@@ -1,0 +1,172 @@
+let allProducts = [];
+const gameImages = {
+    "PUBG Mobile": "https://cdn.cloudflare.steamstatic.com/steam/apps/578080/header.jpg",
+    "Mobile Legends": "https://play-lh.googleusercontent.com/7oS5oPpR2z6kV1U1vVZrXW6Y7n4Zs3l7J9v0V0p0m8V0Q0h3R0Z0J0U0R0I0M0Y=s512",
+    "Free Fire": "https://cdn2.unrealengine.com/egs-garena-freefire-garena-s1-2560x1440-0d1cfd2e3c8d.jpg",
+    "Delta Force": "https://cdn.cloudflare.steamstatic.com/steam/apps/2507950/header.jpg"
+};
+let selectedGame = "";
+let selectedBrand = "";
+
+const gameGrid = document.getElementById("gameGrid");
+const brandSelect = document.getElementById("brand");
+const productSelect = document.getElementById("product");
+
+function formatRupiah(num) {
+    return "Rp " + Number(num).toLocaleString("id-ID");
+}
+
+async function loadAllProducts() {
+    try {
+        const res = await fetch("/public-products");
+        const data = await res.json();
+
+        if (!Array.isArray(data) || data.length === 0) {
+            alert("Produk belum tersedia.");
+            return;
+        }
+
+        allProducts = data;
+
+        const uniqueGames = [...new Set(allProducts.map(item => item.game))];
+        selectedGame = uniqueGames[0] || "";
+        renderGames();
+        loadBrands();
+    } catch (err) {
+        alert("Gagal memuat daftar produk.");
+    }
+}
+
+function renderGames() {
+    gameGrid.innerHTML = "";
+
+    const uniqueGames = [...new Set(allProducts.map(item => item.game))];
+
+    uniqueGames.forEach((game) => {
+        const div = document.createElement("div");
+        div.className = "game-card";
+        const imageUrl = gameImages[game] || "https://via.placeholder.com/300x150?text=Game";
+
+        div.innerHTML = `
+            <img src="${imageUrl}" alt="${game}">
+            <span>${game}</span>
+        `;
+
+        if (game === selectedGame) {
+            div.classList.add("active");
+        }
+
+        div.onclick = () => {
+            selectedGame = game;
+            renderGames();
+            loadBrands();
+        };
+
+        gameGrid.appendChild(div);
+    });
+}
+
+function loadBrands() {
+    const brands = [
+        ...new Set(
+            allProducts
+                .filter(item => item.game === selectedGame)
+                .map(item => item.brand)
+        )
+    ];
+
+    brandSelect.innerHTML = "";
+
+    brands.forEach((brand) => {
+        const option = document.createElement("option");
+        option.value = brand;
+        option.textContent = brand;
+        brandSelect.appendChild(option);
+    });
+
+    selectedBrand = brands[0] || "";
+    loadDurations();
+}
+
+function loadDurations() {
+    const filteredProducts = allProducts.filter(
+        item => item.game === selectedGame && item.brand === brandSelect.value
+    );
+
+    productSelect.innerHTML = "";
+
+    filteredProducts.forEach((item) => {
+        const option = document.createElement("option");
+        option.value = item.id;
+        option.textContent = `${item.duration} - ${formatRupiah(item.price)}`;
+        productSelect.appendChild(option);
+    });
+
+    updatePreview();
+}
+
+function updatePreview() {
+    const selectedProduct = allProducts.find(
+        item => String(item.id) === String(productSelect.value)
+    );
+
+    if (!selectedProduct) return;
+
+    document.getElementById("previewGame").innerText = selectedProduct.game;
+    document.getElementById("previewProduct").innerText = `${selectedProduct.brand} - ${selectedProduct.duration}`;
+    document.getElementById("previewPrice").innerText = formatRupiah(selectedProduct.price);
+}
+
+brandSelect.addEventListener("change", loadDurations);
+productSelect.addEventListener("change", updatePreview);
+
+async function buy() {
+    const name = document.getElementById("name").value.trim();
+    const contact = document.getElementById("contact").value.trim();
+
+    const selectedProduct = allProducts.find(
+        item => String(item.id) === String(productSelect.value)
+    );
+
+    if (!name || !contact) {
+        alert("Isi nama dan kontak dulu!");
+        return;
+    }
+
+    if (!selectedProduct) {
+        alert("Pilih produk dulu.");
+        return;
+    }
+
+    document.getElementById("loading").style.display = "block";
+    document.getElementById("buyBtn").disabled = true;
+
+    try {
+        const res = await fetch("/create-order", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                product_id: selectedProduct.id,
+                name,
+                contact
+            })
+        });
+
+        const data = await res.json();
+
+        if (data.invoiceUrl) {
+            window.location.href = data.invoiceUrl;
+        } else {
+            alert(data.message || "Gagal membuat invoice");
+        }
+    } catch (err) {
+        alert("Terjadi error server");
+    }
+
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("buyBtn").disabled = false;
+}
+
+loadAllProducts();

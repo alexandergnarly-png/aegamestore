@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AE Game Store</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1>AE Game Store</h1>
+            <p>Top Up & Digital Key Cepat, Aman, dan Otomatis</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="store-card">
+            <div class="left-panel">
+                <h2>Beli Produk</h2>
+                <p class="subtitle">Pilih game dan produk yang kamu mau, lalu lanjut bayar.</p>
+
+                <h3>Pilih Game</h3>
+                <div class="game-grid" id="gameGrid"></div>
+
+                <label for="brand">Pilih Brand</label>
+                <select id="brand"></select>
+
+                <label for="product">Pilih Durasi</label>
+                <select id="product"></select>
+
+                <label for="name">Nama Pembeli</label>
+                <input type="text" id="name" placeholder="Masukkan nama kamu">
+
+                <label for="contact">Kontak</label>
+                <input type="text" id="contact" placeholder="WA / Telegram / Email">
+
+                <button id="buyBtn" onclick="buy()">Beli Sekarang</button>
+                <div class="loading" id="loading">Membuat invoice...</div>
+                <p class="trust-text">
+                    Key dikirim otomatis setelah pembayaran sukses • Pembayaran aman via Xendit
+                </p>
+            </div>
+
+            <div class="right-panel">
+                <div class="preview-box">
+                    <span class="badge">Preview Order</span>
+                    <h3 id="previewGame">Memuat game...</h3>
+                    <p id="previewProduct">Memuat produk...</p>
+                    <div class="price-box">
+                        <span>Total</span>
+                        <strong id="previewPrice">Rp 0</strong>
+                    </div>
+                    <ul class="features">
+                        <li>Proses otomatis</li>
+                        <li>Pembayaran aman via Xendit</li>
+                        <li>Key / produk dikirim setelah pembayaran sukses</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

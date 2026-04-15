@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Admin - AE Game Store</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top left, rgba(56, 189, 248, 0.25), transparent 30%),
+                radial-gradient(circle at bottom right, rgba(37, 99, 235, 0.22), transparent 28%),
+                linear-gradient(135deg, #eaf4ff, #f4f9ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            color: #1e293b;
+        }
+
+        .login-shell {
+            width: 100%;
+            max-width: 980px;
+            display: grid;
+            grid-template-columns: 1.05fr 0.95fr;
+            background: rgba(255, 255, 255, 0.88);
+            border: 1px solid rgba(191, 219, 254, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(15, 23, 42, 0.12);
+        }
+
+        .left-panel {
+            padding: 44px;
+            background: linear-gradient(160deg, #0f172a, #1d4ed8, #38bdf8);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .left-panel::before {
+            content: "";
+            position: absolute;
+            width: 260px;
+            height: 260px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            top: -80px;
+            right: -60px;
+        }
+
+        .left-panel::after {
+            content: "";
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            bottom: -70px;
+            left: -50px;
+        }
+
+        .brand {
+            position: relative;
+            z-index: 1;
+        }
+
+        .brand-badge {
+            display: inline-block;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.16);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 0.4px;
+            margin-bottom: 18px;
+        }
+
+        .brand h1 {
+            margin: 0 0 14px;
+            font-size: 42px;
+            line-height: 1.15;
+        }
+
+        .brand p {
+            margin: 0;
+            font-size: 16px;
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.92);
+            max-width: 420px;
+        }
+
+        .feature-list {
+            position: relative;
+            z-index: 1;
+            margin-top: 28px;
+            display: grid;
+            gap: 12px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.94);
+        }
+
+        .feature-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: white;
+            box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.12);
+            flex-shrink: 0;
+        }
+
+        .right-panel {
+            padding: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.82);
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 380px;
+        }
+
+        .login-card h2 {
+            margin: 0 0 10px;
+            font-size: 32px;
+            color: #0f172a;
+        }
+
+        .login-card p {
+            margin: 0 0 24px;
+            color: #64748b;
+            line-height: 1.7;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            margin-top: 14px;
+            font-weight: bold;
+            font-size: 14px;
+            color: #1e293b;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 14px;
+            font-size: 14px;
+            background: #f8fbff;
+            color: #0f172a;
+            outline: none;
+            transition: 0.2s ease;
+        }
+
+        input:focus {
+            border-color: #3b82f6;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+        }
+
+        button {
+            width: 100%;
+            margin-top: 22px;
+            padding: 14px;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #2563eb, #38bdf8);
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.15s ease, opacity 0.15s ease;
+            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.22);
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            opacity: 0.97;
+        }
+
+        .error-text {
+            margin-top: 14px;
+            color: #dc2626;
+            font-size: 14px;
+            min-height: 20px;
+        }
+
+        .footer-text {
+            margin-top: 18px;
+            font-size: 13px;
+            color: #94a3b8;
+            text-align: center;
+        }
+
+        @media (max-width: 900px) {
+            .login-shell {
+                grid-template-columns: 1fr;
+            }
+
+            .left-panel,
+            .right-panel {
+                padding: 30px 24px;
+            }
+
+            .brand h1 {
+                font-size: 34px;
+            }
+
+            .login-card h2 {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-shell">
+        <div class="left-panel">
+            <div class="brand">
+                <div class="brand-badge">AE GAME STORE • ADMIN ACCESS</div>
+                <h1>Panel Admin yang Lebih Rapi dan Aman</h1>
+                <p>
+                    Login untuk mengakses pengelolaan key, memantau order masuk,
+                    dan mengontrol transaksi digital store kamu dalam satu dashboard.
+                </p>
+
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <span class="feature-dot"></span>
+                        <span>Pantau transaksi secara real-time</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-dot"></span>
+                        <span>Kelola stok game key dari satu tempat</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-dot"></span>
+                        <span>Akses admin diproteksi dengan login</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div class="login-card">
+                <h2>Login Admin</h2>
+                <p>Masukkan username dan password untuk masuk ke admin panel.</p>
+
+                <label for="username">Username</label>
+                <div class="input-wrap">
+                    <input type="text" id="username" placeholder="Masukkan username">
+                </div>
+
+                <label for="password">Password</label>
+                <div class="input-wrap">
+                    <input type="password" id="password" placeholder="Masukkan password">
+                </div>
+
+                <button onclick="loginAdmin()">Masuk ke Admin Panel</button>
+
+                <div class="error-text" id="errorText"></div>
+                <div class="footer-text">AE Game Store Admin Portal</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function loginAdmin() {
+            const username = document.getElementById("username").value.trim();
+            const password = document.getElementById("password").value.trim();
+            const errorText = document.getElementById("errorText");
+
+            errorText.innerText = "";
+
+            if (!username || !password) {
+                errorText.innerText = "Username dan password wajib diisi.";
+                return;
+            }
+
+            try {
+                const res = await fetch("/admin-login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    errorText.innerText = data.message || "Login gagal";
+                    return;
+                }
+
+                window.location.href = "/ae-control";
+            } catch (err) {
+                errorText.innerText = "Terjadi error server.";
+            }
+        }
+    </script>
+</body>
+</html>

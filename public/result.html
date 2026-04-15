@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hasil Pembayaran</title>
+    <style>
+    body {
+        font-family: Arial, sans-serif;
+        background: linear-gradient(135deg, #eef7ff, #f8fbff);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px;
+        color: #1e293b;
+    }
+
+    .card {
+        background: white;
+        padding: 30px;
+        border-radius: 22px;
+        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+        width: 100%;
+        max-width: 520px;
+        text-align: left;
+        border: 1px solid #dbeafe;
+    }
+
+    h1 {
+        margin: 0 0 10px;
+        color: #0f172a;
+        text-align: center;
+        font-size: 30px;
+    }
+
+    .subtitle {
+        text-align: center;
+        color: #64748b;
+        margin-bottom: 20px;
+        line-height: 1.6;
+    }
+
+    .status-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-bottom: 22px;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .badge.pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .badge.paid {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .badge.expired {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .badge.waiting_payment {
+        background: #e2e8f0;
+        color: #475569;
+    }
+
+    .badge.delivered {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .badge.manual {
+        background: #ffe4e6;
+        color: #be123c;
+    }
+
+    .badge.cancelled {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .summary {
+        background: #f8fbff;
+        border: 1px solid #dbeafe;
+        border-radius: 16px;
+        padding: 18px;
+        margin-bottom: 18px;
+    }
+
+    .summary-item {
+        margin: 10px 0;
+        color: #334155;
+        line-height: 1.6;
+    }
+
+    .summary-label {
+        font-weight: bold;
+        color: #0f172a;
+    }
+
+    .key-box {
+        margin-top: 18px;
+        padding: 16px;
+        background: linear-gradient(180deg, #eff6ff, #f8fbff);
+        border: 1px solid #bfdbfe;
+        border-radius: 14px;
+        font-weight: bold;
+        color: #1d4ed8;
+        word-break: break-word;
+        line-height: 1.6;
+    }
+
+    .key-title {
+        display: block;
+        font-size: 13px;
+        color: #64748b;
+        margin-bottom: 8px;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .copy-btn {
+        width: 100%;
+        margin-top: 12px;
+        padding: 12px;
+        border: none;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #2563eb, #38bdf8);
+        color: white;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .copy-btn:hover {
+        opacity: 0.96;
+    }
+
+    .helper-text {
+        margin-top: 12px;
+        font-size: 12px;
+        color: #64748b;
+        text-align: center;
+        line-height: 1.6;
+    }
+</style>
+</head>
+<body>
+    <div class="card">
+    <h1>Hasil Pembayaran</h1>
+    <p class="subtitle">Cek status pembayaran dan hasil pengiriman produk kamu di sini.</p>
+
+    <div class="status-row" id="statusRow">
+        <span class="badge waiting_payment">Memuat status...</span>
+    </div>
+
+    <div class="summary">
+        <div class="summary-item" id="nameText"></div>
+        <div class="summary-item" id="contactText"></div>
+        <div class="summary-item" id="gameText"></div>
+        <div class="summary-item" id="productText"></div>
+        <div class="summary-item" id="priceText"></div>
+    </div>
+
+    <div class="key-box">
+        <span class="key-title">Hasil Pengiriman</span>
+        <div id="keyBox">Menunggu key...</div>
+        <button class="copy-btn" id="copyBtn" onclick="copyKey()" style="display:none;">Copy Key</button>
+    </div>
+
+    <p class="helper-text" id="statusText">Memuat data order...</p>
+</div>
+
+    <script>
+    let latestGameKey = "";
+
+    function formatRupiah(num) {
+        return "Rp " + Number(num).toLocaleString("id-ID");
+    }
+
+    function badge(status) {
+        const safeStatus = String(status || "-").toLowerCase();
+        return `<span class="badge ${safeStatus}">${status || "-"}</span>`;
+    }
+
+    function copyKey() {
+        if (!latestGameKey) return;
+
+        navigator.clipboard.writeText(latestGameKey)
+            .then(() => {
+                alert("Game key berhasil dicopy!");
+            })
+            .catch(() => {
+                alert("Gagal copy key.");
+            });
+    }
+
+    async function loadOrder() {
+            const params = new URLSearchParams(window.location.search);
+            const orderId = params.get("order_id");
+            const token = params.get("token");
+
+                if (!orderId || !token) {
+        document.getElementById("statusRow").innerHTML =
+            `<span class="badge cancelled">Data tidak lengkap</span>`;
+        document.getElementById("statusText").innerText = "Data order tidak lengkap.";
+        document.getElementById("keyBox").innerText = "Link order tidak valid.";
+        return;
+    }
+
+            try {
+                const response = await fetch("/order/" + orderId + "?token=" + encodeURIComponent(token));
+const data = await response.json();
+
+if (!response.ok) {
+    throw new Error(data.message || "Gagal mengambil data order");
+}
+
+document.getElementById("statusRow").innerHTML =
+    badge(data.payment_status) + badge(data.delivery_status);
+
+document.getElementById("statusText").innerText =
+    "Order berhasil ditemukan. Simpan halaman ini untuk cek status order kamu kapan saja.";
+
+document.getElementById("nameText").innerHTML =
+    `<span class="summary-label">Nama:</span> ${data.name || "-"}`;
+document.getElementById("contactText").innerHTML =
+    `<span class="summary-label">Kontak:</span> ${data.contact || "-"}`;
+document.getElementById("gameText").innerHTML =
+    `<span class="summary-label">Game:</span> ${data.game || "-"}`;
+document.getElementById("productText").innerHTML =
+    `<span class="summary-label">Produk:</span> ${data.product || "-"}`;
+document.getElementById("priceText").innerHTML =
+    `<span class="summary-label">Harga:</span> ${data.price ? formatRupiah(data.price) : "-"}`;
+
+const copyBtn = document.getElementById("copyBtn");
+
+if (data.delivery_status === "manual") {
+    latestGameKey = "";
+    copyBtn.style.display = "none";
+    document.getElementById("keyBox").innerText =
+        data.gameKey || "Akan dikirim manual oleh admin";
+} else if (data.gameKey && data.gameKey !== "Akan dikirim manual oleh admin") {
+    latestGameKey = data.gameKey;
+    copyBtn.style.display = "block";
+    document.getElementById("keyBox").innerText = data.gameKey;
+}
+    else {
+    latestGameKey = "";
+    copyBtn.style.display = "none";
+    document.getElementById("keyBox").innerText = "Belum tersedia";
+}
+            } catch (error) {
+    document.getElementById("statusRow").innerHTML =
+        `<span class="badge cancelled">Gagal memuat</span>`;
+    document.getElementById("statusText").innerText =
+        error.message || "Gagal mengambil data order.";
+    document.getElementById("keyBox").innerText =
+        "Data order tidak bisa dimuat.";
+}
+        }
+
+        loadOrder();
+    </script>
+</body>
+</html>
