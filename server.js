@@ -537,22 +537,25 @@ app.get("/order/:id", (req, res) => {
     );
 });
 
-app.get("/orders", (req, res) => {
+app.get("/orders", async (req, res) => {
     if (!isAdminLoggedIn(req)) {
         return res.status(401).json({
             message: "Unauthorized"
         });
     }
 
-    db.all("SELECT * FROM orders ORDER BY id DESC", [], (err, rows) => {
-        if (err) {
-            return res.status(500).json({
-                message: "Gagal mengambil daftar order"
-            });
-        }
+    try {
+        const result = await query(
+            "SELECT * FROM orders ORDER BY created_at DESC, id DESC"
+        );
 
-        res.json(rows);
-    });
+        return res.json(result.rows);
+    } catch (err) {
+        console.error("ERROR GET ORDERS:", err);
+        return res.status(500).json({
+            message: "Gagal mengambil daftar order"
+        });
+    }
 });
 
 app.get("/keys", (req, res) => {
