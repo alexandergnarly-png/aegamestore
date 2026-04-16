@@ -495,7 +495,7 @@ app.post("/xendit-webhook", async (req, res) => {
     return res.status(200).send("OK");
 });
 
-app.get("/order/:id", (req, res) => {
+app.get("/order/:id", async (req, res) => {
     const orderId = req.params.id;
     const token = String(req.query.token || "").trim();
 
@@ -505,36 +505,38 @@ app.get("/order/:id", (req, res) => {
         });
     }
 
-    db.get(
-        "SELECT * FROM orders WHERE id = ? AND access_token = ?",
-        [orderId, token],
-        (err, order) => {
-            if (err) {
-                return res.status(500).json({
-                    message: "Gagal mengambil data order"
-                });
-            }
+    try {
+        const result = await query(
+            "SELECT * FROM orders WHERE id = $1 AND access_token = $2",
+            [orderId, token]
+        );
 
-            if (!order) {
-                return res.status(404).json({
-                    message: "Order tidak ditemukan"
-                });
-            }
+        const order = result.rows[0];
 
-            return res.json({
-                id: order.id,
-                name: order.name,
-                contact: order.contact,
-                game: order.game,
-                product: order.product,
-                price: order.price,
-                payment_status: order.payment_status,
-                delivery_status: order.delivery_status,
-                gameKey: order.gameKey,
-                created_at: order.created_at
+        if (!order) {
+            return res.status(404).json({
+                message: "Order tidak ditemukan"
             });
         }
-    );
+
+        return res.json({
+            id: order.id,
+            name: order.name,
+            contact: order.contact,
+            game: order.game,
+            product: order.product,
+            price: order.price,
+            payment_status: order.payment_status,
+            delivery_status: order.delivery_status,
+            gameKey: order.gamekey,
+            created_at: order.created_at
+        });
+    } catch (err) {
+        console.error("ERROR GET ORDER:", err);
+        return res.status(500).json({
+            message: "Gagal mengambil data order"
+        });
+    }
 });
 
 app.get("/orders", async (req, res) => {
@@ -558,34 +560,35 @@ app.get("/orders", async (req, res) => {
     }
 });
 
-app.get("/keys", (req, res) => {
+app.get("/keys", async (req, res) => {
     if (!isAdminLoggedIn(req)) {
         return res.status(401).json({
             message: "Unauthorized"
         });
     }
 
-    db.all(`
-        SELECT
-            keys.*,
-            products.game,
-            products.brand,
-            products.duration
-        FROM keys
-        LEFT JOIN products ON keys.product_id = products.id
-        ORDER BY keys.id DESC
-    `, [], (err, rows) => {
-        if (err) {
-            return res.status(500).json({
-                message: "Gagal mengambil daftar key"
-            });
-        }
+    try {
+        const result = await query(`
+            SELECT
+                keys.*,
+                products.game,
+                products.brand,
+                products.duration
+            FROM keys
+            LEFT JOIN products ON keys.product_id = products.id
+            ORDER BY keys.id DESC
+        `);
 
-        res.json(rows);
-    });
+        return res.json(result.rows);
+    } catch (err) {
+        console.error("ERROR GET KEYS:", err);
+        return res.status(500).json({
+            message: "Gagal mengambil daftar key"
+        });
+    }
 });
 
-app.post("/keys", (req, res) => {
+app.post("/keys", async (req, res) => {
     if (!isAdminLoggedIn(req)) {
         return res.status(401).json({
             message: "Unauthorized"
@@ -608,119 +611,39 @@ app.post("/keys", (req, res) => {
         });
     }
 
-    db.get(
-        "SELECT id FROM products WHERE id = ?",
-        [cleanProductId],
-        (productErr, productRow) => {
-            if (productErr) {
-                return res.status(500).json({
-                    message: "Gagal memeriksa produk"
-                });
-            }
+    try {
+        const productCheck = await query(
+            "SELECT id FROM products WHERE id = $1",
+            [cleanProductId]
+        );
 
-            if (!productRow) {
-                return res.status(404).json({
-                    message: "Produk tidak ditemukan"
-                });
-            }
-
-            db.run(
-                "INSERT INTO keys (product_id, key, used) VALUES (?, ?, 0)",
-                [cleanProductId, cleanKey],
-                function (err) {
-                    if (err) {
-                        return res.status(500).json({
-                            message: "Gagal menambahkan key: " + err.message
-                        });
-                    }
-
-                    return res.json({
-                        message: "Key berhasil ditambahkan",
-                        id: this.lastID
-                    });
-                }
-            );
+        if (productCheck.rows.length === 0) {
+            return res.status(404).json({
+                message: "Produk tidak ditemukan"
+            });
         }
-    );
+
+        const result = await query(
+            "INSERT INTO keys (product_id, key, used) VALUES ($1, $2, 0) RETURNING id",
+            [cleanProductId, cleanKey]
+        );
+
+        return res.json({
+            message: "Key berhasil ditambahkan",
+            id: result.rows[0].id
+        });
+    } catch (err) {
+        console.error("ERROR ADD KEY:", err);
+        return res.status(500).json({
+            message: "Gagal menambahkan key: " + err.message
+        });
+    }
 });
 
-app.post("/keys/bulk", (req, res) => {
-    if (!isAdminLoggedIn(req)) {
-        return res.status(401).json({
-            message: "Unauthorized"
-        });
-    }
-
-    const { product_id, keys } = req.body;
-    const cleanProductId = Number(product_id);
-
-    if (!Number.isInteger(cleanProductId) || cleanProductId <= 0) {
-        return res.status(400).json({
-            message: "Produk tidak valid"
-        });
-    }
-
-    if (!Array.isArray(keys) || keys.length === 0) {
-        return res.status(400).json({
-            message: "Daftar key kosong"
-        });
-    }
-
-    const cleanKeys = keys
-        .map(item => String(item).trim())
-        .filter(item => item.length >= 3 && item.length <= 255);
-
-    if (cleanKeys.length === 0) {
-        return res.status(400).json({
-            message: "Tidak ada key valid untuk disimpan"
-        });
-    }
-
-    db.get(
-        "SELECT id FROM products WHERE id = ?",
-        [cleanProductId],
-        (productErr, productRow) => {
-            if (productErr) {
-                return res.status(500).json({
-                    message: "Gagal memeriksa produk"
-                });
-            }
-
-            if (!productRow) {
-                return res.status(404).json({
-                    message: "Produk tidak ditemukan"
-                });
-            }
-
-            let successCount = 0;
-            let failedCount = 0;
-
-            const stmt = db.prepare("INSERT INTO keys (product_id, key, used) VALUES (?, ?, 0)");
-            cleanKeys.forEach((key) => {
-                stmt.run(cleanProductId, key, (err) => {
-                    if (err) {
-                        failedCount++;
-                    } else {
-                        successCount++;
-                    }
-                });
-            });
-
-            stmt.finalize((err) => {
-                if (err) {
-                    return res.status(500).json({
-                        message: "Gagal menyimpan bulk key"
-                    });
-                }
-
-                return res.json({
-                    message: `Bulk key selesai. Berhasil: ${successCount}, gagal: ${failedCount}`,
-                    successCount,
-                    failedCount
-                });
-            });
-        }
-    );
+app.post("/keys/bulk", async (req, res) => {
+    return res.status(501).json({
+        message: "Bulk key belum dimigrasikan ke PostgreSQL"
+    });
 });
 
 app.get("/products", async (req, res) => {
@@ -988,7 +911,7 @@ app.get("/public-products", async (req, res) => {
     }
 });
 
-app.delete("/keys/:id", (req, res) => {
+app.delete("/keys/:id", async (req, res) => {
     if (!isAdminLoggedIn(req)) {
         return res.status(401).json({
             message: "Unauthorized"
@@ -1003,12 +926,13 @@ app.delete("/keys/:id", (req, res) => {
         });
     }
 
-    db.get("SELECT * FROM keys WHERE id = ?", [keyId], (findErr, keyRow) => {
-        if (findErr) {
-            return res.status(500).json({
-                message: "Gagal memeriksa key"
-            });
-        }
+    try {
+        const findResult = await query(
+            "SELECT * FROM keys WHERE id = $1",
+            [keyId]
+        );
+
+        const keyRow = findResult.rows[0];
 
         if (!keyRow) {
             return res.status(404).json({
@@ -1022,18 +946,20 @@ app.delete("/keys/:id", (req, res) => {
             });
         }
 
-        db.run("DELETE FROM keys WHERE id = ?", [keyId], function (deleteErr) {
-            if (deleteErr) {
-                return res.status(500).json({
-                    message: "Gagal menghapus key"
-                });
-            }
+        await query(
+            "DELETE FROM keys WHERE id = $1",
+            [keyId]
+        );
 
-            return res.json({
-                message: "Key berhasil dihapus"
-            });
+        return res.json({
+            message: "Key berhasil dihapus"
         });
-    });
+    } catch (err) {
+        console.error("ERROR DELETE KEY:", err);
+        return res.status(500).json({
+            message: "Gagal menghapus key"
+        });
+    }
 });
 
 app.get("/admin", (req, res) => {
