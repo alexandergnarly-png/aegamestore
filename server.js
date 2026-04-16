@@ -978,5 +978,3 @@ app.get("/admin-login", (req, res) => {
 app.listen(port, () => {
     console.log("Server jalan di port", port);
 });
-
-module.exports = app;
