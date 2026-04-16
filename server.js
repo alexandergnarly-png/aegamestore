@@ -18,6 +18,28 @@ db.query("SELECT NOW()", (err, res) => {
     console.log("DB Connected:", res.rows[0]);
   }
 });
+
+db.query(`
+  CREATE TABLE IF NOT EXISTS products (
+    id SERIAL PRIMARY KEY,
+    game TEXT NOT NULL,
+    brand TEXT NOT NULL,
+    duration TEXT NOT NULL,
+    price INTEGER NOT NULL,
+    active INTEGER DEFAULT 1,
+    created_at TEXT
+  )
+`, (err) => {
+  if (err) {
+    console.error("CREATE TABLE products ERROR:", err);
+  } else {
+    console.log("Table products ready");
+  }
+});
+
+async function query(sql, params = []) {
+  return db.query(sql, params);
+}
 // limit umum (global)
 const globalLimiter = rateLimit({
     windowMs: 60 * 1000, // 1 menit
@@ -677,7 +699,7 @@ app.get("/products", (req, res) => {
     });
 });
 
-app.post("/products", (req, res) => {
+app.post("/products", async (req, res) => {
     if (!isAdminLoggedIn(req)) {
         return res.status(401).json({
             message: "Unauthorized"
@@ -705,22 +727,22 @@ app.post("/products", (req, res) => {
 
     const createdAt = new Date().toISOString();
 
-    db.run(
-        "INSERT INTO products (game, brand, duration, price, active, created_at) VALUES (?, ?, ?, ?, ?, ?)",
-        [cleanGame, cleanBrand, cleanDuration, cleanPrice, 1, createdAt],
-        function (err) {
-            if (err) {
-                return res.status(500).json({
-                    message: "Gagal menambahkan produk: " + err.message
-                });
-            }
+    try {
+        const result = await query(
+            "INSERT INTO products (game, brand, duration, price, active, created_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
+            [cleanGame, cleanBrand, cleanDuration, cleanPrice, 1, createdAt]
+        );
 
-            res.json({
-                message: "Produk berhasil ditambahkan",
-                id: this.lastID
-            });
-        }
-    );
+        res.json({
+            message: "Produk berhasil ditambahkan",
+            id: result.rows[0].id
+        });
+    } catch (err) {
+        console.error("ERROR ADD PRODUCT:", err);
+        return res.status(500).json({
+            message: "Gagal menambahkan produk: " + err.message
+        });
+    }
 });
 
 app.delete("/products/:id", (req, res) => {
@@ -911,20 +933,18 @@ app.patch("/products/:id/toggle-active", (req, res) => {
     );
 });
 
-app.get("/public-products", (req, res) => {
-    db.all(
-        "SELECT * FROM products WHERE active = 1 ORDER BY game ASC, brand ASC, duration ASC",
-        [],
-        (err, rows) => {
-            if (err) {
-                return res.status(500).json({
-                    message: "Gagal mengambil produk publik"
-                });
-            }
-
-            res.json(rows);
-        }
-    );
+app.get("/public-products", async (req, res) => {
+    try {
+        const result = await query(
+            "SELECT * FROM products WHERE active = 1 ORDER BY game ASC, brand ASC, duration ASC"
+        );
+        res.json(result.rows);
+    } catch (err) {
+        console.error("ERROR PUBLIC PRODUCTS:", err);
+        return res.status(500).json({
+            message: "Gagal mengambil produk publik"
+        });
+    }
 });
 
 app.delete("/keys/:id", (req, res) => {
