@@ -7,6 +7,7 @@ const bcrypt = require("bcryptjs");
 require("dotenv").config();
 const rateLimit = require("express-rate-limit");
 
+app.set("trust proxy", 1);
 const app = express();
 const port = process.env.PORT || 3000;
 // limit umum (global)
@@ -974,6 +975,4 @@ app.get("/admin-login", (req, res) => {
     return res.status(404).send("Not Found");
 });
 
-app.listen(port, () => {
-    console.log(`Server jalan di http://localhost:${port}`);
-});
+module.exports = app;
