@@ -41,6 +41,44 @@ db.query(`
   }
 });
 
+db.query(`
+  CREATE TABLE IF NOT EXISTS orders (
+    id TEXT PRIMARY KEY,
+    product_id INTEGER,
+    access_token TEXT,
+    name TEXT,
+    contact TEXT,
+    game TEXT,
+    product TEXT,
+    price INTEGER,
+    payment_status TEXT,
+    delivery_status TEXT,
+    gameKey TEXT,
+    created_at TEXT
+  )
+`, (err) => {
+  if (err) {
+    console.error("CREATE TABLE orders ERROR:", err);
+  } else {
+    console.log("Table orders ready");
+  }
+});
+
+db.query(`
+  CREATE TABLE IF NOT EXISTS keys (
+    id SERIAL PRIMARY KEY,
+    product_id INTEGER,
+    key TEXT,
+    used INTEGER DEFAULT 0
+  )
+`, (err) => {
+  if (err) {
+    console.error("CREATE TABLE keys ERROR:", err);
+  } else {
+    console.log("Table keys ready");
+  }
+});
+
 
 // limit umum (global)
 const globalLimiter = rateLimit({
@@ -891,8 +929,7 @@ app.patch("/products/:id/toggle-active", async (req, res) => {
     }
 
     const productId = Number(req.params.id);
-    const { active } = req.body;
-    const cleanActive = Number(active);
+    let { active } = req.body;
 
     if (!Number.isInteger(productId) || productId <= 0) {
         return res.status(400).json({
@@ -900,16 +937,20 @@ app.patch("/products/:id/toggle-active", async (req, res) => {
         });
     }
 
-    if (cleanActive !== 0 && cleanActive !== 1) {
+    if (active === true || active === "true" || active === 1 || active === "1") {
+        active = 1;
+    } else if (active === false || active === "false" || active === 0 || active === "0") {
+        active = 0;
+    } else {
         return res.status(400).json({
-            message: "Nilai active harus 0 atau 1"
+            message: "Nilai active harus 0/1 atau true/false"
         });
     }
 
     try {
         const result = await query(
-            "UPDATE products SET active = $1 WHERE id = $2 RETURNING id",
-            [cleanActive, productId]
+            "UPDATE products SET active = $1 WHERE id = $2 RETURNING id, active",
+            [active, productId]
         );
 
         if (result.rows.length === 0) {
@@ -919,7 +960,8 @@ app.patch("/products/:id/toggle-active", async (req, res) => {
         }
 
         return res.json({
-            message: cleanActive === 1 ? "Produk diaktifkan" : "Produk dinonaktifkan"
+            message: active === 1 ? "Produk diaktifkan" : "Produk dinonaktifkan",
+            product: result.rows[0]
         });
     } catch (err) {
         console.error("ERROR TOGGLE PRODUCT:", err);
