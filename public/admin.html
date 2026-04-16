@@ -489,11 +489,19 @@
                 </p>
 
                 <div class="toolbar">
-                    <select id="keyProductSelect"></select>
-                    <textarea id="bulkKeyInput" placeholder="Masukkan banyak key, satu key per baris&#10;Contoh:&#10;KEY-AAA-111&#10;KEY-BBB-222&#10;KEY-CCC-333"></textarea>
-                    <button onclick="addBulkKeys()">Tambah Bulk Key</button>
-                    <button class="ghost-btn" onclick="loadKeys()">Refresh Key</button>
-                </div>
+    <select id="keyProductSelect"></select>
+</div>
+
+<div class="toolbar">
+    <input type="text" id="singleKeyInput" placeholder="Masukkan 1 game key, contoh: KEY-AAA-111">
+    <button onclick="addSingleKey()">Tambah 1 Key</button>
+</div>
+
+<div class="toolbar">
+    <textarea id="bulkKeyInput" placeholder="Masukkan banyak key, satu key per baris&#10;Contoh:&#10;KEY-AAA-111&#10;KEY-BBB-222&#10;KEY-CCC-333"></textarea>
+    <button onclick="addBulkKeys()">Tambah Bulk Key</button>
+    <button class="ghost-btn" onclick="loadKeys()">Refresh Key</button>
+</div>
 
                 <div class="info-row">
                     <div class="info" id="keyStatusText">Memuat daftar key...</div>
@@ -682,7 +690,52 @@
                 `;
             }
         }
+        async function addSingleKey() {
+    const productId = document.getElementById("keyProductSelect").value;
+    const input = document.getElementById("singleKeyInput");
+    const key = input.value.trim();
 
+    if (!productId) {
+        alert("Pilih produk dulu.");
+        return;
+    }
+
+    if (!key) {
+        alert("Isi 1 key dulu.");
+        return;
+    }
+
+    try {
+        const res = await fetch("/keys", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                product_id: productId,
+                key
+            })
+        });
+
+        const data = await res.json();
+
+        if (res.status === 401) {
+            window.location.href = "/ae-auth";
+            return;
+        }
+
+        if (!res.ok) {
+            alert(data.message || "Gagal menambahkan key");
+            return;
+        }
+
+        alert(data.message || "Key berhasil ditambahkan");
+        input.value = "";
+        loadKeys();
+    } catch (err) {
+        alert("Terjadi error server saat menambahkan key");
+    }
+}
         async function addBulkKeys() {
             const productId = document.getElementById("keyProductSelect").value;
             const input = document.getElementById("bulkKeyInput");
