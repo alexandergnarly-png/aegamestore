@@ -19,6 +19,10 @@ db.query("SELECT NOW()", (err, res) => {
   }
 });
 
+async function query(sql, params = []) {
+  return db.query(sql, params);
+}
+
 db.query(`
   CREATE TABLE IF NOT EXISTS products (
     id SERIAL PRIMARY KEY,
@@ -37,9 +41,7 @@ db.query(`
   }
 });
 
-async function query(sql, params = []) {
-  return db.query(sql, params);
-}
+
 // limit umum (global)
 const globalLimiter = rateLimit({
     windowMs: 60 * 1000, // 1 menit
@@ -726,12 +728,19 @@ app.post("/products", async (req, res) => {
     }
 
     const createdAt = new Date().toISOString();
+    console.log("ADD PRODUCT REQUEST:", {
+    game: cleanGame,
+    brand: cleanBrand,
+    duration: cleanDuration,
+    price: cleanPrice
+});
 
     try {
         const result = await query(
             "INSERT INTO products (game, brand, duration, price, active, created_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
             [cleanGame, cleanBrand, cleanDuration, cleanPrice, 1, createdAt]
         );
+        console.log("INSERT SUCCESS:", result.rows);
 
         res.json({
             message: "Produk berhasil ditambahkan",
@@ -830,21 +839,14 @@ app.delete("/products/:id", (req, res) => {
     );
 });
 
-app.put("/products/:id", (req, res) => {
+app.post("/products", async (req, res) => {
     if (!isAdminLoggedIn(req)) {
         return res.status(401).json({
             message: "Unauthorized"
         });
     }
 
-    const productId = Number(req.params.id);
     const { game, brand, duration, price } = req.body;
-
-    if (!Number.isInteger(productId) || productId <= 0) {
-        return res.status(400).json({
-            message: "ID produk tidak valid"
-        });
-    }
 
     const cleanGame = String(game || "").trim();
     const cleanBrand = String(brand || "").trim();
@@ -863,27 +865,33 @@ app.put("/products/:id", (req, res) => {
         });
     }
 
-    db.run(
-        "UPDATE products SET game = ?, brand = ?, duration = ?, price = ? WHERE id = ?",
-        [cleanGame, cleanBrand, cleanDuration, cleanPrice, productId],
-        function (err) {
-            if (err) {
-                return res.status(500).json({
-                    message: "Gagal update produk: " + err.message
-                });
-            }
+    const createdAt = new Date().toISOString();
 
-            if (this.changes === 0) {
-                return res.status(404).json({
-                    message: "Produk tidak ditemukan"
-                });
-            }
+    console.log("ADD PRODUCT REQUEST:", {
+        game: cleanGame,
+        brand: cleanBrand,
+        duration: cleanDuration,
+        price: cleanPrice
+    });
 
-            res.json({
-                message: "Produk berhasil diupdate"
-            });
-        }
-    );
+    try {
+        const result = await query(
+            "INSERT INTO products (game, brand, duration, price, active, created_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
+            [cleanGame, cleanBrand, cleanDuration, cleanPrice, 1, createdAt]
+        );
+
+        console.log("INSERT SUCCESS:", result.rows);
+
+        res.json({
+            message: "Produk berhasil ditambahkan",
+            id: result.rows[0].id
+        });
+    } catch (err) {
+        console.error("ERROR ADD PRODUCT:", err);
+        return res.status(500).json({
+            message: "Gagal menambahkan produk: " + err.message
+        });
+    }
 });
 
 app.patch("/products/:id/toggle-active", (req, res) => {
