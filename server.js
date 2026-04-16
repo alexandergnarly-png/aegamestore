@@ -79,7 +79,6 @@ db.query(`
   }
 });
 
-
 // limit umum (global)
 const globalLimiter = rateLimit({
     windowMs: 60 * 1000, // 1 menit
