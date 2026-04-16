@@ -695,7 +695,7 @@ app.get("/products", async (req, res) => {
             "SELECT * FROM products ORDER BY id DESC"
         );
 
-        res.json(result.rows);
+        return res.json(result.rows);
     } catch (err) {
         console.error("ERROR GET PRODUCTS:", err);
         return res.status(500).json({
@@ -731,21 +731,23 @@ app.post("/products", async (req, res) => {
     }
 
     const createdAt = new Date().toISOString();
+
     console.log("ADD PRODUCT REQUEST:", {
-    game: cleanGame,
-    brand: cleanBrand,
-    duration: cleanDuration,
-    price: cleanPrice
-});
+        game: cleanGame,
+        brand: cleanBrand,
+        duration: cleanDuration,
+        price: cleanPrice
+    });
 
     try {
         const result = await query(
             "INSERT INTO products (game, brand, duration, price, active, created_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
             [cleanGame, cleanBrand, cleanDuration, cleanPrice, 1, createdAt]
         );
+
         console.log("INSERT SUCCESS:", result.rows);
 
-        res.json({
+        return res.json({
             message: "Produk berhasil ditambahkan",
             id: result.rows[0].id
         });
@@ -802,7 +804,7 @@ app.put("/products/:id", async (req, res) => {
             });
         }
 
-        res.json({
+        return res.json({
             message: "Produk berhasil diupdate"
         });
     } catch (err) {
@@ -813,7 +815,7 @@ app.put("/products/:id", async (req, res) => {
     }
 });
 
-app.delete("/products/:id", (req, res) => {
+app.delete("/products/:id", async (req, res) => {
     if (!isAdminLoggedIn(req)) {
         return res.status(401).json({
             message: "Unauthorized"
@@ -828,78 +830,60 @@ app.delete("/products/:id", (req, res) => {
         });
     }
 
-    db.get(
-        "SELECT COUNT(*) AS totalOrders FROM orders WHERE product_id = ?",
-        [productId],
-        (orderErr, orderRow) => {
-            if (orderErr) {
-                return res.status(500).json({
-                    message: "Gagal memeriksa relasi order produk"
+    try {
+        const orderCheck = await query(
+            "SELECT COUNT(*)::int AS total_orders FROM orders WHERE product_id = $1",
+            [productId]
+        );
+
+        const keyCheck = await query(
+            "SELECT COUNT(*)::int AS total_keys FROM keys WHERE product_id = $1",
+            [productId]
+        );
+
+        const totalOrders = Number(orderCheck.rows[0]?.total_orders || 0);
+        const totalKeys = Number(keyCheck.rows[0]?.total_keys || 0);
+
+        if (totalOrders > 0 || totalKeys > 0) {
+            const updateResult = await query(
+                "UPDATE products SET active = 0 WHERE id = $1 RETURNING id",
+                [productId]
+            );
+
+            if (updateResult.rows.length === 0) {
+                return res.status(404).json({
+                    message: "Produk tidak ditemukan"
                 });
             }
 
-            db.get(
-                "SELECT COUNT(*) AS totalKeys FROM keys WHERE product_id = ?",
-                [productId],
-                (keyErr, keyRow) => {
-                    if (keyErr) {
-                        return res.status(500).json({
-                            message: "Gagal memeriksa relasi key produk"
-                        });
-                    }
-
-                    const totalOrders = Number(orderRow?.totalOrders || 0);
-                    const totalKeys = Number(keyRow?.totalKeys || 0);
-
-                    if (totalOrders > 0 || totalKeys > 0) {
-                        return db.run(
-                            "UPDATE products SET active = 0 WHERE id = ?",
-                            [productId],
-                            function (updateErr) {
-                                if (updateErr) {
-                                    return res.status(500).json({
-                                        message: "Gagal menonaktifkan produk"
-                                    });
-                                }
-
-                                if (this.changes === 0) {
-                                    return res.status(404).json({
-                                        message: "Produk tidak ditemukan"
-                                    });
-                                }
-
-                                return res.json({
-                                    message: "Produk dipakai oleh order/key, jadi dinonaktifkan saja"
-                                });
-                            }
-                        );
-                    }
-
-                    db.run("DELETE FROM products WHERE id = ?", [productId], function (deleteErr) {
-                        if (deleteErr) {
-                            return res.status(500).json({
-                                message: "Gagal menghapus produk"
-                            });
-                        }
-
-                        if (this.changes === 0) {
-                            return res.status(404).json({
-                                message: "Produk tidak ditemukan"
-                            });
-                        }
-
-                        return res.json({
-                            message: "Produk berhasil dihapus"
-                        });
-                    });
-                }
-            );
+            return res.json({
+                message: "Produk dipakai oleh order/key, jadi dinonaktifkan saja"
+            });
         }
-    );
+
+        const deleteResult = await query(
+            "DELETE FROM products WHERE id = $1 RETURNING id",
+            [productId]
+        );
+
+        if (deleteResult.rows.length === 0) {
+            return res.status(404).json({
+                message: "Produk tidak ditemukan"
+            });
+        }
+
+        return res.json({
+            message: "Produk berhasil dihapus"
+        });
+    } catch (err) {
+        console.error("ERROR DELETE PRODUCT:", err);
+        return res.status(500).json({
+            message: "Gagal menghapus produk: " + err.message
+        });
+    }
 });
 
-
-app.patch("/products/:id/toggle-active", (req, res) => {
+app.patch("/products/:id/toggle-active", async (req, res) => {
     if (!isAdminLoggedIn(req)) {
         return res.status(401).json({
             message: "Unauthorized"
@@ -908,6 +892,7 @@ app.patch("/products/:id/toggle-active", (req, res) => {
 
     const productId = Number(req.params.id);
     const { active } = req.body;
+    const cleanActive = Number(active);
 
     if (!Number.isInteger(productId) || productId <= 0) {
         return res.status(400).json({
@@ -915,35 +900,33 @@ app.patch("/products/:id/toggle-active", (req, res) => {
         });
     }
 
-    const cleanActive = Number(active);
-
     if (cleanActive !== 0 && cleanActive !== 1) {
         return res.status(400).json({
             message: "Nilai active harus 0 atau 1"
         });
     }
 
-    db.run(
-        "UPDATE products SET active = ? WHERE id = ?",
-        [active, productId],
-        function (err) {
-            if (err) {
-                return res.status(500).json({
-                    message: "Gagal mengubah status produk: " + err.message
-                });
-            }
+    try {
+        const result = await query(
+            "UPDATE products SET active = $1 WHERE id = $2 RETURNING id",
+            [cleanActive, productId]
+        );
 
-            if (this.changes === 0) {
-                return res.status(404).json({
-                    message: "Produk tidak ditemukan"
-                });
-            }
-
-            res.json({
-                message: active === 1 ? "Produk diaktifkan" : "Produk dinonaktifkan"
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                message: "Produk tidak ditemukan"
             });
         }
-    );
+
+        return res.json({
+            message: cleanActive === 1 ? "Produk diaktifkan" : "Produk dinonaktifkan"
+        });
+    } catch (err) {
+        console.error("ERROR TOGGLE PRODUCT:", err);
+        return res.status(500).json({
+            message: "Gagal mengubah status produk: " + err.message
+        });
+    }
 });
 
 app.get("/public-products", async (req, res) => {
@@ -952,7 +935,7 @@ app.get("/public-products", async (req, res) => {
             "SELECT * FROM products WHERE active = 1 ORDER BY game ASC, brand ASC, duration ASC"
         );
 
-        res.json(result.rows);
+        return res.json(result.rows);
     } catch (err) {
         console.error("ERROR PUBLIC PRODUCTS:", err);
         return res.status(500).json({
