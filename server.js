@@ -757,6 +757,62 @@ app.post("/products", async (req, res) => {
     }
 });
 
+app.put("/products/:id", async (req, res) => {
+    if (!isAdminLoggedIn(req)) {
+        return res.status(401).json({
+            message: "Unauthorized"
+        });
+    }
+
+    const productId = Number(req.params.id);
+    const { game, brand, duration, price } = req.body;
+
+    if (!Number.isInteger(productId) || productId <= 0) {
+        return res.status(400).json({
+            message: "ID produk tidak valid"
+        });
+    }
+
+    const cleanGame = String(game || "").trim();
+    const cleanBrand = String(brand || "").trim();
+    const cleanDuration = String(duration || "").trim();
+    const cleanPrice = Number(price);
+
+    if (!cleanGame || !cleanBrand || !cleanDuration) {
+        return res.status(400).json({
+            message: "Data produk belum lengkap"
+        });
+    }
+
+    if (!Number.isFinite(cleanPrice) || cleanPrice <= 0) {
+        return res.status(400).json({
+            message: "Harga produk tidak valid"
+        });
+    }
+
+    try {
+        const result = await query(
+            "UPDATE products SET game = $1, brand = $2, duration = $3, price = $4 WHERE id = $5 RETURNING id",
+            [cleanGame, cleanBrand, cleanDuration, cleanPrice, productId]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                message: "Produk tidak ditemukan"
+            });
+        }
+
+        res.json({
+            message: "Produk berhasil diupdate"
+        });
+    } catch (err) {
+        console.error("ERROR UPDATE PRODUCT:", err);
+        return res.status(500).json({
+            message: "Gagal update produk: " + err.message
+        });
+    }
+});
+
 app.delete("/products/:id", (req, res) => {
     if (!isAdminLoggedIn(req)) {
         return res.status(401).json({
