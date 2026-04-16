@@ -231,7 +231,7 @@ app.post("/create-order", orderLimiter, async (req, res) => {
                     try {
                         const auth = Buffer.from(process.env.XENDIT_SECRET_KEY + ":").toString("base64");
                         const baseUrl = process.env.APP_BASE_URL || `http://localhost:${port}`;
-
+                        const fetch = require("node-fetch");
                         const xenditResponse = await fetch("https://api.xendit.co/v2/invoices", {
                             method: "POST",
                             headers: {
@@ -973,6 +973,10 @@ app.get("/admin", (req, res) => {
 
 app.get("/admin-login", (req, res) => {
     return res.status(404).send("Not Found");
+});
+
+app.listen(port, () => {
+    console.log("Server jalan di port", port);
 });
 
 module.exports = app;
