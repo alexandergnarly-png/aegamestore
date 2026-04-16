@@ -10,6 +10,14 @@ const rateLimit = require("express-rate-limit");
 const app = express();
 app.set("trust proxy", 1);
 const port = process.env.PORT || 3000;
+
+db.query("SELECT NOW()", (err, res) => {
+  if (err) {
+    console.error("DB ERROR:", err);
+  } else {
+    console.log("DB Connected:", res.rows[0]);
+  }
+});
 // limit umum (global)
 const globalLimiter = rateLimit({
     windowMs: 60 * 1000, // 1 menit
