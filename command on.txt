@@ -1,4 +1,0 @@
-command on
-npm run dev
-
-curl -X POST http://localhost:3000/xendit-webhook -H "Content-Type: application/json" -H "x-callback-token: FMXwoEJlqeQzNmAno7TUWWfpf9LFPSALubWKtigeFsIzAguq" -d "{\"status\":\"PAID\",\"external_id\":\"ORDER-d999a981-18c6-42a8-bf29-da6ff94c8d11\"}"
