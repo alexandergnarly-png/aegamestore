@@ -683,22 +683,25 @@ app.post("/keys/bulk", (req, res) => {
     );
 });
 
-app.get("/products", (req, res) => {
+app.get("/products", async (req, res) => {
     if (!isAdminLoggedIn(req)) {
         return res.status(401).json({
             message: "Unauthorized"
         });
     }
 
-    db.all("SELECT * FROM products ORDER BY id DESC", [], (err, rows) => {
-        if (err) {
-            return res.status(500).json({
-                message: "Gagal mengambil daftar produk"
-            });
-        }
+    try {
+        const result = await query(
+            "SELECT * FROM products ORDER BY id DESC"
+        );
 
-        res.json(rows);
-    });
+        res.json(result.rows);
+    } catch (err) {
+        console.error("ERROR GET PRODUCTS:", err);
+        return res.status(500).json({
+            message: "Gagal mengambil daftar produk"
+        });
+    }
 });
 
 app.post("/products", async (req, res) => {
@@ -946,6 +949,7 @@ app.get("/public-products", async (req, res) => {
         const result = await query(
             "SELECT * FROM products WHERE active = 1 ORDER BY game ASC, brand ASC, duration ASC"
         );
+
         res.json(result.rows);
     } catch (err) {
         console.error("ERROR PUBLIC PRODUCTS:", err);
