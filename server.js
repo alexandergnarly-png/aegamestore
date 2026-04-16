@@ -172,47 +172,6 @@ app.get("/ae-control", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "admin.html"));
 });
 
-app.get("/products", async (req, res) => {
-    if (!isAdminLoggedIn(req)) {
-        return res.status(401).json({
-            message: "Unauthorized"
-        });
-    }
-
-    try {
-        const result = await db.query(`
-            SELECT *
-            FROM products
-            ORDER BY id DESC
-        `);
-
-        return res.json(result.rows);
-    } catch (err) {
-        console.error("ERROR GET PRODUCTS:", err);
-        return res.status(500).json({
-            message: "Gagal mengambil daftar produk"
-        });
-    }
-});
-
-app.get("/public-products", async (req, res) => {
-    try {
-        const result = await db.query(`
-            SELECT *
-            FROM products
-            WHERE active = 1
-            ORDER BY id DESC
-        `);
-
-        return res.json(result.rows);
-    } catch (err) {
-        console.error("ERROR GET PUBLIC PRODUCTS:", err);
-        return res.status(500).json({
-            message: "Gagal mengambil produk"
-        });
-    }
-});
-
 // buat order + invoice Xendit
 app.post("/create-order", orderLimiter, async (req, res) => {
     const { product_id, name, contact } = req.body;
@@ -883,60 +842,6 @@ app.delete("/products/:id", (req, res) => {
     );
 });
 
-app.post("/products", async (req, res) => {
-    if (!isAdminLoggedIn(req)) {
-        return res.status(401).json({
-            message: "Unauthorized"
-        });
-    }
-
-    const { game, brand, duration, price } = req.body;
-
-    const cleanGame = String(game || "").trim();
-    const cleanBrand = String(brand || "").trim();
-    const cleanDuration = String(duration || "").trim();
-    const cleanPrice = Number(price);
-
-    if (!cleanGame || !cleanBrand || !cleanDuration) {
-        return res.status(400).json({
-            message: "Data produk belum lengkap"
-        });
-    }
-
-    if (!Number.isFinite(cleanPrice) || cleanPrice <= 0) {
-        return res.status(400).json({
-            message: "Harga produk tidak valid"
-        });
-    }
-
-    const createdAt = new Date().toISOString();
-
-    console.log("ADD PRODUCT REQUEST:", {
-        game: cleanGame,
-        brand: cleanBrand,
-        duration: cleanDuration,
-        price: cleanPrice
-    });
-
-    try {
-        const result = await query(
-            "INSERT INTO products (game, brand, duration, price, active, created_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
-            [cleanGame, cleanBrand, cleanDuration, cleanPrice, 1, createdAt]
-        );
-
-        console.log("INSERT SUCCESS:", result.rows);
-
-        res.json({
-            message: "Produk berhasil ditambahkan",
-            id: result.rows[0].id
-        });
-    } catch (err) {
-        console.error("ERROR ADD PRODUCT:", err);
-        return res.status(500).json({
-            message: "Gagal menambahkan produk: " + err.message
-        });
-    }
-});
 
 app.patch("/products/:id/toggle-active", (req, res) => {
     if (!isAdminLoggedIn(req)) {
