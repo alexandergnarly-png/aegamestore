@@ -7,8 +7,8 @@ const bcrypt = require("bcryptjs");
 require("dotenv").config();
 const rateLimit = require("express-rate-limit");
 
-app.set("trust proxy", 1);
 const app = express();
+app.set("trust proxy", 1);
 const port = process.env.PORT || 3000;
 // limit umum (global)
 const globalLimiter = rateLimit({
