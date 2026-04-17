@@ -159,6 +159,24 @@ async function isAdminLoggedIn(req) {
     }
 }
 
+async function requireAdminAuth(req, res, next) {
+    const isLoggedIn = await isAdminLoggedIn(req);
+
+    if (!isLoggedIn) {
+        // kalau akses dari browser
+        if (req.headers.accept && req.headers.accept.includes("text/html")) {
+            return res.redirect("/ae-auth");
+        }
+
+        // kalau akses dari API (fetch)
+        return res.status(401).json({
+            message: "Unauthorized"
+        });
+    }
+
+    next();
+}
+
 function runQuery(sql, params = []) {
     return new Promise((resolve, reject) => {
         db.run(sql, params, function (err) {
@@ -281,11 +299,7 @@ app.post("/admin-logout", async (req, res) => {
     }
 });
 
-app.get("/ae-control", async (req, res) => {
-    if (!(await isAdminLoggedIn(req))) {
-        return res.redirect("/ae-auth");
-    }
-
+app.get("/ae-control", requireAdminAuth, (req, res) => {
     res.sendFile(path.join(__dirname, "public", "admin.html"));
 });
 
@@ -619,13 +633,7 @@ app.get("/order/:id", async (req, res) => {
     }
 });
 
-app.get("/orders", async (req, res) => {
-    if (!(await isAdminLoggedIn(req))) {
-        return res.status(401).json({
-            message: "Unauthorized"
-        });
-    }
-
+app.get("/orders", requireAdminAuth, async (req, res) => {
     try {
         const result = await query(
             "SELECT * FROM orders ORDER BY created_at DESC, id DESC"
@@ -641,12 +649,6 @@ app.get("/orders", async (req, res) => {
 });
 
 app.get("/keys", async (req, res) => {
-    if (!(await isAdminLoggedIn(req))) {
-        return res.status(401).json({
-            message: "Unauthorized"
-        });
-    }
-
     try {
         const result = await query(`
             SELECT
@@ -668,13 +670,7 @@ app.get("/keys", async (req, res) => {
     }
 });
 
-app.post("/keys", async (req, res) => {
-    if (!(await isAdminLoggedIn(req))) {
-        return res.status(401).json({
-            message: "Unauthorized"
-        });
-    }
-
+app.post("/keys",requireAdminAuth, async (req, res) => {
     const { product_id, key } = req.body;
     const cleanProductId = Number(product_id);
     const cleanKey = String(key || "").trim();
@@ -720,19 +716,13 @@ app.post("/keys", async (req, res) => {
     }
 });
 
-app.post("/keys/bulk", async (req, res) => {
+app.post("/keys/bulk",requireAdminAuth, async (req, res) => {
     return res.status(501).json({
         message: "Bulk key belum dimigrasikan ke PostgreSQL"
     });
 });
 
 app.get("/products", async (req, res) => {
-    if (!(await isAdminLoggedIn(req))) {
-        return res.status(401).json({
-            message: "Unauthorized"
-        });
-    }
-
     try {
         const result = await query(
             "SELECT * FROM products ORDER BY id DESC"
@@ -747,13 +737,7 @@ app.get("/products", async (req, res) => {
     }
 });
 
-app.post("/products", async (req, res) => {
-    if (!(await isAdminLoggedIn(req))) {
-        return res.status(401).json({
-            message: "Unauthorized"
-        });
-    }
-
+app.post("/products",requireAdminAuth, async (req, res) => {
     const { game, brand, duration, price } = req.body;
 
     const cleanGame = String(game || "").trim();
@@ -803,12 +787,6 @@ app.post("/products", async (req, res) => {
 });
 
 app.put("/products/:id", async (req, res) => {
-    if (!(await isAdminLoggedIn(req))) {
-        return res.status(401).json({
-            message: "Unauthorized"
-        });
-    }
-
     const productId = Number(req.params.id);
     const { game, brand, duration, price } = req.body;
 
@@ -859,12 +837,6 @@ app.put("/products/:id", async (req, res) => {
 });
 
 app.delete("/products/:id", async (req, res) => {
-    if (!(await isAdminLoggedIn(req))) {
-        return res.status(401).json({
-            message: "Unauthorized"
-        });
-    }
-
     const productId = Number(req.params.id);
 
     if (!Number.isInteger(productId) || productId <= 0) {
@@ -927,12 +899,6 @@ app.delete("/products/:id", async (req, res) => {
 });
 
 app.patch("/products/:id/toggle-active", async (req, res) => {
-    if (!(await isAdminLoggedIn(req))) {
-        return res.status(401).json({
-            message: "Unauthorized"
-        });
-    }
-
     const productId = Number(req.params.id);
     let { active } = req.body;
 
@@ -992,12 +958,6 @@ app.get("/public-products", async (req, res) => {
 });
 
 app.delete("/keys/:id", async (req, res) => {
-    if (!(await isAdminLoggedIn(req))) {
-    return res.status(401).json({
-        message: "Unauthorized"
-    });
-}
-
     const keyId = Number(req.params.id);
 
     if (!Number.isInteger(keyId) || keyId <= 0) {
