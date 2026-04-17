@@ -648,7 +648,7 @@ app.get("/orders", requireAdminAuth, async (req, res) => {
     }
 });
 
-app.get("/keys", async (req, res) => {
+app.get("/keys",requireAdminAuth, async (req, res) => {
     try {
         const result = await query(`
             SELECT
@@ -722,7 +722,7 @@ app.post("/keys/bulk",requireAdminAuth, async (req, res) => {
     });
 });
 
-app.get("/products", async (req, res) => {
+app.get("/products", requireAdminAuth, async (req, res) => {
     try {
         const result = await query(
             "SELECT * FROM products ORDER BY id DESC"
@@ -786,7 +786,7 @@ app.post("/products",requireAdminAuth, async (req, res) => {
     }
 });
 
-app.put("/products/:id", async (req, res) => {
+app.put("/products/:id", requireAdminAuth, async (req, res) => {
     const productId = Number(req.params.id);
     const { game, brand, duration, price } = req.body;
 
@@ -836,7 +836,7 @@ app.put("/products/:id", async (req, res) => {
     }
 });
 
-app.delete("/products/:id", async (req, res) => {
+app.delete("/products/:id", requireAdminAuth, async (req, res) => {
     const productId = Number(req.params.id);
 
     if (!Number.isInteger(productId) || productId <= 0) {
@@ -898,7 +898,7 @@ app.delete("/products/:id", async (req, res) => {
     }
 });
 
-app.patch("/products/:id/toggle-active", async (req, res) => {
+app.patch("/products/:id/toggle-active", requireAdminAuth, async (req, res) => {
     const productId = Number(req.params.id);
     let { active } = req.body;
 
@@ -957,7 +957,7 @@ app.get("/public-products", async (req, res) => {
     }
 });
 
-app.delete("/keys/:id", async (req, res) => {
+app.delete("/keys/:id", requireAdminAuth, async (req, res) => {
     const keyId = Number(req.params.id);
 
     if (!Number.isInteger(keyId) || keyId <= 0) {
