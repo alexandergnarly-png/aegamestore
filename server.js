@@ -4,6 +4,7 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
+const helmet = require("helmet");
 require("dotenv").config();
 const rateLimit = require("express-rate-limit");
 
@@ -21,6 +22,10 @@ db.query("SELECT NOW()", (err, res) => {
 
 async function query(sql, params = []) {
   return db.query(sql, params);
+}
+
+function generateCsrfToken() {
+    return crypto.randomBytes(32).toString("hex");
 }
 
 async function deleteExpiredAdminSessions() {
@@ -160,6 +165,18 @@ async function isAdminLoggedIn(req) {
 }
 
 async function requireAdminAuth(req, res, next) {
+    function requireAdminCsrf(req, res, next) {
+    const csrfFromCookie = String(req.cookies.admin_csrf || "").trim();
+    const csrfFromHeader = String(req.headers["x-csrf-token"] || "").trim();
+
+    if (!csrfFromCookie || !csrfFromHeader || csrfFromCookie !== csrfFromHeader) {
+        return res.status(403).json({
+            message: "Invalid CSRF token"
+        });
+    }
+
+    next();
+}
     const isLoggedIn = await isAdminLoggedIn(req);
 
     if (!isLoggedIn) {
@@ -195,6 +212,9 @@ function getQuery(sql, params = []) {
     });
 }
 
+app.use(helmet({
+    contentSecurityPolicy: false
+}));
 app.use(globalLimiter);
 app.use(express.json());
 app.use(cookieParser());
@@ -254,11 +274,22 @@ app.post("/admin-login", loginLimiter, async (req, res) => {
             );
 
             res.cookie("admin_auth", sessionToken, {
-                httpOnly: true,
-                sameSite: "lax",
-                secure: process.env.NODE_ENV === "production",
-                maxAge: 1000 * 60 * 60 * 8
-            });
+    httpOnly: true,
+    sameSite: "strict",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 1000 * 60 * 60 * 8,
+    path: "/"
+});
+
+const csrfToken = generateCsrfToken();
+
+res.cookie("admin_csrf", csrfToken, {
+    httpOnly: false,
+    sameSite: "strict",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 1000 * 60 * 60 * 8,
+    path: "/"
+});
 
             return res.json({
                 message: "Login berhasil"
@@ -287,7 +318,8 @@ app.post("/admin-logout", async (req, res) => {
             );
         }
 
-        res.clearCookie("admin_auth");
+        res.clearCookie("admin_auth", { path: "/" });
+        res.clearCookie("admin_csrf", { path: "/" });
         return res.json({
             message: "Logout berhasil"
         });
@@ -300,6 +332,18 @@ app.post("/admin-logout", async (req, res) => {
 });
 
 app.get("/ae-control", requireAdminAuth, (req, res) => {
+    function requireAdminCsrf(req, res, next) {
+    const csrfFromCookie = String(req.cookies.admin_csrf || "").trim();
+    const csrfFromHeader = String(req.headers["x-csrf-token"] || "").trim();
+
+    if (!csrfFromCookie || !csrfFromHeader || csrfFromCookie !== csrfFromHeader) {
+        return res.status(403).json({
+            message: "Invalid CSRF token"
+        });
+    }
+
+    next();
+}
     res.sendFile(path.join(__dirname, "public", "admin.html"));
 });
 
@@ -318,16 +362,30 @@ app.post("/create-order", orderLimiter, async (req, res) => {
     }
 
     if (!cleanName || cleanName.length < 2 || cleanName.length > 60) {
-        return res.status(400).json({
-            message: "Nama harus 2 sampai 60 karakter"
-        });
-    }
+    return res.status(400).json({
+        message: "Nama harus 2 sampai 60 karakter"
+    });
+}
 
-    if (!cleanContact || cleanContact.length < 5 || cleanContact.length > 100) {
-        return res.status(400).json({
-            message: "Kontak harus 5 sampai 100 karakter"
-        });
-    }
+const safeNameRegex = /^[a-zA-Z0-9 .,_'’-]+$/;
+if (!safeNameRegex.test(cleanName)) {
+    return res.status(400).json({
+        message: "Nama mengandung karakter yang tidak diizinkan"
+    });
+}
+
+if (!cleanContact || cleanContact.length < 5 || cleanContact.length > 100) {
+    return res.status(400).json({
+        message: "Kontak harus 5 sampai 100 karakter"
+    });
+}
+
+const safeContactRegex = /^[a-zA-Z0-9@+._\- ]+$/;
+if (!safeContactRegex.test(cleanContact)) {
+    return res.status(400).json({
+        message: "Kontak mengandung karakter yang tidak diizinkan"
+    });
+}
 
     try {
         const productResult = await query(
@@ -630,6 +688,18 @@ app.get("/order/:id", async (req, res) => {
 });
 
 app.get("/orders", requireAdminAuth, async (req, res) => {
+    function requireAdminCsrf(req, res, next) {
+    const csrfFromCookie = String(req.cookies.admin_csrf || "").trim();
+    const csrfFromHeader = String(req.headers["x-csrf-token"] || "").trim();
+
+    if (!csrfFromCookie || !csrfFromHeader || csrfFromCookie !== csrfFromHeader) {
+        return res.status(403).json({
+            message: "Invalid CSRF token"
+        });
+    }
+
+    next();
+}
     try {
         const result = await query(
             "SELECT * FROM orders ORDER BY created_at DESC, id DESC"
@@ -645,6 +715,18 @@ app.get("/orders", requireAdminAuth, async (req, res) => {
 });
 
 app.get("/keys",requireAdminAuth, async (req, res) => {
+    function requireAdminCsrf(req, res, next) {
+    const csrfFromCookie = String(req.cookies.admin_csrf || "").trim();
+    const csrfFromHeader = String(req.headers["x-csrf-token"] || "").trim();
+
+    if (!csrfFromCookie || !csrfFromHeader || csrfFromCookie !== csrfFromHeader) {
+        return res.status(403).json({
+            message: "Invalid CSRF token"
+        });
+    }
+
+    next();
+}
     try {
         const result = await query(`
             SELECT
@@ -667,6 +749,18 @@ app.get("/keys",requireAdminAuth, async (req, res) => {
 });
 
 app.post("/keys",requireAdminAuth, async (req, res) => {
+    function requireAdminCsrf(req, res, next) {
+    const csrfFromCookie = String(req.cookies.admin_csrf || "").trim();
+    const csrfFromHeader = String(req.headers["x-csrf-token"] || "").trim();
+
+    if (!csrfFromCookie || !csrfFromHeader || csrfFromCookie !== csrfFromHeader) {
+        return res.status(403).json({
+            message: "Invalid CSRF token"
+        });
+    }
+
+    next();
+}
     const { product_id, key } = req.body;
     const cleanProductId = Number(product_id);
     const cleanKey = String(key || "").trim();
@@ -713,12 +807,36 @@ app.post("/keys",requireAdminAuth, async (req, res) => {
 });
 
 app.post("/keys/bulk",requireAdminAuth, async (req, res) => {
+    function requireAdminCsrf(req, res, next) {
+    const csrfFromCookie = String(req.cookies.admin_csrf || "").trim();
+    const csrfFromHeader = String(req.headers["x-csrf-token"] || "").trim();
+
+    if (!csrfFromCookie || !csrfFromHeader || csrfFromCookie !== csrfFromHeader) {
+        return res.status(403).json({
+            message: "Invalid CSRF token"
+        });
+    }
+
+    next();
+}
     return res.status(501).json({
         message: "Bulk key belum dimigrasikan ke PostgreSQL"
     });
 });
 
 app.get("/products", requireAdminAuth, async (req, res) => {
+    function requireAdminCsrf(req, res, next) {
+    const csrfFromCookie = String(req.cookies.admin_csrf || "").trim();
+    const csrfFromHeader = String(req.headers["x-csrf-token"] || "").trim();
+
+    if (!csrfFromCookie || !csrfFromHeader || csrfFromCookie !== csrfFromHeader) {
+        return res.status(403).json({
+            message: "Invalid CSRF token"
+        });
+    }
+
+    next();
+}
     try {
         const result = await query(
             "SELECT * FROM products ORDER BY id DESC"
@@ -734,6 +852,18 @@ app.get("/products", requireAdminAuth, async (req, res) => {
 });
 
 app.post("/products",requireAdminAuth, async (req, res) => {
+    function requireAdminCsrf(req, res, next) {
+    const csrfFromCookie = String(req.cookies.admin_csrf || "").trim();
+    const csrfFromHeader = String(req.headers["x-csrf-token"] || "").trim();
+
+    if (!csrfFromCookie || !csrfFromHeader || csrfFromCookie !== csrfFromHeader) {
+        return res.status(403).json({
+            message: "Invalid CSRF token"
+        });
+    }
+
+    next();
+}
     const { game, brand, duration, price } = req.body;
 
     const cleanGame = String(game || "").trim();
@@ -783,6 +913,18 @@ app.post("/products",requireAdminAuth, async (req, res) => {
 });
 
 app.put("/products/:id", requireAdminAuth, async (req, res) => {
+    function requireAdminCsrf(req, res, next) {
+    const csrfFromCookie = String(req.cookies.admin_csrf || "").trim();
+    const csrfFromHeader = String(req.headers["x-csrf-token"] || "").trim();
+
+    if (!csrfFromCookie || !csrfFromHeader || csrfFromCookie !== csrfFromHeader) {
+        return res.status(403).json({
+            message: "Invalid CSRF token"
+        });
+    }
+
+    next();
+}
     const productId = Number(req.params.id);
     const { game, brand, duration, price } = req.body;
 
@@ -833,6 +975,18 @@ app.put("/products/:id", requireAdminAuth, async (req, res) => {
 });
 
 app.delete("/products/:id", requireAdminAuth, async (req, res) => {
+    function requireAdminCsrf(req, res, next) {
+    const csrfFromCookie = String(req.cookies.admin_csrf || "").trim();
+    const csrfFromHeader = String(req.headers["x-csrf-token"] || "").trim();
+
+    if (!csrfFromCookie || !csrfFromHeader || csrfFromCookie !== csrfFromHeader) {
+        return res.status(403).json({
+            message: "Invalid CSRF token"
+        });
+    }
+
+    next();
+}
     const productId = Number(req.params.id);
 
     if (!Number.isInteger(productId) || productId <= 0) {
@@ -895,6 +1049,18 @@ app.delete("/products/:id", requireAdminAuth, async (req, res) => {
 });
 
 app.patch("/products/:id/toggle-active", requireAdminAuth, async (req, res) => {
+    function requireAdminCsrf(req, res, next) {
+    const csrfFromCookie = String(req.cookies.admin_csrf || "").trim();
+    const csrfFromHeader = String(req.headers["x-csrf-token"] || "").trim();
+
+    if (!csrfFromCookie || !csrfFromHeader || csrfFromCookie !== csrfFromHeader) {
+        return res.status(403).json({
+            message: "Invalid CSRF token"
+        });
+    }
+
+    next();
+}
     const productId = Number(req.params.id);
     let { active } = req.body;
 
@@ -954,6 +1120,18 @@ app.get("/public-products", async (req, res) => {
 });
 
 app.delete("/keys/:id", requireAdminAuth, async (req, res) => {
+    function requireAdminCsrf(req, res, next) {
+    const csrfFromCookie = String(req.cookies.admin_csrf || "").trim();
+    const csrfFromHeader = String(req.headers["x-csrf-token"] || "").trim();
+
+    if (!csrfFromCookie || !csrfFromHeader || csrfFromCookie !== csrfFromHeader) {
+        return res.status(403).json({
+            message: "Invalid CSRF token"
+        });
+    }
+
+    next();
+}
     const keyId = Number(req.params.id);
 
     if (!Number.isInteger(keyId) || keyId <= 0) {

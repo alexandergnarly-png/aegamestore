@@ -237,16 +237,16 @@ document.getElementById("statusRow").innerHTML =
 document.getElementById("statusText").innerText =
     "Order berhasil ditemukan. Simpan halaman ini untuk cek status order kamu kapan saja.";
 
-document.getElementById("nameText").innerHTML =
-    `<span class="summary-label">Nama:</span> ${data.name || "-"}`;
-document.getElementById("contactText").innerHTML =
-    `<span class="summary-label">Kontak:</span> ${data.contact || "-"}`;
-document.getElementById("gameText").innerHTML =
-    `<span class="summary-label">Game:</span> ${data.game || "-"}`;
-document.getElementById("productText").innerHTML =
-    `<span class="summary-label">Produk:</span> ${data.product || "-"}`;
-document.getElementById("priceText").innerHTML =
-    `<span class="summary-label">Harga:</span> ${data.price ? formatRupiah(data.price) : "-"}`;
+document.getElementById("nameText").textContent =
+    `Nama: ${data.name || "-"}`;
+document.getElementById("contactText").textContent =
+    `Kontak: ${data.contact || "-"}`;
+document.getElementById("gameText").textContent =
+    `Game: ${data.game || "-"}`;
+document.getElementById("productText").textContent =
+    `Produk: ${data.product || "-"}`;
+document.getElementById("priceText").textContent =
+    `Harga: ${data.price ? formatRupiah(data.price) : "-"}`;
 
 const copyBtn = document.getElementById("copyBtn");
 
