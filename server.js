@@ -23,6 +23,17 @@ async function query(sql, params = []) {
   return db.query(sql, params);
 }
 
+async function deleteExpiredAdminSessions() {
+  try {
+    await query(
+      "DELETE FROM admin_sessions WHERE expires_at <= $1",
+      [new Date().toISOString()]
+    );
+  } catch (err) {
+    console.error("ERROR DELETE EXPIRED ADMIN SESSIONS:", err);
+  }
+}
+
 db.query(`
   CREATE TABLE IF NOT EXISTS products (
     id SERIAL PRIMARY KEY,
@@ -79,6 +90,22 @@ db.query(`
   }
 });
 
+db.query(`
+  CREATE TABLE IF NOT EXISTS admin_sessions (
+    id SERIAL PRIMARY KEY,
+    session_token TEXT NOT NULL UNIQUE,
+    username TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    expires_at TEXT NOT NULL
+  )
+`, (err) => {
+  if (err) {
+    console.error("CREATE TABLE admin_sessions ERROR:", err);
+  } else {
+    console.log("Table admin_sessions ready");
+  }
+});
+
 // limit umum (global)
 const globalLimiter = rateLimit({
     windowMs: 60 * 1000, // 1 menit
@@ -109,8 +136,27 @@ const orderLimiter = rateLimit({
     }
 });
 
-function isAdminLoggedIn(req) {
-    return req.cookies.admin_auth === "true";
+async function isAdminLoggedIn(req) {
+    const sessionToken = String(req.cookies.admin_auth || "").trim();
+
+    if (!sessionToken) {
+        return false;
+    }
+
+    try {
+        const result = await query(
+            `SELECT * FROM admin_sessions
+             WHERE session_token = $1
+             AND expires_at > $2
+             LIMIT 1`,
+            [sessionToken, new Date().toISOString()]
+        );
+
+        return result.rows.length > 0;
+    } catch (err) {
+        console.error("ERROR CHECK ADMIN SESSION:", err);
+        return false;
+    }
 }
 
 function runQuery(sql, params = []) {
@@ -167,11 +213,29 @@ app.post("/admin-login", loginLimiter, async (req, res) => {
     }
 
     try {
-        const isUsernameMatch = String(username).trim() === envUsername;
+        await deleteExpiredAdminSessions();
+
+        const cleanUsername = String(username).trim();
+        const isUsernameMatch = cleanUsername === envUsername;
         const isPasswordMatch = await bcrypt.compare(String(password), envPasswordHash);
 
         if (isUsernameMatch && isPasswordMatch) {
-            res.cookie("admin_auth", "true", {
+            const sessionToken = crypto.randomBytes(48).toString("hex");
+            const createdAt = new Date();
+            const expiresAt = new Date(createdAt.getTime() + (1000 * 60 * 60 * 8));
+
+            await query(
+                `INSERT INTO admin_sessions (session_token, username, created_at, expires_at)
+                 VALUES ($1, $2, $3, $4)`,
+                [
+                    sessionToken,
+                    cleanUsername,
+                    createdAt.toISOString(),
+                    expiresAt.toISOString()
+                ]
+            );
+
+            res.cookie("admin_auth", sessionToken, {
                 httpOnly: true,
                 sameSite: "lax",
                 secure: process.env.NODE_ENV === "production",
@@ -194,15 +258,31 @@ app.post("/admin-login", loginLimiter, async (req, res) => {
     }
 });
 
-app.post("/admin-logout", (req, res) => {
-    res.clearCookie("admin_auth");
-    res.json({
-        message: "Logout berhasil"
-    });
+app.post("/admin-logout", async (req, res) => {
+    const sessionToken = String(req.cookies.admin_auth || "").trim();
+
+    try {
+        if (sessionToken) {
+            await query(
+                "DELETE FROM admin_sessions WHERE session_token = $1",
+                [sessionToken]
+            );
+        }
+
+        res.clearCookie("admin_auth");
+        return res.json({
+            message: "Logout berhasil"
+        });
+    } catch (err) {
+        console.error("ERROR LOGOUT ADMIN:", err);
+        return res.status(500).json({
+            message: "Gagal logout admin"
+        });
+    }
 });
 
-app.get("/ae-control", (req, res) => {
-    if (!isAdminLoggedIn(req)) {
+app.get("/ae-control", async (req, res) => {
+    if (!(await isAdminLoggedIn(req))) {
         return res.redirect("/ae-auth");
     }
 
@@ -540,7 +620,7 @@ app.get("/order/:id", async (req, res) => {
 });
 
 app.get("/orders", async (req, res) => {
-    if (!isAdminLoggedIn(req)) {
+    if (!(await isAdminLoggedIn(req))) {
         return res.status(401).json({
             message: "Unauthorized"
         });
@@ -561,7 +641,7 @@ app.get("/orders", async (req, res) => {
 });
 
 app.get("/keys", async (req, res) => {
-    if (!isAdminLoggedIn(req)) {
+    if (!(await isAdminLoggedIn(req))) {
         return res.status(401).json({
             message: "Unauthorized"
         });
@@ -589,7 +669,7 @@ app.get("/keys", async (req, res) => {
 });
 
 app.post("/keys", async (req, res) => {
-    if (!isAdminLoggedIn(req)) {
+    if (!(await isAdminLoggedIn(req))) {
         return res.status(401).json({
             message: "Unauthorized"
         });
@@ -647,7 +727,7 @@ app.post("/keys/bulk", async (req, res) => {
 });
 
 app.get("/products", async (req, res) => {
-    if (!isAdminLoggedIn(req)) {
+    if (!(await isAdminLoggedIn(req))) {
         return res.status(401).json({
             message: "Unauthorized"
         });
@@ -668,7 +748,7 @@ app.get("/products", async (req, res) => {
 });
 
 app.post("/products", async (req, res) => {
-    if (!isAdminLoggedIn(req)) {
+    if (!(await isAdminLoggedIn(req))) {
         return res.status(401).json({
             message: "Unauthorized"
         });
@@ -723,7 +803,7 @@ app.post("/products", async (req, res) => {
 });
 
 app.put("/products/:id", async (req, res) => {
-    if (!isAdminLoggedIn(req)) {
+    if (!(await isAdminLoggedIn(req))) {
         return res.status(401).json({
             message: "Unauthorized"
         });
@@ -779,7 +859,7 @@ app.put("/products/:id", async (req, res) => {
 });
 
 app.delete("/products/:id", async (req, res) => {
-    if (!isAdminLoggedIn(req)) {
+    if (!(await isAdminLoggedIn(req))) {
         return res.status(401).json({
             message: "Unauthorized"
         });
@@ -847,7 +927,7 @@ app.delete("/products/:id", async (req, res) => {
 });
 
 app.patch("/products/:id/toggle-active", async (req, res) => {
-    if (!isAdminLoggedIn(req)) {
+    if (!(await isAdminLoggedIn(req))) {
         return res.status(401).json({
             message: "Unauthorized"
         });
@@ -912,11 +992,11 @@ app.get("/public-products", async (req, res) => {
 });
 
 app.delete("/keys/:id", async (req, res) => {
-    if (!isAdminLoggedIn(req)) {
-        return res.status(401).json({
-            message: "Unauthorized"
-        });
-    }
+    if (!(await isAdminLoggedIn(req))) {
+    return res.status(401).json({
+        message: "Unauthorized"
+    });
+}
 
     const keyId = Number(req.params.id);
 
