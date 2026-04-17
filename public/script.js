@@ -1,19 +1,31 @@
 let allProducts = [];
+
 const gameImages = {
     "PUBG Mobile": "https://cdn.cloudflare.steamstatic.com/steam/apps/578080/header.jpg",
     "Mobile Legends": "https://play-lh.googleusercontent.com/7oS5oPpR2z6kV1U1vVZrXW6Y7n4Zs3l7J9v0V0p0m8V0Q0h3R0Z0J0U0R0I0M0Y=s512",
     "Free Fire": "https://cdn2.unrealengine.com/egs-garena-freefire-garena-s1-2560x1440-0d1cfd2e3c8d.jpg",
     "Delta Force": "https://cdn.cloudflare.steamstatic.com/steam/apps/2507950/header.jpg"
 };
+
+const fallbackImage = "https://via.placeholder.com/600x300?text=Game+Store";
+
 let selectedGame = "";
 let selectedBrand = "";
 
 const gameGrid = document.getElementById("gameGrid");
 const brandSelect = document.getElementById("brand");
 const productSelect = document.getElementById("product");
+const buyBtn = document.getElementById("buyBtn");
+const loadingText = document.getElementById("loading");
 
 function formatRupiah(num) {
-    return "Rp " + Number(num).toLocaleString("id-ID");
+    return "Rp " + Number(num || 0).toLocaleString("id-ID");
+}
+
+function setLoading(isLoading) {
+    loadingText.style.display = isLoading ? "block" : "none";
+    buyBtn.disabled = isLoading;
+    buyBtn.innerText = isLoading ? "⏳ Memproses..." : "🛍️ Beli Sekarang";
 }
 
 async function loadAllProducts() {
@@ -45,10 +57,10 @@ function renderGames() {
     uniqueGames.forEach((game) => {
         const div = document.createElement("div");
         div.className = "game-card";
-        const imageUrl = gameImages[game] || "https://via.placeholder.com/300x150?text=Game";
+        const imageUrl = gameImages[game] || fallbackImage;
 
         div.innerHTML = `
-            <img src="${imageUrl}" alt="${game}">
+            <img src="${imageUrl}" alt="${game}" onerror="this.src='${fallbackImage}'">
             <span>${game}</span>
         `;
 
@@ -110,7 +122,12 @@ function updatePreview() {
         item => String(item.id) === String(productSelect.value)
     );
 
-    if (!selectedProduct) return;
+    if (!selectedProduct) {
+        document.getElementById("previewGame").innerText = "Produk belum dipilih";
+        document.getElementById("previewProduct").innerText = "Silakan pilih brand dan durasi";
+        document.getElementById("previewPrice").innerText = "Rp 0";
+        return;
+    }
 
     document.getElementById("previewGame").innerText = selectedProduct.game;
     document.getElementById("previewProduct").innerText = `${selectedProduct.brand} - ${selectedProduct.duration}`;
@@ -138,8 +155,7 @@ async function buy() {
         return;
     }
 
-    document.getElementById("loading").style.display = "block";
-    document.getElementById("buyBtn").disabled = true;
+    setLoading(true);
 
     try {
         const res = await fetch("/create-order", {
@@ -158,15 +174,15 @@ async function buy() {
 
         if (data.invoiceUrl) {
             window.location.href = data.invoiceUrl;
-        } else {
-            alert(data.message || "Gagal membuat invoice");
+            return;
         }
+
+        alert(data.message || "Gagal membuat invoice");
     } catch (err) {
         alert("Terjadi error server");
     }
 
-    document.getElementById("loading").style.display = "none";
-    document.getElementById("buyBtn").disabled = false;
+    setLoading(false);
 }
 
 loadAllProducts();
