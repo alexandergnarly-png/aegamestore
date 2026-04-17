@@ -7,10 +7,9 @@ const gameImages = {
     "Delta Force": "https://cdn.cloudflare.steamstatic.com/steam/apps/2507950/header.jpg"
 };
 
-const fallbackImage = "https://via.placeholder.com/600x300?text=Game+Store";
+const fallbackImage = "https://via.placeholder.com/400x220?text=Game";
 
 let selectedGame = "";
-let selectedBrand = "";
 
 const gameGrid = document.getElementById("gameGrid");
 const brandSelect = document.getElementById("brand");
@@ -25,7 +24,7 @@ function formatRupiah(num) {
 function setLoading(isLoading) {
     loadingText.style.display = isLoading ? "block" : "none";
     buyBtn.disabled = isLoading;
-    buyBtn.innerText = isLoading ? "⏳ Memproses..." : "🛍️ Beli Sekarang";
+    buyBtn.innerText = isLoading ? "Memproses..." : "Beli Sekarang";
 }
 
 async function loadAllProducts() {
@@ -42,6 +41,7 @@ async function loadAllProducts() {
 
         const uniqueGames = [...new Set(allProducts.map(item => item.game))];
         selectedGame = uniqueGames[0] || "";
+
         renderGames();
         loadBrands();
     } catch (err) {
@@ -55,26 +55,27 @@ function renderGames() {
     const uniqueGames = [...new Set(allProducts.map(item => item.game))];
 
     uniqueGames.forEach((game) => {
-        const div = document.createElement("div");
-        div.className = "game-card";
+        const card = document.createElement("div");
+        card.className = "game-card";
+
         const imageUrl = gameImages[game] || fallbackImage;
 
-        div.innerHTML = `
+        card.innerHTML = `
             <img src="${imageUrl}" alt="${game}" onerror="this.src='${fallbackImage}'">
             <span>${game}</span>
         `;
 
         if (game === selectedGame) {
-            div.classList.add("active");
+            card.classList.add("active");
         }
 
-        div.onclick = () => {
+        card.onclick = () => {
             selectedGame = game;
             renderGames();
             loadBrands();
         };
 
-        gameGrid.appendChild(div);
+        gameGrid.appendChild(card);
     });
 }
 
@@ -96,7 +97,6 @@ function loadBrands() {
         brandSelect.appendChild(option);
     });
 
-    selectedBrand = brands[0] || "";
     loadDurations();
 }
 

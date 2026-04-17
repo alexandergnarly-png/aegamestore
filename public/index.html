@@ -7,197 +7,107 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header class="shop-hero">
-        <div class="shop-hero-overlay"></div>
-
-        <nav class="topbar">
-            <div class="brand-wrap">
+    <header class="site-header">
+        <div class="header-inner">
+            <div class="brand">
                 <div class="brand-logo">AE</div>
-                <div class="brand-text">
+                <div class="brand-copy">
                     <strong>AE Game Store</strong>
-                    <span>Digital Key & Top Up Store</span>
+                    <span>Digital Key Store</span>
                 </div>
             </div>
 
-            <div class="topbar-badges">
-                <span class="top-chip">⚡ Fast Checkout</span>
-                <span class="top-chip">🔒 Secure Payment</span>
-                <span class="top-chip">🎮 Digital Product</span>
-            </div>
-        </nav>
-
-        <div class="hero-inner">
-            <div class="hero-copy">
-                <span class="hero-badge">STORE FRONT • MODERN GAMING SHOP</span>
-                <h1>Beli Digital Product dengan Tampilan yang Lebih Modern dan Nyaman</h1>
-                <p>
-                    Pilih game, tentukan produk, lalu lanjut checkout dengan proses cepat,
-                    pembayaran aman, dan pengiriman otomatis setelah pembayaran berhasil.
-                </p>
-
-                <div class="hero-points">
-                    <div class="hero-point">
-                        <span class="hero-icon">🛡️</span>
-                        <span>Pembayaran aman via Xendit</span>
-                    </div>
-                    <div class="hero-point">
-                        <span class="hero-icon">⚡</span>
-                        <span>Checkout cepat dan praktis</span>
-                    </div>
-                    <div class="hero-point">
-                        <span class="hero-icon">📦</span>
-                        <span>Produk digital dikirim otomatis</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="hero-side-card">
-                <div class="mini-card">
-                    <div class="mini-card-top">
-                        <span class="mini-pill">Best Experience</span>
-                        <span class="mini-rating">⭐ 4.9/5</span>
-                    </div>
-                    <h3>Belanja game key jadi lebih simpel</h3>
-                    <p>
-                        Pilih game favorit, lihat preview order, lalu checkout tanpa ribet.
-                    </p>
-
-                    <div class="mini-stats">
-                        <div class="mini-stat">
-                            <strong>Fast</strong>
-                            <span>Checkout cepat</span>
-                        </div>
-                        <div class="mini-stat">
-                            <strong>Safe</strong>
-                            <span>Pembayaran aman</span>
-                        </div>
-                        <div class="mini-stat">
-                            <strong>Auto</strong>
-                            <span>Pengiriman otomatis</span>
-                        </div>
-                    </div>
-                </div>
+            <div class="header-note">
+                Fast checkout • Secure payment • Auto delivery
             </div>
         </div>
     </header>
 
-    <main class="storefront-container">
-        <section class="storefront-grid">
-            <div class="shop-panel">
+    <main class="page">
+        <section class="hero">
+            <div class="hero-copy">
+                <span class="hero-badge">MODERN DIGITAL STORE</span>
+                <h1>Beli game key dengan tampilan yang simpel, cepat, dan nyaman</h1>
+                <p>
+                    Pilih game, tentukan produk, isi data pembeli, lalu lanjut checkout
+                    dengan proses yang ringkas dan pembayaran yang aman.
+                </p>
+            </div>
+        </section>
+
+        <section class="store-layout">
+            <div class="shop-card">
                 <div class="section-head">
                     <div>
-                        <span class="section-kicker">Product Catalog</span>
-                        <h2>Pilih Produk Favoritmu</h2>
-                        <p class="section-subtitle">
-                            Cari game, pilih brand dan durasi, lalu isi data pembeli untuk lanjut checkout.
-                        </p>
+                        <h2>Pilih Produk</h2>
+                        <p>Mulai dari pilih game dulu, lalu lanjut ke brand dan durasi.</p>
                     </div>
-                    <div class="section-chip">🛒 Buyer Checkout</div>
                 </div>
 
-                <div class="shop-card">
-                    <div class="input-block">
-                        <div class="label-row">
-                            <span class="label-icon">🎮</span>
-                            <label>Pilih Game</label>
-                        </div>
-                        <div class="game-grid" id="gameGrid"></div>
-                    </div>
-
-                    <div class="form-grid">
-                        <div class="field-card">
-                            <div class="label-row">
-                                <span class="label-icon">🏷️</span>
-                                <label for="brand">Pilih Brand</label>
-                            </div>
-                            <select id="brand"></select>
-                        </div>
-
-                        <div class="field-card">
-                            <div class="label-row">
-                                <span class="label-icon">⏳</span>
-                                <label for="product">Pilih Durasi</label>
-                            </div>
-                            <select id="product"></select>
-                        </div>
-                    </div>
-
-                    <div class="form-grid buyer-grid">
-                        <div class="field-card">
-                            <div class="label-row">
-                                <span class="label-icon">👤</span>
-                                <label for="name">Nama Pembeli</label>
-                            </div>
-                            <input type="text" id="name" placeholder="Masukkan nama kamu">
-                        </div>
-
-                        <div class="field-card">
-                            <div class="label-row">
-                                <span class="label-icon">💬</span>
-                                <label for="contact">Kontak</label>
-                            </div>
-                            <input type="text" id="contact" placeholder="WA / Telegram / Email">
-                        </div>
-                    </div>
-
-                    <button id="buyBtn" onclick="buy()">🛍️ Beli Sekarang</button>
-                    <div class="loading" id="loading">Membuat invoice...</div>
-
-                    <div class="trust-row">
-                        <div class="trust-item">🔐 Secure Checkout</div>
-                        <div class="trust-item">⚡ Instant Process</div>
-                        <div class="trust-item">📨 Auto Delivery</div>
-                    </div>
-
-                    <p class="trust-text">
-                        Key dikirim otomatis setelah pembayaran sukses • Pembayaran aman via Xendit
-                    </p>
+                <div class="block">
+                    <label class="section-label">Game</label>
+                    <div class="game-grid" id="gameGrid"></div>
                 </div>
+
+                <div class="form-grid">
+                    <div class="field">
+                        <label for="brand">Brand</label>
+                        <select id="brand"></select>
+                    </div>
+
+                    <div class="field">
+                        <label for="product">Durasi / Produk</label>
+                        <select id="product"></select>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="field">
+                        <label for="name">Nama Pembeli</label>
+                        <input type="text" id="name" placeholder="Masukkan nama kamu">
+                    </div>
+
+                    <div class="field">
+                        <label for="contact">Kontak</label>
+                        <input type="text" id="contact" placeholder="WA / Telegram / Email">
+                    </div>
+                </div>
+
+                <button id="buyBtn" onclick="buy()">Beli Sekarang</button>
+                <div class="loading" id="loading">Memproses checkout...</div>
+
+                <p class="trust-text">
+                    Pembayaran aman via Xendit • Produk digital dikirim setelah pembayaran berhasil
+                </p>
             </div>
 
-            <aside class="checkout-panel">
-                <div class="preview-box">
-                    <div class="preview-top">
-                        <span class="badge">Preview Order</span>
-                        <span class="preview-status">Ready to Checkout</span>
+            <aside class="summary-card">
+                <div class="summary-head">
+                    <span class="summary-badge">Preview Order</span>
+                </div>
+
+                <h3 id="previewGame">Memuat game...</h3>
+                <p class="summary-product" id="previewProduct">Memuat produk...</p>
+
+                <div class="price-box">
+                    <span>Total Pembayaran</span>
+                    <strong id="previewPrice">Rp 0</strong>
+                </div>
+
+                <div class="summary-points">
+                    <div class="summary-point">
+                        <strong>Checkout cepat</strong>
+                        <span>Flow pembelian singkat dan langsung ke invoice.</span>
                     </div>
 
-                    <h3 id="previewGame">Memuat game...</h3>
-                    <p id="previewProduct">Memuat produk...</p>
-
-                    <div class="price-box">
-                        <span>Total Pembayaran</span>
-                        <strong id="previewPrice">Rp 0</strong>
+                    <div class="summary-point">
+                        <strong>Pembayaran aman</strong>
+                        <span>Diproses dengan metode pembayaran yang aman.</span>
                     </div>
 
-                    <div class="preview-list">
-                        <div class="preview-item">
-                            <span class="preview-icon">⚡</span>
-                            <div>
-                                <strong>Proses Cepat</strong>
-                                <p>Checkout simpel dan langsung lanjut ke invoice pembayaran.</p>
-                            </div>
-                        </div>
-
-                        <div class="preview-item">
-                            <span class="preview-icon">🛡️</span>
-                            <div>
-                                <strong>Pembayaran Aman</strong>
-                                <p>Transaksi diproses dengan metode pembayaran yang aman.</p>
-                            </div>
-                        </div>
-
-                        <div class="preview-item">
-                            <span class="preview-icon">🎁</span>
-                            <div>
-                                <strong>Pengiriman Otomatis</strong>
-                                <p>Produk digital akan dikirim setelah pembayaran berhasil.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="checkout-note">
-                        <strong>Tips:</strong> pastikan kontak yang kamu isi aktif supaya admin mudah menghubungi jika dibutuhkan.
+                    <div class="summary-point">
+                        <strong>Auto delivery</strong>
+                        <span>Produk digital dikirim setelah pembayaran sukses.</span>
                     </div>
                 </div>
             </aside>
