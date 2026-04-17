@@ -329,128 +329,124 @@ app.post("/create-order", orderLimiter, async (req, res) => {
         });
     }
 
-    db.get(
-        "SELECT * FROM products WHERE id = ? AND active = 1",
-        [cleanProductId],
-        async (productErr, productRow) => {
-            if (productErr) {
-                console.error("ERROR AMBIL PRODUK:", productErr);
-                return res.status(500).json({
-                    message: "Gagal mengambil data produk"
-                });
-            }
+    try {
+        const productResult = await query(
+            "SELECT * FROM products WHERE id = $1 AND active = 1 LIMIT 1",
+            [cleanProductId]
+        );
 
-            if (!productRow) {
-                return res.status(404).json({
-                    message: "Produk tidak ditemukan atau tidak aktif"
-                });
-            }
+        const productRow = productResult.rows[0];
 
-            const orderId = "ORDER-" + crypto.randomUUID();
-            const accessToken = crypto.randomBytes(24).toString("hex");
-            const createdAt = new Date().toISOString();
-            const productName = `${productRow.brand} - ${productRow.duration}`;
-            const price = Number(productRow.price);
-            const game = productRow.game;
-
-            const newOrder = {
-                id: orderId,
-                product_id: cleanProductId,
-                access_token: accessToken,
-                name: cleanName,
-                contact: cleanContact,
-                game,
-                product: productName,
-                price,
-                payment_status: "pending",
-                delivery_status: "waiting_payment"
-            };
-            
-            db.run(
-                "INSERT INTO orders (id, product_id, access_token, name, contact, game, product, price, payment_status, delivery_status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                [
-                    orderId,
-                    cleanProductId,
-                    accessToken,
-                    cleanName,
-                    cleanContact,
-                    game,
-                    productName,
-                    price,
-                    "pending",
-                    "waiting_payment",
-                    createdAt
-                ],
-                async (err) => {
-                    if (err) {
-                        console.error("ERROR INSERT ORDER:", err);
-                        return res.status(500).json({
-                            message: "Gagal menyimpan order ke database"
-                        });
-                    }
-
-                    console.log("Order baru:", newOrder);
-
-                    try {
-                        const auth = Buffer.from(process.env.XENDIT_SECRET_KEY + ":").toString("base64");
-                        const baseUrl = process.env.APP_BASE_URL || `http://localhost:${port}`;
-                        const fetch = require("node-fetch");
-                        const xenditResponse = await fetch("https://api.xendit.co/v2/invoices", {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json",
-                                "Authorization": "Basic " + auth
-                            },
-                            body: JSON.stringify({
-                                external_id: orderId,
-                                amount: price,
-                                payer_email: "test@example.com",
-                                description: `Pembayaran untuk ${game} - ${productName}`,
-                                success_redirect_url: `${baseUrl}/result?order_id=${orderId}&token=${accessToken}`,
-                                failure_redirect_url: `${baseUrl}/result?order_id=${orderId}&token=${accessToken}`
-                            })
-                        });
-
-                        const rawText = await xenditResponse.text();
-                        console.log("STATUS XENDIT:", xenditResponse.status);
-                        console.log("RESPON XENDIT RAW:", rawText);
-
-                        let data;
-                        try {
-                            data = JSON.parse(rawText);
-                        } catch (error) {
-                            return res.status(500).json({
-                                message: "Response Xendit bukan JSON"
-                            });
-                        }
-
-                        if (!xenditResponse.ok) {
-                            return res.status(500).json({
-                                message: data.message || "Gagal membuat invoice di Xendit"
-                            });
-                        }
-
-                        if (!data.invoice_url) {
-                            return res.status(500).json({
-                                message: "invoice_url tidak ada dari Xendit"
-                            });
-                        }
-
-                        return res.json({
-                            message: "Invoice berhasil dibuat!",
-                            invoiceUrl: data.invoice_url
-                        });
-                    } catch (error) {
-                        console.error("ERROR SERVER:", error);
-
-                        return res.status(500).json({
-                            message: "Server gagal menghubungi Xendit"
-                        });
-                    }
-                }
-            );
+        if (!productRow) {
+            return res.status(404).json({
+                message: "Produk tidak ditemukan atau tidak aktif"
+            });
         }
-    );
+
+        const orderId = "ORDER-" + crypto.randomUUID();
+        const accessToken = crypto.randomBytes(24).toString("hex");
+        const createdAt = new Date().toISOString();
+        const productName = `${productRow.brand} - ${productRow.duration}`;
+        const price = Number(productRow.price);
+        const game = productRow.game;
+
+        const newOrder = {
+            id: orderId,
+            product_id: cleanProductId,
+            access_token: accessToken,
+            name: cleanName,
+            contact: cleanContact,
+            game,
+            product: productName,
+            price,
+            payment_status: "pending",
+            delivery_status: "waiting_payment"
+        };
+
+        await query(
+            `INSERT INTO orders
+            (id, product_id, access_token, name, contact, game, product, price, payment_status, delivery_status, created_at)
+            VALUES
+            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+            [
+                orderId,
+                cleanProductId,
+                accessToken,
+                cleanName,
+                cleanContact,
+                game,
+                productName,
+                price,
+                "pending",
+                "waiting_payment",
+                createdAt
+            ]
+        );
+
+        console.log("Order baru:", newOrder);
+
+        try {
+            const auth = Buffer.from(process.env.XENDIT_SECRET_KEY + ":").toString("base64");
+            const baseUrl = process.env.APP_BASE_URL || `http://localhost:${port}`;
+            const fetch = require("node-fetch");
+
+            const xenditResponse = await fetch("https://api.xendit.co/v2/invoices", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Basic " + auth
+                },
+                body: JSON.stringify({
+                    external_id: orderId,
+                    amount: price,
+                    payer_email: "test@example.com",
+                    description: `Pembayaran untuk ${game} - ${productName}`,
+                    success_redirect_url: `${baseUrl}/result?order_id=${orderId}&token=${accessToken}`,
+                    failure_redirect_url: `${baseUrl}/result?order_id=${orderId}&token=${accessToken}`
+                })
+            });
+
+            const rawText = await xenditResponse.text();
+            console.log("STATUS XENDIT:", xenditResponse.status);
+            console.log("RESPON XENDIT RAW:", rawText);
+
+            let data;
+            try {
+                data = JSON.parse(rawText);
+            } catch (error) {
+                return res.status(500).json({
+                    message: "Response Xendit bukan JSON"
+                });
+            }
+
+            if (!xenditResponse.ok) {
+                return res.status(500).json({
+                    message: data.message || "Gagal membuat invoice di Xendit"
+                });
+            }
+
+            if (!data.invoice_url) {
+                return res.status(500).json({
+                    message: "invoice_url tidak ada dari Xendit"
+                });
+            }
+
+            return res.json({
+                message: "Invoice berhasil dibuat!",
+                invoiceUrl: data.invoice_url
+            });
+        } catch (error) {
+            console.error("ERROR SERVER:", error);
+            return res.status(500).json({
+                message: "Server gagal menghubungi Xendit"
+            });
+        }
+    } catch (err) {
+        console.error("ERROR CREATE ORDER:", err);
+        return res.status(500).json({
+            message: "Gagal membuat order"
+        });
+    }
 });
 
 app.post("/xendit-webhook", async (req, res) => {
