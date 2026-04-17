@@ -1,655 +1,223 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Admin - AE Game Store</title>
-    <style>
-        * {
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Login - AE Game Store</title>
 
-        :root {
-            --bg-1: #06121f;
-            --bg-2: #0f172a;
-            --bg-3: #1d4ed8;
-            --accent: #38bdf8;
-            --accent-2: #60a5fa;
-            --white: #ffffff;
-            --text: #0f172a;
-            --muted: #64748b;
-            --line: #dbeafe;
-            --input-bg: #f8fbff;
-            --danger-bg: #fef2f2;
-            --danger-text: #dc2626;
-            --danger-line: #fecaca;
-            --success-bg: rgba(255, 255, 255, 0.12);
-            --card-shadow: 0 30px 80px rgba(2, 8, 23, 0.28);
-        }
+<style>
+* {
+    box-sizing: border-box;
+}
 
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            min-height: 100vh;
-            background:
-                radial-gradient(circle at top left, rgba(56, 189, 248, 0.18), transparent 26%),
-                radial-gradient(circle at bottom right, rgba(37, 99, 235, 0.18), transparent 24%),
-                linear-gradient(135deg, #eaf4ff, #f8fbff);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-            color: var(--text);
-        }
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    height: 100vh;
+    display: flex;
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+}
 
-        .login-shell {
-            width: 100%;
-            max-width: 1120px;
-            min-height: 680px;
-            display: grid;
-            grid-template-columns: 1.08fr 0.92fr;
-            background: rgba(255, 255, 255, 0.88);
-            border: 1px solid rgba(191, 219, 254, 0.7);
-            backdrop-filter: blur(12px);
-            border-radius: 32px;
-            overflow: hidden;
-            box-shadow: var(--card-shadow);
-        }
+/* ===== LEFT SIDE ===== */
+.left {
+    flex: 1;
+    background:
+        linear-gradient(135deg, rgba(0,0,0,0.6), rgba(0,0,0,0.2)),
+        url("https://images.unsplash.com/photo-1605902711622-cfb43c4437d1?q=80&w=1600&auto=format&fit=crop");
+    background-size: cover;
+    background-position: center;
+    color: white;
+    display: flex;
+    align-items: flex-end;
+    padding: 40px;
+}
 
-        .left-panel {
-            position: relative;
-            overflow: hidden;
-            padding: 52px 48px;
-            color: var(--white);
-            background:
-                radial-gradient(circle at 15% 20%, rgba(255,255,255,0.12), transparent 18%),
-                radial-gradient(circle at 80% 15%, rgba(255,255,255,0.09), transparent 18%),
-                radial-gradient(circle at 85% 85%, rgba(255,255,255,0.08), transparent 20%),
-                linear-gradient(155deg, #020617, #0f172a 35%, #1d4ed8 75%, #38bdf8 100%);
-        }
+.left-content {
+    max-width: 400px;
+}
 
-        .left-panel::before {
-            content: "";
-            position: absolute;
-            width: 320px;
-            height: 320px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.07);
-            top: -120px;
-            right: -90px;
-        }
+.left h1 {
+    margin: 0;
+    font-size: 32px;
+}
 
-        .left-panel::after {
-            content: "";
-            position: absolute;
-            width: 220px;
-            height: 220px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.06);
-            bottom: -80px;
-            left: -60px;
-        }
+.left p {
+    margin-top: 10px;
+    opacity: 0.85;
+    line-height: 1.6;
+}
 
-        .left-content {
-            position: relative;
-            z-index: 2;
-            max-width: 520px;
-        }
+/* ===== RIGHT SIDE ===== */
+.right {
+    flex: 1;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
-        .brand-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 16px;
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.12);
-            border: 1px solid rgba(255, 255, 255, 0.16);
-            font-size: 12px;
-            font-weight: bold;
-            letter-spacing: 0.5px;
-            margin-bottom: 24px;
-        }
+.card {
+    width: 100%;
+    max-width: 360px;
+}
 
-        .badge-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #86efac;
-            box-shadow: 0 0 0 6px rgba(134, 239, 172, 0.15);
-            flex-shrink: 0;
-        }
+.card h2 {
+    margin-bottom: 10px;
+}
 
-        .headline {
-            margin: 0;
-            font-size: 46px;
-            line-height: 1.1;
-            letter-spacing: -0.6px;
-        }
+.card p {
+    color: #64748b;
+    font-size: 14px;
+    margin-bottom: 25px;
+}
 
-        .subheadline {
-            margin: 18px 0 0;
-            font-size: 16px;
-            line-height: 1.9;
-            color: rgba(255, 255, 255, 0.88);
-            max-width: 470px;
-        }
+/* INPUT */
+.input-group {
+    margin-bottom: 16px;
+}
 
-        .feature-list {
-            margin-top: 34px;
-            display: grid;
-            gap: 14px;
-        }
+input {
+    width: 100%;
+    padding: 14px;
+    border-radius: 10px;
+    border: 1px solid #cbd5e1;
+    font-size: 14px;
+}
 
-        .feature-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            padding: 14px 16px;
-            border-radius: 18px;
-            background: rgba(255, 255, 255, 0.09);
-            border: 1px solid rgba(255, 255, 255, 0.10);
-        }
+input:focus {
+    outline: none;
+    border-color: #2563eb;
+}
 
-        .feature-icon {
-            width: 34px;
-            height: 34px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255, 255, 255, 0.14);
-            font-size: 16px;
-            flex-shrink: 0;
-        }
+/* PASSWORD TOGGLE */
+.password-wrap {
+    position: relative;
+}
 
-        .feature-title {
-            font-size: 14px;
-            font-weight: bold;
-            margin-bottom: 4px;
-        }
+.toggle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 12px;
+    color: #2563eb;
+}
 
-        .feature-desc {
-            font-size: 13px;
-            line-height: 1.6;
-            color: rgba(255, 255, 255, 0.84);
-        }
+/* BUTTON */
+button {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    background: #2563eb;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+}
 
-        .security-row {
-            margin-top: 26px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
+button:hover {
+    background: #1d4ed8;
+}
 
-        .security-chip {
-            padding: 10px 14px;
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.10);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.92);
-        }
+/* STATUS */
+.status {
+    margin-top: 12px;
+    font-size: 14px;
+    color: red;
+}
 
-        .stats-grid {
-            margin-top: 34px;
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 14px;
-        }
+/* FOOTER */
+.footer {
+    margin-top: 20px;
+    font-size: 12px;
+    color: #94a3b8;
+    text-align: center;
+}
 
-        .stat-card {
-            padding: 18px;
-            border-radius: 20px;
-            background: rgba(255, 255, 255, 0.10);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-        }
-
-        .stat-value {
-            font-size: 22px;
-            font-weight: bold;
-            margin-bottom: 6px;
-        }
-
-        .stat-label {
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.82);
-            line-height: 1.5;
-        }
-
-        .right-panel {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 42px;
-            background:
-                linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.82));
-        }
-
-        .login-card {
-            width: 100%;
-            max-width: 410px;
-            padding: 6px 0;
-        }
-
-        .login-top-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 12px;
-            border-radius: 999px;
-            background: #eff6ff;
-            color: #1d4ed8;
-            border: 1px solid #dbeafe;
-            font-size: 12px;
-            font-weight: bold;
-            margin-bottom: 18px;
-        }
-
-        .login-card h2 {
-            margin: 0 0 10px;
-            font-size: 34px;
-            color: var(--text);
-            letter-spacing: -0.4px;
-        }
-
-        .login-card p {
-            margin: 0 0 28px;
-            color: var(--muted);
-            line-height: 1.8;
-            font-size: 14px;
-        }
-
-        .field-group {
-            margin-bottom: 16px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            font-size: 14px;
-            color: #1e293b;
-        }
-
-        .input-wrap {
-            position: relative;
-        }
-
-        .input-icon {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 15px;
-            color: #64748b;
-            pointer-events: none;
-        }
-
-        input {
-            width: 100%;
-            height: 52px;
-            padding: 14px 46px 14px 42px;
-            border: 1px solid #cbd5e1;
-            border-radius: 16px;
-            font-size: 14px;
-            background: var(--input-bg);
-            color: var(--text);
-            outline: none;
-            transition: 0.2s ease;
-        }
-
-        input:focus {
-            border-color: #3b82f6;
-            background: #ffffff;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
-        }
-
-        .password-toggle {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            border: none;
-            background: transparent;
-            color: #475569;
-            font-size: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            padding: 6px 8px;
-            width: auto;
-            margin: 0;
-            box-shadow: none;
-        }
-
-        .password-toggle:hover {
-            transform: translateY(-50%);
-            opacity: 1;
-            color: #1d4ed8;
-        }
-
-        .helper-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-            margin: 10px 0 6px;
-            flex-wrap: wrap;
-        }
-
-        .helper-text {
-            font-size: 12px;
-            color: #64748b;
-            line-height: 1.6;
-        }
-
-        .status-box {
-            display: none;
-            margin-top: 14px;
-            padding: 12px 14px;
-            border-radius: 14px;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-        .status-box.error {
-            display: block;
-            background: var(--danger-bg);
-            color: var(--danger-text);
-            border: 1px solid var(--danger-line);
-        }
-
-        .status-box.success {
-            display: block;
-            background: #eff6ff;
-            color: #1d4ed8;
-            border: 1px solid #bfdbfe;
-        }
-
-        .login-btn {
-            width: 100%;
-            margin-top: 22px;
-            height: 54px;
-            border: none;
-            border-radius: 16px;
-            background: linear-gradient(135deg, #2563eb, #38bdf8);
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
-            box-shadow: 0 14px 28px rgba(37, 99, 235, 0.24);
-        }
-
-        .login-btn:hover {
-            transform: translateY(-1px);
-            opacity: 0.98;
-            box-shadow: 0 16px 34px rgba(37, 99, 235, 0.28);
-        }
-
-        .login-btn:disabled {
-            cursor: not-allowed;
-            opacity: 0.75;
-            transform: none;
-            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.18);
-        }
-
-        .footer-text {
-            margin-top: 18px;
-            font-size: 13px;
-            color: #94a3b8;
-            text-align: center;
-            line-height: 1.7;
-        }
-
-        .mini-note {
-            margin-top: 14px;
-            text-align: center;
-            font-size: 12px;
-            color: #64748b;
-            line-height: 1.7;
-        }
-
-        @media (max-width: 980px) {
-            .login-shell {
-                grid-template-columns: 1fr;
-                max-width: 680px;
-            }
-
-            .left-panel,
-            .right-panel {
-                padding: 30px 24px;
-            }
-
-            .headline {
-                font-size: 36px;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .login-card h2 {
-                font-size: 30px;
-            }
-        }
-
-        @media (max-width: 560px) {
-            body {
-                padding: 14px;
-            }
-
-            .login-shell {
-                border-radius: 24px;
-            }
-
-            .headline {
-                font-size: 30px;
-            }
-
-            .subheadline {
-                font-size: 14px;
-            }
-
-            .feature-item {
-                padding: 12px 14px;
-            }
-
-            .login-card h2 {
-                font-size: 28px;
-            }
-
-            input {
-                height: 50px;
-            }
-
-            .login-btn {
-                height: 52px;
-            }
-        }
-    </style>
+/* MOBILE */
+@media(max-width: 900px) {
+    .left {
+        display: none;
+    }
+}
+</style>
 </head>
+
 <body>
-    <div class="login-shell">
-        <div class="left-panel">
-            <div class="left-content">
-                <div class="brand-badge">
-                    <span class="badge-dot"></span>
-                    <span>AE GAME STORE • SECURE ADMIN ACCESS</span>
-                </div>
 
-                <h1 class="headline">Portal Admin yang Lebih Premium, Aman, dan Siap Dipakai Harian</h1>
+<div class="left">
+    <div class="left-content">
+        <h1>AE Game Store</h1>
+        <p>Admin portal untuk mengelola produk, key, dan transaksi dengan aman dan cepat.</p>
+    </div>
+</div>
 
-                <p class="subheadline">
-                    Masuk ke dashboard admin untuk mengelola stok game key, memantau transaksi,
-                    dan menjaga operasional digital store kamu tetap rapi dalam satu akses terproteksi.
-                </p>
+<div class="right">
+    <div class="card">
+        <h2>Login Admin</h2>
+        <p>Masukkan kredensial untuk akses dashboard</p>
 
-                <div class="feature-list">
-                    <div class="feature-item">
-                        <div class="feature-icon">📦</div>
-                        <div>
-                            <div class="feature-title">Kelola stok lebih cepat</div>
-                            <div class="feature-desc">Tambah, pantau, dan kontrol distribusi key dari satu panel yang terstruktur.</div>
-                        </div>
-                    </div>
-
-                    <div class="feature-item">
-                        <div class="feature-icon">📊</div>
-                        <div>
-                            <div class="feature-title">Monitoring transaksi real-time</div>
-                            <div class="feature-desc">Lihat order masuk, status pembayaran, dan pengiriman produk dengan lebih nyaman.</div>
-                        </div>
-                    </div>
-
-                    <div class="feature-item">
-                        <div class="feature-icon">🛡️</div>
-                        <div>
-                            <div class="feature-title">Akses admin lebih aman</div>
-                            <div class="feature-desc">Panel admin diproteksi dengan autentikasi session untuk mencegah akses sembarangan.</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="security-row">
-                    <div class="security-chip">Secure Session</div>
-                    <div class="security-chip">Protected Access</div>
-                    <div class="security-chip">Admin Only</div>
-                </div>
-
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value">24/7</div>
-                        <div class="stat-label">Akses dashboard kapan pun saat kamu butuh kontrol penuh.</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value">Real-Time</div>
-                        <div class="stat-label">Pantau update order dan key lebih cepat tanpa ribet.</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value">Secure</div>
-                        <div class="stat-label">Fondasi login admin sekarang lebih rapi dan lebih aman.</div>
-                    </div>
-                </div>
-            </div>
+        <div class="input-group">
+            <input type="text" id="username" placeholder="Username">
         </div>
 
-        <div class="right-panel">
-            <div class="login-card">
-                <div class="login-top-badge">Admin Portal</div>
-                <h2>Login Admin</h2>
-                <p>Masukkan username dan password untuk mengakses dashboard AE Game Store dengan aman.</p>
+        <div class="input-group password-wrap">
+            <input type="password" id="password" placeholder="Password">
+            <span class="toggle" onclick="togglePass()">Show</span>
+        </div>
 
-                <div class="field-group">
-                    <label for="username">Username</label>
-                    <div class="input-wrap">
-                        <span class="input-icon">👤</span>
-                        <input type="text" id="username" placeholder="Masukkan username" autocomplete="username">
-                    </div>
-                </div>
+        <button onclick="login()">Login</button>
 
-                <div class="field-group">
-                    <label for="password">Password</label>
-                    <div class="input-wrap">
-                        <span class="input-icon">🔒</span>
-                        <input type="password" id="password" placeholder="Masukkan password" autocomplete="current-password">
-                        <button type="button" class="password-toggle" id="togglePasswordBtn" onclick="togglePassword()">Show</button>
-                    </div>
-                </div>
+        <div class="status" id="status"></div>
 
-                <div class="helper-row">
-                    <div class="helper-text">Gunakan akun admin yang valid untuk masuk ke dashboard.</div>
-                </div>
-
-                <div class="status-box" id="statusBox"></div>
-
-                <button class="login-btn" id="loginBtn" onclick="loginAdmin()">Masuk ke Admin Panel</button>
-
-                <div class="mini-note">Protected Admin Login • Session-based Access</div>
-                <div class="footer-text">AE Game Store Admin Portal</div>
-            </div>
+        <div class="footer">
+            Secure Admin Access
         </div>
     </div>
+</div>
 
-    <script>
-        const usernameInput = document.getElementById("username");
-        const passwordInput = document.getElementById("password");
-        const statusBox = document.getElementById("statusBox");
-        const loginBtn = document.getElementById("loginBtn");
-        const togglePasswordBtn = document.getElementById("togglePasswordBtn");
+<script>
+function togglePass() {
+    const input = document.getElementById("password");
+    input.type = input.type === "password" ? "text" : "password";
+}
 
-        function setStatus(type, message) {
-            statusBox.className = "status-box " + type;
-            statusBox.innerText = message;
-        }
+async function login() {
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const status = document.getElementById("status");
 
-        function clearStatus() {
-            statusBox.className = "status-box";
-            statusBox.innerText = "";
-        }
+    status.innerText = "";
 
-        function setLoading(isLoading) {
-            loginBtn.disabled = isLoading;
-            loginBtn.innerText = isLoading ? "Memproses login..." : "Masuk ke Admin Panel";
-        }
+    if (!username || !password) {
+        status.innerText = "Isi semua field";
+        return;
+    }
 
-        function togglePassword() {
-            const isPassword = passwordInput.type === "password";
-            passwordInput.type = isPassword ? "text" : "password";
-            togglePasswordBtn.innerText = isPassword ? "Hide" : "Show";
-        }
-
-        async function loginAdmin() {
-            const username = usernameInput.value.trim();
-            const password = passwordInput.value.trim();
-
-            clearStatus();
-
-            if (!username || !password) {
-                setStatus("error", "Username dan password wajib diisi.");
-                return;
-            }
-
-            setLoading(true);
-
-            try {
-                const res = await fetch("/admin-login", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ username, password })
-                });
-
-                const data = await res.json();
-
-                if (!res.ok) {
-                    setStatus("error", data.message || "Login gagal.");
-                    setLoading(false);
-                    return;
-                }
-
-                setStatus("success", "Login berhasil. Mengarahkan ke dashboard...");
-                window.location.href = "/ae-control";
-            } catch (err) {
-                setStatus("error", "Terjadi error server.");
-                setLoading(false);
-            }
-        }
-
-        usernameInput.addEventListener("input", clearStatus);
-        passwordInput.addEventListener("input", clearStatus);
-
-        usernameInput.addEventListener("keydown", function (e) {
-            if (e.key === "Enter") {
-                loginAdmin();
-            }
+    try {
+        const res = await fetch("/admin-login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ username, password })
         });
 
-        passwordInput.addEventListener("keydown", function (e) {
-            if (e.key === "Enter") {
-                loginAdmin();
-            }
-        });
-    </script>
+        const data = await res.json();
+
+        if (!res.ok) {
+            status.innerText = data.message || "Login gagal";
+            return;
+        }
+
+        window.location.href = "/ae-control";
+    } catch {
+        status.innerText = "Server error";
+    }
+}
+</script>
+
 </body>
 </html>
