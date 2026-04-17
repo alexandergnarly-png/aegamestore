@@ -9,230 +9,454 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --bg: #f4f8fc;
+            --bg-soft: #f8fbff;
+            --card: rgba(255, 255, 255, 0.88);
+            --card-strong: #ffffff;
+            --line: #dbe7f3;
+            --line-soft: #e8eef5;
+            --text: #0f172a;
+            --muted: #64748b;
+            --muted-2: #94a3b8;
+            --primary: #2563eb;
+            --primary-2: #38bdf8;
+            --primary-soft: #eff6ff;
+            --success-bg: #dcfce7;
+            --success-text: #166534;
+            --warn-bg: #fef3c7;
+            --warn-text: #92400e;
+            --danger-bg: #fee2e2;
+            --danger-text: #991b1b;
+            --pink-bg: #ffe4e6;
+            --pink-text: #be123c;
+            --shadow-lg: 0 24px 70px rgba(15, 23, 42, 0.10);
+            --shadow-md: 0 12px 30px rgba(15, 23, 42, 0.08);
+            --shadow-sm: 0 8px 18px rgba(15, 23, 42, 0.06);
+            --radius-xl: 28px;
+            --radius-lg: 22px;
+            --radius-md: 16px;
+            --radius-sm: 12px;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
             margin: 0;
             font-family: Arial, sans-serif;
             background:
-                radial-gradient(circle at top left, rgba(56, 189, 248, 0.18), transparent 28%),
-                radial-gradient(circle at bottom right, rgba(37, 99, 235, 0.14), transparent 26%),
-                linear-gradient(135deg, #edf5ff, #f8fbff);
-            color: #1e293b;
+                radial-gradient(circle at top left, rgba(56, 189, 248, 0.18), transparent 26%),
+                radial-gradient(circle at bottom right, rgba(37, 99, 235, 0.12), transparent 24%),
+                linear-gradient(135deg, #eef5fb, #f8fbff);
+            color: var(--text);
             min-height: 100vh;
         }
 
         .page {
-            max-width: 1320px;
+            max-width: 1380px;
             margin: 0 auto;
-            padding: 28px 20px 36px;
+            padding: 24px 18px 40px;
         }
 
-        .topbar {
+        .top-nav {
+            position: sticky;
+            top: 14px;
+            z-index: 20;
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            gap: 16px;
-            margin-bottom: 22px;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 14px;
+            margin-bottom: 18px;
+            border: 1px solid rgba(191, 219, 254, 0.65);
+            background: rgba(255, 255, 255, 0.78);
+            backdrop-filter: blur(14px);
+            border-radius: 18px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .top-nav-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .logo-badge {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0f172a, #2563eb, #38bdf8);
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 10px 24px rgba(37, 99, 235, 0.25);
+            flex-shrink: 0;
+        }
+
+        .nav-title-wrap {
+            min-width: 0;
+        }
+
+        .nav-kicker {
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            font-weight: bold;
+            color: var(--primary);
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+
+        .nav-title {
+            font-size: 15px;
+            font-weight: bold;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
             flex-wrap: wrap;
         }
 
+        .nav-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            border: 1px solid #dbeafe;
+            background: #f8fbff;
+            color: var(--muted);
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .chip-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: #22c55e;
+            box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.10);
+            flex-shrink: 0;
+        }
+
         .hero {
-            background: linear-gradient(135deg, #0f172a, #1d4ed8, #38bdf8);
-            color: white;
-            border-radius: 26px;
-            padding: 28px;
-            box-shadow: 0 18px 50px rgba(15, 23, 42, 0.14);
             position: relative;
             overflow: hidden;
-            margin-bottom: 24px;
+            padding: 30px;
+            border-radius: var(--radius-xl);
+            background:
+                radial-gradient(circle at 10% 15%, rgba(255,255,255,0.16), transparent 20%),
+                radial-gradient(circle at 90% 15%, rgba(255,255,255,0.10), transparent 18%),
+                linear-gradient(135deg, #020617, #0f172a 30%, #1d4ed8 74%, #38bdf8);
+            color: white;
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 20px;
         }
 
         .hero::before {
             content: "";
             position: absolute;
-            width: 240px;
-            height: 240px;
+            width: 260px;
+            height: 260px;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.08);
-            top: -90px;
-            right: -70px;
+            top: -100px;
+            right: -80px;
         }
 
         .hero::after {
             content: "";
             position: absolute;
-            width: 180px;
-            height: 180px;
+            width: 190px;
+            height: 190px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.06);
             bottom: -70px;
             left: -40px;
         }
 
-        .hero-content {
+        .hero-row {
             position: relative;
             z-index: 1;
+            display: flex;
+            justify-content: space-between;
+            gap: 18px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .hero-content {
+            max-width: 760px;
         }
 
         .hero-badge {
             display: inline-block;
-            padding: 8px 14px;
+            padding: 9px 14px;
             border-radius: 999px;
-            background: rgba(255, 255, 255, 0.14);
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255,255,255,0.14);
+            border: 1px solid rgba(255,255,255,0.14);
             font-size: 12px;
             font-weight: bold;
-            margin-bottom: 14px;
             letter-spacing: 0.4px;
+            margin-bottom: 16px;
         }
 
         .hero h1 {
             margin: 0 0 10px;
-            font-size: 40px;
-            line-height: 1.15;
+            font-size: 42px;
+            line-height: 1.12;
+            letter-spacing: -0.6px;
         }
 
         .hero p {
             margin: 0;
-            color: rgba(255, 255, 255, 0.92);
-            line-height: 1.8;
             max-width: 700px;
+            color: rgba(255,255,255,0.90);
+            line-height: 1.85;
+            font-size: 15px;
+        }
+
+        .hero-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
         .logout-btn {
-            border: none;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.16);
+            border: 1px solid rgba(255,255,255,0.16);
+            background: rgba(255,255,255,0.14);
             color: white;
+            border-radius: 14px;
             padding: 12px 16px;
             font-weight: bold;
             cursor: pointer;
-            border: 1px solid rgba(255, 255, 255, 0.16);
-            backdrop-filter: blur(6px);
+            backdrop-filter: blur(8px);
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-1px);
+            opacity: 0.98;
+            background: rgba(255,255,255,0.18);
+        }
+
+        .hero-mini {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .mini-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 999px;
+            padding: 10px 14px;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.12);
+            font-size: 12px;
+            color: rgba(255,255,255,0.94);
         }
 
         .stats {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 16px;
-            margin-top: 22px;
-            position: relative;
-            z-index: 1;
+            gap: 14px;
+            margin: 18px 0 22px;
         }
 
         .stat-card {
-            background: rgba(255, 255, 255, 0.14);
-            border: 1px solid rgba(255, 255, 255, 0.14);
-            border-radius: 18px;
+            border-radius: 22px;
             padding: 18px;
+            background: rgba(255, 255, 255, 0.78);
+            border: 1px solid rgba(191, 219, 254, 0.70);
+            box-shadow: var(--shadow-sm);
+            backdrop-filter: blur(10px);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 18px 35px rgba(15, 23, 42, 0.10);
+        }
+
+        .stat-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 12px;
         }
 
         .stat-label {
             font-size: 13px;
-            color: rgba(255, 255, 255, 0.82);
-            margin-bottom: 8px;
-        }
-
-        .stat-value {
-            font-size: 28px;
+            color: var(--muted);
             font-weight: bold;
         }
 
-        .grid {
+        .stat-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--primary-soft);
+            color: var(--primary);
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .stat-value {
+            font-size: 30px;
+            font-weight: bold;
+            color: var(--text);
+            line-height: 1;
+        }
+
+        .stat-note {
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--muted-2);
+            line-height: 1.6;
+        }
+
+        .dashboard-grid {
             display: grid;
-            grid-template-columns: 1fr;
-            gap: 22px;
+            grid-template-columns: 1.04fr 0.96fr;
+            gap: 18px;
+            align-items: start;
+        }
+
+        .left-stack,
+        .right-stack {
+            display: grid;
+            gap: 18px;
         }
 
         .card {
-            background: rgba(255, 255, 255, 0.9);
-            border: 1px solid rgba(191, 219, 254, 0.7);
-            border-radius: 24px;
-            box-shadow: 0 14px 40px rgba(15, 23, 42, 0.07);
+            background: var(--card);
+            border: 1px solid rgba(191, 219, 254, 0.65);
+            border-radius: 26px;
+            box-shadow: var(--shadow-md);
             padding: 24px;
-            overflow-x: auto;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(12px);
+            overflow: hidden;
         }
 
-        .card h2 {
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+
+        .card-title-wrap h2 {
             margin: 0 0 8px;
-            font-size: 30px;
-            color: #0f172a;
+            font-size: 28px;
+            color: var(--text);
+            letter-spacing: -0.4px;
         }
 
         .card-subtitle {
-            margin: 0 0 18px;
-            color: #64748b;
-            line-height: 1.7;
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.75;
+            font-size: 14px;
+            max-width: 760px;
+        }
+
+        .section-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 12px;
+            border-radius: 999px;
+            background: #f8fbff;
+            border: 1px solid #dbeafe;
+            color: var(--primary);
+            font-size: 12px;
+            font-weight: bold;
+            white-space: nowrap;
         }
 
         .toolbar {
             display: flex;
             gap: 12px;
             flex-wrap: wrap;
-            align-items: center;
-            margin-bottom: 16px;
+            align-items: stretch;
+            margin-bottom: 14px;
         }
 
-        input[type="text"] {
+        .toolbar.compact {
+            margin-bottom: 12px;
+        }
+
+        .field,
+        .field-wide {
             flex: 1;
+            min-width: 200px;
+        }
+
+        .field-wide {
             min-width: 260px;
-            padding: 14px 16px;
-            border: 1px solid #cbd5e1;
-            border-radius: 14px;
-            font-size: 14px;
-            background: #f8fbff;
-            outline: none;
-            transition: 0.2s ease;
         }
 
+        input[type="text"],
+        select,
+        textarea {
+            width: 100%;
+            border: 1px solid #cbd5e1;
+            background: var(--bg-soft);
+            color: var(--text);
+            border-radius: 16px;
+            outline: none;
+            font-size: 14px;
+            transition: 0.2s ease;
+            font-family: Arial, sans-serif;
+        }
+
+        input[type="text"],
         select {
-            flex: 1;
-            min-width: 220px;
+            min-height: 52px;
             padding: 14px 16px;
-            border: 1px solid #cbd5e1;
-            border-radius: 14px;
-            font-size: 14px;
-            background: #f8fbff;
-            outline: none;
-            transition: 0.2s ease;
-        }
-
-        select:focus {
-            border-color: #3b82f6;
-            background: white;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
-        }
-
-        #orderSearchInput {
-            flex: 2;
-            min-width: 280px;
         }
 
         textarea {
-            width: 100%;
             min-height: 150px;
             padding: 14px 16px;
-            border: 1px solid #cbd5e1;
-            border-radius: 14px;
-            font-size: 14px;
-            background: #f8fbff;
-            outline: none;
-            transition: 0.2s ease;
             resize: vertical;
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
+            line-height: 1.7;
         }
 
+        input[type="text"]:focus,
+        select:focus,
         textarea:focus {
-            border-color: #3b82f6;
-            background: white;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+            border-color: #60a5fa;
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.10);
         }
 
-        input[type="text"]:focus {
-            border-color: #3b82f6;
-            background: white;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
         button {
@@ -243,84 +467,100 @@
             padding: 14px 18px;
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 10px 24px rgba(37, 99, 235, 0.18);
-            transition: transform 0.15s ease, opacity 0.15s ease;
+            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.18);
+            transition: transform 0.16s ease, opacity 0.16s ease, box-shadow 0.16s ease;
         }
 
         button:hover {
             transform: translateY(-1px);
-            opacity: 0.97;
+            opacity: 0.98;
+            box-shadow: 0 14px 28px rgba(37, 99, 235, 0.20);
         }
 
         .ghost-btn {
             background: #eff6ff;
-            color: #2563eb;
+            color: var(--primary);
             box-shadow: none;
             border: 1px solid #bfdbfe;
         }
 
+        .ghost-btn:hover {
+            box-shadow: none;
+        }
+
         .danger-btn {
-            background: #fee2e2;
-            color: #991b1b;
+            background: var(--danger-bg);
+            color: var(--danger-text);
             box-shadow: none;
             border: 1px solid #fecaca;
             padding: 10px 14px;
         }
 
-        .table-wrap button {
-            margin-right: 8px;
-            margin-bottom: 6px;
+        .danger-btn:hover {
+            box-shadow: none;
         }
 
         .info-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
             flex-wrap: wrap;
-            margin-bottom: 12px;
+            margin-bottom: 14px;
         }
 
         .info {
-            font-size: 14px;
-            color: #64748b;
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.7;
         }
 
         .table-wrap {
-            background: #fbfdff;
-            border: 1px solid #e2e8f0;
-            border-radius: 18px;
             overflow: auto;
-        }
-
-        .table-wrap .ghost-btn {
-            padding: 6px 10px;
-            font-size: 12px;
+            background: rgba(251, 253, 255, 0.92);
+            border: 1px solid var(--line-soft);
+            border-radius: 20px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 950px;
+            min-width: 920px;
         }
 
         th,
         td {
             padding: 16px 14px;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid var(--line-soft);
             text-align: left;
             font-size: 14px;
             vertical-align: top;
         }
 
         th {
+            position: sticky;
+            top: 0;
             background: #f8fbff;
             color: #334155;
             font-weight: bold;
+            z-index: 1;
         }
 
         tr:last-child td {
             border-bottom: none;
+        }
+
+        tbody tr {
+            transition: background 0.18s ease;
+        }
+
+        tbody tr:hover {
+            background: rgba(239, 246, 255, 0.55);
+        }
+
+        .table-wrap button {
+            margin-right: 8px;
+            margin-bottom: 6px;
         }
 
         .badge {
@@ -330,21 +570,26 @@
             font-size: 12px;
             font-weight: bold;
             text-transform: capitalize;
+            white-space: nowrap;
         }
 
         .badge.pending {
-            background: #fef3c7;
-            color: #92400e;
+            background: var(--warn-bg);
+            color: var(--warn-text);
         }
 
-        .badge.paid {
-            background: #dcfce7;
-            color: #166534;
+        .badge.paid,
+        .badge.delivered,
+        .badge.available {
+            background: var(--success-bg);
+            color: var(--success-text);
         }
 
-        .badge.expired {
-            background: #fee2e2;
-            color: #991b1b;
+        .badge.expired,
+        .badge.cancelled,
+        .badge.used {
+            background: var(--danger-bg);
+            color: var(--danger-text);
         }
 
         .badge.waiting_payment {
@@ -352,43 +597,46 @@
             color: #475569;
         }
 
-        .badge.delivered {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .badge.manual {
-            background: #ffe4e6;
-            color: #be123c;
-        }
-
-        .badge.cancelled {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
+        .badge.manual,
         .badge.stock_empty {
-            background: #ffe4e6;
-            color: #be123c;
-        }
-
-        .badge.used {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        .badge.available {
-            background: #dcfce7;
-            color: #166534;
+            background: var(--pink-bg);
+            color: var(--pink-text);
         }
 
         .empty {
-            color: #64748b;
-            padding: 18px 0;
+            color: var(--muted);
+            padding: 20px 0;
         }
 
         .muted {
-            color: #94a3b8;
+            color: var(--muted-2);
+        }
+
+        .fade-up {
+            animation: fadeUp 0.7s ease both;
+        }
+
+        .fade-up.delay-1 { animation-delay: 0.05s; }
+        .fade-up.delay-2 { animation-delay: 0.10s; }
+        .fade-up.delay-3 { animation-delay: 0.16s; }
+        .fade-up.delay-4 { animation-delay: 0.22s; }
+        .fade-up.delay-5 { animation-delay: 0.28s; }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 1120px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         @media (max-width: 980px) {
@@ -397,181 +645,308 @@
             }
 
             .stats {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .card-title-wrap h2 {
+                font-size: 24px;
+            }
+
+            .top-nav {
+                top: 8px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .page {
+                padding: 16px 12px 30px;
+            }
+
+            .hero,
+            .card {
+                padding: 18px;
+                border-radius: 20px;
+            }
+
+            .stats {
                 grid-template-columns: 1fr;
             }
 
-            .card h2 {
-                font-size: 26px;
+            .hero h1 {
+                font-size: 28px;
+            }
+
+            .nav-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .section-badge,
+            .nav-chip {
+                white-space: normal;
             }
         }
     </style>
 </head>
 <body>
     <div class="page">
-        <div class="hero">
-            <div class="topbar">
+        <div class="top-nav fade-up">
+            <div class="top-nav-left">
+                <div class="logo-badge">AE</div>
+                <div class="nav-title-wrap">
+                    <div class="nav-kicker">AE Game Store</div>
+                    <div class="nav-title">Modern Admin Dashboard</div>
+                </div>
+            </div>
+
+            <div class="nav-actions">
+                <div class="nav-chip">
+                    <span class="chip-dot"></span>
+                    <span>Admin Session Active</span>
+                </div>
+                <button class="logout-btn" onclick="logoutAdmin()">Logout</button>
+            </div>
+        </div>
+
+        <div class="hero fade-up delay-1">
+            <div class="hero-row">
                 <div class="hero-content">
                     <div class="hero-badge">AE GAME STORE • ADMIN DASHBOARD</div>
-                    <h1>Admin Panel AE Game Store</h1>
+                    <h1>Kelola store kamu dengan tampilan yang lebih modern dan enak dipakai</h1>
                     <p>
-                        Kelola stok game key, pantau transaksi yang masuk,
-                        dan cek distribusi key dalam satu dashboard yang lebih rapi.
+                        Pantau produk, stok key, dan order masuk dalam satu dashboard yang lebih clean,
+                        lebih ringan dilihat, dan tetap nyaman dipakai untuk kerja harian.
                     </p>
                 </div>
 
-                <button class="logout-btn" onclick="logoutAdmin()">Logout</button>
+                <div class="hero-actions">
+                    <button class="logout-btn" onclick="loadProducts(); loadKeyProductOptions(); loadKeys(); loadOrders();">
+                        Refresh Semua
+                    </button>
+                </div>
             </div>
 
-            <div class="stats">
-                <div class="stat-card">
+            <div class="hero-mini">
+                <div class="mini-pill">Live Data Admin</div>
+                <div class="mini-pill">Minimal UI</div>
+                <div class="mini-pill">Smooth Animation</div>
+                <div class="mini-pill">Protected Access</div>
+            </div>
+        </div>
+
+        <div class="stats fade-up delay-2">
+            <div class="stat-card">
+                <div class="stat-top">
                     <div class="stat-label">Total Key</div>
-                    <div class="stat-value" id="totalKeyStat">0</div>
+                    <div class="stat-icon">🔑</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-value" id="totalKeyStat">0</div>
+                <div class="stat-note">Seluruh key yang tersimpan di database.</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-top">
                     <div class="stat-label">Key Available</div>
-                    <div class="stat-value" id="availableKeyStat">0</div>
+                    <div class="stat-icon">✅</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-value" id="availableKeyStat">0</div>
+                <div class="stat-note">Stok key aktif yang belum dipakai.</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-top">
                     <div class="stat-label">Total Order</div>
-                    <div class="stat-value" id="totalOrderStat">0</div>
+                    <div class="stat-icon">🧾</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-value" id="totalOrderStat">0</div>
+                <div class="stat-note">Jumlah order yang tercatat di sistem.</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-top">
                     <div class="stat-label">Total Produk</div>
-                    <div class="stat-value" id="totalProductStat">0</div>
+                    <div class="stat-icon">📦</div>
                 </div>
+                <div class="stat-value" id="totalProductStat">0</div>
+                <div class="stat-note">Semua produk yang tersedia di panel admin.</div>
             </div>
         </div>
 
-        <div class="card">
-            <h2>Kelola Produk</h2>
-            <p class="card-subtitle">
-                Tambahkan produk berdasarkan game, brand, durasi, dan harga. Data ini nanti dipakai di halaman buyer.
-            </p>
+        <div class="dashboard-grid">
+            <div class="left-stack">
+                <div class="card fade-up delay-3">
+                    <div class="card-header">
+                        <div class="card-title-wrap">
+                            <h2>Kelola Produk</h2>
+                            <p class="card-subtitle">
+                                Tambahkan, edit, aktifkan, nonaktifkan, atau hapus produk dari store dengan lebih cepat.
+                            </p>
+                        </div>
+                        <div class="section-badge">Product Manager</div>
+                    </div>
 
-            <div class="toolbar">
-                <input type="hidden" id="editingProductId">
-                <input type="text" id="productGame" placeholder="Game, contoh: Delta Force">
-                <input type="text" id="productBrand" placeholder="Brand, contoh: Aorus">
-                <input type="text" id="productDuration" placeholder="Durasi, contoh: 1 Hari">
-                <input type="text" id="productPrice" placeholder="Harga, contoh: 30000">
-                <button id="saveProductBtn" onclick="saveProduct()">Tambah Produk</button>
-                <button class="ghost-btn" onclick="resetProductForm()">Reset Form</button>
-                <button class="ghost-btn" onclick="loadProducts()">Refresh Produk</button>
-            </div>
+                    <div class="toolbar">
+                        <input type="hidden" id="editingProductId">
+                        <div class="field"><input type="text" id="productGame" placeholder="Game, contoh: Delta Force"></div>
+                        <div class="field"><input type="text" id="productBrand" placeholder="Brand, contoh: Aorus"></div>
+                        <div class="field"><input type="text" id="productDuration" placeholder="Durasi, contoh: 1 Hari"></div>
+                        <div class="field"><input type="text" id="productPrice" placeholder="Harga, contoh: 30000"></div>
+                    </div>
 
-            <div class="info-row">
-                <div class="info" id="productStatusText">Memuat daftar produk...</div>
-            </div>
+                    <div class="toolbar compact">
+                        <div class="btn-group">
+                            <button id="saveProductBtn" onclick="saveProduct()">Tambah Produk</button>
+                            <button class="ghost-btn" onclick="resetProductForm()">Reset Form</button>
+                            <button class="ghost-btn" onclick="loadProducts()">Refresh Produk</button>
+                        </div>
+                    </div>
 
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="width: 70px;">ID</th>
-                            <th>Game</th>
-                            <th>Brand</th>
-                            <th>Durasi</th>
-                            <th>Harga</th>
-                            <th>Status</th>
-                            <th style="width: 120px;">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="productTableBody"></tbody>
-                </table>
-            </div>
-        </div>
+                    <div class="info-row">
+                        <div class="info" id="productStatusText">Memuat daftar produk...</div>
+                    </div>
 
-        <div class="grid">
-            <div class="card">
-                <h2>Tambah Game Key</h2>
-                <p class="card-subtitle">
-                    Tambahkan stok key baru ke database. Kamu bisa input satu atau banyak key sekaligus, satu key per baris.
-                </p>
-
-                <div class="toolbar">
-    <select id="keyProductSelect"></select>
-</div>
-
-<div class="toolbar">
-    <input type="text" id="singleKeyInput" placeholder="Masukkan 1 game key, contoh: KEY-AAA-111">
-    <button onclick="addSingleKey()">Tambah 1 Key</button>
-</div>
-
-<div class="toolbar">
-    <textarea id="bulkKeyInput" placeholder="Masukkan banyak key, satu key per baris&#10;Contoh:&#10;KEY-AAA-111&#10;KEY-BBB-222&#10;KEY-CCC-333"></textarea>
-    <button onclick="addBulkKeys()">Tambah Bulk Key</button>
-    <button class="ghost-btn" onclick="loadKeys()">Refresh Key</button>
-</div>
-
-                <div class="info-row">
-                    <div class="info" id="keyStatusText">Memuat daftar key...</div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 70px;">ID</th>
+                                    <th>Game</th>
+                                    <th>Brand</th>
+                                    <th>Durasi</th>
+                                    <th>Harga</th>
+                                    <th>Status</th>
+                                    <th style="width: 180px;">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productTableBody"></tbody>
+                        </table>
+                    </div>
                 </div>
 
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="width: 90px;">ID</th>
-                                <th>Produk</th>
-                                <th>Key</th>
-                                <th style="width: 180px;">Status</th>
-                                <th style="width: 140px;">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="keyTableBody"></tbody>
-                    </table>
+                <div class="card fade-up delay-4">
+                    <div class="card-header">
+                        <div class="card-title-wrap">
+                            <h2>Daftar Order</h2>
+                            <p class="card-subtitle">
+                                Lihat transaksi masuk, filter pembayaran dan pengiriman, lalu copy detail order dengan cepat.
+                            </p>
+                        </div>
+                        <div class="section-badge">Order Monitor</div>
+                    </div>
+
+                    <div class="toolbar">
+                        <div class="field-wide">
+                            <input type="text" id="orderSearchInput" placeholder="Cari order id / nama / kontak / game / produk">
+                        </div>
+
+                        <div class="field">
+                            <select id="paymentFilter" onchange="applyOrderFilters()">
+                                <option value="">Semua Pembayaran</option>
+                                <option value="pending">Pending</option>
+                                <option value="paid">Paid</option>
+                                <option value="expired">Expired</option>
+                            </select>
+                        </div>
+
+                        <div class="field">
+                            <select id="deliveryFilter" onchange="applyOrderFilters()">
+                                <option value="">Semua Pengiriman</option>
+                                <option value="waiting_payment">Waiting Payment</option>
+                                <option value="delivered">Delivered</option>
+                                <option value="manual">Manual</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+
+                        <div class="btn-group">
+                            <button onclick="loadOrders()">Refresh Order</button>
+                        </div>
+                    </div>
+
+                    <div class="info-row">
+                        <div class="info" id="orderStatusText">Memuat daftar order...</div>
+                    </div>
+
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Nama</th>
+                                    <th>Kontak</th>
+                                    <th>Game</th>
+                                    <th>Produk</th>
+                                    <th>Harga</th>
+                                    <th>Pembayaran</th>
+                                    <th>Pengiriman</th>
+                                    <th>Game Key</th>
+                                    <th>Waktu</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orderTableBody"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
-            <div class="card">
-                <h2>Daftar Order</h2>
-                <p class="card-subtitle">
-                    Pantau semua transaksi yang masuk, status pembayaran, serta key yang sudah terdistribusi.
-                </p>
+            <div class="right-stack">
+                <div class="card fade-up delay-5">
+                    <div class="card-header">
+                        <div class="card-title-wrap">
+                            <h2>Tambah Game Key</h2>
+                            <p class="card-subtitle">
+                                Tambahkan key satuan atau bulk untuk setiap produk yang aktif di store kamu.
+                            </p>
+                        </div>
+                        <div class="section-badge">Key Stock</div>
+                    </div>
 
-                <div class="toolbar">
-                    <input type="text" id="orderSearchInput" placeholder="Cari order id / nama / kontak / game / produk">
-                    
-                    <select id="paymentFilter" onchange="applyOrderFilters()">
-                        <option value="">Semua Pembayaran</option>
-                        <option value="pending">Pending</option>
-                        <option value="paid">Paid</option>
-                        <option value="expired">Expired</option>
-                    </select>
+                    <div class="toolbar">
+                        <div class="field-wide">
+                            <select id="keyProductSelect"></select>
+                        </div>
+                    </div>
 
-                    <select id="deliveryFilter" onchange="applyOrderFilters()">
-                        <option value="">Semua Pengiriman</option>
-                        <option value="waiting_payment">Waiting Payment</option>
-                        <option value="delivered">Delivered</option>
-                        <option value="manual">Manual</option>
-                        <option value="cancelled">Cancelled</option>
-                    </select>
+                    <div class="toolbar">
+                        <div class="field-wide">
+                            <input type="text" id="singleKeyInput" placeholder="Masukkan 1 game key, contoh: KEY-AAA-111">
+                        </div>
+                        <div class="btn-group">
+                            <button onclick="addSingleKey()">Tambah 1 Key</button>
+                        </div>
+                    </div>
 
-                    <button onclick="loadOrders()">Refresh Order</button>
-                </div>
+                    <div class="toolbar">
+                        <div class="field-wide" style="flex: 1 1 100%;">
+                            <textarea id="bulkKeyInput" placeholder="Masukkan banyak key, satu key per baris&#10;Contoh:&#10;KEY-AAA-111&#10;KEY-BBB-222&#10;KEY-CCC-333"></textarea>
+                        </div>
+                    </div>
 
-                <div class="info-row">
-                    <div class="info" id="orderStatusText">Memuat daftar order...</div>
-                </div>
+                    <div class="toolbar compact">
+                        <div class="btn-group">
+                            <button onclick="addBulkKeys()">Tambah Bulk Key</button>
+                            <button class="ghost-btn" onclick="loadKeys()">Refresh Key</button>
+                        </div>
+                    </div>
 
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Order ID</th>
-                                <th>Nama</th>
-                                <th>Kontak</th>
-                                <th>Game</th>
-                                <th>Produk</th>
-                                <th>Harga</th>
-                                <th>Pembayaran</th>
-                                <th>Pengiriman</th>
-                                <th>Game Key</th>
-                                <th>Waktu</th>
-                            </tr>
-                        </thead>
-                        <tbody id="orderTableBody"></tbody>
-                    </table>
+                    <div class="info-row">
+                        <div class="info" id="keyStatusText">Memuat daftar key...</div>
+                    </div>
+
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 90px;">ID</th>
+                                    <th>Produk</th>
+                                    <th>Key</th>
+                                    <th style="width: 180px;">Status</th>
+                                    <th style="width: 140px;">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="keyTableBody"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -579,6 +954,7 @@
 
     <script>
         let allOrders = [];
+
         function formatRupiah(num) {
             return "Rp " + Number(num || 0).toLocaleString("id-ID");
         }
@@ -686,56 +1062,58 @@
                 tableBody.innerHTML = `
                     <tr>
                         <td colspan="5" class="empty">Terjadi error saat mengambil key.</td>
-                        </tr>
+                    </tr>
                 `;
             }
         }
+
         async function addSingleKey() {
-    const productId = document.getElementById("keyProductSelect").value;
-    const input = document.getElementById("singleKeyInput");
-    const key = input.value.trim();
+            const productId = document.getElementById("keyProductSelect").value;
+            const input = document.getElementById("singleKeyInput");
+            const key = input.value.trim();
 
-    if (!productId) {
-        alert("Pilih produk dulu.");
-        return;
-    }
+            if (!productId) {
+                alert("Pilih produk dulu.");
+                return;
+            }
 
-    if (!key) {
-        alert("Isi 1 key dulu.");
-        return;
-    }
+            if (!key) {
+                alert("Isi 1 key dulu.");
+                return;
+            }
 
-    try {
-        const res = await fetch("/keys", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                product_id: productId,
-                key
-            })
-        });
+            try {
+                const res = await fetch("/keys", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        product_id: productId,
+                        key
+                    })
+                });
 
-        const data = await res.json();
+                const data = await res.json();
 
-        if (res.status === 401) {
-            window.location.href = "/ae-auth";
-            return;
+                if (res.status === 401) {
+                    window.location.href = "/ae-auth";
+                    return;
+                }
+
+                if (!res.ok) {
+                    alert(data.message || "Gagal menambahkan key");
+                    return;
+                }
+
+                alert(data.message || "Key berhasil ditambahkan");
+                input.value = "";
+                loadKeys();
+            } catch (err) {
+                alert("Terjadi error server saat menambahkan key");
+            }
         }
 
-        if (!res.ok) {
-            alert(data.message || "Gagal menambahkan key");
-            return;
-        }
-
-        alert(data.message || "Key berhasil ditambahkan");
-        input.value = "";
-        loadKeys();
-    } catch (err) {
-        alert("Terjadi error server saat menambahkan key");
-    }
-}
         async function addBulkKeys() {
             const productId = document.getElementById("keyProductSelect").value;
             const input = document.getElementById("bulkKeyInput");
@@ -899,17 +1277,17 @@
 
         function copyOrderDetail(id, name, contact, game, product, price, payment, delivery, key) {
             const text = `
-        Order ID : ${id}
-        Nama     : ${name}
-        Kontak   : ${contact}
-        Game     : ${game}
-        Produk   : ${product}
-        Harga    : ${formatRupiah(price)}
+Order ID : ${id}
+Nama     : ${name}
+Kontak   : ${contact}
+Game     : ${game}
+Produk   : ${product}
+Harga    : ${formatRupiah(price)}
 
-        Status Pembayaran : ${payment}
-        Status Pengiriman : ${delivery}
+Status Pembayaran : ${payment}
+Status Pengiriman : ${delivery}
 
-        Game Key : ${key || "-"}
+Game Key : ${key || "-"}
             `.trim();
 
             copyToClipboard(text);
@@ -1194,6 +1572,7 @@
         }
 
         document.getElementById("orderSearchInput").addEventListener("input", applyOrderFilters);
+
         loadProducts();
         loadKeyProductOptions();
         loadKeys();
