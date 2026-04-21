@@ -947,16 +947,6 @@
                         <div class="stat-note">Produk dengan stok < 5</div>
                         </div>
                     </div>
-
-                    <div class="stat-card">
-                        <div class="stat-top">
-                            <div class="stat-label">Produk Hampir Habis</div>
-                            <div class="stat-icon">⚠️</div>
-                        </div>
-                        <div class="stat-value" id="lowStockStat">0</div>
-                        <div class="stat-note">Produk dengan stok < 5</div>
-                        </div>
-
             </section>
 
             <div class="dashboard-grid">
@@ -1188,13 +1178,7 @@
             }
 
             if (sectionName === "dashboard") {
-                loadProducts();
-                loadOrders();
-                loadKeys();
-                loadKeyProductOptions();
-                if (typeof loadStockSummary === "function") {
-                    loadStockSummary();
-                }
+                loadStockSummary();
             }
         }
 
@@ -1916,11 +1900,7 @@ Game Key : ${key || "-"}
 
         document.getElementById("orderSearchInput").addEventListener("input", applyOrderFilters);
 
-        loadProducts();
-        loadKeyProductOptions();
-        loadKeys();
-        loadOrders();
-        loadStockSummary();
+        showSection("dashboard");
     </script>
 </body>
 
