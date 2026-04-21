@@ -390,6 +390,17 @@ app.post("/create-order", orderLimiter, async (req, res) => {
             });
         }
 
+        const keyCheck = await query(
+            "SELECT id FROM keys WHERE product_id = $1 AND used = 0 LIMIT 1",
+            [cleanProductId]
+        );
+
+        if (keyCheck.rows.length === 0) {
+            return res.status(400).json({
+                message: "Stok key habis"
+            });
+        }
+
         const orderId = "ORDER-" + crypto.randomUUID();
         const accessToken = crypto.randomBytes(24).toString("hex");
         const createdAt = new Date().toISOString();
