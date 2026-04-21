@@ -702,6 +702,54 @@ app.get("/orders", requireAdminAuth, async (req, res) => {
     }
 });
 
+app.delete("/orders/:id", requireAdminAuth, requireAdminCsrf, async (req, res) => {
+    const orderId = String(req.params.id || "").trim();
+
+    if (!orderId) {
+        return res.status(400).json({
+            message: "ID order tidak valid"
+        });
+    }
+
+    try {
+        const result = await query(
+            "SELECT id, payment_status, delivery_status FROM orders WHERE id = $1 LIMIT 1",
+            [orderId]
+        );
+
+        const order = result.rows[0];
+
+        if (!order) {
+            return res.status(404).json({
+                message: "Order tidak ditemukan"
+            });
+        }
+
+        const paymentStatus = String(order.payment_status || "").toLowerCase();
+        const deliveryStatus = String(order.delivery_status || "").toLowerCase();
+
+        if (paymentStatus === "paid" || deliveryStatus === "delivered") {
+            return res.status(400).json({
+                message: "Order yang sudah dibayar / terkirim tidak boleh dihapus"
+            });
+        }
+
+        await query(
+            "DELETE FROM orders WHERE id = $1",
+            [orderId]
+        );
+
+        return res.json({
+            message: "Order berhasil dihapus"
+        });
+    } catch (err) {
+        console.error("ERROR DELETE ORDER:", err);
+        return res.status(500).json({
+            message: "Gagal menghapus order: " + err.message
+        });
+    }
+});
+
 app.get("/keys", requireAdminAuth, async (req, res) => {
     try {
         const result = await query(`

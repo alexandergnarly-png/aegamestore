@@ -528,7 +528,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 920px;
+            min-width: 1080px;
         }
 
         th,
@@ -839,7 +839,7 @@
                                     <th>Durasi</th>
                                     <th>Harga</th>
                                     <th>Status</th>
-                                    <th style="width: 180px;">Aksi</th>
+                                    <th style="width: 220px;">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="productTableBody"></tbody>
@@ -907,6 +907,7 @@
                                     <th>Pengiriman</th>
                                     <th>Game Key</th>
                                     <th>Waktu</th>
+                                    <th style="width: 160px;">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="orderTableBody"></tbody>
@@ -992,14 +993,23 @@
             return new Date(dateString).toLocaleString("id-ID");
         }
 
+        function escapeHtml(value) {
+            return String(value ?? "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+        }
+
         function orderBadge(status) {
             const s = (status || "").toLowerCase();
-            return `<span class="badge ${s}">${status || "-"}</span>`;
+            return `<span class="badge ${s}">${escapeHtml(status || "-")}</span>`;
         }
 
         function deliveryBadge(status) {
             const s = (status || "").toLowerCase();
-            return `<span class="badge ${s}">${status || "-"}</span>`;
+            return `<span class="badge ${s}">${escapeHtml(status || "-")}</span>`;
         }
 
         function activeBadge(active) {
@@ -1082,8 +1092,8 @@
                 tableBody.innerHTML = data.map(item => `
                     <tr>
                         <td>${item.id}</td>
-                        <td>${item.game || "-"} - ${item.brand || "-"} - ${item.duration || "-"}</td>
-                        <td>${item.key}</td>
+                        <td>${escapeHtml(item.game || "-")} - ${escapeHtml(item.brand || "-")} - ${escapeHtml(item.duration || "-")}</td>
+                        <td>${escapeHtml(item.key)}</td>
                         <td>${keyBadge(item.used)}</td>
                         <td>
                             <button class="danger-btn" onclick="deleteKey(${item.id})">Hapus</button>
@@ -1229,7 +1239,7 @@
                     statusText.innerText = "Belum ada order.";
                     tableBody.innerHTML = `
                         <tr>
-                            <td colspan="10" class="empty">Belum ada transaksi.</td>
+                            <td colspan="11" class="empty">Belum ada transaksi.</td>
                         </tr>
                     `;
                     return;
@@ -1241,7 +1251,7 @@
                 statusText.innerText = "Gagal memuat daftar order.";
                 tableBody.innerHTML = `
                     <tr>
-                        <td colspan="10" class="empty">Terjadi error saat mengambil order.</td>
+                        <td colspan="11" class="empty">Terjadi error saat mengambil order.</td>
                     </tr>
                 `;
             }
@@ -1255,7 +1265,7 @@
             const paymentValue = document.getElementById("paymentFilter").value;
             const deliveryValue = document.getElementById("deliveryFilter").value;
 
-            let filteredOrders = allOrders.filter(item => {
+            const filteredOrders = allOrders.filter(item => {
                 const matchesSearch =
                     !searchValue ||
                     String(item.id || "").toLowerCase().includes(searchValue) ||
@@ -1279,35 +1289,50 @@
             if (filteredOrders.length === 0) {
                 tableBody.innerHTML = `
                     <tr>
-                        <td colspan="10" class="empty">Tidak ada order yang cocok dengan filter.</td>
+                        <td colspan="11" class="empty">Tidak ada order yang cocok dengan filter.</td>
                     </tr>
                 `;
                 return;
             }
 
-            tableBody.innerHTML = filteredOrders.map(item => `
-                <tr>
-                    <td>${item.id || "-"}</td>
-                    <td>${item.name || "-"}</td>
-                    <td>${item.contact || "-"}</td>
-                    <td>${item.game || "-"}</td>
-                    <td>${item.product || "-"}</td>
-                    <td>${formatRupiah(item.price)}</td>
-                    <td>${orderBadge(item.payment_status)}</td>
-                    <td>${deliveryBadge(item.delivery_status)}</td>
-                    <td>
-                        ${item.gameKey || "-"}
-                        ${item.gameKey ? `<br><button class="ghost-btn" onclick="copyToClipboard('${String(item.gameKey).replace(/'/g, "\\'")}')">Copy Key</button>` : ""}
-                    </td>
-                    <td>
-                        ${formatTanggal(item.created_at)}
-                        <br>
-                        <button class="ghost-btn" onclick="copyOrderDetail('${item.id}', '${String(item.name).replace(/'/g, "\\'")}', '${String(item.contact).replace(/'/g, "\\'")}', '${String(item.game).replace(/'/g, "\\'")}', '${String(item.product).replace(/'/g, "\\'")}', ${item.price}, '${item.payment_status}', '${item.delivery_status}', '${String(item.gameKey || "").replace(/'/g, "\\'")}')">
-                            Copy Detail
-                        </button>
-                    </td>
-                </tr>
-            `).join("");
+            tableBody.innerHTML = filteredOrders.map(item => {
+                const safeId = JSON.stringify(String(item.id || ""));
+                const safeName = JSON.stringify(String(item.name || ""));
+                const safeContact = JSON.stringify(String(item.contact || ""));
+                const safeGame = JSON.stringify(String(item.game || ""));
+                const safeProduct = JSON.stringify(String(item.product || ""));
+                const safePayment = JSON.stringify(String(item.payment_status || ""));
+                const safeDelivery = JSON.stringify(String(item.delivery_status || ""));
+                const safeGameKey = JSON.stringify(String(item.gameKey || item.gamekey || ""));
+                const isProtected = String(item.payment_status || "").toLowerCase() === "paid" ||
+                    String(item.delivery_status || "").toLowerCase() === "delivered";
+
+                return `
+                    <tr>
+                        <td>${escapeHtml(item.id || "-")}</td>
+                        <td>${escapeHtml(item.name || "-")}</td>
+                        <td>${escapeHtml(item.contact || "-")}</td>
+                        <td>${escapeHtml(item.game || "-")}</td>
+                        <td>${escapeHtml(item.product || "-")}</td>
+                        <td>${formatRupiah(item.price)}</td>
+                        <td>${orderBadge(item.payment_status)}</td>
+                        <td>${deliveryBadge(item.delivery_status)}</td>
+                        <td>
+                            ${escapeHtml(item.gameKey || item.gamekey || "-")}
+                            ${(item.gameKey || item.gamekey) ? `<br><button class="ghost-btn" onclick='copyToClipboard(${safeGameKey})'>Copy Key</button>` : ""}
+                        </td>
+                        <td>${formatTanggal(item.created_at)}</td>
+                        <td>
+                            <button class="ghost-btn" onclick='copyOrderDetail(${safeId}, ${safeName}, ${safeContact}, ${safeGame}, ${safeProduct}, ${Number(item.price || 0)}, ${safePayment}, ${safeDelivery}, ${safeGameKey})'>
+                                Copy Detail
+                            </button>
+                            <button class="danger-btn" onclick='deleteOrder(${safeId})' ${isProtected ? "disabled" : ""}>
+                                Hapus
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join("");
         }
 
         function copyOrderDetail(id, name, contact, game, product, price, payment, delivery, key) {
@@ -1326,6 +1351,37 @@ Game Key : ${key || "-"}
             `.trim();
 
             copyToClipboard(text);
+        }
+
+        async function deleteOrder(orderId) {
+            const yakin = confirm("Yakin mau hapus order ini?");
+            if (!yakin) return;
+
+            try {
+                const res = await fetch(`/orders/${encodeURIComponent(orderId)}`, {
+                    method: "DELETE",
+                    headers: {
+                        "x-csrf-token": getCsrfToken()
+                    }
+                });
+
+                const data = await res.json();
+
+                if (res.status === 401) {
+                    window.location.href = "/ae-auth";
+                    return;
+                }
+
+                if (!res.ok) {
+                    alert(data.message || "Gagal menghapus order");
+                    return;
+                }
+
+                alert(data.message || "Order berhasil dihapus");
+                loadOrders();
+            } catch (err) {
+                alert("Terjadi error server saat menghapus order");
+            }
         }
 
         async function deleteKey(id) {
@@ -1362,7 +1418,10 @@ Game Key : ${key || "-"}
         async function logoutAdmin() {
             try {
                 await fetch("/admin-logout", {
-                    method: "POST"
+                    method: "POST",
+                    headers: {
+                        "x-csrf-token": getCsrfToken()
+                    }
                 });
 
                 window.location.href = "/ae-auth";
@@ -1406,23 +1465,28 @@ Game Key : ${key || "-"}
                 updateProductStats(data);
                 statusText.innerText = `Total produk: ${data.length}`;
 
-                tableBody.innerHTML = data.map(item => `
-                    <tr>
-                        <td>${item.id}</td>
-                        <td>${item.game}</td>
-                        <td>${item.brand}</td>
-                        <td>${item.duration}</td>
-                        <td>${formatRupiah(item.price)}</td>
-                        <td>${activeBadge(item.active)}</td>
-                        <td>
-                            <button onclick="editProduct(${item.id}, '${String(item.game).replace(/'/g, "\\'")}', '${String(item.brand).replace(/'/g, "\\'")}', '${String(item.duration).replace(/'/g, "\\'")}', ${item.price})">Edit</button>
-                            <button class="ghost-btn" onclick="toggleProductActive(${item.id}, ${Number(item.active) === 1 ? 0 : 1})">
-                                ${Number(item.active) === 1 ? "Nonaktifkan" : "Aktifkan"}
-                            </button>
-                            <button class="danger-btn" onclick="deleteProduct(${item.id})">Hapus</button>
-                        </td>
-                    </tr>
-                `).join("");
+                tableBody.innerHTML = data.map(item => {
+                    const safeGame = JSON.stringify(String(item.game || ""));
+                    const safeBrand = JSON.stringify(String(item.brand || ""));
+                    const safeDuration = JSON.stringify(String(item.duration || ""));
+                    return `
+                        <tr>
+                            <td>${item.id}</td>
+                            <td>${escapeHtml(item.game)}</td>
+                            <td>${escapeHtml(item.brand)}</td>
+                            <td>${escapeHtml(item.duration)}</td>
+                            <td>${formatRupiah(item.price)}</td>
+                            <td>${activeBadge(item.active)}</td>
+                            <td>
+                                <button onclick='editProduct(${item.id}, ${safeGame}, ${safeBrand}, ${safeDuration}, ${Number(item.price || 0)})'>Edit</button>
+                                <button class="ghost-btn" onclick="toggleProductActive(${item.id}, ${Number(item.active) === 1 ? 0 : 1})">
+                                    ${Number(item.active) === 1 ? "Nonaktifkan" : "Aktifkan"}
+                                </button>
+                                <button class="danger-btn" onclick="deleteProduct(${item.id})">Hapus</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join("");
             } catch (err) {
                 statusText.innerText = "Gagal memuat daftar produk.";
                 tableBody.innerHTML = `
