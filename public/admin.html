@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -155,8 +156,8 @@
             padding: 30px;
             border-radius: var(--radius-xl);
             background:
-                radial-gradient(circle at 10% 15%, rgba(255,255,255,0.16), transparent 20%),
-                radial-gradient(circle at 90% 15%, rgba(255,255,255,0.10), transparent 18%),
+                radial-gradient(circle at 10% 15%, rgba(255, 255, 255, 0.16), transparent 20%),
+                radial-gradient(circle at 90% 15%, rgba(255, 255, 255, 0.10), transparent 18%),
                 linear-gradient(135deg, #020617, #0f172a 30%, #1d4ed8 74%, #38bdf8);
             color: white;
             box-shadow: var(--shadow-lg);
@@ -203,8 +204,8 @@
             display: inline-block;
             padding: 9px 14px;
             border-radius: 999px;
-            background: rgba(255,255,255,0.14);
-            border: 1px solid rgba(255,255,255,0.14);
+            background: rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.14);
             font-size: 12px;
             font-weight: bold;
             letter-spacing: 0.4px;
@@ -221,7 +222,7 @@
         .hero p {
             margin: 0;
             max-width: 700px;
-            color: rgba(255,255,255,0.90);
+            color: rgba(255, 255, 255, 0.90);
             line-height: 1.85;
             font-size: 15px;
         }
@@ -233,25 +234,25 @@
             flex-wrap: wrap;
         }
 
-.logout-btn {
-    width: auto;
-    min-width: 96px;
-    border: 1px solid rgba(255,255,255,0.16);
-    background: #ffffff;
-    color: #0f172a;
-    border-radius: 14px;
-    padding: 12px 16px;
-    font-weight: bold;
-    cursor: pointer;
-    box-shadow: none;
-    transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease;
-}
+        .logout-btn {
+            width: auto;
+            min-width: 96px;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            background: #ffffff;
+            color: #0f172a;
+            border-radius: 14px;
+            padding: 12px 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: none;
+            transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease;
+        }
 
-.logout-btn:hover {
-    transform: translateY(-1px);
-    opacity: 1;
-    background: #e2e8f0;
-}
+        .logout-btn:hover {
+            transform: translateY(-1px);
+            opacity: 1;
+            background: #e2e8f0;
+        }
 
         .hero-mini {
             display: flex;
@@ -268,10 +269,10 @@
             gap: 8px;
             border-radius: 999px;
             padding: 10px 14px;
-            background: rgba(255,255,255,0.12);
-            border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             font-size: 12px;
-            color: rgba(255,255,255,0.94);
+            color: rgba(255, 255, 255, 0.94);
         }
 
         .stats {
@@ -618,17 +619,32 @@
             animation: fadeUp 0.7s ease both;
         }
 
-        .fade-up.delay-1 { animation-delay: 0.05s; }
-        .fade-up.delay-2 { animation-delay: 0.10s; }
-        .fade-up.delay-3 { animation-delay: 0.16s; }
-        .fade-up.delay-4 { animation-delay: 0.22s; }
-        .fade-up.delay-5 { animation-delay: 0.28s; }
+        .fade-up.delay-1 {
+            animation-delay: 0.05s;
+        }
+
+        .fade-up.delay-2 {
+            animation-delay: 0.10s;
+        }
+
+        .fade-up.delay-3 {
+            animation-delay: 0.16s;
+        }
+
+        .fade-up.delay-4 {
+            animation-delay: 0.22s;
+        }
+
+        .fade-up.delay-5 {
+            animation-delay: 0.28s;
+        }
 
         @keyframes fadeUp {
             from {
                 opacity: 0;
                 transform: translateY(18px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -690,6 +706,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="page">
         <div class="top-nav fade-up">
@@ -722,7 +739,8 @@
                 </div>
 
                 <div class="hero-actions">
-                    <button class="logout-btn" onclick="loadProducts(); loadKeyProductOptions(); loadKeys(); loadOrders();">
+                    <button class="logout-btn"
+                        onclick="loadProducts(); loadKeyProductOptions(); loadKeys(); loadOrders();">
                         Refresh Semua
                     </button>
                 </div>
@@ -789,10 +807,14 @@
 
                     <div class="toolbar">
                         <input type="hidden" id="editingProductId">
-                        <div class="field"><input type="text" id="productGame" placeholder="Game, contoh: Delta Force"></div>
-                        <div class="field"><input type="text" id="productBrand" placeholder="Brand, contoh: Aorus"></div>
-                        <div class="field"><input type="text" id="productDuration" placeholder="Durasi, contoh: 1 Hari"></div>
-                        <div class="field"><input type="text" id="productPrice" placeholder="Harga, contoh: 30000"></div>
+                        <div class="field"><input type="text" id="productGame" placeholder="Game, contoh: Delta Force">
+                        </div>
+                        <div class="field"><input type="text" id="productBrand" placeholder="Brand, contoh: Aorus">
+                        </div>
+                        <div class="field"><input type="text" id="productDuration" placeholder="Durasi, contoh: 1 Hari">
+                        </div>
+                        <div class="field"><input type="text" id="productPrice" placeholder="Harga, contoh: 30000">
+                        </div>
                     </div>
 
                     <div class="toolbar compact">
@@ -830,7 +852,8 @@
                         <div class="card-title-wrap">
                             <h2>Daftar Order</h2>
                             <p class="card-subtitle">
-                                Lihat transaksi masuk, filter pembayaran dan pengiriman, lalu copy detail order dengan cepat.
+                                Lihat transaksi masuk, filter pembayaran dan pengiriman, lalu copy detail order dengan
+                                cepat.
                             </p>
                         </div>
                         <div class="section-badge">Order Monitor</div>
@@ -838,7 +861,8 @@
 
                     <div class="toolbar">
                         <div class="field-wide">
-                            <input type="text" id="orderSearchInput" placeholder="Cari order id / nama / kontak / game / produk">
+                            <input type="text" id="orderSearchInput"
+                                placeholder="Cari order id / nama / kontak / game / produk">
                         </div>
 
                         <div class="field">
@@ -911,7 +935,8 @@
 
                     <div class="toolbar">
                         <div class="field-wide">
-                            <input type="text" id="singleKeyInput" placeholder="Masukkan 1 game key, contoh: KEY-AAA-111">
+                            <input type="text" id="singleKeyInput"
+                                placeholder="Masukkan 1 game key, contoh: KEY-AAA-111">
                         </div>
                         <div class="btn-group">
                             <button onclick="addSingleKey()">Tambah 1 Key</button>
@@ -920,7 +945,8 @@
 
                     <div class="toolbar">
                         <div class="field-wide" style="flex: 1 1 100%;">
-                            <textarea id="bulkKeyInput" placeholder="Masukkan banyak key, satu key per baris&#10;Contoh:&#10;KEY-AAA-111&#10;KEY-BBB-222&#10;KEY-CCC-333"></textarea>
+                            <textarea id="bulkKeyInput"
+                                placeholder="Masukkan banyak key, satu key per baris&#10;Contoh:&#10;KEY-AAA-111&#10;KEY-BBB-222&#10;KEY-CCC-333"></textarea>
                         </div>
                     </div>
 
@@ -1000,6 +1026,11 @@
 
         function updateOrderStats(orders) {
             document.getElementById("totalOrderStat").innerText = orders.length;
+        }
+
+        function getCsrfToken() {
+            const match = document.cookie.match(/(?:^|; )admin_csrf=([^;]+)/);
+            return match ? decodeURIComponent(match[1]) : "";
         }
 
         function copyToClipboard(text) {
@@ -1088,7 +1119,8 @@
                 const res = await fetch("/keys", {
                     method: "POST",
                     headers: {
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/json",
+                        "x-csrf-token": getCsrfToken()
                     },
                     body: JSON.stringify({
                         product_id: productId,
@@ -1145,7 +1177,8 @@
                 const res = await fetch("/keys/bulk", {
                     method: "POST",
                     headers: {
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/json",
+                        "x-csrf-token": getCsrfToken()
                     },
                     body: JSON.stringify({
                         product_id: productId,
@@ -1301,7 +1334,10 @@ Game Key : ${key || "-"}
 
             try {
                 const res = await fetch(`/keys/${id}`, {
-                    method: "DELETE"
+                    method: "DELETE",
+                    headers: {
+                        "x-csrf-token": getCsrfToken()
+                    }
                 });
 
                 const data = await res.json();
@@ -1581,4 +1617,5 @@ Game Key : ${key || "-"}
         loadOrders();
     </script>
 </body>
+
 </html>

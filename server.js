@@ -759,10 +759,70 @@ app.post("/keys", requireAdminAuth, requireAdminCsrf, async (req, res) => {
     }
 });
 
-app.post("/keys/bulk", requireAdminAuth, async (req, res) => {
-    return res.status(501).json({
-        message: "Bulk key belum dimigrasikan ke PostgreSQL"
-    });
+app.post("/keys/bulk", requireAdminAuth, requireAdminCsrf, async (req, res) => {
+    const { product_id, keys } = req.body;
+    const cleanProductId = Number(product_id);
+
+    if (!Number.isInteger(cleanProductId) || cleanProductId <= 0) {
+        return res.status(400).json({
+            message: "Produk tidak valid"
+        });
+    }
+
+    if (!Array.isArray(keys) || keys.length === 0) {
+        return res.status(400).json({
+            message: "Daftar key tidak valid"
+        });
+    }
+
+    const cleanKeys = [...new Set(
+        keys
+            .map(item => String(item || "").trim())
+            .filter(item => item.length >= 3 && item.length <= 255)
+    )];
+
+    if (cleanKeys.length === 0) {
+        return res.status(400).json({
+            message: "Tidak ada key valid untuk disimpan"
+        });
+    }
+
+    try {
+        const productCheck = await query(
+            "SELECT id FROM products WHERE id = $1",
+            [cleanProductId]
+        );
+
+        if (productCheck.rows.length === 0) {
+            return res.status(404).json({
+                message: "Produk tidak ditemukan"
+            });
+        }
+
+        const values = [];
+        const placeholders = cleanKeys.map((key, index) => {
+            const base = index * 2;
+            values.push(cleanProductId, key);
+            return `($${base + 1}, $${base + 2}, 0)`;
+        }).join(", ");
+
+        const result = await query(
+            `INSERT INTO keys (product_id, key, used)
+             VALUES ${placeholders}
+             RETURNING id`,
+            values
+        );
+
+        return res.json({
+            message: `${result.rows.length} key berhasil ditambahkan`,
+            total: result.rows.length
+        });
+    } catch (err) {
+        console.error("ERROR BULK ADD KEY:", err);
+        return res.status(500).json({
+            message: "Gagal menambahkan bulk key: " + err.message
+        });
+    }
 });
 
 app.get("/products", requireAdminAuth, async (req, res) => {
@@ -1000,7 +1060,7 @@ app.get("/public-products", async (req, res) => {
     }
 });
 
-app.delete("/keys/:id", requireAdminAuth, async (req, res) => {
+app.delete("/keys/:id", requireAdminAuth, requireAdminCsrf, async (req, res) => {
     const keyId = Number(req.params.id);
 
     if (!Number.isInteger(keyId) || keyId <= 0) {
@@ -1010,37 +1070,38 @@ app.delete("/keys/:id", requireAdminAuth, async (req, res) => {
     }
 
     try {
-        const findResult = await query(
-            "SELECT * FROM keys WHERE id = $1",
+        const keyCheck = await query(
+            "SELECT id, used FROM keys WHERE id = $1",
             [keyId]
         );
 
-        const keyRow = findResult.rows[0];
-
-        if (!keyRow) {
+        if (keyCheck.rows.length === 0) {
             return res.status(404).json({
                 message: "Key tidak ditemukan"
             });
         }
 
+        const keyRow = keyCheck.rows[0];
+
         if (Number(keyRow.used) === 1) {
             return res.status(400).json({
-                message: "Key yang sudah dipakai tidak boleh dihapus"
+                message: "Key yang sudah dipakai tidak bisa dihapus"
             });
         }
 
-        await query(
-            "DELETE FROM keys WHERE id = $1",
+        const result = await query(
+            "DELETE FROM keys WHERE id = $1 RETURNING id",
             [keyId]
         );
 
         return res.json({
-            message: "Key berhasil dihapus"
+            message: "Key berhasil dihapus",
+            id: result.rows[0].id
         });
     } catch (err) {
         console.error("ERROR DELETE KEY:", err);
         return res.status(500).json({
-            message: "Gagal menghapus key"
+            message: "Gagal menghapus key: " + err.message
         });
     }
 });
