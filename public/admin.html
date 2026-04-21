@@ -55,6 +55,118 @@
             min-height: 100vh;
         }
 
+        .admin-shell {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, #0f172a, #111827);
+            color: white;
+            padding: 22px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            border-right: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 6px 4px 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .sidebar-logo {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #2563eb, #38bdf8);
+            font-weight: bold;
+            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.25);
+        }
+
+        .sidebar-kicker {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #93c5fd;
+            margin-bottom: 2px;
+            font-weight: bold;
+        }
+
+        .sidebar-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .sidebar-nav {
+            display: grid;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            text-align: left;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.04);
+            color: #e2e8f0;
+            padding: 13px 14px;
+            border-radius: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: none;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: none;
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, #2563eb, #38bdf8);
+            color: white;
+            border-color: transparent;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+        }
+
+        .sidebar-logout {
+            width: 100%;
+            background: #ffffff;
+            color: #0f172a;
+            border-radius: 14px;
+            border: none;
+            padding: 13px 14px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: none;
+        }
+
+        .sidebar-logout:hover {
+            background: #e2e8f0;
+            box-shadow: none;
+        }
+
+        .admin-section {
+            display: none;
+        }
+
+        .admin-section.active {
+            display: block;
+        }
+
         .page {
             max-width: 1380px;
             margin: 0 auto;
@@ -675,6 +787,18 @@
             }
         }
 
+        @media (max-width: 980px) {
+            .admin-shell {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+        }
+
         @media (max-width: 640px) {
             .page {
                 padding: 16px 12px 30px;
@@ -708,401 +832,478 @@
 </head>
 
 <body>
-    <div class="page">
-        <div class="top-nav fade-up">
-            <div class="top-nav-left">
-                <div class="logo-badge">AE</div>
-                <div class="nav-title-wrap">
-                    <div class="nav-kicker">AE Game Store</div>
-                    <div class="nav-title">Modern Admin Dashboard</div>
+    <div class="admin-shell">
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="sidebar-logo">AE</div>
+                <div>
+                    <div class="sidebar-kicker">AE Game Store</div>
+                    <div class="sidebar-title">Admin Panel</div>
                 </div>
             </div>
 
-            <div class="nav-actions">
-                <div class="nav-chip">
-                    <span class="chip-dot"></span>
-                    <span>Admin Session Active</span>
+            <nav class="sidebar-nav">
+                <button class="nav-btn active" onclick="showSection('dashboard', this)">Dashboard</button>
+                <button class="nav-btn" onclick="showSection('products', this)">Produk</button>
+                <button class="nav-btn" onclick="showSection('orders', this)">Order</button>
+                <button class="nav-btn" onclick="showSection('keys', this)">Game Key</button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="sidebar-logout" onclick="logoutAdmin()">Logout</button>
+            </div>
+        </aside>
+
+        <main class="page">
+            <section id="section-dashboard" class="admin-section active">
+                <div class="top-nav fade-up">
+                    <div class="top-nav-left">
+                        <div class="logo-badge">AE</div>
+                        <div class="nav-title-wrap">
+                            <div class="nav-kicker">AE Game Store</div>
+                            <div class="nav-title">Modern Admin Dashboard</div>
+                        </div>
+                    </div>
+
+                    <div class="nav-actions">
+                        <div class="nav-chip">
+                            <span class="chip-dot"></span>
+                            <span>Admin Session Active</span>
+                        </div>
+                        <button class="logout-btn" onclick="logoutAdmin()">Logout</button>
+                    </div>
                 </div>
-                <button class="logout-btn" onclick="logoutAdmin()">Logout</button>
-            </div>
-        </div>
 
-        <div class="hero fade-up delay-1">
-            <div class="hero-row">
-                <div class="hero-content">
-                    <div class="hero-badge">AE GAME STORE • ADMIN DASHBOARD</div>
-                    <h1>Kelola store kamu dengan tampilan yang lebih modern dan enak dipakai</h1>
-                    <p>
-                        Pantau produk, stok key, dan order masuk dalam satu dashboard yang lebih clean,
-                        lebih ringan dilihat, dan tetap nyaman dipakai untuk kerja harian.
-                    </p>
+                <div class="hero fade-up delay-1">
+                    <div class="hero-row">
+                        <div class="hero-content">
+                            <div class="hero-badge">AE GAME STORE • ADMIN DASHBOARD</div>
+                            <h1>Kelola store kamu dengan tampilan yang lebih modern dan enak dipakai</h1>
+                            <p>
+                                Pantau produk, stok key, dan order masuk dalam satu dashboard yang lebih clean,
+                                lebih ringan dilihat, dan tetap nyaman dipakai untuk kerja harian.
+                            </p>
+                        </div>
+
+                        <div class="hero-actions">
+                            <button class="logout-btn"
+                                onclick="loadProducts(); loadKeyProductOptions(); loadKeys(); loadOrders();">
+                                Refresh Semua
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="hero-mini">
+                        <div class="mini-pill">Live Data Admin</div>
+                        <div class="mini-pill">Minimal UI</div>
+                        <div class="mini-pill">Smooth Animation</div>
+                        <div class="mini-pill">Protected Access</div>
+                    </div>
                 </div>
 
-                <div class="hero-actions">
-                    <button class="logout-btn"
-                        onclick="loadProducts(); loadKeyProductOptions(); loadKeys(); loadOrders();">
-                        Refresh Semua
-                    </button>
-                </div>
-            </div>
+                <div class="stats fade-up delay-2">
+                    <div class="stat-card">
+                        <div class="stat-top">
+                            <div class="stat-label">Total Key</div>
+                            <div class="stat-icon">🔑</div>
+                        </div>
+                        <div class="stat-value" id="totalKeyStat">0</div>
+                        <div class="stat-note">Seluruh key yang tersimpan di database.</div>
+                    </div>
 
-            <div class="hero-mini">
-                <div class="mini-pill">Live Data Admin</div>
-                <div class="mini-pill">Minimal UI</div>
-                <div class="mini-pill">Smooth Animation</div>
-                <div class="mini-pill">Protected Access</div>
-            </div>
-        </div>
+                    <div class="stat-card">
+                        <div class="stat-top">
+                            <div class="stat-label">Key Available</div>
+                            <div class="stat-icon">✅</div>
+                        </div>
+                        <div class="stat-value" id="availableKeyStat">0</div>
+                        <div class="stat-note">Stok key aktif yang belum dipakai.</div>
+                    </div>
 
-        <div class="stats fade-up delay-2">
-            <div class="stat-card">
-                <div class="stat-top">
-                    <div class="stat-label">Total Key</div>
-                    <div class="stat-icon">🔑</div>
-                </div>
-                <div class="stat-value" id="totalKeyStat">0</div>
-                <div class="stat-note">Seluruh key yang tersimpan di database.</div>
-            </div>
+                    <div class="stat-card">
+                        <div class="stat-top">
+                            <div class="stat-label">Total Order</div>
+                            <div class="stat-icon">🧾</div>
+                        </div>
+                        <div class="stat-value" id="totalOrderStat">0</div>
+                        <div class="stat-note">Jumlah order yang tercatat di sistem.</div>
+                    </div>
 
-            <div class="stat-card">
-                <div class="stat-top">
-                    <div class="stat-label">Key Available</div>
-                    <div class="stat-icon">✅</div>
-                </div>
-                <div class="stat-value" id="availableKeyStat">0</div>
-                <div class="stat-note">Stok key aktif yang belum dipakai.</div>
-            </div>
+                    <div class="stat-card">
+                        <div class="stat-top">
+                            <div class="stat-label">Total Produk</div>
+                            <div class="stat-icon">📦</div>
+                        </div>
+                        <div class="stat-value" id="totalProductStat">0</div>
+                        <div class="stat-note">Semua produk yang tersedia di panel admin.</div>
+                    </div>
 
-            <div class="stat-card">
-                <div class="stat-top">
-                    <div class="stat-label">Total Order</div>
-                    <div class="stat-icon">🧾</div>
-                </div>
-                <div class="stat-value" id="totalOrderStat">0</div>
-                <div class="stat-note">Jumlah order yang tercatat di sistem.</div>
-            </div>
+                    <div class="stat-card">
+                        <div class="stat-top">
+                            <div class="stat-label">Produk Hampir Habis</div>
+                            <div class="stat-icon">⚠️</div>
+                        </div>
+                        <div class="stat-value" id="lowStockStat">0</div>
+                        <div class="stat-note">Produk dengan stok < 5</div>
+                        </div>
+                    </div>
 
-            <div class="stat-card">
-                <div class="stat-top">
-                    <div class="stat-label">Total Produk</div>
-                    <div class="stat-icon">📦</div>
-                </div>
-                <div class="stat-value" id="totalProductStat">0</div>
-                <div class="stat-note">Semua produk yang tersedia di panel admin.</div>
-            </div>
-        </div>
+                    <div class="stat-card">
+                        <div class="stat-top">
+                            <div class="stat-label">Produk Hampir Habis</div>
+                            <div class="stat-icon">⚠️</div>
+                        </div>
+                        <div class="stat-value" id="lowStockStat">0</div>
+                        <div class="stat-note">Produk dengan stok < 5</div>
+                        </div>
 
-        <div class="stat-card">
-            <div class="stat-top">
-                <div class="stat-label">Produk Hampir Habis</div>
-                <div class="stat-icon">⚠️</div>
-            </div>
-            <div class="stat-value" id="lowStockStat">0</div>
-            <div class="stat-note">Produk dengan stok < 5</div>
-            </div>
+            </section>
 
             <div class="dashboard-grid">
                 <div class="left-stack">
-                    <div class="card fade-up delay-3">
-                        <div class="card-header">
-                            <div class="card-title-wrap">
-                                <h2>Kelola Produk</h2>
-                                <p class="card-subtitle">
-                                    Tambahkan, edit, aktifkan, nonaktifkan, atau hapus produk dari store dengan lebih
-                                    cepat.
-                                </p>
-                            </div>
-                            <div class="section-badge">Product Manager</div>
-                        </div>
-
-                        <div class="toolbar">
-                            <input type="hidden" id="editingProductId">
-                            <div class="field"><input type="text" id="productGame"
-                                    placeholder="Game, contoh: Delta Force">
-                            </div>
-                            <div class="field"><input type="text" id="productBrand" placeholder="Brand, contoh: Aorus">
-                            </div>
-                            <div class="field"><input type="text" id="productDuration"
-                                    placeholder="Durasi, contoh: 1 Hari">
-                            </div>
-                            <div class="field"><input type="text" id="productPrice" placeholder="Harga, contoh: 30000">
-                            </div>
-                        </div>
-
-                        <div class="toolbar compact">
-                            <div class="btn-group">
-                                <button id="saveProductBtn" onclick="saveProduct()">Tambah Produk</button>
-                                <button class="ghost-btn" onclick="resetProductForm()">Reset Form</button>
-                                <button class="ghost-btn" onclick="loadProducts()">Refresh Produk</button>
-                            </div>
-                        </div>
-
-                        <div class="info-row">
-                            <div class="info" id="productStatusText">Memuat daftar produk...</div>
-                        </div>
-
-                        <div class="table-wrap">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th style="width: 70px;">ID</th>
-                                        <th>Game</th>
-                                        <th>Brand</th>
-                                        <th>Durasi</th>
-                                        <th>Harga</th>
-                                        <th>Status</th>
-                                        <th style="width: 220px;">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="productTableBody"></tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="card fade-up delay-4">
-                        <div class="card-header">
-                            <div class="card-title-wrap">
-                                <h2>Daftar Order</h2>
-                                <p class="card-subtitle">
-                                    Lihat transaksi masuk, filter pembayaran dan pengiriman, lalu copy detail order
-                                    dengan
-                                    cepat.
-                                </p>
-                            </div>
-                            <div class="section-badge">Order Monitor</div>
-                        </div>
-
-                        <div class="toolbar">
-                            <div class="field-wide">
-                                <input type="text" id="orderSearchInput"
-                                    placeholder="Cari order id / nama / kontak / game / produk">
+                    <section id="section-products" class="admin-section">
+                        <div class="card fade-up delay-3">
+                            <div class="card-header">
+                                <div class="card-title-wrap">
+                                    <h2>Kelola Produk</h2>
+                                    <p class="card-subtitle">
+                                        Tambahkan, edit, aktifkan, nonaktifkan, atau hapus produk dari store dengan
+                                        lebih cepat.
+                                    </p>
+                                </div>
+                                <div class="section-badge">Product Manager</div>
                             </div>
 
-                            <div class="field">
-                                <select id="paymentFilter" onchange="applyOrderFilters()">
-                                    <option value="">Semua Pembayaran</option>
-                                    <option value="pending">Pending</option>
-                                    <option value="paid">Paid</option>
-                                    <option value="expired">Expired</option>
-                                </select>
+                            <div class="toolbar">
+                                <input type="hidden" id="editingProductId">
+                                <div class="field"><input type="text" id="productGame"
+                                        placeholder="Game, contoh: Delta Force"></div>
+                                <div class="field"><input type="text" id="productBrand"
+                                        placeholder="Brand, contoh: Aorus"></div>
+                                <div class="field"><input type="text" id="productDuration"
+                                        placeholder="Durasi, contoh: 1 Hari"></div>
+                                <div class="field"><input type="text" id="productPrice"
+                                        placeholder="Harga, contoh: 30000"></div>
                             </div>
 
-                            <div class="field">
-                                <select id="deliveryFilter" onchange="applyOrderFilters()">
-                                    <option value="">Semua Pengiriman</option>
-                                    <option value="waiting_payment">Waiting Payment</option>
-                                    <option value="delivered">Delivered</option>
-                                    <option value="manual">Manual</option>
-                                    <option value="cancelled">Cancelled</option>
-                                </select>
+                            <div class="toolbar compact">
+                                <div class="btn-group">
+                                    <button id="saveProductBtn" onclick="saveProduct()">Tambah Produk</button>
+                                    <button class="ghost-btn" onclick="resetProductForm()">Reset Form</button>
+                                    <button class="ghost-btn" onclick="loadProducts()">Refresh Produk</button>
+                                </div>
                             </div>
 
-                            <div class="btn-group">
-                                <button onclick="loadOrders()">Refresh Order</button>
+                            <div class="info-row">
+                                <div class="info" id="productStatusText">Memuat daftar produk...</div>
+                            </div>
+
+                            <div class="table-wrap">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 70px;">ID</th>
+                                            <th>Game</th>
+                                            <th>Brand</th>
+                                            <th>Durasi</th>
+                                            <th>Harga</th>
+                                            <th>Status</th>
+                                            <th style="width: 220px;">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="productTableBody"></tbody>
+                                </table>
                             </div>
                         </div>
+                    </section>
 
-                        <div class="info-row">
-                            <div class="info" id="orderStatusText">Memuat daftar order...</div>
-                        </div>
+                    <section id="section-orders" class="admin-section">
+                        <div class="card fade-up delay-4">
+                            <div class="card-header">
+                                <div class="card-title-wrap">
+                                    <h2>Daftar Order</h2>
+                                    <p class="card-subtitle">
+                                        Lihat transaksi masuk, filter pembayaran dan pengiriman, lalu copy detail order
+                                        dengan cepat.
+                                    </p>
+                                </div>
+                                <div class="section-badge">Order Monitor</div>
+                            </div>
 
-                        <div class="table-wrap">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Order ID</th>
-                                        <th>Nama</th>
-                                        <th>Kontak</th>
-                                        <th>Game</th>
-                                        <th>Produk</th>
-                                        <th>Harga</th>
-                                        <th>Pembayaran</th>
-                                        <th>Pengiriman</th>
-                                        <th>Game Key</th>
-                                        <th>Waktu</th>
-                                        <th style="width: 160px;">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="orderTableBody"></tbody>
-                            </table>
+                            <div class="toolbar">
+                                <div class="field-wide">
+                                    <input type="text" id="orderSearchInput"
+                                        placeholder="Cari order id / nama / kontak / game / produk">
+                                </div>
+
+                                <div class="field">
+                                    <select id="paymentFilter" onchange="applyOrderFilters()">
+                                        <option value="">Semua Pembayaran</option>
+                                        <option value="pending">Pending</option>
+                                        <option value="paid">Paid</option>
+                                        <option value="expired">Expired</option>
+                                    </select>
+                                </div>
+
+                                <div class="field">
+                                    <select id="deliveryFilter" onchange="applyOrderFilters()">
+                                        <option value="">Semua Pengiriman</option>
+                                        <option value="waiting_payment">Waiting Payment</option>
+                                        <option value="delivered">Delivered</option>
+                                        <option value="manual">Manual</option>
+                                        <option value="cancelled">Cancelled</option>
+                                    </select>
+                                </div>
+
+                                <div class="btn-group">
+                                    <button onclick="loadOrders()">Refresh Order</button>
+                                </div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info" id="orderStatusText">Memuat daftar order...</div>
+                            </div>
+
+                            <div class="table-wrap">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Order ID</th>
+                                            <th>Nama</th>
+                                            <th>Kontak</th>
+                                            <th>Game</th>
+                                            <th>Produk</th>
+                                            <th>Harga</th>
+                                            <th>Pembayaran</th>
+                                            <th>Pengiriman</th>
+                                            <th>Game Key</th>
+                                            <th>Waktu</th>
+                                            <th style="width: 160px;">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="orderTableBody"></tbody>
+                                </table>
+                            </div>
                         </div>
-                    </div>
+                    </section>
                 </div>
 
                 <div class="right-stack">
-                    <div class="card fade-up delay-5">
-                        <div class="card-header">
-                            <div class="card-title-wrap">
-                                <h2>Tambah Game Key</h2>
-                                <p class="card-subtitle">
-                                    Tambahkan key satuan atau bulk untuk setiap produk yang aktif di store kamu.
-                                </p>
+                    <section id="section-keys" class="admin-section">
+                        <div class="card fade-up delay-5">
+                            <div class="card-header">
+                                <div class="card-title-wrap">
+                                    <h2>Tambah Game Key</h2>
+                                    <p class="card-subtitle">
+                                        Tambahkan key satuan atau bulk untuk setiap produk yang aktif di store kamu.
+                                    </p>
+                                </div>
+                                <div class="section-badge">Key Stock</div>
                             </div>
-                            <div class="section-badge">Key Stock</div>
-                        </div>
 
-                        <div class="toolbar">
-                            <div class="field-wide">
-                                <select id="keyProductSelect"></select>
+                            <div class="toolbar">
+                                <div class="field-wide">
+                                    <select id="keyProductSelect"></select>
+                                </div>
+                            </div>
+
+                            <div class="toolbar">
+                                <div class="field-wide">
+                                    <input type="text" id="singleKeyInput"
+                                        placeholder="Masukkan 1 game key, contoh: KEY-AAA-111">
+                                </div>
+                                <div class="btn-group">
+                                    <button onclick="addSingleKey()">Tambah 1 Key</button>
+                                </div>
+                            </div>
+
+                            <div class="toolbar">
+                                <div class="field-wide" style="flex: 1 1 100%;">
+                                    <textarea id="bulkKeyInput"
+                                        placeholder="Masukkan banyak key, satu key per baris&#10;Contoh:&#10;KEY-AAA-111&#10;KEY-BBB-222&#10;KEY-CCC-333"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="toolbar compact">
+                                <div class="btn-group">
+                                    <button onclick="addBulkKeys()">Tambah Bulk Key</button>
+                                    <button class="ghost-btn" onclick="loadKeys()">Refresh Key</button>
+                                </div>
+                            </div>
+
+                            <div class="info-row">
+                                <div class="info" id="keyStatusText">Memuat daftar key...</div>
+                            </div>
+
+                            <div class="table-wrap">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 90px;">ID</th>
+                                            <th>Produk</th>
+                                            <th>Key</th>
+                                            <th style="width: 180px;">Status</th>
+                                            <th style="width: 140px;">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="keyTableBody"></tbody>
+                                </table>
                             </div>
                         </div>
-
-                        <div class="toolbar">
-                            <div class="field-wide">
-                                <input type="text" id="singleKeyInput"
-                                    placeholder="Masukkan 1 game key, contoh: KEY-AAA-111">
-                            </div>
-                            <div class="btn-group">
-                                <button onclick="addSingleKey()">Tambah 1 Key</button>
-                            </div>
-                        </div>
-
-                        <div class="toolbar">
-                            <div class="field-wide" style="flex: 1 1 100%;">
-                                <textarea id="bulkKeyInput"
-                                    placeholder="Masukkan banyak key, satu key per baris&#10;Contoh:&#10;KEY-AAA-111&#10;KEY-BBB-222&#10;KEY-CCC-333"></textarea>
-                            </div>
-                        </div>
-
-                        <div class="toolbar compact">
-                            <div class="btn-group">
-                                <button onclick="addBulkKeys()">Tambah Bulk Key</button>
-                                <button class="ghost-btn" onclick="loadKeys()">Refresh Key</button>
-                            </div>
-                        </div>
-
-                        <div class="info-row">
-                            <div class="info" id="keyStatusText">Memuat daftar key...</div>
-                        </div>
-
-                        <div class="table-wrap">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th style="width: 90px;">ID</th>
-                                        <th>Produk</th>
-                                        <th>Key</th>
-                                        <th style="width: 180px;">Status</th>
-                                        <th style="width: 140px;">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="keyTableBody"></tbody>
-                            </table>
-                        </div>
-                    </div>
+                    </section>
                 </div>
             </div>
-        </div>
+        </main>
+    </div>
 
-        <script>
-            let allOrders = [];
+    <script>
+        let allOrders = [];
+        function showSection(sectionName, buttonEl = null) {
+            const sections = document.querySelectorAll(".admin-section");
+            sections.forEach(section => section.classList.remove("active"));
 
-            function formatRupiah(num) {
-                return "Rp " + Number(num || 0).toLocaleString("id-ID");
+            const target = document.getElementById(`section-${sectionName}`);
+            if (target) {
+                target.classList.add("active");
             }
 
-            function formatTanggal(dateString) {
-                if (!dateString) return "-";
-                return new Date(dateString).toLocaleString("id-ID");
+            const navButtons = document.querySelectorAll(".nav-btn");
+            navButtons.forEach(btn => btn.classList.remove("active"));
+
+            if (buttonEl) {
+                buttonEl.classList.add("active");
             }
 
-            function escapeHtml(value) {
-                return String(value ?? "")
-                    .replace(/&/g, "&amp;")
-                    .replace(/</g, "&lt;")
-                    .replace(/>/g, "&gt;")
-                    .replace(/"/g, "&quot;")
-                    .replace(/'/g, "&#39;");
+            if (sectionName === "products") {
+                loadProducts();
             }
 
-            function orderBadge(status) {
-                const s = (status || "").toLowerCase();
-                return `<span class="badge ${s}">${escapeHtml(status || "-")}</span>`;
+            if (sectionName === "orders") {
+                loadOrders();
             }
 
-            function deliveryBadge(status) {
-                const s = (status || "").toLowerCase();
-                return `<span class="badge ${s}">${escapeHtml(status || "-")}</span>`;
+            if (sectionName === "keys") {
+                loadKeys();
+                loadKeyProductOptions();
             }
 
-            function activeBadge(active) {
-                if (Number(active) === 1) {
-                    return `<span class="badge available">Active</span>`;
+            if (sectionName === "dashboard") {
+                loadProducts();
+                loadOrders();
+                loadKeys();
+                loadKeyProductOptions();
+                if (typeof loadStockSummary === "function") {
+                    loadStockSummary();
                 }
-                return `<span class="badge used">Inactive</span>`;
+            }
+        }
+
+        function formatRupiah(num) {
+            return "Rp " + Number(num || 0).toLocaleString("id-ID");
+        }
+
+        function formatTanggal(dateString) {
+            if (!dateString) return "-";
+            return new Date(dateString).toLocaleString("id-ID");
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+        }
+
+        function orderBadge(status) {
+            const s = (status || "").toLowerCase();
+            return `<span class="badge ${s}">${escapeHtml(status || "-")}</span>`;
+        }
+
+        function deliveryBadge(status) {
+            const s = (status || "").toLowerCase();
+            return `<span class="badge ${s}">${escapeHtml(status || "-")}</span>`;
+        }
+
+        function activeBadge(active) {
+            if (Number(active) === 1) {
+                return `<span class="badge available">Active</span>`;
+            }
+            return `<span class="badge used">Inactive</span>`;
+        }
+
+        function keyBadge(used) {
+            if (Number(used) === 1) {
+                return `<span class="badge used">Used</span>`;
+            }
+            return `<span class="badge available">Available</span>`;
+        }
+
+        function updateKeyStats(keys) {
+            const total = keys.length;
+            const available = keys.filter(item => Number(item.used) === 0).length;
+
+            document.getElementById("totalKeyStat").innerText = total;
+            document.getElementById("availableKeyStat").innerText = available;
+        }
+
+        function updateOrderStats(orders) {
+            document.getElementById("totalOrderStat").innerText = orders.length;
+        }
+
+        function getCsrfToken() {
+            const match = document.cookie.match(/(?:^|; )admin_csrf=([^;]+)/);
+            return match ? decodeURIComponent(match[1]) : "";
+        }
+
+        function copyToClipboard(text) {
+            if (!text) {
+                alert("Tidak ada data untuk dicopy.");
+                return;
             }
 
-            function keyBadge(used) {
-                if (Number(used) === 1) {
-                    return `<span class="badge used">Used</span>`;
-                }
-                return `<span class="badge available">Available</span>`;
-            }
+            navigator.clipboard.writeText(text)
+                .then(() => {
+                    alert("Berhasil dicopy!");
+                })
+                .catch(() => {
+                    alert("Gagal copy.");
+                });
+        }
 
-            function updateKeyStats(keys) {
-                const total = keys.length;
-                const available = keys.filter(item => Number(item.used) === 0).length;
+        async function loadKeys() {
+            const statusText = document.getElementById("keyStatusText");
+            const tableBody = document.getElementById("keyTableBody");
 
-                document.getElementById("totalKeyStat").innerText = total;
-                document.getElementById("availableKeyStat").innerText = available;
-            }
+            statusText.innerText = "Memuat daftar key...";
+            tableBody.innerHTML = "";
 
-            function updateOrderStats(orders) {
-                document.getElementById("totalOrderStat").innerText = orders.length;
-            }
+            try {
+                const res = await fetch("/keys");
 
-            function getCsrfToken() {
-                const match = document.cookie.match(/(?:^|; )admin_csrf=([^;]+)/);
-                return match ? decodeURIComponent(match[1]) : "";
-            }
-
-            function copyToClipboard(text) {
-                if (!text) {
-                    alert("Tidak ada data untuk dicopy.");
+                if (res.status === 401) {
+                    window.location.href = "/ae-auth";
                     return;
                 }
 
-                navigator.clipboard.writeText(text)
-                    .then(() => {
-                        alert("Berhasil dicopy!");
-                    })
-                    .catch(() => {
-                        alert("Gagal copy.");
-                    });
-            }
+                const data = await res.json();
 
-            async function loadKeys() {
-                const statusText = document.getElementById("keyStatusText");
-                const tableBody = document.getElementById("keyTableBody");
-
-                statusText.innerText = "Memuat daftar key...";
-                tableBody.innerHTML = "";
-
-                try {
-                    const res = await fetch("/keys");
-
-                    if (res.status === 401) {
-                        window.location.href = "/ae-auth";
-                        return;
-                    }
-
-                    const data = await res.json();
-
-                    if (!Array.isArray(data) || data.length === 0) {
-                        updateKeyStats([]);
-                        statusText.innerText = "Belum ada key.";
-                        tableBody.innerHTML = `
+                if (!Array.isArray(data) || data.length === 0) {
+                    updateKeyStats([]);
+                    statusText.innerText = "Belum ada key.";
+                    tableBody.innerHTML = `
                         <tr>
                             <td colspan="5" class="empty">Belum ada key di database.</td>
                         </tr>
                     `;
-                        return;
-                    }
+                    return;
+                }
 
-                    updateKeyStats(data);
-                    statusText.innerText = `Total key: ${data.length}`;
+                updateKeyStats(data);
+                statusText.innerText = `Total key: ${data.length}`;
 
-                    tableBody.innerHTML = data.map(item => `
+                tableBody.innerHTML = data.map(item => `
                     <tr>
                         <td>${item.id}</td>
                         <td>${escapeHtml(item.game || "-")} - ${escapeHtml(item.brand || "-")} - ${escapeHtml(item.duration || "-")}</td>
@@ -1113,214 +1314,214 @@
                         </td>
                     </tr>
                 `).join("");
-                } catch (err) {
-                    statusText.innerText = "Gagal memuat daftar key.";
-                    tableBody.innerHTML = `
+            } catch (err) {
+                statusText.innerText = "Gagal memuat daftar key.";
+                tableBody.innerHTML = `
                     <tr>
                         <td colspan="5" class="empty">Terjadi error saat mengambil key.</td>
                     </tr>
                 `;
-                }
+            }
+        }
+
+        async function addSingleKey() {
+            const productId = document.getElementById("keyProductSelect").value;
+            const input = document.getElementById("singleKeyInput");
+            const key = input.value.trim();
+
+            if (!productId) {
+                alert("Pilih produk dulu.");
+                return;
             }
 
-            async function addSingleKey() {
-                const productId = document.getElementById("keyProductSelect").value;
-                const input = document.getElementById("singleKeyInput");
-                const key = input.value.trim();
-
-                if (!productId) {
-                    alert("Pilih produk dulu.");
-                    return;
-                }
-
-                if (!key) {
-                    alert("Isi 1 key dulu.");
-                    return;
-                }
-
-                try {
-                    const res = await fetch("/keys", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "x-csrf-token": getCsrfToken()
-                        },
-                        body: JSON.stringify({
-                            product_id: productId,
-                            key
-                        })
-                    });
-
-                    const data = await res.json();
-
-                    if (res.status === 401) {
-                        window.location.href = "/ae-auth";
-                        return;
-                    }
-
-                    if (!res.ok) {
-                        alert(data.message || "Gagal menambahkan key");
-                        return;
-                    }
-
-                    alert(data.message || "Key berhasil ditambahkan");
-                    input.value = "";
-                    loadKeys();
-                } catch (err) {
-                    alert("Terjadi error server saat menambahkan key");
-                }
+            if (!key) {
+                alert("Isi 1 key dulu.");
+                return;
             }
 
-            async function addBulkKeys() {
-                const productId = document.getElementById("keyProductSelect").value;
-                const input = document.getElementById("bulkKeyInput");
-                const rawValue = input.value.trim();
+            try {
+                const res = await fetch("/keys", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "x-csrf-token": getCsrfToken()
+                    },
+                    body: JSON.stringify({
+                        product_id: productId,
+                        key
+                    })
+                });
 
-                if (!productId) {
-                    alert("Pilih produk dulu.");
+                const data = await res.json();
+
+                if (res.status === 401) {
+                    window.location.href = "/ae-auth";
                     return;
                 }
 
-                if (!rawValue) {
-                    alert("Isi key dulu.");
+                if (!res.ok) {
+                    alert(data.message || "Gagal menambahkan key");
                     return;
                 }
 
-                const keys = rawValue
-                    .split("\n")
-                    .map(item => item.trim())
-                    .filter(item => item.length > 0);
+                alert(data.message || "Key berhasil ditambahkan");
+                input.value = "";
+                loadKeys();
+            } catch (err) {
+                alert("Terjadi error server saat menambahkan key");
+            }
+        }
 
-                if (keys.length === 0) {
-                    alert("Tidak ada key valid.");
-                    return;
-                }
+        async function addBulkKeys() {
+            const productId = document.getElementById("keyProductSelect").value;
+            const input = document.getElementById("bulkKeyInput");
+            const rawValue = input.value.trim();
 
-                try {
-                    const res = await fetch("/keys/bulk", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "x-csrf-token": getCsrfToken()
-                        },
-                        body: JSON.stringify({
-                            product_id: productId,
-                            keys
-                        })
-                    });
-
-                    const data = await res.json();
-
-                    if (res.status === 401) {
-                        window.location.href = "/ae-auth";
-                        return;
-                    }
-
-                    if (!res.ok) {
-                        alert(data.message || "Gagal menambahkan bulk key");
-                        return;
-                    }
-
-                    alert(data.message || "Bulk key berhasil ditambahkan");
-                    input.value = "";
-                    loadKeys();
-                } catch (err) {
-                    alert("Terjadi error server saat menambahkan bulk key");
-                }
+            if (!productId) {
+                alert("Pilih produk dulu.");
+                return;
             }
 
-            async function loadOrders() {
-                const statusText = document.getElementById("orderStatusText");
-                const tableBody = document.getElementById("orderTableBody");
+            if (!rawValue) {
+                alert("Isi key dulu.");
+                return;
+            }
 
-                statusText.innerText = "Memuat daftar order...";
-                tableBody.innerHTML = "";
+            const keys = rawValue
+                .split("\n")
+                .map(item => item.trim())
+                .filter(item => item.length > 0);
 
-                try {
-                    const res = await fetch("/orders");
+            if (keys.length === 0) {
+                alert("Tidak ada key valid.");
+                return;
+            }
 
-                    if (res.status === 401) {
-                        window.location.href = "/ae-auth";
-                        return;
-                    }
+            try {
+                const res = await fetch("/keys/bulk", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "x-csrf-token": getCsrfToken()
+                    },
+                    body: JSON.stringify({
+                        product_id: productId,
+                        keys
+                    })
+                });
 
-                    const data = await res.json();
+                const data = await res.json();
 
-                    if (!Array.isArray(data) || data.length === 0) {
-                        allOrders = [];
-                        updateOrderStats([]);
-                        statusText.innerText = "Belum ada order.";
-                        tableBody.innerHTML = `
+                if (res.status === 401) {
+                    window.location.href = "/ae-auth";
+                    return;
+                }
+
+                if (!res.ok) {
+                    alert(data.message || "Gagal menambahkan bulk key");
+                    return;
+                }
+
+                alert(data.message || "Bulk key berhasil ditambahkan");
+                input.value = "";
+                loadKeys();
+            } catch (err) {
+                alert("Terjadi error server saat menambahkan bulk key");
+            }
+        }
+
+        async function loadOrders() {
+            const statusText = document.getElementById("orderStatusText");
+            const tableBody = document.getElementById("orderTableBody");
+
+            statusText.innerText = "Memuat daftar order...";
+            tableBody.innerHTML = "";
+
+            try {
+                const res = await fetch("/orders");
+
+                if (res.status === 401) {
+                    window.location.href = "/ae-auth";
+                    return;
+                }
+
+                const data = await res.json();
+
+                if (!Array.isArray(data) || data.length === 0) {
+                    allOrders = [];
+                    updateOrderStats([]);
+                    statusText.innerText = "Belum ada order.";
+                    tableBody.innerHTML = `
                         <tr>
                             <td colspan="11" class="empty">Belum ada transaksi.</td>
                         </tr>
                     `;
-                        return;
-                    }
+                    return;
+                }
 
-                    allOrders = data;
-                    applyOrderFilters();
-                } catch (err) {
-                    statusText.innerText = "Gagal memuat daftar order.";
-                    tableBody.innerHTML = `
+                allOrders = data;
+                applyOrderFilters();
+            } catch (err) {
+                statusText.innerText = "Gagal memuat daftar order.";
+                tableBody.innerHTML = `
                     <tr>
                         <td colspan="11" class="empty">Terjadi error saat mengambil order.</td>
                     </tr>
                 `;
-                }
             }
+        }
 
-            function applyOrderFilters() {
-                const statusText = document.getElementById("orderStatusText");
-                const tableBody = document.getElementById("orderTableBody");
+        function applyOrderFilters() {
+            const statusText = document.getElementById("orderStatusText");
+            const tableBody = document.getElementById("orderTableBody");
 
-                const searchValue = document.getElementById("orderSearchInput").value.trim().toLowerCase();
-                const paymentValue = document.getElementById("paymentFilter").value;
-                const deliveryValue = document.getElementById("deliveryFilter").value;
+            const searchValue = document.getElementById("orderSearchInput").value.trim().toLowerCase();
+            const paymentValue = document.getElementById("paymentFilter").value;
+            const deliveryValue = document.getElementById("deliveryFilter").value;
 
-                const filteredOrders = allOrders.filter(item => {
-                    const matchesSearch =
-                        !searchValue ||
-                        String(item.id || "").toLowerCase().includes(searchValue) ||
-                        String(item.name || "").toLowerCase().includes(searchValue) ||
-                        String(item.contact || "").toLowerCase().includes(searchValue) ||
-                        String(item.game || "").toLowerCase().includes(searchValue) ||
-                        String(item.product || "").toLowerCase().includes(searchValue);
+            const filteredOrders = allOrders.filter(item => {
+                const matchesSearch =
+                    !searchValue ||
+                    String(item.id || "").toLowerCase().includes(searchValue) ||
+                    String(item.name || "").toLowerCase().includes(searchValue) ||
+                    String(item.contact || "").toLowerCase().includes(searchValue) ||
+                    String(item.game || "").toLowerCase().includes(searchValue) ||
+                    String(item.product || "").toLowerCase().includes(searchValue);
 
-                    const matchesPayment =
-                        !paymentValue || String(item.payment_status || "") === paymentValue;
+                const matchesPayment =
+                    !paymentValue || String(item.payment_status || "") === paymentValue;
 
-                    const matchesDelivery =
-                        !deliveryValue || String(item.delivery_status || "") === deliveryValue;
+                const matchesDelivery =
+                    !deliveryValue || String(item.delivery_status || "") === deliveryValue;
 
-                    return matchesSearch && matchesPayment && matchesDelivery;
-                });
+                return matchesSearch && matchesPayment && matchesDelivery;
+            });
 
-                updateOrderStats(filteredOrders);
-                statusText.innerText = `Menampilkan ${filteredOrders.length} dari ${allOrders.length} order`;
+            updateOrderStats(filteredOrders);
+            statusText.innerText = `Menampilkan ${filteredOrders.length} dari ${allOrders.length} order`;
 
-                if (filteredOrders.length === 0) {
-                    tableBody.innerHTML = `
+            if (filteredOrders.length === 0) {
+                tableBody.innerHTML = `
                     <tr>
                         <td colspan="11" class="empty">Tidak ada order yang cocok dengan filter.</td>
                     </tr>
                 `;
-                    return;
-                }
+                return;
+            }
 
-                tableBody.innerHTML = filteredOrders.map(item => {
-                    const safeId = JSON.stringify(String(item.id || ""));
-                    const safeName = JSON.stringify(String(item.name || ""));
-                    const safeContact = JSON.stringify(String(item.contact || ""));
-                    const safeGame = JSON.stringify(String(item.game || ""));
-                    const safeProduct = JSON.stringify(String(item.product || ""));
-                    const safePayment = JSON.stringify(String(item.payment_status || ""));
-                    const safeDelivery = JSON.stringify(String(item.delivery_status || ""));
-                    const safeGameKey = JSON.stringify(String(item.gameKey || item.gamekey || ""));
-                    const isProtected = String(item.payment_status || "").toLowerCase() === "paid" ||
-                        String(item.delivery_status || "").toLowerCase() === "delivered";
+            tableBody.innerHTML = filteredOrders.map(item => {
+                const safeId = JSON.stringify(String(item.id || ""));
+                const safeName = JSON.stringify(String(item.name || ""));
+                const safeContact = JSON.stringify(String(item.contact || ""));
+                const safeGame = JSON.stringify(String(item.game || ""));
+                const safeProduct = JSON.stringify(String(item.product || ""));
+                const safePayment = JSON.stringify(String(item.payment_status || ""));
+                const safeDelivery = JSON.stringify(String(item.delivery_status || ""));
+                const safeGameKey = JSON.stringify(String(item.gameKey || item.gamekey || ""));
+                const isProtected = String(item.payment_status || "").toLowerCase() === "paid" ||
+                    String(item.delivery_status || "").toLowerCase() === "delivered";
 
-                    return `
+                return `
                     <tr>
                         <td>${escapeHtml(item.id || "-")}</td>
                         <td>${escapeHtml(item.name || "-")}</td>
@@ -1345,11 +1546,11 @@
                         </td>
                     </tr>
                 `;
-                }).join("");
-            }
+            }).join("");
+        }
 
-            function copyOrderDetail(id, name, contact, game, product, price, payment, delivery, key) {
-                const text = `
+        function copyOrderDetail(id, name, contact, game, product, price, payment, delivery, key) {
+            const text = `
 Order ID : ${id}
 Nama     : ${name}
 Kontak   : ${contact}
@@ -1363,126 +1564,126 @@ Status Pengiriman : ${delivery}
 Game Key : ${key || "-"}
             `.trim();
 
-                copyToClipboard(text);
-            }
+            copyToClipboard(text);
+        }
 
-            async function deleteOrder(orderId) {
-                const yakin = confirm("Yakin mau hapus order ini?");
-                if (!yakin) return;
+        async function deleteOrder(orderId) {
+            const yakin = confirm("Yakin mau hapus order ini?");
+            if (!yakin) return;
 
-                try {
-                    const res = await fetch(`/orders/${encodeURIComponent(orderId)}`, {
-                        method: "DELETE",
-                        headers: {
-                            "x-csrf-token": getCsrfToken()
-                        }
-                    });
-
-                    const data = await res.json();
-
-                    if (res.status === 401) {
-                        window.location.href = "/ae-auth";
-                        return;
+            try {
+                const res = await fetch(`/orders/${encodeURIComponent(orderId)}`, {
+                    method: "DELETE",
+                    headers: {
+                        "x-csrf-token": getCsrfToken()
                     }
+                });
 
-                    if (!res.ok) {
-                        alert(data.message || "Gagal menghapus order");
-                        return;
-                    }
+                const data = await res.json();
 
-                    alert(data.message || "Order berhasil dihapus");
-                    loadOrders();
-                } catch (err) {
-                    alert("Terjadi error server saat menghapus order");
-                }
-            }
-
-            async function deleteKey(id) {
-                const yakin = confirm("Yakin mau hapus key ini?");
-                if (!yakin) return;
-
-                try {
-                    const res = await fetch(`/keys/${id}`, {
-                        method: "DELETE",
-                        headers: {
-                            "x-csrf-token": getCsrfToken()
-                        }
-                    });
-
-                    const data = await res.json();
-
-                    if (res.status === 401) {
-                        window.location.href = "/ae-auth";
-                        return;
-                    }
-
-                    if (!res.ok) {
-                        alert(data.message || "Gagal menghapus key");
-                        return;
-                    }
-
-                    alert("Key berhasil dihapus");
-                    loadKeys();
-                } catch (err) {
-                    alert("Terjadi error server saat menghapus key");
-                }
-            }
-
-            async function logoutAdmin() {
-                try {
-                    await fetch("/admin-logout", {
-                        method: "POST",
-                        headers: {
-                            "x-csrf-token": getCsrfToken()
-                        }
-                    });
-
+                if (res.status === 401) {
                     window.location.href = "/ae-auth";
-                } catch (err) {
-                    alert("Gagal logout");
+                    return;
                 }
+
+                if (!res.ok) {
+                    alert(data.message || "Gagal menghapus order");
+                    return;
+                }
+
+                alert(data.message || "Order berhasil dihapus");
+                loadOrders();
+            } catch (err) {
+                alert("Terjadi error server saat menghapus order");
             }
+        }
 
-            function updateProductStats(products) {
-                document.getElementById("totalProductStat").innerText = products.length;
-            }
+        async function deleteKey(id) {
+            const yakin = confirm("Yakin mau hapus key ini?");
+            if (!yakin) return;
 
-            async function loadProducts() {
-                const statusText = document.getElementById("productStatusText");
-                const tableBody = document.getElementById("productTableBody");
-
-                statusText.innerText = "Memuat daftar produk...";
-                tableBody.innerHTML = "";
-
-                try {
-                    const res = await fetch("/products");
-
-                    if (res.status === 401) {
-                        window.location.href = "/ae-auth";
-                        return;
+            try {
+                const res = await fetch(`/keys/${id}`, {
+                    method: "DELETE",
+                    headers: {
+                        "x-csrf-token": getCsrfToken()
                     }
+                });
 
-                    const data = await res.json();
+                const data = await res.json();
 
-                    if (!Array.isArray(data) || data.length === 0) {
-                        updateProductStats([]);
-                        statusText.innerText = "Belum ada produk.";
-                        tableBody.innerHTML = `
+                if (res.status === 401) {
+                    window.location.href = "/ae-auth";
+                    return;
+                }
+
+                if (!res.ok) {
+                    alert(data.message || "Gagal menghapus key");
+                    return;
+                }
+
+                alert("Key berhasil dihapus");
+                loadKeys();
+            } catch (err) {
+                alert("Terjadi error server saat menghapus key");
+            }
+        }
+
+        async function logoutAdmin() {
+            try {
+                await fetch("/admin-logout", {
+                    method: "POST",
+                    headers: {
+                        "x-csrf-token": getCsrfToken()
+                    }
+                });
+
+                window.location.href = "/ae-auth";
+            } catch (err) {
+                alert("Gagal logout");
+            }
+        }
+
+        function updateProductStats(products) {
+            document.getElementById("totalProductStat").innerText = products.length;
+        }
+
+        async function loadProducts() {
+            const statusText = document.getElementById("productStatusText");
+            const tableBody = document.getElementById("productTableBody");
+
+            statusText.innerText = "Memuat daftar produk...";
+            tableBody.innerHTML = "";
+
+            try {
+                const res = await fetch("/products");
+
+                if (res.status === 401) {
+                    window.location.href = "/ae-auth";
+                    return;
+                }
+
+                const data = await res.json();
+
+                if (!Array.isArray(data) || data.length === 0) {
+                    updateProductStats([]);
+                    statusText.innerText = "Belum ada produk.";
+                    tableBody.innerHTML = `
                         <tr>
                             <td colspan="7" class="empty">Belum ada produk di database.</td>
                         </tr>
                     `;
-                        return;
-                    }
+                    return;
+                }
 
-                    updateProductStats(data);
-                    statusText.innerText = `Total produk: ${data.length}`;
+                updateProductStats(data);
+                statusText.innerText = `Total produk: ${data.length}`;
 
-                    tableBody.innerHTML = data.map(item => {
-                        const safeGame = JSON.stringify(String(item.game || ""));
-                        const safeBrand = JSON.stringify(String(item.brand || ""));
-                        const safeDuration = JSON.stringify(String(item.duration || ""));
-                        return `
+                tableBody.innerHTML = data.map(item => {
+                    const safeGame = JSON.stringify(String(item.game || ""));
+                    const safeBrand = JSON.stringify(String(item.brand || ""));
+                    const safeDuration = JSON.stringify(String(item.duration || ""));
+                    return `
                         <tr>
                             <td>${item.id}</td>
                             <td>${escapeHtml(item.game)}</td>
@@ -1499,228 +1700,228 @@ Game Key : ${key || "-"}
                             </td>
                         </tr>
                     `;
-                    }).join("");
-                } catch (err) {
-                    statusText.innerText = "Gagal memuat daftar produk.";
-                    tableBody.innerHTML = `
+                }).join("");
+            } catch (err) {
+                statusText.innerText = "Gagal memuat daftar produk.";
+                tableBody.innerHTML = `
                     <tr>
                         <td colspan="7" class="empty">Terjadi error saat mengambil produk.</td>
                     </tr>
                 `;
-                }
             }
+        }
 
-            async function loadStockSummary() {
-                try {
-                    const res = await fetch("/stock-summary");
+        async function loadStockSummary() {
+            try {
+                const res = await fetch("/stock-summary");
 
-                    if (res.status === 401) {
-                        window.location.href = "/ae-auth";
-                        return;
-                    }
-
-                    const data = await res.json();
-
-                    let lowStock = 0;
-
-                    data.forEach(item => {
-                        const stock = Number(item.available_keys || 0);
-
-                        if (stock < 5) {
-                            lowStock++;
-                        }
-                    });
-
-                    document.getElementById("lowStockStat").innerText = lowStock;
-                } catch (err) {
-                    console.error("Gagal load stock summary");
-                }
-            }
-
-            async function saveProduct() {
-                const editingId = document.getElementById("editingProductId").value;
-                const game = document.getElementById("productGame").value.trim();
-                const brand = document.getElementById("productBrand").value.trim();
-                const duration = document.getElementById("productDuration").value.trim();
-                const price = document.getElementById("productPrice").value.trim();
-
-                if (!game || !brand || !duration || !price) {
-                    alert("Semua data produk wajib diisi.");
+                if (res.status === 401) {
+                    window.location.href = "/ae-auth";
                     return;
                 }
 
-                const isEditMode = !!editingId;
-                const url = isEditMode ? `/products/${editingId}` : "/products";
-                const method = isEditMode ? "PUT" : "POST";
+                const data = await res.json();
 
-                try {
-                    const res = await fetch(url, {
-                        method,
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({
-                            game,
-                            brand,
-                            duration,
-                            price
-                        })
-                    });
+                let lowStock = 0;
 
-                    const data = await res.json();
+                data.forEach(item => {
+                    const stock = Number(item.available_keys || 0);
 
-                    if (res.status === 401) {
-                        window.location.href = "/ae-auth";
-                        return;
+                    if (stock < 5) {
+                        lowStock++;
                     }
-
-                    if (!res.ok) {
-                        alert(data.message || "Gagal menyimpan produk");
-                        return;
-                    }
-
-                    alert(data.message || "Produk berhasil disimpan");
-                    resetProductForm();
-                    loadProducts();
-                    loadKeyProductOptions();
-                } catch (err) {
-                    alert("Terjadi error server saat menyimpan produk");
-                }
-            }
-
-            async function deleteProduct(id) {
-                const yakin = confirm("Yakin mau hapus produk ini?");
-                if (!yakin) return;
-
-                try {
-                    const res = await fetch(`/products/${id}`, {
-                        method: "DELETE"
-                    });
-
-                    const data = await res.json();
-
-                    if (res.status === 401) {
-                        window.location.href = "/ae-auth";
-                        return;
-                    }
-
-                    if (!res.ok) {
-                        alert(data.message || "Gagal menghapus produk");
-                        return;
-                    }
-
-                    alert("Produk berhasil dihapus");
-                    resetProductForm();
-                    loadProducts();
-                    loadKeyProductOptions();
-                } catch (err) {
-                    alert("Terjadi error server saat menghapus produk");
-                }
-            }
-
-            async function toggleProductActive(id, active) {
-                const yakin = confirm(
-                    active === 1
-                        ? "Aktifkan produk ini?"
-                        : "Nonaktifkan produk ini?"
-                );
-
-                if (!yakin) return;
-
-                try {
-                    const res = await fetch(`/products/${id}/toggle-active`, {
-                        method: "PATCH",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({ active })
-                    });
-
-                    const data = await res.json();
-
-                    if (res.status === 401) {
-                        window.location.href = "/ae-auth";
-                        return;
-                    }
-
-                    if (!res.ok) {
-                        alert(data.message || "Gagal mengubah status produk");
-                        return;
-                    }
-
-                    alert(data.message || "Status produk berhasil diubah");
-                    loadProducts();
-                    loadKeyProductOptions();
-                } catch (err) {
-                    alert("Terjadi error server saat mengubah status produk");
-                }
-            }
-
-            function resetProductForm() {
-                document.getElementById("editingProductId").value = "";
-                document.getElementById("productGame").value = "";
-                document.getElementById("productBrand").value = "";
-                document.getElementById("productDuration").value = "";
-                document.getElementById("productPrice").value = "";
-                document.getElementById("saveProductBtn").innerText = "Tambah Produk";
-            }
-
-            function editProduct(id, game, brand, duration, price) {
-                document.getElementById("editingProductId").value = id;
-                document.getElementById("productGame").value = game;
-                document.getElementById("productBrand").value = brand;
-                document.getElementById("productDuration").value = duration;
-                document.getElementById("productPrice").value = price;
-                document.getElementById("saveProductBtn").innerText = "Update Produk";
-
-                window.scrollTo({
-                    top: 0,
-                    behavior: "smooth"
                 });
+
+                document.getElementById("lowStockStat").innerText = lowStock;
+            } catch (err) {
+                console.error("Gagal load stock summary");
+            }
+        }
+
+        async function saveProduct() {
+            const editingId = document.getElementById("editingProductId").value;
+            const game = document.getElementById("productGame").value.trim();
+            const brand = document.getElementById("productBrand").value.trim();
+            const duration = document.getElementById("productDuration").value.trim();
+            const price = document.getElementById("productPrice").value.trim();
+
+            if (!game || !brand || !duration || !price) {
+                alert("Semua data produk wajib diisi.");
+                return;
             }
 
-            async function loadKeyProductOptions() {
-                const select = document.getElementById("keyProductSelect");
+            const isEditMode = !!editingId;
+            const url = isEditMode ? `/products/${editingId}` : "/products";
+            const method = isEditMode ? "PUT" : "POST";
 
-                try {
-                    const res = await fetch("/products");
+            try {
+                const res = await fetch(url, {
+                    method,
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        game,
+                        brand,
+                        duration,
+                        price
+                    })
+                });
 
-                    if (res.status === 401) {
-                        window.location.href = "/ae-auth";
-                        return;
-                    }
+                const data = await res.json();
 
-                    const data = await res.json();
-
-                    select.innerHTML = "";
-
-                    if (!Array.isArray(data) || data.length === 0) {
-                        const option = document.createElement("option");
-                        option.value = "";
-                        option.textContent = "Belum ada produk";
-                        select.appendChild(option);
-                        return;
-                    }
-
-                    data.forEach(item => {
-                        const option = document.createElement("option");
-                        option.value = item.id;
-                        option.textContent = `${item.game} - ${item.brand} - ${item.duration}`;
-                        select.appendChild(option);
-                    });
-                } catch (err) {
-                    select.innerHTML = `<option value="">Gagal memuat produk</option>`;
+                if (res.status === 401) {
+                    window.location.href = "/ae-auth";
+                    return;
                 }
+
+                if (!res.ok) {
+                    alert(data.message || "Gagal menyimpan produk");
+                    return;
+                }
+
+                alert(data.message || "Produk berhasil disimpan");
+                resetProductForm();
+                loadProducts();
+                loadKeyProductOptions();
+            } catch (err) {
+                alert("Terjadi error server saat menyimpan produk");
             }
+        }
 
-            document.getElementById("orderSearchInput").addEventListener("input", applyOrderFilters);
+        async function deleteProduct(id) {
+            const yakin = confirm("Yakin mau hapus produk ini?");
+            if (!yakin) return;
 
-            loadProducts();
-            loadKeyProductOptions();
-            loadKeys();
-            loadOrders();
-            loadStockSummary();
-        </script>
+            try {
+                const res = await fetch(`/products/${id}`, {
+                    method: "DELETE"
+                });
+
+                const data = await res.json();
+
+                if (res.status === 401) {
+                    window.location.href = "/ae-auth";
+                    return;
+                }
+
+                if (!res.ok) {
+                    alert(data.message || "Gagal menghapus produk");
+                    return;
+                }
+
+                alert("Produk berhasil dihapus");
+                resetProductForm();
+                loadProducts();
+                loadKeyProductOptions();
+            } catch (err) {
+                alert("Terjadi error server saat menghapus produk");
+            }
+        }
+
+        async function toggleProductActive(id, active) {
+            const yakin = confirm(
+                active === 1
+                    ? "Aktifkan produk ini?"
+                    : "Nonaktifkan produk ini?"
+            );
+
+            if (!yakin) return;
+
+            try {
+                const res = await fetch(`/products/${id}/toggle-active`, {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ active })
+                });
+
+                const data = await res.json();
+
+                if (res.status === 401) {
+                    window.location.href = "/ae-auth";
+                    return;
+                }
+
+                if (!res.ok) {
+                    alert(data.message || "Gagal mengubah status produk");
+                    return;
+                }
+
+                alert(data.message || "Status produk berhasil diubah");
+                loadProducts();
+                loadKeyProductOptions();
+            } catch (err) {
+                alert("Terjadi error server saat mengubah status produk");
+            }
+        }
+
+        function resetProductForm() {
+            document.getElementById("editingProductId").value = "";
+            document.getElementById("productGame").value = "";
+            document.getElementById("productBrand").value = "";
+            document.getElementById("productDuration").value = "";
+            document.getElementById("productPrice").value = "";
+            document.getElementById("saveProductBtn").innerText = "Tambah Produk";
+        }
+
+        function editProduct(id, game, brand, duration, price) {
+            document.getElementById("editingProductId").value = id;
+            document.getElementById("productGame").value = game;
+            document.getElementById("productBrand").value = brand;
+            document.getElementById("productDuration").value = duration;
+            document.getElementById("productPrice").value = price;
+            document.getElementById("saveProductBtn").innerText = "Update Produk";
+
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+        }
+
+        async function loadKeyProductOptions() {
+            const select = document.getElementById("keyProductSelect");
+
+            try {
+                const res = await fetch("/products");
+
+                if (res.status === 401) {
+                    window.location.href = "/ae-auth";
+                    return;
+                }
+
+                const data = await res.json();
+
+                select.innerHTML = "";
+
+                if (!Array.isArray(data) || data.length === 0) {
+                    const option = document.createElement("option");
+                    option.value = "";
+                    option.textContent = "Belum ada produk";
+                    select.appendChild(option);
+                    return;
+                }
+
+                data.forEach(item => {
+                    const option = document.createElement("option");
+                    option.value = item.id;
+                    option.textContent = `${item.game} - ${item.brand} - ${item.duration}`;
+                    select.appendChild(option);
+                });
+            } catch (err) {
+                select.innerHTML = `<option value="">Gagal memuat produk</option>`;
+            }
+        }
+
+        document.getElementById("orderSearchInput").addEventListener("input", applyOrderFilters);
+
+        loadProducts();
+        loadKeyProductOptions();
+        loadKeys();
+        loadOrders();
+        loadStockSummary();
+    </script>
 </body>
 
 </html>
