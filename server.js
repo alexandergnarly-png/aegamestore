@@ -702,6 +702,30 @@ app.get("/orders", requireAdminAuth, async (req, res) => {
     }
 });
 
+app.get("/stock-summary", requireAdminAuth, async (req, res) => {
+    try {
+        const result = await query(`
+            SELECT 
+                p.id,
+                p.game,
+                p.brand,
+                p.duration,
+                COUNT(k.id) FILTER (WHERE k.used = 0) AS available_keys
+            FROM products p
+            LEFT JOIN keys k ON p.id = k.product_id
+            GROUP BY p.id
+            ORDER BY p.id DESC
+        `);
+
+        return res.json(result.rows);
+    } catch (err) {
+        console.error("ERROR STOCK SUMMARY:", err);
+        return res.status(500).json({
+            message: "Gagal ambil stok"
+        });
+    }
+});
+
 app.delete("/orders/:id", requireAdminAuth, requireAdminCsrf, async (req, res) => {
     const orderId = String(req.params.id || "").trim();
 
