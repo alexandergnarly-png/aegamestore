@@ -72,14 +72,24 @@
             top: 0;
             height: 100vh;
             border-right: 1px solid rgba(255, 255, 255, 0.06);
+            transition: width 0.22s ease, padding 0.22s ease;
+            overflow: hidden;
         }
 
         .sidebar-brand {
             display: flex;
             align-items: center;
+            justify-content: space-between;
             gap: 12px;
             padding: 6px 4px 14px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .sidebar-brand-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
         }
 
         .sidebar-logo {
@@ -92,6 +102,11 @@
             background: linear-gradient(135deg, #2563eb, #38bdf8);
             font-weight: bold;
             box-shadow: 0 12px 24px rgba(37, 99, 235, 0.25);
+            flex-shrink: 0;
+        }
+
+        .sidebar-text {
+            min-width: 0;
         }
 
         .sidebar-kicker {
@@ -125,11 +140,13 @@
             font-weight: bold;
             cursor: pointer;
             box-shadow: none;
+            transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
         }
 
         .nav-btn:hover {
             background: rgba(255, 255, 255, 0.08);
             box-shadow: none;
+            transform: translateY(-1px);
         }
 
         .nav-btn.active {
@@ -159,6 +176,68 @@
             box-shadow: none;
         }
 
+        .sidebar-toggle,
+        .page-sidebar-toggle {
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+            border-radius: 12px;
+            padding: 10px 12px;
+            cursor: pointer;
+            box-shadow: none;
+            font-weight: bold;
+            min-width: 44px;
+        }
+
+        .page-sidebar-toggle {
+            background: #eff6ff;
+            color: #2563eb;
+            border: 1px solid #bfdbfe;
+            margin-right: 6px;
+        }
+
+        .sidebar-collapsed .sidebar {
+            width: 92px;
+            padding: 22px 10px;
+        }
+
+        .sidebar-collapsed .sidebar-text {
+            display: none;
+        }
+
+        .sidebar-collapsed .nav-btn,
+        .sidebar-collapsed .sidebar-logout {
+            font-size: 0;
+            text-align: center;
+            padding-left: 12px;
+            padding-right: 12px;
+        }
+
+        .sidebar-collapsed .nav-btn::before,
+        .sidebar-collapsed .sidebar-logout::before {
+            font-size: 16px;
+        }
+
+        .sidebar-collapsed .nav-btn[data-section="dashboard"]::before {
+            content: "🏠";
+        }
+
+        .sidebar-collapsed .nav-btn[data-section="products"]::before {
+            content: "📦";
+        }
+
+        .sidebar-collapsed .nav-btn[data-section="orders"]::before {
+            content: "🧾";
+        }
+
+        .sidebar-collapsed .nav-btn[data-section="keys"]::before {
+            content: "🔑";
+        }
+
+        .sidebar-collapsed .sidebar-logout::before {
+            content: "⎋";
+        }
+
         .admin-section {
             display: none;
         }
@@ -168,6 +247,7 @@
         }
 
         .page {
+            width: 100%;
             max-width: 1380px;
             margin: 0 auto;
             padding: 24px 18px 40px;
@@ -389,7 +469,7 @@
 
         .stats {
             display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-template-columns: repeat(5, minmax(0, 1fr));
             gap: 14px;
             margin: 18px 0 22px;
         }
@@ -767,23 +847,9 @@
             .dashboard-grid {
                 grid-template-columns: 1fr;
             }
-        }
-
-        @media (max-width: 980px) {
-            .hero h1 {
-                font-size: 32px;
-            }
 
             .stats {
                 grid-template-columns: 1fr 1fr;
-            }
-
-            .card-title-wrap h2 {
-                font-size: 24px;
-            }
-
-            .top-nav {
-                top: 8px;
             }
         }
 
@@ -796,6 +862,38 @@
                 width: 100%;
                 height: auto;
                 position: relative;
+            }
+
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .card-title-wrap h2 {
+                font-size: 24px;
+            }
+
+            .top-nav {
+                top: 8px;
+            }
+
+            body.sidebar-collapsed .sidebar {
+                width: 100%;
+                padding: 22px 18px;
+            }
+
+            body.sidebar-collapsed .sidebar-text {
+                display: block;
+            }
+
+            body.sidebar-collapsed .nav-btn,
+            body.sidebar-collapsed .sidebar-logout {
+                font-size: inherit;
+                text-align: left;
+            }
+
+            body.sidebar-collapsed .nav-btn::before,
+            body.sidebar-collapsed .sidebar-logout::before {
+                content: none;
             }
         }
 
@@ -835,18 +933,23 @@
     <div class="admin-shell">
         <aside class="sidebar">
             <div class="sidebar-brand">
-                <div class="sidebar-logo">AE</div>
-                <div>
-                    <div class="sidebar-kicker">AE Game Store</div>
-                    <div class="sidebar-title">Admin Panel</div>
+                <div class="sidebar-brand-left">
+                    <div class="sidebar-logo">AE</div>
+                    <div class="sidebar-text">
+                        <div class="sidebar-kicker">AE Game Store</div>
+                        <div class="sidebar-title">Admin Panel</div>
+                    </div>
                 </div>
+
+                <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
             </div>
 
             <nav class="sidebar-nav">
-                <button class="nav-btn active" onclick="showSection('dashboard', this)">Dashboard</button>
-                <button class="nav-btn" onclick="showSection('products', this)">Produk</button>
-                <button class="nav-btn" onclick="showSection('orders', this)">Order</button>
-                <button class="nav-btn" onclick="showSection('keys', this)">Game Key</button>
+                <button class="nav-btn active" data-section="dashboard"
+                    onclick="showSection('dashboard', this)">Dashboard</button>
+                <button class="nav-btn" data-section="products" onclick="showSection('products', this)">Produk</button>
+                <button class="nav-btn" data-section="orders" onclick="showSection('orders', this)">Order</button>
+                <button class="nav-btn" data-section="keys" onclick="showSection('keys', this)">Game Key</button>
             </nav>
 
             <div class="sidebar-footer">
@@ -858,6 +961,7 @@
             <section id="section-dashboard" class="admin-section active">
                 <div class="top-nav fade-up">
                     <div class="top-nav-left">
+                        <button class="page-sidebar-toggle" onclick="toggleSidebar()">☰</button>
                         <div class="logo-badge">AE</div>
                         <div class="nav-title-wrap">
                             <div class="nav-kicker">AE Game Store</div>
@@ -886,8 +990,7 @@
                         </div>
 
                         <div class="hero-actions">
-                            <button class="logout-btn"
-                                onclick="loadProducts(); loadKeyProductOptions(); loadKeys(); loadOrders();">
+                            <button class="logout-btn" onclick="refreshAllData()">
                                 Refresh Semua
                             </button>
                         </div>
@@ -1148,6 +1251,11 @@
 
     <script>
         let allOrders = [];
+
+        function toggleSidebar() {
+            document.body.classList.toggle("sidebar-collapsed");
+        }
+
         function showSection(sectionName, buttonEl = null) {
             const sections = document.querySelectorAll(".admin-section");
             sections.forEach(section => section.classList.remove("active"));
@@ -1162,6 +1270,9 @@
 
             if (buttonEl) {
                 buttonEl.classList.add("active");
+            } else {
+                const autoBtn = document.querySelector(`.nav-btn[data-section="${sectionName}"]`);
+                if (autoBtn) autoBtn.classList.add("active");
             }
 
             if (sectionName === "products") {
@@ -1180,6 +1291,14 @@
             if (sectionName === "dashboard") {
                 loadStockSummary();
             }
+        }
+
+        function refreshAllData() {
+            loadProducts();
+            loadKeyProductOptions();
+            loadKeys();
+            loadOrders();
+            loadStockSummary();
         }
 
         function formatRupiah(num) {
@@ -1710,7 +1829,6 @@ Game Key : ${key || "-"}
 
                 data.forEach(item => {
                     const stock = Number(item.available_keys || 0);
-
                     if (stock < 5) {
                         lowStock++;
                     }
@@ -1898,9 +2016,14 @@ Game Key : ${key || "-"}
             }
         }
 
-        document.getElementById("orderSearchInput").addEventListener("input", applyOrderFilters);
+        document.addEventListener("DOMContentLoaded", () => {
+            const searchInput = document.getElementById("orderSearchInput");
+            if (searchInput) {
+                searchInput.addEventListener("input", applyOrderFilters);
+            }
 
-        showSection("dashboard");
+            showSection("dashboard");
+        });
     </script>
 </body>
 
