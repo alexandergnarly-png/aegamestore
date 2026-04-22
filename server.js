@@ -388,7 +388,7 @@ app.post("/create-order", orderLimiter, async (req, res) => {
 
         res.cookie(`order_token_${orderId}`, accessToken, {
             httpOnly: true,
-            sameSite: "strict",
+            sameSite: "lax",
             secure: process.env.NODE_ENV === "production",
             maxAge: 1000 * 60 * 60 * 2,
             path: "/"
@@ -446,7 +446,7 @@ app.post("/create-order", orderLimiter, async (req, res) => {
                 body: JSON.stringify({
                     external_id: orderId,
                     amount: price,
-                    payer_email: "test@example.com",
+                    payer_email: cleanContact.includes("@") ? cleanContact : "no-reply@aestore.com",
                     description: `Pembayaran untuk ${game} - ${productName}`,
                     success_redirect_url: `${baseUrl}/result?order_id=${orderId}`,
                     failure_redirect_url: `${baseUrl}/result?order_id=${orderId}`
