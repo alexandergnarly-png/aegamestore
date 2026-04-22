@@ -1029,200 +1029,199 @@
                             <div class="stat-icon">⚠️</div>
                         </div>
                         <div class="stat-value" id="lowStockStat">0</div>
-                        <div class="stat-note">Produk dengan stok < 5</div>
-                        </div>
+                        <div class="stat-note">Produk dengan stok &lt; 5</div>
                     </div>
+                </div>
             </section>
 
-            <div class="dashboard-grid">
-                <div class="left-stack">
-                    <div class="card fade-up delay-3">
-                        <div class="card-header">
-                            <div class="card-title-wrap">
-                                <h2>Kelola Produk</h2>
-                                <p class="card-subtitle">
-                                    Tambahkan, edit, aktifkan, nonaktifkan, atau hapus produk dari store dengan
-                                    lebih cepat.
-                                </p>
-                            </div>
-                            <div class="section-badge">Product Manager</div>
+            <section id="section-products" class="admin-section">
+                <div class="card fade-up delay-3">
+                    <div class="card-header">
+                        <div class="card-title-wrap">
+                            <h2>Kelola Produk</h2>
+                            <p class="card-subtitle">
+                                Tambahkan, edit, aktifkan, nonaktifkan, atau hapus produk dari store dengan
+                                lebih cepat.
+                            </p>
                         </div>
+                        <div class="section-badge">Product Manager</div>
+                    </div>
 
-                        <div class="toolbar">
-                            <input type="hidden" id="editingProductId">
-                            <div class="field"><input type="text" id="productGame"
-                                    placeholder="Game, contoh: Delta Force"></div>
-                            <div class="field"><input type="text" id="productBrand" placeholder="Brand, contoh: Aorus">
-                            </div>
-                            <div class="field"><input type="text" id="productDuration"
-                                    placeholder="Durasi, contoh: 1 Hari"></div>
-                            <div class="field"><input type="text" id="productPrice" placeholder="Harga, contoh: 30000">
-                            </div>
+                    <div class="toolbar">
+                        <input type="hidden" id="editingProductId">
+                        <div class="field"><input type="text" id="productGame" placeholder="Game, contoh: Delta Force">
                         </div>
-
-                        <div class="toolbar compact">
-                            <div class="btn-group">
-                                <button id="saveProductBtn" onclick="saveProduct()">Tambah Produk</button>
-                                <button class="ghost-btn" onclick="resetProductForm()">Reset Form</button>
-                                <button class="ghost-btn" onclick="loadProducts()">Refresh Produk</button>
-                            </div>
+                        <div class="field"><input type="text" id="productBrand" placeholder="Brand, contoh: Aorus">
                         </div>
-
-                        <div class="info-row">
-                            <div class="info" id="productStatusText">Memuat daftar produk...</div>
+                        <div class="field"><input type="text" id="productDuration" placeholder="Durasi, contoh: 1 Hari">
                         </div>
-
-                        <div class="table-wrap">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th style="width: 70px;">ID</th>
-                                        <th>Game</th>
-                                        <th>Brand</th>
-                                        <th>Durasi</th>
-                                        <th>Harga</th>
-                                        <th>Status</th>
-                                        <th style="width: 220px;">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="productTableBody"></tbody>
-                            </table>
+                        <div class="field"><input type="text" id="productPrice" placeholder="Harga, contoh: 30000">
                         </div>
                     </div>
-                    </section>
 
-                    <section id="section-orders" class="admin-section">
-                        <div class="card fade-up delay-4">
-                            <div class="card-header">
-                                <div class="card-title-wrap">
-                                    <h2>Daftar Order</h2>
-                                    <p class="card-subtitle">
-                                        Lihat transaksi masuk, filter pembayaran dan pengiriman, lalu copy detail order
-                                        dengan cepat.
-                                    </p>
-                                </div>
-                                <div class="section-badge">Order Monitor</div>
-                            </div>
-
-                            <div class="toolbar">
-                                <div class="field-wide">
-                                    <input type="text" id="orderSearchInput"
-                                        placeholder="Cari order id / nama / kontak / game / produk">
-                                </div>
-
-                                <div class="field">
-                                    <select id="paymentFilter" onchange="applyOrderFilters()">
-                                        <option value="">Semua Pembayaran</option>
-                                        <option value="pending">Pending</option>
-                                        <option value="paid">Paid</option>
-                                        <option value="expired">Expired</option>
-                                    </select>
-                                </div>
-
-                                <div class="field">
-                                    <select id="deliveryFilter" onchange="applyOrderFilters()">
-                                        <option value="">Semua Pengiriman</option>
-                                        <option value="waiting_payment">Waiting Payment</option>
-                                        <option value="delivered">Delivered</option>
-                                        <option value="manual">Manual</option>
-                                        <option value="cancelled">Cancelled</option>
-                                    </select>
-                                </div>
-
-                                <div class="btn-group">
-                                    <button onclick="loadOrders()">Refresh Order</button>
-                                </div>
-                            </div>
-
-                            <div class="info-row">
-                                <div class="info" id="orderStatusText">Memuat daftar order...</div>
-                            </div>
-
-                            <div class="table-wrap">
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>Order ID</th>
-                                            <th>Nama</th>
-                                            <th>Kontak</th>
-                                            <th>Game</th>
-                                            <th>Produk</th>
-                                            <th>Harga</th>
-                                            <th>Pembayaran</th>
-                                            <th>Pengiriman</th>
-                                            <th>Game Key</th>
-                                            <th>Waktu</th>
-                                            <th style="width: 160px;">Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="orderTableBody"></tbody>
-                                </table>
-                            </div>
+                    <div class="toolbar compact">
+                        <div class="btn-group">
+                            <button id="saveProductBtn" onclick="saveProduct()">Tambah Produk</button>
+                            <button class="ghost-btn" onclick="resetProductForm()">Reset Form</button>
+                            <button class="ghost-btn" onclick="loadProducts()">Refresh Produk</button>
                         </div>
-                    </section>
+                    </div>
 
-                    <section id="section-keys" class="admin-section">
-                        <div class="card fade-up delay-5">
-                            <div class="card-header">
-                                <div class="card-title-wrap">
-                                    <h2>Tambah Game Key</h2>
-                                    <p class="card-subtitle">
-                                        Tambahkan key satuan atau bulk untuk setiap produk yang aktif di store kamu.
-                                    </p>
-                                </div>
-                                <div class="section-badge">Key Stock</div>
-                            </div>
+                    <div class="info-row">
+                        <div class="info" id="productStatusText">Memuat daftar produk...</div>
+                    </div>
 
-                            <div class="toolbar">
-                                <div class="field-wide">
-                                    <select id="keyProductSelect"></select>
-                                </div>
-                            </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 70px;">ID</th>
+                                    <th>Game</th>
+                                    <th>Brand</th>
+                                    <th>Durasi</th>
+                                    <th>Harga</th>
+                                    <th>Status</th>
+                                    <th style="width: 220px;">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
 
-                            <div class="toolbar">
-                                <div class="field-wide">
-                                    <input type="text" id="singleKeyInput"
-                                        placeholder="Masukkan 1 game key, contoh: KEY-AAA-111">
-                                </div>
-                                <div class="btn-group">
-                                    <button onclick="addSingleKey()">Tambah 1 Key</button>
-                                </div>
-                            </div>
-
-                            <div class="toolbar">
-                                <div class="field-wide" style="flex: 1 1 100%;">
-                                    <textarea id="bulkKeyInput"
-                                        placeholder="Masukkan banyak key, satu key per baris&#10;Contoh:&#10;KEY-AAA-111&#10;KEY-BBB-222&#10;KEY-CCC-333"></textarea>
-                                </div>
-                            </div>
-
-                            <div class="toolbar compact">
-                                <div class="btn-group">
-                                    <button onclick="addBulkKeys()">Tambah Bulk Key</button>
-                                    <button class="ghost-btn" onclick="loadKeys()">Refresh Key</button>
-                                </div>
-                            </div>
-
-                            <div class="info-row">
-                                <div class="info" id="keyStatusText">Memuat daftar key...</div>
-                            </div>
-
-                            <div class="table-wrap">
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th style="width: 90px;">ID</th>
-                                            <th>Produk</th>
-                                            <th>Key</th>
-                                            <th style="width: 180px;">Status</th>
-                                            <th style="width: 140px;">Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="keyTableBody"></tbody>
-                                </table>
-                            </div>
+            <section id="section-orders" class="admin-section">
+                <div class="card fade-up delay-4">
+                    <div class="card-header">
+                        <div class="card-title-wrap">
+                            <h2>Daftar Order</h2>
+                            <p class="card-subtitle">
+                                Lihat transaksi masuk, filter pembayaran dan pengiriman, lalu copy detail order
+                                dengan cepat.
+                            </p>
                         </div>
-                    </section>
+                        <div class="section-badge">Order Monitor</div>
+                    </div>
+
+                    <div class="toolbar">
+                        <div class="field-wide">
+                            <input type="text" id="orderSearchInput"
+                                placeholder="Cari order id / nama / kontak / game / produk">
+                        </div>
+
+                        <div class="field">
+                            <select id="paymentFilter" onchange="applyOrderFilters()">
+                                <option value="">Semua Pembayaran</option>
+                                <option value="pending">Pending</option>
+                                <option value="paid">Paid</option>
+                                <option value="expired">Expired</option>
+                            </select>
+                        </div>
+
+                        <div class="field">
+                            <select id="deliveryFilter" onchange="applyOrderFilters()">
+                                <option value="">Semua Pengiriman</option>
+                                <option value="waiting_payment">Waiting Payment</option>
+                                <option value="delivered">Delivered</option>
+                                <option value="manual">Manual</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+
+                        <div class="btn-group">
+                            <button onclick="loadOrders()">Refresh Order</button>
+                        </div>
+                    </div>
+
+                    <div class="info-row">
+                        <div class="info" id="orderStatusText">Memuat daftar order...</div>
+                    </div>
+
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Nama</th>
+                                    <th>Kontak</th>
+                                    <th>Game</th>
+                                    <th>Produk</th>
+                                    <th>Harga</th>
+                                    <th>Pembayaran</th>
+                                    <th>Pengiriman</th>
+                                    <th>Game Key</th>
+                                    <th>Waktu</th>
+                                    <th style="width: 160px;">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orderTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="section-keys" class="admin-section">
+                <div class="card fade-up delay-5">
+                    <div class="card-header">
+                        <div class="card-title-wrap">
+                            <h2>Tambah Game Key</h2>
+                            <p class="card-subtitle">
+                                Tambahkan key satuan atau bulk untuk setiap produk yang aktif di store kamu.
+                            </p>
+                        </div>
+                        <div class="section-badge">Key Stock</div>
+                    </div>
+
+                    <div class="toolbar">
+                        <div class="field-wide">
+                            <select id="keyProductSelect"></select>
+                        </div>
+                    </div>
+
+                    <div class="toolbar">
+                        <div class="field-wide">
+                            <input type="text" id="singleKeyInput"
+                                placeholder="Masukkan 1 game key, contoh: KEY-AAA-111">
+                        </div>
+                        <div class="btn-group">
+                            <button onclick="addSingleKey()">Tambah 1 Key</button>
+                        </div>
+                    </div>
+
+                    <div class="toolbar">
+                        <div class="field-wide" style="flex: 1 1 100%;">
+                            <textarea id="bulkKeyInput"
+                                placeholder="Masukkan banyak key, satu key per baris&#10;Contoh:&#10;KEY-AAA-111&#10;KEY-BBB-222&#10;KEY-CCC-333"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="toolbar compact">
+                        <div class="btn-group">
+                            <button onclick="addBulkKeys()">Tambah Bulk Key</button>
+                            <button class="ghost-btn" onclick="loadKeys()">Refresh Key</button>
+                        </div>
+                    </div>
+
+                    <div class="info-row">
+                        <div class="info" id="keyStatusText">Memuat daftar key...</div>
+                    </div>
+
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 90px;">ID</th>
+                                    <th>Produk</th>
+                                    <th>Key</th>
+                                    <th style="width: 180px;">Status</th>
+                                    <th style="width: 140px;">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="keyTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
         </main>
     </div>
 
