@@ -489,7 +489,7 @@ app.post("/create-order", orderLimiter, async (req, res) => {
     }
 });
 
-aapp.post("/xendit-webhook", async (req, res) => {
+app.post("/xendit-webhook", async (req, res) => {
     const callbackToken = String(req.headers["x-callback-token"] || "").trim();
 
     if (callbackToken !== String(process.env.XENDIT_CALLBACK_TOKEN || "").trim()) {
