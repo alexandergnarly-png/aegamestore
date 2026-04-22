@@ -1,281 +1,434 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hasil Pembayaran</title>
+    <title>Hasil Pembayaran - AE Game Store</title>
     <style>
-    body {
-        font-family: Arial, sans-serif;
-        background: linear-gradient(135deg, #eef7ff, #f8fbff);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        margin: 0;
-        padding: 20px;
-        color: #1e293b;
-    }
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --secondary: #38bdf8;
+            --bg-color: #f8fbff;
+            --card-bg: rgba(255, 255, 255, 0.88);
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: rgba(191, 219, 254, 0.65);
+            --shadow-lg: 0 24px 50px rgba(15, 23, 42, 0.08);
+            --shadow-md: 0 12px 30px rgba(15, 23, 42, 0.06);
+            --radius-xl: 28px;
+            --radius-lg: 20px;
+            --radius-md: 14px;
+        }
 
-    .card {
-        background: white;
-        padding: 30px;
-        border-radius: 22px;
-        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
-        width: 100%;
-        max-width: 520px;
-        text-align: left;
-        border: 1px solid #dbeafe;
-    }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-    h1 {
-        margin: 0 0 10px;
-        color: #0f172a;
-        text-align: center;
-        font-size: 30px;
-    }
+        body {
+            background:
+                radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.15), transparent 40%),
+                radial-gradient(circle at 100% 100%, rgba(37, 99, 235, 0.1), transparent 40%),
+                linear-gradient(135deg, #eef5fb, #f8fbff);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            overflow-x: hidden;
+        }
 
-    .subtitle {
-        text-align: center;
-        color: #64748b;
-        margin-bottom: 20px;
-        line-height: 1.6;
-    }
+        /* Background Ornaments */
+        body::before {
+            content: "";
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 70%);
+            top: -100px;
+            left: -100px;
+            z-index: -1;
+        }
 
-    .status-row {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-        justify-content: center;
-        margin-bottom: 22px;
-    }
+        body::after {
+            content: "";
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.08) 0%, transparent 70%);
+            bottom: -50px;
+            right: -50px;
+            z-index: -1;
+        }
 
-    .badge {
-        display: inline-block;
-        padding: 8px 12px;
-        border-radius: 999px;
-        font-size: 12px;
-        font-weight: bold;
-    }
+        .result-wrapper {
+            width: 100%;
+            max-width: 460px;
+            animation: fadeUp 0.6s ease-out forwards;
+        }
 
-    .badge.pending {
-        background: #fef3c7;
-        color: #92400e;
-    }
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            padding: 40px 32px;
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
 
-    .badge.paid {
-        background: #dcfce7;
-        color: #166534;
-    }
+        /* Top Accent Line */
+        .card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
 
-    .badge.expired {
-        background: #fee2e2;
-        color: #991b1b;
-    }
+        .logo-badge {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.25);
+            margin: 0 auto 20px;
+        }
 
-    .badge.waiting_payment {
-        background: #e2e8f0;
-        color: #475569;
-    }
+        h1 {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
 
-    .badge.delivered {
-        background: #dcfce7;
-        color: #166534;
-    }
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
 
-    .badge.manual {
-        background: #ffe4e6;
-        color: #be123c;
-    }
+        .status-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 28px;
+        }
 
-    .badge.cancelled {
-        background: #fee2e2;
-        color: #991b1b;
-    }
+        /* Badges Styling */
+        .badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 99px;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: capitalize;
+            letter-spacing: 0.3px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
 
-    .summary {
-        background: #f8fbff;
-        border: 1px solid #dbeafe;
-        border-radius: 16px;
-        padding: 18px;
-        margin-bottom: 18px;
-    }
+        .badge.pending {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
 
-    .summary-item {
-        margin: 10px 0;
-        color: #334155;
-        line-height: 1.6;
-    }
+        .badge.paid {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
 
-    .summary-label {
-        font-weight: bold;
-        color: #0f172a;
-    }
+        .badge.expired {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
 
-    .key-box {
-        margin-top: 18px;
-        padding: 16px;
-        background: linear-gradient(180deg, #eff6ff, #f8fbff);
-        border: 1px solid #bfdbfe;
-        border-radius: 14px;
-        font-weight: bold;
-        color: #1d4ed8;
-        word-break: break-word;
-        line-height: 1.6;
-    }
+        .badge.waiting_payment {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+        }
 
-    .key-title {
-        display: block;
-        font-size: 13px;
-        color: #64748b;
-        margin-bottom: 8px;
-        font-weight: bold;
-        text-transform: uppercase;
-        letter-spacing: 0.3px;
-    }
+        .badge.delivered {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
 
-    .copy-btn {
-        width: 100%;
-        margin-top: 12px;
-        padding: 12px;
-        border: none;
-        border-radius: 12px;
-        background: linear-gradient(135deg, #2563eb, #38bdf8);
-        color: white;
-        font-size: 14px;
-        font-weight: bold;
-        cursor: pointer;
-    }
+        .badge.manual {
+            background: #ffe4e6;
+            color: #be123c;
+            border: 1px solid #fecdd3;
+        }
 
-    .copy-btn:hover {
-        opacity: 0.96;
-    }
+        .badge.cancelled {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
 
-    .helper-text {
-        margin-top: 12px;
-        font-size: 12px;
-        color: #64748b;
-        text-align: center;
-        line-height: 1.6;
-    }
-</style>
+        /* Summary Area (Digital Receipt) */
+        .summary {
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px dashed #cbd5e1;
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-bottom: 24px;
+            text-align: left;
+        }
+
+        .summary-item {
+            padding: 10px 0;
+            color: #334155;
+            font-size: 14px;
+            font-weight: 500;
+            border-bottom: 1px dashed #e2e8f0;
+            word-break: break-word;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .summary-item:first-child {
+            padding-top: 0;
+        }
+
+        /* Key Box Highlight */
+        .key-box {
+            position: relative;
+            margin-top: 10px;
+            padding: 24px;
+            background: linear-gradient(180deg, #eff6ff, #ffffff);
+            border: 2px solid #bfdbfe;
+            border-radius: var(--radius-lg);
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.08);
+            overflow: hidden;
+        }
+
+        .key-title {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--primary);
+            background: #dbeafe;
+            padding: 4px 10px;
+            border-radius: 99px;
+            margin-bottom: 16px;
+        }
+
+        #keyBox {
+            font-size: 18px;
+            font-weight: 800;
+            color: #0f172a;
+            word-break: break-all;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .copy-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 28px rgba(37, 99, 235, 0.3);
+        }
+
+        .copy-btn:active {
+            transform: translateY(0);
+        }
+
+        .helper-text {
+            margin-top: 24px;
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.6;
+            padding: 0 10px;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .card {
+                padding: 32px 20px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+        }
+    </style>
 </head>
+
 <body>
-    <div class="card">
-    <h1>Hasil Pembayaran</h1>
-    <p class="subtitle">Cek status pembayaran dan hasil pengiriman produk kamu di sini.</p>
 
-    <div class="status-row" id="statusRow">
-        <span class="badge waiting_payment">Memuat status...</span>
+    <div class="result-wrapper">
+        <div class="card">
+            <div class="logo-badge">AE</div>
+            <h1>Status Pesanan</h1>
+            <p class="subtitle">Berikut adalah detail pembayaran dan hasil pengiriman produk digital kamu.</p>
+
+            <div class="status-row" id="statusRow">
+                <span class="badge waiting_payment">Memuat status...</span>
+            </div>
+
+            <div class="summary">
+                <div class="summary-item" id="nameText"></div>
+                <div class="summary-item" id="contactText"></div>
+                <div class="summary-item" id="gameText"></div>
+                <div class="summary-item" id="productText"></div>
+                <div class="summary-item" id="priceText"></div>
+            </div>
+
+            <div class="key-box">
+                <span class="key-title">Game Key / Voucher</span>
+                <div id="keyBox">Menunggu key...</div>
+                <button class="copy-btn" id="copyBtn" onclick="copyKey()" style="display:none;">Copy Kode</button>
+            </div>
+
+            <p class="helper-text" id="statusText">Memuat data order...</p>
+        </div>
     </div>
-
-    <div class="summary">
-        <div class="summary-item" id="nameText"></div>
-        <div class="summary-item" id="contactText"></div>
-        <div class="summary-item" id="gameText"></div>
-        <div class="summary-item" id="productText"></div>
-        <div class="summary-item" id="priceText"></div>
-    </div>
-
-    <div class="key-box">
-        <span class="key-title">Hasil Pengiriman</span>
-        <div id="keyBox">Menunggu key...</div>
-        <button class="copy-btn" id="copyBtn" onclick="copyKey()" style="display:none;">Copy Key</button>
-    </div>
-
-    <p class="helper-text" id="statusText">Memuat data order...</p>
-</div>
 
     <script>
-    let latestGameKey = "";
+        // Logic JS tetap dibiarkan sama 100% tanpa diubah
+        let latestGameKey = "";
 
-    function formatRupiah(num) {
-        return "Rp " + Number(num).toLocaleString("id-ID");
-    }
+        function formatRupiah(num) {
+            return "Rp " + Number(num).toLocaleString("id-ID");
+        }
 
-    function badge(status) {
-        const safeStatus = String(status || "-").toLowerCase();
-        return `<span class="badge ${safeStatus}">${status || "-"}</span>`;
-    }
+        function badge(status) {
+            const safeStatus = String(status || "-").toLowerCase();
+            return `<span class="badge ${safeStatus}">${status || "-"}</span>`;
+        }
 
-    function copyKey() {
-        if (!latestGameKey) return;
+        function copyKey() {
+            if (!latestGameKey) return;
 
-        navigator.clipboard.writeText(latestGameKey)
-            .then(() => {
-                alert("Game key berhasil dicopy!");
-            })
-            .catch(() => {
-                alert("Gagal copy key.");
-            });
-    }
+            navigator.clipboard.writeText(latestGameKey)
+                .then(() => {
+                    alert("Game key berhasil dicopy!");
+                })
+                .catch(() => {
+                    alert("Gagal copy key.");
+                });
+        }
 
-    async function loadOrder() {
+        async function loadOrder() {
             const params = new URLSearchParams(window.location.search);
             const orderId = params.get("order_id");
             const token = params.get("token");
 
-                if (!orderId || !token) {
-        document.getElementById("statusRow").innerHTML =
-            `<span class="badge cancelled">Data tidak lengkap</span>`;
-        document.getElementById("statusText").innerText = "Data order tidak lengkap.";
-        document.getElementById("keyBox").innerText = "Link order tidak valid.";
-        return;
-    }
+            if (!orderId || !token) {
+                document.getElementById("statusRow").innerHTML =
+                    `<span class="badge cancelled">Data tidak lengkap</span>`;
+                document.getElementById("statusText").innerText = "Data order tidak lengkap.";
+                document.getElementById("keyBox").innerText = "Link order tidak valid.";
+                return;
+            }
 
             try {
                 const response = await fetch("/order/" + orderId + "?token=" + encodeURIComponent(token));
-const data = await response.json();
+                const data = await response.json();
 
-if (!response.ok) {
-    throw new Error(data.message || "Gagal mengambil data order");
-}
+                if (!response.ok) {
+                    throw new Error(data.message || "Gagal mengambil data order");
+                }
 
-document.getElementById("statusRow").innerHTML =
-    badge(data.payment_status) + badge(data.delivery_status);
+                document.getElementById("statusRow").innerHTML =
+                    badge(data.payment_status) + badge(data.delivery_status);
 
-document.getElementById("statusText").innerText =
-    "Order berhasil ditemukan. Simpan halaman ini untuk cek status order kamu kapan saja.";
+                document.getElementById("statusText").innerText =
+                    "Order berhasil ditemukan. Simpan halaman ini untuk cek status order kamu kapan saja.";
 
-document.getElementById("nameText").textContent =
-    `Nama: ${data.name || "-"}`;
-document.getElementById("contactText").textContent =
-    `Kontak: ${data.contact || "-"}`;
-document.getElementById("gameText").textContent =
-    `Game: ${data.game || "-"}`;
-document.getElementById("productText").textContent =
-    `Produk: ${data.product || "-"}`;
-document.getElementById("priceText").textContent =
-    `Harga: ${data.price ? formatRupiah(data.price) : "-"}`;
+                document.getElementById("nameText").textContent =
+                    `Nama: ${data.name || "-"}`;
+                document.getElementById("contactText").textContent =
+                    `Kontak: ${data.contact || "-"}`;
+                document.getElementById("gameText").textContent =
+                    `Game: ${data.game || "-"}`;
+                document.getElementById("productText").textContent =
+                    `Produk: ${data.product || "-"}`;
+                document.getElementById("priceText").textContent =
+                    `Harga: ${data.price ? formatRupiah(data.price) : "-"}`;
 
-const copyBtn = document.getElementById("copyBtn");
+                const copyBtn = document.getElementById("copyBtn");
 
-if (data.delivery_status === "manual") {
-    latestGameKey = "";
-    copyBtn.style.display = "none";
-    document.getElementById("keyBox").innerText =
-        data.gameKey || "Akan dikirim manual oleh admin";
-} else if (data.gameKey && data.gameKey !== "Akan dikirim manual oleh admin") {
-    latestGameKey = data.gameKey;
-    copyBtn.style.display = "block";
-    document.getElementById("keyBox").innerText = data.gameKey;
-}
-    else {
-    latestGameKey = "";
-    copyBtn.style.display = "none";
-    document.getElementById("keyBox").innerText = "Belum tersedia";
-}
+                if (data.delivery_status === "manual") {
+                    latestGameKey = "";
+                    copyBtn.style.display = "none";
+                    document.getElementById("keyBox").innerText =
+                        data.gameKey || "Akan dikirim manual oleh admin";
+                } else if (data.gameKey && data.gameKey !== "Akan dikirim manual oleh admin") {
+                    latestGameKey = data.gameKey;
+                    copyBtn.style.display = "block";
+                    document.getElementById("keyBox").innerText = data.gameKey;
+                }
+                else {
+                    latestGameKey = "";
+                    copyBtn.style.display = "none";
+                    document.getElementById("keyBox").innerText = "Belum tersedia";
+                }
             } catch (error) {
-    document.getElementById("statusRow").innerHTML =
-        `<span class="badge cancelled">Gagal memuat</span>`;
-    document.getElementById("statusText").innerText =
-        error.message || "Gagal mengambil data order.";
-    document.getElementById("keyBox").innerText =
-        "Data order tidak bisa dimuat.";
-}
+                document.getElementById("statusRow").innerHTML =
+                    `<span class="badge cancelled">Gagal memuat</span>`;
+                document.getElementById("statusText").innerText =
+                    error.message || "Gagal mengambil data order.";
+                document.getElementById("keyBox").innerText =
+                    "Data order tidak bisa dimuat.";
+            }
         }
 
         loadOrder();
     </script>
 </body>
+
 </html>
