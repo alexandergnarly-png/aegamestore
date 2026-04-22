@@ -2,6 +2,7 @@ let allProducts = [];
 
 const gameImages = {
     "PUBG Mobile": "https://cdn.cloudflare.steamstatic.com/steam/apps/578080/header.jpg",
+    "Pubg M": "https://cdn.cloudflare.steamstatic.com/steam/apps/578080/header.jpg",
     "Mobile Legends": "https://play-lh.googleusercontent.com/7oS5oPpR2z6kV1U1vVZrXW6Y7n4Zs3l7J9v0V0p0m8V0Q0h3R0Z0J0U0R0I0M0Y=s512",
     "Free Fire": "https://cdn2.unrealengine.com/egs-garena-freefire-garena-s1-2560x1440-0d1cfd2e3c8d.jpg",
     "Delta Force": "https://cdn.cloudflare.steamstatic.com/steam/apps/2507950/header.jpg"
