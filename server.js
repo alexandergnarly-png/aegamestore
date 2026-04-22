@@ -489,7 +489,7 @@ app.post("/create-order", orderLimiter, async (req, res) => {
     }
 });
 
-app.post("/xendit-webhook", async (req, res) => {
+aapp.post("/xendit-webhook", async (req, res) => {
     const callbackToken = String(req.headers["x-callback-token"] || "").trim();
 
     if (callbackToken !== String(process.env.XENDIT_CALLBACK_TOKEN || "").trim()) {
@@ -504,11 +504,13 @@ app.post("/xendit-webhook", async (req, res) => {
         return res.status(400).send("ORDER ID TIDAK VALID");
     }
 
+    const client = await db.connect();
+
     try {
         if (status === "PAID") {
-            await query("BEGIN");
+            await client.query("BEGIN");
 
-            const orderResult = await query(
+            const orderResult = await client.query(
                 "SELECT * FROM orders WHERE id = $1 LIMIT 1",
                 [orderId]
             );
@@ -516,16 +518,16 @@ app.post("/xendit-webhook", async (req, res) => {
             const order = orderResult.rows[0];
 
             if (!order) {
-                await query("ROLLBACK");
+                await client.query("ROLLBACK");
                 return res.status(404).send("ORDER TIDAK DITEMUKAN");
             }
 
             if (String(order.payment_status).toLowerCase() === "paid") {
-                await query("COMMIT");
+                await client.query("COMMIT");
                 return res.status(200).send("OK");
             }
 
-            const keyResult = await query(
+            const keyResult = await client.query(
                 `SELECT * FROM keys
                  WHERE product_id = $1 AND used = 0
                  ORDER BY id ASC
@@ -536,7 +538,7 @@ app.post("/xendit-webhook", async (req, res) => {
             const keyRow = keyResult.rows[0];
 
             if (keyRow) {
-                const lockResult = await query(
+                const lockResult = await client.query(
                     "UPDATE keys SET used = 1 WHERE id = $1 AND used = 0 RETURNING id",
                     [keyRow.id]
                 );
@@ -545,30 +547,30 @@ app.post("/xendit-webhook", async (req, res) => {
                     throw new Error("Key gagal dikunci untuk order ini");
                 }
 
-                await query(
+                await client.query(
                     `UPDATE orders
                      SET payment_status = $1, delivery_status = $2, gameKey = $3
                      WHERE id = $4`,
                     ["paid", "delivered", keyRow.key, orderId]
                 );
 
-                await query("COMMIT");
+                await client.query("COMMIT");
                 return res.status(200).send("OK");
             }
 
-            await query(
+            await client.query(
                 `UPDATE orders
                  SET payment_status = $1, delivery_status = $2, gameKey = $3
                  WHERE id = $4`,
                 ["paid", "manual", "STOK HABIS - CEK ADMIN", orderId]
             );
 
-            await query("COMMIT");
+            await client.query("COMMIT");
             return res.status(200).send("OK");
         }
 
         if (status === "EXPIRED") {
-            await query(
+            await client.query(
                 `UPDATE orders
                  SET payment_status = $1, delivery_status = $2
                  WHERE id = $3 AND payment_status <> $4`,
@@ -581,28 +583,29 @@ app.post("/xendit-webhook", async (req, res) => {
         return res.status(200).send("IGNORED");
     } catch (err) {
         try {
-            await query("ROLLBACK");
+            await client.query("ROLLBACK");
         } catch (_) { }
 
         console.error("ERROR WEBHOOK XENDIT:", err.message);
         return res.status(500).send("ERROR");
+    } finally {
+        client.release();
     }
 });
 
 app.get("/order/:id", async (req, res) => {
-    const orderId = req.params.id;
-    const token = String(req.query.token || "").trim();
+    const orderId = String(req.params.id || "").trim();
 
-    if (!token) {
+    if (!orderId) {
         return res.status(400).json({
-            message: "Token order wajib disertakan"
+            message: "Order tidak valid"
         });
     }
 
     try {
         const result = await query(
-            "SELECT * FROM orders WHERE id = $1 AND access_token = $2",
-            [orderId, token]
+            "SELECT * FROM orders WHERE id = $1 LIMIT 1",
+            [orderId]
         );
 
         const order = result.rows[0];
