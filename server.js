@@ -195,24 +195,6 @@ async function requireAdminAuth(req, res, next) {
     next();
 }
 
-function runQuery(sql, params = []) {
-    return new Promise((resolve, reject) => {
-        db.run(sql, params, function (err) {
-            if (err) return reject(err);
-            resolve(this);
-        });
-    });
-}
-
-function getQuery(sql, params = []) {
-    return new Promise((resolve, reject) => {
-        db.get(sql, params, (err, row) => {
-            if (err) return reject(err);
-            resolve(row);
-        });
-    });
-}
-
 app.use(helmet({
     contentSecurityPolicy: false
 }));
@@ -459,8 +441,8 @@ app.post("/create-order", orderLimiter, async (req, res) => {
                     amount: price,
                     payer_email: "test@example.com",
                     description: `Pembayaran untuk ${game} - ${productName}`,
-                    success_redirect_url: `${baseUrl}/result?order_id=${orderId}&token=${accessToken}`,
-                    failure_redirect_url: `${baseUrl}/result?order_id=${orderId}&token=${accessToken}`
+                    success_redirect_url: `${baseUrl}/result?order_id=${orderId}`,
+                    failure_redirect_url: `${baseUrl}/result?order_id=${orderId}`
                 })
             });
 
@@ -508,13 +490,9 @@ app.post("/create-order", orderLimiter, async (req, res) => {
 });
 
 app.post("/xendit-webhook", async (req, res) => {
-    console.log("=== WEBHOOK MASUK ===");
-    console.log(req.body);
+    const callbackToken = String(req.headers["x-callback-token"] || "").trim();
 
-    const callbackToken = req.headers["x-callback-token"];
-
-    if (callbackToken !== process.env.XENDIT_CALLBACK_TOKEN) {
-        console.log("TOKEN SALAH!");
+    if (callbackToken !== String(process.env.XENDIT_CALLBACK_TOKEN || "").trim()) {
         return res.status(403).send("Forbidden");
     }
 
@@ -522,125 +500,93 @@ app.post("/xendit-webhook", async (req, res) => {
     const status = String(data?.status || "").toUpperCase();
     const orderId = String(data?.external_id || "").trim();
 
-    console.log("STATUS:", status);
-    console.log("ORDER ID:", orderId);
-
     if (!orderId) {
         return res.status(400).send("ORDER ID TIDAK VALID");
     }
 
-    if (status === "PAID") {
-        try {
-            await runQuery("BEGIN IMMEDIATE TRANSACTION");
+    try {
+        if (status === "PAID") {
+            await query("BEGIN");
 
-            const order = await getQuery(
-                "SELECT * FROM orders WHERE id = ?",
+            const orderResult = await query(
+                "SELECT * FROM orders WHERE id = $1 LIMIT 1",
                 [orderId]
             );
 
+            const order = orderResult.rows[0];
+
             if (!order) {
-                await runQuery("ROLLBACK");
-                console.log("ORDER TIDAK DITEMUKAN:", orderId);
+                await query("ROLLBACK");
                 return res.status(404).send("ORDER TIDAK DITEMUKAN");
             }
 
-            if (order.payment_status === "paid") {
-                await runQuery("COMMIT");
-                console.log("ORDER SUDAH PERNAH DIPROSES:", orderId);
+            if (String(order.payment_status).toLowerCase() === "paid") {
+                await query("COMMIT");
                 return res.status(200).send("OK");
             }
 
-            const keyRow = await getQuery(
-                "SELECT * FROM keys WHERE product_id = ? AND used = 0 ORDER BY id ASC LIMIT 1",
+            const keyResult = await query(
+                `SELECT * FROM keys
+                 WHERE product_id = $1 AND used = 0
+                 ORDER BY id ASC
+                 LIMIT 1`,
                 [order.product_id]
             );
 
+            const keyRow = keyResult.rows[0];
+
             if (keyRow) {
-                const keyUpdate = await runQuery(
-                    "UPDATE keys SET used = 1 WHERE id = ? AND used = 0",
+                const lockResult = await query(
+                    "UPDATE keys SET used = 1 WHERE id = $1 AND used = 0 RETURNING id",
                     [keyRow.id]
                 );
 
-                if (keyUpdate.changes === 0) {
+                if (lockResult.rows.length === 0) {
                     throw new Error("Key gagal dikunci untuk order ini");
                 }
 
-                await runQuery(
-                    "UPDATE orders SET payment_status = ?, delivery_status = ?, gameKey = ? WHERE id = ?",
+                await query(
+                    `UPDATE orders
+                     SET payment_status = $1, delivery_status = $2, gameKey = $3
+                     WHERE id = $4`,
                     ["paid", "delivered", keyRow.key, orderId]
                 );
 
-                await runQuery("COMMIT");
-
-                console.log("ORDER SUDAH DIBAYAR:", orderId);
-                console.log("KEY TERKIRIM:", keyRow.key);
+                await query("COMMIT");
                 return res.status(200).send("OK");
             }
 
-            await runQuery(
-                "UPDATE orders SET payment_status = ?, delivery_status = ?, gameKey = ? WHERE id = ?",
-                ["paid", "manual", "Akan dikirim manual oleh admin", orderId]
+            await query(
+                `UPDATE orders
+                 SET payment_status = $1, delivery_status = $2, gameKey = $3
+                 WHERE id = $4`,
+                ["paid", "manual", "STOK HABIS - CEK ADMIN", orderId]
             );
 
-            await runQuery("COMMIT");
-
-            console.log("ORDER STOCK KOSONG:", orderId);
+            await query("COMMIT");
             return res.status(200).send("OK");
-        } catch (err) {
-            try {
-                await runQuery("ROLLBACK");
-            } catch (rollbackErr) {
-                console.log("ERROR ROLLBACK:", rollbackErr);
-            }
-
-            console.log("ERROR WEBHOOK PAID:", err);
-            return res.status(500).send("ERROR");
         }
-    }
 
-    if (status === "EXPIRED") {
+        if (status === "EXPIRED") {
+            await query(
+                `UPDATE orders
+                 SET payment_status = $1, delivery_status = $2
+                 WHERE id = $3 AND payment_status <> $4`,
+                ["expired", "cancelled", orderId, "paid"]
+            );
+
+            return res.status(200).send("OK");
+        }
+
+        return res.status(200).send("IGNORED");
+    } catch (err) {
         try {
-            await runQuery("BEGIN IMMEDIATE TRANSACTION");
+            await query("ROLLBACK");
+        } catch (_) { }
 
-            const order = await getQuery(
-                "SELECT * FROM orders WHERE id = ?",
-                [orderId]
-            );
-
-            if (!order) {
-                await runQuery("ROLLBACK");
-                console.log("ORDER TIDAK DITEMUKAN:", orderId);
-                return res.status(404).send("ORDER TIDAK DITEMUKAN");
-            }
-
-            if (order.payment_status === "paid") {
-                await runQuery("COMMIT");
-                console.log("ORDER SUDAH PAID, ABAIKAN EXPIRED:", orderId);
-                return res.status(200).send("OK");
-            }
-
-            await runQuery(
-                "UPDATE orders SET payment_status = ?, delivery_status = ? WHERE id = ?",
-                ["expired", "cancelled", orderId]
-            );
-
-            await runQuery("COMMIT");
-
-            console.log("ORDER EXPIRED:", orderId);
-            return res.status(200).send("OK");
-        } catch (err) {
-            try {
-                await runQuery("ROLLBACK");
-            } catch (rollbackErr) {
-                console.log("ERROR ROLLBACK:", rollbackErr);
-            }
-
-            console.log("ERROR WEBHOOK EXPIRED:", err);
-            return res.status(500).send("ERROR");
-        }
+        console.error("ERROR WEBHOOK XENDIT:", err.message);
+        return res.status(500).send("ERROR");
     }
-
-    return res.status(200).send("OK");
 });
 
 app.get("/order/:id", async (req, res) => {
