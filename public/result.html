@@ -365,9 +365,8 @@
         async function loadOrder() {
             const params = new URLSearchParams(window.location.search);
             const orderId = params.get("order_id");
-            const token = params.get("token");
 
-            if (!orderId || !token) {
+            if (!orderId) {
                 document.getElementById("statusRow").innerHTML =
                     `<span class="badge cancelled">Data tidak lengkap</span>`;
                 document.getElementById("statusText").innerText = "Data order tidak lengkap.";
@@ -376,7 +375,7 @@
             }
 
             try {
-                const response = await fetch("/order/" + orderId + "?token=" + encodeURIComponent(token));
+                const response = await fetch("/order/" + orderId);
                 const data = await response.json();
 
                 if (!response.ok) {

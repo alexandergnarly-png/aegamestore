@@ -423,8 +423,6 @@ app.post("/create-order", orderLimiter, async (req, res) => {
             ]
         );
 
-        console.log("Order baru:", newOrder);
-
         try {
             const auth = Buffer.from(process.env.XENDIT_SECRET_KEY + ":").toString("base64");
             const baseUrl = process.env.APP_BASE_URL || `http://localhost:${port}`;
@@ -447,8 +445,7 @@ app.post("/create-order", orderLimiter, async (req, res) => {
             });
 
             const rawText = await xenditResponse.text();
-            console.log("STATUS XENDIT:", xenditResponse.status);
-            console.log("RESPON XENDIT RAW:", rawText);
+
 
             let data;
             try {
@@ -872,7 +869,7 @@ app.get("/products", requireAdminAuth, async (req, res) => {
     }
 });
 
-app.post("/products", requireAdminAuth, async (req, res) => {
+app.post("/products", requireAdminAuth, requireAdminCsrf, async (req, res) => {
     const { game, brand, duration, price } = req.body;
 
     const cleanGame = String(game || "").trim();
@@ -921,7 +918,7 @@ app.post("/products", requireAdminAuth, async (req, res) => {
     }
 });
 
-app.put("/products/:id", requireAdminAuth, async (req, res) => {
+app.put("/products/:id", requireAdminAuth, requireAdminCsrf, async (req, res) => {
     const productId = Number(req.params.id);
     const { game, brand, duration, price } = req.body;
 
@@ -971,7 +968,7 @@ app.put("/products/:id", requireAdminAuth, async (req, res) => {
     }
 });
 
-app.delete("/products/:id", requireAdminAuth, async (req, res) => {
+app.delete("/products/:id", requireAdminAuth, requireAdminCsrf, async (req, res) => {
     const productId = Number(req.params.id);
 
     if (!Number.isInteger(productId) || productId <= 0) {
@@ -1033,7 +1030,7 @@ app.delete("/products/:id", requireAdminAuth, async (req, res) => {
     }
 });
 
-app.patch("/products/:id/toggle-active", requireAdminAuth, async (req, res) => {
+app.patch("/products/:id/toggle-active", requireAdminAuth, requireAdminCsrf, async (req, res) => {
     const productId = Number(req.params.id);
     let { active } = req.body;
 
