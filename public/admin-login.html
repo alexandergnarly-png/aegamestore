@@ -1,223 +1,272 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Login - AE Game Store</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - AE Game Store</title>
 
-<style>
-* {
-    box-sizing: border-box;
-}
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    height: 100vh;
-    display: flex;
-    background: linear-gradient(135deg, #0f172a, #1e293b);
-}
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background:
+                radial-gradient(circle at top left, rgba(56, 189, 248, 0.18), transparent 30%),
+                radial-gradient(circle at bottom right, rgba(37, 99, 235, 0.12), transparent 30%),
+                linear-gradient(135deg, #eef5fb, #f8fbff);
+            color: #0f172a;
+            overflow: hidden;
+        }
 
-/* ===== LEFT SIDE ===== */
-.left {
-    flex: 1;
-    background:
-        linear-gradient(135deg, rgba(0,0,0,0.6), rgba(0,0,0,0.2)),
-        url("https://images.unsplash.com/photo-1605902711622-cfb43c4437d1?q=80&w=1600&auto=format&fit=crop");
-    background-size: cover;
-    background-position: center;
-    color: white;
-    display: flex;
-    align-items: flex-end;
-    padding: 40px;
-}
+        /* Background Ornaments */
+        body::before {
+            content: "";
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 70%);
+            top: -100px;
+            left: -100px;
+            z-index: -1;
+        }
 
-.left-content {
-    max-width: 400px;
-}
+        body::after {
+            content: "";
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.08) 0%, transparent 70%);
+            bottom: -50px;
+            right: -50px;
+            z-index: -1;
+        }
 
-.left h1 {
-    margin: 0;
-    font-size: 32px;
-}
+        .login-wrapper {
+            width: 100%;
+            max-width: 420px;
+            padding: 20px;
+            animation: fadeUp 0.6s ease-out;
+        }
 
-.left p {
-    margin-top: 10px;
-    opacity: 0.85;
-    line-height: 1.6;
-}
+        .card {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(191, 219, 254, 0.65);
+            border-radius: 28px;
+            box-shadow: 0 24px 70px rgba(15, 23, 42, 0.08);
+            padding: 40px 32px;
+            text-align: center;
+        }
 
-/* ===== RIGHT SIDE ===== */
-.right {
-    flex: 1;
-    background: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+        .logo-badge {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #2563eb, #38bdf8);
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.25);
+            margin: 0 auto 20px;
+        }
 
-.card {
-    width: 100%;
-    max-width: 360px;
-}
+        .card h2 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
 
-.card h2 {
-    margin-bottom: 10px;
-}
+        .card p.subtitle {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
 
-.card p {
-    color: #64748b;
-    font-size: 14px;
-    margin-bottom: 25px;
-}
+        .input-group {
+            position: relative;
+            margin-bottom: 16px;
+            text-align: left;
+        }
 
-/* INPUT */
-.input-group {
-    margin-bottom: 16px;
-}
+        input {
+            width: 100%;
+            padding: 16px 18px;
+            border-radius: 14px;
+            border: 1px solid #cbd5e1;
+            background: #f8fbff;
+            color: #0f172a;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            outline: none;
+        }
 
-input {
-    width: 100%;
-    padding: 14px;
-    border-radius: 10px;
-    border: 1px solid #cbd5e1;
-    font-size: 14px;
-}
+        input:focus {
+            border-color: #60a5fa;
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.10);
+        }
 
-input:focus {
-    outline: none;
-    border-color: #2563eb;
-}
+        input::placeholder {
+            color: #94a3b8;
+        }
 
-/* PASSWORD TOGGLE */
-.password-wrap {
-    position: relative;
-}
+        .password-wrap .toggle {
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: #2563eb;
+            user-select: none;
+            transition: color 0.2s;
+        }
 
-.toggle {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
-    font-size: 12px;
-    color: #2563eb;
-}
+        .password-wrap .toggle:hover {
+            color: #1d4ed8;
+        }
 
-/* BUTTON */
-button {
-    width: 100%;
-    padding: 14px;
-    border: none;
-    border-radius: 10px;
-    background: #2563eb;
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-    margin-top: 10px;
-}
+        button {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #2563eb, #38bdf8);
+            color: white;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
 
-button:hover {
-    background: #1d4ed8;
-}
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 28px rgba(37, 99, 235, 0.25);
+        }
 
-/* STATUS */
-.status {
-    margin-top: 12px;
-    font-size: 14px;
-    color: red;
-}
+        button:active {
+            transform: translateY(0);
+        }
 
-/* FOOTER */
-.footer {
-    margin-top: 20px;
-    font-size: 12px;
-    color: #94a3b8;
-    text-align: center;
-}
+        .status {
+            margin-top: 16px;
+            font-size: 13px;
+            color: #e11d48;
+            font-weight: 500;
+            min-height: 20px;
+        }
 
-/* MOBILE */
-@media(max-width: 900px) {
-    .left {
-        display: none;
-    }
-}
-</style>
+        .footer {
+            margin-top: 24px;
+            font-size: 12px;
+            color: #94a3b8;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-<div class="left">
-    <div class="left-content">
-        <h1>AE Game Store</h1>
-        <p>Admin portal untuk mengelola produk, key, dan transaksi dengan aman dan cepat.</p>
-    </div>
-</div>
+    <div class="login-wrapper">
+        <div class="card">
+            <div class="logo-badge">AE</div>
+            <h2>Admin Portal</h2>
+            <p class="subtitle">Silakan masuk untuk mengelola AE Game Store.</p>
 
-<div class="right">
-    <div class="card">
-        <h2>Login Admin</h2>
-        <p>Masukkan kredensial untuk akses dashboard</p>
+            <div class="input-group">
+                <input type="text" id="username" placeholder="Username" autocomplete="off">
+            </div>
 
-        <div class="input-group">
-            <input type="text" id="username" placeholder="Username">
-        </div>
+            <div class="input-group password-wrap">
+                <input type="password" id="password" placeholder="Password">
+                <span class="toggle" onclick="togglePass()">Show</span>
+            </div>
 
-        <div class="input-group password-wrap">
-            <input type="password" id="password" placeholder="Password">
-            <span class="toggle" onclick="togglePass()">Show</span>
-        </div>
+            <button onclick="login()">Masuk Dashboard</button>
 
-        <button onclick="login()">Login</button>
+            <div class="status" id="status"></div>
 
-        <div class="status" id="status"></div>
-
-        <div class="footer">
-            Secure Admin Access
+            <div class="footer">
+                Secure Admin Access
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-function togglePass() {
-    const input = document.getElementById("password");
-    input.type = input.type === "password" ? "text" : "password";
-}
-
-async function login() {
-    const username = document.getElementById("username").value.trim();
-    const password = document.getElementById("password").value.trim();
-    const status = document.getElementById("status");
-
-    status.innerText = "";
-
-    if (!username || !password) {
-        status.innerText = "Isi semua field";
-        return;
-    }
-
-    try {
-        const res = await fetch("/admin-login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ username, password })
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-            status.innerText = data.message || "Login gagal";
-            return;
+    <script>
+        // Logic ini tidak diubah sama sekali sesuai permintaan
+        function togglePass() {
+            const input = document.getElementById("password");
+            input.type = input.type === "password" ? "text" : "password";
         }
 
-        window.location.href = "/ae-control";
-    } catch {
-        status.innerText = "Server error";
-    }
-}
-</script>
+        async function login() {
+            const username = document.getElementById("username").value.trim();
+            const password = document.getElementById("password").value.trim();
+            const status = document.getElementById("status");
+
+            status.innerText = "";
+
+            if (!username || !password) {
+                status.innerText = "Isi semua field";
+                return;
+            }
+
+            try {
+                const res = await fetch("/admin-login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    status.innerText = data.message || "Login gagal";
+                    return;
+                }
+
+                window.location.href = "/ae-control";
+            } catch {
+                status.innerText = "Server error";
+            }
+        }
+    </script>
 
 </body>
+
 </html>
