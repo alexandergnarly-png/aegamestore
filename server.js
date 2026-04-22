@@ -385,12 +385,15 @@ app.post("/create-order", orderLimiter, async (req, res) => {
 
         const orderId = "ORDER-" + crypto.randomUUID();
         const accessToken = crypto.randomBytes(24).toString("hex");
-        res.cookie("order_token", accessToken, {
+
+        res.cookie(`order_token_${orderId}`, accessToken, {
             httpOnly: true,
             sameSite: "strict",
             secure: process.env.NODE_ENV === "production",
-            maxAge: 1000 * 60 * 60 * 2 // 2 jam
+            maxAge: 1000 * 60 * 60 * 2,
+            path: "/"
         });
+
         const createdAt = new Date().toISOString();
         const productName = `${productRow.brand} - ${productRow.duration}`;
         const price = Number(productRow.price);
@@ -598,7 +601,7 @@ app.post("/xendit-webhook", async (req, res) => {
 
 app.get("/order/:id", async (req, res) => {
     const orderId = String(req.params.id || "").trim();
-    const token = String(req.cookies.order_token || "").trim();
+    const token = String(req.cookies[`order_token_${orderId}`] || "").trim();
 
     if (!orderId || !token) {
         return res.status(403).json({
