@@ -111,6 +111,9 @@ db.query(`
     }
 });
 
+db.query(`CREATE INDEX IF NOT EXISTS idx_orders_id ON orders(id)`);
+db.query(`CREATE INDEX IF NOT EXISTS idx_keys_product_used ON keys(product_id, used)`);
+
 // limit umum (global)
 const globalLimiter = rateLimit({
     windowMs: 60 * 1000, // 1 menit
