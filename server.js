@@ -385,6 +385,12 @@ app.post("/create-order", orderLimiter, async (req, res) => {
 
         const orderId = "ORDER-" + crypto.randomUUID();
         const accessToken = crypto.randomBytes(24).toString("hex");
+        res.cookie("order_token", accessToken, {
+            httpOnly: true,
+            sameSite: "strict",
+            secure: process.env.NODE_ENV === "production",
+            maxAge: 1000 * 60 * 60 * 2 // 2 jam
+        });
         const createdAt = new Date().toISOString();
         const productName = `${productRow.brand} - ${productRow.duration}`;
         const price = Number(productRow.price);
@@ -592,24 +598,25 @@ app.post("/xendit-webhook", async (req, res) => {
 
 app.get("/order/:id", async (req, res) => {
     const orderId = String(req.params.id || "").trim();
+    const token = String(req.cookies.order_token || "").trim();
 
-    if (!orderId) {
-        return res.status(400).json({
-            message: "Order tidak valid"
+    if (!orderId || !token) {
+        return res.status(403).json({
+            message: "Akses tidak valid"
         });
     }
 
     try {
         const result = await query(
-            "SELECT * FROM orders WHERE id = $1 LIMIT 1",
-            [orderId]
+            "SELECT * FROM orders WHERE id = $1 AND access_token = $2 LIMIT 1",
+            [orderId, token]
         );
 
         const order = result.rows[0];
 
         if (!order) {
-            return res.status(404).json({
-                message: "Order tidak ditemukan"
+            return res.status(403).json({
+                message: "Akses ditolak"
             });
         }
 
