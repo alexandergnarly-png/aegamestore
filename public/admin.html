@@ -530,19 +530,6 @@
             line-height: 1.6;
         }
 
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 1.04fr 0.96fr;
-            gap: 18px;
-            align-items: start;
-        }
-
-        .left-stack,
-        .right-stack {
-            display: grid;
-            gap: 18px;
-        }
-
         .card {
             background: var(--card);
             border: 1px solid rgba(191, 219, 254, 0.65);
@@ -844,10 +831,6 @@
         }
 
         @media (max-width: 1120px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-
             .stats {
                 grid-template-columns: 1fr 1fr;
             }
@@ -961,7 +944,6 @@
             <section id="section-dashboard" class="admin-section active">
                 <div class="top-nav fade-up">
                     <div class="top-nav-left">
-                        <button class="page-sidebar-toggle" onclick="toggleSidebar()">☰</button>
                         <div class="logo-badge">AE</div>
                         <div class="nav-title-wrap">
                             <div class="nav-kicker">AE Game Store</div>
@@ -1054,60 +1036,59 @@
 
             <div class="dashboard-grid">
                 <div class="left-stack">
-                    <section id="section-products" class="admin-section">
-                        <div class="card fade-up delay-3">
-                            <div class="card-header">
-                                <div class="card-title-wrap">
-                                    <h2>Kelola Produk</h2>
-                                    <p class="card-subtitle">
-                                        Tambahkan, edit, aktifkan, nonaktifkan, atau hapus produk dari store dengan
-                                        lebih cepat.
-                                    </p>
-                                </div>
-                                <div class="section-badge">Product Manager</div>
+                    <div class="card fade-up delay-3">
+                        <div class="card-header">
+                            <div class="card-title-wrap">
+                                <h2>Kelola Produk</h2>
+                                <p class="card-subtitle">
+                                    Tambahkan, edit, aktifkan, nonaktifkan, atau hapus produk dari store dengan
+                                    lebih cepat.
+                                </p>
                             </div>
+                            <div class="section-badge">Product Manager</div>
+                        </div>
 
-                            <div class="toolbar">
-                                <input type="hidden" id="editingProductId">
-                                <div class="field"><input type="text" id="productGame"
-                                        placeholder="Game, contoh: Delta Force"></div>
-                                <div class="field"><input type="text" id="productBrand"
-                                        placeholder="Brand, contoh: Aorus"></div>
-                                <div class="field"><input type="text" id="productDuration"
-                                        placeholder="Durasi, contoh: 1 Hari"></div>
-                                <div class="field"><input type="text" id="productPrice"
-                                        placeholder="Harga, contoh: 30000"></div>
+                        <div class="toolbar">
+                            <input type="hidden" id="editingProductId">
+                            <div class="field"><input type="text" id="productGame"
+                                    placeholder="Game, contoh: Delta Force"></div>
+                            <div class="field"><input type="text" id="productBrand" placeholder="Brand, contoh: Aorus">
                             </div>
-
-                            <div class="toolbar compact">
-                                <div class="btn-group">
-                                    <button id="saveProductBtn" onclick="saveProduct()">Tambah Produk</button>
-                                    <button class="ghost-btn" onclick="resetProductForm()">Reset Form</button>
-                                    <button class="ghost-btn" onclick="loadProducts()">Refresh Produk</button>
-                                </div>
-                            </div>
-
-                            <div class="info-row">
-                                <div class="info" id="productStatusText">Memuat daftar produk...</div>
-                            </div>
-
-                            <div class="table-wrap">
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th style="width: 70px;">ID</th>
-                                            <th>Game</th>
-                                            <th>Brand</th>
-                                            <th>Durasi</th>
-                                            <th>Harga</th>
-                                            <th>Status</th>
-                                            <th style="width: 220px;">Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="productTableBody"></tbody>
-                                </table>
+                            <div class="field"><input type="text" id="productDuration"
+                                    placeholder="Durasi, contoh: 1 Hari"></div>
+                            <div class="field"><input type="text" id="productPrice" placeholder="Harga, contoh: 30000">
                             </div>
                         </div>
+
+                        <div class="toolbar compact">
+                            <div class="btn-group">
+                                <button id="saveProductBtn" onclick="saveProduct()">Tambah Produk</button>
+                                <button class="ghost-btn" onclick="resetProductForm()">Reset Form</button>
+                                <button class="ghost-btn" onclick="loadProducts()">Refresh Produk</button>
+                            </div>
+                        </div>
+
+                        <div class="info-row">
+                            <div class="info" id="productStatusText">Memuat daftar produk...</div>
+                        </div>
+
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style="width: 70px;">ID</th>
+                                        <th>Game</th>
+                                        <th>Brand</th>
+                                        <th>Durasi</th>
+                                        <th>Harga</th>
+                                        <th>Status</th>
+                                        <th style="width: 220px;">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="productTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
                     </section>
 
                     <section id="section-orders" class="admin-section">
@@ -1179,9 +1160,7 @@
                             </div>
                         </div>
                     </section>
-                </div>
 
-                <div class="right-stack">
                     <section id="section-keys" class="admin-section">
                         <div class="card fade-up delay-5">
                             <div class="card-header">
@@ -1244,8 +1223,6 @@
                             </div>
                         </div>
                     </section>
-                </div>
-            </div>
         </main>
     </div>
 
