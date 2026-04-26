@@ -1903,7 +1903,10 @@ Game Key : ${key || "-"}
                 if (result.isConfirmed) {
                     try {
                         const res = await fetch(`/products/${id}`, {
-                            method: "DELETE"
+                            method: "DELETE",
+                            headers: {
+                                "x-csrf-token": getCsrfToken()
+                            }
                         });
 
                         const data = await res.json();
@@ -1942,7 +1945,8 @@ Game Key : ${key || "-"}
                 const res = await fetch(`/products/${id}/toggle-active`, {
                     method: "PATCH",
                     headers: {
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/json",
+                        "x-csrf-token": getCsrfToken()
                     },
                     body: JSON.stringify({ active })
                 });

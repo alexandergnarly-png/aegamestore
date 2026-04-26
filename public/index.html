@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AE Game Store 🌊⛩️</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
@@ -22,8 +23,8 @@
                 </div>
             </div>
 
-            <div class="header-note">
-                <span class="pulse-dot"></span> Aman • Cepat • Auto Delivery
+            <div class="header-note" style="cursor: pointer; transition: 0.2s;" onclick="showGuide()" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                <span class="pulse-dot"></span> Cara Beli 📖
             </div>
         </div>
     </header>
@@ -126,21 +127,105 @@
         </section>
     </main>
 
+    <a href="https://t.me/aegamestore" target="_blank" class="floating-btn">
+        💬 Hubungi Admin
+    </a>
+
     <script src="script.js?v=2"></script>
 
+    <style>
+        /* Floating Button Admin */
+        .floating-btn {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: linear-gradient(135deg, #0ea5e9, #38bdf8);
+            color: white;
+            padding: 14px 22px;
+            border-radius: 99px;
+            text-decoration: none;
+            font-weight: 800;
+            font-size: 14px;
+            box-shadow: 0 8px 24px rgba(14, 165, 233, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 1000;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .floating-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 28px rgba(14, 165, 233, 0.5);
+            color: white;
+        }
+
+        /* Sakura Effect */
+        .sakura {
+            position: fixed;
+            top: -10%;
+            z-index: 9999;
+            pointer-events: none;
+            background: #fbcfe8;
+            border-radius: 100% 0 100% 0;
+            animation: fall linear infinite, sway ease-in-out infinite alternate;
+        }
+        @keyframes fall {
+            to { top: 110%; }
+        }
+        @keyframes sway {
+            from { transform: translateX(-20px) rotate(0deg); }
+            to { transform: translateX(20px) rotate(45deg); }
+        }
+    </style>
+
     <script>
+        // Fitur Live Search
         function searchGame() {
             const input = document.getElementById('gameSearch').value.toLowerCase();
             const cards = document.querySelectorAll('.game-card');
 
             cards.forEach(card => {
-                // Mengambil nama game dari elemen span di dalam card
                 const gameName = card.querySelector('span').innerText.toLowerCase();
                 if (gameName.includes(input)) {
-                    card.style.display = "flex"; // Tampilkan jika cocok
+                    card.style.display = "flex"; 
                 } else {
-                    card.style.display = "none"; // Sembunyikan jika tidak cocok
+                    card.style.display = "none"; 
                 }
+            });
+        }
+
+        // Fitur Sakura Jatuh
+        function createSakura() {
+            const sakura = document.createElement('div');
+            sakura.classList.add('sakura');
+            const size = Math.random() * 10 + 5;
+            sakura.style.width = size + 'px';
+            sakura.style.height = size + 'px';
+            sakura.style.left = Math.random() * 100 + 'vw';
+            sakura.style.animationDuration = (Math.random() * 3 + 4) + 's, ' + (Math.random() * 2 + 2) + 's';
+            document.body.appendChild(sakura);
+            setTimeout(() => { sakura.remove(); }, 7000);
+        }
+        setInterval(createSakura, 400);
+
+        // Fitur Popup Panduan Beli
+        function showGuide() {
+            Swal.fire({
+                title: 'Panduan Top-Up ⛩️',
+                html: `
+                    <div style="text-align: left; font-size: 14px; line-height: 1.6; color: #334155;">
+                        <b>1. Pilih Game:</b> Cari dan klik game yang kamu inginkan.<br><br>
+                        <b>2. Tentukan Produk:</b> Pilih server/brand dan nominal top-up atau durasi.<br><br>
+                        <b>3. Isi Data:</b> Masukkan nickname/ID dan nomor kontak (WA/Email) dengan benar.<br><br>
+                        <b>4. Checkout:</b> Klik <i>'Beli Sekarang'</i> dan selesaikan pembayaran via QRIS.<br><br>
+                        <b>5. Selesai!</b> Game Key / Voucher akan langsung dikirim ke layar kamu setelah sukses.
+                    </div>
+                `,
+                icon: 'info',
+                confirmButtonText: 'Mengerti! 🌊',
+                confirmButtonColor: '#0ea5e9',
+                background: '#f0f9ff',
+                backdrop: `rgba(12, 74, 110, 0.4)`
             });
         }
     </script>

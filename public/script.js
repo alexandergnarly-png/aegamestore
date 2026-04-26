@@ -25,7 +25,7 @@ function formatRupiah(num) {
 function setLoading(isLoading) {
     loadingText.style.display = isLoading ? "block" : "none";
     buyBtn.disabled = isLoading;
-    buyBtn.innerText = isLoading ? "Memproses..." : "Beli Sekarang";
+    buyBtn.innerText = isLoading ? "Memproses..." : "Beli Sekarang 🌊";
 }
 
 async function loadAllProducts() {
@@ -34,7 +34,7 @@ async function loadAllProducts() {
         const data = await res.json();
 
         if (!Array.isArray(data) || data.length === 0) {
-            alert("Produk belum tersedia.");
+            Swal.fire({ icon: 'info', title: 'Stok Kosong', text: 'Produk belum tersedia saat ini.', confirmButtonColor: '#0ea5e9' });
             return;
         }
 
@@ -46,7 +46,7 @@ async function loadAllProducts() {
         renderGames();
         loadBrands();
     } catch (err) {
-        alert("Gagal memuat daftar produk.");
+        Swal.fire({ icon: 'error', title: 'Oops...', text: 'Gagal memuat daftar produk dari server.', confirmButtonColor: '#fb7185' });
     }
 }
 
@@ -147,12 +147,11 @@ async function buy() {
     );
 
     if (!name || !contact) {
-        alert("Isi nama dan kontak dulu!");
+        Swal.fire({ icon: 'warning', title: 'Oops...', text: 'Isi nama player dan kontak kamu dulu ya!', confirmButtonColor: '#0ea5e9' });
         return;
     }
-
     if (!selectedProduct) {
-        alert("Pilih produk dulu.");
+        Swal.fire({ icon: 'info', title: 'Pilih Produk', text: 'Pilih game dan durasi produknya dulu.', confirmButtonColor: '#0ea5e9' });
         return;
     }
 
@@ -183,9 +182,9 @@ async function buy() {
             return;
         }
 
-        alert(data.message || "Gagal membuat pembayaran");
+        Swal.fire({ icon: 'error', title: 'Gagal', text: data.message || "Gagal membuat pembayaran", confirmButtonColor: '#fb7185' });
     } catch (err) {
-        alert("Terjadi error server");
+        Swal.fire({ icon: 'error', title: 'Error', text: 'Terjadi error server', confirmButtonColor: '#fb7185' });
     }
 
     setLoading(false);
