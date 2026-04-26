@@ -10,6 +10,15 @@
 </head>
 
 <body>
+    <div id="preloader">
+        <div class="loader-content">
+            <div class="loader-logo">⛩️</div>
+            <div class="loader-text">Memuat Website...</div>
+            <div class="loader-bar">
+                <div class="loader-progress"></div>
+            </div>
+        </div>
+    </div>
     <div class="watercolor-blob blob-1"></div>
     <div class="watercolor-blob blob-2"></div>
 
@@ -23,7 +32,8 @@
                 </div>
             </div>
 
-            <div class="header-note" style="cursor: pointer; transition: 0.2s;" onclick="showGuide()" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+            <div class="header-note" style="cursor: pointer; transition: 0.2s;" onclick="showGuide()"
+                onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
                 <span class="pulse-dot"></span> Cara Beli 📖
             </div>
         </div>
@@ -153,6 +163,7 @@
             z-index: 1000;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
+
         .floating-btn:hover {
             transform: translateY(-5px);
             box-shadow: 0 12px 28px rgba(14, 165, 233, 0.5);
@@ -169,12 +180,21 @@
             border-radius: 100% 0 100% 0;
             animation: fall linear infinite, sway ease-in-out infinite alternate;
         }
+
         @keyframes fall {
-            to { top: 110%; }
+            to {
+                top: 110%;
+            }
         }
+
         @keyframes sway {
-            from { transform: translateX(-20px) rotate(0deg); }
-            to { transform: translateX(20px) rotate(45deg); }
+            from {
+                transform: translateX(-20px) rotate(0deg);
+            }
+
+            to {
+                transform: translateX(20px) rotate(45deg);
+            }
         }
     </style>
 
@@ -187,9 +207,9 @@
             cards.forEach(card => {
                 const gameName = card.querySelector('span').innerText.toLowerCase();
                 if (gameName.includes(input)) {
-                    card.style.display = "flex"; 
+                    card.style.display = "flex";
                 } else {
-                    card.style.display = "none"; 
+                    card.style.display = "none";
                 }
             });
         }
@@ -228,6 +248,14 @@
                 backdrop: `rgba(12, 74, 110, 0.4)`
             });
         }
+        // Fitur Menghilangkan Loading Screen
+        window.addEventListener('load', function () {
+            const preloader = document.getElementById('preloader');
+            // Sengaja diberi delay 0.8 detik biar animasinya sempat terlihat cantik
+            setTimeout(() => {
+                preloader.classList.add('fade-out');
+            }, 800);
+        });
     </script>
 </body>
 

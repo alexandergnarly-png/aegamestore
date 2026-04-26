@@ -581,3 +581,88 @@ button#buyBtn:active {
         width: 100%;
     }
 }
+
+/* ===== PRELOADER (LOADING SCREEN) ===== */
+#preloader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-color);
+    /* Warna biru muda laut */
+    z-index: 999999;
+    /* Pastikan selalu berada di paling atas */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+
+/* Hilangkan saat halaman selesai dimuat */
+#preloader.fade-out {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.loader-content {
+    text-align: center;
+    animation: floatLoader 2s ease-in-out infinite;
+}
+
+.loader-logo {
+    font-size: 60px;
+    margin-bottom: 16px;
+    text-shadow: 0 10px 20px rgba(251, 113, 133, 0.4);
+}
+
+.loader-text {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--ocean-deep);
+    letter-spacing: 3px;
+    margin-bottom: 24px;
+    text-transform: uppercase;
+}
+
+/* Bar Progres seperti air mengalir */
+.loader-bar {
+    width: 180px;
+    height: 6px;
+    background: rgba(14, 165, 233, 0.15);
+    border-radius: 10px;
+    margin: 0 auto;
+    overflow: hidden;
+    position: relative;
+}
+
+.loader-progress {
+    width: 40%;
+    height: 100%;
+    background: linear-gradient(90deg, var(--ocean-deep), var(--ocean-light));
+    border-radius: 10px;
+    animation: waveLoad 1.5s infinite ease-in-out;
+}
+
+/* Animasi Melayang dan Mengalir */
+@keyframes floatLoader {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-15px);
+    }
+}
+
+@keyframes waveLoad {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(300%);
+    }
+}
