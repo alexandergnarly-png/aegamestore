@@ -388,50 +388,41 @@
                 document.getElementById("statusText").innerText =
                     "Order berhasil ditemukan. Simpan halaman ini untuk cek status order kamu kapan saja.";
 
-                document.getElementById("nameText").textContent =
-                    `Nama: ${data.name || "-"}`;
-                document.getElementById("contactText").textContent =
-                    `Kontak: ${data.contact || "-"}`;
-                document.getElementById("gameText").textContent =
-                    `Game: ${data.game || "-"}`;
-                document.getElementById("productText").textContent =
-                    `Produk: ${data.product || "-"}`;
-                document.getElementById("priceText").textContent =
-                    `Harga: ${data.price ? formatRupiah(data.price) : "-"}`;
+                document.getElementById("nameText").textContent = `Nama: ${data.name || "-"}`;
+                document.getElementById("contactText").textContent = `Kontak: ${data.contact || "-"}`;
+                document.getElementById("gameText").textContent = `Game: ${data.game || "-"}`;
+                document.getElementById("productText").textContent = `Produk: ${data.product || "-"}`;
+                document.getElementById("priceText").textContent = `Harga: ${data.price ? formatRupiah(data.price) : "-"}`;
 
                 const copyBtn = document.getElementById("copyBtn");
 
                 if (data.delivery_status === "manual") {
                     latestGameKey = "";
                     copyBtn.style.display = "none";
-                    document.getElementById("keyBox").innerText =
-                        data.gameKey || "Akan dikirim manual oleh admin";
+                    document.getElementById("keyBox").innerText = data.gameKey || "Akan dikirim manual oleh admin";
                 } else if (data.gameKey && data.gameKey !== "Akan dikirim manual oleh admin") {
                     latestGameKey = data.gameKey;
                     copyBtn.style.display = "block";
                     document.getElementById("keyBox").innerText = data.gameKey;
-                }
-                else {
+                } else {
+                    // Bagian yang tadi error sudah dirapikan di sini
                     latestGameKey = "";
                     copyBtn.style.display = "none";
 
                     document.getElementById("keyBox").innerHTML = `
-        <div style="font-family:Segoe UI,sans-serif;font-size:14px;font-weight:600;margin-bottom:12px;">
-            Silakan bayar via QRIS di bawah ini.
-        </div>
-        <img src="/qris.png" alt="QRIS AE Game Store" style="width:100%;max-width:260px;border-radius:16px;border:1px solid #bfdbfe;">
-        <div style="font-family:Segoe UI,sans-serif;font-size:13px;font-weight:500;margin-top:12px;color:#64748b;">
-            Setelah bayar, admin akan cek pembayaran dan mengirim key.
-        </div>
-    `;
+                        <div style="font-family:Segoe UI,sans-serif;font-size:14px;font-weight:700;margin-bottom:10px;">
+                            Pembayaran belum selesai.
+                        </div>
+                        <div style="font-family:Segoe UI,sans-serif;font-size:13px;font-weight:500;color:#64748b;line-height:1.6;">
+                            Jika kamu sudah membayar, tunggu beberapa saat lalu refresh halaman ini.
+                            Game key akan muncul otomatis setelah pembayaran dikonfirmasi sistem.
+                        </div>
+                    `;
                 }
             } catch (error) {
-                document.getElementById("statusRow").innerHTML =
-                    `<span class="badge cancelled">Gagal memuat</span>`;
-                document.getElementById("statusText").innerText =
-                    error.message || "Gagal mengambil data order.";
-                document.getElementById("keyBox").innerText =
-                    "Data order tidak bisa dimuat.";
+                document.getElementById("statusRow").innerHTML = `<span class="badge cancelled">Gagal memuat</span>`;
+                document.getElementById("statusText").innerText = error.message || "Gagal mengambil data order.";
+                document.getElementById("keyBox").innerText = "Data order tidak bisa dimuat.";
             }
         }
 

@@ -1,5 +1,6 @@
 const db = require("./database");
 const express = require("express");
+const midtransClient = require("midtrans-client");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const crypto = require("crypto");
@@ -11,6 +12,13 @@ const rateLimit = require("express-rate-limit");
 const app = express();
 app.set("trust proxy", 1);
 const port = process.env.PORT || 3000;
+const isMidtransProduction = process.env.MIDTRANS_IS_PRODUCTION === "true";
+
+const snap = new midtransClient.Snap({
+    isProduction: isMidtransProduction,
+    serverKey: process.env.MIDTRANS_SERVER_KEY,
+    clientKey: process.env.MIDTRANS_CLIENT_KEY
+});
 
 db.query("SELECT NOW()", (err, res) => {
     if (err) {
@@ -322,6 +330,7 @@ app.get("/ae-control", requireAdminAuth, (req, res) => {
 });
 
 // buat order (QRIS manual)
+// buat order + pembayaran Midtrans
 app.post("/create-order", orderLimiter, async (req, res) => {
     const { product_id, name, contact } = req.body;
 
@@ -330,35 +339,25 @@ app.post("/create-order", orderLimiter, async (req, res) => {
     const cleanProductId = Number(product_id);
 
     if (!Number.isInteger(cleanProductId) || cleanProductId <= 0) {
-        return res.status(400).json({
-            message: "Produk tidak valid"
-        });
+        return res.status(400).json({ message: "Produk tidak valid" });
     }
 
     if (!cleanName || cleanName.length < 2 || cleanName.length > 60) {
-        return res.status(400).json({
-            message: "Nama harus 2 sampai 60 karakter"
-        });
+        return res.status(400).json({ message: "Nama harus 2 sampai 60 karakter" });
     }
 
     const safeNameRegex = /^[a-zA-Z0-9 .,_'’-]+$/;
     if (!safeNameRegex.test(cleanName)) {
-        return res.status(400).json({
-            message: "Nama mengandung karakter yang tidak diizinkan"
-        });
+        return res.status(400).json({ message: "Nama mengandung karakter yang tidak diizinkan" });
     }
 
     if (!cleanContact || cleanContact.length < 5 || cleanContact.length > 100) {
-        return res.status(400).json({
-            message: "Kontak harus 5 sampai 100 karakter"
-        });
+        return res.status(400).json({ message: "Kontak harus 5 sampai 100 karakter" });
     }
 
     const safeContactRegex = /^[a-zA-Z0-9@+._\- ]+$/;
     if (!safeContactRegex.test(cleanContact)) {
-        return res.status(400).json({
-            message: "Kontak mengandung karakter yang tidak diizinkan"
-        });
+        return res.status(400).json({ message: "Kontak mengandung karakter yang tidak diizinkan" });
     }
 
     try {
@@ -370,9 +369,7 @@ app.post("/create-order", orderLimiter, async (req, res) => {
         const productRow = productResult.rows[0];
 
         if (!productRow) {
-            return res.status(404).json({
-                message: "Produk tidak ditemukan atau tidak aktif"
-            });
+            return res.status(404).json({ message: "Produk tidak ditemukan atau tidak aktif" });
         }
 
         const keyCheck = await query(
@@ -381,13 +378,16 @@ app.post("/create-order", orderLimiter, async (req, res) => {
         );
 
         if (keyCheck.rows.length === 0) {
-            return res.status(400).json({
-                message: "Stok key habis"
-            });
+            return res.status(400).json({ message: "Stok key habis" });
         }
 
         const orderId = "ORDER-" + crypto.randomUUID();
         const accessToken = crypto.randomBytes(24).toString("hex");
+        const createdAt = new Date().toISOString();
+        const productName = `${productRow.brand} - ${productRow.duration}`;
+        const price = Number(productRow.price);
+        const game = productRow.game;
+        const baseUrl = process.env.APP_BASE_URL || `http://localhost:${port}`;
 
         res.cookie(`order_token_${orderId}`, accessToken, {
             httpOnly: true,
@@ -396,24 +396,6 @@ app.post("/create-order", orderLimiter, async (req, res) => {
             maxAge: 1000 * 60 * 60 * 2,
             path: "/"
         });
-
-        const createdAt = new Date().toISOString();
-        const productName = `${productRow.brand} - ${productRow.duration}`;
-        const price = Number(productRow.price);
-        const game = productRow.game;
-
-        const newOrder = {
-            id: orderId,
-            product_id: cleanProductId,
-            access_token: accessToken,
-            name: cleanName,
-            contact: cleanContact,
-            game,
-            product: productName,
-            price,
-            payment_status: "pending",
-            delivery_status: "waiting_payment"
-        };
 
         await query(
             `INSERT INTO orders
@@ -435,17 +417,153 @@ app.post("/create-order", orderLimiter, async (req, res) => {
             ]
         );
 
-        const baseUrl = process.env.APP_BASE_URL || `http://localhost:${port}`;
+        const transaction = await snap.createTransaction({
+            transaction_details: {
+                order_id: orderId,
+                gross_amount: price
+            },
+            customer_details: {
+                first_name: cleanName,
+                email: cleanContact.includes("@") ? cleanContact : "customer@example.com",
+                phone: cleanContact.includes("@") ? "" : cleanContact.replace(/[^0-9+]/g, "")
+            },
+            item_details: [
+                {
+                    id: String(cleanProductId),
+                    price: price,
+                    quantity: 1,
+                    name: `${game} - ${productName}`
+                }
+            ],
+            callbacks: {
+                finish: `${baseUrl}/result?order_id=${orderId}`,
+                error: `${baseUrl}/result?order_id=${orderId}`,
+                pending: `${baseUrl}/result?order_id=${orderId}`
+            }
+        });
 
         return res.json({
-            message: "Order berhasil dibuat. Silakan bayar via QRIS.",
+            message: "Transaksi Midtrans berhasil dibuat",
+            paymentUrl: transaction.redirect_url,
             resultUrl: `${baseUrl}/result?order_id=${orderId}`
         });
     } catch (err) {
-        console.error("ERROR CREATE ORDER:", err);
+        console.error("ERROR CREATE MIDTRANS ORDER:", err);
         return res.status(500).json({
-            message: "Gagal membuat order"
+            message: "Gagal membuat pembayaran Midtrans"
         });
+    }
+});
+
+app.post("/midtrans-notification", async (req, res) => {
+    try {
+        const notification = await snap.transaction.notification(req.body);
+
+        const orderId = String(notification.order_id || "").trim();
+        const transactionStatus = String(notification.transaction_status || "").toLowerCase();
+        const fraudStatus = String(notification.fraud_status || "").toLowerCase();
+
+        if (!orderId) {
+            return res.status(400).send("ORDER ID TIDAK VALID");
+        }
+
+        const isPaid =
+            transactionStatus === "settlement" ||
+            (transactionStatus === "capture" && fraudStatus === "accept");
+
+        const isExpiredOrFailed =
+            transactionStatus === "expire" ||
+            transactionStatus === "cancel" ||
+            transactionStatus === "deny";
+
+        if (isPaid) {
+            const client = await db.connect();
+
+            try {
+                await client.query("BEGIN");
+
+                const orderResult = await client.query(
+                    "SELECT * FROM orders WHERE id = $1 LIMIT 1",
+                    [orderId]
+                );
+
+                const order = orderResult.rows[0];
+
+                if (!order) {
+                    await client.query("ROLLBACK");
+                    return res.status(404).send("ORDER TIDAK DITEMUKAN");
+                }
+
+                if (String(order.payment_status).toLowerCase() === "paid") {
+                    await client.query("COMMIT");
+                    return res.status(200).send("OK");
+                }
+
+                const keyResult = await client.query(
+                    `SELECT * FROM keys
+                     WHERE product_id = $1 AND used = 0
+                     ORDER BY id ASC
+                     LIMIT 1`,
+                    [order.product_id]
+                );
+
+                const keyRow = keyResult.rows[0];
+
+                if (!keyRow) {
+                    await client.query(
+                        `UPDATE orders
+                         SET payment_status = $1, delivery_status = $2, gameKey = $3
+                         WHERE id = $4`,
+                        ["paid", "manual", "STOK HABIS - CEK ADMIN", orderId]
+                    );
+
+                    await client.query("COMMIT");
+                    return res.status(200).send("OK");
+                }
+
+                const lockResult = await client.query(
+                    "UPDATE keys SET used = 1 WHERE id = $1 AND used = 0 RETURNING id",
+                    [keyRow.id]
+                );
+
+                if (lockResult.rows.length === 0) {
+                    throw new Error("Key gagal dikunci");
+                }
+
+                await client.query(
+                    `UPDATE orders
+                     SET payment_status = $1, delivery_status = $2, gameKey = $3
+                     WHERE id = $4`,
+                    ["paid", "delivered", keyRow.key, orderId]
+                );
+
+                await client.query("COMMIT");
+                return res.status(200).send("OK");
+            } catch (err) {
+                try {
+                    await client.query("ROLLBACK");
+                } catch (_) {}
+
+                console.error("ERROR MIDTRANS PAID:", err.message);
+                return res.status(500).send("ERROR");
+            } finally {
+                client.release();
+            }
+        }
+
+        if (isExpiredOrFailed) {
+            await query(
+                `UPDATE orders
+                 SET payment_status = $1, delivery_status = $2
+                 WHERE id = $3 AND payment_status <> $4`,
+                ["expired", "cancelled", orderId, "paid"]
+            );
+        }
+
+        return res.status(200).send("OK");
+    } catch (err) {
+        console.error("ERROR MIDTRANS NOTIFICATION:", err.message);
+        return res.status(500).send("ERROR");
     }
 });
 

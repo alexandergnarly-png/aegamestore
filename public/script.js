@@ -173,12 +173,17 @@ async function buy() {
 
         const data = await res.json();
 
+        if (data.paymentUrl) {
+            window.location.href = data.paymentUrl;
+            return;
+        }
+
         if (data.resultUrl) {
             window.location.href = data.resultUrl;
             return;
         }
 
-        alert(data.message || "Gagal membuat order");
+        alert(data.message || "Gagal membuat pembayaran");
     } catch (err) {
         alert("Terjadi error server");
     }
