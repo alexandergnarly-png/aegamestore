@@ -448,7 +448,7 @@ app.post("/create-order", orderLimiter, async (req, res) => {
             resultUrl: `${baseUrl}/result?order_id=${orderId}`
         });
     } catch (err) {
-        console.error("ERROR CREATE MIDTRANS ORDER:", err);
+        console.error("ERROR CREATE MIDTRANS ORDER:", err.response?.data || err.message || err);
         return res.status(500).json({
             message: "Gagal membuat pembayaran Midtrans"
         });
@@ -542,7 +542,7 @@ app.post("/midtrans-notification", async (req, res) => {
             } catch (err) {
                 try {
                     await client.query("ROLLBACK");
-                } catch (_) {}
+                } catch (_) { }
 
                 console.error("ERROR MIDTRANS PAID:", err.message);
                 return res.status(500).send("ERROR");
