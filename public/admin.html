@@ -4,31 +4,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - AE Game Store</title>
+    <title>Admin Panel - AE Game Store 🌊</title>
     <style>
         :root {
-            --primary: #0284c7;
-            --primary-hover: #0369a1;
-            --secondary: #10b981;
-            --bg-color: #f0fdfa;
-            --card-bg: rgba(255, 255, 255, 0.92);
-            --text-main: #064e3b;
+            /* Ocean Vibes Japan Palette */
+            --primary: #0ea5e9;
+            /* Ocean Deep */
+            --primary-hover: #0284c7;
+            --secondary: #fb7185;
+            /* Torii Red / Sakura */
+            --bg-color: #f0f9ff;
+            --card-bg: rgba(255, 255, 255, 0.75);
+            --text-main: #0c4a6e;
             --text-muted: #475569;
-            --border-color: rgba(16, 185, 129, 0.35);
-            --shadow-sm: 0 4px 12px rgba(2, 132, 199, 0.04);
-            --shadow-md: 0 12px 30px rgba(2, 132, 199, 0.08);
-            --shadow-lg: 0 24px 50px rgba(2, 132, 199, 0.1);
+            --border-color: rgba(56, 189, 248, 0.4);
+
+            --shadow-sm: 0 4px 12px rgba(14, 165, 233, 0.08);
+            --shadow-md: 0 12px 30px rgba(14, 165, 233, 0.12);
+            --shadow-lg: 0 24px 50px rgba(14, 165, 233, 0.15);
             --radius-xl: 28px;
             --radius-lg: 20px;
             --radius-md: 14px;
             --radius-sm: 10px;
 
-            --success-bg: #dcfce7;
-            --success-text: #166534;
-            --warn-bg: #fef3c7;
-            --warn-text: #92400e;
-            --danger-bg: #fee2e2;
-            --danger-text: #991b1b;
+            /* Zen Badges */
+            --success-bg: #d1fae5;
+            /* Matcha Light */
+            --success-text: #065f46;
+            --warn-bg: #fef08a;
+            /* Sunset Gold */
+            --warn-text: #854d0e;
+            --danger-bg: #ffe4e6;
+            /* Sakura Pink */
+            --danger-text: #be123c;
         }
 
         * {
@@ -43,20 +51,45 @@
         }
 
         body {
-            background:
-                radial-gradient(circle at 0% 0%, rgba(16, 185, 129, 0.18), transparent 40%),
-                radial-gradient(circle at 100% 100%, rgba(2, 132, 199, 0.15), transparent 40%),
-                linear-gradient(135deg, #e0f2fe, #d1fae5);
+            background-color: var(--bg-color);
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(251, 113, 133, 0.1) 0%, transparent 40%);
             color: var(--text-main);
             min-height: 100vh;
             display: flex;
+            position: relative;
+            z-index: 0;
+        }
+
+        /* Aesthetic Watermarks (Ukiyo-e Feel) */
+        body::before {
+            content: "🌊";
+            position: fixed;
+            bottom: -50px;
+            right: -20px;
+            font-size: 350px;
+            opacity: 0.04;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        body::after {
+            content: "⛩️";
+            position: fixed;
+            bottom: 50px;
+            right: 320px;
+            font-size: 200px;
+            opacity: 0.03;
+            z-index: -1;
+            pointer-events: none;
         }
 
         /* ===== SIDEBAR ===== */
         .sidebar {
             width: 260px;
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(24px);
             border-right: 1px solid var(--border-color);
             padding: 24px 20px;
             display: flex;
@@ -76,7 +109,7 @@
             justify-content: space-between;
             gap: 12px;
             padding-bottom: 20px;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px dashed var(--border-color);
         }
 
         .sidebar-brand-left {
@@ -93,11 +126,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background: linear-gradient(135deg, var(--secondary), #f43f5e);
             color: white;
             font-weight: bold;
-            font-size: 16px;
-            box-shadow: 0 8px 16px rgba(16, 185, 129, 0.25);
+            font-size: 20px;
+            box-shadow: 0 8px 16px rgba(251, 113, 133, 0.3);
             flex-shrink: 0;
         }
 
@@ -111,13 +144,13 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
             color: var(--primary);
-            font-weight: 700;
+            font-weight: 800;
         }
 
         .sidebar-title {
             font-size: 16px;
-            font-weight: 700;
-            color: #022c22;
+            font-weight: 800;
+            color: var(--text-main);
         }
 
         .sidebar-nav {
@@ -144,14 +177,14 @@
         }
 
         .nav-btn:hover {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--text-main);
+            background: rgba(14, 165, 233, 0.1);
+            color: var(--primary);
         }
 
         .nav-btn.active {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
             color: white;
-            box-shadow: 0 8px 16px rgba(16, 185, 129, 0.25);
+            box-shadow: 0 8px 16px rgba(14, 165, 233, 0.25);
         }
 
         .sidebar-footer {
@@ -161,12 +194,12 @@
         .sidebar-logout,
         .sidebar-toggle {
             width: 100%;
-            background: white;
+            background: rgba(255, 255, 255, 0.8);
             color: var(--text-main);
             border: 1px solid var(--border-color);
             padding: 14px;
             border-radius: var(--radius-md);
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.2s ease;
             display: flex;
@@ -175,23 +208,24 @@
         }
 
         .sidebar-logout:hover {
-            background: #fef2f2;
+            background: #fff1f2;
             color: var(--danger-text);
-            border-color: #fca5a5;
+            border-color: #fecdd3;
         }
 
         .sidebar-toggle {
             width: auto;
             padding: 10px;
             color: var(--primary);
-            background: rgba(16, 185, 129, 0.1);
+            background: rgba(14, 165, 233, 0.1);
             border: none;
         }
 
         .sidebar-toggle:hover {
-            background: rgba(16, 185, 129, 0.2);
+            background: rgba(14, 165, 233, 0.2);
         }
 
+        /* Collapsed State */
         .sidebar-collapsed .sidebar {
             width: 88px;
             padding: 24px 14px;
@@ -262,7 +296,7 @@
             padding: 14px 20px;
             margin-bottom: 24px;
             background: var(--card-bg);
-            backdrop-filter: blur(16px);
+            backdrop-filter: blur(24px);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-lg);
             box-shadow: var(--shadow-sm);
@@ -278,7 +312,7 @@
             width: 38px;
             height: 38px;
             border-radius: 10px;
-            background: #022c22;
+            background: var(--text-main);
             color: white;
             display: flex;
             align-items: center;
@@ -292,13 +326,13 @@
             letter-spacing: 0.5px;
             color: var(--primary);
             text-transform: uppercase;
-            font-weight: bold;
+            font-weight: 800;
         }
 
         .nav-title {
             font-size: 14px;
-            font-weight: 700;
-            color: #022c22;
+            font-weight: 800;
+            color: var(--text-main);
         }
 
         .nav-actions {
@@ -313,19 +347,34 @@
             gap: 8px;
             padding: 8px 14px;
             border-radius: 99px;
-            background: #ecfdf5;
-            color: #065f46;
+            background: #e0f2fe;
+            color: #0369a1;
             font-size: 12px;
-            font-weight: 600;
-            border: 1px solid #a7f3d0;
+            font-weight: 700;
+            border: 1px solid #bae6fd;
         }
 
         .chip-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: #10b981;
-            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+            background: #0ea5e9;
+            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.2);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 6px rgba(14, 165, 233, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(14, 165, 233, 0);
+            }
         }
 
         /* ===== HERO BANNER ===== */
@@ -333,8 +382,8 @@
             position: relative;
             padding: 40px;
             border-radius: var(--radius-xl);
-            background: linear-gradient(135deg, #064e3b, #0f766e, #0284c7);
-            /* Forest to Ocean gradient */
+            background: linear-gradient(135deg, #0284c7, #38bdf8, #fbcfe8);
+            /* Ocean to Sakura */
             color: white;
             box-shadow: var(--shadow-md);
             margin-bottom: 28px;
@@ -346,7 +395,7 @@
             position: absolute;
             width: 300px;
             height: 300px;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
             top: -100px;
             right: -50px;
             border-radius: 50%;
@@ -369,9 +418,10 @@
             backdrop-filter: blur(4px);
             border-radius: 6px;
             font-size: 11px;
-            font-weight: 700;
+            font-weight: 800;
             letter-spacing: 1px;
             margin-bottom: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         .hero h1 {
@@ -380,10 +430,11 @@
             line-height: 1.2;
             margin-bottom: 12px;
             letter-spacing: -0.5px;
+            color: white;
         }
 
         .hero p {
-            color: rgba(255, 255, 255, 0.85);
+            color: rgba(255, 255, 255, 0.9);
             font-size: 15px;
             line-height: 1.6;
             max-width: 600px;
@@ -400,8 +451,8 @@
 
         .mini-pill {
             padding: 8px 14px;
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 99px;
             font-size: 12px;
             font-weight: 600;
@@ -417,7 +468,7 @@
 
         .stat-card {
             background: var(--card-bg);
-            backdrop-filter: blur(16px);
+            backdrop-filter: blur(24px);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-lg);
             padding: 24px;
@@ -428,6 +479,7 @@
         .stat-card:hover {
             transform: translateY(-4px);
             box-shadow: var(--shadow-md);
+            border-color: var(--primary);
         }
 
         .stat-top {
@@ -440,13 +492,13 @@
         .stat-label {
             font-size: 13px;
             color: var(--text-muted);
-            font-weight: 700;
+            font-weight: 800;
         }
 
         .stat-icon {
             width: 40px;
             height: 40px;
-            background: #e0f2fe;
+            background: var(--water-foam);
             color: var(--primary);
             border-radius: 12px;
             display: flex;
@@ -458,18 +510,18 @@
         .stat-value {
             font-size: 32px;
             font-weight: 800;
-            color: #022c22;
+            color: var(--text-main);
             margin-bottom: 4px;
         }
 
         .stat-note {
             font-size: 12px;
-            color: #94a3b8;
+            color: var(--text-muted);
         }
 
         .card {
             background: var(--card-bg);
-            backdrop-filter: blur(16px);
+            backdrop-filter: blur(24px);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-xl);
             padding: 32px;
@@ -483,12 +535,14 @@
             margin-bottom: 24px;
             flex-wrap: wrap;
             gap: 16px;
+            border-bottom: 1px dashed rgba(56, 189, 248, 0.5);
+            padding-bottom: 20px;
         }
 
         .card-title-wrap h2 {
             font-size: 24px;
             font-weight: 800;
-            color: #022c22;
+            color: var(--text-main);
             margin-bottom: 6px;
             letter-spacing: -0.5px;
         }
@@ -499,13 +553,13 @@
         }
 
         .section-badge {
-            background: #ecfdf5;
-            color: #047857;
-            border: 1px solid #a7f3d0;
+            background: #e0f2fe;
+            color: var(--primary);
+            border: 1px solid #bae6fd;
             padding: 8px 14px;
             border-radius: 99px;
             font-size: 12px;
-            font-weight: 700;
+            font-weight: 800;
         }
 
         .toolbar {
@@ -531,10 +585,11 @@
             width: 100%;
             padding: 14px 16px;
             border-radius: var(--radius-md);
-            border: 1px solid #99f6e4;
-            background: #f0fdfa;
+            border: 1px solid #bae6fd;
+            background: rgba(255, 255, 255, 0.8);
             color: var(--text-main);
             font-size: 14px;
+            font-weight: 500;
             outline: none;
             transition: all 0.2s ease;
         }
@@ -547,12 +602,12 @@
         input:focus,
         select:focus,
         textarea:focus {
-            border-color: #2dd4bf;
+            border-color: var(--primary);
             background: white;
-            box-shadow: 0 0 0 4px rgba(45, 212, 191, 0.15);
+            box-shadow: 0 0 0 4px #e0f2fe;
         }
 
-        /* ===== BUTTONS & TABLES ===== */
+        /* ===== BUTTONS ===== */
         .btn-group {
             display: flex;
             gap: 12px;
@@ -563,18 +618,18 @@
             padding: 14px 20px;
             border: none;
             border-radius: var(--radius-md);
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
             color: white;
             font-size: 14px;
-            font-weight: 700;
+            font-weight: 800;
             cursor: pointer;
-            box-shadow: 0 8px 16px rgba(16, 185, 129, 0.2);
+            box-shadow: 0 8px 16px rgba(14, 165, 233, 0.2);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
         button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 24px rgba(16, 185, 129, 0.3);
+            box-shadow: 0 12px 24px rgba(14, 165, 233, 0.3);
         }
 
         button:active {
@@ -582,7 +637,7 @@
         }
 
         .ghost-btn {
-            background: white;
+            background: rgba(255, 255, 255, 0.9);
             color: var(--primary);
             border: 1px solid var(--border-color);
             box-shadow: var(--shadow-sm);
@@ -595,7 +650,7 @@
         }
 
         .danger-btn {
-            background: white;
+            background: rgba(255, 255, 255, 0.9);
             color: var(--danger-text);
             border: 1px solid #fecaca;
             box-shadow: none;
@@ -604,18 +659,21 @@
         .danger-btn:hover {
             background: var(--danger-bg);
             box-shadow: none;
+            border-color: #fda4af;
         }
 
         .logout-btn {
-            background: white;
+            background: rgba(255, 255, 255, 0.9);
             color: var(--text-main);
             border: 1px solid transparent;
         }
 
         .hero .logout-btn {
             color: var(--text-main);
+            font-weight: 800;
         }
 
+        /* ===== TABLES ===== */
         .info-row {
             margin-bottom: 16px;
         }
@@ -623,15 +681,16 @@
         .info {
             font-size: 13px;
             color: var(--text-muted);
-            font-weight: 500;
+            font-weight: 600;
         }
 
         .table-wrap {
             overflow-x: auto;
-            background: white;
+            background: rgba(255, 255, 255, 0.6);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-lg);
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+            backdrop-filter: blur(10px);
         }
 
         table {
@@ -644,15 +703,15 @@
         td {
             padding: 16px 20px;
             text-align: left;
-            border-bottom: 1px solid #ccfbf1;
+            border-bottom: 1px solid #e0f2fe;
             font-size: 14px;
             vertical-align: middle;
         }
 
         th {
-            background: #f0fdfa;
-            color: #0f766e;
-            font-weight: 700;
+            background: #f0f9ff;
+            color: var(--primary);
+            font-weight: 800;
             font-size: 12px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -666,9 +725,10 @@
         }
 
         tbody tr:hover {
-            background: #f0fdfa;
+            background: rgba(224, 242, 254, 0.5);
         }
 
+        /* Soft blue hover */
         tbody tr:last-child td {
             border-bottom: none;
         }
@@ -686,13 +746,15 @@
             padding: 6px 12px;
             border-radius: 6px;
             font-size: 12px;
-            font-weight: 700;
+            font-weight: 800;
             text-transform: capitalize;
+            border: 1px solid transparent;
         }
 
         .badge.pending {
             background: var(--warn-bg);
             color: var(--warn-text);
+            border-color: #fde047;
         }
 
         .badge.paid,
@@ -700,6 +762,7 @@
         .badge.available {
             background: var(--success-bg);
             color: var(--success-text);
+            border-color: #6ee7b7;
         }
 
         .badge.expired,
@@ -707,24 +770,38 @@
         .badge.used {
             background: var(--danger-bg);
             color: var(--danger-text);
+            border-color: #fecdd3;
         }
 
         .badge.waiting_payment {
             background: #e0f2fe;
             color: #0369a1;
+            border-color: #bae6fd;
         }
 
         .badge.manual,
         .badge.stock_empty {
-            background: #fee2e2;
-            color: #991b1b;
+            background: #ffe4e6;
+            color: #be123c;
+            border-color: #fecdd3;
         }
 
+        /* Empty State Aesthetic 🎐 */
         .empty {
             text-align: center;
-            padding: 40px !important;
+            padding: 60px !important;
             color: var(--text-muted);
             font-style: italic;
+            font-weight: 500;
+            font-size: 15px;
+        }
+
+        .empty::before {
+            content: "🎐";
+            display: block;
+            font-size: 36px;
+            margin-bottom: 12px;
+            opacity: 0.8;
         }
 
         @keyframes fadeUp {
@@ -855,7 +932,7 @@
     <div class="sidebar">
         <div class="sidebar-brand">
             <div class="sidebar-brand-left">
-                <div class="sidebar-logo">AE</div>
+                <div class="sidebar-logo">⛩️</div>
                 <div class="sidebar-text">
                     <div class="sidebar-kicker">AE Game Store</div>
                     <div class="sidebar-title">Admin Panel</div>
@@ -884,13 +961,13 @@
                     <div class="logo-badge">AE</div>
                     <div>
                         <div class="nav-kicker">AE Game Store</div>
-                        <div class="nav-title">Modern Admin Dashboard</div>
+                        <div class="nav-title">Zen Admin Dashboard</div>
                     </div>
                 </div>
                 <div class="nav-actions">
                     <div class="nav-chip">
                         <span class="chip-dot"></span>
-                        <span>Admin Session Active</span>
+                        <span>Sistem Aktif & Terlindungi</span>
                     </div>
                     <button class="ghost-btn" style="padding: 8px 14px;" onclick="logoutAdmin()">Logout</button>
                 </div>
@@ -899,19 +976,19 @@
             <div class="hero">
                 <div class="hero-row">
                     <div style="max-width: 600px;">
-                        <div class="hero-badge">AE GAME STORE • DASHBOARD</div>
-                        <h1>Kelola store kamu dengan tampilan yang lebih modern</h1>
-                        <p>Pantau produk, stok key, dan order masuk dalam satu dashboard yang bersih, ringan dilihat,
-                            dan nyaman dipakai untuk operasional harian.</p>
+                        <div class="hero-badge">🌊 AE GAME STORE • DASHBOARD</div>
+                        <h1>Pantau operasional tokomu setenang ombak lautan</h1>
+                        <p>Kelola produk, periksa stok voucher, dan pantau pesanan yang masuk dalam satu tempat yang
+                            nyaman dan tertata rapi.</p>
                     </div>
                     <div>
-                        <button class="logout-btn" onclick="refreshAllData()">Refresh Semua Data</button>
+                        <button class="logout-btn" onclick="refreshAllData()">Refresh Semua Data 🌊</button>
                     </div>
                 </div>
                 <div class="hero-mini">
-                    <div class="mini-pill">Live Data Admin</div>
-                    <div class="mini-pill">Minimal UI</div>
-                    <div class="mini-pill">Protected Access</div>
+                    <div class="mini-pill">Live Monitoring</div>
+                    <div class="mini-pill">Aesthetic UI</div>
+                    <div class="mini-pill">Secured System</div>
                 </div>
             </div>
 
@@ -1291,7 +1368,7 @@
                     statusText.innerText = "Belum ada key.";
                     tableBody.innerHTML = `
                         <tr>
-                            <td colspan="5" class="empty">Belum ada key di database.</td>
+                            <td colspan="5" class="empty">Belum ada key... stok masih kosong.</td>
                         </tr>
                     `;
                     return;
@@ -1450,7 +1527,7 @@
                     statusText.innerText = "Belum ada order.";
                     tableBody.innerHTML = `
                         <tr>
-                            <td colspan="11" class="empty">Belum ada transaksi.</td>
+                            <td colspan="11" class="empty">Lautan masih tenang... belum ada transaksi.</td>
                         </tr>
                     `;
                     return;
@@ -1500,7 +1577,7 @@
             if (filteredOrders.length === 0) {
                 tableBody.innerHTML = `
                     <tr>
-                        <td colspan="11" class="empty">Tidak ada order yang cocok dengan filter.</td>
+                        <td colspan="11" class="empty">Tidak ada pesanan yang sesuai dengan filter.</td>
                     </tr>
                 `;
                 return;
