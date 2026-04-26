@@ -1,14 +1,21 @@
 :root {
-    --primary: #2563eb;
-    --primary-hover: #1d4ed8;
-    --secondary: #38bdf8;
-    --bg-color: #f8fbff;
-    --card-bg: rgba(255, 255, 255, 0.88);
-    --text-main: #0f172a;
-    --text-muted: #64748b;
-    --border-color: rgba(191, 219, 254, 0.65);
-    --shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.03);
-    --shadow-md: 0 12px 30px rgba(15, 23, 42, 0.08);
+    /* Tema Ocean & Nature */
+    --primary: #0284c7;
+    /* Ocean Blue */
+    --primary-hover: #0369a1;
+    /* Deep Ocean */
+    --secondary: #10b981;
+    /* Nature Emerald Green */
+    --bg-color: #f0fdfa;
+    /* Light Mint / Water */
+    --card-bg: rgba(255, 255, 255, 0.85);
+    --text-main: #064e3b;
+    /* Dark Forest Green untuk teks utama */
+    --text-muted: #475569;
+    --border-color: rgba(16, 185, 129, 0.35);
+    /* Soft Green Border */
+    --shadow-sm: 0 4px 12px rgba(2, 132, 199, 0.05);
+    --shadow-md: 0 12px 30px rgba(2, 132, 199, 0.08);
     --radius-xl: 28px;
     --radius-lg: 20px;
     --radius-md: 14px;
@@ -23,9 +30,10 @@
 
 body {
     background:
-        radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.15), transparent 40%),
-        radial-gradient(circle at 100% 100%, rgba(37, 99, 235, 0.1), transparent 40%),
-        linear-gradient(135deg, #eef5fb, #f8fbff);
+        radial-gradient(circle at 0% 0%, rgba(16, 185, 129, 0.18), transparent 40%),
+        radial-gradient(circle at 100% 100%, rgba(2, 132, 199, 0.15), transparent 40%),
+        linear-gradient(135deg, #e0f2fe, #d1fae5);
+    /* Gradient Langit Biru ke Daun Mint */
     color: var(--text-main);
     min-height: 100vh;
     display: flex;
@@ -35,7 +43,7 @@ body {
 
 /* ===== HEADER ===== */
 .site-header {
-    background: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.65);
     backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--border-color);
     position: sticky;
@@ -71,7 +79,7 @@ body {
     justify-content: center;
     font-size: 20px;
     font-weight: 800;
-    box-shadow: 0 8px 16px rgba(37, 99, 235, 0.2);
+    box-shadow: 0 8px 16px rgba(16, 185, 129, 0.25);
 }
 
 .brand-copy strong {
@@ -91,11 +99,11 @@ body {
 .header-note {
     font-size: 12px;
     color: var(--primary);
-    background: #eff6ff;
+    background: #e0f2fe;
     padding: 8px 16px;
     border-radius: 99px;
     font-weight: 700;
-    border: 1px solid #bfdbfe;
+    border: 1px solid #bae6fd;
 }
 
 /* ===== MAIN CONTAINER ===== */
@@ -122,11 +130,12 @@ body {
     font-size: 11px;
     font-weight: 800;
     letter-spacing: 1px;
-    color: var(--primary);
-    background: rgba(37, 99, 235, 0.1);
+    color: var(--secondary);
+    background: rgba(16, 185, 129, 0.15);
     padding: 8px 16px;
     border-radius: 99px;
     margin-bottom: 20px;
+    border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
 .hero h1 {
@@ -135,7 +144,7 @@ body {
     margin-bottom: 16px;
     font-weight: 800;
     letter-spacing: -1px;
-    color: #020617;
+    color: #022c22;
 }
 
 .hero p {
@@ -168,7 +177,7 @@ body {
 .section-head {
     margin-bottom: 28px;
     padding-bottom: 20px;
-    border-bottom: 1px solid rgba(191, 219, 254, 0.4);
+    border-bottom: 1px solid rgba(16, 185, 129, 0.2);
 }
 
 .section-head h2 {
@@ -176,6 +185,7 @@ body {
     font-weight: 800;
     margin-bottom: 6px;
     letter-spacing: -0.5px;
+    color: #064e3b;
 }
 
 .section-head p {
@@ -193,7 +203,7 @@ body {
     font-size: 14px;
     font-weight: 700;
     margin-bottom: 10px;
-    color: #334155;
+    color: #0f766e;
 }
 
 .game-grid {
@@ -219,8 +229,8 @@ select {
     width: 100%;
     padding: 16px;
     border-radius: var(--radius-md);
-    border: 1px solid #cbd5e1;
-    background: #f8fbff;
+    border: 1px solid #99f6e4;
+    background: #f0fdfa;
     color: var(--text-main);
     font-size: 14px;
     font-weight: 500;
@@ -231,9 +241,9 @@ select {
 
 input:focus,
 select:focus {
-    border-color: #60a5fa;
+    border-color: #2dd4bf;
     background: #ffffff;
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.10);
+    box-shadow: 0 0 0 4px rgba(45, 212, 191, 0.15);
 }
 
 input::placeholder {
@@ -250,14 +260,14 @@ button#buyBtn {
     font-size: 16px;
     font-weight: 800;
     cursor: pointer;
-    box-shadow: 0 10px 24px rgba(37, 99, 235, 0.25);
+    box-shadow: 0 10px 24px rgba(16, 185, 129, 0.25);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     margin-top: 10px;
 }
 
 button#buyBtn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 14px 28px rgba(37, 99, 235, 0.35);
+    box-shadow: 0 14px 28px rgba(16, 185, 129, 0.35);
 }
 
 button#buyBtn:active {
@@ -285,7 +295,7 @@ button#buyBtn:active {
 .summary-card {
     position: sticky;
     top: 100px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(248, 251, 255, 0.9));
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(240, 253, 250, 0.9));
 }
 
 .summary-head {
@@ -298,7 +308,7 @@ button#buyBtn:active {
     text-transform: uppercase;
     letter-spacing: 1px;
     color: white;
-    background: var(--text-main);
+    background: #064e3b;
     padding: 6px 12px;
     border-radius: 6px;
 }
@@ -307,7 +317,7 @@ button#buyBtn:active {
     font-size: 24px;
     font-weight: 800;
     margin-bottom: 6px;
-    color: #0f172a;
+    color: #022c22;
     letter-spacing: -0.5px;
 }
 
@@ -316,12 +326,12 @@ button#buyBtn:active {
     color: var(--text-muted);
     margin-bottom: 24px;
     padding-bottom: 24px;
-    border-bottom: 1px dashed #cbd5e1;
+    border-bottom: 1px dashed #99f6e4;
 }
 
 .price-box {
-    background: #eff6ff;
-    border: 1px solid #bfdbfe;
+    background: #e0f2fe;
+    border: 1px solid #bae6fd;
     border-radius: var(--radius-lg);
     padding: 24px;
     display: flex;
@@ -339,7 +349,7 @@ button#buyBtn:active {
 .price-box strong {
     font-size: 34px;
     font-weight: 800;
-    color: #0f172a;
+    color: #0369a1;
     line-height: 1;
 }
 
@@ -354,12 +364,12 @@ button#buyBtn:active {
     flex-direction: column;
     gap: 4px;
     padding-left: 16px;
-    border-left: 3px solid var(--primary);
+    border-left: 3px solid var(--secondary);
 }
 
 .summary-point strong {
     font-size: 14px;
-    color: #334155;
+    color: #0f766e;
     font-weight: 700;
 }
 
