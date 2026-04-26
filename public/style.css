@@ -2,16 +2,16 @@
     --primary: #2563eb;
     --primary-hover: #1d4ed8;
     --secondary: #38bdf8;
-    --bg-color: #f4f8fc;
-    --card-bg: rgba(255, 255, 255, 0.85);
+    --bg-color: #f8fbff;
+    --card-bg: rgba(255, 255, 255, 0.88);
     --text-main: #0f172a;
     --text-muted: #64748b;
-    --border-color: rgba(191, 219, 254, 0.6);
-    --shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.05);
+    --border-color: rgba(191, 219, 254, 0.65);
+    --shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.03);
     --shadow-md: 0 12px 30px rgba(15, 23, 42, 0.08);
-    --radius-lg: 24px;
-    --radius-md: 16px;
-    --radius-sm: 12px;
+    --radius-xl: 28px;
+    --radius-lg: 20px;
+    --radius-md: 14px;
 }
 
 * {
@@ -36,7 +36,7 @@ body {
 /* ===== HEADER ===== */
 .site-header {
     background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(12px);
+    backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--border-color);
     position: sticky;
     top: 0;
@@ -65,12 +65,12 @@ body {
     height: 48px;
     background: linear-gradient(135deg, var(--primary), var(--secondary));
     color: white;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 20px;
-    font-weight: bold;
+    font-weight: 800;
     box-shadow: 0 8px 16px rgba(37, 99, 235, 0.2);
 }
 
@@ -78,29 +78,31 @@ body {
     display: block;
     font-size: 18px;
     color: var(--text-main);
+    font-weight: 800;
+    letter-spacing: -0.5px;
 }
 
 .brand-copy span {
     font-size: 13px;
     color: var(--text-muted);
-    letter-spacing: 0.5px;
+    font-weight: 500;
 }
 
 .header-note {
-    font-size: 13px;
+    font-size: 12px;
     color: var(--primary);
-    background: rgba(56, 189, 248, 0.1);
+    background: #eff6ff;
     padding: 8px 16px;
     border-radius: 99px;
-    font-weight: 600;
-    border: 1px solid rgba(56, 189, 248, 0.2);
+    font-weight: 700;
+    border: 1px solid #bfdbfe;
 }
 
 /* ===== MAIN CONTAINER ===== */
 .page {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 40px 24px;
+    padding: 40px 24px 80px;
     flex: 1;
     width: 100%;
     animation: fadeUp 0.6s ease-out;
@@ -117,22 +119,21 @@ body {
 
 .hero-badge {
     display: inline-block;
-    font-size: 12px;
-    font-weight: 700;
+    font-size: 11px;
+    font-weight: 800;
     letter-spacing: 1px;
     color: var(--primary);
-    background: white;
+    background: rgba(37, 99, 235, 0.1);
     padding: 8px 16px;
     border-radius: 99px;
-    border: 1px solid var(--border-color);
     margin-bottom: 20px;
-    box-shadow: var(--shadow-sm);
 }
 
 .hero h1 {
     font-size: 42px;
     line-height: 1.2;
     margin-bottom: 16px;
+    font-weight: 800;
     letter-spacing: -1px;
     color: #020617;
 }
@@ -148,7 +149,7 @@ body {
 /* ===== STORE LAYOUT ===== */
 .store-layout {
     display: grid;
-    grid-template-columns: 1.5fr 1fr;
+    grid-template-columns: 1.6fr 1fr;
     gap: 32px;
     align-items: start;
 }
@@ -156,23 +157,25 @@ body {
 .shop-card,
 .summary-card {
     background: var(--card-bg);
-    backdrop-filter: blur(16px);
+    backdrop-filter: blur(20px);
     border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    padding: 32px;
+    border-radius: var(--radius-xl);
+    padding: 36px;
     box-shadow: var(--shadow-md);
 }
 
 /* ===== FORM ELEMENTS ===== */
 .section-head {
-    margin-bottom: 24px;
-    padding-bottom: 16px;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
     border-bottom: 1px solid rgba(191, 219, 254, 0.4);
 }
 
 .section-head h2 {
-    font-size: 22px;
+    font-size: 24px;
+    font-weight: 800;
     margin-bottom: 6px;
+    letter-spacing: -0.5px;
 }
 
 .section-head p {
@@ -188,50 +191,15 @@ body {
 .field label {
     display: block;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 700;
     margin-bottom: 10px;
     color: #334155;
 }
 
-/* Game grid default styling assuming JS populates it */
 .game-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
     gap: 12px;
-}
-
-.game-card {
-    border: 1px solid #cbd5e1;
-    border-radius: 16px;
-    background: #fff;
-    overflow: hidden;
-    cursor: pointer;
-    transition: 0.2s ease;
-}
-
-.game-card:hover {
-    transform: translateY(-2px);
-    border-color: #60a5fa;
-}
-
-.game-card.active {
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
-}
-
-.game-card img {
-    width: 100%;
-    height: 140px;
-    object-fit: cover;
-    display: block;
-}
-
-.game-card span {
-    display: block;
-    padding: 10px 12px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #0f172a;
 }
 
 .form-grid {
@@ -249,12 +217,13 @@ body {
 input,
 select {
     width: 100%;
-    padding: 14px 16px;
-    border-radius: var(--radius-sm);
+    padding: 16px;
+    border-radius: var(--radius-md);
     border: 1px solid #cbd5e1;
     background: #f8fbff;
     color: var(--text-main);
-    font-size: 15px;
+    font-size: 14px;
+    font-weight: 500;
     transition: all 0.2s ease;
     outline: none;
     appearance: auto;
@@ -267,15 +236,19 @@ select:focus {
     box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.10);
 }
 
+input::placeholder {
+    color: #94a3b8;
+}
+
 button#buyBtn {
     width: 100%;
-    padding: 16px;
+    padding: 18px;
     border: none;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
     background: linear-gradient(135deg, var(--primary), var(--secondary));
     color: white;
     font-size: 16px;
-    font-weight: bold;
+    font-weight: 800;
     cursor: pointer;
     box-shadow: 0 10px 24px rgba(37, 99, 235, 0.25);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -293,12 +266,11 @@ button#buyBtn:active {
 
 #loading {
     display: none;
-    /* Disembunyikan secara default, JS akan memunculkannya */
     text-align: center;
     margin-top: 16px;
     font-size: 14px;
     color: var(--primary);
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .trust-text {
@@ -306,34 +278,37 @@ button#buyBtn:active {
     font-size: 12px;
     color: var(--text-muted);
     margin-top: 24px;
+    line-height: 1.6;
 }
 
 /* ===== SUMMARY CARD ===== */
 .summary-card {
     position: sticky;
     top: 100px;
-    background: linear-gradient(180deg, #ffffff, #f8fbff);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(248, 251, 255, 0.9));
 }
 
 .summary-head {
-    margin-bottom: 20px;
+    margin-bottom: 24px;
 }
 
 .summary-badge {
     font-size: 11px;
-    font-weight: bold;
+    font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 1px;
     color: white;
-    background: #0f172a;
+    background: var(--text-main);
     padding: 6px 12px;
     border-radius: 6px;
 }
 
 #previewGame {
     font-size: 24px;
-    margin-bottom: 4px;
+    font-weight: 800;
+    margin-bottom: 6px;
     color: #0f172a;
+    letter-spacing: -0.5px;
 }
 
 #previewProduct {
@@ -347,23 +322,25 @@ button#buyBtn:active {
 .price-box {
     background: #eff6ff;
     border: 1px solid #bfdbfe;
-    border-radius: var(--radius-md);
-    padding: 20px;
+    border-radius: var(--radius-lg);
+    padding: 24px;
     display: flex;
     flex-direction: column;
     gap: 8px;
-    margin-bottom: 24px;
+    margin-bottom: 28px;
 }
 
 .price-box span {
     font-size: 14px;
     color: var(--primary);
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .price-box strong {
-    font-size: 32px;
+    font-size: 34px;
+    font-weight: 800;
     color: #0f172a;
+    line-height: 1;
 }
 
 .summary-points {
@@ -383,15 +360,15 @@ button#buyBtn:active {
 .summary-point strong {
     font-size: 14px;
     color: #334155;
+    font-weight: 700;
 }
 
 .summary-point span {
     font-size: 13px;
     color: var(--text-muted);
-    line-height: 1.4;
+    line-height: 1.5;
 }
 
-/* Animations */
 @keyframes fadeUp {
     from {
         opacity: 0;
@@ -413,29 +390,14 @@ button#buyBtn:active {
     .summary-card {
         position: static;
     }
-
-    .hero h1 {
-        font-size: 32px;
-    }
 }
 
 @media (max-width: 600px) {
     .form-grid {
         grid-template-columns: 1fr;
-        gap: 16px;
     }
 
     .header-inner {
         flex-direction: column;
-        text-align: center;
-    }
-
-    .page {
-        padding: 24px 16px;
-    }
-
-    .shop-card,
-    .summary-card {
-        padding: 24px 16px;
     }
 }
