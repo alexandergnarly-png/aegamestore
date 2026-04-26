@@ -1543,6 +1543,11 @@
                             <button class="ghost-btn" onclick='copyOrderDetail(${safeId}, ${safeName}, ${safeContact}, ${safeGame}, ${safeProduct}, ${Number(item.price || 0)}, ${safePayment}, ${safeDelivery}, ${safeGameKey})'>
                                 Copy Detail
                             </button>
+                            ${String(item.payment_status || "").toLowerCase() !== "paid" ? `
+    <button class="ghost-btn" onclick='confirmPayment(${safeId})'>
+        Konfirmasi Bayar
+    </button>
+` : ""}
                             <button class="danger-btn" onclick='deleteOrder(${safeId})' ${isProtected ? "disabled" : ""}>
                                 Hapus
                             </button>
@@ -1569,7 +1574,33 @@ Game Key : ${key || "-"}
 
             copyToClipboard(text);
         }
+        async function confirmPayment(orderId) {
+            const yakin = confirm("Yakin pembayaran sudah masuk dan key mau dikirim?");
+            if (!yakin) return;
 
+            try {
+                const res = await fetch(`/orders/${encodeURIComponent(orderId)}/confirm-payment`, {
+                    method: "POST",
+                    headers: {
+                        "x-csrf-token": getCsrfToken()
+                    }
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    alert(data.message || "Gagal konfirmasi pembayaran");
+                    return;
+                }
+
+                alert(data.message || "Pembayaran dikonfirmasi");
+                loadOrders();
+                loadKeys();
+                loadStockSummary();
+            } catch (err) {
+                alert("Terjadi error saat konfirmasi pembayaran");
+            }
+        }
         async function deleteOrder(orderId) {
             const yakin = confirm("Yakin mau hapus order ini?");
             if (!yakin) return;

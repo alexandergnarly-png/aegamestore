@@ -173,8 +173,8 @@ async function buy() {
 
         const data = await res.json();
 
-        if (data.invoiceUrl) {
-            window.location.href = data.invoiceUrl;
+        if (data.resultUrl) {
+            window.location.href = data.resultUrl;
             return;
         }
 

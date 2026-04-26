@@ -321,7 +321,7 @@ app.get("/ae-control", requireAdminAuth, (req, res) => {
     res.sendFile(path.join(__dirname, "public", "admin.html"));
 });
 
-// buat order + invoice Xendit
+// buat order (QRIS manual)
 app.post("/create-order", orderLimiter, async (req, res) => {
     const { product_id, name, contact } = req.body;
 
@@ -435,170 +435,17 @@ app.post("/create-order", orderLimiter, async (req, res) => {
             ]
         );
 
-        try {
-            const auth = Buffer.from(process.env.XENDIT_SECRET_KEY + ":").toString("base64");
-            const baseUrl = process.env.APP_BASE_URL || `http://localhost:${port}`;
-            const fetch = require("node-fetch");
+        const baseUrl = process.env.APP_BASE_URL || `http://localhost:${port}`;
 
-            const xenditResponse = await fetch("https://api.xendit.co/v2/invoices", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": "Basic " + auth
-                },
-                body: JSON.stringify({
-                    external_id: orderId,
-                    amount: price,
-                    payer_email: cleanContact.includes("@") ? cleanContact : "no-reply@aestore.com",
-                    description: `Pembayaran untuk ${game} - ${productName}`,
-                    success_redirect_url: `${baseUrl}/result?order_id=${orderId}`,
-                    failure_redirect_url: `${baseUrl}/result?order_id=${orderId}`
-                })
-            });
-
-            const rawText = await xenditResponse.text();
-
-
-            let data;
-            try {
-                data = JSON.parse(rawText);
-            } catch (error) {
-                return res.status(500).json({
-                    message: "Response Xendit bukan JSON"
-                });
-            }
-
-            if (!xenditResponse.ok) {
-                return res.status(500).json({
-                    message: data.message || "Gagal membuat invoice di Xendit"
-                });
-            }
-
-            if (!data.invoice_url) {
-                return res.status(500).json({
-                    message: "invoice_url tidak ada dari Xendit"
-                });
-            }
-
-            return res.json({
-                message: "Invoice berhasil dibuat!",
-                invoiceUrl: data.invoice_url
-            });
-        } catch (error) {
-            console.error("ERROR SERVER:", error);
-            return res.status(500).json({
-                message: "Server gagal menghubungi Xendit"
-            });
-        }
+        return res.json({
+            message: "Order berhasil dibuat. Silakan bayar via QRIS.",
+            resultUrl: `${baseUrl}/result?order_id=${orderId}`
+        });
     } catch (err) {
         console.error("ERROR CREATE ORDER:", err);
         return res.status(500).json({
             message: "Gagal membuat order"
         });
-    }
-});
-
-app.post("/xendit-webhook", async (req, res) => {
-    const callbackToken = String(req.headers["x-callback-token"] || "").trim();
-
-    if (callbackToken !== String(process.env.XENDIT_CALLBACK_TOKEN || "").trim()) {
-        return res.status(403).send("Forbidden");
-    }
-
-    const data = req.body;
-    const status = String(data?.status || "").toUpperCase();
-    const orderId = String(data?.external_id || "").trim();
-
-    if (!orderId) {
-        return res.status(400).send("ORDER ID TIDAK VALID");
-    }
-
-    const client = await db.connect();
-
-    try {
-        if (status === "PAID") {
-            await client.query("BEGIN");
-
-            const orderResult = await client.query(
-                "SELECT * FROM orders WHERE id = $1 LIMIT 1",
-                [orderId]
-            );
-
-            const order = orderResult.rows[0];
-
-            if (!order) {
-                await client.query("ROLLBACK");
-                return res.status(404).send("ORDER TIDAK DITEMUKAN");
-            }
-
-            if (String(order.payment_status).toLowerCase() === "paid") {
-                await client.query("COMMIT");
-                return res.status(200).send("OK");
-            }
-
-            const keyResult = await client.query(
-                `SELECT * FROM keys
-                 WHERE product_id = $1 AND used = 0
-                 ORDER BY id ASC
-                 LIMIT 1`,
-                [order.product_id]
-            );
-
-            const keyRow = keyResult.rows[0];
-
-            if (keyRow) {
-                const lockResult = await client.query(
-                    "UPDATE keys SET used = 1 WHERE id = $1 AND used = 0 RETURNING id",
-                    [keyRow.id]
-                );
-
-                if (lockResult.rows.length === 0) {
-                    throw new Error("Key gagal dikunci untuk order ini");
-                }
-
-                await client.query(
-                    `UPDATE orders
-                     SET payment_status = $1, delivery_status = $2, gameKey = $3
-                     WHERE id = $4`,
-                    ["paid", "delivered", keyRow.key, orderId]
-                );
-
-                await client.query("COMMIT");
-                return res.status(200).send("OK");
-            }
-
-            await client.query(
-                `UPDATE orders
-                 SET payment_status = $1, delivery_status = $2, gameKey = $3
-                 WHERE id = $4`,
-                ["paid", "manual", "STOK HABIS - CEK ADMIN", orderId]
-            );
-
-            await client.query("COMMIT");
-            return res.status(200).send("OK");
-        }
-
-        if (status === "EXPIRED") {
-            await client.query(
-                `UPDATE orders
-                 SET payment_status = $1, delivery_status = $2
-                 WHERE id = $3 AND payment_status <> $4`,
-                ["expired", "cancelled", orderId, "paid"]
-            );
-
-            return res.status(200).send("OK");
-        }
-
-        return res.status(200).send("IGNORED");
-    } catch (err) {
-        try {
-            await client.query("ROLLBACK");
-        } catch (_) { }
-
-        console.error("ERROR WEBHOOK XENDIT:", err.message);
-        return res.status(500).send("ERROR");
-    } finally {
-        client.release();
     }
 });
 
@@ -643,6 +490,87 @@ app.get("/order/:id", async (req, res) => {
         return res.status(500).json({
             message: "Gagal mengambil data order"
         });
+    }
+});
+
+app.post("/orders/:id/confirm-payment", requireAdminAuth, requireAdminCsrf, async (req, res) => {
+    const orderId = String(req.params.id || "").trim();
+
+    if (!orderId) {
+        return res.status(400).json({ message: "ID order tidak valid" });
+    }
+
+    const client = await db.connect();
+
+    try {
+        await client.query("BEGIN");
+
+        const orderResult = await client.query(
+            "SELECT * FROM orders WHERE id = $1 LIMIT 1",
+            [orderId]
+        );
+
+        const order = orderResult.rows[0];
+
+        if (!order) {
+            await client.query("ROLLBACK");
+            return res.status(404).json({ message: "Order tidak ditemukan" });
+        }
+
+        if (String(order.payment_status).toLowerCase() === "paid") {
+            await client.query("COMMIT");
+            return res.json({ message: "Order sudah dibayar sebelumnya" });
+        }
+
+        const keyResult = await client.query(
+            `SELECT * FROM keys
+             WHERE product_id = $1 AND used = 0
+             ORDER BY id ASC
+             LIMIT 1`,
+            [order.product_id]
+        );
+
+        const keyRow = keyResult.rows[0];
+
+        if (!keyRow) {
+            await client.query(
+                `UPDATE orders
+                 SET payment_status = $1, delivery_status = $2, gameKey = $3
+                 WHERE id = $4`,
+                ["paid", "manual", "STOK HABIS - CEK ADMIN", orderId]
+            );
+
+            await client.query("COMMIT");
+            return res.json({ message: "Pembayaran dikonfirmasi, tapi stok key habis" });
+        }
+
+        await client.query(
+            "UPDATE keys SET used = 1 WHERE id = $1 AND used = 0",
+            [keyRow.id]
+        );
+
+        await client.query(
+            `UPDATE orders
+             SET payment_status = $1, delivery_status = $2, gameKey = $3
+             WHERE id = $4`,
+            ["paid", "delivered", keyRow.key, orderId]
+        );
+
+        await client.query("COMMIT");
+
+        return res.json({
+            message: "Pembayaran dikonfirmasi dan key berhasil dikirim"
+        });
+    } catch (err) {
+        try {
+            await client.query("ROLLBACK");
+        } catch (_) { }
+
+        return res.status(500).json({
+            message: "Gagal konfirmasi pembayaran: " + err.message
+        });
+    } finally {
+        client.release();
     }
 });
 

@@ -414,7 +414,16 @@
                 else {
                     latestGameKey = "";
                     copyBtn.style.display = "none";
-                    document.getElementById("keyBox").innerText = "Belum tersedia";
+
+                    document.getElementById("keyBox").innerHTML = `
+        <div style="font-family:Segoe UI,sans-serif;font-size:14px;font-weight:600;margin-bottom:12px;">
+            Silakan bayar via QRIS di bawah ini.
+        </div>
+        <img src="/qris.png" alt="QRIS AE Game Store" style="width:100%;max-width:260px;border-radius:16px;border:1px solid #bfdbfe;">
+        <div style="font-family:Segoe UI,sans-serif;font-size:13px;font-weight:500;margin-top:12px;color:#64748b;">
+            Setelah bayar, admin akan cek pembayaran dan mengirim key.
+        </div>
+    `;
                 }
             } catch (error) {
                 document.getElementById("statusRow").innerHTML =
