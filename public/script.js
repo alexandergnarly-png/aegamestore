@@ -178,7 +178,7 @@ async function buy() {
             return;
         }
 
-        alert(data.message || "Gagal membuat invoice");
+        alert(data.message || "Gagal membuat order");
     } catch (err) {
         alert("Terjadi error server");
     }
