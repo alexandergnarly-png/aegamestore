@@ -36,9 +36,9 @@
                 onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
                 <span class="pulse-dot"></span> <span data-i18n="howToBuy">Cara Beli 📖</span>
             </div>
-            <div style="display:flex; gap:8px;">
-                <button type="button" onclick="setLanguage('id')">ID</button>
-                <button type="button" onclick="setLanguage('en')">EN</button>
+            <div class="lang-switch">
+                <button type="button" onclick="setLanguage('id')" class="lang-btn" id="btn-id">ID</button>
+                <button type="button" onclick="setLanguage('en')" class="lang-btn" id="btn-en">EN</button>
             </div>
         </div>
     </header>
@@ -47,8 +47,8 @@
         <section class="hero">
             <div class="hero-copy">
                 <span class="hero-badge">🌊 SEAMLESS TOP-UP EXPERIENCE</span>
-                <h1>Arungi petualangan barumu dengan top-up yang lebih mudah</h1>
-                <p>
+                <h1 data-i18n="heroTitle">Arungi petualangan barumu dengan top-up yang lebih mudah</h1>
+                <p data-i18n="heroDesc">
                     Temukan game favoritmu, pilih produk, dan selesaikan pembayaran setenang ombak di lautan.
                     Transaksi instan dan terenkripsi.
                 </p>
@@ -117,7 +117,7 @@
                 <p class="summary-product" id="previewProduct">Menunggu pilihan...</p>
 
                 <div class="price-box">
-                    <span>Total Pembayaran</span>
+                    <span data-i18n="totalPayment">Total Pembayaran</span>
                     <strong id="previewPrice">Rp 0</strong>
                 </div>
 

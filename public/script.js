@@ -8,7 +8,10 @@ const translations = {
         loadingWebsite: "Memuat Website...",
         howToBuy: "Cara Beli 📖",
         searchGamePlaceholder: "Cari nama game (contoh: PUBG)...",
-        processingOrder: "Memproses pesanan..."
+        processingOrder: "Memproses pesanan...",
+        heroTitle: "Arungi petualangan barumu dengan top-up yang lebih mudah",
+        heroDesc: "Temukan game favoritmu, pilih produk, dan selesaikan pembayaran setenang ombak di lautan.",
+        totalPayment: "Total Pembayaran",
     },
     en: {
         selectProduct: "Select Product",
@@ -19,7 +22,10 @@ const translations = {
         loadingWebsite: "Loading Website...",
         howToBuy: "How to Buy 📖",
         searchGamePlaceholder: "Search game name (e.g. PUBG)...",
-        processingOrder: "Processing order..."
+        processingOrder: "Processing order...",
+        heroTitle: "Start your new adventure with easier top-ups",
+        heroDesc: "Find your favorite game, choose a product, and complete payment smoothly like ocean waves.",
+        totalPayment: "Total Payment"
     }
 };
 
@@ -32,7 +38,7 @@ function setLanguage(lang) {
     document.querySelectorAll("[data-i18n]").forEach((element) => {
         const key = element.getAttribute("data-i18n");
 
-        if (translations[lang][key]) {
+        if (translations[lang] && translations[lang][key]) {
             element.innerText = translations[lang][key];
         }
     });
@@ -44,6 +50,14 @@ function setLanguage(lang) {
             element.placeholder = translations[lang][key];
         }
     });
+    const btnId = document.getElementById("btn-id");
+    const btnEn = document.getElementById("btn-en");
+
+    if (btnId && btnEn) {
+        btnId.classList.remove("active");
+        btnEn.classList.remove("active");
+        document.getElementById("btn-" + lang).classList.add("active");
+    }
 }
 let allProducts = [];
 
