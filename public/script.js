@@ -1,3 +1,50 @@
+const translations = {
+    id: {
+        selectProduct: "Pilih Produk",
+        fillDetails: "Lengkapi data di bawah ini untuk memulai pesanan.",
+        selectGame: "1. Pilih Game",
+        buyNow: "Beli Sekarang 🌊",
+        processing: "Memproses...",
+        loadingWebsite: "Memuat Website...",
+        howToBuy: "Cara Beli 📖",
+        searchGamePlaceholder: "Cari nama game (contoh: PUBG)...",
+        processingOrder: "Memproses pesanan..."
+    },
+    en: {
+        selectProduct: "Select Product",
+        fillDetails: "Fill in the details below to start your order.",
+        selectGame: "1. Select Game",
+        buyNow: "Buy Now 🌊",
+        processing: "Processing...",
+        loadingWebsite: "Loading Website...",
+        howToBuy: "How to Buy 📖",
+        searchGamePlaceholder: "Search game name (e.g. PUBG)...",
+        processingOrder: "Processing order..."
+    }
+};
+
+let currentLanguage = localStorage.getItem("language") || "id";
+
+function setLanguage(lang) {
+    currentLanguage = lang;
+    localStorage.setItem("language", lang);
+
+    document.querySelectorAll("[data-i18n]").forEach((element) => {
+        const key = element.getAttribute("data-i18n");
+
+        if (translations[lang][key]) {
+            element.innerText = translations[lang][key];
+        }
+    });
+
+    document.querySelectorAll("[data-i18n-placeholder]").forEach((element) => {
+        const key = element.getAttribute("data-i18n-placeholder");
+
+        if (translations[lang][key]) {
+            element.placeholder = translations[lang][key];
+        }
+    });
+}
 let allProducts = [];
 
 const gameImages = {
@@ -25,7 +72,9 @@ function formatRupiah(num) {
 function setLoading(isLoading) {
     loadingText.style.display = isLoading ? "block" : "none";
     buyBtn.disabled = isLoading;
-    buyBtn.innerText = isLoading ? "Memproses..." : "Beli Sekarang 🌊";
+    buyBtn.innerText = isLoading
+        ? translations[currentLanguage].processing
+        : translations[currentLanguage].buyNow;
 }
 
 async function loadAllProducts() {
@@ -190,4 +239,5 @@ async function buy() {
     setLoading(false);
 }
 
+setLanguage(currentLanguage);
 loadAllProducts();

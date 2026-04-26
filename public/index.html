@@ -13,7 +13,7 @@
     <div id="preloader">
         <div class="loader-content">
             <div class="loader-logo">⛩️</div>
-            <div class="loader-text">Memuat Website...</div>
+            <div class="loader-text" data-i18n="loadingWebsite">Memuat Website...</div>
             <div class="loader-bar">
                 <div class="loader-progress"></div>
             </div>
@@ -34,7 +34,11 @@
 
             <div class="header-note" style="cursor: pointer; transition: 0.2s;" onclick="showGuide()"
                 onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                <span class="pulse-dot"></span> Cara Beli 📖
+                <span class="pulse-dot"></span> <span data-i18n="howToBuy">Cara Beli 📖</span>
+            </div>
+            <div style="display:flex; gap:8px;">
+                <button type="button" onclick="setLanguage('id')">ID</button>
+                <button type="button" onclick="setLanguage('en')">EN</button>
             </div>
         </div>
     </header>
@@ -55,18 +59,18 @@
             <div class="shop-card">
                 <div class="section-head">
                     <div>
-                        <h2>Pilih Produk</h2>
-                        <p>Lengkapi data di bawah ini untuk memulai pesanan.</p>
+                        <h2 data-i18n="selectProduct">Pilih Produk</h2>
+                        <p data-i18n="fillDetails">Lengkapi data di bawah ini untuk memulai pesanan.</p>
                     </div>
                 </div>
 
                 <div class="block">
                     <div class="search-header">
-                        <label class="section-label">1. Pilih Game</label>
+                        <label class="section-label" data-i18n="selectGame">1. Pilih Game</label>
                         <div class="search-box">
                             <span class="search-icon">🔍</span>
-                            <input type="text" id="gameSearch" placeholder="Cari nama game (contoh: PUBG)..."
-                                onkeyup="searchGame()">
+                            <input type="text" id="gameSearch" data-i18n-placeholder="searchGamePlaceholder"
+                                placeholder="Cari nama game (contoh: PUBG)..." onkeyup="searchGame()">
                         </div>
                     </div>
                     <div class="game-grid" id="gameGrid"></div>
@@ -96,8 +100,8 @@
                     </div>
                 </div>
 
-                <button id="buyBtn" onclick="buy()">Beli Sekarang 🌊</button>
-                <div class="loading" id="loading">Memproses pesanan...</div>
+                <button id="buyBtn" onclick="buy()" data-i18n="buyNow">Beli Sekarang 🌊</button>
+                <div class="loading" id="loading" data-i18n="processingOrder">Memproses pesanan...</div>
 
                 <p class="trust-text">
                     🔒 Pembayaran aman via QRIS GoPay Merchant • Pengiriman instan
