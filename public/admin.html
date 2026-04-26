@@ -226,6 +226,7 @@
         }
 
         /* Collapsed State */
+        /* Collapsed State */
         .sidebar-collapsed .sidebar {
             width: 88px;
             padding: 24px 14px;
@@ -236,36 +237,29 @@
             display: none;
         }
 
+        /* --- TAMBAHAN UNTUK FIX BUG ICON GATE --- */
+        .sidebar-collapsed .sidebar-brand {
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            padding-bottom: 16px;
+        }
+
+        .sidebar-collapsed .sidebar-brand-left {
+            margin: 0;
+        }
+
+        .sidebar-collapsed .sidebar-toggle {
+            width: 100%;
+        }
+
+        /* ---------------------------------------- */
+
         .sidebar-collapsed .nav-btn,
         .sidebar-collapsed .sidebar-logout {
             justify-content: center;
             padding: 14px 0;
             font-size: 0;
-        }
-
-        .sidebar-collapsed .nav-btn::before,
-        .sidebar-collapsed .sidebar-logout::before {
-            font-size: 18px;
-        }
-
-        .sidebar-collapsed .nav-btn[data-section="dashboard"]::before {
-            content: "🏠";
-        }
-
-        .sidebar-collapsed .nav-btn[data-section="products"]::before {
-            content: "📦";
-        }
-
-        .sidebar-collapsed .nav-btn[data-section="orders"]::before {
-            content: "🧾";
-        }
-
-        .sidebar-collapsed .nav-btn[data-section="keys"]::before {
-            content: "🔑";
-        }
-
-        .sidebar-collapsed .sidebar-logout::before {
-            content: "⎋";
         }
 
         /* ===== MAIN CONTENT ===== */
@@ -926,6 +920,7 @@
             }
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
@@ -1333,16 +1328,16 @@
 
         function copyToClipboard(text) {
             if (!text) {
-                alert("Tidak ada data untuk dicopy.");
+                Swal.fire("Tidak ada data untuk dicopy.");
                 return;
             }
 
             navigator.clipboard.writeText(text)
                 .then(() => {
-                    alert("Berhasil dicopy!");
+                    Swal.fire("Berhasil dicopy!");
                 })
                 .catch(() => {
-                    alert("Gagal copy.");
+                    Swal.fire("Gagal copy.");
                 });
         }
 
@@ -1404,12 +1399,12 @@
             const key = input.value.trim();
 
             if (!productId) {
-                alert("Pilih produk dulu.");
+                Swal.fire("Pilih produk dulu.");
                 return;
             }
 
             if (!key) {
-                alert("Isi 1 key dulu.");
+                Swal.fire("Isi 1 key dulu.");
                 return;
             }
 
@@ -1442,7 +1437,7 @@
                 input.value = "";
                 loadKeys();
             } catch (err) {
-                alert("Terjadi error server saat menambahkan key");
+                Swal.fire("Terjadi error server saat menambahkan key");
             }
         }
 
@@ -1452,12 +1447,12 @@
             const rawValue = input.value.trim();
 
             if (!productId) {
-                alert("Pilih produk dulu.");
+                Swal.fire("Pilih produk dulu.");
                 return;
             }
 
             if (!rawValue) {
-                alert("Isi key dulu.");
+                Swal.fire("Isi key dulu.");
                 return;
             }
 
@@ -1467,7 +1462,7 @@
                 .filter(item => item.length > 0);
 
             if (keys.length === 0) {
-                alert("Tidak ada key valid.");
+                Swal.fire("Tidak ada key valid.");
                 return;
             }
 
@@ -1500,7 +1495,7 @@
                 input.value = "";
                 loadKeys();
             } catch (err) {
-                alert("Terjadi error server saat menambahkan bulk key");
+                Swal.fire("Terjadi error server saat menambahkan bulk key");
             }
         }
 
@@ -1669,7 +1664,7 @@ Game Key : ${key || "-"}
                 loadKeys();
                 loadStockSummary();
             } catch (err) {
-                alert("Terjadi error saat konfirmasi pembayaran");
+                Swal.fire("Terjadi error saat konfirmasi pembayaran");
             }
         }
         async function deleteOrder(orderId) {
@@ -1699,7 +1694,7 @@ Game Key : ${key || "-"}
                 alert(data.message || "Order berhasil dihapus");
                 loadOrders();
             } catch (err) {
-                alert("Terjadi error server saat menghapus order");
+                Swal.fire("Terjadi error server saat menghapus order");
             }
         }
 
@@ -1727,10 +1722,10 @@ Game Key : ${key || "-"}
                     return;
                 }
 
-                alert("Key berhasil dihapus");
+                Swal.fire("Key berhasil dihapus");
                 loadKeys();
             } catch (err) {
-                alert("Terjadi error server saat menghapus key");
+                Swal.fire("Terjadi error server saat menghapus key");
             }
         }
 
@@ -1745,7 +1740,7 @@ Game Key : ${key || "-"}
 
                 window.location.href = "/ae-auth";
             } catch (err) {
-                alert("Gagal logout");
+                Swal.fire("Gagal logout");
             }
         }
 
@@ -1850,7 +1845,7 @@ Game Key : ${key || "-"}
             const price = document.getElementById("productPrice").value.trim();
 
             if (!game || !brand || !duration || !price) {
-                alert("Semua data produk wajib diisi.");
+                Swal.fire("Semua data produk wajib diisi.");
                 return;
             }
 
@@ -1889,38 +1884,49 @@ Game Key : ${key || "-"}
                 loadProducts();
                 loadKeyProductOptions();
             } catch (err) {
-                alert("Terjadi error server saat menyimpan produk");
+                Swal.fire("Terjadi error server saat menyimpan produk");
             }
         }
 
         async function deleteProduct(id) {
-            const yakin = confirm("Yakin mau hapus produk ini?");
-            if (!yakin) return;
+            Swal.fire({
+                title: 'Hapus Produk?',
+                text: "Produk yang dihapus tidak bisa dikembalikan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#fb7185', // Warna Torii Red
+                cancelButtonColor: '#475569',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then(async (result) => {
+                // Semua logika fetch HARUS masuk ke dalam blok ini
+                if (result.isConfirmed) {
+                    try {
+                        const res = await fetch(`/products/${id}`, {
+                            method: "DELETE"
+                        });
 
-            try {
-                const res = await fetch(`/products/${id}`, {
-                    method: "DELETE"
-                });
+                        const data = await res.json();
 
-                const data = await res.json();
+                        if (res.status === 401) {
+                            window.location.href = "/ae-auth";
+                            return;
+                        }
 
-                if (res.status === 401) {
-                    window.location.href = "/ae-auth";
-                    return;
+                        if (!res.ok) {
+                            Swal.fire("Oops!", data.message || "Gagal menghapus produk", "error");
+                            return;
+                        }
+
+                        Swal.fire("Terhapus!", "Produk berhasil dihapus", "success");
+                        resetProductForm();
+                        loadProducts();
+                        loadKeyProductOptions();
+                    } catch (err) {
+                        Swal.fire("Error!", "Terjadi error server saat menghapus produk", "error");
+                    }
                 }
-
-                if (!res.ok) {
-                    alert(data.message || "Gagal menghapus produk");
-                    return;
-                }
-
-                alert("Produk berhasil dihapus");
-                resetProductForm();
-                loadProducts();
-                loadKeyProductOptions();
-            } catch (err) {
-                alert("Terjadi error server saat menghapus produk");
-            }
+            });
         }
 
         async function toggleProductActive(id, active) {
@@ -1953,11 +1959,11 @@ Game Key : ${key || "-"}
                     return;
                 }
 
-                alert(data.message || "Status produk berhasil diubah");
+                Swal.fire(data.message || "Status produk berhasil diubah");
                 loadProducts();
                 loadKeyProductOptions();
             } catch (err) {
-                alert("Terjadi error server saat mengubah status produk");
+                Swal.fire("Terjadi error server saat mengubah status produk");
             }
         }
 
@@ -2026,6 +2032,51 @@ Game Key : ${key || "-"}
 
             showSection("dashboard");
         });
+    </script>
+    <style>
+        .sakura {
+            position: fixed;
+            top: -10%;
+            z-index: 0;
+            pointer-events: none;
+            background: #fbcfe8;
+            border-radius: 100% 0 100% 0;
+            animation: fall linear infinite, sway ease-in-out infinite alternate;
+        }
+
+        @keyframes fall {
+            to {
+                top: 110%;
+            }
+        }
+
+        @keyframes sway {
+            from {
+                transform: translateX(-20px) rotate(0deg);
+            }
+
+            to {
+                transform: translateX(20px) rotate(45deg);
+            }
+        }
+    </style>
+    <script>
+        function createSakura() {
+            const sakura = document.createElement('div');
+            sakura.classList.add('sakura');
+            // Ukuran random
+            const size = Math.random() * 10 + 5;
+            sakura.style.width = size + 'px';
+            sakura.style.height = size + 'px';
+            // Posisi dan durasi random
+            sakura.style.left = Math.random() * 100 + 'vw';
+            sakura.style.animationDuration = (Math.random() * 3 + 4) + 's, ' + (Math.random() * 2 + 2) + 's';
+            document.body.appendChild(sakura);
+            // Hapus elemen setelah jatuh agar web tidak berat (anti lag/bug)
+            setTimeout(() => { sakura.remove(); }, 7000);
+        }
+        // Munculkan sakura setiap 400ms
+        setInterval(createSakura, 400);
     </script>
 </body>
 
