@@ -4,23 +4,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AE Game Store</title>
+    <title>AE Game Store 🌊⛩️</title>
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
+    <div class="watercolor-blob blob-1"></div>
+    <div class="watercolor-blob blob-2"></div>
+
     <header class="site-header">
         <div class="header-inner">
             <div class="brand">
-                <div class="brand-logo">AE</div>
+                <div class="brand-logo">⛩️</div>
                 <div class="brand-copy">
                     <strong>AE Game Store</strong>
-                    <span>Digital Key Store</span>
+                    <span>Premium Digital Keys</span>
                 </div>
             </div>
 
             <div class="header-note">
-                Fast checkout • Secure payment • Auto delivery
+                <span class="pulse-dot"></span> Aman • Cepat • Auto Delivery
             </div>
         </div>
     </header>
@@ -28,11 +31,11 @@
     <main class="page">
         <section class="hero">
             <div class="hero-copy">
-                <span class="hero-badge">MODERN DIGITAL STORE</span>
-                <h1>Buy game keys with a simple, fast, and seamless experience</h1>
+                <span class="hero-badge">🌊 SEAMLESS TOP-UP EXPERIENCE</span>
+                <h1>Arungi petualangan barumu dengan top-up yang lebih mudah</h1>
                 <p>
-                    Pilih game, tentukan produk, isi data pembeli, lalu lanjut checkout
-                    dengan proses yang ringkas dan pembayaran yang aman.
+                    Temukan game favoritmu, pilih produk, dan selesaikan pembayaran setenang ombak di lautan.
+                    Transaksi instan dan terenkripsi.
                 </p>
             </div>
         </section>
@@ -42,54 +45,61 @@
                 <div class="section-head">
                     <div>
                         <h2>Pilih Produk</h2>
-                        <p>Mulai dari pilih game dulu, lalu lanjut ke brand dan durasi.</p>
+                        <p>Lengkapi data di bawah ini untuk memulai pesanan.</p>
                     </div>
                 </div>
 
                 <div class="block">
-                    <label class="section-label">Game</label>
+                    <div class="search-header">
+                        <label class="section-label">1. Pilih Game</label>
+                        <div class="search-box">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" id="gameSearch" placeholder="Cari nama game (contoh: PUBG)..."
+                                onkeyup="searchGame()">
+                        </div>
+                    </div>
                     <div class="game-grid" id="gameGrid"></div>
                 </div>
 
                 <div class="form-grid">
                     <div class="field">
-                        <label for="brand">Brand</label>
+                        <label for="brand">2. Brand / Server</label>
                         <select id="brand"></select>
                     </div>
 
                     <div class="field">
-                        <label for="product">Durasi / Produk</label>
+                        <label for="product">3. Nominal / Durasi</label>
                         <select id="product"></select>
                     </div>
                 </div>
 
                 <div class="form-grid">
                     <div class="field">
-                        <label for="name">Nama Pembeli</label>
+                        <label for="name">4. Nama Player</label>
                         <input type="text" id="name" placeholder="Masukkan nama kamu">
                     </div>
 
                     <div class="field">
-                        <label for="contact">Kontak</label>
-                        <input type="text" id="contact" placeholder="WA / Telegram / Email">
+                        <label for="contact">5. Kontak / Email</label>
+                        <input type="text" id="contact" placeholder="No. WA / Email">
                     </div>
                 </div>
 
-                <button id="buyBtn" onclick="buy()">Beli Sekarang</button>
-                <div class="loading" id="loading">Memproses checkout...</div>
+                <button id="buyBtn" onclick="buy()">Beli Sekarang 🌊</button>
+                <div class="loading" id="loading">Memproses pesanan...</div>
 
                 <p class="trust-text">
-                    Pembayaran via QRIS GoPay Merchant • Produk digital dikirim setelah pembayaran dikonfirmasi
+                    🔒 Pembayaran aman via QRIS GoPay Merchant • Pengiriman instan
                 </p>
             </div>
 
             <aside class="summary-card">
                 <div class="summary-head">
-                    <span class="summary-badge">Preview Order</span>
+                    <span class="summary-badge">ORDER PREVIEW</span>
                 </div>
 
-                <h3 id="previewGame">Memuat game...</h3>
-                <p class="summary-product" id="previewProduct">Memuat produk...</p>
+                <h3 id="previewGame">Memuat data...</h3>
+                <p class="summary-product" id="previewProduct">Menunggu pilihan...</p>
 
                 <div class="price-box">
                     <span>Total Pembayaran</span>
@@ -98,18 +108,18 @@
 
                 <div class="summary-points">
                     <div class="summary-point">
-                        <strong>Checkout cepat</strong>
-                        <span>Flow pembelian singkat dan langsung ke invoice.</span>
+                        <strong>⚡ Checkout Instan</strong>
+                        <span>Proses ringkas langsung menuju gerbang pembayaran.</span>
                     </div>
 
                     <div class="summary-point">
-                        <strong>Pembayaran aman</strong>
-                        <span>Diproses dengan metode pembayaran yang aman.</span>
+                        <strong>🛡️ 100% Aman</strong>
+                        <span>Sistem kami memproses order dengan aman dan legal.</span>
                     </div>
 
                     <div class="summary-point">
-                        <strong>Auto delivery</strong>
-                        <span>Produk digital dikirim setelah pembayaran sukses.</span>
+                        <strong>🎁 Auto Delivery</strong>
+                        <span>Key atau voucher langsung dikirim setelah sukses.</span>
                     </div>
                 </div>
             </aside>
@@ -117,6 +127,23 @@
     </main>
 
     <script src="script.js?v=2"></script>
+
+    <script>
+        function searchGame() {
+            const input = document.getElementById('gameSearch').value.toLowerCase();
+            const cards = document.querySelectorAll('.game-card');
+
+            cards.forEach(card => {
+                // Mengambil nama game dari elemen span di dalam card
+                const gameName = card.querySelector('span').innerText.toLowerCase();
+                if (gameName.includes(input)) {
+                    card.style.display = "flex"; // Tampilkan jika cocok
+                } else {
+                    card.style.display = "none"; // Sembunyikan jika tidak cocok
+                }
+            });
+        }
+    </script>
 </body>
 
 </html>

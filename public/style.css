@@ -1,21 +1,19 @@
 :root {
-    /* Tema Ocean & Nature */
-    --primary: #0284c7;
-    /* Ocean Blue */
-    --primary-hover: #0369a1;
-    /* Deep Ocean */
-    --secondary: #10b981;
-    /* Nature Emerald Green */
-    --bg-color: #f0fdfa;
-    /* Light Mint / Water */
-    --card-bg: rgba(255, 255, 255, 0.85);
-    --text-main: #064e3b;
-    /* Dark Forest Green untuk teks utama */
+    /* Ocean Vibes Japan & Watercolor Anime Palette */
+    --ocean-deep: #0ea5e9;
+    --ocean-light: #38bdf8;
+    --water-foam: #e0f2fe;
+    --sakura-accent: #fbcfe8;
+    --torii-red: #fb7185;
+
+    --bg-color: #f0f9ff;
+    --card-bg: rgba(255, 255, 255, 0.75);
+    --text-main: #0c4a6e;
     --text-muted: #475569;
-    --border-color: rgba(16, 185, 129, 0.35);
-    /* Soft Green Border */
-    --shadow-sm: 0 4px 12px rgba(2, 132, 199, 0.05);
-    --shadow-md: 0 12px 30px rgba(2, 132, 199, 0.08);
+    --border-color: rgba(56, 189, 248, 0.4);
+
+    --shadow-sm: 0 4px 12px rgba(14, 165, 233, 0.08);
+    --shadow-md: 0 12px 30px rgba(14, 165, 233, 0.12);
     --radius-xl: 28px;
     --radius-lg: 20px;
     --radius-md: 14px;
@@ -29,22 +27,44 @@
 }
 
 body {
-    background:
-        radial-gradient(circle at 0% 0%, rgba(16, 185, 129, 0.18), transparent 40%),
-        radial-gradient(circle at 100% 100%, rgba(2, 132, 199, 0.15), transparent 40%),
-        linear-gradient(135deg, #e0f2fe, #d1fae5);
-    /* Gradient Langit Biru ke Daun Mint */
+    background-color: var(--bg-color);
     color: var(--text-main);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
+    position: relative;
+}
+
+/* Watercolor Blobs Effects */
+.watercolor-blob {
+    position: absolute;
+    filter: blur(80px);
+    z-index: -1;
+    opacity: 0.6;
+    border-radius: 50%;
+}
+
+.blob-1 {
+    top: -100px;
+    left: -100px;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, var(--water-foam), var(--ocean-light));
+}
+
+.blob-2 {
+    bottom: -150px;
+    right: -100px;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, var(--sakura-accent), #bae6fd);
 }
 
 /* ===== HEADER ===== */
 .site-header {
-    background: rgba(255, 255, 255, 0.65);
-    backdrop-filter: blur(16px);
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--border-color);
     position: sticky;
     top: 0;
@@ -71,15 +91,14 @@ body {
 .brand-logo {
     width: 48px;
     height: 48px;
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    background: linear-gradient(135deg, var(--torii-red), #f43f5e);
     color: white;
     border-radius: var(--radius-md);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 20px;
-    font-weight: 800;
-    box-shadow: 0 8px 16px rgba(16, 185, 129, 0.25);
+    font-size: 24px;
+    box-shadow: 0 8px 16px rgba(251, 113, 133, 0.3);
 }
 
 .brand-copy strong {
@@ -87,23 +106,48 @@ body {
     font-size: 18px;
     color: var(--text-main);
     font-weight: 800;
-    letter-spacing: -0.5px;
 }
 
 .brand-copy span {
     font-size: 13px;
-    color: var(--text-muted);
-    font-weight: 500;
+    color: var(--ocean-deep);
+    font-weight: 600;
 }
 
 .header-note {
     font-size: 12px;
-    color: var(--primary);
-    background: #e0f2fe;
+    color: var(--ocean-deep);
+    background: var(--water-foam);
     padding: 8px 16px;
     border-radius: 99px;
     font-weight: 700;
     border: 1px solid #bae6fd;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pulse-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--torii-red);
+    border-radius: 50%;
+    box-shadow: 0 0 0 0 rgba(251, 113, 133, 0.7);
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(251, 113, 133, 0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 6px rgba(251, 113, 133, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(251, 113, 133, 0);
+    }
 }
 
 /* ===== MAIN CONTAINER ===== */
@@ -130,12 +174,12 @@ body {
     font-size: 11px;
     font-weight: 800;
     letter-spacing: 1px;
-    color: var(--secondary);
-    background: rgba(16, 185, 129, 0.15);
+    color: var(--ocean-deep);
+    background: var(--water-foam);
     padding: 8px 16px;
     border-radius: 99px;
     margin-bottom: 20px;
-    border: 1px solid rgba(16, 185, 129, 0.3);
+    border: 1px solid var(--ocean-light);
 }
 
 .hero h1 {
@@ -144,12 +188,12 @@ body {
     margin-bottom: 16px;
     font-weight: 800;
     letter-spacing: -1px;
-    color: #022c22;
+    color: #082f49;
 }
 
 .hero p {
     font-size: 16px;
-    color: var(--text-muted);
+    color: #334155;
     line-height: 1.6;
     max-width: 600px;
     margin: 0 auto;
@@ -166,7 +210,7 @@ body {
 .shop-card,
 .summary-card {
     background: var(--card-bg);
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(24px);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-xl);
     padding: 36px;
@@ -177,15 +221,14 @@ body {
 .section-head {
     margin-bottom: 28px;
     padding-bottom: 20px;
-    border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+    border-bottom: 1px dashed rgba(56, 189, 248, 0.5);
 }
 
 .section-head h2 {
     font-size: 24px;
     font-weight: 800;
     margin-bottom: 6px;
-    letter-spacing: -0.5px;
-    color: #064e3b;
+    color: #0c4a6e;
 }
 
 .section-head p {
@@ -197,21 +240,109 @@ body {
     margin-bottom: 24px;
 }
 
+/* SEARCH BAR */
+.search-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
 .section-label,
 .field label {
     display: block;
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 800;
+    color: #0284c7;
     margin-bottom: 10px;
-    color: #0f766e;
 }
 
+.search-header .section-label {
+    margin-bottom: 0;
+}
+
+.search-box {
+    position: relative;
+    flex: 1;
+    max-width: 300px;
+    min-width: 200px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 10px 14px 10px 38px;
+    border-radius: 99px;
+    border: 1px solid var(--ocean-light);
+    background: rgba(255, 255, 255, 0.8);
+    font-size: 13px;
+    transition: all 0.2s;
+}
+
+.search-box input:focus {
+    background: white;
+    box-shadow: 0 0 0 3px var(--water-foam);
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    opacity: 0.6;
+}
+
+/* GAME GRID */
 .game-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-    gap: 12px;
+    gap: 14px;
 }
 
+.game-card {
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid #bae6fd;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-sm);
+    backdrop-filter: blur(10px);
+}
+
+.game-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--ocean-light);
+}
+
+.game-card.active {
+    border: 2px solid var(--ocean-deep);
+    background: var(--water-foam);
+    box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.2);
+}
+
+.game-card img {
+    width: 100%;
+    height: 85px;
+    object-fit: cover;
+    border-bottom: 1px solid #bae6fd;
+}
+
+.game-card span {
+    display: block;
+    padding: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+/* FORM FIELDS */
 .form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -224,13 +355,13 @@ body {
     flex-direction: column;
 }
 
-input,
+input[type="text"]:not(#gameSearch),
 select {
     width: 100%;
     padding: 16px;
     border-radius: var(--radius-md);
-    border: 1px solid #99f6e4;
-    background: #f0fdfa;
+    border: 1px solid #bae6fd;
+    background: rgba(255, 255, 255, 0.8);
     color: var(--text-main);
     font-size: 14px;
     font-weight: 500;
@@ -239,15 +370,11 @@ select {
     appearance: auto;
 }
 
-input:focus,
+input[type="text"]:not(#gameSearch):focus,
 select:focus {
-    border-color: #2dd4bf;
+    border-color: var(--ocean-light);
     background: #ffffff;
-    box-shadow: 0 0 0 4px rgba(45, 212, 191, 0.15);
-}
-
-input::placeholder {
-    color: #94a3b8;
+    box-shadow: 0 0 0 4px var(--water-foam);
 }
 
 button#buyBtn {
@@ -255,19 +382,41 @@ button#buyBtn {
     padding: 18px;
     border: none;
     border-radius: var(--radius-md);
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    background: linear-gradient(135deg, var(--ocean-deep), var(--ocean-light));
     color: white;
     font-size: 16px;
     font-weight: 800;
     cursor: pointer;
-    box-shadow: 0 10px 24px rgba(16, 185, 129, 0.25);
+    box-shadow: 0 10px 24px rgba(14, 165, 233, 0.3);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     margin-top: 10px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Efek Ombak (Wave) saat hover di tombol */
+button#buyBtn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 300px;
+    height: 300px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 40%;
+    transform: translate(-50%, -50%) rotate(0deg);
+    transition: transform 0.8s ease;
+    opacity: 0;
+}
+
+button#buyBtn:hover::after {
+    transform: translate(-50%, -50%) rotate(180deg);
+    opacity: 1;
 }
 
 button#buyBtn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 14px 28px rgba(16, 185, 129, 0.35);
+    box-shadow: 0 14px 28px rgba(14, 165, 233, 0.4);
 }
 
 button#buyBtn:active {
@@ -279,7 +428,7 @@ button#buyBtn:active {
     text-align: center;
     margin-top: 16px;
     font-size: 14px;
-    color: var(--primary);
+    color: var(--ocean-deep);
     font-weight: 700;
 }
 
@@ -295,7 +444,7 @@ button#buyBtn:active {
 .summary-card {
     position: sticky;
     top: 100px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(240, 253, 250, 0.9));
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(224, 242, 254, 0.6));
 }
 
 .summary-head {
@@ -308,7 +457,7 @@ button#buyBtn:active {
     text-transform: uppercase;
     letter-spacing: 1px;
     color: white;
-    background: #064e3b;
+    background: var(--torii-red);
     padding: 6px 12px;
     border-radius: 6px;
 }
@@ -317,8 +466,7 @@ button#buyBtn:active {
     font-size: 24px;
     font-weight: 800;
     margin-bottom: 6px;
-    color: #022c22;
-    letter-spacing: -0.5px;
+    color: #0c4a6e;
 }
 
 #previewProduct {
@@ -326,30 +474,42 @@ button#buyBtn:active {
     color: var(--text-muted);
     margin-bottom: 24px;
     padding-bottom: 24px;
-    border-bottom: 1px dashed #99f6e4;
+    border-bottom: 1px dashed #bae6fd;
 }
 
 .price-box {
-    background: #e0f2fe;
-    border: 1px solid #bae6fd;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid var(--ocean-light);
     border-radius: var(--radius-lg);
     padding: 24px;
     display: flex;
     flex-direction: column;
     gap: 8px;
     margin-bottom: 28px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Ornamen Gelombang kecil di Price Box */
+.price-box::before {
+    content: "🌊";
+    position: absolute;
+    right: -10px;
+    bottom: -15px;
+    font-size: 60px;
+    opacity: 0.1;
 }
 
 .price-box span {
     font-size: 14px;
-    color: var(--primary);
+    color: var(--ocean-deep);
     font-weight: 700;
 }
 
 .price-box strong {
     font-size: 34px;
     font-weight: 800;
-    color: #0369a1;
+    color: #0284c7;
     line-height: 1;
 }
 
@@ -364,18 +524,18 @@ button#buyBtn:active {
     flex-direction: column;
     gap: 4px;
     padding-left: 16px;
-    border-left: 3px solid var(--secondary);
+    border-left: 3px solid var(--ocean-light);
 }
 
 .summary-point strong {
     font-size: 14px;
-    color: #0f766e;
+    color: #0284c7;
     font-weight: 700;
 }
 
 .summary-point span {
     font-size: 13px;
-    color: var(--text-muted);
+    color: #475569;
     line-height: 1.5;
 }
 
@@ -410,45 +570,14 @@ button#buyBtn:active {
     .header-inner {
         flex-direction: column;
     }
-}
 
-/* ===== GAME CARDS (Pilihan Game) ===== */
-.game-card {
-    background: #ffffff;
-    border: 1px solid #99f6e4;
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    box-shadow: var(--shadow-sm);
-}
+    .search-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 
-.game-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-    border-color: var(--secondary);
-}
-
-.game-card.active {
-    border: 2px solid var(--primary);
-    background: #f0fdfa;
-    box-shadow: 0 0 0 4px rgba(45, 212, 191, 0.2);
-}
-
-.game-card img {
-    width: 100%;
-    height: 80px;
-    object-fit: cover;
-    border-bottom: 1px solid #ccfbf1;
-}
-
-.game-card span {
-    display: block;
-    padding: 10px;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text-main);
+    .search-box {
+        max-width: 100%;
+        width: 100%;
+    }
 }
