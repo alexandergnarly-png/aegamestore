@@ -720,6 +720,7 @@ button#buyBtn:active {
 }
 
 /* ===== TOMBOL LOGIN / REGISTER ===== */
+/* ===== TOMBOL LOGIN / REGISTER ===== */
 .auth-btn {
     background: linear-gradient(135deg, var(--ocean-deep), var(--ocean-light));
     color: white;
