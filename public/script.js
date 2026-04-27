@@ -21,6 +21,7 @@ const translations = {
         guideStep4: "Checkout: Klik 'Beli Sekarang' dan selesaikan pembayaran.",
         guideStep5: "Selesai! Game akan langsung dikirim setelah sukses.",
         guideOk: "Mengerti! 🌊",
+        loginBtn: "Masuk / Daftar",
     },
     en: {
         selectProduct: "Select Product",
@@ -44,6 +45,7 @@ const translations = {
         guideStep4: "Checkout: Click 'Buy Now' and complete the payment.",
         guideStep5: "Done! Your game will be delivered instantly after success.",
         guideOk: "Got it! 🌊",
+        loginBtn: "Login / Register",
     }
 };
 

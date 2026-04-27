@@ -718,3 +718,25 @@ button#buyBtn:active {
 .lang-btn.active:hover::after {
     opacity: 1;
 }
+
+/* ===== TOMBOL LOGIN / REGISTER ===== */
+.auth-btn {
+    background: linear-gradient(135deg, var(--ocean-deep), var(--ocean-light));
+    color: white;
+    padding: 8px 18px;
+    border-radius: 99px;
+    font-size: 13px;
+    font-weight: 800;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.auth-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(14, 165, 233, 0.3);
+    color: white;
+}
