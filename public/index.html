@@ -234,19 +234,21 @@
 
         // Fitur Popup Panduan Beli
         function showGuide() {
+            const t = translations[currentLanguage];
+
             Swal.fire({
-                title: 'Panduan Top-Up ⛩️',
+                title: t.guideTitle,
                 html: `
-                    <div style="text-align: left; font-size: 14px; line-height: 1.6; color: #334155;">
-                        <b>1. Pilih Game:</b> Cari dan klik game yang kamu inginkan.<br><br>
-                        <b>2. Tentukan Produk:</b> Pilih server/brand dan nominal top-up atau durasi.<br><br>
-                        <b>3. Isi Data:</b> Masukkan nickname/ID dan nomor kontak (WA/Email) dengan benar.<br><br>
-                        <b>4. Checkout:</b> Klik <i>'Beli Sekarang'</i> dan selesaikan pembayaran via QRIS.<br><br>
-                        <b>5. Selesai!</b> Game Key / Voucher akan langsung dikirim ke layar kamu setelah sukses.
-                    </div>
-                `,
+            <div style="text-align: left; font-size: 14px; line-height: 1.6; color: #334155;">
+                <b>1.</b> ${t.guideStep1}<br><br>
+                <b>2.</b> ${t.guideStep2}<br><br>
+                <b>3.</b> ${t.guideStep3}<br><br>
+                <b>4.</b> ${t.guideStep4}<br><br>
+                <b>5.</b> ${t.guideStep5}
+            </div>
+        `,
                 icon: 'info',
-                confirmButtonText: 'Mengerti! 🌊',
+                confirmButtonText: t.guideOk,
                 confirmButtonColor: '#0ea5e9',
                 background: '#f0f9ff',
                 backdrop: `rgba(12, 74, 110, 0.4)`

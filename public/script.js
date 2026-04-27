@@ -14,6 +14,13 @@ const translations = {
         totalPayment: "Total Pembayaran",
         previewEmpty: "Produk belum dipilih",
         previewWait: "Silakan pilih brand dan durasi",
+        guideTitle: "Panduan Top-Up ⛩️",
+        guideStep1: "Pilih Game: Cari dan klik game yang kamu inginkan.",
+        guideStep2: "Tentukan Produk: Pilih server/brand dan nominal top-up atau durasi.",
+        guideStep3: "Isi Data: Masukkan nickname/ID dan nomor kontak dengan benar.",
+        guideStep4: "Checkout: Klik 'Beli Sekarang' dan selesaikan pembayaran.",
+        guideStep5: "Selesai! Game akan langsung dikirim setelah sukses.",
+        guideOk: "Mengerti! 🌊",
     },
     en: {
         selectProduct: "Select Product",
@@ -30,6 +37,13 @@ const translations = {
         totalPayment: "Total Payment",
         previewEmpty: "No product selected",
         previewWait: "Please select brand and product",
+        guideTitle: "Top-Up Guide ⛩️",
+        guideStep1: "Select Game: Find and choose your desired game.",
+        guideStep2: "Choose Product: Select server/brand and top-up amount or duration.",
+        guideStep3: "Fill Data: Enter your nickname/ID and contact correctly.",
+        guideStep4: "Checkout: Click 'Buy Now' and complete the payment.",
+        guideStep5: "Done! Your game will be delivered instantly after success.",
+        guideOk: "Got it! 🌊",
     }
 };
 
