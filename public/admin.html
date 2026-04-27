@@ -955,8 +955,8 @@
                 <div class="top-nav-left">
                     <div class="logo-badge">AE</div>
                     <div>
-                        <div class="nav-kicker">AE Game Store</div>
-                        <div class="nav-title">Zen Admin Dashboard</div>
+                        <div class="nav-kicker" id="adminGreeting">AE Game Store</div>
+                        <div class="nav-title" id="adminClock">Zen Admin Dashboard</div>
                     </div>
                 </div>
                 <div class="nav-actions">
@@ -2081,6 +2081,28 @@ Game Key : ${key || "-"}
         }
         // Munculkan sakura setiap 400ms
         setInterval(createSakura, 400);
+        // --- FITUR TAMBAHAN: Jam & Sapaan Real-Time ---
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours();
+            let greeting = "Selamat Malam 🌙";
+
+            if (hours >= 5 && hours < 11) greeting = "Selamat Pagi 🌅";
+            else if (hours >= 11 && hours < 15) greeting = "Selamat Siang ☀️";
+            else if (hours >= 15 && hours < 18) greeting = "Selamat Sore 🌇";
+
+            const timeString = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+            const greetingEl = document.getElementById("adminGreeting");
+            const clockEl = document.getElementById("adminClock");
+
+            if (greetingEl) greetingEl.innerText = greeting + ", Admin!";
+            if (clockEl) clockEl.innerText = "Waktu lokal: " + timeString;
+        }
+
+        setInterval(updateClock, 1000); // Update setiap detik
+        updateClock(); // Jalankan pertama kali
+        // ----------------------------------------------
     </script>
 </body>
 
