@@ -32,24 +32,29 @@
                 </div>
             </div>
 
-            <div class="header-note" style="cursor: pointer; transition: 0.2s;" onclick="showGuide()"
-                onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                <span class="pulse-dot"></span> <span data-i18n="howToBuy">Cara Beli 📖</span>
-            </div>
-            <div class="lang-switch">
-                <button type="button" onclick="setLanguage('id')" class="lang-btn" id="btn-id">ID</button>
-                <button type="button" onclick="setLanguage('en')" class="lang-btn" id="btn-en">EN</button>
-            </div>
-            <div id="userMenu">
-                <a href="/auth" class="auth-btn">
-                    <span data-i18n="loginBtn">Masuk / Daftar</span> ⛩️
-                </a>
+            <nav class="main-nav">
+                <a href="#hero" class="nav-link" data-i18n="navHome">Beranda</a>
+                <a href="#store-section" class="nav-link" data-i18n="navStore">Katalog Game</a>
+                <a href="#" class="nav-link" onclick="showGuide()" data-i18n="navGuide">Cara Beli</a>
+            </nav>
+
+            <div class="header-actions">
+                <div class="lang-switch">
+                    <button type="button" onclick="setLanguage('id')" class="lang-btn active" id="btn-id">ID</button>
+                    <button type="button" onclick="setLanguage('en')" class="lang-btn" id="btn-en">EN</button>
+                </div>
+
+                <div id="userMenu">
+                    <a href="/auth" class="auth-btn">
+                        <span data-i18n="loginBtn">Masuk / Daftar</span> ⛩️
+                    </a>
+                </div>
             </div>
         </div>
     </header>
 
     <main class="page">
-        <section class="hero">
+        <section class="hero" id="hero">
             <div class="hero-copy">
                 <span class="hero-badge">🌊 SEAMLESS TOP-UP EXPERIENCE</span>
                 <h1 data-i18n="heroTitle">Arungi petualangan barumu dengan top-up yang lebih mudah</h1>
@@ -60,7 +65,7 @@
             </div>
         </section>
 
-        <section class="store-layout">
+        <section class="store-layout" id="store-section">
             <div class="shop-card">
                 <div class="section-head">
                     <div>

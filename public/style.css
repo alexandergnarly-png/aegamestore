@@ -62,24 +62,76 @@ body {
 }
 
 /* ===== HEADER ===== */
+/* ===== NAVBAR UPGRADE ===== */
 .site-header {
-    background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border-color);
     position: sticky;
     top: 0;
     z-index: 100;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(56, 189, 248, 0.3);
+    box-shadow: 0 4px 20px rgba(14, 165, 233, 0.05);
 }
 
 .header-inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 16px 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 16px 24px;
+}
+
+.main-nav {
+    display: flex;
+    gap: 28px;
+    align-items: center;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: var(--text-muted);
+    font-weight: 700;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.nav-link:hover {
+    color: var(--ocean-deep);
+}
+
+/* Garis bawah animasi saat dihover */
+.nav-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -4px;
+    left: 0;
+    background-color: var(--ocean-deep);
+    transition: width 0.3s ease;
+}
+
+.nav-link:hover::after {
+    width: 100%;
+}
+
+.header-actions {
+    display: flex;
     gap: 16px;
+    align-items: center;
+}
+
+/* Responsif: Sembunyikan menu teks di HP agar tidak menumpuk */
+@media (max-width: 768px) {
+    .main-nav {
+        display: none;
+    }
+
+    .header-actions {
+        gap: 8px;
+    }
 }
 
 .brand {

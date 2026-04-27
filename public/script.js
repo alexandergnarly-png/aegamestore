@@ -22,6 +22,9 @@ const translations = {
         guideStep5: "Selesai! Game akan langsung dikirim setelah sukses.",
         guideOk: "Mengerti! 🌊",
         loginBtn: "Masuk / Daftar",
+        navHome: "Beranda",
+        navStore: "Katalog Game",
+        navGuide: "Cara Beli",
     },
     en: {
         selectProduct: "Select Product",
@@ -46,6 +49,9 @@ const translations = {
         guideStep5: "Done! Your game will be delivered instantly after success.",
         guideOk: "Got it! 🌊",
         loginBtn: "Login / Register",
+        navHome: "Home",
+        navStore: "Game Catalog",
+        navGuide: "How to Buy",
     }
 };
 
