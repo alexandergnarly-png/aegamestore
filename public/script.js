@@ -12,6 +12,8 @@ const translations = {
         heroTitle: "Arungi petualangan barumu dengan top-up yang lebih mudah",
         heroDesc: "Temukan game favoritmu, pilih produk, dan selesaikan pembayaran setenang ombak di lautan.",
         totalPayment: "Total Pembayaran",
+        previewEmpty: "Produk belum dipilih",
+        previewWait: "Silakan pilih brand dan durasi",
     },
     en: {
         selectProduct: "Select Product",
@@ -25,7 +27,9 @@ const translations = {
         processingOrder: "Processing order...",
         heroTitle: "Start your new adventure with easier top-ups",
         heroDesc: "Find your favorite game, choose a product, and complete payment smoothly like ocean waves.",
-        totalPayment: "Total Payment"
+        totalPayment: "Total Payment",
+        previewEmpty: "No product selected",
+        previewWait: "Please select brand and product",
     }
 };
 
@@ -187,8 +191,8 @@ function updatePreview() {
     );
 
     if (!selectedProduct) {
-        document.getElementById("previewGame").innerText = "Produk belum dipilih";
-        document.getElementById("previewProduct").innerText = "Silakan pilih brand dan durasi";
+        document.getElementById("previewGame").innerText = translations[currentLanguage].previewEmpty;
+        document.getElementById("previewProduct").innerText = translations[currentLanguage].previewWait;
         document.getElementById("previewPrice").innerText = "Rp 0";
         return;
     }
