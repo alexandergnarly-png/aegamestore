@@ -143,14 +143,6 @@
             transform: translateY(0);
         }
 
-        .status {
-            margin-top: 16px;
-            font-size: 13px;
-            color: #fb7185;
-            font-weight: 700;
-            min-height: 20px;
-        }
-
         .footer {
             margin-top: 24px;
             font-size: 12px;
@@ -199,6 +191,7 @@
             }
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
@@ -217,9 +210,7 @@
                 <span class="toggle" onclick="togglePass()">Show</span>
             </div>
 
-            <button onclick="login()">Masuk Dashboard</button>
-
-            <div class="status" id="status"></div>
+            <button id="loginBtn" onclick="login()">Masuk Dashboard</button>
 
             <div class="footer">
                 Secure Admin Access
@@ -233,17 +224,29 @@
             input.type = input.type === "password" ? "text" : "password";
         }
 
+        // FITUR BARU: Bisa tekan 'Enter' untuk login
+        document.getElementById("password").addEventListener("keypress", function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                login();
+            }
+        });
+
         async function login() {
             const username = document.getElementById("username").value.trim();
             const password = document.getElementById("password").value.trim();
-            const status = document.getElementById("status");
-
-            status.innerText = "";
+            const btn = document.getElementById("loginBtn");
 
             if (!username || !password) {
-                status.innerText = "Isi semua field";
+                Swal.fire({ icon: 'warning', title: 'Oops!', text: 'Isi username dan password dulu ya.', confirmButtonColor: '#0ea5e9' });
                 return;
             }
+
+            // FITUR BARU: Animasi Loading di Tombol
+            const originalText = btn.innerText;
+            btn.innerText = "Memverifikasi... 🌊";
+            btn.style.opacity = "0.7";
+            btn.disabled = true;
 
             try {
                 const res = await fetch("/admin-login", {
@@ -255,13 +258,22 @@
                 const data = await res.json();
 
                 if (!res.ok) {
-                    status.innerText = data.message || "Login gagal";
+                    Swal.fire({ icon: 'error', title: 'Akses Ditolak', text: data.message || "Username atau Password salah!", confirmButtonColor: '#fb7185' });
+                    // Kembalikan tombol seperti semula jika gagal
+                    btn.innerText = originalText;
+                    btn.style.opacity = "1";
+                    btn.disabled = false;
                     return;
                 }
 
+                // Jika sukses
+                btn.innerText = "Berhasil Masuk! ⛩️";
                 window.location.href = "/ae-control";
             } catch {
-                status.innerText = "Server error";
+                Swal.fire({ icon: 'error', title: 'Error Server', text: 'Server tidak merespon, coba lagi nanti.', confirmButtonColor: '#fb7185' });
+                btn.innerText = originalText;
+                btn.style.opacity = "1";
+                btn.disabled = false;
             }
         }
 

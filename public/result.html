@@ -368,6 +368,21 @@
 
                 document.getElementById("statusRow").innerHTML = badge(data.payment_status) + badge(data.delivery_status);
                 document.getElementById("statusText").innerText = "Order berhasil ditemukan. Simpan halaman ini untuk cek status order kamu kapan saja.";
+
+                // FITUR BARU: Toast Notification yang estetik saat data berhasil dimuat
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+                if (data.payment_status === "paid") {
+                    Toast.fire({ icon: 'success', title: 'Pembayaran Lunas! 🎉' });
+                } else {
+                    Toast.fire({ icon: 'info', title: 'Data Order Ditemukan 🌊' });
+                }
+
                 document.getElementById("nameText").textContent = `Nama: ${data.name || "-"}`;
                 document.getElementById("contactText").textContent = `Kontak: ${data.contact || "-"}`;
                 document.getElementById("gameText").textContent = `Game: ${data.game || "-"}`;
