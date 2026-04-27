@@ -8,6 +8,7 @@ const bcrypt = require("bcryptjs");
 const helmet = require("helmet");
 require("dotenv").config();
 const rateLimit = require("express-rate-limit");
+const jwt = require("jsonwebtoken");
 
 const app = express();
 app.set("trust proxy", 1);
@@ -111,11 +112,27 @@ db.query(`
     created_at TEXT NOT NULL,
     expires_at TEXT NOT NULL
   )
+    
 `, (err) => {
     if (err) {
         console.error("CREATE TABLE admin_sessions ERROR:", err);
     } else {
         console.log("Table admin_sessions ready");
+    }
+});
+
+db.query(`
+  CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    username TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )
+`, (err) => {
+    if (err) {
+        console.error("CREATE TABLE users ERROR:", err);
+    } else {
+        console.log("Table users ready");
     }
 });
 
@@ -1201,6 +1218,65 @@ app.get("/admin", (req, res) => {
 app.get("/admin-login", (req, res) => {
     return res.status(404).send("Not Found");
 });
+
+// --- API USER REGISTER & LOGIN ---
+app.post("/register", async (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !password || username.length < 3 || password.length < 6) {
+        return res.status(400).json({ message: "Username min 3 karakter dan password min 6 karakter" });
+    }
+
+    try {
+        // Enkripsi password biar aman kalau database bocor
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        await query(
+            "INSERT INTO users (username, password) VALUES ($1, $2)",
+            [username, hashedPassword]
+        );
+        return res.json({ message: "Pendaftaran berhasil! Silakan login." });
+    } catch (err) {
+        if (err.code === '23505') { // Kode error unik PostgreSQL
+            return res.status(400).json({ message: "Username sudah dipakai, pilih yang lain" });
+        }
+        return res.status(500).json({ message: "Terjadi error server" });
+    }
+});
+
+app.post("/user-login", async (req, res) => {
+    const { username, password } = req.body;
+
+    try {
+        const result = await query("SELECT * FROM users WHERE username = $1 LIMIT 1", [username]);
+        const user = result.rows[0];
+
+        if (!user) return res.status(400).json({ message: "Username tidak ditemukan" });
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) return res.status(400).json({ message: "Password salah!" });
+
+        // Buat "tiket masuk" (Token) untuk user
+        const token = jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET || "rahasia_sementara", { expiresIn: "7d" });
+
+        // Simpan tiket di cookie browser
+        res.cookie("user_auth", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            maxAge: 1000 * 60 * 60 * 24 * 7 // 7 hari
+        });
+
+        return res.json({ message: "Login berhasil!" });
+    } catch (err) {
+        return res.status(500).json({ message: "Terjadi error server" });
+    }
+});
+
+app.post("/user-logout", (req, res) => {
+    res.clearCookie("user_auth");
+    return res.json({ message: "Logout berhasil" });
+});
+// ----------------------------------
 
 app.listen(port, () => {
     console.log("Server jalan di port", port);
