@@ -239,6 +239,10 @@ app.get("/result", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "result.html"));
 });
 
+app.get("/auth", (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "user-auth.html"));
+});
+
 app.get("/ae-auth", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "admin-login.html"));
 });
