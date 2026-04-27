@@ -272,6 +272,52 @@ async function buy() {
 
     setLoading(false);
 }
+// --- FITUR USER LOGIN STATUS ---
+async function checkLoginStatus() {
+    try {
+        const res = await fetch("/api/user/me");
+        const data = await res.json();
+        const userMenu = document.getElementById("userMenu");
 
+        // Kalau user sudah login dan elemen userMenu ditemukan
+        if (data.loggedIn && userMenu) {
+            userMenu.innerHTML = `
+                <div style="display: flex; gap: 8px;">
+                    <div class="auth-btn" style="background: rgba(255,255,255,0.8); color: #0284c7; cursor: default; box-shadow: none; border: 1px solid #bae6fd;">
+                        👤 Halo, <strong style="margin-left: 4px;">${data.username}</strong>
+                    </div>
+                    <button onclick="logoutUser()" class="auth-btn" style="background: linear-gradient(135deg, #fb7185, #e11d48); border: none; padding: 8px 12px;">
+                        Keluar
+                    </button>
+                </div>
+            `;
+        }
+    } catch (err) {
+        console.error("Gagal mengecek status login");
+    }
+}
+
+async function logoutUser() {
+    Swal.fire({
+        title: 'Keluar Akun?',
+        text: "Kamu akan keluar dari sesi ini.",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#fb7185',
+        cancelButtonColor: '#475569',
+        confirmButtonText: 'Ya, Keluar'
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            await fetch("/user-logout", { method: "POST" });
+            window.location.reload(); // Refresh halaman agar kembali jadi tombol Masuk
+        }
+    });
+}
+
+// Jalankan fungsi saat halaman beranda pertama kali dibuka
+document.addEventListener("DOMContentLoaded", () => {
+    checkLoginStatus();
+});
+// --------------------------------
 setLanguage(currentLanguage);
 loadAllProducts();

@@ -1282,6 +1282,24 @@ app.post("/user-logout", (req, res) => {
 });
 // ----------------------------------
 
+// --- FITUR BARU: Cek User yang sedang Login ---
+app.get("/api/user/me", (req, res) => {
+    const token = req.cookies.user_auth;
+
+    // Kalau tidak ada token/belum login
+    if (!token) return res.json({ loggedIn: false });
+
+    try {
+        // Cek apakah tokennya valid dan cocok dengan JWT_SECRET
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || "rahasia_sementara");
+        return res.json({ loggedIn: true, username: decoded.username });
+    } catch (err) {
+        // Kalau token kadaluarsa atau error
+        return res.json({ loggedIn: false });
+    }
+});
+// ----------------------------------------------
+
 app.listen(port, () => {
     console.log("Server jalan di port", port);
 });
