@@ -25,6 +25,10 @@ const translations = {
         navHome: "Beranda",
         navStore: "Katalog Game",
         navGuide: "Cara Beli",
+        filterAll: "Semua",
+        filterMobile: "Mobile",
+        filterPC: "PC Games",
+        filterVoucher: "Voucher",
     },
     en: {
         selectProduct: "Select Product",
@@ -52,6 +56,10 @@ const translations = {
         navHome: "Home",
         navStore: "Game Catalog",
         navGuide: "How to Buy",
+        filterAll: "All",
+        filterMobile: "Mobile",
+        filterPC: "PC Games",
+        filterVoucher: "Voucher",
     }
 };
 
@@ -325,5 +333,59 @@ document.addEventListener("DOMContentLoaded", () => {
     checkLoginStatus();
 });
 // --------------------------------
+
+// --- AUTO SLIDER BANNER ---
+let currentSlide = 0;
+function nextSlide() {
+    const slides = document.querySelectorAll('.promo-slide');
+    if (slides.length === 0) return;
+    slides[currentSlide].classList.remove('active');
+    currentSlide = (currentSlide + 1) % slides.length;
+    slides[currentSlide].classList.add('active');
+}
+setInterval(nextSlide, 5000);
+
+// --- SOCIAL PROOF SIMULATOR ---
+const buyerNames = ["Budi", "Andi", "Siska", "Rian", "Wati", "Reza", "Dewi"];
+const purchaseGames = ["PUBG Mobile", "Mobile Legends", "Free Fire", "Delta Force"];
+
+function showSocialProof() {
+    const sp = document.getElementById('social-proof');
+    if (!sp) return;
+
+    const name = buyerNames[Math.floor(Math.random() * buyerNames.length)];
+    const game = purchaseGames[Math.floor(Math.random() * purchaseGames.length)];
+
+    sp.innerHTML = `🚀 <div style="font-size: 13px;"><b>${name}</b> baru saja membeli <b>${game}</b></div>`;
+    sp.classList.add('show');
+
+    setTimeout(() => sp.classList.remove('show'), 5000);
+}
+// Munculkan setiap 20 detik
+setInterval(showSocialProof, 20000);
+
+// --- FILTER CATEGORY ---
+// --- FILTER CATEGORY ---
+function filterCategory(cat, btnElement) {
+    // Update active class pada tombol dengan aman
+    document.querySelectorAll('.pill').forEach(btn => btn.classList.remove('active'));
+
+    // Tambahkan class active ke tombol yang diklik
+    if (btnElement) btnElement.classList.add('active');
+
+    const cards = document.querySelectorAll('.game-card');
+    cards.forEach(card => {
+        if (cat === 'all') {
+            card.style.display = "flex";
+        } else {
+            const name = card.querySelector('span').innerText;
+            if (name.toLowerCase().includes(cat.toLowerCase()) || cat === 'Mobile') {
+                card.style.display = "flex";
+            } else {
+                card.style.display = "none";
+            }
+        }
+    });
+}
 setLanguage(currentLanguage);
 loadAllProducts();

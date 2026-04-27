@@ -65,6 +65,26 @@
             </div>
         </section>
 
+        <section class="promo-container">
+            <div class="promo-slider" id="promoSlider">
+                <div class="promo-slide active" style="background: linear-gradient(135deg, #0ea5e9, #6366f1);">
+                    <div class="promo-content">
+                        <span>🔥 PROMO WEEKEND</span>
+                        <h3>Diskon Top-Up s/d 20%</h3>
+                        <p>Berlaku untuk semua game PC & Mobile. Cek sekarang!</p>
+                    </div>
+                </div>
+                <div class="promo-slide" style="background: linear-gradient(135deg, #fb7185, #f43f5e);">
+                    <div class="promo-content">
+                        <span>✨ MEMBER BARU</span>
+                        <h3>Bonus Poin Melimpah</h3>
+                        <p>Daftar akun sekarang dan dapatkan potongan harga spesial.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="promo-dots" id="promoDots"></div>
+        </section>
+
         <section class="store-layout" id="store-section">
             <div class="shop-card">
                 <div class="section-head">
@@ -72,6 +92,15 @@
                         <h2 data-i18n="selectProduct">Pilih Produk</h2>
                         <p data-i18n="fillDetails">Lengkapi data di bawah ini untuk memulai pesanan.</p>
                     </div>
+                </div>
+                <div class="filter-pills">
+                    <button class="pill active" onclick="filterCategory('all', this)"
+                        data-i18n="filterAll">Semua</button>
+                    <button class="pill" onclick="filterCategory('Mobile', this)"
+                        data-i18n="filterMobile">Mobile</button>
+                    <button class="pill" onclick="filterCategory('PC', this)" data-i18n="filterPC">PC Games</button>
+                    <button class="pill" onclick="filterCategory('Voucher', this)"
+                        data-i18n="filterVoucher">Voucher</button>
                 </div>
 
                 <div class="block">
@@ -154,6 +183,27 @@
     <a href="https://t.me/aegamestore" target="_blank" class="floating-btn">
         💬 Hubungi Admin
     </a>
+
+    <div id="social-proof" class="social-proof"></div>
+
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <div class="brand-logo">⛩️</div>
+                <strong>AE Game Store</strong>
+                <p>Solusi top-up game tercepat dan terpercaya di Indonesia. Otomatis 24 jam non-stop.</p>
+            </div>
+            <div class="footer-payments">
+                <p>Metode Pembayaran Aman</p>
+                <div class="payment-icons">
+                    <span>QRIS</span> <span>GoPay</span> <span>OVO</span> <span>DANA</span> <span>ShopeePay</span>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2026 AE Game Store. All Rights Reserved. Arungi lautan petualanganmu! 🌊
+        </div>
+    </footer>
 
     <script src="script.js?v=2"></script>
 
@@ -273,6 +323,7 @@
             }, 2500);
         });
     </script>
+
 </body>
 
 </html>
