@@ -161,6 +161,37 @@ db.query(
 );
 db.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS user_id INTEGER`);
 db.query(`CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id)`);
+db.query(
+  `ALTER TABLE orders ADD COLUMN IF NOT EXISTS original_price INTEGER DEFAULT 0`,
+);
+db.query(
+  `ALTER TABLE orders ADD COLUMN IF NOT EXISTS discount_amount INTEGER DEFAULT 0`,
+);
+db.query(
+  `ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_fee INTEGER DEFAULT 0`,
+);
+db.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS voucher_code TEXT`);
+
+db.query(
+  `
+  CREATE TABLE IF NOT EXISTS vouchers (
+    id SERIAL PRIMARY KEY,
+    code TEXT UNIQUE NOT NULL,
+    game_name TEXT,
+    discount_amount INTEGER NOT NULL DEFAULT 0,
+    active INTEGER DEFAULT 1,
+    expires_at TEXT,
+    created_at TEXT NOT NULL
+  )
+`,
+  (err) => {
+    if (err) {
+      console.error("CREATE TABLE vouchers ERROR:", err);
+    } else {
+      console.log("Table vouchers ready");
+    }
+  },
+);
 
 // limit umum (global)
 const globalLimiter = rateLimit({
@@ -249,6 +280,97 @@ function getLoggedInUserFromRequest(req) {
     return null;
   }
 }
+function calculateQrisGrossPrice(netPrice) {
+  const qrisFeeRate = 0.007;
+  const ppnRate = 0.11;
+  const totalFeeRate = qrisFeeRate * (1 + ppnRate);
+
+  return Math.ceil(Number(netPrice) / (1 - totalFeeRate));
+}
+
+function normalizeVoucherCode(code) {
+  return String(code || "")
+    .trim()
+    .toUpperCase();
+}
+
+async function getVoucherDiscount({ gameName, voucherCode, productPrice }) {
+  const cleanCode = normalizeVoucherCode(voucherCode);
+
+  if (!cleanCode) {
+    return {
+      valid: true,
+      code: "",
+      discountAmount: 0,
+      message: "",
+    };
+  }
+
+  if (!/^[A-Z0-9_-]{3,30}$/.test(cleanCode)) {
+    return {
+      valid: false,
+      message: "Format kode voucher tidak valid",
+    };
+  }
+
+  const voucherResult = await query(
+    `SELECT *
+     FROM vouchers
+     WHERE code = $1
+       AND active = 1
+     LIMIT 1`,
+    [cleanCode],
+  );
+
+  const voucher = voucherResult.rows[0];
+
+  if (!voucher) {
+    return {
+      valid: false,
+      message: "Kode voucher tidak ditemukan atau tidak aktif",
+    };
+  }
+
+  const targetGame = String(voucher.game_name || "")
+    .trim()
+    .toLowerCase();
+  const currentGame = String(gameName || "")
+    .trim()
+    .toLowerCase();
+
+  if (targetGame && targetGame !== currentGame) {
+    return {
+      valid: false,
+      message: "Voucher ini tidak berlaku untuk game ini",
+    };
+  }
+
+  if (voucher.expires_at && new Date(voucher.expires_at) < new Date()) {
+    return {
+      valid: false,
+      message: "Voucher sudah expired",
+    };
+  }
+
+  const rawDiscount = Number(voucher.discount_amount || 0);
+  const maxDiscount = Math.max(Number(productPrice) - 1000, 0);
+  const discountAmount = Math.min(rawDiscount, maxDiscount);
+
+  if (discountAmount <= 0) {
+    return {
+      valid: false,
+      message: "Nominal voucher tidak valid",
+    };
+  }
+
+  return {
+    valid: true,
+    code: cleanCode,
+    discountAmount,
+    message: "Voucher berhasil digunakan",
+  };
+}
+
 function requireAdminCsrf(req, res, next) {
   const csrfFromCookie = String(req.cookies.admin_csrf || "").trim();
   const csrfFromHeader = String(req.headers["x-csrf-token"] || "").trim();
@@ -432,7 +554,65 @@ app.get("/ae-control", requireAdminAuth, (req, res) => {
   res.sendFile(path.join(__dirname, "views", "admin.html"));
 });
 
-// buat order (QRIS manual)
+app.post("/vouchers", requireAdminAuth, requireAdminCsrf, async (req, res) => {
+  const { code, game_name, discount_amount, expires_at } = req.body;
+
+  const cleanCode = normalizeVoucherCode(code);
+  const cleanGameName = String(game_name || "").trim();
+  const discountAmount = Number(discount_amount);
+  const expiresAt = expires_at ? String(expires_at).trim() : null;
+
+  if (!/^[A-Z0-9_-]{3,30}$/.test(cleanCode)) {
+    return res.status(400).json({
+      message:
+        "Kode voucher hanya boleh huruf, angka, underscore, strip, 3-30 karakter",
+    });
+  }
+
+  if (!cleanGameName || cleanGameName.length < 2 || cleanGameName.length > 80) {
+    return res.status(400).json({
+      message: "Nama game voucher tidak valid",
+    });
+  }
+
+  if (!Number.isInteger(discountAmount) || discountAmount <= 0) {
+    return res.status(400).json({
+      message: "Diskon tidak valid",
+    });
+  }
+
+  try {
+    await query(
+      `INSERT INTO vouchers
+        (code, game_name, discount_amount, active, expires_at, created_at)
+       VALUES
+        ($1, $2, $3, 1, $4, $5)
+       ON CONFLICT (code)
+       DO UPDATE SET
+        game_name = EXCLUDED.game_name,
+        discount_amount = EXCLUDED.discount_amount,
+        active = 1,
+        expires_at = EXCLUDED.expires_at`,
+      [
+        cleanCode,
+        cleanGameName,
+        discountAmount,
+        expiresAt,
+        new Date().toISOString(),
+      ],
+    );
+
+    return res.json({
+      message: "Voucher berhasil disimpan",
+    });
+  } catch (err) {
+    console.error("ERROR SAVE VOUCHER:", err);
+    return res.status(500).json({
+      message: "Gagal menyimpan voucher",
+    });
+  }
+});
+
 // buat order + pembayaran Midtrans
 app.post("/create-order", orderLimiter, async (req, res) => {
   const loggedInUser = getLoggedInUserFromRequest(req);
@@ -443,7 +623,7 @@ app.post("/create-order", orderLimiter, async (req, res) => {
       redirectUrl: "/auth",
     });
   }
-  const { product_id, name, contact } = req.body;
+  const { product_id, name, contact, voucher_code } = req.body;
 
   const cleanName = String(name || "").trim();
   const cleanContact = String(contact || "").trim();
@@ -504,8 +684,27 @@ app.post("/create-order", orderLimiter, async (req, res) => {
     const accessToken = crypto.randomBytes(24).toString("hex");
     const createdAt = new Date().toISOString();
     const productName = `${productRow.brand} - ${productRow.duration}`;
-    const price = Number(productRow.price);
     const game = productRow.game;
+    const originalPrice = Number(productRow.price);
+
+    const voucherCheck = await getVoucherDiscount({
+      gameName: game,
+      voucherCode: voucher_code,
+      productPrice: originalPrice,
+    });
+
+    if (!voucherCheck.valid) {
+      return res.status(400).json({
+        message: voucherCheck.message,
+      });
+    }
+
+    const discountAmount = voucherCheck.discountAmount;
+    const netPrice = Math.max(originalPrice - discountAmount, 1000);
+    const price = calculateQrisGrossPrice(netPrice);
+    const paymentFee = price - netPrice;
+    const appliedVoucherCode = voucherCheck.code || null;
+
     const baseUrl = process.env.APP_BASE_URL || `http://localhost:${port}`;
     const userId = loggedInUser.id;
 
@@ -519,9 +718,9 @@ app.post("/create-order", orderLimiter, async (req, res) => {
 
     await query(
       `INSERT INTO orders
-            (id, product_id, user_id, access_token, name, contact, game, product, price, payment_status, delivery_status, created_at)
-            VALUES
-            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+      (id, product_id, user_id, access_token, name, contact, game, product, price, original_price, discount_amount, payment_fee, voucher_code, payment_status, delivery_status, created_at)
+      VALUES
+      ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
       [
         orderId,
         cleanProductId,
@@ -532,6 +731,10 @@ app.post("/create-order", orderLimiter, async (req, res) => {
         game,
         productName,
         price,
+        originalPrice,
+        discountAmount,
+        paymentFee,
+        appliedVoucherCode,
         "pending",
         "waiting_payment",
         createdAt,
@@ -544,6 +747,7 @@ app.post("/create-order", orderLimiter, async (req, res) => {
         order_id: orderId,
         gross_amount: price,
       },
+      enabled_payments: ["qris"],
       customer_details: {
         first_name: cleanName,
         email: isValidEmail ? cleanContact : "customer@example.com",
