@@ -1185,6 +1185,7 @@
                                 <th style="width: 90px;">ID</th>
                                 <th>Username</th>
                                 <th>Waktu Daftar</th>
+                                <th style="width: 220px;">Aksi</th>
                             </tr>
                         </thead>
                         <tbody id="userTableBody"></tbody>
@@ -1571,12 +1572,16 @@
                 statusText.innerText = `Total user: ${data.length}`;
 
                 tableBody.innerHTML = data.map(item => `
-            <tr>
-                <td>${item.id}</td>
-                <td>${escapeHtml(item.username || "-")}</td>
-                <td>${formatTanggal(item.created_at)}</td>
-            </tr>
-        `).join("");
+    <tr>
+        <td>${item.id}</td>
+        <td>${escapeHtml(item.username || "-")}</td>
+        <td>${formatTanggal(item.created_at)}</td>
+        <td>
+            <button class="ghost-btn" onclick="changeUserPassword(${item.id})">Ubah Password</button>
+            <button class="danger-btn" onclick="deleteUser(${item.id})">Hapus</button>
+        </td>
+    </tr>
+`).join("");
             } catch (err) {
                 statusText.innerText = "Gagal memuat daftar user.";
                 tableBody.innerHTML = `
@@ -1584,6 +1589,83 @@
                 <td colspan="3" class="empty">Terjadi error saat mengambil user.</td>
             </tr>
         `;
+            }
+        }
+        async function changeUserPassword(userId) {
+            const result = await Swal.fire({
+                title: "Ubah Password User",
+                input: "password",
+                inputLabel: "Password baru",
+                inputPlaceholder: "Minimal 6 karakter",
+                showCancelButton: true,
+                confirmButtonText: "Simpan",
+                cancelButtonText: "Batal"
+            });
+
+            if (!result.isConfirmed) return;
+
+            const password = String(result.value || "").trim();
+
+            if (password.length < 6) {
+                Swal.fire("Password minimal 6 karakter");
+                return;
+            }
+
+            try {
+                const res = await fetch(`/users/${userId}/password`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "x-csrf-token": getCsrfToken()
+                    },
+                    body: JSON.stringify({ password })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    Swal.fire(data.message || "Gagal ubah password user");
+                    return;
+                }
+
+                Swal.fire(data.message || "Password berhasil diubah");
+            } catch (err) {
+                Swal.fire("Terjadi error server saat ubah password user");
+            }
+        }
+
+        async function deleteUser(userId) {
+            const result = await Swal.fire({
+                title: "Hapus User?",
+                text: "User yang dihapus tidak bisa login lagi.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Ya, Hapus",
+                cancelButtonText: "Batal",
+                confirmButtonColor: "#fb7185"
+            });
+
+            if (!result.isConfirmed) return;
+
+            try {
+                const res = await fetch(`/users/${userId}`, {
+                    method: "DELETE",
+                    headers: {
+                        "x-csrf-token": getCsrfToken()
+                    }
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    Swal.fire(data.message || "Gagal hapus user");
+                    return;
+                }
+
+                Swal.fire(data.message || "User berhasil dihapus");
+                loadUsers();
+            } catch (err) {
+                Swal.fire("Terjadi error server saat hapus user");
             }
         }
         async function loadOrders() {

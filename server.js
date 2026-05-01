@@ -734,6 +734,63 @@ app.get("/users", requireAdminAuth, async (req, res) => {
     }
 });
 
+app.put("/users/:id/password", requireAdminAuth, requireAdminCsrf, async (req, res) => {
+    const userId = Number(req.params.id);
+    const { password } = req.body;
+
+    if (!Number.isInteger(userId) || userId <= 0) {
+        return res.status(400).json({ message: "ID user tidak valid" });
+    }
+
+    const cleanPassword = String(password || "").trim();
+
+    if (cleanPassword.length < 6) {
+        return res.status(400).json({ message: "Password minimal 6 karakter" });
+    }
+
+    try {
+        const hashedPassword = await bcrypt.hash(cleanPassword, 10);
+
+        const result = await query(
+            "UPDATE users SET password = $1 WHERE id = $2 RETURNING id",
+            [hashedPassword, userId]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: "User tidak ditemukan" });
+        }
+
+        return res.json({ message: "Password user berhasil diubah" });
+    } catch (err) {
+        console.error("ERROR UPDATE USER PASSWORD:", err);
+        return res.status(500).json({ message: "Gagal ubah password user" });
+    }
+});
+
+app.delete("/users/:id", requireAdminAuth, requireAdminCsrf, async (req, res) => {
+    const userId = Number(req.params.id);
+
+    if (!Number.isInteger(userId) || userId <= 0) {
+        return res.status(400).json({ message: "ID user tidak valid" });
+    }
+
+    try {
+        const result = await query(
+            "DELETE FROM users WHERE id = $1 RETURNING id",
+            [userId]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: "User tidak ditemukan" });
+        }
+
+        return res.json({ message: "User berhasil dihapus" });
+    } catch (err) {
+        console.error("ERROR DELETE USER:", err);
+        return res.status(500).json({ message: "Gagal hapus user" });
+    }
+});
+
 app.get("/orders", requireAdminAuth, async (req, res) => {
     try {
         const result = await query(
