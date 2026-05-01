@@ -264,48 +264,66 @@
           return;
         }
 
-        // FITUR BARU: Animasi Loading di Tombol
         const originalText = btn.innerText;
         btn.innerText = "Memverifikasi... 🌊";
         btn.style.opacity = "0.7";
         btn.disabled = true;
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
 
         try {
           const res = await fetch("/admin-login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ username, password }),
+            signal: controller.signal,
           });
 
-          const data = await res.json();
+          clearTimeout(timeoutId);
+
+          let data = {};
+          try {
+            data = await res.json();
+          } catch (_) {}
 
           if (!res.ok) {
             Swal.fire({
               icon: "error",
-              title: "Akses Ditolak",
-              text: data.message || "Username atau Password salah!",
+              title:
+                res.status === 429
+                  ? "Terlalu Banyak Percobaan"
+                  : "Akses Ditolak",
+              text:
+                data.message ||
+                (res.status === 429
+                  ? "Tunggu sekitar 1 menit lalu coba lagi."
+                  : "Username atau password salah."),
               confirmButtonColor: "#fb7185",
             });
-            // Kembalikan tombol seperti semula jika gagal
-            btn.innerText = originalText;
-            btn.style.opacity = "1";
-            btn.disabled = false;
             return;
           }
 
-          // Jika sukses
           btn.innerText = "Berhasil Masuk! ⛩️";
           window.location.href = "/ae-control";
-        } catch {
+        } catch (err) {
           Swal.fire({
             icon: "error",
-            title: "Error Server",
-            text: "Server tidak merespon, coba lagi nanti.",
+            title: "Koneksi Bermasalah",
+            text:
+              err.name === "AbortError"
+                ? "Request terlalu lama. Coba refresh lalu login lagi."
+                : "Server tidak merespon, coba lagi nanti.",
             confirmButtonColor: "#fb7185",
           });
-          btn.innerText = originalText;
-          btn.style.opacity = "1";
-          btn.disabled = false;
+        } finally {
+          clearTimeout(timeoutId);
+
+          if (!window.location.href.includes("/ae-control")) {
+            btn.innerText = originalText;
+            btn.style.opacity = "1";
+            btn.disabled = false;
+          }
         }
       }
 
