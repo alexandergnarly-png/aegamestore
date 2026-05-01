@@ -1123,3 +1123,14 @@ button#buyBtn:active {
     font-size: 22px;
   }
 }
+.modal-close-btn {
+  z-index: 3;
+}
+
+.order-modal-card {
+  z-index: 2;
+}
+
+.order-modal-backdrop {
+  z-index: 1;
+}

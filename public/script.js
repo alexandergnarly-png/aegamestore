@@ -470,5 +470,19 @@ function filterCategory(cat, btnElement) {
     card.style.display = name.includes(cat.toLowerCase()) ? "flex" : "none";
   });
 }
+document.addEventListener("DOMContentLoaded", () => {
+  const closeBtn = document.getElementById("closeOrderModalBtn");
+  const modal = document.getElementById("orderModal");
+
+  if (closeBtn) {
+    closeBtn.addEventListener("click", closeOrderModal);
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && modal && modal.classList.contains("show")) {
+      closeOrderModal();
+    }
+  });
+});
 setLanguage(currentLanguage);
 loadAllProducts();
