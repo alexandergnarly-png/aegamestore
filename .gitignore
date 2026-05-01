@@ -1,5 +1,11 @@
 node_modules/
 .env
+.env*
 database.db
+database*.db
 secret_api_key.csv
+secret_api_key*.csv
+backup_codes*.csv
 *.exe
+*.key
+*.pem
