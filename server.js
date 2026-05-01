@@ -411,6 +411,14 @@ app.get("/ae-control", requireAdminAuth, (req, res) => {
 // buat order (QRIS manual)
 // buat order + pembayaran Midtrans
 app.post("/create-order", orderLimiter, async (req, res) => {
+  const loggedInUser = getLoggedInUserFromRequest(req);
+
+  if (!loggedInUser) {
+    return res.status(401).json({
+      message: "Kamu harus login dulu sebelum order",
+      redirectUrl: "/auth",
+    });
+  }
   const { product_id, name, contact } = req.body;
 
   const cleanName = String(name || "").trim();
@@ -475,8 +483,7 @@ app.post("/create-order", orderLimiter, async (req, res) => {
     const price = Number(productRow.price);
     const game = productRow.game;
     const baseUrl = process.env.APP_BASE_URL || `http://localhost:${port}`;
-    const loggedInUser = getLoggedInUserFromRequest(req);
-    const userId = loggedInUser?.id || null;
+    const userId = loggedInUser.id;
 
     res.cookie(`order_token_${orderId}`, accessToken, {
       httpOnly: true,

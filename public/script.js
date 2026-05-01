@@ -137,7 +137,6 @@ async function loadAllProducts() {
   try {
     const res = await fetch("/public-products");
     const data = await res.json();
-
     if (!Array.isArray(data) || data.length === 0) {
       Swal.fire({
         icon: "info",
@@ -301,6 +300,18 @@ async function buy() {
     });
 
     const data = await res.json();
+
+    if (res.status === 401) {
+      Swal.fire({
+        icon: "warning",
+        title: "Login Dulu",
+        text: data.message || "Kamu harus login dulu sebelum order",
+        confirmButtonColor: "#0ea5e9",
+      }).then(() => {
+        window.location.href = data.redirectUrl || "/auth";
+      });
+      return;
+    }
 
     if (data.paymentUrl) {
       window.location.href = data.paymentUrl;
