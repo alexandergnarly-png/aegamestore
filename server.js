@@ -1464,16 +1464,11 @@ app.post("/register", registerLimiter, async (req, res) => {
       message: "Password harus 6 sampai 72 karakter",
     });
   }
-  if (!username || !password || username.length < 3 || password.length < 6) {
-    return res
-      .status(400)
-      .json({ message: "Username min 3 karakter dan password min 6 karakter" });
-  }
 
   try {
     // Enkripsi password biar aman kalau database bocor
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const hashedPassword = await bcrypt.hash(cleanPassword, salt);
 
     await query("INSERT INTO users (username, password) VALUES ($1, $2)", [
       cleanUsername,
