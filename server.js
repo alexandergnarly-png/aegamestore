@@ -438,6 +438,7 @@ app.post("/create-order", orderLimiter, async (req, res) => {
             ]
         );
 
+        const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanContact);
         const transaction = await snap.createTransaction({
             transaction_details: {
                 order_id: orderId,
@@ -445,8 +446,8 @@ app.post("/create-order", orderLimiter, async (req, res) => {
             },
             customer_details: {
                 first_name: cleanName,
-                email: cleanContact.includes("@") ? cleanContact : "customer@example.com",
-                phone: cleanContact.includes("@") ? "" : cleanContact.replace(/[^0-9+]/g, "")
+                email: isValidEmail ? cleanContact : "customer@example.com",
+                phone: isValidEmail ? "" : cleanContact.replace(/[^0-9+]/g, "")
             },
             item_details: [
                 {
