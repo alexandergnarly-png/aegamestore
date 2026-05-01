@@ -14,6 +14,11 @@ const app = express();
 app.set("trust proxy", 1);
 const port = process.env.PORT || 3000;
 const isMidtransProduction = process.env.MIDTRANS_IS_PRODUCTION === "true";
+const jwtSecret = String(process.env.JWT_SECRET || "").trim();
+
+if (!jwtSecret || jwtSecret.length < 32) {
+    throw new Error("JWT_SECRET wajib diisi minimal 32 karakter");
+}
 
 const snap = new midtransClient.Snap({
     isProduction: isMidtransProduction,
@@ -1262,7 +1267,7 @@ app.post("/user-login", async (req, res) => {
         if (!isMatch) return res.status(400).json({ message: "Password salah!" });
 
         // Buat "tiket masuk" (Token) untuk user
-        const token = jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET || "rahasia_sementara", { expiresIn: "7d" });
+        const token = jwt.sign({ id: user.id, username: user.username }, jwtSecret, { expiresIn: "7d" });
 
         // Simpan tiket di cookie browser
         res.cookie("user_auth", token, {
@@ -1292,7 +1297,7 @@ app.get("/api/user/me", (req, res) => {
 
     try {
         // Cek apakah tokennya valid dan cocok dengan JWT_SECRET
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || "rahasia_sementara");
+        const decoded = jwt.verify(token, jwtSecret)
         return res.json({ loggedIn: true, username: decoded.username });
     } catch (err) {
         // Kalau token kadaluarsa atau error
