@@ -449,7 +449,6 @@ function showSocialProof() {
 setInterval(showSocialProof, 20000);
 
 // --- FILTER CATEGORY ---
-// --- FILTER CATEGORY ---
 function filterCategory(cat, btnElement) {
   document
     .querySelectorAll(".pill")
@@ -467,7 +466,26 @@ function filterCategory(cat, btnElement) {
       return;
     }
 
-    card.style.display = name.includes(cat.toLowerCase()) ? "flex" : "none";
+    if (cat === "Mobile") {
+      const isTools =
+        name.includes("gbox") ||
+        name.includes("g box") ||
+        name.includes("tools") ||
+        name.includes("tool");
+
+      card.style.display = isTools ? "none" : "flex";
+      return;
+    }
+
+    if (cat === "Tools") {
+      const isTools =
+        name.includes("gbox") ||
+        name.includes("g box") ||
+        name.includes("tools") ||
+        name.includes("tool");
+
+      card.style.display = isTools ? "flex" : "none";
+    }
   });
 }
 document.addEventListener("DOMContentLoaded", () => {
