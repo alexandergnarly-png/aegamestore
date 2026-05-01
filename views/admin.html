@@ -2478,27 +2478,6 @@ Game Key : ${key || "-"}
       });
     </script>
     <script>
-      function createSakura() {
-        const sakura = document.createElement("div");
-        sakura.classList.add("sakura");
-        // Ukuran random
-        const size = Math.random() * 10 + 5;
-        sakura.style.width = size + "px";
-        sakura.style.height = size + "px";
-        // Posisi dan durasi random
-        sakura.style.left = Math.random() * 100 + "vw";
-        sakura.style.animationDuration =
-          Math.random() * 3 + 4 + "s, " + (Math.random() * 2 + 2) + "s";
-        document.body.appendChild(sakura);
-        // Hapus elemen setelah jatuh agar web tidak berat (anti lag/bug)
-        setTimeout(() => {
-          sakura.remove();
-        }, 7000);
-      }
-      // Munculkan sakura setiap 400ms
-      if (window.innerWidth > 768) {
-        setInterval(createSakura, 1200);
-      }
       // --- FITUR TAMBAHAN: Jam & Sapaan Real-Time ---
       function updateClock() {
         const now = new Date();
