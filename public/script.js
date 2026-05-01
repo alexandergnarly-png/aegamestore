@@ -219,15 +219,47 @@ function renderGames() {
       card.classList.add("active");
     }
 
-    card.onclick = () => {
-      openOrderModal(game);
+    card.onclick = async () => {
+      card.style.pointerEvents = "none";
+
+      try {
+        await openOrderModal(game);
+      } finally {
+        card.style.pointerEvents = "auto";
+      }
     };
 
     gameGrid.appendChild(card);
   });
 }
 
-function openOrderModal(game) {
+async function openOrderModal(game) {
+  try {
+    const res = await fetch("/api/user/me");
+    const data = await res.json();
+
+    if (!data.loggedIn) {
+      Swal.fire({
+        icon: "warning",
+        title: "Login Dulu",
+        text: "Kamu harus login dulu sebelum order.",
+        confirmButtonColor: "#0ea5e9",
+        confirmButtonText: "Login Sekarang",
+      }).then(() => {
+        window.location.href = "/auth";
+      });
+      return;
+    }
+  } catch (err) {
+    Swal.fire({
+      icon: "error",
+      title: "Gagal Cek Login",
+      text: "Coba refresh halaman lalu login ulang.",
+      confirmButtonColor: "#fb7185",
+    });
+    return;
+  }
+
   selectedGame = game;
   renderGames();
   loadBrands();
