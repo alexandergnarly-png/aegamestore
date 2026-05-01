@@ -1,1422 +1,1546 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Panel - AE Game Store 🌊</title>
     <style>
-        :root {
-            /* Ocean Vibes Japan Palette */
-            --primary: #0ea5e9;
-            /* Ocean Deep */
-            --primary-hover: #0284c7;
-            --secondary: #fb7185;
-            /* Torii Red / Sakura */
-            --bg-color: #f0f9ff;
-            --card-bg: rgba(255, 255, 255, 0.75);
-            --text-main: #0c4a6e;
-            --text-muted: #475569;
-            --border-color: rgba(56, 189, 248, 0.4);
+      :root {
+        /* Ocean Vibes Japan Palette */
+        --primary: #0ea5e9;
+        /* Ocean Deep */
+        --primary-hover: #0284c7;
+        --secondary: #fb7185;
+        /* Torii Red / Sakura */
+        --bg-color: #f0f9ff;
+        --card-bg: rgba(255, 255, 255, 0.75);
+        --text-main: #0c4a6e;
+        --text-muted: #475569;
+        --border-color: rgba(56, 189, 248, 0.4);
 
-            --shadow-sm: 0 4px 12px rgba(14, 165, 233, 0.08);
-            --shadow-md: 0 12px 30px rgba(14, 165, 233, 0.12);
-            --shadow-lg: 0 24px 50px rgba(14, 165, 233, 0.15);
-            --radius-xl: 28px;
-            --radius-lg: 20px;
-            --radius-md: 14px;
-            --radius-sm: 10px;
+        --shadow-sm: 0 4px 12px rgba(14, 165, 233, 0.08);
+        --shadow-md: 0 12px 30px rgba(14, 165, 233, 0.12);
+        --shadow-lg: 0 24px 50px rgba(14, 165, 233, 0.15);
+        --radius-xl: 28px;
+        --radius-lg: 20px;
+        --radius-md: 14px;
+        --radius-sm: 10px;
 
-            /* Zen Badges */
-            --success-bg: #d1fae5;
-            /* Matcha Light */
-            --success-text: #065f46;
-            --warn-bg: #fef08a;
-            /* Sunset Gold */
-            --warn-text: #854d0e;
-            --danger-bg: #ffe4e6;
-            /* Sakura Pink */
-            --danger-text: #be123c;
+        /* Zen Badges */
+        --success-bg: #d1fae5;
+        /* Matcha Light */
+        --success-text: #065f46;
+        --warn-bg: #fef08a;
+        /* Sunset Gold */
+        --warn-text: #854d0e;
+        --danger-bg: #ffe4e6;
+        /* Sakura Pink */
+        --danger-text: #be123c;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        background-color: var(--bg-color);
+        background-image:
+          radial-gradient(
+            circle at 10% 20%,
+            rgba(56, 189, 248, 0.15) 0%,
+            transparent 40%
+          ),
+          radial-gradient(
+            circle at 90% 80%,
+            rgba(251, 113, 133, 0.1) 0%,
+            transparent 40%
+          );
+        color: var(--text-main);
+        min-height: 100vh;
+        display: flex;
+        position: relative;
+        z-index: 0;
+      }
+
+      /* Aesthetic Watermarks (Ukiyo-e Feel) */
+      body::before {
+        content: "🌊";
+        position: fixed;
+        bottom: -50px;
+        right: -20px;
+        font-size: 350px;
+        opacity: 0.04;
+        z-index: -1;
+        pointer-events: none;
+      }
+
+      body::after {
+        content: "⛩️";
+        position: fixed;
+        bottom: 50px;
+        right: 320px;
+        font-size: 200px;
+        opacity: 0.03;
+        z-index: -1;
+        pointer-events: none;
+      }
+
+      /* ===== SIDEBAR ===== */
+      .sidebar {
+        width: 260px;
+        background: rgba(255, 255, 255, 0.6);
+        backdrop-filter: blur(24px);
+        border-right: 1px solid var(--border-color);
+        padding: 24px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        transition:
+          width 0.3s ease,
+          padding 0.3s ease;
+        overflow-x: hidden;
+        z-index: 50;
+      }
+
+      .sidebar-brand {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding-bottom: 20px;
+        border-bottom: 1px dashed var(--border-color);
+      }
+
+      .sidebar-brand-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+      }
+
+      .sidebar-logo {
+        width: 44px;
+        height: 44px;
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--secondary), #f43f5e);
+        color: white;
+        font-weight: bold;
+        font-size: 20px;
+        box-shadow: 0 8px 16px rgba(251, 113, 133, 0.3);
+        flex-shrink: 0;
+      }
+
+      .sidebar-text {
+        min-width: 0;
+        white-space: nowrap;
+      }
+
+      .sidebar-kicker {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--primary);
+        font-weight: 800;
+      }
+
+      .sidebar-title {
+        font-size: 16px;
+        font-weight: 800;
+        color: var(--text-main);
+      }
+
+      .sidebar-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .nav-btn {
+        width: 100%;
+        text-align: left;
+        background: transparent;
+        color: var(--text-muted);
+        padding: 14px 16px;
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        border: none;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .nav-btn:hover {
+        background: rgba(14, 165, 233, 0.1);
+        color: var(--primary);
+      }
+
+      .nav-btn.active {
+        background: linear-gradient(
+          135deg,
+          var(--primary),
+          var(--primary-hover)
+        );
+        color: white;
+        box-shadow: 0 8px 16px rgba(14, 165, 233, 0.25);
+      }
+
+      .sidebar-footer {
+        margin-top: auto;
+      }
+
+      .sidebar-logout,
+      .sidebar-toggle {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.8);
+        color: var(--text-main);
+        border: 1px solid var(--border-color);
+        padding: 14px;
+        border-radius: var(--radius-md);
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .sidebar-logout:hover {
+        background: #fff1f2;
+        color: var(--danger-text);
+        border-color: #fecdd3;
+      }
+
+      .sidebar-toggle {
+        width: auto;
+        padding: 10px;
+        color: var(--primary);
+        background: rgba(14, 165, 233, 0.1);
+        border: none;
+      }
+
+      .sidebar-toggle:hover {
+        background: rgba(14, 165, 233, 0.2);
+      }
+
+      /* Collapsed State */
+      /* Collapsed State */
+      .sidebar-collapsed .sidebar {
+        width: 88px;
+        padding: 24px 14px;
+      }
+
+      .sidebar-collapsed .sidebar-text {
+        opacity: 0;
+        display: none;
+      }
+
+      /* --- TAMBAHAN UNTUK FIX BUG ICON GATE --- */
+      .sidebar-collapsed .sidebar-brand {
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        padding-bottom: 16px;
+      }
+
+      .sidebar-collapsed .sidebar-brand-left {
+        margin: 0;
+      }
+
+      .sidebar-collapsed .sidebar-toggle {
+        width: 100%;
+      }
+
+      /* ---------------------------------------- */
+
+      .sidebar-collapsed .nav-btn,
+      .sidebar-collapsed .sidebar-logout {
+        justify-content: center;
+        padding: 14px 0;
+        font-size: 0;
+      }
+
+      /* ===== MAIN CONTENT ===== */
+      .page {
+        flex: 1;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 24px 32px 60px;
+        overflow-x: hidden;
+        position: relative; /* 👈 TAMBAHKAN INI */
+        z-index: 10; /* 👈 TAMBAHKAN INI BIAR NAIK KE ATAS */
+      }
+
+      .admin-section {
+        display: none;
+        animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+
+      .admin-section.active {
+        display: block;
+      }
+
+      .top-nav {
+        position: sticky;
+        top: 16px;
+        z-index: 20;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 20px;
+        margin-bottom: 24px;
+        background: var(--card-bg);
+        backdrop-filter: blur(24px);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .top-nav-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .logo-badge {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: var(--text-main);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 14px;
+      }
+
+      .nav-kicker {
+        font-size: 10px;
+        letter-spacing: 0.5px;
+        color: var(--primary);
+        text-transform: uppercase;
+        font-weight: 800;
+      }
+
+      .nav-title {
+        font-size: 14px;
+        font-weight: 800;
+        color: var(--text-main);
+      }
+
+      .nav-actions {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .nav-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 14px;
+        border-radius: 99px;
+        background: #e0f2fe;
+        color: #0369a1;
+        font-size: 12px;
+        font-weight: 700;
+        border: 1px solid #bae6fd;
+      }
+
+      .chip-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #0ea5e9;
+        box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.2);
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.4);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        70% {
+          box-shadow: 0 0 0 6px rgba(14, 165, 233, 0);
         }
 
-        html {
-            scroll-behavior: smooth;
+        100% {
+          box-shadow: 0 0 0 0 rgba(14, 165, 233, 0);
+        }
+      }
+
+      /* ===== HERO BANNER ===== */
+      .hero {
+        position: relative;
+        padding: 40px;
+        border-radius: var(--radius-xl);
+        background: linear-gradient(135deg, #0284c7, #38bdf8, #fbcfe8);
+        /* Ocean to Sakura */
+        color: white;
+        box-shadow: var(--shadow-md);
+        margin-bottom: 28px;
+        overflow: hidden;
+      }
+
+      .hero::after {
+        content: "";
+        position: absolute;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(
+          circle,
+          rgba(255, 255, 255, 0.15) 0%,
+          transparent 70%
+        );
+        top: -100px;
+        right: -50px;
+        border-radius: 50%;
+      }
+
+      .hero-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        position: relative;
+        z-index: 2;
+        gap: 24px;
+        flex-wrap: wrap;
+      }
+
+      .hero-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(4px);
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        margin-bottom: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+      }
+
+      .hero h1 {
+        font-size: 36px;
+        font-weight: 800;
+        line-height: 1.2;
+        margin-bottom: 12px;
+        letter-spacing: -0.5px;
+        color: white;
+      }
+
+      .hero p {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 15px;
+        line-height: 1.6;
+        max-width: 600px;
+      }
+
+      .hero-mini {
+        display: flex;
+        gap: 12px;
+        margin-top: 24px;
+        position: relative;
+        z-index: 2;
+        flex-wrap: wrap;
+      }
+
+      .mini-pill {
+        padding: 8px 14px;
+        background: rgba(0, 0, 0, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 99px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      /* ===== STAT CARDS & FORMS ===== */
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 28px;
+      }
+
+      .stat-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(24px);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        box-shadow: var(--shadow-sm);
+        transition:
+          transform 0.2s ease,
+          box-shadow 0.2s ease;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--primary);
+      }
+
+      .stat-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+
+      .stat-label {
+        font-size: 13px;
+        color: var(--text-muted);
+        font-weight: 800;
+      }
+
+      .stat-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--water-foam);
+        color: var(--primary);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+      }
+
+      .stat-value {
+        font-size: 32px;
+        font-weight: 800;
+        color: var(--text-main);
+        margin-bottom: 4px;
+      }
+
+      .stat-note {
+        font-size: 12px;
+        color: var(--text-muted);
+      }
+
+      .card {
+        background: var(--card-bg);
+        backdrop-filter: blur(24px);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-xl);
+        padding: 32px;
+        box-shadow: var(--shadow-md);
+      }
+
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+        gap: 16px;
+        border-bottom: 1px dashed rgba(56, 189, 248, 0.5);
+        padding-bottom: 20px;
+      }
+
+      .card-title-wrap h2 {
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--text-main);
+        margin-bottom: 6px;
+        letter-spacing: -0.5px;
+      }
+
+      .card-subtitle {
+        font-size: 14px;
+        color: var(--text-muted);
+      }
+
+      .section-badge {
+        background: #e0f2fe;
+        color: var(--primary);
+        border: 1px solid #bae6fd;
+        padding: 8px 14px;
+        border-radius: 99px;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .toolbar {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+      }
+
+      .field,
+      .field-wide {
+        flex: 1;
+        min-width: 200px;
+      }
+
+      .field-wide {
+        min-width: 100%;
+      }
+
+      input[type="text"],
+      select,
+      textarea {
+        width: 100%;
+        padding: 14px 16px;
+        border-radius: var(--radius-md);
+        border: 1px solid #bae6fd;
+        background: rgba(255, 255, 255, 0.8);
+        color: var(--text-main);
+        font-size: 14px;
+        font-weight: 500;
+        outline: none;
+        transition: all 0.2s ease;
+      }
+
+      textarea {
+        min-height: 120px;
+        resize: vertical;
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        border-color: var(--primary);
+        background: white;
+        box-shadow: 0 0 0 4px #e0f2fe;
+      }
+
+      /* ===== BUTTONS ===== */
+      .btn-group {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      button {
+        padding: 14px 20px;
+        border: none;
+        border-radius: var(--radius-md);
+        background: linear-gradient(
+          135deg,
+          var(--primary),
+          var(--primary-hover)
+        );
+        color: white;
+        font-size: 14px;
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 8px 16px rgba(14, 165, 233, 0.2);
+        transition:
+          transform 0.2s ease,
+          box-shadow 0.2s ease;
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(14, 165, 233, 0.3);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      .ghost-btn {
+        background: rgba(255, 255, 255, 0.9);
+        color: var(--primary);
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .ghost-btn:hover {
+        background: #e0f2fe;
+        box-shadow: var(--shadow-md);
+        border-color: #bae6fd;
+      }
+
+      .danger-btn {
+        background: rgba(255, 255, 255, 0.9);
+        color: var(--danger-text);
+        border: 1px solid #fecaca;
+        box-shadow: none;
+      }
+
+      .danger-btn:hover {
+        background: var(--danger-bg);
+        box-shadow: none;
+        border-color: #fda4af;
+      }
+
+      .logout-btn {
+        background: rgba(255, 255, 255, 0.9);
+        color: var(--text-main);
+        border: 1px solid transparent;
+      }
+
+      .hero .logout-btn {
+        color: var(--text-main);
+        font-weight: 800;
+      }
+
+      /* ===== TABLES ===== */
+      .info-row {
+        margin-bottom: 16px;
+      }
+
+      .info {
+        font-size: 13px;
+        color: var(--text-muted);
+        font-weight: 600;
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+        background: rgba(255, 255, 255, 0.6);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+        backdrop-filter: blur(10px);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 1000px;
+      }
+
+      th,
+      td {
+        padding: 16px 20px;
+        text-align: left;
+        border-bottom: 1px solid #e0f2fe;
+        font-size: 14px;
+        vertical-align: middle;
+      }
+
+      th {
+        background: #f0f9ff;
+        color: var(--primary);
+        font-weight: 800;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+
+      tbody tr {
+        transition: background 0.2s ease;
+      }
+
+      tbody tr:hover {
+        background: rgba(224, 242, 254, 0.5);
+      }
+
+      /* Soft blue hover */
+      tbody tr:last-child td {
+        border-bottom: none;
+      }
+
+      td button {
+        padding: 8px 12px;
+        font-size: 12px;
+        margin-right: 4px;
+        margin-bottom: 4px;
+      }
+
+      /* ===== BADGES ===== */
+      .badge {
+        display: inline-flex;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: capitalize;
+        border: 1px solid transparent;
+      }
+
+      .badge.pending {
+        background: var(--warn-bg);
+        color: var(--warn-text);
+        border-color: #fde047;
+      }
+
+      .badge.paid,
+      .badge.delivered,
+      .badge.available {
+        background: var(--success-bg);
+        color: var(--success-text);
+        border-color: #6ee7b7;
+      }
+
+      .badge.expired,
+      .badge.cancelled,
+      .badge.used {
+        background: var(--danger-bg);
+        color: var(--danger-text);
+        border-color: #fecdd3;
+      }
+
+      .badge.waiting_payment {
+        background: #e0f2fe;
+        color: #0369a1;
+        border-color: #bae6fd;
+      }
+
+      .badge.manual,
+      .badge.stock_empty {
+        background: #ffe4e6;
+        color: #be123c;
+        border-color: #fecdd3;
+      }
+
+      /* Empty State Aesthetic 🎐 */
+      .empty {
+        text-align: center;
+        padding: 60px !important;
+        color: var(--text-muted);
+        font-style: italic;
+        font-weight: 500;
+        font-size: 15px;
+      }
+
+      .empty::before {
+        content: "🎐";
+        display: block;
+        font-size: 36px;
+        margin-bottom: 12px;
+        opacity: 0.8;
+      }
+
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(15px);
         }
 
-        body {
-            background-color: var(--bg-color);
-            background-image:
-                radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(251, 113, 133, 0.1) 0%, transparent 40%);
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            position: relative;
-            z-index: 0;
+        to {
+          opacity: 1;
+          transform: translateY(0);
         }
+      }
 
-        /* Aesthetic Watermarks (Ukiyo-e Feel) */
-        body::before {
-            content: "🌊";
-            position: fixed;
-            bottom: -50px;
-            right: -20px;
-            font-size: 350px;
-            opacity: 0.04;
-            z-index: -1;
-            pointer-events: none;
-        }
+      .delay-1 {
+        animation-delay: 0.1s;
+      }
 
-        body::after {
-            content: "⛩️";
-            position: fixed;
-            bottom: 50px;
-            right: 320px;
-            font-size: 200px;
-            opacity: 0.03;
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        /* ===== SIDEBAR ===== */
+      @media (max-width: 1024px) {
         .sidebar {
-            width: 260px;
-            background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(24px);
-            border-right: 1px solid var(--border-color);
-            padding: 24px 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-            position: sticky;
-            top: 0;
-            height: 100vh;
-            transition: width 0.3s ease, padding 0.3s ease;
-            overflow-x: hidden;
-            z-index: 50;
-        }
-
-        .sidebar-brand {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            padding-bottom: 20px;
-            border-bottom: 1px dashed var(--border-color);
-        }
-
-        .sidebar-brand-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            min-width: 0;
-        }
-
-        .sidebar-logo {
-            width: 44px;
-            height: 44px;
-            border-radius: var(--radius-md);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, var(--secondary), #f43f5e);
-            color: white;
-            font-weight: bold;
-            font-size: 20px;
-            box-shadow: 0 8px 16px rgba(251, 113, 133, 0.3);
-            flex-shrink: 0;
+          width: 88px;
+          padding: 24px 14px;
         }
 
         .sidebar-text {
-            min-width: 0;
-            white-space: nowrap;
+          display: none;
         }
 
-        .sidebar-kicker {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--primary);
-            font-weight: 800;
+        .nav-btn,
+        .sidebar-logout {
+          justify-content: center;
+          padding: 14px 0;
+          font-size: 0;
         }
 
-        .sidebar-title {
-            font-size: 16px;
-            font-weight: 800;
-            color: var(--text-main);
+        .nav-btn::before,
+        .sidebar-logout::before {
+          font-size: 18px;
+        }
+
+        .nav-btn[data-section="dashboard"]::before {
+          content: "🏠";
+        }
+
+        .nav-btn[data-section="products"]::before {
+          content: "📦";
+        }
+
+        .nav-btn[data-section="orders"]::before {
+          content: "🧾";
+        }
+
+        .nav-btn[data-section="keys"]::before {
+          content: "🔑";
+        }
+
+        .sidebar-logout::before {
+          content: "⎋";
+        }
+
+        .sidebar-toggle {
+          display: none;
+        }
+      }
+
+      @media (max-width: 768px) {
+        body {
+          flex-direction: column;
+        }
+
+        .sidebar {
+          width: 100% !important;
+          height: auto;
+          position: relative;
+          border-right: none;
+          border-bottom: 1px solid var(--border-color);
+          flex-direction: row;
+          align-items: center;
+          padding: 16px;
+        }
+
+        .sidebar-brand {
+          border-bottom: none;
+          padding-bottom: 0;
         }
 
         .sidebar-nav {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .nav-btn {
-            width: 100%;
-            text-align: left;
-            background: transparent;
-            color: var(--text-muted);
-            padding: 14px 16px;
-            border-radius: var(--radius-md);
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-            border: none;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .nav-btn:hover {
-            background: rgba(14, 165, 233, 0.1);
-            color: var(--primary);
-        }
-
-        .nav-btn.active {
-            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
-            color: white;
-            box-shadow: 0 8px 16px rgba(14, 165, 233, 0.25);
+          flex-direction: row;
+          flex: 1;
+          justify-content: flex-end;
         }
 
         .sidebar-footer {
-            margin-top: auto;
+          display: none;
         }
 
-        .sidebar-logout,
-        .sidebar-toggle {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.8);
-            color: var(--text-main);
-            border: 1px solid var(--border-color);
-            padding: 14px;
-            border-radius: var(--radius-md);
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .nav-btn {
+          width: auto;
+          padding: 10px 14px;
         }
 
-        .sidebar-logout:hover {
-            background: #fff1f2;
-            color: var(--danger-text);
-            border-color: #fecdd3;
-        }
-
-        .sidebar-toggle {
-            width: auto;
-            padding: 10px;
-            color: var(--primary);
-            background: rgba(14, 165, 233, 0.1);
-            border: none;
-        }
-
-        .sidebar-toggle:hover {
-            background: rgba(14, 165, 233, 0.2);
-        }
-
-        /* Collapsed State */
-        /* Collapsed State */
-        .sidebar-collapsed .sidebar {
-            width: 88px;
-            padding: 24px 14px;
-        }
-
-        .sidebar-collapsed .sidebar-text {
-            opacity: 0;
-            display: none;
-        }
-
-        /* --- TAMBAHAN UNTUK FIX BUG ICON GATE --- */
-        .sidebar-collapsed .sidebar-brand {
-            flex-direction: column;
-            align-items: center;
-            gap: 16px;
-            padding-bottom: 16px;
-        }
-
-        .sidebar-collapsed .sidebar-brand-left {
-            margin: 0;
-        }
-
-        .sidebar-collapsed .sidebar-toggle {
-            width: 100%;
-        }
-
-        /* ---------------------------------------- */
-
-        .sidebar-collapsed .nav-btn,
-        .sidebar-collapsed .sidebar-logout {
-            justify-content: center;
-            padding: 14px 0;
-            font-size: 0;
-        }
-
-        /* ===== MAIN CONTENT ===== */
         .page {
-            flex: 1;
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 24px 32px 60px;
-            overflow-x: hidden;
+          padding: 16px;
         }
 
-        .admin-section {
-            display: none;
-            animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        .admin-section.active {
-            display: block;
-        }
-
-        .top-nav {
-            position: sticky;
-            top: 16px;
-            z-index: 20;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px 20px;
-            margin-bottom: 24px;
-            background: var(--card-bg);
-            backdrop-filter: blur(24px);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .top-nav-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .logo-badge {
-            width: 38px;
-            height: 38px;
-            border-radius: 10px;
-            background: var(--text-main);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 14px;
-        }
-
-        .nav-kicker {
-            font-size: 10px;
-            letter-spacing: 0.5px;
-            color: var(--primary);
-            text-transform: uppercase;
-            font-weight: 800;
-        }
-
-        .nav-title {
-            font-size: 14px;
-            font-weight: 800;
-            color: var(--text-main);
-        }
-
-        .nav-actions {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-
-        .nav-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 14px;
-            border-radius: 99px;
-            background: #e0f2fe;
-            color: #0369a1;
-            font-size: 12px;
-            font-weight: 700;
-            border: 1px solid #bae6fd;
-        }
-
-        .chip-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #0ea5e9;
-            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.2);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.4);
-            }
-
-            70% {
-                box-shadow: 0 0 0 6px rgba(14, 165, 233, 0);
-            }
-
-            100% {
-                box-shadow: 0 0 0 0 rgba(14, 165, 233, 0);
-            }
-        }
-
-        /* ===== HERO BANNER ===== */
         .hero {
-            position: relative;
-            padding: 40px;
-            border-radius: var(--radius-xl);
-            background: linear-gradient(135deg, #0284c7, #38bdf8, #fbcfe8);
-            /* Ocean to Sakura */
-            color: white;
-            box-shadow: var(--shadow-md);
-            margin-bottom: 28px;
-            overflow: hidden;
-        }
-
-        .hero::after {
-            content: "";
-            position: absolute;
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
-            top: -100px;
-            right: -50px;
-            border-radius: 50%;
-        }
-
-        .hero-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            position: relative;
-            z-index: 2;
-            gap: 24px;
-            flex-wrap: wrap;
-        }
-
-        .hero-badge {
-            display: inline-block;
-            padding: 6px 12px;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(4px);
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 800;
-            letter-spacing: 1px;
-            margin-bottom: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+          padding: 24px;
         }
 
         .hero h1 {
-            font-size: 36px;
-            font-weight: 800;
-            line-height: 1.2;
-            margin-bottom: 12px;
-            letter-spacing: -0.5px;
-            color: white;
-        }
-
-        .hero p {
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 15px;
-            line-height: 1.6;
-            max-width: 600px;
-        }
-
-        .hero-mini {
-            display: flex;
-            gap: 12px;
-            margin-top: 24px;
-            position: relative;
-            z-index: 2;
-            flex-wrap: wrap;
-        }
-
-        .mini-pill {
-            padding: 8px 14px;
-            background: rgba(0, 0, 0, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 99px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        /* ===== STAT CARDS & FORMS ===== */
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 28px;
-        }
-
-        .stat-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(24px);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            padding: 24px;
-            box-shadow: var(--shadow-sm);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-md);
-            border-color: var(--primary);
-        }
-
-        .stat-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-
-        .stat-label {
-            font-size: 13px;
-            color: var(--text-muted);
-            font-weight: 800;
-        }
-
-        .stat-icon {
-            width: 40px;
-            height: 40px;
-            background: var(--water-foam);
-            color: var(--primary);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-        }
-
-        .stat-value {
-            font-size: 32px;
-            font-weight: 800;
-            color: var(--text-main);
-            margin-bottom: 4px;
-        }
-
-        .stat-note {
-            font-size: 12px;
-            color: var(--text-muted);
+          font-size: 28px;
         }
 
         .card {
-            background: var(--card-bg);
-            backdrop-filter: blur(24px);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-xl);
-            padding: 32px;
-            box-shadow: var(--shadow-md);
+          padding: 20px;
         }
 
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-            gap: 16px;
-            border-bottom: 1px dashed rgba(56, 189, 248, 0.5);
-            padding-bottom: 20px;
+        .top-nav {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 16px;
         }
-
-        .card-title-wrap h2 {
-            font-size: 24px;
-            font-weight: 800;
-            color: var(--text-main);
-            margin-bottom: 6px;
-            letter-spacing: -0.5px;
-        }
-
-        .card-subtitle {
-            font-size: 14px;
-            color: var(--text-muted);
-        }
-
-        .section-badge {
-            background: #e0f2fe;
-            color: var(--primary);
-            border: 1px solid #bae6fd;
-            padding: 8px 14px;
-            border-radius: 99px;
-            font-size: 12px;
-            font-weight: 800;
-        }
-
-        .toolbar {
-            display: flex;
-            gap: 16px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-        }
-
-        .field,
-        .field-wide {
-            flex: 1;
-            min-width: 200px;
-        }
-
-        .field-wide {
-            min-width: 100%;
-        }
-
-        input[type="text"],
-        select,
-        textarea {
-            width: 100%;
-            padding: 14px 16px;
-            border-radius: var(--radius-md);
-            border: 1px solid #bae6fd;
-            background: rgba(255, 255, 255, 0.8);
-            color: var(--text-main);
-            font-size: 14px;
-            font-weight: 500;
-            outline: none;
-            transition: all 0.2s ease;
-        }
-
-        textarea {
-            min-height: 120px;
-            resize: vertical;
-        }
-
-        input:focus,
-        select:focus,
-        textarea:focus {
-            border-color: var(--primary);
-            background: white;
-            box-shadow: 0 0 0 4px #e0f2fe;
-        }
-
-        /* ===== BUTTONS ===== */
-        .btn-group {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        button {
-            padding: 14px 20px;
-            border: none;
-            border-radius: var(--radius-md);
-            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
-            color: white;
-            font-size: 14px;
-            font-weight: 800;
-            cursor: pointer;
-            box-shadow: 0 8px 16px rgba(14, 165, 233, 0.2);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 24px rgba(14, 165, 233, 0.3);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
-        .ghost-btn {
-            background: rgba(255, 255, 255, 0.9);
-            color: var(--primary);
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .ghost-btn:hover {
-            background: #e0f2fe;
-            box-shadow: var(--shadow-md);
-            border-color: #bae6fd;
-        }
-
-        .danger-btn {
-            background: rgba(255, 255, 255, 0.9);
-            color: var(--danger-text);
-            border: 1px solid #fecaca;
-            box-shadow: none;
-        }
-
-        .danger-btn:hover {
-            background: var(--danger-bg);
-            box-shadow: none;
-            border-color: #fda4af;
-        }
-
-        .logout-btn {
-            background: rgba(255, 255, 255, 0.9);
-            color: var(--text-main);
-            border: 1px solid transparent;
-        }
-
-        .hero .logout-btn {
-            color: var(--text-main);
-            font-weight: 800;
-        }
-
-        /* ===== TABLES ===== */
-        .info-row {
-            margin-bottom: 16px;
-        }
-
-        .info {
-            font-size: 13px;
-            color: var(--text-muted);
-            font-weight: 600;
-        }
-
-        .table-wrap {
-            overflow-x: auto;
-            background: rgba(255, 255, 255, 0.6);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
-            backdrop-filter: blur(10px);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 1000px;
-        }
-
-        th,
-        td {
-            padding: 16px 20px;
-            text-align: left;
-            border-bottom: 1px solid #e0f2fe;
-            font-size: 14px;
-            vertical-align: middle;
-        }
-
-        th {
-            background: #f0f9ff;
-            color: var(--primary);
-            font-weight: 800;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        tbody tr {
-            transition: background 0.2s ease;
-        }
-
-        tbody tr:hover {
-            background: rgba(224, 242, 254, 0.5);
-        }
-
-        /* Soft blue hover */
-        tbody tr:last-child td {
-            border-bottom: none;
-        }
-
-        td button {
-            padding: 8px 12px;
-            font-size: 12px;
-            margin-right: 4px;
-            margin-bottom: 4px;
-        }
-
-        /* ===== BADGES ===== */
-        .badge {
-            display: inline-flex;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 800;
-            text-transform: capitalize;
-            border: 1px solid transparent;
-        }
-
-        .badge.pending {
-            background: var(--warn-bg);
-            color: var(--warn-text);
-            border-color: #fde047;
-        }
-
-        .badge.paid,
-        .badge.delivered,
-        .badge.available {
-            background: var(--success-bg);
-            color: var(--success-text);
-            border-color: #6ee7b7;
-        }
-
-        .badge.expired,
-        .badge.cancelled,
-        .badge.used {
-            background: var(--danger-bg);
-            color: var(--danger-text);
-            border-color: #fecdd3;
-        }
-
-        .badge.waiting_payment {
-            background: #e0f2fe;
-            color: #0369a1;
-            border-color: #bae6fd;
-        }
-
-        .badge.manual,
-        .badge.stock_empty {
-            background: #ffe4e6;
-            color: #be123c;
-            border-color: #fecdd3;
-        }
-
-        /* Empty State Aesthetic 🎐 */
-        .empty {
-            text-align: center;
-            padding: 60px !important;
-            color: var(--text-muted);
-            font-style: italic;
-            font-weight: 500;
-            font-size: 15px;
-        }
-
-        .empty::before {
-            content: "🎐";
-            display: block;
-            font-size: 36px;
-            margin-bottom: 12px;
-            opacity: 0.8;
-        }
-
-        @keyframes fadeUp {
-            from {
-                opacity: 0;
-                transform: translateY(15px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .delay-1 {
-            animation-delay: 0.1s;
-        }
-
-        @media (max-width: 1024px) {
-            .sidebar {
-                width: 88px;
-                padding: 24px 14px;
-            }
-
-            .sidebar-text {
-                display: none;
-            }
-
-            .nav-btn,
-            .sidebar-logout {
-                justify-content: center;
-                padding: 14px 0;
-                font-size: 0;
-            }
-
-            .nav-btn::before,
-            .sidebar-logout::before {
-                font-size: 18px;
-            }
-
-            .nav-btn[data-section="dashboard"]::before {
-                content: "🏠";
-            }
-
-            .nav-btn[data-section="products"]::before {
-                content: "📦";
-            }
-
-            .nav-btn[data-section="orders"]::before {
-                content: "🧾";
-            }
-
-            .nav-btn[data-section="keys"]::before {
-                content: "🔑";
-            }
-
-            .sidebar-logout::before {
-                content: "⎋";
-            }
-
-            .sidebar-toggle {
-                display: none;
-            }
-        }
-
-        @media (max-width: 768px) {
-            body {
-                flex-direction: column;
-            }
-
-            .sidebar {
-                width: 100% !important;
-                height: auto;
-                position: relative;
-                border-right: none;
-                border-bottom: 1px solid var(--border-color);
-                flex-direction: row;
-                align-items: center;
-                padding: 16px;
-            }
-
-            .sidebar-brand {
-                border-bottom: none;
-                padding-bottom: 0;
-            }
-
-            .sidebar-nav {
-                flex-direction: row;
-                flex: 1;
-                justify-content: flex-end;
-            }
-
-            .sidebar-footer {
-                display: none;
-            }
-
-            .nav-btn {
-                width: auto;
-                padding: 10px 14px;
-            }
-
-            .page {
-                padding: 16px;
-            }
-
-            .hero {
-                padding: 24px;
-            }
-
-            .hero h1 {
-                font-size: 28px;
-            }
-
-            .card {
-                padding: 20px;
-            }
-
-            .top-nav {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 16px;
-            }
-        }
+      }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-</head>
+  </head>
 
-<body>
+  <body>
     <div class="sidebar">
-        <div class="sidebar-brand">
-            <div class="sidebar-brand-left">
-                <div class="sidebar-logo">⛩️</div>
-                <div class="sidebar-text">
-                    <div class="sidebar-kicker">AE Game Store</div>
-                    <div class="sidebar-title">Admin Panel</div>
-                </div>
-            </div>
-            <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-left">
+          <div class="sidebar-logo">⛩️</div>
+          <div class="sidebar-text">
+            <div class="sidebar-kicker">AE Game Store</div>
+            <div class="sidebar-title">Admin Panel</div>
+          </div>
         </div>
+        <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+      </div>
 
-        <nav class="sidebar-nav">
-            <button class="nav-btn active" data-section="dashboard"
-                onclick="showSection('dashboard', this)">Dashboard</button>
-            <button class="nav-btn" data-section="products" onclick="showSection('products', this)">Produk</button>
-            <button class="nav-btn" data-section="orders" onclick="showSection('orders', this)">Order</button>
-            <button class="nav-btn" data-section="users" onclick="showSection('users', this)">User Buyer</button>
-            <button class="nav-btn" data-section="keys" onclick="showSection('keys', this)">Game Key</button>
-        </nav>
+      <nav class="sidebar-nav">
+        <button
+          class="nav-btn active"
+          data-section="dashboard"
+          onclick="showSection('dashboard', this)"
+        >
+          Dashboard
+        </button>
+        <button
+          class="nav-btn"
+          data-section="products"
+          onclick="showSection('products', this)"
+        >
+          Produk
+        </button>
+        <button
+          class="nav-btn"
+          data-section="orders"
+          onclick="showSection('orders', this)"
+        >
+          Order
+        </button>
+        <button
+          class="nav-btn"
+          data-section="users"
+          onclick="showSection('users', this)"
+        >
+          User Buyer
+        </button>
+        <button
+          class="nav-btn"
+          data-section="keys"
+          onclick="showSection('keys', this)"
+        >
+          Game Key
+        </button>
+      </nav>
 
-        <div class="sidebar-footer">
-            <button class="sidebar-logout" onclick="logoutAdmin()">Logout</button>
-        </div>
+      <div class="sidebar-footer">
+        <button class="sidebar-logout" onclick="logoutAdmin()">Logout</button>
+      </div>
     </div>
 
     <main class="page">
-        <section id="section-dashboard" class="admin-section active">
-            <div class="top-nav">
-                <div class="top-nav-left">
-                    <div class="logo-badge">AE</div>
-                    <div>
-                        <div class="nav-kicker" id="adminGreeting">AE Game Store</div>
-                        <div class="nav-title" id="adminClock">Zen Admin Dashboard</div>
-                    </div>
-                </div>
-                <div class="nav-actions">
-                    <div class="nav-chip">
-                        <span class="chip-dot"></span>
-                        <span>Sistem Aktif & Terlindungi</span>
-                    </div>
-                    <button class="ghost-btn" style="padding: 8px 14px;" onclick="logoutAdmin()">Logout</button>
-                </div>
+      <section id="section-dashboard" class="admin-section active">
+        <div class="top-nav">
+          <div class="top-nav-left">
+            <div class="logo-badge">AE</div>
+            <div>
+              <div class="nav-kicker" id="adminGreeting">AE Game Store</div>
+              <div class="nav-title" id="adminClock">Zen Admin Dashboard</div>
+            </div>
+          </div>
+          <div class="nav-actions">
+            <div class="nav-chip">
+              <span class="chip-dot"></span>
+              <span>Sistem Aktif & Terlindungi</span>
+            </div>
+            <button
+              class="ghost-btn"
+              style="padding: 8px 14px"
+              onclick="logoutAdmin()"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+
+        <div class="hero">
+          <div class="hero-row">
+            <div style="max-width: 600px">
+              <div class="hero-badge">🌊 AE GAME STORE • DASHBOARD</div>
+              <h1>Pantau operasional tokomu setenang ombak lautan</h1>
+              <p>
+                Kelola produk, periksa stok voucher, dan pantau pesanan yang
+                masuk dalam satu tempat yang nyaman dan tertata rapi.
+              </p>
+            </div>
+            <div>
+              <button class="logout-btn" onclick="refreshAllData()">
+                Refresh Semua Data 🌊
+              </button>
+            </div>
+          </div>
+          <div class="hero-mini">
+            <div class="mini-pill">Live Monitoring</div>
+            <div class="mini-pill">Aesthetic UI</div>
+            <div class="mini-pill">Secured System</div>
+          </div>
+        </div>
+
+        <div class="stats delay-1">
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-label">Total Key</div>
+              <div class="stat-icon">🔑</div>
+            </div>
+            <div class="stat-value" id="totalKeyStat">0</div>
+            <div class="stat-note">Seluruh key di database.</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-label">Key Available</div>
+              <div class="stat-icon">✅</div>
+            </div>
+            <div class="stat-value" id="availableKeyStat">0</div>
+            <div class="stat-note">Stok key yang belum dipakai.</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-label">Total Order</div>
+              <div class="stat-icon">🧾</div>
+            </div>
+            <div class="stat-value" id="totalOrderStat">0</div>
+            <div class="stat-note">Jumlah order yang tercatat.</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-label">Total Produk</div>
+              <div class="stat-icon">📦</div>
+            </div>
+            <div class="stat-value" id="totalProductStat">0</div>
+            <div class="stat-note">Produk tersedia di panel.</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-top">
+              <div class="stat-label">Produk Hampir Habis</div>
+              <div class="stat-icon">⚠️</div>
+            </div>
+            <div class="stat-value" id="lowStockStat">0</div>
+            <div class="stat-note">Produk dengan stok &lt; 5</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="section-products" class="admin-section">
+        <div class="card delay-1">
+          <div class="card-header">
+            <div class="card-title-wrap">
+              <h2>Kelola Produk</h2>
+              <p class="card-subtitle">
+                Tambahkan, edit, aktifkan, atau hapus produk dari store dengan
+                cepat.
+              </p>
+            </div>
+            <div class="section-badge">Product Manager</div>
+          </div>
+
+          <div class="toolbar">
+            <input type="hidden" id="editingProductId" />
+            <div class="field">
+              <input
+                type="text"
+                id="productGame"
+                placeholder="Game, contoh: Delta Force"
+              />
+            </div>
+            <div class="field">
+              <input
+                type="text"
+                id="productBrand"
+                placeholder="Brand, contoh: Aorus"
+              />
+            </div>
+            <div class="field">
+              <input
+                type="text"
+                id="productDuration"
+                placeholder="Durasi, contoh: 1 Hari"
+              />
+            </div>
+            <div class="field">
+              <input
+                type="text"
+                id="productPrice"
+                placeholder="Harga, contoh: 30000"
+              />
+            </div>
+          </div>
+
+          <div class="toolbar">
+            <div class="btn-group">
+              <button id="saveProductBtn" onclick="saveProduct()">
+                Tambah Produk
+              </button>
+              <button class="ghost-btn" onclick="resetProductForm()">
+                Reset Form
+              </button>
+              <button class="ghost-btn" onclick="loadProducts()">
+                Refresh Produk
+              </button>
+            </div>
+          </div>
+
+          <div class="info-row">
+            <div class="info" id="productStatusText">
+              Memuat daftar produk...
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 70px">ID</th>
+                  <th>Game</th>
+                  <th>Brand</th>
+                  <th>Durasi</th>
+                  <th>Harga</th>
+                  <th>Status</th>
+                  <th style="width: 220px">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="productTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="section-orders" class="admin-section">
+        <div class="card delay-1">
+          <div class="card-header">
+            <div class="card-title-wrap">
+              <h2>Daftar Order</h2>
+              <p class="card-subtitle">
+                Lihat transaksi masuk, filter pembayaran, dan copy detail order.
+              </p>
+            </div>
+            <div class="section-badge">Order Monitor</div>
+          </div>
+
+          <div class="toolbar">
+            <div class="field-wide">
+              <input
+                type="text"
+                id="orderSearchInput"
+                placeholder="Cari order id / nama / kontak / game / produk"
+              />
             </div>
 
-            <div class="hero">
-                <div class="hero-row">
-                    <div style="max-width: 600px;">
-                        <div class="hero-badge">🌊 AE GAME STORE • DASHBOARD</div>
-                        <h1>Pantau operasional tokomu setenang ombak lautan</h1>
-                        <p>Kelola produk, periksa stok voucher, dan pantau pesanan yang masuk dalam satu tempat yang
-                            nyaman dan tertata rapi.</p>
-                    </div>
-                    <div>
-                        <button class="logout-btn" onclick="refreshAllData()">Refresh Semua Data 🌊</button>
-                    </div>
-                </div>
-                <div class="hero-mini">
-                    <div class="mini-pill">Live Monitoring</div>
-                    <div class="mini-pill">Aesthetic UI</div>
-                    <div class="mini-pill">Secured System</div>
-                </div>
+            <div class="field">
+              <select id="paymentFilter" onchange="applyOrderFilters()">
+                <option value="">Semua Pembayaran</option>
+                <option value="pending">Pending</option>
+                <option value="paid">Paid</option>
+                <option value="expired">Expired</option>
+              </select>
             </div>
 
-            <div class="stats delay-1">
-                <div class="stat-card">
-                    <div class="stat-top">
-                        <div class="stat-label">Total Key</div>
-                        <div class="stat-icon">🔑</div>
-                    </div>
-                    <div class="stat-value" id="totalKeyStat">0</div>
-                    <div class="stat-note">Seluruh key di database.</div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-top">
-                        <div class="stat-label">Key Available</div>
-                        <div class="stat-icon">✅</div>
-                    </div>
-                    <div class="stat-value" id="availableKeyStat">0</div>
-                    <div class="stat-note">Stok key yang belum dipakai.</div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-top">
-                        <div class="stat-label">Total Order</div>
-                        <div class="stat-icon">🧾</div>
-                    </div>
-                    <div class="stat-value" id="totalOrderStat">0</div>
-                    <div class="stat-note">Jumlah order yang tercatat.</div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-top">
-                        <div class="stat-label">Total Produk</div>
-                        <div class="stat-icon">📦</div>
-                    </div>
-                    <div class="stat-value" id="totalProductStat">0</div>
-                    <div class="stat-note">Produk tersedia di panel.</div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-top">
-                        <div class="stat-label">Produk Hampir Habis</div>
-                        <div class="stat-icon">⚠️</div>
-                    </div>
-                    <div class="stat-value" id="lowStockStat">0</div>
-                    <div class="stat-note">Produk dengan stok &lt; 5</div>
-                </div>
+            <div class="field">
+              <select id="deliveryFilter" onchange="applyOrderFilters()">
+                <option value="">Semua Pengiriman</option>
+                <option value="waiting_payment">Waiting Payment</option>
+                <option value="delivered">Delivered</option>
+                <option value="manual">Manual</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
             </div>
-        </section>
 
-        <section id="section-products" class="admin-section">
-            <div class="card delay-1">
-                <div class="card-header">
-                    <div class="card-title-wrap">
-                        <h2>Kelola Produk</h2>
-                        <p class="card-subtitle">Tambahkan, edit, aktifkan, atau hapus produk dari store dengan cepat.
-                        </p>
-                    </div>
-                    <div class="section-badge">Product Manager</div>
-                </div>
-
-                <div class="toolbar">
-                    <input type="hidden" id="editingProductId">
-                    <div class="field"><input type="text" id="productGame" placeholder="Game, contoh: Delta Force">
-                    </div>
-                    <div class="field"><input type="text" id="productBrand" placeholder="Brand, contoh: Aorus"></div>
-                    <div class="field"><input type="text" id="productDuration" placeholder="Durasi, contoh: 1 Hari">
-                    </div>
-                    <div class="field"><input type="text" id="productPrice" placeholder="Harga, contoh: 30000"></div>
-                </div>
-
-                <div class="toolbar">
-                    <div class="btn-group">
-                        <button id="saveProductBtn" onclick="saveProduct()">Tambah Produk</button>
-                        <button class="ghost-btn" onclick="resetProductForm()">Reset Form</button>
-                        <button class="ghost-btn" onclick="loadProducts()">Refresh Produk</button>
-                    </div>
-                </div>
-
-                <div class="info-row">
-                    <div class="info" id="productStatusText">Memuat daftar produk...</div>
-                </div>
-
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="width: 70px;">ID</th>
-                                <th>Game</th>
-                                <th>Brand</th>
-                                <th>Durasi</th>
-                                <th>Harga</th>
-                                <th>Status</th>
-                                <th style="width: 220px;">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="productTableBody"></tbody>
-                    </table>
-                </div>
+            <div class="btn-group">
+              <button onclick="loadOrders()">Refresh Order</button>
+              <button class="ghost-btn" onclick="selectAllFilteredOrders()">
+                Pilih Semua Filter
+              </button>
+              <button class="danger-btn" onclick="deleteSelectedOrders()">
+                Hapus Terpilih
+              </button>
+              <button class="ghost-btn" onclick="clearSelectedOrders()">
+                Batal Pilih
+              </button>
             </div>
-        </section>
+          </div>
 
-        <section id="section-orders" class="admin-section">
-            <div class="card delay-1">
-                <div class="card-header">
-                    <div class="card-title-wrap">
-                        <h2>Daftar Order</h2>
-                        <p class="card-subtitle">Lihat transaksi masuk, filter pembayaran, dan copy detail order.</p>
-                    </div>
-                    <div class="section-badge">Order Monitor</div>
-                </div>
+          <div class="info-row">
+            <div class="info" id="orderStatusText">Memuat daftar order...</div>
+          </div>
 
-                <div class="toolbar">
-                    <div class="field-wide">
-                        <input type="text" id="orderSearchInput"
-                            placeholder="Cari order id / nama / kontak / game / produk">
-                    </div>
-
-                    <div class="field">
-                        <select id="paymentFilter" onchange="applyOrderFilters()">
-                            <option value="">Semua Pembayaran</option>
-                            <option value="pending">Pending</option>
-                            <option value="paid">Paid</option>
-                            <option value="expired">Expired</option>
-                        </select>
-                    </div>
-
-                    <div class="field">
-                        <select id="deliveryFilter" onchange="applyOrderFilters()">
-                            <option value="">Semua Pengiriman</option>
-                            <option value="waiting_payment">Waiting Payment</option>
-                            <option value="delivered">Delivered</option>
-                            <option value="manual">Manual</option>
-                            <option value="cancelled">Cancelled</option>
-                        </select>
-                    </div>
-
-                    <div class="btn-group">
-                        <button onclick="loadOrders()">Refresh Order</button>
-                        <button class="ghost-btn" onclick="selectAllFilteredOrders()">Pilih Semua Filter</button>
-                        <button class="danger-btn" onclick="deleteSelectedOrders()">Hapus Terpilih</button>
-                        <button class="ghost-btn" onclick="clearSelectedOrders()">Batal Pilih</button>
-                    </div>
-                </div>
-
-                <div class="info-row">
-                    <div class="info" id="orderStatusText">Memuat daftar order...</div>
-                </div>
-
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="width: 50px;">Pilih</th>
-                                <th>Order ID</th>
-                                <th>Nama</th>
-                                <th>Kontak</th>
-                                <th>Game</th>
-                                <th>Produk</th>
-                                <th>Harga</th>
-                                <th>Pembayaran</th>
-                                <th>Pengiriman</th>
-                                <th>Game Key</th>
-                                <th>Waktu</th>
-                                <th style="width: 160px;">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="orderTableBody"></tbody>
-                    </table>
-                </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 50px">Pilih</th>
+                  <th>Order ID</th>
+                  <th>Nama</th>
+                  <th>Kontak</th>
+                  <th>Game</th>
+                  <th>Produk</th>
+                  <th>Harga</th>
+                  <th>Pembayaran</th>
+                  <th>Pengiriman</th>
+                  <th>Game Key</th>
+                  <th>Waktu</th>
+                  <th style="width: 160px">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="orderTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+      <section id="section-users" class="admin-section">
+        <div class="card delay-1">
+          <div class="card-header">
+            <div class="card-title-wrap">
+              <h2>Daftar User Buyer</h2>
+              <p class="card-subtitle">Lihat akun buyer yang sudah daftar.</p>
             </div>
-        </section>
-        <section id="section-users" class="admin-section">
-            <div class="card delay-1">
-                <div class="card-header">
-                    <div class="card-title-wrap">
-                        <h2>Daftar User Buyer</h2>
-                        <p class="card-subtitle">Lihat akun buyer yang sudah daftar.</p>
-                    </div>
-                    <div class="section-badge">User Monitor</div>
-                </div>
+            <div class="section-badge">User Monitor</div>
+          </div>
 
-                <div class="toolbar">
-                    <div class="btn-group">
-                        <button onclick="loadUsers()">Refresh User</button>
-                    </div>
-                </div>
-
-                <div class="info-row">
-                    <div class="info" id="userStatusText">Memuat daftar user...</div>
-                </div>
-
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="width: 90px;">ID</th>
-                                <th>Username</th>
-                                <th>Waktu Daftar</th>
-                                <th style="width: 220px;">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="userTableBody"></tbody>
-                    </table>
-                </div>
+          <div class="toolbar">
+            <div class="btn-group">
+              <button onclick="loadUsers()">Refresh User</button>
             </div>
-        </section>
+          </div>
 
-        <section id="section-keys" class="admin-section">
-            <div class="card delay-1">
-                <div class="card-header">
-                    <div class="card-title-wrap">
-                        <h2>Tambah Game Key</h2>
-                        <p class="card-subtitle">Tambahkan key satuan atau bulk untuk setiap produk yang aktif.</p>
-                    </div>
-                    <div class="section-badge">Key Stock</div>
-                </div>
+          <div class="info-row">
+            <div class="info" id="userStatusText">Memuat daftar user...</div>
+          </div>
 
-                <div class="toolbar">
-                    <div class="field-wide">
-                        <select id="keyProductSelect"></select>
-                    </div>
-                </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 90px">ID</th>
+                  <th>Username</th>
+                  <th>Waktu Daftar</th>
+                  <th style="width: 220px">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="userTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
 
-                <div class="toolbar">
-                    <div class="field-wide">
-                        <input type="text" id="singleKeyInput" placeholder="Masukkan 1 game key, contoh: KEY-AAA-111">
-                    </div>
-                    <div class="btn-group">
-                        <button onclick="addSingleKey()">Tambah 1 Key</button>
-                    </div>
-                </div>
-
-                <div class="toolbar">
-                    <div class="field-wide">
-                        <textarea id="bulkKeyInput"
-                            placeholder="Masukkan banyak key, satu key per baris&#10;Contoh:&#10;KEY-AAA-111&#10;KEY-BBB-222"></textarea>
-                    </div>
-                </div>
-
-                <div class="toolbar">
-                    <div class="btn-group">
-                        <button onclick="addBulkKeys()">Tambah Bulk Key</button>
-                        <button class="ghost-btn" onclick="loadKeys()">Refresh Key</button>
-                    </div>
-                </div>
-
-                <div class="info-row">
-                    <div class="info" id="keyStatusText">Memuat daftar key...</div>
-                </div>
-
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="width: 90px;">ID</th>
-                                <th>Produk</th>
-                                <th>Key</th>
-                                <th style="width: 180px;">Status</th>
-                                <th style="width: 140px;">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="keyTableBody"></tbody>
-                    </table>
-                </div>
+      <section id="section-keys" class="admin-section">
+        <div class="card delay-1">
+          <div class="card-header">
+            <div class="card-title-wrap">
+              <h2>Tambah Game Key</h2>
+              <p class="card-subtitle">
+                Tambahkan key satuan atau bulk untuk setiap produk yang aktif.
+              </p>
             </div>
-        </section>
+            <div class="section-badge">Key Stock</div>
+          </div>
+
+          <div class="toolbar">
+            <div class="field-wide">
+              <select id="keyProductSelect"></select>
+            </div>
+          </div>
+
+          <div class="toolbar">
+            <div class="field-wide">
+              <input
+                type="text"
+                id="singleKeyInput"
+                placeholder="Masukkan 1 game key, contoh: KEY-AAA-111"
+              />
+            </div>
+            <div class="btn-group">
+              <button onclick="addSingleKey()">Tambah 1 Key</button>
+            </div>
+          </div>
+
+          <div class="toolbar">
+            <div class="field-wide">
+              <textarea
+                id="bulkKeyInput"
+                placeholder="Masukkan banyak key, satu key per baris&#10;Contoh:&#10;KEY-AAA-111&#10;KEY-BBB-222"
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="toolbar">
+            <div class="btn-group">
+              <button onclick="addBulkKeys()">Tambah Bulk Key</button>
+              <button class="ghost-btn" onclick="loadKeys()">
+                Refresh Key
+              </button>
+            </div>
+          </div>
+
+          <div class="info-row">
+            <div class="info" id="keyStatusText">Memuat daftar key...</div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 90px">ID</th>
+                  <th>Produk</th>
+                  <th>Key</th>
+                  <th style="width: 180px">Status</th>
+                  <th style="width: 140px">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="keyTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
     </main>
 
     <script>
-        let allOrders = [];
-        let selectedOrderIds = new Set();
+      let allOrders = [];
+      let selectedOrderIds = new Set();
 
-        function toggleSidebar() {
-            document.body.classList.toggle("sidebar-collapsed");
+      function toggleSidebar() {
+        document.body.classList.toggle("sidebar-collapsed");
+      }
+
+      function showSection(sectionName, buttonEl = null) {
+        const sections = document.querySelectorAll(".admin-section");
+        sections.forEach((section) => section.classList.remove("active"));
+
+        const target = document.getElementById(`section-${sectionName}`);
+        if (target) {
+          target.classList.add("active");
         }
 
-        function showSection(sectionName, buttonEl = null) {
-            const sections = document.querySelectorAll(".admin-section");
-            sections.forEach(section => section.classList.remove("active"));
+        const navButtons = document.querySelectorAll(".nav-btn");
+        navButtons.forEach((btn) => btn.classList.remove("active"));
 
-            const target = document.getElementById(`section-${sectionName}`);
-            if (target) {
-                target.classList.add("active");
-            }
-
-            const navButtons = document.querySelectorAll(".nav-btn");
-            navButtons.forEach(btn => btn.classList.remove("active"));
-
-            if (buttonEl) {
-                buttonEl.classList.add("active");
-            } else {
-                const autoBtn = document.querySelector(`.nav-btn[data-section="${sectionName}"]`);
-                if (autoBtn) autoBtn.classList.add("active");
-            }
-
-            if (sectionName === "products") {
-                loadProducts();
-            }
-
-            if (sectionName === "orders") {
-                loadOrders();
-            }
-            if (sectionName === "users") {
-                loadUsers();
-            }
-
-            if (sectionName === "keys") {
-                loadKeys();
-                loadKeyProductOptions();
-            }
-
-            if (sectionName === "dashboard") {
-                loadStockSummary();
-            }
+        if (buttonEl) {
+          buttonEl.classList.add("active");
+        } else {
+          const autoBtn = document.querySelector(
+            `.nav-btn[data-section="${sectionName}"]`,
+          );
+          if (autoBtn) autoBtn.classList.add("active");
         }
 
-        function refreshAllData() {
-            loadProducts();
-            loadKeyProductOptions();
-            loadKeys();
-            loadOrders();
-            loadStockSummary();
+        if (sectionName === "products") {
+          loadProducts();
         }
 
-        function formatRupiah(num) {
-            return "Rp " + Number(num || 0).toLocaleString("id-ID");
+        if (sectionName === "orders") {
+          loadOrders();
+        }
+        if (sectionName === "users") {
+          loadUsers();
         }
 
-        function formatTanggal(dateString) {
-            if (!dateString) return "-";
-            return new Date(dateString).toLocaleString("id-ID");
+        if (sectionName === "keys") {
+          loadKeys();
+          loadKeyProductOptions();
         }
 
-        function escapeHtml(value) {
-            return String(value ?? "")
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#39;");
+        if (sectionName === "dashboard") {
+          loadStockSummary();
+        }
+      }
+
+      function refreshAllData() {
+        loadProducts();
+        loadKeyProductOptions();
+        loadKeys();
+        loadOrders();
+        loadStockSummary();
+      }
+
+      function formatRupiah(num) {
+        return "Rp " + Number(num || 0).toLocaleString("id-ID");
+      }
+
+      function formatTanggal(dateString) {
+        if (!dateString) return "-";
+        return new Date(dateString).toLocaleString("id-ID");
+      }
+
+      function escapeHtml(value) {
+        return String(value ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function orderBadge(status) {
+        const s = (status || "").toLowerCase();
+        return `<span class="badge ${s}">${escapeHtml(status || "-")}</span>`;
+      }
+
+      function deliveryBadge(status) {
+        const s = (status || "").toLowerCase();
+        return `<span class="badge ${s}">${escapeHtml(status || "-")}</span>`;
+      }
+
+      function activeBadge(active) {
+        if (Number(active) === 1) {
+          return `<span class="badge available">Active</span>`;
+        }
+        return `<span class="badge used">Inactive</span>`;
+      }
+
+      function keyBadge(used) {
+        if (Number(used) === 1) {
+          return `<span class="badge used">Used</span>`;
+        }
+        return `<span class="badge available">Available</span>`;
+      }
+
+      function updateKeyStats(keys) {
+        const total = keys.length;
+        const available = keys.filter((item) => Number(item.used) === 0).length;
+
+        document.getElementById("totalKeyStat").innerText = total;
+        document.getElementById("availableKeyStat").innerText = available;
+      }
+
+      function updateOrderStats(orders) {
+        document.getElementById("totalOrderStat").innerText = orders.length;
+      }
+
+      function getCsrfToken() {
+        const match = document.cookie.match(/(?:^|; )admin_csrf=([^;]+)/);
+        return match ? decodeURIComponent(match[1]) : "";
+      }
+
+      function copyToClipboard(text) {
+        if (!text) {
+          Swal.fire("Tidak ada data untuk dicopy.");
+          return;
         }
 
-        function orderBadge(status) {
-            const s = (status || "").toLowerCase();
-            return `<span class="badge ${s}">${escapeHtml(status || "-")}</span>`;
-        }
+        navigator.clipboard
+          .writeText(text)
+          .then(() => {
+            Swal.fire("Berhasil dicopy!");
+          })
+          .catch(() => {
+            Swal.fire("Gagal copy.");
+          });
+      }
 
-        function deliveryBadge(status) {
-            const s = (status || "").toLowerCase();
-            return `<span class="badge ${s}">${escapeHtml(status || "-")}</span>`;
-        }
+      async function loadKeys() {
+        const statusText = document.getElementById("keyStatusText");
+        const tableBody = document.getElementById("keyTableBody");
 
-        function activeBadge(active) {
-            if (Number(active) === 1) {
-                return `<span class="badge available">Active</span>`;
-            }
-            return `<span class="badge used">Inactive</span>`;
-        }
+        statusText.innerText = "Memuat daftar key...";
+        tableBody.innerHTML = "";
 
-        function keyBadge(used) {
-            if (Number(used) === 1) {
-                return `<span class="badge used">Used</span>`;
-            }
-            return `<span class="badge available">Available</span>`;
-        }
+        try {
+          const res = await fetch("/keys");
 
-        function updateKeyStats(keys) {
-            const total = keys.length;
-            const available = keys.filter(item => Number(item.used) === 0).length;
+          if (res.status === 401) {
+            window.location.href = "/ae-auth";
+            return;
+          }
 
-            document.getElementById("totalKeyStat").innerText = total;
-            document.getElementById("availableKeyStat").innerText = available;
-        }
+          const data = await res.json();
 
-        function updateOrderStats(orders) {
-            document.getElementById("totalOrderStat").innerText = orders.length;
-        }
-
-        function getCsrfToken() {
-            const match = document.cookie.match(/(?:^|; )admin_csrf=([^;]+)/);
-            return match ? decodeURIComponent(match[1]) : "";
-        }
-
-        function copyToClipboard(text) {
-            if (!text) {
-                Swal.fire("Tidak ada data untuk dicopy.");
-                return;
-            }
-
-            navigator.clipboard.writeText(text)
-                .then(() => {
-                    Swal.fire("Berhasil dicopy!");
-                })
-                .catch(() => {
-                    Swal.fire("Gagal copy.");
-                });
-        }
-
-        async function loadKeys() {
-            const statusText = document.getElementById("keyStatusText");
-            const tableBody = document.getElementById("keyTableBody");
-
-            statusText.innerText = "Memuat daftar key...";
-            tableBody.innerHTML = "";
-
-            try {
-                const res = await fetch("/keys");
-
-                if (res.status === 401) {
-                    window.location.href = "/ae-auth";
-                    return;
-                }
-
-                const data = await res.json();
-
-                if (!Array.isArray(data) || data.length === 0) {
-                    updateKeyStats([]);
-                    statusText.innerText = "Belum ada key.";
-                    tableBody.innerHTML = `
+          if (!Array.isArray(data) || data.length === 0) {
+            updateKeyStats([]);
+            statusText.innerText = "Belum ada key.";
+            tableBody.innerHTML = `
                         <tr>
                             <td colspan="5" class="empty">Belum ada key... stok masih kosong.</td>
                         </tr>
                     `;
-                    return;
-                }
+            return;
+          }
 
-                updateKeyStats(data);
-                statusText.innerText = `Total key: ${data.length}`;
+          updateKeyStats(data);
+          statusText.innerText = `Total key: ${data.length}`;
 
-                tableBody.innerHTML = data.map(item => `
+          tableBody.innerHTML = data
+            .map(
+              (item) => `
                     <tr>
                         <td>${item.id}</td>
                         <td>${escapeHtml(item.game || "-")} - ${escapeHtml(item.brand || "-")} - ${escapeHtml(item.duration || "-")}</td>
@@ -1426,152 +1550,156 @@
                             <button class="danger-btn" onclick="deleteKey(${item.id})">Hapus</button>
                         </td>
                     </tr>
-                `).join("");
-            } catch (err) {
-                statusText.innerText = "Gagal memuat daftar key.";
-                tableBody.innerHTML = `
+                `,
+            )
+            .join("");
+        } catch (err) {
+          statusText.innerText = "Gagal memuat daftar key.";
+          tableBody.innerHTML = `
                     <tr>
                         <td colspan="5" class="empty">Terjadi error saat mengambil key.</td>
                     </tr>
                 `;
-            }
+        }
+      }
+
+      async function addSingleKey() {
+        const productId = document.getElementById("keyProductSelect").value;
+        const input = document.getElementById("singleKeyInput");
+        const key = input.value.trim();
+
+        if (!productId) {
+          Swal.fire("Pilih produk dulu.");
+          return;
         }
 
-        async function addSingleKey() {
-            const productId = document.getElementById("keyProductSelect").value;
-            const input = document.getElementById("singleKeyInput");
-            const key = input.value.trim();
-
-            if (!productId) {
-                Swal.fire("Pilih produk dulu.");
-                return;
-            }
-
-            if (!key) {
-                Swal.fire("Isi 1 key dulu.");
-                return;
-            }
-
-            try {
-                const res = await fetch("/keys", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "x-csrf-token": getCsrfToken()
-                    },
-                    body: JSON.stringify({
-                        product_id: productId,
-                        key
-                    })
-                });
-
-                const data = await res.json();
-
-                if (res.status === 401) {
-                    window.location.href = "/ae-auth";
-                    return;
-                }
-
-                if (!res.ok) {
-                    alert(data.message || "Gagal menambahkan key");
-                    return;
-                }
-
-                alert(data.message || "Key berhasil ditambahkan");
-                input.value = "";
-                loadKeys();
-            } catch (err) {
-                Swal.fire("Terjadi error server saat menambahkan key");
-            }
+        if (!key) {
+          Swal.fire("Isi 1 key dulu.");
+          return;
         }
 
-        async function addBulkKeys() {
-            const productId = document.getElementById("keyProductSelect").value;
-            const input = document.getElementById("bulkKeyInput");
-            const rawValue = input.value.trim();
+        try {
+          const res = await fetch("/keys", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-csrf-token": getCsrfToken(),
+            },
+            body: JSON.stringify({
+              product_id: productId,
+              key,
+            }),
+          });
 
-            if (!productId) {
-                Swal.fire("Pilih produk dulu.");
-                return;
-            }
+          const data = await res.json();
 
-            if (!rawValue) {
-                Swal.fire("Isi key dulu.");
-                return;
-            }
+          if (res.status === 401) {
+            window.location.href = "/ae-auth";
+            return;
+          }
 
-            const keys = rawValue
-                .split("\n")
-                .map(item => item.trim())
-                .filter(item => item.length > 0);
+          if (!res.ok) {
+            alert(data.message || "Gagal menambahkan key");
+            return;
+          }
 
-            if (keys.length === 0) {
-                Swal.fire("Tidak ada key valid.");
-                return;
-            }
-
-            try {
-                const res = await fetch("/keys/bulk", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "x-csrf-token": getCsrfToken()
-                    },
-                    body: JSON.stringify({
-                        product_id: productId,
-                        keys
-                    })
-                });
-
-                const data = await res.json();
-
-                if (res.status === 401) {
-                    window.location.href = "/ae-auth";
-                    return;
-                }
-
-                if (!res.ok) {
-                    alert(data.message || "Gagal menambahkan bulk key");
-                    return;
-                }
-
-                alert(data.message || "Bulk key berhasil ditambahkan");
-                input.value = "";
-                loadKeys();
-            } catch (err) {
-                Swal.fire("Terjadi error server saat menambahkan bulk key");
-            }
+          alert(data.message || "Key berhasil ditambahkan");
+          input.value = "";
+          loadKeys();
+        } catch (err) {
+          Swal.fire("Terjadi error server saat menambahkan key");
         }
-        async function loadUsers() {
-            const statusText = document.getElementById("userStatusText");
-            const tableBody = document.getElementById("userTableBody");
+      }
 
-            statusText.innerText = "Memuat daftar user...";
-            tableBody.innerHTML = "";
+      async function addBulkKeys() {
+        const productId = document.getElementById("keyProductSelect").value;
+        const input = document.getElementById("bulkKeyInput");
+        const rawValue = input.value.trim();
 
-            try {
-                const res = await fetch("/users");
+        if (!productId) {
+          Swal.fire("Pilih produk dulu.");
+          return;
+        }
 
-                if (res.status === 401) {
-                    window.location.href = "/ae-auth";
-                    return;
-                }
+        if (!rawValue) {
+          Swal.fire("Isi key dulu.");
+          return;
+        }
 
-                const data = await res.json();
+        const keys = rawValue
+          .split("\n")
+          .map((item) => item.trim())
+          .filter((item) => item.length > 0);
 
-                if (!Array.isArray(data) || data.length === 0) {
-                    statusText.innerText = "Belum ada user buyer.";
-                    tableBody.innerHTML = `
+        if (keys.length === 0) {
+          Swal.fire("Tidak ada key valid.");
+          return;
+        }
+
+        try {
+          const res = await fetch("/keys/bulk", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-csrf-token": getCsrfToken(),
+            },
+            body: JSON.stringify({
+              product_id: productId,
+              keys,
+            }),
+          });
+
+          const data = await res.json();
+
+          if (res.status === 401) {
+            window.location.href = "/ae-auth";
+            return;
+          }
+
+          if (!res.ok) {
+            alert(data.message || "Gagal menambahkan bulk key");
+            return;
+          }
+
+          alert(data.message || "Bulk key berhasil ditambahkan");
+          input.value = "";
+          loadKeys();
+        } catch (err) {
+          Swal.fire("Terjadi error server saat menambahkan bulk key");
+        }
+      }
+      async function loadUsers() {
+        const statusText = document.getElementById("userStatusText");
+        const tableBody = document.getElementById("userTableBody");
+
+        statusText.innerText = "Memuat daftar user...";
+        tableBody.innerHTML = "";
+
+        try {
+          const res = await fetch("/users");
+
+          if (res.status === 401) {
+            window.location.href = "/ae-auth";
+            return;
+          }
+
+          const data = await res.json();
+
+          if (!Array.isArray(data) || data.length === 0) {
+            statusText.innerText = "Belum ada user buyer.";
+            tableBody.innerHTML = `
                 <tr>
                     <td colspan="4" class="empty">Belum ada user yang daftar.</td>
                 </tr>
             `;
-                    return;
-                }
+            return;
+          }
 
-                statusText.innerText = `Total user: ${data.length}`;
+          statusText.innerText = `Total user: ${data.length}`;
 
-                tableBody.innerHTML = data.map(item => `
+          tableBody.innerHTML = data
+            .map(
+              (item) => `
     <tr>
         <td>${item.id}</td>
         <td>${escapeHtml(item.username || "-")}</td>
@@ -1581,193 +1709,219 @@
             <button class="danger-btn" onclick="deleteUser(${item.id})">Hapus</button>
         </td>
     </tr>
-`).join("");
-            } catch (err) {
-                statusText.innerText = "Gagal memuat daftar user.";
-                tableBody.innerHTML = `
+`,
+            )
+            .join("");
+        } catch (err) {
+          statusText.innerText = "Gagal memuat daftar user.";
+          tableBody.innerHTML = `
             <tr>
                 <td colspan="4" class="empty">Terjadi error saat mengambil user.</td>
             </tr>
         `;
-            }
         }
+      }
 
-        async function resetUserPassword(userId) {
-            const result = await Swal.fire({
-                title: "Reset Password User?",
-                text: "Sistem akan membuat password random baru untuk user ini.",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonText: "Ya, Reset",
-                cancelButtonText: "Batal",
-                confirmButtonColor: "#0ea5e9"
-            });
+      async function resetUserPassword(userId) {
+        const result = await Swal.fire({
+          title: "Reset Password User?",
+          text: "Sistem akan membuat password random baru untuk user ini.",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "Ya, Reset",
+          cancelButtonText: "Batal",
+          confirmButtonColor: "#0ea5e9",
+        });
 
-            if (!result.isConfirmed) return;
+        if (!result.isConfirmed) return;
 
-            try {
-                const res = await fetch(`/users/${userId}/reset-password`, {
-                    method: "POST",
-                    headers: {
-                        "x-csrf-token": getCsrfToken()
-                    }
-                });
+        try {
+          const res = await fetch(`/users/${userId}/reset-password`, {
+            method: "POST",
+            headers: {
+              "x-csrf-token": getCsrfToken(),
+            },
+          });
 
-                const data = await res.json();
+          const data = await res.json();
 
-                if (!res.ok) {
-                    Swal.fire(data.message || "Gagal reset password user");
-                    return;
-                }
+          if (!res.ok) {
+            Swal.fire(data.message || "Gagal reset password user");
+            return;
+          }
 
-                Swal.fire({
-                    title: "Password Baru",
-                    html: `
+          Swal.fire({
+            title: "Password Baru",
+            html: `
                 <p>Username: <b>${escapeHtml(data.username || "-")}</b></p>
                 <p>Password baru:</p>
                 <input id="newPasswordBox" class="swal2-input" value="${escapeHtml(data.newPassword || "")}" readonly>
             `,
-                    confirmButtonText: "Copy Password",
-                    showCancelButton: true,
-                    cancelButtonText: "Tutup"
-                }).then((copyResult) => {
-                    if (copyResult.isConfirmed) {
-                        navigator.clipboard.writeText(data.newPassword || "");
-                        Swal.fire("Password berhasil dicopy");
-                    }
-                });
-            } catch (err) {
-                Swal.fire("Terjadi error server saat reset password user");
+            confirmButtonText: "Copy Password",
+            showCancelButton: true,
+            cancelButtonText: "Tutup",
+          }).then((copyResult) => {
+            if (copyResult.isConfirmed) {
+              navigator.clipboard.writeText(data.newPassword || "");
+              Swal.fire("Password berhasil dicopy");
             }
+          });
+        } catch (err) {
+          Swal.fire("Terjadi error server saat reset password user");
         }
+      }
 
-        async function deleteUser(userId) {
-            const result = await Swal.fire({
-                title: "Hapus User?",
-                text: "User yang dihapus tidak bisa login lagi.",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonText: "Ya, Hapus",
-                cancelButtonText: "Batal",
-                confirmButtonColor: "#fb7185"
-            });
+      async function deleteUser(userId) {
+        const result = await Swal.fire({
+          title: "Hapus User?",
+          text: "User yang dihapus tidak bisa login lagi.",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "Ya, Hapus",
+          cancelButtonText: "Batal",
+          confirmButtonColor: "#fb7185",
+        });
 
-            if (!result.isConfirmed) return;
+        if (!result.isConfirmed) return;
 
-            try {
-                const res = await fetch(`/users/${userId}`, {
-                    method: "DELETE",
-                    headers: {
-                        "x-csrf-token": getCsrfToken()
-                    }
-                });
+        try {
+          const res = await fetch(`/users/${userId}`, {
+            method: "DELETE",
+            headers: {
+              "x-csrf-token": getCsrfToken(),
+            },
+          });
 
-                const data = await res.json();
+          const data = await res.json();
 
-                if (!res.ok) {
-                    Swal.fire(data.message || "Gagal hapus user");
-                    return;
-                }
+          if (!res.ok) {
+            Swal.fire(data.message || "Gagal hapus user");
+            return;
+          }
 
-                Swal.fire(data.message || "User berhasil dihapus");
-                loadUsers();
-            } catch (err) {
-                Swal.fire("Terjadi error server saat hapus user");
-            }
+          Swal.fire(data.message || "User berhasil dihapus");
+          loadUsers();
+        } catch (err) {
+          Swal.fire("Terjadi error server saat hapus user");
         }
-        async function loadOrders() {
-            const statusText = document.getElementById("orderStatusText");
-            const tableBody = document.getElementById("orderTableBody");
+      }
+      async function loadOrders() {
+        const statusText = document.getElementById("orderStatusText");
+        const tableBody = document.getElementById("orderTableBody");
 
-            statusText.innerText = "Memuat daftar order...";
-            tableBody.innerHTML = "";
+        statusText.innerText = "Memuat daftar order...";
+        tableBody.innerHTML = "";
 
-            try {
-                const res = await fetch("/orders");
+        try {
+          const res = await fetch("/orders");
 
-                if (res.status === 401) {
-                    window.location.href = "/ae-auth";
-                    return;
-                }
+          if (res.status === 401) {
+            window.location.href = "/ae-auth";
+            return;
+          }
 
-                const data = await res.json();
+          const data = await res.json();
 
-                if (!Array.isArray(data) || data.length === 0) {
-                    allOrders = [];
-                    updateOrderStats([]);
-                    statusText.innerText = "Belum ada order.";
-                    tableBody.innerHTML = `
+          if (!Array.isArray(data) || data.length === 0) {
+            allOrders = [];
+            updateOrderStats([]);
+            statusText.innerText = "Belum ada order.";
+            tableBody.innerHTML = `
                         <tr>
                             <td colspan="11" class="empty">Lautan masih tenang... belum ada transaksi.</td>
                         </tr>
                     `;
-                    return;
-                }
+            return;
+          }
 
-                allOrders = data;
-                applyOrderFilters();
-            } catch (err) {
-                statusText.innerText = "Gagal memuat daftar order.";
-                tableBody.innerHTML = `
+          allOrders = data;
+          applyOrderFilters();
+        } catch (err) {
+          statusText.innerText = "Gagal memuat daftar order.";
+          tableBody.innerHTML = `
                     <tr>
                         <td colspan="11" class="empty">Terjadi error saat mengambil order.</td>
                     </tr>
                 `;
-            }
         }
+      }
 
-        function applyOrderFilters() {
-            const statusText = document.getElementById("orderStatusText");
-            const tableBody = document.getElementById("orderTableBody");
+      function applyOrderFilters() {
+        const statusText = document.getElementById("orderStatusText");
+        const tableBody = document.getElementById("orderTableBody");
 
-            const searchValue = document.getElementById("orderSearchInput").value.trim().toLowerCase();
-            const paymentValue = document.getElementById("paymentFilter").value;
-            const deliveryValue = document.getElementById("deliveryFilter").value;
+        const searchValue = document
+          .getElementById("orderSearchInput")
+          .value.trim()
+          .toLowerCase();
+        const paymentValue = document.getElementById("paymentFilter").value;
+        const deliveryValue = document.getElementById("deliveryFilter").value;
 
-            const filteredOrders = allOrders.filter(item => {
-                const matchesSearch =
-                    !searchValue ||
-                    String(item.id || "").toLowerCase().includes(searchValue) ||
-                    String(item.name || "").toLowerCase().includes(searchValue) ||
-                    String(item.contact || "").toLowerCase().includes(searchValue) ||
-                    String(item.game || "").toLowerCase().includes(searchValue) ||
-                    String(item.product || "").toLowerCase().includes(searchValue);
+        const filteredOrders = allOrders.filter((item) => {
+          const matchesSearch =
+            !searchValue ||
+            String(item.id || "")
+              .toLowerCase()
+              .includes(searchValue) ||
+            String(item.name || "")
+              .toLowerCase()
+              .includes(searchValue) ||
+            String(item.contact || "")
+              .toLowerCase()
+              .includes(searchValue) ||
+            String(item.game || "")
+              .toLowerCase()
+              .includes(searchValue) ||
+            String(item.product || "")
+              .toLowerCase()
+              .includes(searchValue);
 
-                const matchesPayment =
-                    !paymentValue || String(item.payment_status || "") === paymentValue;
+          const matchesPayment =
+            !paymentValue || String(item.payment_status || "") === paymentValue;
 
-                const matchesDelivery =
-                    !deliveryValue || String(item.delivery_status || "") === deliveryValue;
+          const matchesDelivery =
+            !deliveryValue ||
+            String(item.delivery_status || "") === deliveryValue;
 
-                return matchesSearch && matchesPayment && matchesDelivery;
-            });
+          return matchesSearch && matchesPayment && matchesDelivery;
+        });
 
-            updateOrderStats(filteredOrders);
-            statusText.innerText = `Menampilkan ${filteredOrders.length} dari ${allOrders.length} order`;
+        updateOrderStats(filteredOrders);
+        statusText.innerText = `Menampilkan ${filteredOrders.length} dari ${allOrders.length} order`;
 
-            if (filteredOrders.length === 0) {
-                tableBody.innerHTML = `
+        if (filteredOrders.length === 0) {
+          tableBody.innerHTML = `
                     <tr>
                         <td colspan="11" class="empty">Tidak ada pesanan yang sesuai dengan filter.</td>
                     </tr>
                 `;
-                return;
-            }
+          return;
+        }
 
-            tableBody.innerHTML = filteredOrders.map(item => {
-                const safeId = JSON.stringify(String(item.id || ""));
-                const safeName = JSON.stringify(String(item.name || ""));
-                const safeContact = JSON.stringify(String(item.contact || ""));
-                const safeGame = JSON.stringify(String(item.game || ""));
-                const safeProduct = JSON.stringify(String(item.product || ""));
-                const safePayment = JSON.stringify(String(item.payment_status || ""));
-                const safeDelivery = JSON.stringify(String(item.delivery_status || ""));
-                const safeGameKey = JSON.stringify(String(item.gameKey || item.gamekey || ""));
-                const isProtected = String(item.payment_status || "").toLowerCase() === "paid" ||
-                    String(item.delivery_status || "").toLowerCase() === "delivered";
-                const checked = selectedOrderIds.has(String(item.id || "")) ? "checked" : "";
+        tableBody.innerHTML = filteredOrders
+          .map((item) => {
+            const safeId = JSON.stringify(String(item.id || ""));
+            const safeName = JSON.stringify(String(item.name || ""));
+            const safeContact = JSON.stringify(String(item.contact || ""));
+            const safeGame = JSON.stringify(String(item.game || ""));
+            const safeProduct = JSON.stringify(String(item.product || ""));
+            const safePayment = JSON.stringify(
+              String(item.payment_status || ""),
+            );
+            const safeDelivery = JSON.stringify(
+              String(item.delivery_status || ""),
+            );
+            const safeGameKey = JSON.stringify(
+              String(item.gameKey || item.gamekey || ""),
+            );
+            const isProtected =
+              String(item.payment_status || "").toLowerCase() === "paid" ||
+              String(item.delivery_status || "").toLowerCase() === "delivered";
+            const checked = selectedOrderIds.has(String(item.id || ""))
+              ? "checked"
+              : "";
 
-                return `
+            return `
                     <tr>
     <td>
         <input type="checkbox"
@@ -1785,29 +1939,46 @@
                         <td>${deliveryBadge(item.delivery_status)}</td>
                         <td>
                             ${escapeHtml(item.gameKey || item.gamekey || "-")}
-                            ${(item.gameKey || item.gamekey) ? `<br><button class="ghost-btn" onclick='copyToClipboard(${safeGameKey})'>Copy Key</button>` : ""}
+                            ${item.gameKey || item.gamekey ? `<br><button class="ghost-btn" onclick='copyToClipboard(${safeGameKey})'>Copy Key</button>` : ""}
                         </td>
                         <td>${formatTanggal(item.created_at)}</td>
                         <td>
                             <button class="ghost-btn" onclick='copyOrderDetail(${safeId}, ${safeName}, ${safeContact}, ${safeGame}, ${safeProduct}, ${Number(item.price || 0)}, ${safePayment}, ${safeDelivery}, ${safeGameKey})'>
                                 Copy Detail
                             </button>
-                            ${String(item.payment_status || "").toLowerCase() !== "paid" ? `
+                            ${
+                              String(
+                                item.payment_status || "",
+                              ).toLowerCase() !== "paid"
+                                ? `
     <button class="ghost-btn" onclick='confirmPayment(${safeId})'>
         Konfirmasi Bayar
     </button>
-` : ""}
+`
+                                : ""
+                            }
                             <button class="danger-btn" onclick='deleteOrder(${safeId})' ${isProtected ? "disabled" : ""}>
                                 Hapus
                             </button>
                         </td>
                     </tr>
                 `;
-            }).join("");
-        }
+          })
+          .join("");
+      }
 
-        function copyOrderDetail(id, name, contact, game, product, price, payment, delivery, key) {
-            const text = `
+      function copyOrderDetail(
+        id,
+        name,
+        contact,
+        game,
+        product,
+        price,
+        payment,
+        delivery,
+        key,
+      ) {
+        const text = `
 Order ID : ${id}
 Nama     : ${name}
 Kontak   : ${contact}
@@ -1821,238 +1992,262 @@ Status Pengiriman : ${delivery}
 Game Key : ${key || "-"}
             `.trim();
 
-            copyToClipboard(text);
+        copyToClipboard(text);
+      }
+      async function confirmPayment(orderId) {
+        const yakin = confirm(
+          "Yakin pembayaran sudah masuk dan key mau dikirim?",
+        );
+        if (!yakin) return;
+
+        try {
+          const res = await fetch(
+            `/orders/${encodeURIComponent(orderId)}/confirm-payment`,
+            {
+              method: "POST",
+              headers: {
+                "x-csrf-token": getCsrfToken(),
+              },
+            },
+          );
+
+          const data = await res.json();
+
+          if (!res.ok) {
+            alert(data.message || "Gagal konfirmasi pembayaran");
+            return;
+          }
+
+          alert(data.message || "Pembayaran dikonfirmasi");
+          loadOrders();
+          loadKeys();
+          loadStockSummary();
+        } catch (err) {
+          Swal.fire("Terjadi error saat konfirmasi pembayaran");
         }
-        async function confirmPayment(orderId) {
-            const yakin = confirm("Yakin pembayaran sudah masuk dan key mau dikirim?");
-            if (!yakin) return;
+      }
+      function getFilteredDeletableOrders() {
+        const searchValue = document
+          .getElementById("orderSearchInput")
+          .value.trim()
+          .toLowerCase();
+        const paymentValue = document.getElementById("paymentFilter").value;
+        const deliveryValue = document.getElementById("deliveryFilter").value;
 
-            try {
-                const res = await fetch(`/orders/${encodeURIComponent(orderId)}/confirm-payment`, {
-                    method: "POST",
-                    headers: {
-                        "x-csrf-token": getCsrfToken()
-                    }
-                });
+        return allOrders.filter((item) => {
+          const matchesSearch =
+            !searchValue ||
+            String(item.id || "")
+              .toLowerCase()
+              .includes(searchValue) ||
+            String(item.name || "")
+              .toLowerCase()
+              .includes(searchValue) ||
+            String(item.contact || "")
+              .toLowerCase()
+              .includes(searchValue) ||
+            String(item.game || "")
+              .toLowerCase()
+              .includes(searchValue) ||
+            String(item.product || "")
+              .toLowerCase()
+              .includes(searchValue);
 
-                const data = await res.json();
+          const matchesPayment =
+            !paymentValue || String(item.payment_status || "") === paymentValue;
+          const matchesDelivery =
+            !deliveryValue ||
+            String(item.delivery_status || "") === deliveryValue;
 
-                if (!res.ok) {
-                    alert(data.message || "Gagal konfirmasi pembayaran");
-                    return;
-                }
+          const isProtected =
+            String(item.payment_status || "").toLowerCase() === "paid" ||
+            String(item.delivery_status || "").toLowerCase() === "delivered";
 
-                alert(data.message || "Pembayaran dikonfirmasi");
-                loadOrders();
-                loadKeys();
-                loadStockSummary();
-            } catch (err) {
-                Swal.fire("Terjadi error saat konfirmasi pembayaran");
-            }
+          return (
+            matchesSearch && matchesPayment && matchesDelivery && !isProtected
+          );
+        });
+      }
+
+      function toggleOrderSelection(orderId, checked) {
+        if (checked) {
+          selectedOrderIds.add(String(orderId));
+        } else {
+          selectedOrderIds.delete(String(orderId));
         }
-        function getFilteredDeletableOrders() {
-            const searchValue = document.getElementById("orderSearchInput").value.trim().toLowerCase();
-            const paymentValue = document.getElementById("paymentFilter").value;
-            const deliveryValue = document.getElementById("deliveryFilter").value;
+      }
 
-            return allOrders.filter(item => {
-                const matchesSearch =
-                    !searchValue ||
-                    String(item.id || "").toLowerCase().includes(searchValue) ||
-                    String(item.name || "").toLowerCase().includes(searchValue) ||
-                    String(item.contact || "").toLowerCase().includes(searchValue) ||
-                    String(item.game || "").toLowerCase().includes(searchValue) ||
-                    String(item.product || "").toLowerCase().includes(searchValue);
+      function selectAllFilteredOrders() {
+        const orders = getFilteredDeletableOrders();
 
-                const matchesPayment = !paymentValue || String(item.payment_status || "") === paymentValue;
-                const matchesDelivery = !deliveryValue || String(item.delivery_status || "") === deliveryValue;
+        orders.forEach((item) => {
+          selectedOrderIds.add(String(item.id));
+        });
 
-                const isProtected =
-                    String(item.payment_status || "").toLowerCase() === "paid" ||
-                    String(item.delivery_status || "").toLowerCase() === "delivered";
+        applyOrderFilters();
+      }
 
-                return matchesSearch && matchesPayment && matchesDelivery && !isProtected;
+      function clearSelectedOrders() {
+        selectedOrderIds.clear();
+        applyOrderFilters();
+      }
+
+      async function deleteSelectedOrders() {
+        const ids = Array.from(selectedOrderIds);
+
+        if (ids.length === 0) {
+          alert("Belum ada order yang dipilih.");
+          return;
+        }
+
+        const yakin = confirm(`Yakin hapus ${ids.length} order terpilih?`);
+        if (!yakin) return;
+
+        let success = 0;
+        let failed = 0;
+
+        for (const id of ids) {
+          try {
+            const res = await fetch(`/orders/${encodeURIComponent(id)}`, {
+              method: "DELETE",
+              headers: {
+                "x-csrf-token": getCsrfToken(),
+              },
             });
-        }
 
-        function toggleOrderSelection(orderId, checked) {
-            if (checked) {
-                selectedOrderIds.add(String(orderId));
+            if (res.ok) {
+              success++;
+              selectedOrderIds.delete(id);
             } else {
-                selectedOrderIds.delete(String(orderId));
+              failed++;
             }
+          } catch (err) {
+            failed++;
+          }
         }
 
-        function selectAllFilteredOrders() {
-            const orders = getFilteredDeletableOrders();
+        alert(`Selesai. Berhasil: ${success}, gagal: ${failed}`);
+        loadOrders();
+      }
 
-            orders.forEach(item => {
-                selectedOrderIds.add(String(item.id));
-            });
+      async function deleteOrder(orderId) {
+        const yakin = confirm("Yakin mau hapus order ini?");
+        if (!yakin) return;
 
-            applyOrderFilters();
+        try {
+          const res = await fetch(`/orders/${encodeURIComponent(orderId)}`, {
+            method: "DELETE",
+            headers: {
+              "x-csrf-token": getCsrfToken(),
+            },
+          });
+
+          const data = await res.json();
+
+          if (res.status === 401) {
+            window.location.href = "/ae-auth";
+            return;
+          }
+
+          if (!res.ok) {
+            alert(data.message || "Gagal menghapus order");
+            return;
+          }
+
+          alert(data.message || "Order berhasil dihapus");
+          loadOrders();
+        } catch (err) {
+          Swal.fire("Terjadi error server saat menghapus order");
         }
+      }
 
-        function clearSelectedOrders() {
-            selectedOrderIds.clear();
-            applyOrderFilters();
+      async function deleteKey(id) {
+        const yakin = confirm("Yakin mau hapus key ini?");
+        if (!yakin) return;
+
+        try {
+          const res = await fetch(`/keys/${id}`, {
+            method: "DELETE",
+            headers: {
+              "x-csrf-token": getCsrfToken(),
+            },
+          });
+
+          const data = await res.json();
+
+          if (res.status === 401) {
+            window.location.href = "/ae-auth";
+            return;
+          }
+
+          if (!res.ok) {
+            alert(data.message || "Gagal menghapus key");
+            return;
+          }
+
+          Swal.fire("Key berhasil dihapus");
+          loadKeys();
+        } catch (err) {
+          Swal.fire("Terjadi error server saat menghapus key");
         }
+      }
 
-        async function deleteSelectedOrders() {
-            const ids = Array.from(selectedOrderIds);
+      async function logoutAdmin() {
+        try {
+          await fetch("/admin-logout", {
+            method: "POST",
+            headers: {
+              "x-csrf-token": getCsrfToken(),
+            },
+          });
 
-            if (ids.length === 0) {
-                alert("Belum ada order yang dipilih.");
-                return;
-            }
-
-            const yakin = confirm(`Yakin hapus ${ids.length} order terpilih?`);
-            if (!yakin) return;
-
-            let success = 0;
-            let failed = 0;
-
-            for (const id of ids) {
-                try {
-                    const res = await fetch(`/orders/${encodeURIComponent(id)}`, {
-                        method: "DELETE",
-                        headers: {
-                            "x-csrf-token": getCsrfToken()
-                        }
-                    });
-
-                    if (res.ok) {
-                        success++;
-                        selectedOrderIds.delete(id);
-                    } else {
-                        failed++;
-                    }
-                } catch (err) {
-                    failed++;
-                }
-            }
-
-            alert(`Selesai. Berhasil: ${success}, gagal: ${failed}`);
-            loadOrders();
+          window.location.href = "/ae-auth";
+        } catch (err) {
+          Swal.fire("Gagal logout");
         }
+      }
 
-        async function deleteOrder(orderId) {
-            const yakin = confirm("Yakin mau hapus order ini?");
-            if (!yakin) return;
+      function updateProductStats(products) {
+        document.getElementById("totalProductStat").innerText = products.length;
+      }
 
-            try {
-                const res = await fetch(`/orders/${encodeURIComponent(orderId)}`, {
-                    method: "DELETE",
-                    headers: {
-                        "x-csrf-token": getCsrfToken()
-                    }
-                });
+      async function loadProducts() {
+        const statusText = document.getElementById("productStatusText");
+        const tableBody = document.getElementById("productTableBody");
 
-                const data = await res.json();
+        statusText.innerText = "Memuat daftar produk...";
+        tableBody.innerHTML = "";
 
-                if (res.status === 401) {
-                    window.location.href = "/ae-auth";
-                    return;
-                }
+        try {
+          const res = await fetch("/products");
 
-                if (!res.ok) {
-                    alert(data.message || "Gagal menghapus order");
-                    return;
-                }
+          if (res.status === 401) {
+            window.location.href = "/ae-auth";
+            return;
+          }
 
-                alert(data.message || "Order berhasil dihapus");
-                loadOrders();
-            } catch (err) {
-                Swal.fire("Terjadi error server saat menghapus order");
-            }
-        }
+          const data = await res.json();
 
-        async function deleteKey(id) {
-            const yakin = confirm("Yakin mau hapus key ini?");
-            if (!yakin) return;
-
-            try {
-                const res = await fetch(`/keys/${id}`, {
-                    method: "DELETE",
-                    headers: {
-                        "x-csrf-token": getCsrfToken()
-                    }
-                });
-
-                const data = await res.json();
-
-                if (res.status === 401) {
-                    window.location.href = "/ae-auth";
-                    return;
-                }
-
-                if (!res.ok) {
-                    alert(data.message || "Gagal menghapus key");
-                    return;
-                }
-
-                Swal.fire("Key berhasil dihapus");
-                loadKeys();
-            } catch (err) {
-                Swal.fire("Terjadi error server saat menghapus key");
-            }
-        }
-
-        async function logoutAdmin() {
-            try {
-                await fetch("/admin-logout", {
-                    method: "POST",
-                    headers: {
-                        "x-csrf-token": getCsrfToken()
-                    }
-                });
-
-                window.location.href = "/ae-auth";
-            } catch (err) {
-                Swal.fire("Gagal logout");
-            }
-        }
-
-        function updateProductStats(products) {
-            document.getElementById("totalProductStat").innerText = products.length;
-        }
-
-        async function loadProducts() {
-            const statusText = document.getElementById("productStatusText");
-            const tableBody = document.getElementById("productTableBody");
-
-            statusText.innerText = "Memuat daftar produk...";
-            tableBody.innerHTML = "";
-
-            try {
-                const res = await fetch("/products");
-
-                if (res.status === 401) {
-                    window.location.href = "/ae-auth";
-                    return;
-                }
-
-                const data = await res.json();
-
-                if (!Array.isArray(data) || data.length === 0) {
-                    updateProductStats([]);
-                    statusText.innerText = "Belum ada produk.";
-                    tableBody.innerHTML = `
+          if (!Array.isArray(data) || data.length === 0) {
+            updateProductStats([]);
+            statusText.innerText = "Belum ada produk.";
+            tableBody.innerHTML = `
                         <tr>
                             <td colspan="7" class="empty">Belum ada produk di database.</td>
                         </tr>
                     `;
-                    return;
-                }
+            return;
+          }
 
-                updateProductStats(data);
-                statusText.innerText = `Total produk: ${data.length}`;
+          updateProductStats(data);
+          statusText.innerText = `Total produk: ${data.length}`;
 
-                tableBody.innerHTML = data.map(item => {
-                    const safeGame = JSON.stringify(String(item.game || ""));
-                    const safeBrand = JSON.stringify(String(item.brand || ""));
-                    const safeDuration = JSON.stringify(String(item.duration || ""));
-                    return `
+          tableBody.innerHTML = data
+            .map((item) => {
+              const safeGame = JSON.stringify(String(item.game || ""));
+              const safeBrand = JSON.stringify(String(item.brand || ""));
+              const safeDuration = JSON.stringify(String(item.duration || ""));
+              return `
                         <tr>
                             <td>${item.id}</td>
                             <td>${escapeHtml(item.game)}</td>
@@ -2069,311 +2264,299 @@ Game Key : ${key || "-"}
                             </td>
                         </tr>
                     `;
-                }).join("");
-            } catch (err) {
-                statusText.innerText = "Gagal memuat daftar produk.";
-                tableBody.innerHTML = `
+            })
+            .join("");
+        } catch (err) {
+          statusText.innerText = "Gagal memuat daftar produk.";
+          tableBody.innerHTML = `
                     <tr>
                         <td colspan="7" class="empty">Terjadi error saat mengambil produk.</td>
                     </tr>
                 `;
+        }
+      }
+
+      async function loadStockSummary() {
+        try {
+          const res = await fetch("/stock-summary");
+
+          if (res.status === 401) {
+            window.location.href = "/ae-auth";
+            return;
+          }
+
+          const data = await res.json();
+
+          let lowStock = 0;
+
+          data.forEach((item) => {
+            const stock = Number(item.available_keys || 0);
+            if (stock < 5) {
+              lowStock++;
             }
+          });
+
+          document.getElementById("lowStockStat").innerText = lowStock;
+        } catch (err) {
+          console.error("Gagal load stock summary");
+        }
+      }
+
+      async function saveProduct() {
+        const editingId = document.getElementById("editingProductId").value;
+        const game = document.getElementById("productGame").value.trim();
+        const brand = document.getElementById("productBrand").value.trim();
+        const duration = document
+          .getElementById("productDuration")
+          .value.trim();
+        const price = document.getElementById("productPrice").value.trim();
+
+        if (!game || !brand || !duration || !price) {
+          Swal.fire("Semua data produk wajib diisi.");
+          return;
         }
 
-        async function loadStockSummary() {
+        const isEditMode = !!editingId;
+        const url = isEditMode ? `/products/${editingId}` : "/products";
+        const method = isEditMode ? "PUT" : "POST";
+
+        try {
+          const res = await fetch(url, {
+            method,
+            headers: {
+              "Content-Type": "application/json",
+              "x-csrf-token": getCsrfToken(),
+            },
+            body: JSON.stringify({
+              game,
+              brand,
+              duration,
+              price,
+            }),
+          });
+
+          const data = await res.json();
+
+          if (res.status === 401) {
+            window.location.href = "/ae-auth";
+            return;
+          }
+
+          if (!res.ok) {
+            alert(data.message || "Gagal menyimpan produk");
+            return;
+          }
+
+          alert(data.message || "Produk berhasil disimpan");
+          resetProductForm();
+          loadProducts();
+          loadKeyProductOptions();
+        } catch (err) {
+          Swal.fire("Terjadi error server saat menyimpan produk");
+        }
+      }
+
+      async function deleteProduct(id) {
+        Swal.fire({
+          title: "Hapus Produk?",
+          text: "Produk yang dihapus tidak bisa dikembalikan!",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#fb7185", // Warna Torii Red
+          cancelButtonColor: "#475569",
+          confirmButtonText: "Ya, Hapus!",
+          cancelButtonText: "Batal",
+        }).then(async (result) => {
+          // Semua logika fetch HARUS masuk ke dalam blok ini
+          if (result.isConfirmed) {
             try {
-                const res = await fetch("/stock-summary");
+              const res = await fetch(`/products/${id}`, {
+                method: "DELETE",
+                headers: {
+                  "x-csrf-token": getCsrfToken(),
+                },
+              });
 
-                if (res.status === 401) {
-                    window.location.href = "/ae-auth";
-                    return;
-                }
+              const data = await res.json();
 
-                const data = await res.json();
-
-                let lowStock = 0;
-
-                data.forEach(item => {
-                    const stock = Number(item.available_keys || 0);
-                    if (stock < 5) {
-                        lowStock++;
-                    }
-                });
-
-                document.getElementById("lowStockStat").innerText = lowStock;
-            } catch (err) {
-                console.error("Gagal load stock summary");
-            }
-        }
-
-        async function saveProduct() {
-            const editingId = document.getElementById("editingProductId").value;
-            const game = document.getElementById("productGame").value.trim();
-            const brand = document.getElementById("productBrand").value.trim();
-            const duration = document.getElementById("productDuration").value.trim();
-            const price = document.getElementById("productPrice").value.trim();
-
-            if (!game || !brand || !duration || !price) {
-                Swal.fire("Semua data produk wajib diisi.");
+              if (res.status === 401) {
+                window.location.href = "/ae-auth";
                 return;
-            }
+              }
 
-            const isEditMode = !!editingId;
-            const url = isEditMode ? `/products/${editingId}` : "/products";
-            const method = isEditMode ? "PUT" : "POST";
+              if (!res.ok) {
+                Swal.fire(
+                  "Oops!",
+                  data.message || "Gagal menghapus produk",
+                  "error",
+                );
+                return;
+              }
 
-            try {
-                const res = await fetch(url, {
-                    method,
-                    headers: {
-                        "Content-Type": "application/json",
-                        "x-csrf-token": getCsrfToken()
-                    },
-                    body: JSON.stringify({
-                        game,
-                        brand,
-                        duration,
-                        price
-                    })
-                });
-
-                const data = await res.json();
-
-                if (res.status === 401) {
-                    window.location.href = "/ae-auth";
-                    return;
-                }
-
-                if (!res.ok) {
-                    alert(data.message || "Gagal menyimpan produk");
-                    return;
-                }
-
-                alert(data.message || "Produk berhasil disimpan");
-                resetProductForm();
-                loadProducts();
-                loadKeyProductOptions();
+              Swal.fire("Terhapus!", "Produk berhasil dihapus", "success");
+              resetProductForm();
+              loadProducts();
+              loadKeyProductOptions();
             } catch (err) {
-                Swal.fire("Terjadi error server saat menyimpan produk");
+              Swal.fire(
+                "Error!",
+                "Terjadi error server saat menghapus produk",
+                "error",
+              );
             }
-        }
-
-        async function deleteProduct(id) {
-            Swal.fire({
-                title: 'Hapus Produk?',
-                text: "Produk yang dihapus tidak bisa dikembalikan!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#fb7185', // Warna Torii Red
-                cancelButtonColor: '#475569',
-                confirmButtonText: 'Ya, Hapus!',
-                cancelButtonText: 'Batal'
-            }).then(async (result) => {
-                // Semua logika fetch HARUS masuk ke dalam blok ini
-                if (result.isConfirmed) {
-                    try {
-                        const res = await fetch(`/products/${id}`, {
-                            method: "DELETE",
-                            headers: {
-                                "x-csrf-token": getCsrfToken()
-                            }
-                        });
-
-                        const data = await res.json();
-
-                        if (res.status === 401) {
-                            window.location.href = "/ae-auth";
-                            return;
-                        }
-
-                        if (!res.ok) {
-                            Swal.fire("Oops!", data.message || "Gagal menghapus produk", "error");
-                            return;
-                        }
-
-                        Swal.fire("Terhapus!", "Produk berhasil dihapus", "success");
-                        resetProductForm();
-                        loadProducts();
-                        loadKeyProductOptions();
-                    } catch (err) {
-                        Swal.fire("Error!", "Terjadi error server saat menghapus produk", "error");
-                    }
-                }
-            });
-        }
-
-        async function toggleProductActive(id, active) {
-            const yakin = confirm(
-                active === 1
-                    ? "Aktifkan produk ini?"
-                    : "Nonaktifkan produk ini?"
-            );
-
-            if (!yakin) return;
-
-            try {
-                const res = await fetch(`/products/${id}/toggle-active`, {
-                    method: "PATCH",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "x-csrf-token": getCsrfToken()
-                    },
-                    body: JSON.stringify({ active })
-                });
-
-                const data = await res.json();
-
-                if (res.status === 401) {
-                    window.location.href = "/ae-auth";
-                    return;
-                }
-
-                if (!res.ok) {
-                    alert(data.message || "Gagal mengubah status produk");
-                    return;
-                }
-
-                Swal.fire(data.message || "Status produk berhasil diubah");
-                loadProducts();
-                loadKeyProductOptions();
-            } catch (err) {
-                Swal.fire("Terjadi error server saat mengubah status produk");
-            }
-        }
-
-        function resetProductForm() {
-            document.getElementById("editingProductId").value = "";
-            document.getElementById("productGame").value = "";
-            document.getElementById("productBrand").value = "";
-            document.getElementById("productDuration").value = "";
-            document.getElementById("productPrice").value = "";
-            document.getElementById("saveProductBtn").innerText = "Tambah Produk";
-        }
-
-        function editProduct(id, game, brand, duration, price) {
-            document.getElementById("editingProductId").value = id;
-            document.getElementById("productGame").value = game;
-            document.getElementById("productBrand").value = brand;
-            document.getElementById("productDuration").value = duration;
-            document.getElementById("productPrice").value = price;
-            document.getElementById("saveProductBtn").innerText = "Update Produk";
-
-            window.scrollTo({
-                top: 0,
-                behavior: "smooth"
-            });
-        }
-
-        async function loadKeyProductOptions() {
-            const select = document.getElementById("keyProductSelect");
-
-            try {
-                const res = await fetch("/products");
-
-                if (res.status === 401) {
-                    window.location.href = "/ae-auth";
-                    return;
-                }
-
-                const data = await res.json();
-
-                select.innerHTML = "";
-
-                if (!Array.isArray(data) || data.length === 0) {
-                    const option = document.createElement("option");
-                    option.value = "";
-                    option.textContent = "Belum ada produk";
-                    select.appendChild(option);
-                    return;
-                }
-
-                data.forEach(item => {
-                    const option = document.createElement("option");
-                    option.value = item.id;
-                    option.textContent = `${item.game} - ${item.brand} - ${item.duration}`;
-                    select.appendChild(option);
-                });
-            } catch (err) {
-                select.innerHTML = `<option value="">Gagal memuat produk</option>`;
-            }
-        }
-
-        document.addEventListener("DOMContentLoaded", () => {
-            const searchInput = document.getElementById("orderSearchInput");
-            if (searchInput) {
-                searchInput.addEventListener("input", applyOrderFilters);
-            }
-
-            showSection("dashboard");
+          }
         });
+      }
+
+      async function toggleProductActive(id, active) {
+        const yakin = confirm(
+          active === 1 ? "Aktifkan produk ini?" : "Nonaktifkan produk ini?",
+        );
+
+        if (!yakin) return;
+
+        try {
+          const res = await fetch(`/products/${id}/toggle-active`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              "x-csrf-token": getCsrfToken(),
+            },
+            body: JSON.stringify({ active }),
+          });
+
+          const data = await res.json();
+
+          if (res.status === 401) {
+            window.location.href = "/ae-auth";
+            return;
+          }
+
+          if (!res.ok) {
+            alert(data.message || "Gagal mengubah status produk");
+            return;
+          }
+
+          Swal.fire(data.message || "Status produk berhasil diubah");
+          loadProducts();
+          loadKeyProductOptions();
+        } catch (err) {
+          Swal.fire("Terjadi error server saat mengubah status produk");
+        }
+      }
+
+      function resetProductForm() {
+        document.getElementById("editingProductId").value = "";
+        document.getElementById("productGame").value = "";
+        document.getElementById("productBrand").value = "";
+        document.getElementById("productDuration").value = "";
+        document.getElementById("productPrice").value = "";
+        document.getElementById("saveProductBtn").innerText = "Tambah Produk";
+      }
+
+      function editProduct(id, game, brand, duration, price) {
+        document.getElementById("editingProductId").value = id;
+        document.getElementById("productGame").value = game;
+        document.getElementById("productBrand").value = brand;
+        document.getElementById("productDuration").value = duration;
+        document.getElementById("productPrice").value = price;
+        document.getElementById("saveProductBtn").innerText = "Update Produk";
+
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
+      }
+
+      async function loadKeyProductOptions() {
+        const select = document.getElementById("keyProductSelect");
+
+        try {
+          const res = await fetch("/products");
+
+          if (res.status === 401) {
+            window.location.href = "/ae-auth";
+            return;
+          }
+
+          const data = await res.json();
+
+          select.innerHTML = "";
+
+          if (!Array.isArray(data) || data.length === 0) {
+            const option = document.createElement("option");
+            option.value = "";
+            option.textContent = "Belum ada produk";
+            select.appendChild(option);
+            return;
+          }
+
+          data.forEach((item) => {
+            const option = document.createElement("option");
+            option.value = item.id;
+            option.textContent = `${item.game} - ${item.brand} - ${item.duration}`;
+            select.appendChild(option);
+          });
+        } catch (err) {
+          select.innerHTML = `<option value="">Gagal memuat produk</option>`;
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const searchInput = document.getElementById("orderSearchInput");
+        if (searchInput) {
+          searchInput.addEventListener("input", applyOrderFilters);
+        }
+
+        showSection("dashboard");
+      });
     </script>
-    <style>
-        .sakura {
-            position: fixed;
-            top: -10%;
-            z-index: 0;
-            pointer-events: none;
-            background: #fbcfe8;
-            border-radius: 100% 0 100% 0;
-            animation: fall linear infinite, sway ease-in-out infinite alternate;
-        }
-
-        @keyframes fall {
-            to {
-                top: 110%;
-            }
-        }
-
-        @keyframes sway {
-            from {
-                transform: translateX(-20px) rotate(0deg);
-            }
-
-            to {
-                transform: translateX(20px) rotate(45deg);
-            }
-        }
-    </style>
     <script>
-        function createSakura() {
-            const sakura = document.createElement('div');
-            sakura.classList.add('sakura');
-            // Ukuran random
-            const size = Math.random() * 10 + 5;
-            sakura.style.width = size + 'px';
-            sakura.style.height = size + 'px';
-            // Posisi dan durasi random
-            sakura.style.left = Math.random() * 100 + 'vw';
-            sakura.style.animationDuration = (Math.random() * 3 + 4) + 's, ' + (Math.random() * 2 + 2) + 's';
-            document.body.appendChild(sakura);
-            // Hapus elemen setelah jatuh agar web tidak berat (anti lag/bug)
-            setTimeout(() => { sakura.remove(); }, 7000);
-        }
-        // Munculkan sakura setiap 400ms
-        setInterval(createSakura, 400);
-        // --- FITUR TAMBAHAN: Jam & Sapaan Real-Time ---
-        function updateClock() {
-            const now = new Date();
-            const hours = now.getHours();
-            let greeting = "Selamat Malam 🌙";
+      function createSakura() {
+        const sakura = document.createElement("div");
+        sakura.classList.add("sakura");
+        // Ukuran random
+        const size = Math.random() * 10 + 5;
+        sakura.style.width = size + "px";
+        sakura.style.height = size + "px";
+        // Posisi dan durasi random
+        sakura.style.left = Math.random() * 100 + "vw";
+        sakura.style.animationDuration =
+          Math.random() * 3 + 4 + "s, " + (Math.random() * 2 + 2) + "s";
+        document.body.appendChild(sakura);
+        // Hapus elemen setelah jatuh agar web tidak berat (anti lag/bug)
+        setTimeout(() => {
+          sakura.remove();
+        }, 7000);
+      }
+      // Munculkan sakura setiap 400ms
+      setInterval(createSakura, 400);
+      // --- FITUR TAMBAHAN: Jam & Sapaan Real-Time ---
+      function updateClock() {
+        const now = new Date();
+        const hours = now.getHours();
+        let greeting = "Selamat Malam 🌙";
 
-            if (hours >= 5 && hours < 11) greeting = "Selamat Pagi 🌅";
-            else if (hours >= 11 && hours < 15) greeting = "Selamat Siang ☀️";
-            else if (hours >= 15 && hours < 18) greeting = "Selamat Sore 🌇";
+        if (hours >= 5 && hours < 11) greeting = "Selamat Pagi 🌅";
+        else if (hours >= 11 && hours < 15) greeting = "Selamat Siang ☀️";
+        else if (hours >= 15 && hours < 18) greeting = "Selamat Sore 🌇";
 
-            const timeString = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const timeString = now.toLocaleTimeString("id-ID", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        });
 
-            const greetingEl = document.getElementById("adminGreeting");
-            const clockEl = document.getElementById("adminClock");
+        const greetingEl = document.getElementById("adminGreeting");
+        const clockEl = document.getElementById("adminClock");
 
-            if (greetingEl) greetingEl.innerText = greeting + ", Admin!";
-            if (clockEl) clockEl.innerText = "Waktu lokal: " + timeString;
-        }
+        if (greetingEl) greetingEl.innerText = greeting + ", Admin!";
+        if (clockEl) clockEl.innerText = "Waktu lokal: " + timeString;
+      }
 
-        setInterval(updateClock, 1000); // Update setiap detik
-        updateClock(); // Jalankan pertama kali
-        // ----------------------------------------------
+      setInterval(updateClock, 1000); // Update setiap detik
+      updateClock(); // Jalankan pertama kali
+      // ----------------------------------------------
     </script>
-</body>
-
+  </body>
 </html>

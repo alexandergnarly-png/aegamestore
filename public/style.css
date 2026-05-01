@@ -1134,11 +1134,4 @@ button#buyBtn:active {
 .order-modal-backdrop {
   z-index: 1;
 }
-.filter-pills {
-  position: relative;
-  z-index: 5;
-}
 
-.pill {
-  pointer-events: auto;
-}
