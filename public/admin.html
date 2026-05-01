@@ -1124,6 +1124,9 @@
 
                     <div class="btn-group">
                         <button onclick="loadOrders()">Refresh Order</button>
+                        <button class="ghost-btn" onclick="selectAllFilteredOrders()">Pilih Semua Filter</button>
+                        <button class="danger-btn" onclick="deleteSelectedOrders()">Hapus Terpilih</button>
+                        <button class="ghost-btn" onclick="clearSelectedOrders()">Batal Pilih</button>
                     </div>
                 </div>
 
@@ -1217,6 +1220,7 @@
 
     <script>
         let allOrders = [];
+        let selectedOrderIds = new Set();
 
         function toggleSidebar() {
             document.body.classList.toggle("sidebar-collapsed");
@@ -1589,10 +1593,17 @@
                 const safeGameKey = JSON.stringify(String(item.gameKey || item.gamekey || ""));
                 const isProtected = String(item.payment_status || "").toLowerCase() === "paid" ||
                     String(item.delivery_status || "").toLowerCase() === "delivered";
+                const checked = selectedOrderIds.has(String(item.id || "")) ? "checked" : "";
 
                 return `
-                    <tr>
-                        <td>${escapeHtml(item.id || "-")}</td>
+                    <<tr>
+    <td>
+        <input type="checkbox"
+            ${checked}
+            ${isProtected ? "disabled" : ""}
+            onchange="toggleOrderSelection('${escapeHtml(item.id || "")}', this.checked)">
+    </td>
+    <td>${escapeHtml(item.id || "-")}</td>
                         <td>${escapeHtml(item.name || "-")}</td>
                         <td>${escapeHtml(item.contact || "-")}</td>
                         <td>${escapeHtml(item.game || "-")}</td>
@@ -1667,6 +1678,92 @@ Game Key : ${key || "-"}
                 Swal.fire("Terjadi error saat konfirmasi pembayaran");
             }
         }
+        function getFilteredDeletableOrders() {
+            const searchValue = document.getElementById("orderSearchInput").value.trim().toLowerCase();
+            const paymentValue = document.getElementById("paymentFilter").value;
+            const deliveryValue = document.getElementById("deliveryFilter").value;
+
+            return allOrders.filter(item => {
+                const matchesSearch =
+                    !searchValue ||
+                    String(item.id || "").toLowerCase().includes(searchValue) ||
+                    String(item.name || "").toLowerCase().includes(searchValue) ||
+                    String(item.contact || "").toLowerCase().includes(searchValue) ||
+                    String(item.game || "").toLowerCase().includes(searchValue) ||
+                    String(item.product || "").toLowerCase().includes(searchValue);
+
+                const matchesPayment = !paymentValue || String(item.payment_status || "") === paymentValue;
+                const matchesDelivery = !deliveryValue || String(item.delivery_status || "") === deliveryValue;
+
+                const isProtected =
+                    String(item.payment_status || "").toLowerCase() === "paid" ||
+                    String(item.delivery_status || "").toLowerCase() === "delivered";
+
+                return matchesSearch && matchesPayment && matchesDelivery && !isProtected;
+            });
+        }
+
+        function toggleOrderSelection(orderId, checked) {
+            if (checked) {
+                selectedOrderIds.add(String(orderId));
+            } else {
+                selectedOrderIds.delete(String(orderId));
+            }
+        }
+
+        function selectAllFilteredOrders() {
+            const orders = getFilteredDeletableOrders();
+
+            orders.forEach(item => {
+                selectedOrderIds.add(String(item.id));
+            });
+
+            applyOrderFilters();
+        }
+
+        function clearSelectedOrders() {
+            selectedOrderIds.clear();
+            applyOrderFilters();
+        }
+
+        async function deleteSelectedOrders() {
+            const ids = Array.from(selectedOrderIds);
+
+            if (ids.length === 0) {
+                alert("Belum ada order yang dipilih.");
+                return;
+            }
+
+            const yakin = confirm(`Yakin hapus ${ids.length} order terpilih?`);
+            if (!yakin) return;
+
+            let success = 0;
+            let failed = 0;
+
+            for (const id of ids) {
+                try {
+                    const res = await fetch(`/orders/${encodeURIComponent(id)}`, {
+                        method: "DELETE",
+                        headers: {
+                            "x-csrf-token": getCsrfToken()
+                        }
+                    });
+
+                    if (res.ok) {
+                        success++;
+                        selectedOrderIds.delete(id);
+                    } else {
+                        failed++;
+                    }
+                } catch (err) {
+                    failed++;
+                }
+            }
+
+            alert(`Selesai. Berhasil: ${success}, gagal: ${failed}`);
+            loadOrders();
+        }
+
         async function deleteOrder(orderId) {
             const yakin = confirm("Yakin mau hapus order ini?");
             if (!yakin) return;
