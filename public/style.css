@@ -126,7 +126,31 @@ body {
 
 /* Responsif: Sembunyikan menu teks di HP agar tidak menumpuk */
 @media (max-width: 768px) {
+  .header-inner {
+    flex-wrap: wrap;
+  }
+
   .main-nav {
+    order: 3;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    overflow-x: auto;
+    padding-top: 10px;
+  }
+
+  .nav-link {
+    flex: 0 0 auto;
+    font-size: 12px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(224, 242, 254, 0.75);
+    color: #0284c7;
+    white-space: nowrap;
+  }
+
+  .nav-link::after {
     display: none;
   }
 
@@ -1188,6 +1212,7 @@ button#buyBtn:active {
   .header-inner {
     flex-direction: row;
     align-items: center;
+    flex-wrap: wrap;
     gap: 10px;
     padding: 12px 14px;
   }
