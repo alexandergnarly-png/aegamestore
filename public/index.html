@@ -1,308 +1,475 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AE Game Store 🌊⛩️</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-</head>
+  </head>
 
-<body>
+  <body>
     <div id="preloader">
-        <div class="loader-content">
-            <div class="loader-logo">⛩️</div>
-            <div class="loader-text" data-i18n="loadingWebsite">Memuat Website...</div>
-            <div class="loader-bar">
-                <div class="loader-progress"></div>
-            </div>
+      <div class="loader-content">
+        <div class="loader-logo">⛩️</div>
+        <div class="loader-text" data-i18n="loadingWebsite">
+          Memuat Website...
         </div>
+        <div class="loader-bar">
+          <div class="loader-progress"></div>
+        </div>
+      </div>
     </div>
     <div class="watercolor-blob blob-1"></div>
     <div class="watercolor-blob blob-2"></div>
 
     <header class="site-header">
-        <div class="header-inner">
-            <div class="brand">
-                <div class="brand-logo">⛩️</div>
-                <div class="brand-copy">
-                    <strong>AE Game Store</strong>
-                    <span>Premium Digital Keys</span>
-                </div>
-            </div>
-
-            <nav class="main-nav">
-                <a href="#hero" class="nav-link" data-i18n="navHome">Beranda</a>
-                <a href="#store-section" class="nav-link" data-i18n="navStore">Katalog Game</a>
-                <a href="#" class="nav-link" onclick="showGuide()" data-i18n="navGuide">Cara Beli</a>
-            </nav>
-
-            <div class="header-actions">
-                <div class="lang-switch">
-                    <button type="button" onclick="setLanguage('id')" class="lang-btn active" id="btn-id">ID</button>
-                    <button type="button" onclick="setLanguage('en')" class="lang-btn" id="btn-en">EN</button>
-                </div>
-
-                <div id="userMenu">
-                    <a href="/auth" class="auth-btn">
-                        <span data-i18n="loginBtn">Masuk / Daftar</span> ⛩️
-                    </a>
-                </div>
-            </div>
+      <div class="header-inner">
+        <div class="brand">
+          <div class="brand-logo">⛩️</div>
+          <div class="brand-copy">
+            <strong>AE Game Store</strong>
+            <span>Premium Digital Keys</span>
+          </div>
         </div>
+
+        <nav class="main-nav">
+          <a href="#hero" class="nav-link" data-i18n="navHome">Beranda</a>
+          <a href="#store-section" class="nav-link" data-i18n="navStore"
+            >Katalog Game</a
+          >
+          <a
+            href="#"
+            class="nav-link"
+            onclick="showGuide()"
+            data-i18n="navGuide"
+            >Cara Beli</a
+          >
+        </nav>
+
+        <div class="header-actions">
+          <div class="lang-switch">
+            <button
+              type="button"
+              onclick="setLanguage('id')"
+              class="lang-btn active"
+              id="btn-id"
+            >
+              ID
+            </button>
+            <button
+              type="button"
+              onclick="setLanguage('en')"
+              class="lang-btn"
+              id="btn-en"
+            >
+              EN
+            </button>
+          </div>
+
+          <div id="userMenu">
+            <a href="/auth" class="auth-btn">
+              <span data-i18n="loginBtn">Masuk / Daftar</span> ⛩️
+            </a>
+          </div>
+        </div>
+      </div>
     </header>
 
     <!-- INI BAGIAN YANG TIDAK SENGAJA TERHAPUS TADI -->
     <main class="page">
-        <section class="hero" id="hero">
-            <div class="hero-copy">
-                <span class="hero-badge">🌊 SEAMLESS TOP-UP EXPERIENCE</span>
-                <h1 data-i18n="heroTitle">Arungi petualangan barumu dengan top-up yang lebih mudah</h1>
-                <p data-i18n="heroDesc">
-                    Temukan game favoritmu, pilih produk, dan selesaikan pembayaran setenang ombak di lautan.
-                    Transaksi instan dan terenkripsi.
-                </p>
+      <section class="hero" id="hero">
+        <div class="hero-copy">
+          <span class="hero-badge">🌊 SEAMLESS TOP-UP EXPERIENCE</span>
+          <h1 data-i18n="heroTitle">
+            Arungi petualangan barumu dengan top-up yang lebih mudah
+          </h1>
+          <p data-i18n="heroDesc">
+            Temukan game favoritmu, pilih produk, dan selesaikan pembayaran
+            setenang ombak di lautan. Transaksi instan dan terenkripsi.
+          </p>
+        </div>
+      </section>
+
+      <section class="promo-container">
+        <div class="promo-slider" id="promoSlider">
+          <div
+            class="promo-slide active"
+            style="background: linear-gradient(135deg, #0ea5e9, #6366f1)"
+          >
+            <div class="promo-content">
+              <span>🔥 PROMO WEEKEND</span>
+              <h3>Diskon Top-Up s/d 20%</h3>
+              <p>Berlaku untuk semua platform iOS & Android. Cek sekarang!</p>
             </div>
-        </section>
-
-        <section class="promo-container">
-            <div class="promo-slider" id="promoSlider">
-                <div class="promo-slide active" style="background: linear-gradient(135deg, #0ea5e9, #6366f1);">
-                    <div class="promo-content">
-                        <span>🔥 PROMO WEEKEND</span>
-                        <h3>Diskon Top-Up s/d 20%</h3>
-                        <p>Berlaku untuk semua platform iOS & Android. Cek sekarang!</p>
-                    </div>
-                </div>
-                <div class="promo-slide" style="background: linear-gradient(135deg, #fb7185, #f43f5e);">
-                    <div class="promo-content">
-                        <span>✨ MEMBER BARU</span>
-                        <h3>Bonus Poin Melimpah</h3>
-                        <p>Daftar akun sekarang dan dapatkan potongan harga spesial.</p>
-                    </div>
-                </div>
+          </div>
+          <div
+            class="promo-slide"
+            style="background: linear-gradient(135deg, #fb7185, #f43f5e)"
+          >
+            <div class="promo-content">
+              <span>✨ MEMBER BARU</span>
+              <h3>Bonus Poin Melimpah</h3>
+              <p>Daftar akun sekarang dan dapatkan potongan harga spesial.</p>
             </div>
-            <div class="promo-dots" id="promoDots"></div>
-        </section>
+          </div>
+        </div>
+        <div class="promo-dots" id="promoDots"></div>
+      </section>
 
-        <section class="store-layout" id="store-section">
-            <div class="shop-card">
-                <div class="section-head">
-                    <div>
-                        <h2 data-i18n="selectProduct">Pilih Produk</h2>
-                        <p data-i18n="fillDetails">Lengkapi data di bawah ini untuk memulai pesanan.</p>
-                    </div>
-                </div>
+      <section class="store-layout" id="store-section">
+        <div class="shop-card">
+          <div class="section-head">
+            <div>
+              <h2 data-i18n="selectProduct">Pilih Produk</h2>
+              <p data-i18n="fillDetails">
+                Lengkapi data di bawah ini untuk memulai pesanan.
+              </p>
+            </div>
+          </div>
 
-                <div class="filter-pills">
-                    <button class="pill active" onclick="filterCategory('all', this)"
-                        data-i18n="filterAll">Semua</button>
-                    <button class="pill" onclick="filterCategory('Mobile', this)"
-                        data-i18n="filterMobile">Mobile</button>
-                    <button class="pill" onclick="filterCategory('PC', this)" data-i18n="filterPC">PC Games</button>
-                    <button class="pill" onclick="filterCategory('Voucher', this)"
-                        data-i18n="filterVoucher">Voucher</button>
-                </div>
+          <div class="filter-pills">
+            <button
+              class="pill active"
+              onclick="filterCategory('all', this)"
+              data-i18n="filterAll"
+            >
+              Semua
+            </button>
+            <button
+              class="pill"
+              onclick="filterCategory('Mobile', this)"
+              data-i18n="filterMobile"
+            >
+              Mobile
+            </button>
+            <button
+              class="pill"
+              onclick="filterCategory('PC', this)"
+              data-i18n="filterPC"
+            >
+              PC Games
+            </button>
+            <button
+              class="pill"
+              onclick="filterCategory('Voucher', this)"
+              data-i18n="filterVoucher"
+            >
+              Voucher
+            </button>
+          </div>
 
-                <div class="block">
-                    <div class="search-header">
-                        <label class="section-label" data-i18n="selectGame">1. Pilih Game</label>
-                        <div class="search-box">
-                            <span class="search-icon">🔍</span>
-                            <input type="text" id="gameSearch" data-i18n-placeholder="searchGamePlaceholder"
-                                placeholder="Cari nama game (contoh: PUBG)..." onkeyup="searchGame()">
-                        </div>
-                    </div>
-                    <div class="game-grid" id="gameGrid"></div>
-                </div>
+          <div class="block">
+            <div class="search-header">
+              <label class="section-label" data-i18n="selectGame"
+                >1. Pilih Game</label
+              >
+              <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input
+                  type="text"
+                  id="gameSearch"
+                  data-i18n-placeholder="searchGamePlaceholder"
+                  placeholder="Cari nama game (contoh: PUBG)..."
+                  onkeyup="searchGame()"
+                />
+              </div>
+            </div>
+            <div class="game-grid" id="gameGrid"></div>
+          </div>
 
-                <div class="form-grid">
-                    <div class="field">
-                        <!-- Label diubah ke Platform/Tipe Device -->
-                        <label for="brand">2. Brand</label>
-                        <select id="brand"></select>
-                    </div>
-
-                    <div class="field">
-                        <label for="product">3. Nominal / Durasi</label>
-                        <select id="product"></select>
-                    </div>
-                </div>
-
-                <div class="form-grid">
-                    <div class="field">
-                        <label for="name">4. Nama Player</label>
-                        <input type="text" id="name" placeholder="Masukkan nama kamu">
-                    </div>
-
-                    <div class="field">
-                        <label for="contact">5. Kontak / Email</label>
-                        <input type="text" id="contact" placeholder="No. WA / Email">
-                    </div>
-                </div>
-
-                <button id="buyBtn" onclick="buy()" data-i18n="buyNow">Beli Sekarang 🌊</button>
-                <div class="loading" id="loading" data-i18n="processingOrder">Memproses pesanan...</div>
-
-                <p class="trust-text">
-                    🔒 Pembayaran aman via QRIS GoPay Merchant • Pengiriman instan
-                </p>
+          <div class="form-grid">
+            <div class="field">
+              <!-- Label diubah ke Platform/Tipe Device -->
+              <label for="brand">2. Brand</label>
+              <select id="brand"></select>
             </div>
 
-            <aside class="summary-card">
-                <div class="summary-head">
-                    <span class="summary-badge">ORDER PREVIEW</span>
-                </div>
+            <div class="field">
+              <label for="product">3. Nominal / Durasi</label>
+              <select id="product"></select>
+            </div>
+          </div>
 
-                <h3 id="previewGame">Memuat data...</h3>
-                <p class="summary-product" id="previewProduct">Menunggu pilihan...</p>
+          <div class="form-grid">
+            <div class="field">
+              <label for="name">4. Nama Player</label>
+              <input type="text" id="name" placeholder="Masukkan nama kamu" />
+            </div>
 
-                <div class="price-box">
-                    <span data-i18n="totalPayment">Total Pembayaran</span>
-                    <strong id="previewPrice">Rp 0</strong>
-                </div>
+            <div class="field">
+              <label for="contact">5. Kontak / Email</label>
+              <input type="text" id="contact" placeholder="No. WA / Email" />
+            </div>
+          </div>
 
-                <div class="summary-points">
-                    <div class="summary-point">
-                        <strong>⚡ Checkout Instan</strong>
-                        <span>Proses ringkas langsung menuju gerbang pembayaran.</span>
-                    </div>
+          <button id="buyBtn" onclick="buy()" data-i18n="buyNow">
+            Beli Sekarang 🌊
+          </button>
+          <div class="loading" id="loading" data-i18n="processingOrder">
+            Memproses pesanan...
+          </div>
 
-                    <div class="summary-point">
-                        <strong>🛡️ 100% Aman</strong>
-                        <span>Sistem kami memproses order dengan aman dan legal.</span>
-                    </div>
+          <p class="trust-text">
+            🔒 Pembayaran aman via QRIS GoPay Merchant • Pengiriman instan
+          </p>
+        </div>
 
-                    <div class="summary-point">
-                        <strong>🎁 Auto Delivery</strong>
-                        <span>Key atau voucher langsung dikirim setelah sukses.</span>
-                    </div>
-                </div>
-            </aside>
-        </section>
+        <aside class="summary-card">
+          <div class="summary-head">
+            <span class="summary-badge">ORDER PREVIEW</span>
+          </div>
+
+          <h3 id="previewGame">Memuat data...</h3>
+          <p class="summary-product" id="previewProduct">Menunggu pilihan...</p>
+
+          <div class="price-box">
+            <span data-i18n="totalPayment">Total Pembayaran</span>
+            <strong id="previewPrice">Rp 0</strong>
+          </div>
+
+          <div class="summary-points">
+            <div class="summary-point">
+              <strong>⚡ Checkout Instan</strong>
+              <span>Proses ringkas langsung menuju gerbang pembayaran.</span>
+            </div>
+
+            <div class="summary-point">
+              <strong>🛡️ 100% Aman</strong>
+              <span>Sistem kami memproses order dengan aman dan legal.</span>
+            </div>
+
+            <div class="summary-point">
+              <strong>🎁 Auto Delivery</strong>
+              <span>Key atau voucher langsung dikirim setelah sukses.</span>
+            </div>
+          </div>
+        </aside>
+      </section>
     </main>
 
-    <a href="https://t.me/aegamestore" target="_blank" class="floating-btn">
-        💬 Hubungi Admin
+    <a
+      href="https://t.me/aegamestore"
+      target="_blank"
+      class="floating-admin-btn"
+      aria-label="Hubungi Admin"
+    >
+      <span class="floating-admin-icon">💬</span>
+      <span class="floating-admin-content">
+        <strong>Chat Admin</strong>
+        <small>Fast response</small>
+      </span>
+      <span class="floating-admin-badge"></span>
     </a>
 
     <div id="social-proof" class="social-proof"></div>
 
     <footer class="site-footer">
-        <div class="footer-inner">
-            <div class="footer-brand">
-                <div class="brand-logo">⛩️</div>
-                <strong>AE Game Store</strong>
-                <p>Solusi top-up game tercepat dan terpercaya di Indonesia. Otomatis 24 jam non-stop.</p>
-            </div>
-            <div class="footer-payments">
-                <p>Metode Pembayaran Aman</p>
-                <div class="payment-icons">
-                    <span>QRIS</span> <span>GoPay</span> <span>OVO</span> <span>DANA</span> <span>ShopeePay</span>
-                </div>
-            </div>
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <div class="brand-logo">⛩️</div>
+          <strong>AE Game Store</strong>
+          <p>
+            Solusi top-up game tercepat dan terpercaya di Indonesia. Otomatis 24
+            jam non-stop.
+          </p>
         </div>
-        <div class="footer-bottom">
-            &copy; 2026 AE Game Store. All Rights Reserved. Arungi lautan petualanganmu! 🌊
+        <div class="footer-payments">
+          <p>Metode Pembayaran Aman</p>
+          <div class="payment-icons">
+            <span>QRIS</span> <span>GoPay</span> <span>OVO</span>
+            <span>DANA</span> <span>ShopeePay</span>
+          </div>
         </div>
+      </div>
+      <div class="footer-bottom">
+        &copy; 2026 AE Game Store. All Rights Reserved. Arungi lautan
+        petualanganmu! 🌊
+      </div>
     </footer>
 
     <!-- SEMUA SCRIPT & STYLE DIPOSISIKAN DENGAN BENAR DI BAWAH FOOTER -->
     <script src="script.js?v=2"></script>
 
     <style>
-        /* Floating Button Admin */
-        .floating-btn {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            background: linear-gradient(135deg, #0ea5e9, #38bdf8);
-            color: white;
-            padding: 14px 22px;
-            border-radius: 99px;
-            text-decoration: none;
-            font-weight: 800;
-            font-size: 14px;
-            box-shadow: 0 8px 24px rgba(14, 165, 233, 0.4);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            z-index: 1000;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+      /* Floating Button Admin */
+      /* Floating Button Admin */
+      .floating-admin-btn {
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 190px;
+        padding: 12px 16px;
+        border-radius: 18px;
+        text-decoration: none;
+        color: #ffffff;
+        background: linear-gradient(135deg, #0ea5e9, #0284c7);
+        box-shadow: 0 14px 30px rgba(14, 165, 233, 0.35);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        transition:
+          transform 0.25s ease,
+          box-shadow 0.25s ease,
+          opacity 0.25s ease;
+        backdrop-filter: blur(10px);
+      }
+
+      .floating-admin-btn:hover {
+        transform: translateY(-4px) scale(1.02);
+        box-shadow: 0 18px 34px rgba(14, 165, 233, 0.42);
+        color: #ffffff;
+      }
+
+      .floating-admin-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.18);
+        font-size: 20px;
+        flex-shrink: 0;
+      }
+
+      .floating-admin-content {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.15;
+      }
+
+      .floating-admin-content strong {
+        font-size: 14px;
+        font-weight: 800;
+        color: #ffffff;
+      }
+
+      .floating-admin-content small {
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.82);
+        margin-top: 3px;
+      }
+
+      .floating-admin-badge {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #22c55e;
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6);
+        animation: adminPulse 1.8s infinite;
+        margin-left: auto;
+        flex-shrink: 0;
+      }
+
+      @keyframes adminPulse {
+        0% {
+          box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.55);
+        }
+        70% {
+          box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+        }
+      }
+
+      @media (max-width: 640px) {
+        .floating-admin-btn {
+          right: 14px;
+          bottom: 14px;
+          min-width: auto;
+          padding: 12px 14px;
+          border-radius: 16px;
         }
 
-        .floating-btn:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 28px rgba(14, 165, 233, 0.5);
-            color: white;
+        .floating-admin-content small {
+          display: none;
         }
 
-        /* Sakura Effect */
-        .sakura {
-            position: fixed;
-            top: -10%;
-            z-index: 9999;
-            pointer-events: none;
-            background: #fbcfe8;
-            border-radius: 100% 0 100% 0;
-            animation: fall linear infinite, sway ease-in-out infinite alternate;
+        .floating-admin-content strong {
+          font-size: 13px;
         }
 
-        @keyframes fall {
-            to {
-                top: 110%;
-            }
+        .floating-admin-icon {
+          width: 40px;
+          height: 40px;
+          font-size: 18px;
+        }
+      }
+
+      /* Sakura Effect */
+      .sakura {
+        position: fixed;
+        top: -10%;
+        z-index: 9999;
+        pointer-events: none;
+        background: #fbcfe8;
+        border-radius: 100% 0 100% 0;
+        animation:
+          fall linear infinite,
+          sway ease-in-out infinite alternate;
+      }
+
+      @keyframes fall {
+        to {
+          top: 110%;
+        }
+      }
+
+      @keyframes sway {
+        from {
+          transform: translateX(-20px) rotate(0deg);
         }
 
-        @keyframes sway {
-            from {
-                transform: translateX(-20px) rotate(0deg);
-            }
-
-            to {
-                transform: translateX(20px) rotate(45deg);
-            }
+        to {
+          transform: translateX(20px) rotate(45deg);
         }
+      }
     </style>
 
     <script>
-        // Fitur Live Search
-        function searchGame() {
-            const input = document.getElementById('gameSearch').value.toLowerCase();
-            const cards = document.querySelectorAll('.game-card');
+      // Fitur Live Search
+      function searchGame() {
+        const input = document.getElementById("gameSearch").value.toLowerCase();
+        const cards = document.querySelectorAll(".game-card");
 
-            cards.forEach(card => {
-                const gameName = card.querySelector('span').innerText.toLowerCase();
-                if (gameName.includes(input)) {
-                    card.style.display = "flex";
-                } else {
-                    card.style.display = "none";
-                }
-            });
-        }
+        cards.forEach((card) => {
+          const gameName = card.querySelector("span").innerText.toLowerCase();
+          if (gameName.includes(input)) {
+            card.style.display = "flex";
+          } else {
+            card.style.display = "none";
+          }
+        });
+      }
 
-        // Fitur Sakura Jatuh
-        function createSakura() {
-            const sakura = document.createElement('div');
-            sakura.classList.add('sakura');
-            const size = Math.random() * 10 + 5;
-            sakura.style.width = size + 'px';
-            sakura.style.height = size + 'px';
-            sakura.style.left = Math.random() * 100 + 'vw';
-            sakura.style.animationDuration = (Math.random() * 3 + 4) + 's, ' + (Math.random() * 2 + 2) + 's';
-            document.body.appendChild(sakura);
-            setTimeout(() => { sakura.remove(); }, 7000);
-        }
-        setInterval(createSakura, 400);
+      // Fitur Sakura Jatuh
+      function createSakura() {
+        const sakura = document.createElement("div");
+        sakura.classList.add("sakura");
+        const size = Math.random() * 10 + 5;
+        sakura.style.width = size + "px";
+        sakura.style.height = size + "px";
+        sakura.style.left = Math.random() * 100 + "vw";
+        sakura.style.animationDuration =
+          Math.random() * 3 + 4 + "s, " + (Math.random() * 2 + 2) + "s";
+        document.body.appendChild(sakura);
+        setTimeout(() => {
+          sakura.remove();
+        }, 7000);
+      }
+      setInterval(createSakura, 400);
 
-        // Fitur Popup Panduan Beli
-        function showGuide() {
-            const t = translations[currentLanguage];
+      // Fitur Popup Panduan Beli
+      function showGuide() {
+        const t = translations[currentLanguage];
 
-            Swal.fire({
-                title: t.guideTitle,
-                html: `
+        Swal.fire({
+          title: t.guideTitle,
+          html: `
             <div style="text-align: left; font-size: 14px; line-height: 1.6; color: #334155;">
                 <b>1.</b> ${t.guideStep1}<br><br>
                 <b>2.</b> ${t.guideStep2}<br><br>
@@ -311,22 +478,21 @@
                 <b>5.</b> ${t.guideStep5}
             </div>
         `,
-                icon: 'info',
-                confirmButtonText: t.guideOk,
-                confirmButtonColor: '#0ea5e9',
-                background: '#f0f9ff',
-                backdrop: `rgba(12, 74, 110, 0.4)`
-            });
-        }
-
-        // Fitur Menghilangkan Loading Screen
-        window.addEventListener('load', function () {
-            const preloader = document.getElementById('preloader');
-            setTimeout(() => {
-                preloader.classList.add('fade-out');
-            }, 1000);
+          icon: "info",
+          confirmButtonText: t.guideOk,
+          confirmButtonColor: "#0ea5e9",
+          background: "#f0f9ff",
+          backdrop: `rgba(12, 74, 110, 0.4)`,
         });
-    </script>
-</body>
+      }
 
+      // Fitur Menghilangkan Loading Screen
+      window.addEventListener("load", function () {
+        const preloader = document.getElementById("preloader");
+        setTimeout(() => {
+          preloader.classList.add("fade-out");
+        }, 1000);
+      });
+    </script>
+  </body>
 </html>
