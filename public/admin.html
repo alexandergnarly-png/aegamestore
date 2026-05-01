@@ -941,6 +941,7 @@
                 onclick="showSection('dashboard', this)">Dashboard</button>
             <button class="nav-btn" data-section="products" onclick="showSection('products', this)">Produk</button>
             <button class="nav-btn" data-section="orders" onclick="showSection('orders', this)">Order</button>
+            <button class="nav-btn" data-section="users" onclick="showSection('users', this)">User Buyer</button>
             <button class="nav-btn" data-section="keys" onclick="showSection('keys', this)">Game Key</button>
         </nav>
 
@@ -1157,6 +1158,40 @@
                 </div>
             </div>
         </section>
+        <section id="section-users" class="admin-section">
+            <div class="card delay-1">
+                <div class="card-header">
+                    <div class="card-title-wrap">
+                        <h2>Daftar User Buyer</h2>
+                        <p class="card-subtitle">Lihat akun buyer yang sudah daftar.</p>
+                    </div>
+                    <div class="section-badge">User Monitor</div>
+                </div>
+
+                <div class="toolbar">
+                    <div class="btn-group">
+                        <button onclick="loadUsers()">Refresh User</button>
+                    </div>
+                </div>
+
+                <div class="info-row">
+                    <div class="info" id="userStatusText">Memuat daftar user...</div>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 90px;">ID</th>
+                                <th>Username</th>
+                                <th>Waktu Daftar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
 
         <section id="section-keys" class="admin-section">
             <div class="card delay-1">
@@ -1252,6 +1287,9 @@
 
             if (sectionName === "orders") {
                 loadOrders();
+            }
+            if (sectionName === "users") {
+                loadUsers();
             }
 
             if (sectionName === "keys") {
@@ -1503,7 +1541,51 @@
                 Swal.fire("Terjadi error server saat menambahkan bulk key");
             }
         }
+        async function loadUsers() {
+            const statusText = document.getElementById("userStatusText");
+            const tableBody = document.getElementById("userTableBody");
 
+            statusText.innerText = "Memuat daftar user...";
+            tableBody.innerHTML = "";
+
+            try {
+                const res = await fetch("/users");
+
+                if (res.status === 401) {
+                    window.location.href = "/ae-auth";
+                    return;
+                }
+
+                const data = await res.json();
+
+                if (!Array.isArray(data) || data.length === 0) {
+                    statusText.innerText = "Belum ada user buyer.";
+                    tableBody.innerHTML = `
+                <tr>
+                    <td colspan="3" class="empty">Belum ada user yang daftar.</td>
+                </tr>
+            `;
+                    return;
+                }
+
+                statusText.innerText = `Total user: ${data.length}`;
+
+                tableBody.innerHTML = data.map(item => `
+            <tr>
+                <td>${item.id}</td>
+                <td>${escapeHtml(item.username || "-")}</td>
+                <td>${formatTanggal(item.created_at)}</td>
+            </tr>
+        `).join("");
+            } catch (err) {
+                statusText.innerText = "Gagal memuat daftar user.";
+                tableBody.innerHTML = `
+            <tr>
+                <td colspan="3" class="empty">Terjadi error saat mengambil user.</td>
+            </tr>
+        `;
+            }
+        }
         async function loadOrders() {
             const statusText = document.getElementById("orderStatusText");
             const tableBody = document.getElementById("orderTableBody");

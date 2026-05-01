@@ -719,6 +719,21 @@ app.post("/orders/:id/confirm-payment", requireAdminAuth, requireAdminCsrf, asyn
     }
 });
 
+app.get("/users", requireAdminAuth, async (req, res) => {
+    try {
+        const result = await query(
+            "SELECT id, username, created_at FROM users ORDER BY created_at DESC"
+        );
+
+        return res.json(result.rows);
+    } catch (err) {
+        console.error("ERROR GET USERS:", err);
+        return res.status(500).json({
+            message: "Gagal mengambil daftar user"
+        });
+    }
+});
+
 app.get("/orders", requireAdminAuth, async (req, res) => {
     try {
         const result = await query(
