@@ -95,6 +95,7 @@
       /* ===== SIDEBAR ===== */
       .sidebar {
         width: 260px;
+        flex: 0 0 260px;
         background: rgba(255, 255, 255, 0.6);
         backdrop-filter: blur(24px);
         border-right: 1px solid var(--border-color);
@@ -278,12 +279,13 @@
       /* ===== MAIN CONTENT ===== */
       .page {
         flex: 1;
-        max-width: 1400px;
-        margin: 0 auto;
+        width: 100%;
+        max-width: none;
+        margin: 0;
         padding: 24px 32px 60px;
         overflow-x: hidden;
-        position: relative; /* 👈 TAMBAHKAN INI */
-        z-index: 10; /* 👈 TAMBAHKAN INI BIAR NAIK KE ATAS */
+        position: relative;
+        z-index: 10;
       }
 
       .admin-section {
@@ -649,9 +651,8 @@
       }
 
       button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 12px 24px rgba(14, 165, 233, 0.3);
-      }
+  box-shadow: 0 12px 24px rgba(14, 165, 233, 0.3);
+}}
 
       button:active {
         transform: translateY(0);
