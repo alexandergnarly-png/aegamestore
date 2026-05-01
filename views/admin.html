@@ -93,9 +93,11 @@
       }
 
       /* ===== SIDEBAR ===== */
+      /* ===== SIDEBAR ===== */
       .sidebar {
         width: 260px;
-        flex: 0 0 260px;
+        min-width: 260px; /* Tambahkan ini agar lebar tidak ditekan konten */
+        /* Hapus baris flex: 0 0 260px; jika ada */
         background: rgba(255, 255, 255, 0.6);
         backdrop-filter: blur(24px);
         border-right: 1px solid var(--border-color);
@@ -107,7 +109,8 @@
         top: 0;
         height: 100vh;
         transition:
-          width 0.3s ease,
+          min-width 0.3s ease,
+          /* Ubah transisi ke min-width dan width */ width 0.3s ease,
           padding 0.3s ease;
         overflow-x: hidden;
         z-index: 50;
@@ -240,10 +243,10 @@
       }
 
       /* Collapsed State */
-      /* Collapsed State */
       .sidebar-collapsed .sidebar {
         width: 88px;
-        flex-basis: 88px;
+        min-width: 88px; /* Pastikan min-width juga berubah */
+        /* Hapus flex-basis: 88px; jika ada */
         padding: 24px 14px;
       }
 
@@ -279,7 +282,8 @@
 
       /* ===== MAIN CONTENT ===== */
       .page {
-        flex: 1;
+        flex: 1 1 0%; /* Ubah flex: 1; menjadi flex: 1 1 0%; */
+        min-width: 0; /* PENTING: Mencegah flex item lebih lebar dari container */
         width: 100%;
         max-width: none;
         margin: 0;
