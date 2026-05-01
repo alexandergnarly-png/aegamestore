@@ -451,26 +451,23 @@ setInterval(showSocialProof, 20000);
 // --- FILTER CATEGORY ---
 // --- FILTER CATEGORY ---
 function filterCategory(cat, btnElement) {
-  // Update active class pada tombol dengan aman
   document
     .querySelectorAll(".pill")
     .forEach((btn) => btn.classList.remove("active"));
 
-  // Tambahkan class active ke tombol yang diklik
   if (btnElement) btnElement.classList.add("active");
 
   const cards = document.querySelectorAll(".game-card");
+
   cards.forEach((card) => {
+    const name = card.querySelector("span").innerText.toLowerCase();
+
     if (cat === "all") {
       card.style.display = "flex";
-    } else {
-      const name = card.querySelector("span").innerText;
-      if (name.toLowerCase().includes(cat.toLowerCase()) || cat === "Mobile") {
-        card.style.display = "flex";
-      } else {
-        card.style.display = "none";
-      }
+      return;
     }
+
+    card.style.display = name.includes(cat.toLowerCase()) ? "flex" : "none";
   });
 }
 setLanguage(currentLanguage);
