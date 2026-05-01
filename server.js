@@ -613,6 +613,90 @@ app.post("/vouchers", requireAdminAuth, requireAdminCsrf, async (req, res) => {
   }
 });
 
+app.get("/vouchers", requireAdminAuth, async (req, res) => {
+  try {
+    const result = await query(
+      "SELECT * FROM vouchers ORDER BY created_at DESC, id DESC",
+    );
+
+    return res.json(result.rows);
+  } catch (err) {
+    console.error("ERROR GET VOUCHERS:", err);
+    return res.status(500).json({
+      message: "Gagal mengambil daftar voucher",
+    });
+  }
+});
+
+app.patch(
+  "/vouchers/:id/toggle-active",
+  requireAdminAuth,
+  requireAdminCsrf,
+  async (req, res) => {
+    const voucherId = Number(req.params.id);
+    const active = Number(req.body.active);
+
+    if (!Number.isInteger(voucherId) || voucherId <= 0) {
+      return res.status(400).json({ message: "ID voucher tidak valid" });
+    }
+
+    if (![0, 1].includes(active)) {
+      return res.status(400).json({ message: "Status voucher tidak valid" });
+    }
+
+    try {
+      const result = await query(
+        "UPDATE vouchers SET active = $1 WHERE id = $2 RETURNING id",
+        [active, voucherId],
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: "Voucher tidak ditemukan" });
+      }
+
+      return res.json({
+        message: active === 1 ? "Voucher diaktifkan" : "Voucher dinonaktifkan",
+      });
+    } catch (err) {
+      console.error("ERROR TOGGLE VOUCHER:", err);
+      return res.status(500).json({
+        message: "Gagal mengubah status voucher",
+      });
+    }
+  },
+);
+
+app.delete(
+  "/vouchers/:id",
+  requireAdminAuth,
+  requireAdminCsrf,
+  async (req, res) => {
+    const voucherId = Number(req.params.id);
+
+    if (!Number.isInteger(voucherId) || voucherId <= 0) {
+      return res.status(400).json({ message: "ID voucher tidak valid" });
+    }
+
+    try {
+      const result = await query(
+        "DELETE FROM vouchers WHERE id = $1 RETURNING id",
+        [voucherId],
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: "Voucher tidak ditemukan" });
+      }
+
+      return res.json({ message: "Voucher berhasil dihapus" });
+    } catch (err) {
+      console.error("ERROR DELETE VOUCHER:", err);
+      return res.status(500).json({
+        message: "Gagal menghapus voucher",
+      });
+    }
+  },
+);
+
 app.post("/voucher-preview", async (req, res) => {
   const loggedInUser = getLoggedInUserFromRequest(req);
 

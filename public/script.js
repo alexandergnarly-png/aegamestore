@@ -289,6 +289,11 @@ function closeOrderModal() {
     modal.classList.remove("show");
     document.body.style.overflow = "";
   }
+
+  const voucherInput = document.getElementById("voucherCodeInput");
+  if (voucherInput) voucherInput.value = "";
+
+  resetVoucherPreview();
 }
 function loadBrands() {
   const brands = [
@@ -334,13 +339,18 @@ function updatePreview() {
   );
 
   if (!selectedProduct) {
+    selectedProductId = null;
+
     document.getElementById("previewGame").innerText =
       translations[currentLanguage].previewEmpty;
     document.getElementById("previewProduct").innerText =
       translations[currentLanguage].previewWait;
     document.getElementById("previewPrice").innerText = "Rp 0";
+    resetVoucherPreview();
     return;
   }
+
+  selectedProductId = selectedProduct.id;
 
   document.getElementById("previewGame").innerText = selectedProduct.game;
   document.getElementById("previewProduct").innerText =
@@ -348,6 +358,8 @@ function updatePreview() {
   document.getElementById("previewPrice").innerText = formatRupiah(
     selectedProduct.price,
   );
+
+  resetVoucherPreview();
 }
 
 brandSelect.addEventListener("change", loadDurations);
