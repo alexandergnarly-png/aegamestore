@@ -244,6 +244,12 @@
       </div>
 
       <div class="section">
+        <div style="margin-top: 22px; text-align: left">
+          <h3 style="margin-bottom: 10px">Riwayat Order</h3>
+          <div id="orderHistory" style="font-size: 14px; color: #475569">
+            Memuat riwayat order...
+          </div>
+        </div>
         <a href="/" class="btn btn-secondary">Kembali ke Home</a>
         <button class="btn-danger" onclick="logoutUser()">Logout</button>
       </div>
@@ -262,6 +268,7 @@
 
           document.getElementById("userText").innerText =
             `Login sebagai: ${data.username}`;
+          loadOrderHistory();
         } catch (err) {
           window.location.href = "/auth";
         }
@@ -315,7 +322,52 @@
         await fetch("/user-logout", { method: "POST" });
         window.location.href = "/";
       }
+      function formatRupiah(num) {
+        return "Rp " + Number(num || 0).toLocaleString("id-ID");
+      }
 
+      function formatTanggal(dateString) {
+        if (!dateString) return "-";
+        return new Date(dateString).toLocaleString("id-ID");
+      }
+
+      async function loadOrderHistory() {
+        const box = document.getElementById("orderHistory");
+
+        try {
+          const res = await fetch("/user/orders");
+
+          if (res.status === 401) {
+            window.location.href = "/auth";
+            return;
+          }
+
+          const data = await res.json();
+
+          if (!Array.isArray(data) || data.length === 0) {
+            box.innerHTML = "Belum ada order yang terhubung ke akun ini.";
+            return;
+          }
+
+          box.innerHTML = data
+            .map(
+              (item) => `
+      <div style="padding: 14px; border: 1px solid #bae6fd; border-radius: 14px; margin-top: 10px; background: white;">
+        <strong>${item.game || "-"}</strong><br>
+        Produk: ${item.product || "-"}<br>
+        Harga: ${formatRupiah(item.price)}<br>
+        Pembayaran: ${item.payment_status || "-"}<br>
+        Pengiriman: ${item.delivery_status || "-"}<br>
+        Waktu: ${formatTanggal(item.created_at)}<br>
+        ${item.gamekey ? `Key: <code>${item.gamekey}</code>` : ""}
+      </div>
+    `,
+            )
+            .join("");
+        } catch (err) {
+          box.innerHTML = "Gagal memuat riwayat order.";
+        }
+      }
       checkUser();
     </script>
   </body>

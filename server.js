@@ -159,6 +159,8 @@ db.query(`CREATE INDEX IF NOT EXISTS idx_orders_id ON orders(id)`);
 db.query(
   `CREATE INDEX IF NOT EXISTS idx_keys_product_used ON keys(product_id, used)`,
 );
+db.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS user_id INTEGER`);
+db.query(`CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id)`);
 
 // limit umum (global)
 const globalLimiter = rateLimit({
@@ -228,7 +230,17 @@ async function isAdminLoggedIn(req) {
     return false;
   }
 }
+function getLoggedInUserFromRequest(req) {
+  const token = req.cookies.user_auth;
 
+  if (!token) return null;
+
+  try {
+    return jwt.verify(token, jwtSecret);
+  } catch (err) {
+    return null;
+  }
+}
 function requireAdminCsrf(req, res, next) {
   const csrfFromCookie = String(req.cookies.admin_csrf || "").trim();
   const csrfFromHeader = String(req.headers["x-csrf-token"] || "").trim();
@@ -393,7 +405,7 @@ app.post(
 );
 
 app.get("/ae-control", requireAdminAuth, (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "admin.html"));
+  res.sendFile(path.join(__dirname, "views", "admin.html"));
 });
 
 // buat order (QRIS manual)
@@ -463,6 +475,8 @@ app.post("/create-order", orderLimiter, async (req, res) => {
     const price = Number(productRow.price);
     const game = productRow.game;
     const baseUrl = process.env.APP_BASE_URL || `http://localhost:${port}`;
+    const loggedInUser = getLoggedInUserFromRequest(req);
+    const userId = loggedInUser?.id || null;
 
     res.cookie(`order_token_${orderId}`, accessToken, {
       httpOnly: true,
@@ -474,12 +488,13 @@ app.post("/create-order", orderLimiter, async (req, res) => {
 
     await query(
       `INSERT INTO orders
-            (id, product_id, access_token, name, contact, game, product, price, payment_status, delivery_status, created_at)
+            (id, product_id, user_id, access_token, name, contact, game, product, price, payment_status, delivery_status, created_at)
             VALUES
-            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
       [
         orderId,
         cleanProductId,
+        userId,
         accessToken,
         cleanName,
         cleanContact,
@@ -582,10 +597,10 @@ app.post("/midtrans-notification", async (req, res) => {
 
         const keyResult = await client.query(
           `SELECT * FROM keys
-                     WHERE product_id = $1 AND used = 0
-                     ORDER BY id ASC
-                     LIMIT 1`,
-          [order.product_id],
+             WHERE product_id = $1 AND used = 0
+             ORDER BY id ASC
+             LIMIT 1
+             FOR UPDATE SKIP LOCKED`[order.product_id],
         );
 
         const keyRow = keyResult.rows[0];
@@ -729,7 +744,8 @@ app.post(
         `SELECT * FROM keys
              WHERE product_id = $1 AND used = 0
              ORDER BY id ASC
-             LIMIT 1`,
+             LIMIT 1
+             FOR UPDATE SKIP LOCKED`
         [order.product_id],
       );
 
@@ -1464,6 +1480,29 @@ app.post("/user-login", userAuthLimiter, async (req, res) => {
     return res.json({ message: "Login berhasil!" });
   } catch (err) {
     return res.status(500).json({ message: "Terjadi error server" });
+  }
+});
+
+app.get("/user/orders", async (req, res) => {
+  const loggedInUser = getLoggedInUserFromRequest(req);
+
+  if (!loggedInUser) {
+    return res.status(401).json({ message: "Kamu harus login dulu" });
+  }
+
+  try {
+    const result = await query(
+      `SELECT id, game, product, price, payment_status, delivery_status, gameKey, created_at
+       FROM orders
+       WHERE user_id = $1
+       ORDER BY created_at DESC, id DESC`,
+      [loggedInUser.id],
+    );
+
+    return res.json(result.rows);
+  } catch (err) {
+    console.error("ERROR GET USER ORDERS:", err);
+    return res.status(500).json({ message: "Gagal mengambil riwayat order" });
   }
 });
 
