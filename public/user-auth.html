@@ -1,443 +1,542 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Masuk / Daftar - AE Game Store</title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        :root {
-            --primary: #0ea5e9;
-            --primary-hover: #0284c7;
-            --secondary: #fb7185;
-            --bg-color: #f0f9ff;
-            --card-bg: rgba(255, 255, 255, 0.85);
-            --text-main: #0c4a6e;
-            --text-muted: #475569;
-            --border-color: rgba(56, 189, 248, 0.4);
-            --shadow-lg: 0 24px 50px rgba(14, 165, 233, 0.15);
-            --radius-xl: 28px;
-            --radius-md: 14px;
+      :root {
+        --primary: #0ea5e9;
+        --primary-hover: #0284c7;
+        --secondary: #fb7185;
+        --bg-color: #f0f9ff;
+        --card-bg: rgba(255, 255, 255, 0.85);
+        --text-main: #0c4a6e;
+        --text-muted: #475569;
+        --border-color: rgba(56, 189, 248, 0.4);
+        --shadow-lg: 0 24px 50px rgba(14, 165, 233, 0.15);
+        --radius-xl: 28px;
+        --radius-md: 14px;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background-color: var(--bg-color);
+        background-image:
+          radial-gradient(
+            circle at 0% 0%,
+            rgba(56, 189, 248, 0.15) 0%,
+            transparent 40%
+          ),
+          radial-gradient(
+            circle at 100% 100%,
+            rgba(251, 113, 133, 0.1) 0%,
+            transparent 40%
+          );
+        color: var(--text-main);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 24px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .auth-wrapper {
+        width: 100%;
+        max-width: 400px;
+        animation: fadeUp 0.6s ease-out forwards;
+        position: relative;
+        z-index: 10;
+      }
+
+      .card {
+        background: var(--card-bg);
+        backdrop-filter: blur(24px);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-xl);
+        padding: 40px 32px;
+        box-shadow: var(--shadow-lg);
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: linear-gradient(90deg, var(--primary), var(--secondary));
+      }
+
+      .logo-badge {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--primary), var(--ocean-light));
+        color: white;
+        font-size: 24px;
+        box-shadow: 0 12px 24px rgba(14, 165, 233, 0.3);
+        margin: 0 auto 20px;
+      }
+
+      h2 {
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--text-main);
+        margin-bottom: 8px;
+        letter-spacing: -0.5px;
+      }
+
+      p.subtitle {
+        color: var(--text-muted);
+        font-size: 14px;
+        margin-bottom: 30px;
+        line-height: 1.5;
+      }
+
+      .input-group {
+        margin-bottom: 16px;
+        text-align: left;
+      }
+
+      input {
+        width: 100%;
+        padding: 16px 18px;
+        border-radius: var(--radius-md);
+        border: 1px solid #bae6fd;
+        background: rgba(255, 255, 255, 0.8);
+        color: var(--text-main);
+        font-size: 14px;
+        transition: all 0.2s ease;
+        outline: none;
+      }
+
+      input:focus {
+        border-color: var(--primary);
+        background: #ffffff;
+        box-shadow: 0 0 0 4px #e0f2fe;
+      }
+
+      button.btn-primary {
+        width: 100%;
+        padding: 16px;
+        border: none;
+        border-radius: var(--radius-md);
+        background: linear-gradient(
+          135deg,
+          var(--primary),
+          var(--primary-hover)
+        );
+        color: white;
+        font-size: 15px;
+        font-weight: 800;
+        cursor: pointer;
+        margin-top: 10px;
+        box-shadow: 0 10px 20px rgba(14, 165, 233, 0.25);
+        transition: all 0.2s ease;
+      }
+
+      button.btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 28px rgba(14, 165, 233, 0.35);
+      }
+
+      .switch-form {
+        margin-top: 24px;
+        font-size: 14px;
+        color: var(--text-muted);
+      }
+
+      .switch-form span {
+        color: var(--primary);
+        font-weight: 800;
+        cursor: pointer;
+        transition: color 0.2s;
+      }
+
+      .switch-form span:hover {
+        color: var(--primary-hover);
+        text-decoration: underline;
+      }
+
+      /* Sakura Effect */
+      .sakura {
+        position: absolute;
+        top: -10%;
+        z-index: 1;
+        pointer-events: none;
+        background: #fbcfe8;
+        border-radius: 100% 0 100% 0;
+        animation:
+          fall linear infinite,
+          sway ease-in-out infinite alternate;
+      }
+
+      @keyframes fall {
+        to {
+          top: 110%;
+        }
+      }
+
+      @keyframes sway {
+        from {
+          transform: translateX(-20px) rotate(0deg);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        to {
+          transform: translateX(20px) rotate(45deg);
+        }
+      }
+
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
         }
 
-        body {
-            background-color: var(--bg-color);
-            background-image:
-                radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 100% 100%, rgba(251, 113, 133, 0.1) 0%, transparent 40%);
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 24px;
-            overflow: hidden;
-            position: relative;
+        to {
+          opacity: 1;
+          transform: translateY(0);
         }
+      }
 
-        .auth-wrapper {
-            width: 100%;
-            max-width: 400px;
-            animation: fadeUp 0.6s ease-out forwards;
-            position: relative;
-            z-index: 10;
-        }
-
-        .card {
-            background: var(--card-bg);
-            backdrop-filter: blur(24px);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-xl);
-            padding: 40px 32px;
-            box-shadow: var(--shadow-lg);
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .card::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 6px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-        }
-
-        .logo-badge {
-            width: 56px;
-            height: 56px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, var(--primary), var(--ocean-light));
-            color: white;
-            font-size: 24px;
-            box-shadow: 0 12px 24px rgba(14, 165, 233, 0.3);
-            margin: 0 auto 20px;
-        }
-
-        h2 {
-            font-size: 24px;
-            font-weight: 800;
-            color: var(--text-main);
-            margin-bottom: 8px;
-            letter-spacing: -0.5px;
-        }
-
-        p.subtitle {
-            color: var(--text-muted);
-            font-size: 14px;
-            margin-bottom: 30px;
-            line-height: 1.5;
-        }
-
-        .input-group {
-            margin-bottom: 16px;
-            text-align: left;
-        }
-
-        input {
-            width: 100%;
-            padding: 16px 18px;
-            border-radius: var(--radius-md);
-            border: 1px solid #bae6fd;
-            background: rgba(255, 255, 255, 0.8);
-            color: var(--text-main);
-            font-size: 14px;
-            transition: all 0.2s ease;
-            outline: none;
-        }
-
-        input:focus {
-            border-color: var(--primary);
-            background: #ffffff;
-            box-shadow: 0 0 0 4px #e0f2fe;
-        }
-
-        button.btn-primary {
-            width: 100%;
-            padding: 16px;
-            border: none;
-            border-radius: var(--radius-md);
-            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
-            color: white;
-            font-size: 15px;
-            font-weight: 800;
-            cursor: pointer;
-            margin-top: 10px;
-            box-shadow: 0 10px 20px rgba(14, 165, 233, 0.25);
-            transition: all 0.2s ease;
-        }
-
-        button.btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 14px 28px rgba(14, 165, 233, 0.35);
-        }
-
-        .switch-form {
-            margin-top: 24px;
-            font-size: 14px;
-            color: var(--text-muted);
-        }
-
-        .switch-form span {
-            color: var(--primary);
-            font-weight: 800;
-            cursor: pointer;
-            transition: color 0.2s;
-        }
-
-        .switch-form span:hover {
-            color: var(--primary-hover);
-            text-decoration: underline;
-        }
-
-        /* Sakura Effect */
-        .sakura {
-            position: absolute;
-            top: -10%;
-            z-index: 1;
-            pointer-events: none;
-            background: #fbcfe8;
-            border-radius: 100% 0 100% 0;
-            animation: fall linear infinite, sway ease-in-out infinite alternate;
-        }
-
-        @keyframes fall {
-            to {
-                top: 110%;
-            }
-        }
-
-        @keyframes sway {
-            from {
-                transform: translateX(-20px) rotate(0deg);
-            }
-
-            to {
-                transform: translateX(20px) rotate(45deg);
-            }
-        }
-
-        @keyframes fadeUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Toggle Forms */
-        #registerForm {
-            display: none;
-        }
+      /* Toggle Forms */
+      #registerForm {
+        display: none;
+      }
     </style>
-</head>
+  </head>
 
-<body>
+  <body>
     <div class="auth-wrapper">
-        <div class="card">
-            <div class="logo-badge">⛩️</div>
+      <div class="card">
+        <div class="logo-badge">⛩️</div>
 
-            <div id="loginForm">
-                <h2>Selamat Datang 🌊</h2>
-                <p class="subtitle">Masuk untuk melanjutkan petualanganmu.</p>
+        <div id="loginForm">
+          <h2>Selamat Datang 🌊</h2>
+          <p class="subtitle">Masuk untuk melanjutkan petualanganmu.</p>
 
-                <div class="input-group">
-                    <input type="text" id="loginUsername" placeholder="Username" autocomplete="off">
-                </div>
-                <div class="input-group">
-                    <input type="password" id="loginPassword" placeholder="Password">
-                </div>
+          <div class="input-group">
+            <input
+              type="text"
+              id="loginUsername"
+              placeholder="Username"
+              autocomplete="off"
+            />
+          </div>
+          <div class="input-group">
+            <input type="password" id="loginPassword" placeholder="Password" />
+          </div>
 
-                <button class="btn-primary" id="btnLogin" onclick="login()">Masuk Sekarang</button>
+          <button class="btn-primary" id="btnLogin" onclick="login()">
+            Masuk Sekarang
+          </button>
 
-                <div class="switch-form">
-                    Belum punya akun? <span onclick="toggleForm()">Daftar di sini</span>
-                </div>
-            </div>
-
-            <div id="registerForm">
-                <h2>Buat Akun Baru ✨</h2>
-                <p class="subtitle">Daftar sekarang dan nikmati kemudahan top-up.</p>
-
-                <div class="input-group">
-                    <input type="text" id="regUsername" placeholder="Pilih Username (Min. 3 Huruf)" autocomplete="off">
-                </div>
-                <div class="input-group">
-                    <input type="password" id="regPassword" placeholder="Buat Password (Min. 6 Huruf)">
-                </div>
-
-                <button class="btn-primary" id="btnRegister" onclick="register()">Daftar Akun</button>
-
-                <div class="switch-form">
-                    Sudah punya akun? <span onclick="toggleForm()">Masuk di sini</span>
-                </div>
-            </div>
-            <div id="changePasswordBox" style="display:none; margin-top: 18px;">
-                <button type="button" onclick="openChangePassword()">Ganti Password</button>
-            </div>
-            <div style="margin-top: 20px; font-size: 12px;">
-                <a href="/" style="color: #94a3b8; text-decoration: none;">← Kembali ke Beranda</a>
-            </div>
+          <div class="switch-form">
+            Belum punya akun? <span onclick="toggleForm()">Daftar di sini</span>
+          </div>
         </div>
+
+        <div id="registerForm">
+          <h2>Buat Akun Baru ✨</h2>
+          <p class="subtitle">Daftar sekarang dan nikmati kemudahan top-up.</p>
+
+          <div class="input-group">
+            <input
+              type="text"
+              id="regUsername"
+              placeholder="Pilih Username (Min. 3 Huruf)"
+              autocomplete="off"
+            />
+          </div>
+          <div class="input-group">
+            <input
+              type="password"
+              id="regPassword"
+              placeholder="Buat Password (Min. 6 Huruf)"
+            />
+          </div>
+
+          <button class="btn-primary" id="btnRegister" onclick="register()">
+            Daftar Akun
+          </button>
+
+          <div class="switch-form">
+            Sudah punya akun? <span onclick="toggleForm()">Masuk di sini</span>
+          </div>
+        </div>
+        <div id="changePasswordBox" style="display: none; margin-top: 18px">
+          <p style="font-size: 13px; color: #475569; margin-bottom: 8px">
+            Sudah login? Kamu bisa ubah password akun di sini.
+          </p>
+          <button
+            type="button"
+            class="btn-primary"
+            onclick="openChangePassword()">
+            Ganti Password
+          </button>
+        </div>
+        <div style="margin-top: 20px; font-size: 12px">
+          <a href="/" style="color: #94a3b8; text-decoration: none"
+            >← Kembali ke Beranda</a
+          >
+        </div>
+      </div>
     </div>
 
     <script>
-        // Fitur Ganti Form Login/Register
-        async function checkLoginStatus() {
-            try {
-                const res = await fetch("/api/user/me");
-                const data = await res.json();
+      // Fitur Ganti Form Login/Register
+      async function checkLoginStatus() {
+        try {
+          const res = await fetch("/api/user/me");
+          const data = await res.json();
 
-                const box = document.getElementById("changePasswordBox");
-                if (box && data.loggedIn) {
-                    box.style.display = "block";
-                }
-            } catch (err) { }
-        }
+          const box = document.getElementById("changePasswordBox");
+          if (box && data.loggedIn) {
+            box.style.display = "block";
+          }
+        } catch (err) {}
+      }
 
-        async function openChangePassword() {
-            const result = await Swal.fire({
-                title: "Ganti Password",
-                html: `
+      async function openChangePassword() {
+        const result = await Swal.fire({
+          title: "Ganti Password",
+          html: `
             <input id="oldPasswordInput" type="password" class="swal2-input" placeholder="Password lama / random">
             <input id="newPasswordInput" type="password" class="swal2-input" placeholder="Password baru">
         `,
-                showCancelButton: true,
-                confirmButtonText: "Simpan",
-                cancelButtonText: "Batal",
-                confirmButtonColor: "#0ea5e9",
-                preConfirm: () => {
-                    const oldPassword = document.getElementById("oldPasswordInput").value.trim();
-                    const newPassword = document.getElementById("newPasswordInput").value.trim();
+          showCancelButton: true,
+          confirmButtonText: "Simpan",
+          cancelButtonText: "Batal",
+          confirmButtonColor: "#0ea5e9",
+          preConfirm: () => {
+            const oldPassword = document
+              .getElementById("oldPasswordInput")
+              .value.trim();
+            const newPassword = document
+              .getElementById("newPasswordInput")
+              .value.trim();
 
-                    if (!oldPassword || newPassword.length < 6) {
-                        Swal.showValidationMessage("Isi password lama dan password baru minimal 6 karakter");
-                        return false;
-                    }
-
-                    return { oldPassword, newPassword };
-                }
-            });
-
-            if (!result.isConfirmed) return;
-
-            try {
-                const res = await fetch("/user/change-password", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(result.value)
-                });
-
-                const data = await res.json();
-
-                if (!res.ok) {
-                    Swal.fire("Gagal", data.message || "Gagal ganti password", "error");
-                    return;
-                }
-
-                Swal.fire("Berhasil", "Password berhasil diganti. Silakan pakai password baru untuk login berikutnya.", "success");
-            } catch (err) {
-                Swal.fire("Error", "Terjadi error server", "error");
+            if (!oldPassword || newPassword.length < 6) {
+              Swal.showValidationMessage(
+                "Isi password lama dan password baru minimal 6 karakter",
+              );
+              return false;
             }
-        }
 
-        document.addEventListener("DOMContentLoaded", checkLoginStatus);
-        function toggleForm() {
-            const loginForm = document.getElementById('loginForm');
-            const registerForm = document.getElementById('registerForm');
-
-            if (loginForm.style.display === 'none') {
-                loginForm.style.display = 'block';
-                registerForm.style.display = 'none';
-            } else {
-                loginForm.style.display = 'none';
-                registerForm.style.display = 'block';
-            }
-        }
-
-        // Tombol Enter untuk Login
-        document.getElementById("loginPassword").addEventListener("keypress", function (event) {
-            if (event.key === "Enter") login();
+            return { oldPassword, newPassword };
+          },
         });
 
-        // Fungsi Login User
-        async function login() {
-            const username = document.getElementById("loginUsername").value.trim();
-            const password = document.getElementById("loginPassword").value.trim();
-            const btn = document.getElementById("btnLogin");
+        if (!result.isConfirmed) return;
 
-            if (!username || !password) {
-                Swal.fire({ icon: 'warning', title: 'Oops!', text: 'Isi username dan password dulu ya.', confirmButtonColor: '#0ea5e9' });
-                return;
-            }
+        try {
+          const res = await fetch("/user/change-password", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(result.value),
+          });
 
-            const originalText = btn.innerText;
-            btn.innerText = "Memverifikasi... 🌊";
-            btn.disabled = true;
+          const data = await res.json();
 
-            try {
-                const res = await fetch("/user-login", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ username, password })
-                });
-                const data = await res.json();
+          if (!res.ok) {
+            Swal.fire("Gagal", data.message || "Gagal ganti password", "error");
+            return;
+          }
 
-                if (!res.ok) {
-                    Swal.fire({ icon: 'error', title: 'Gagal Masuk', text: data.message, confirmButtonColor: '#fb7185' });
-                    btn.innerText = originalText;
-                    btn.disabled = false;
-                    return;
-                }
+          Swal.fire(
+            "Berhasil",
+            "Password berhasil diganti. Silakan pakai password baru untuk login berikutnya.",
+            "success",
+          );
+        } catch (err) {
+          Swal.fire("Error", "Terjadi error server", "error");
+        }
+      }
 
-                Swal.fire({ icon: 'success', title: 'Berhasil!', text: 'Selamat datang kembali!', showConfirmButton: false, timer: 1500 });
-                setTimeout(() => window.location.href = "/", 1500); // Arahkan kembali ke beranda setelah login
-            } catch {
-                Swal.fire({ icon: 'error', title: 'Error', text: 'Terjadi kesalahan server.', confirmButtonColor: '#fb7185' });
-                btn.innerText = originalText;
-                btn.disabled = false;
-            }
+      document.addEventListener("DOMContentLoaded", checkLoginStatus);
+      function toggleForm() {
+        const loginForm = document.getElementById("loginForm");
+        const registerForm = document.getElementById("registerForm");
+
+        if (loginForm.style.display === "none") {
+          loginForm.style.display = "block";
+          registerForm.style.display = "none";
+        } else {
+          loginForm.style.display = "none";
+          registerForm.style.display = "block";
+        }
+      }
+
+      // Tombol Enter untuk Login
+      document
+        .getElementById("loginPassword")
+        .addEventListener("keypress", function (event) {
+          if (event.key === "Enter") login();
+        });
+
+      // Fungsi Login User
+      async function login() {
+        const username = document.getElementById("loginUsername").value.trim();
+        const password = document.getElementById("loginPassword").value.trim();
+        const btn = document.getElementById("btnLogin");
+
+        if (!username || !password) {
+          Swal.fire({
+            icon: "warning",
+            title: "Oops!",
+            text: "Isi username dan password dulu ya.",
+            confirmButtonColor: "#0ea5e9",
+          });
+          return;
         }
 
-        // Fungsi Register User
-        async function register() {
-            const username = document.getElementById("regUsername").value.trim();
-            const password = document.getElementById("regPassword").value.trim();
-            const btn = document.getElementById("btnRegister");
+        const originalText = btn.innerText;
+        btn.innerText = "Memverifikasi... 🌊";
+        btn.disabled = true;
 
-            if (username.length < 3 || password.length < 6) {
-                Swal.fire({ icon: 'warning', title: 'Tidak Valid', text: 'Username min. 3 karakter & Password min. 6 karakter.', confirmButtonColor: '#0ea5e9' });
-                return;
-            }
+        try {
+          const res = await fetch("/user-login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password }),
+          });
+          const data = await res.json();
 
-            const originalText = btn.innerText;
-            btn.innerText = "Mendaftarkan... ✨";
-            btn.disabled = true;
+          if (!res.ok) {
+            Swal.fire({
+              icon: "error",
+              title: "Gagal Masuk",
+              text: data.message,
+              confirmButtonColor: "#fb7185",
+            });
+            btn.innerText = originalText;
+            btn.disabled = false;
+            return;
+          }
 
-            try {
-                const res = await fetch("/register", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ username, password })
-                });
-                const data = await res.json();
+          Swal.fire({
+            icon: "success",
+            title: "Berhasil!",
+            text: "Selamat datang kembali!",
+            showConfirmButton: false,
+            timer: 1500,
+          });
+          setTimeout(() => {
+            checkLoginStatus();
+            document.getElementById("changePasswordBox").style.display =
+              "block";
+          }, 1500); // Arahkan kembali ke beranda setelah login
+        } catch {
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "Terjadi kesalahan server.",
+            confirmButtonColor: "#fb7185",
+          });
+          btn.innerText = originalText;
+          btn.disabled = false;
+        }
+      }
 
-                if (!res.ok) {
-                    Swal.fire({ icon: 'error', title: 'Gagal Daftar', text: data.message, confirmButtonColor: '#fb7185' });
-                    btn.innerText = originalText;
-                    btn.disabled = false;
-                    return;
-                }
+      // Fungsi Register User
+      async function register() {
+        const username = document.getElementById("regUsername").value.trim();
+        const password = document.getElementById("regPassword").value.trim();
+        const btn = document.getElementById("btnRegister");
 
-                Swal.fire({ icon: 'success', title: 'Akun Dibuat! 🎉', text: 'Silakan masuk menggunakan akun baru kamu.', confirmButtonColor: '#0ea5e9' })
-                    .then(() => {
-                        document.getElementById("loginUsername").value = username; // Auto fill username
-                        document.getElementById("regPassword").value = ''; // Clear reg password
-                        toggleForm(); // Pindah ke form login
-                    });
-
-                btn.innerText = originalText;
-                btn.disabled = false;
-            } catch {
-                Swal.fire({ icon: 'error', title: 'Error', text: 'Terjadi kesalahan server.', confirmButtonColor: '#fb7185' });
-                btn.innerText = originalText;
-                btn.disabled = false;
-            }
+        if (username.length < 3 || password.length < 6) {
+          Swal.fire({
+            icon: "warning",
+            title: "Tidak Valid",
+            text: "Username min. 3 karakter & Password min. 6 karakter.",
+            confirmButtonColor: "#0ea5e9",
+          });
+          return;
         }
 
-        // Fitur Sakura Jatuh
-        function createSakura() {
-            const sakura = document.createElement('div');
-            sakura.classList.add('sakura');
-            const size = Math.random() * 10 + 5;
-            sakura.style.width = size + 'px';
-            sakura.style.height = size + 'px';
-            sakura.style.left = Math.random() * 100 + 'vw';
-            sakura.style.animationDuration = (Math.random() * 3 + 4) + 's, ' + (Math.random() * 2 + 2) + 's';
-            document.body.appendChild(sakura);
-            setTimeout(() => { sakura.remove(); }, 7000);
+        const originalText = btn.innerText;
+        btn.innerText = "Mendaftarkan... ✨";
+        btn.disabled = true;
+
+        try {
+          const res = await fetch("/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password }),
+          });
+          const data = await res.json();
+
+          if (!res.ok) {
+            Swal.fire({
+              icon: "error",
+              title: "Gagal Daftar",
+              text: data.message,
+              confirmButtonColor: "#fb7185",
+            });
+            btn.innerText = originalText;
+            btn.disabled = false;
+            return;
+          }
+
+          Swal.fire({
+            icon: "success",
+            title: "Akun Dibuat! 🎉",
+            text: "Silakan masuk menggunakan akun baru kamu.",
+            confirmButtonColor: "#0ea5e9",
+          }).then(() => {
+            document.getElementById("loginUsername").value = username; // Auto fill username
+            document.getElementById("regPassword").value = ""; // Clear reg password
+            toggleForm(); // Pindah ke form login
+          });
+
+          btn.innerText = originalText;
+          btn.disabled = false;
+        } catch {
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "Terjadi kesalahan server.",
+            confirmButtonColor: "#fb7185",
+          });
+          btn.innerText = originalText;
+          btn.disabled = false;
         }
-        setInterval(createSakura, 400);
+      }
+
+      // Fitur Sakura Jatuh
+      function createSakura() {
+        const sakura = document.createElement("div");
+        sakura.classList.add("sakura");
+        const size = Math.random() * 10 + 5;
+        sakura.style.width = size + "px";
+        sakura.style.height = size + "px";
+        sakura.style.left = Math.random() * 100 + "vw";
+        sakura.style.animationDuration =
+          Math.random() * 3 + 4 + "s, " + (Math.random() * 2 + 2) + "s";
+        document.body.appendChild(sakura);
+        setTimeout(() => {
+          sakura.remove();
+        }, 7000);
+      }
+      setInterval(createSakura, 400);
     </script>
-</body>
-
+  </body>
 </html>
