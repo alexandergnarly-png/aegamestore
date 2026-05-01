@@ -243,6 +243,7 @@
       /* Collapsed State */
       .sidebar-collapsed .sidebar {
         width: 88px;
+        flex-basis: 88px;
         padding: 24px 14px;
       }
 
@@ -494,7 +495,6 @@
       }
 
       .stat-card:hover {
-        transform: translateY(-4px);
         box-shadow: var(--shadow-md);
         border-color: var(--primary);
       }
@@ -651,8 +651,8 @@
       }
 
       button:hover {
-  box-shadow: 0 12px 24px rgba(14, 165, 233, 0.3);
-}}
+        box-shadow: 0 12px 24px rgba(14, 165, 233, 0.3);
+      }
 
       button:active {
         transform: translateY(0);
@@ -2531,7 +2531,9 @@ Game Key : ${key || "-"}
         }, 7000);
       }
       // Munculkan sakura setiap 400ms
-      setInterval(createSakura, 400);
+      if (window.innerWidth > 768) {
+        setInterval(createSakura, 1200);
+      }
       // --- FITUR TAMBAHAN: Jam & Sapaan Real-Time ---
       function updateClock() {
         const now = new Date();
