@@ -967,6 +967,27 @@
         .top-nav .ghost-btn {
           width: 100%;
         }
+        body.sidebar-collapsed .sidebar {
+          width: 100% !important;
+          min-width: 100% !important;
+          flex: none !important;
+          padding: 12px;
+        }
+
+        body.sidebar-collapsed .sidebar-brand {
+          flex-direction: row;
+          align-items: center;
+        }
+
+        body.sidebar-collapsed .sidebar-text {
+          display: block;
+          opacity: 1;
+        }
+
+        body.sidebar-collapsed .nav-btn {
+          font-size: 12px;
+          padding: 10px 14px;
+        }
       }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
