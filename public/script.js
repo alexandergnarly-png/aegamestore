@@ -185,15 +185,38 @@ function renderGames() {
     }
 
     card.onclick = () => {
-      selectedGame = game;
-      renderGames();
-      loadBrands();
+      openOrderModal(game);
     };
 
     gameGrid.appendChild(card);
   });
 }
+function openOrderModal(game) {
+  selectedGame = game;
+  renderGames();
+  loadBrands();
 
+  const modal = document.getElementById("orderModal");
+  const title = document.getElementById("modalGameTitle");
+
+  if (title) {
+    title.innerText = game;
+  }
+
+  if (modal) {
+    modal.classList.add("show");
+    document.body.style.overflow = "hidden";
+  }
+}
+
+function closeOrderModal() {
+  const modal = document.getElementById("orderModal");
+
+  if (modal) {
+    modal.classList.remove("show");
+    document.body.style.overflow = "";
+  }
+}
 function loadBrands() {
   const brands = [
     ...new Set(
@@ -354,7 +377,7 @@ async function checkLoginStatus() {
             👤 Halo, <strong style="margin-left: 4px;">${data.username}</strong>
         </div>
         <a href="/account.html" class="auth-btn" style="background: rgba(255,255,255,0.9); color: #0284c7; border: 1px solid #bae6fd; padding: 8px 12px; text-decoration: none;">
-            Ganti Password
+            Akun Saya
         </a>
         <button onclick="logoutUser()" class="auth-btn" style="background: linear-gradient(135deg, #fb7185, #e11d48); border: none; padding: 8px 12px;">
             Keluar

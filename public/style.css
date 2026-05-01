@@ -982,3 +982,144 @@ button#buyBtn:active {
     width: auto;
   }
 }
+.game-only-layout {
+  grid-template-columns: 1fr;
+}
+
+.compact-game-grid {
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+}
+
+.compact-game-grid .game-card {
+  border-radius: 20px;
+}
+
+.compact-game-grid .game-card img {
+  height: 78px;
+}
+
+.compact-game-grid .game-card span {
+  font-size: 12px;
+  padding: 9px;
+}
+
+.order-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.order-modal.show {
+  display: flex;
+}
+
+.order-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(12, 74, 110, 0.45);
+  backdrop-filter: blur(8px);
+}
+
+.order-modal-card {
+  width: 100%;
+  max-width: 620px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid var(--border-color);
+  border-radius: 28px;
+  padding: 30px;
+  box-shadow: 0 30px 70px rgba(14, 165, 233, 0.28);
+  animation: modalPop 0.25s ease;
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 12px;
+  background: #e0f2fe;
+  color: #0284c7;
+  font-size: 24px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.modal-head {
+  margin-bottom: 22px;
+  padding-right: 44px;
+}
+
+.modal-head h2 {
+  margin-top: 10px;
+  font-size: 26px;
+  color: var(--text-main);
+}
+
+.modal-head p {
+  margin-top: 6px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.modal-summary {
+  display: grid;
+  gap: 12px;
+  margin: 20px 0;
+  padding: 18px;
+  border-radius: 20px;
+  background: #f0f9ff;
+  border: 1px dashed #bae6fd;
+}
+
+.modal-summary small {
+  display: block;
+  color: #0284c7;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.modal-summary strong {
+  display: block;
+  color: #0c4a6e;
+  font-size: 15px;
+  word-break: break-word;
+}
+
+@keyframes modalPop {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 640px) {
+  .compact-game-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .order-modal-card {
+    padding: 24px;
+    border-radius: 24px;
+  }
+
+  .modal-head h2 {
+    font-size: 22px;
+  }
+}

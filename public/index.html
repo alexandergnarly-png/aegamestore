@@ -117,13 +117,13 @@
         <div class="promo-dots" id="promoDots"></div>
       </section>
 
-      <section class="store-layout" id="store-section">
+      <section class="store-layout game-only-layout" id="store-section">
         <div class="shop-card">
           <div class="section-head">
             <div>
-              <h2 data-i18n="selectProduct">Pilih Produk</h2>
+              <h2 data-i18n="selectProduct">Pilih Game</h2>
               <p data-i18n="fillDetails">
-                Lengkapi data di bawah ini untuk memulai pesanan.
+                Klik game yang kamu mau, lalu isi detail order di popup.
               </p>
             </div>
           </div>
@@ -162,7 +162,7 @@
           <div class="block">
             <div class="search-header">
               <label class="section-label" data-i18n="selectGame"
-                >1. Pilih Game</label
+                >Pilih Game</label
               >
               <div class="search-box">
                 <span class="search-icon">🔍</span>
@@ -175,78 +175,83 @@
                 />
               </div>
             </div>
-            <div class="game-grid" id="gameGrid"></div>
+
+            <div class="game-grid compact-game-grid" id="gameGrid"></div>
           </div>
-
-          <div class="form-grid">
-            <div class="field">
-              <!-- Label diubah ke Platform/Tipe Device -->
-              <label for="brand">2. Brand</label>
-              <select id="brand"></select>
-            </div>
-
-            <div class="field">
-              <label for="product">3. Nominal / Durasi</label>
-              <select id="product"></select>
-            </div>
-          </div>
-
-          <div class="form-grid">
-            <div class="field">
-              <label for="name">4. Nama Player</label>
-              <input type="text" id="name" placeholder="Masukkan nama kamu" />
-            </div>
-
-            <div class="field">
-              <label for="contact">5. Kontak / Email</label>
-              <input type="text" id="contact" placeholder="No. WA / Email" />
-            </div>
-          </div>
-
-          <button id="buyBtn" onclick="buy()" data-i18n="buyNow">
-            Beli Sekarang 🌊
-          </button>
-          <div class="loading" id="loading" data-i18n="processingOrder">
-            Memproses pesanan...
-          </div>
-
-          <p class="trust-text">
-            🔒 Pembayaran aman via QRIS GoPay Merchant • Pengiriman instan
-          </p>
         </div>
-
-        <aside class="summary-card">
-          <div class="summary-head">
-            <span class="summary-badge">ORDER PREVIEW</span>
-          </div>
-
-          <h3 id="previewGame">Memuat data...</h3>
-          <p class="summary-product" id="previewProduct">Menunggu pilihan...</p>
-
-          <div class="price-box">
-            <span data-i18n="totalPayment">Total Pembayaran</span>
-            <strong id="previewPrice">Rp 0</strong>
-          </div>
-
-          <div class="summary-points">
-            <div class="summary-point">
-              <strong>⚡ Checkout Instan</strong>
-              <span>Proses ringkas langsung menuju gerbang pembayaran.</span>
-            </div>
-
-            <div class="summary-point">
-              <strong>🛡️ 100% Aman</strong>
-              <span>Sistem kami memproses order dengan aman dan legal.</span>
-            </div>
-
-            <div class="summary-point">
-              <strong>🎁 Auto Delivery</strong>
-              <span>Key atau voucher langsung dikirim setelah sukses.</span>
-            </div>
-          </div>
-        </aside>
       </section>
     </main>
+    <div class="order-modal" id="orderModal">
+      <div class="order-modal-backdrop" onclick="closeOrderModal()"></div>
+
+      <div class="order-modal-card">
+        <button
+          type="button"
+          class="modal-close-btn"
+          onclick="closeOrderModal()"
+        >
+          ×
+        </button>
+
+        <div class="modal-head">
+          <div>
+            <span class="summary-badge">ORDER GAME</span>
+            <h2 id="modalGameTitle">Pilih Game</h2>
+            <p>Lengkapi data order kamu di bawah ini.</p>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label for="brand">Brand</label>
+            <select id="brand"></select>
+          </div>
+
+          <div class="field">
+            <label for="product">Nominal / Durasi</label>
+            <select id="product"></select>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label for="name">Nama Player</label>
+            <input type="text" id="name" placeholder="Masukkan nama kamu" />
+          </div>
+
+          <div class="field">
+            <label for="contact">Kontak / Email</label>
+            <input type="text" id="contact" placeholder="No. WA / Email" />
+          </div>
+        </div>
+
+        <div class="modal-summary">
+          <div>
+            <small>Game</small>
+            <strong id="previewGame">Memuat data...</strong>
+          </div>
+          <div>
+            <small>Produk</small>
+            <strong id="previewProduct">Menunggu pilihan...</strong>
+          </div>
+          <div>
+            <small>Total Pembayaran</small>
+            <strong id="previewPrice">Rp 0</strong>
+          </div>
+        </div>
+
+        <button id="buyBtn" onclick="buy()" data-i18n="buyNow">
+          Beli Sekarang 🌊
+        </button>
+        <div class="loading" id="loading" data-i18n="processingOrder">
+          Memproses pesanan...
+        </div>
+
+        <p class="trust-text">
+          🔒 Pembayaran aman via QRIS GoPay Merchant • Pengiriman instan
+        </p>
+      </div>
+    </div>
 
     <a
       href="https://t.me/aegamestore"
