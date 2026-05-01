@@ -287,7 +287,9 @@ app.use(
       directives: {
         "default-src": ["'self'"],
         "script-src": ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
+        "script-src-attr": ["'unsafe-inline'"],
         "style-src": ["'self'", "'unsafe-inline'"],
+        "style-src-attr": ["'unsafe-inline'"],
         "img-src": ["'self'", "data:", "https:"],
         "connect-src": ["'self'"],
         "font-src": ["'self'", "data:"],
@@ -298,6 +300,7 @@ app.use(
     },
   }),
 );
+
 app.use(globalLimiter);
 app.use(express.json({ limit: "50kb" }));
 app.use(cookieParser());
