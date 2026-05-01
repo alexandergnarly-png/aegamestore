@@ -442,7 +442,9 @@
           sakura.remove();
         }, 7000);
       }
-      setInterval(createSakura, 400);
+      if (window.innerWidth > 768) {
+        setInterval(createSakura, 700);
+      }
 
       // Fitur Popup Panduan Beli
       function showGuide() {
