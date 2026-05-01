@@ -274,11 +274,24 @@ async function requireAdminAuth(req, res, next) {
 
 app.use(
   helmet({
-    contentSecurityPolicy: false,
+    contentSecurityPolicy: {
+      useDefaults: true,
+      directives: {
+        "default-src": ["'self'"],
+        "script-src": ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
+        "style-src": ["'self'", "'unsafe-inline'"],
+        "img-src": ["'self'", "data:", "https:"],
+        "connect-src": ["'self'"],
+        "font-src": ["'self'", "data:"],
+        "object-src": ["'none'"],
+        "base-uri": ["'self'"],
+        "frame-ancestors": ["'self'"],
+      },
+    },
   }),
 );
 app.use(globalLimiter);
-app.use(express.json());
+app.use(express.json({ limit: "50kb" }));
 app.use(cookieParser());
 app.use(express.static("public"));
 
