@@ -597,10 +597,11 @@ app.post("/midtrans-notification", async (req, res) => {
 
         const keyResult = await client.query(
           `SELECT * FROM keys
-             WHERE product_id = $1 AND used = 0
-             ORDER BY id ASC
-             LIMIT 1
-             FOR UPDATE SKIP LOCKED`[order.product_id],
+   WHERE product_id = $1 AND used = 0
+   ORDER BY id ASC
+   LIMIT 1
+   FOR UPDATE SKIP LOCKED`,
+          [order.product_id],
         );
 
         const keyRow = keyResult.rows[0];
@@ -742,10 +743,10 @@ app.post(
 
       const keyResult = await client.query(
         `SELECT * FROM keys
-             WHERE product_id = $1 AND used = 0
-             ORDER BY id ASC
-             LIMIT 1
-             FOR UPDATE SKIP LOCKED`
+   WHERE product_id = $1 AND used = 0
+   ORDER BY id ASC
+   LIMIT 1
+   FOR UPDATE SKIP LOCKED`,
         [order.product_id],
       );
 
