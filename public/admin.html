@@ -1563,7 +1563,7 @@
                     statusText.innerText = "Belum ada user buyer.";
                     tableBody.innerHTML = `
                 <tr>
-                    <td colspan="3" class="empty">Belum ada user yang daftar.</td>
+                    <td colspan="4" class="empty">Belum ada user yang daftar.</td>
                 </tr>
             `;
                     return;
@@ -1577,7 +1577,7 @@
         <td>${escapeHtml(item.username || "-")}</td>
         <td>${formatTanggal(item.created_at)}</td>
         <td>
-            <button class="ghost-btn" onclick="changeUserPassword(${item.id})">Ubah Password</button>
+            <button class="ghost-btn" onclick="resetUserPassword(${item.id})">Reset Password</button>
             <button class="danger-btn" onclick="deleteUser(${item.id})">Hapus</button>
         </td>
     </tr>
@@ -1586,51 +1586,58 @@
                 statusText.innerText = "Gagal memuat daftar user.";
                 tableBody.innerHTML = `
             <tr>
-                <td colspan="3" class="empty">Terjadi error saat mengambil user.</td>
+                <td colspan="4" class="empty">Terjadi error saat mengambil user.</td>
             </tr>
         `;
             }
         }
-        async function changeUserPassword(userId) {
+
+        async function resetUserPassword(userId) {
             const result = await Swal.fire({
-                title: "Ubah Password User",
-                input: "password",
-                inputLabel: "Password baru",
-                inputPlaceholder: "Minimal 6 karakter",
+                title: "Reset Password User?",
+                text: "Sistem akan membuat password random baru untuk user ini.",
+                icon: "warning",
                 showCancelButton: true,
-                confirmButtonText: "Simpan",
-                cancelButtonText: "Batal"
+                confirmButtonText: "Ya, Reset",
+                cancelButtonText: "Batal",
+                confirmButtonColor: "#0ea5e9"
             });
 
             if (!result.isConfirmed) return;
 
-            const password = String(result.value || "").trim();
-
-            if (password.length < 6) {
-                Swal.fire("Password minimal 6 karakter");
-                return;
-            }
-
             try {
-                const res = await fetch(`/users/${userId}/password`, {
-                    method: "PUT",
+                const res = await fetch(`/users/${userId}/reset-password`, {
+                    method: "POST",
                     headers: {
-                        "Content-Type": "application/json",
                         "x-csrf-token": getCsrfToken()
-                    },
-                    body: JSON.stringify({ password })
+                    }
                 });
 
                 const data = await res.json();
 
                 if (!res.ok) {
-                    Swal.fire(data.message || "Gagal ubah password user");
+                    Swal.fire(data.message || "Gagal reset password user");
                     return;
                 }
 
-                Swal.fire(data.message || "Password berhasil diubah");
+                Swal.fire({
+                    title: "Password Baru",
+                    html: `
+                <p>Username: <b>${escapeHtml(data.username || "-")}</b></p>
+                <p>Password baru:</p>
+                <input id="newPasswordBox" class="swal2-input" value="${escapeHtml(data.newPassword || "")}" readonly>
+            `,
+                    confirmButtonText: "Copy Password",
+                    showCancelButton: true,
+                    cancelButtonText: "Tutup"
+                }).then((copyResult) => {
+                    if (copyResult.isConfirmed) {
+                        navigator.clipboard.writeText(data.newPassword || "");
+                        Swal.fire("Password berhasil dicopy");
+                    }
+                });
             } catch (err) {
-                Swal.fire("Terjadi error server saat ubah password user");
+                Swal.fire("Terjadi error server saat reset password user");
             }
         }
 

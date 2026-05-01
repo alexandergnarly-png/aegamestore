@@ -734,25 +734,19 @@ app.get("/users", requireAdminAuth, async (req, res) => {
     }
 });
 
-app.put("/users/:id/password", requireAdminAuth, requireAdminCsrf, async (req, res) => {
+app.post("/users/:id/reset-password", requireAdminAuth, requireAdminCsrf, async (req, res) => {
     const userId = Number(req.params.id);
-    const { password } = req.body;
 
     if (!Number.isInteger(userId) || userId <= 0) {
         return res.status(400).json({ message: "ID user tidak valid" });
     }
 
-    const cleanPassword = String(password || "").trim();
-
-    if (cleanPassword.length < 6) {
-        return res.status(400).json({ message: "Password minimal 6 karakter" });
-    }
+    const newPassword = crypto.randomBytes(5).toString("hex");
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     try {
-        const hashedPassword = await bcrypt.hash(cleanPassword, 10);
-
         const result = await query(
-            "UPDATE users SET password = $1 WHERE id = $2 RETURNING id",
+            "UPDATE users SET password = $1 WHERE id = $2 RETURNING id, username",
             [hashedPassword, userId]
         );
 
@@ -760,10 +754,14 @@ app.put("/users/:id/password", requireAdminAuth, requireAdminCsrf, async (req, r
             return res.status(404).json({ message: "User tidak ditemukan" });
         }
 
-        return res.json({ message: "Password user berhasil diubah" });
+        return res.json({
+            message: "Password user berhasil direset",
+            username: result.rows[0].username,
+            newPassword
+        });
     } catch (err) {
-        console.error("ERROR UPDATE USER PASSWORD:", err);
-        return res.status(500).json({ message: "Gagal ubah password user" });
+        console.error("ERROR RESET USER PASSWORD:", err);
+        return res.status(500).json({ message: "Gagal reset password user" });
     }
 });
 
