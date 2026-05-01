@@ -1042,6 +1042,13 @@
         >
           Game Key
         </button>
+        <button
+          class="nav-btn"
+          data-section="vouchers"
+          onclick="showSection('vouchers', this)"
+        >
+          Voucher
+        </button>
       </nav>
 
       <div class="sidebar-footer">
@@ -1415,6 +1422,93 @@
           </div>
         </div>
       </section>
+      <section id="section-vouchers" class="admin-section">
+        <div class="card delay-1">
+          <div class="card-header">
+            <div class="card-title-wrap">
+              <h2>Kelola Voucher</h2>
+              <p class="card-subtitle">
+                Buat kode voucher khusus game tertentu, contoh DELTA5K untuk
+                Delta Force.
+              </p>
+            </div>
+            <div class="section-badge">Voucher Manager</div>
+          </div>
+
+          <div class="toolbar">
+            <input type="hidden" id="editingVoucherId" />
+
+            <div class="field">
+              <input
+                type="text"
+                id="voucherCode"
+                placeholder="Kode voucher, contoh: DELTA5K"
+              />
+            </div>
+
+            <div class="field">
+              <input
+                type="text"
+                id="voucherGameName"
+                placeholder="Nama game, contoh: Delta Force"
+              />
+            </div>
+
+            <div class="field">
+              <input
+                type="text"
+                id="voucherDiscount"
+                placeholder="Nominal diskon, contoh: 5000"
+              />
+            </div>
+
+            <div class="field">
+              <input
+                type="text"
+                id="voucherExpiresAt"
+                placeholder="Expired optional, contoh: 2026-12-31"
+              />
+            </div>
+          </div>
+
+          <div class="toolbar">
+            <div class="btn-group">
+              <button id="saveVoucherBtn" onclick="saveVoucher()">
+                Simpan Voucher
+              </button>
+              <button class="ghost-btn" onclick="resetVoucherForm()">
+                Reset Form
+              </button>
+              <button class="ghost-btn" onclick="loadVouchers()">
+                Refresh Voucher
+              </button>
+            </div>
+          </div>
+
+          <div class="info-row">
+            <div class="info" id="voucherStatusText">
+              Memuat daftar voucher...
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 80px">ID</th>
+                  <th>Kode</th>
+                  <th>Game</th>
+                  <th>Diskon</th>
+                  <th>Status</th>
+                  <th>Expired</th>
+                  <th style="width: 220px">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="voucherTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
     </main>
 
     <script>
@@ -1460,6 +1554,10 @@
         if (sectionName === "keys") {
           loadKeys();
           loadKeyProductOptions();
+        }
+
+        if (sectionName === "vouchers") {
+          loadVouchers();
         }
 
         if (sectionName === "dashboard") {
@@ -2485,6 +2583,204 @@ Game Key : ${key || "-"}
           loadKeyProductOptions();
         } catch (err) {
           Swal.fire("Terjadi error server saat mengubah status produk");
+        }
+      }
+
+      function resetVoucherForm() {
+        document.getElementById("editingVoucherId").value = "";
+        document.getElementById("voucherCode").value = "";
+        document.getElementById("voucherGameName").value = "";
+        document.getElementById("voucherDiscount").value = "";
+        document.getElementById("voucherExpiresAt").value = "";
+        document.getElementById("saveVoucherBtn").innerText = "Simpan Voucher";
+      }
+
+      async function loadVouchers() {
+        const statusText = document.getElementById("voucherStatusText");
+        const tableBody = document.getElementById("voucherTableBody");
+
+        statusText.innerText = "Memuat daftar voucher...";
+        tableBody.innerHTML = "";
+
+        try {
+          const res = await fetch("/vouchers");
+
+          if (res.status === 401) {
+            window.location.href = "/ae-auth";
+            return;
+          }
+
+          const data = await res.json();
+
+          if (!Array.isArray(data) || data.length === 0) {
+            statusText.innerText = "Belum ada voucher.";
+            tableBody.innerHTML = `
+        <tr>
+          <td colspan="7" class="empty">Belum ada voucher yang dibuat.</td>
+        </tr>
+      `;
+            return;
+          }
+
+          statusText.innerText = `Total voucher: ${data.length}`;
+
+          tableBody.innerHTML = data
+            .map((item) => {
+              const active = Number(item.active) === 1;
+              const safeCode = JSON.stringify(String(item.code || ""));
+              const safeGameName = JSON.stringify(String(item.game_name || ""));
+              const safeDiscount = Number(item.discount_amount || 0);
+              const safeExpiresAt = JSON.stringify(
+                String(item.expires_at || ""),
+              );
+
+              return `
+          <tr>
+            <td>${item.id}</td>
+            <td><b>${escapeHtml(item.code || "-")}</b></td>
+            <td>${escapeHtml(item.game_name || "-")}</td>
+            <td>${formatRupiah(item.discount_amount || 0)}</td>
+            <td>${active ? '<span class="badge available">Active</span>' : '<span class="badge used">Inactive</span>'}</td>
+            <td>${escapeHtml(item.expires_at || "-")}</td>
+            <td>
+              <button onclick='editVoucher(${item.id}, ${safeCode}, ${safeGameName}, ${safeDiscount}, ${safeExpiresAt})'>Edit</button>
+              <button class="ghost-btn" onclick="toggleVoucherActive(${item.id}, ${active ? 0 : 1})">
+                ${active ? "Nonaktifkan" : "Aktifkan"}
+              </button>
+              <button class="danger-btn" onclick="deleteVoucher(${item.id})">Hapus</button>
+            </td>
+          </tr>
+        `;
+            })
+            .join("");
+        } catch (err) {
+          statusText.innerText = "Gagal memuat daftar voucher.";
+          tableBody.innerHTML = `
+      <tr>
+        <td colspan="7" class="empty">Terjadi error saat mengambil voucher.</td>
+      </tr>
+    `;
+        }
+      }
+
+      function editVoucher(id, code, gameName, discountAmount, expiresAt) {
+        document.getElementById("editingVoucherId").value = id;
+        document.getElementById("voucherCode").value = code;
+        document.getElementById("voucherGameName").value = gameName;
+        document.getElementById("voucherDiscount").value = discountAmount;
+        document.getElementById("voucherExpiresAt").value = expiresAt || "";
+        document.getElementById("saveVoucherBtn").innerText = "Update Voucher";
+      }
+
+      async function saveVoucher() {
+        const code = document.getElementById("voucherCode").value.trim();
+        const gameName = document
+          .getElementById("voucherGameName")
+          .value.trim();
+        const discountAmount = document
+          .getElementById("voucherDiscount")
+          .value.trim();
+        const expiresAt = document
+          .getElementById("voucherExpiresAt")
+          .value.trim();
+
+        if (!code || !gameName || !discountAmount) {
+          Swal.fire("Kode, nama game, dan nominal diskon wajib diisi.");
+          return;
+        }
+
+        try {
+          const res = await fetch("/vouchers", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-csrf-token": getCsrfToken(),
+            },
+            body: JSON.stringify({
+              code,
+              game_name: gameName,
+              discount_amount: Number(discountAmount),
+              expires_at: expiresAt || null,
+            }),
+          });
+
+          const data = await res.json();
+
+          if (res.status === 401) {
+            window.location.href = "/ae-auth";
+            return;
+          }
+
+          if (!res.ok) {
+            Swal.fire(data.message || "Gagal menyimpan voucher");
+            return;
+          }
+
+          Swal.fire(data.message || "Voucher berhasil disimpan");
+          resetVoucherForm();
+          loadVouchers();
+        } catch (err) {
+          Swal.fire("Terjadi error server saat menyimpan voucher");
+        }
+      }
+
+      async function toggleVoucherActive(id, active) {
+        try {
+          const res = await fetch(`/vouchers/${id}/toggle-active`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              "x-csrf-token": getCsrfToken(),
+            },
+            body: JSON.stringify({ active }),
+          });
+
+          const data = await res.json();
+
+          if (!res.ok) {
+            Swal.fire(data.message || "Gagal mengubah status voucher");
+            return;
+          }
+
+          Swal.fire(data.message || "Status voucher berhasil diubah");
+          loadVouchers();
+        } catch (err) {
+          Swal.fire("Terjadi error server saat mengubah status voucher");
+        }
+      }
+
+      async function deleteVoucher(id) {
+        const result = await Swal.fire({
+          title: "Hapus Voucher?",
+          text: "Voucher yang dihapus tidak bisa digunakan lagi.",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "Ya, Hapus",
+          cancelButtonText: "Batal",
+          confirmButtonColor: "#fb7185",
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+          const res = await fetch(`/vouchers/${id}`, {
+            method: "DELETE",
+            headers: {
+              "x-csrf-token": getCsrfToken(),
+            },
+          });
+
+          const data = await res.json();
+
+          if (!res.ok) {
+            Swal.fire(data.message || "Gagal menghapus voucher");
+            return;
+          }
+
+          Swal.fire(data.message || "Voucher berhasil dihapus");
+          loadVouchers();
+        } catch (err) {
+          Swal.fire("Terjadi error server saat menghapus voucher");
         }
       }
 
