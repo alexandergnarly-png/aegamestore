@@ -114,6 +114,7 @@ const gameImages = {
 const fallbackImage = "https://via.placeholder.com/400x220?text=Game";
 
 let selectedGame = "";
+let currentCategory = "all";
 
 const gameGrid = document.getElementById("gameGrid");
 const brandSelect = document.getElementById("brand");
@@ -164,21 +165,55 @@ async function loadAllProducts() {
   }
 }
 
+function isToolsGame(gameName) {
+  const name = String(gameName || "").toLowerCase();
+
+  return (
+    name.includes("gbox") ||
+    name.includes("g box") ||
+    name.includes("tools") ||
+    name.includes("tool")
+  );
+}
+
+function getVisibleGames() {
+  const uniqueGames = [...new Set(allProducts.map((item) => item.game))];
+
+  if (currentCategory === "Tools") {
+    return uniqueGames.filter((game) => isToolsGame(game));
+  }
+
+  if (currentCategory === "Mobile") {
+    return uniqueGames.filter((game) => !isToolsGame(game));
+  }
+
+  return uniqueGames;
+}
+
 function renderGames() {
   gameGrid.innerHTML = "";
 
-  const uniqueGames = [...new Set(allProducts.map((item) => item.game))];
+  const visibleGames = getVisibleGames();
 
-  uniqueGames.forEach((game) => {
+  if (visibleGames.length === 0) {
+    gameGrid.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align: center; color: #64748b; padding: 24px;">
+        Tidak ada game di kategori ini.
+      </div>
+    `;
+    return;
+  }
+
+  visibleGames.forEach((game) => {
     const card = document.createElement("div");
     card.className = "game-card";
 
     const imageUrl = gameImages[game] || fallbackImage;
 
     card.innerHTML = `
-            <img src="${imageUrl}" alt="${game}" onerror="this.src='${fallbackImage}'">
-            <span>${game}</span>
-        `;
+      <img src="${imageUrl}" alt="${game}" onerror="this.src='${fallbackImage}'">
+      <span>${game}</span>
+    `;
 
     if (game === selectedGame) {
       card.classList.add("active");
@@ -191,6 +226,7 @@ function renderGames() {
     gameGrid.appendChild(card);
   });
 }
+
 function openOrderModal(game) {
   selectedGame = game;
   renderGames();
@@ -450,44 +486,19 @@ setInterval(showSocialProof, 20000);
 
 // --- FILTER CATEGORY ---
 function filterCategory(cat, btnElement) {
+  currentCategory = cat || "all";
+
   document
     .querySelectorAll(".pill")
     .forEach((btn) => btn.classList.remove("active"));
 
-  if (btnElement) btnElement.classList.add("active");
+  if (btnElement) {
+    btnElement.classList.add("active");
+  }
 
-  const cards = document.querySelectorAll(".game-card");
-
-  cards.forEach((card) => {
-    const name = card.querySelector("span").innerText.toLowerCase();
-
-    if (cat === "all") {
-      card.style.display = "flex";
-      return;
-    }
-
-    if (cat === "Mobile") {
-      const isTools =
-        name.includes("gbox") ||
-        name.includes("g box") ||
-        name.includes("tools") ||
-        name.includes("tool");
-
-      card.style.display = isTools ? "none" : "flex";
-      return;
-    }
-
-    if (cat === "Tools") {
-      const isTools =
-        name.includes("gbox") ||
-        name.includes("g box") ||
-        name.includes("tools") ||
-        name.includes("tool");
-
-      card.style.display = isTools ? "flex" : "none";
-    }
-  });
+  renderGames();
 }
+
 document.addEventListener("DOMContentLoaded", () => {
   const closeBtn = document.getElementById("closeOrderModalBtn");
   const modal = document.getElementById("orderModal");
@@ -496,10 +507,12 @@ document.addEventListener("DOMContentLoaded", () => {
     closeBtn.addEventListener("click", closeOrderModal);
   }
 
-  document.querySelectorAll(".pill").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      filterCategory(btn.dataset.category, btn);
-    });
+  document.addEventListener("click", (e) => {
+    const pill = e.target.closest(".pill");
+
+    if (!pill) return;
+
+    filterCategory(pill.dataset.category, pill);
   });
 
   document.addEventListener("keydown", (e) => {

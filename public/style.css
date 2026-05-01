@@ -1136,19 +1136,9 @@ button#buyBtn:active {
 }
 .filter-pills {
   position: relative;
-  z-index: 50;
+  z-index: 5;
 }
 
 .pill {
-  position: relative;
-  z-index: 51;
   pointer-events: auto;
-}
-
-.sakura {
-  pointer-events: none;
-}
-
-#preloader.fade-out {
-  pointer-events: none;
 }
