@@ -38,11 +38,12 @@ body {
 
 /* Watercolor Blobs Effects */
 .watercolor-blob {
-  position: absolute;
+  position: fixed;
   filter: blur(80px);
   z-index: -1;
   opacity: 0.6;
   border-radius: 50%;
+  pointer-events: none;
 }
 
 .blob-1 {
