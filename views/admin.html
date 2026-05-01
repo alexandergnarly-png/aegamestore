@@ -93,11 +93,9 @@
       }
 
       /* ===== SIDEBAR ===== */
-      /* ===== SIDEBAR ===== */
       .sidebar {
         width: 260px;
-        min-width: 260px; /* Tambahkan ini agar lebar tidak ditekan konten */
-        /* Hapus baris flex: 0 0 260px; jika ada */
+        min-width: 260px;
         background: rgba(255, 255, 255, 0.6);
         backdrop-filter: blur(24px);
         border-right: 1px solid var(--border-color);
@@ -108,10 +106,7 @@
         position: sticky;
         top: 0;
         height: 100vh;
-        transition:
-          min-width 0.3s ease,
-          /* Ubah transisi ke min-width dan width */ width 0.3s ease,
-          padding 0.3s ease;
+        transition: none;
         overflow-x: hidden;
         z-index: 50;
       }
@@ -349,6 +344,8 @@
         font-size: 14px;
         font-weight: 800;
         color: var(--text-main);
+        min-width: 190px;
+        font-variant-numeric: tabular-nums;
       }
 
       .nav-actions {
@@ -849,6 +846,7 @@
       @media (max-width: 1024px) {
         .sidebar {
           width: 88px;
+          min-width: 88px;
           padding: 24px 14px;
         }
 
