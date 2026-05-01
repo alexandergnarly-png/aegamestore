@@ -192,6 +192,14 @@ const orderLimiter = rateLimit({
   },
 });
 
+const orderCheckLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 30,
+  message: {
+    message: "Terlalu banyak cek order, coba lagi nanti",
+  },
+});
+
 const userAuthLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 20,
@@ -684,7 +692,7 @@ app.post("/midtrans-notification", async (req, res) => {
   }
 });
 
-app.get("/order/:id", async (req, res) => {
+app.get("/order/:id", orderCheckLimiter, async (req, res) => {
   const orderId = String(req.params.id || "").trim();
   const token = String(req.cookies[`order_token_${orderId}`] || "").trim();
 
@@ -1441,6 +1449,21 @@ app.get("/admin-login", (req, res) => {
 // --- API USER REGISTER & LOGIN ---
 app.post("/register", registerLimiter, async (req, res) => {
   const { username, password } = req.body;
+  const cleanUsername = String(username || "").trim();
+  const cleanPassword = String(password || "");
+  const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
+
+  if (!usernameRegex.test(cleanUsername)) {
+    return res.status(400).json({
+      message: "Username hanya boleh huruf, angka, underscore, 3-20 karakter",
+    });
+  }
+
+  if (cleanPassword.length < 6 || cleanPassword.length > 72) {
+    return res.status(400).json({
+      message: "Password harus 6 sampai 72 karakter",
+    });
+  }
   if (!username || !password || username.length < 3 || password.length < 6) {
     return res
       .status(400)
@@ -1453,7 +1476,7 @@ app.post("/register", registerLimiter, async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     await query("INSERT INTO users (username, password) VALUES ($1, $2)", [
-      username,
+      cleanUsername,
       hashedPassword,
     ]);
     return res.json({ message: "Pendaftaran berhasil! Silakan login." });
