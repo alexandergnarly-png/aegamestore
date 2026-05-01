@@ -1355,3 +1355,163 @@ button#buyBtn:active {
     width: 100%;
   }
 }
+.hero-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 22px;
+  padding: 13px 22px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--ocean-deep), var(--ocean-light));
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 14px;
+  box-shadow: 0 10px 22px rgba(14, 165, 233, 0.25);
+}
+
+@media (max-width: 640px) {
+  .site-header {
+    position: sticky;
+    top: 0;
+  }
+
+  .header-inner {
+    padding: 12px 14px;
+    gap: 10px;
+  }
+
+  .brand {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .brand-logo {
+    width: 44px;
+    height: 44px;
+    font-size: 22px;
+  }
+
+  .brand-copy strong {
+    font-size: 18px;
+  }
+
+  .brand-copy span {
+    font-size: 12px;
+  }
+
+  .header-actions {
+    width: 100%;
+    margin-left: 0;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  #userMenu > div {
+    justify-content: center;
+  }
+
+  #userMenu .auth-btn {
+    padding: 8px 11px !important;
+    font-size: 12px !important;
+  }
+
+  .main-nav {
+    padding-top: 8px;
+    gap: 8px;
+  }
+
+  .nav-link {
+    font-size: 12px;
+    padding: 8px 13px;
+  }
+
+  .page {
+    padding-top: 26px;
+  }
+
+  .hero {
+    margin-bottom: 28px;
+  }
+
+  .hero-badge {
+    font-size: 10px;
+    padding: 7px 13px;
+    margin-bottom: 16px;
+  }
+
+  .hero h1 {
+    font-size: 34px;
+    line-height: 1.16;
+    margin-bottom: 14px;
+  }
+
+  .hero p {
+    font-size: 15px;
+    line-height: 1.55;
+  }
+
+  .hero-cta {
+    margin-top: 18px;
+    padding: 12px 18px;
+    font-size: 13px;
+  }
+
+  .promo-container {
+    margin-bottom: 28px;
+    padding: 0 18px;
+  }
+
+  .promo-slider {
+    height: 132px;
+    border-radius: 22px;
+  }
+
+  .promo-slide {
+    padding: 0 22px;
+  }
+
+  .promo-content span {
+    font-size: 10px;
+  }
+
+  .promo-content h3 {
+    font-size: 23px;
+    line-height: 1.15;
+  }
+
+  .promo-content p {
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .floating-admin-btn {
+    width: 58px;
+    height: 58px;
+    min-width: 58px;
+    right: 16px;
+    bottom: 18px;
+    padding: 0;
+    justify-content: center;
+    border-radius: 50%;
+  }
+
+  .floating-admin-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+  }
+
+  .floating-admin-content,
+  .floating-admin-badge {
+    display: none;
+  }
+
+  .shop-card {
+    padding-top: 26px;
+  }
+
+  .section-head h2 {
+    font-size: 28px;
+  }
+}
