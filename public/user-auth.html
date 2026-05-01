@@ -287,7 +287,8 @@
           <button
             type="button"
             class="btn-primary"
-            onclick="openChangePassword()">
+            onclick="openChangePassword()"
+          >
             Ganti Password
           </button>
         </div>
@@ -443,6 +444,8 @@
             checkLoginStatus();
             document.getElementById("changePasswordBox").style.display =
               "block";
+            btn.innerText = originalText;
+            btn.disabled = false;
           }, 1500); // Arahkan kembali ke beranda setelah login
         } catch {
           Swal.fire({
