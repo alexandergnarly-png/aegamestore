@@ -1138,6 +1138,7 @@
                     <table>
                         <thead>
                             <tr>
+                                <th style="width: 50px;">Pilih</th>
                                 <th>Order ID</th>
                                 <th>Nama</th>
                                 <th>Kontak</th>
@@ -1596,7 +1597,7 @@
                 const checked = selectedOrderIds.has(String(item.id || "")) ? "checked" : "";
 
                 return `
-                    <<tr>
+                    <tr>
     <td>
         <input type="checkbox"
             ${checked}
