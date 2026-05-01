@@ -496,6 +496,12 @@ document.addEventListener("DOMContentLoaded", () => {
     closeBtn.addEventListener("click", closeOrderModal);
   }
 
+  document.querySelectorAll(".pill").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      filterCategory(btn.dataset.category, btn);
+    });
+  });
+
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && modal && modal.classList.contains("show")) {
       closeOrderModal();

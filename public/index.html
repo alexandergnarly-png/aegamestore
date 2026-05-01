@@ -129,17 +129,13 @@
           </div>
 
           <div class="filter-pills">
-            <button
-              class="pill active"
-              onclick="filterCategory('all', this)"
-              data-i18n="filterAll"
-            >
+            <button type="button" class="pill active" data-category="all">
               Semua
             </button>
-            <button class="pill" onclick="filterCategory('Mobile', this)">
+            <button type="button" class="pill" data-category="Mobile">
               Mobile
             </button>
-            <button class="pill" onclick="filterCategory('Tools', this)">
+            <button type="button" class="pill" data-category="Tools">
               Tools / GBox
             </button>
           </div>
@@ -275,8 +271,7 @@
     </footer>
 
     <!-- SEMUA SCRIPT & STYLE DIPOSISIKAN DENGAN BENAR DI BAWAH FOOTER -->
-    <script src="script.js?v=3"></script>
-
+    <script src="script.js?v=4"></script>
     <style>
       /* Floating Button Admin */
       /* Floating Button Admin */
