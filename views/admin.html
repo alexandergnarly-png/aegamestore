@@ -274,12 +274,23 @@
         padding: 14px 0;
         font-size: 0;
       }
+      body:not(.sidebar-collapsed) .sidebar {
+        width: 260px;
+        min-width: 260px;
+        flex: 0 0 260px;
+      }
+
+      body.sidebar-collapsed .sidebar {
+        width: 88px;
+        min-width: 88px;
+        flex: 0 0 88px;
+      }
 
       /* ===== MAIN CONTENT ===== */
       .page {
-        flex: 1 1 0%; /* Ubah flex: 1; menjadi flex: 1 1 0%; */
-        min-width: 0; /* PENTING: Mencegah flex item lebih lebar dari container */
-        width: 100%;
+        flex: 1 1 auto;
+        min-width: 0;
+        width: auto;
         max-width: none;
         margin: 0;
         padding: 24px 32px 60px;
@@ -290,7 +301,7 @@
 
       .admin-section {
         display: none;
-        animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation: none;
       }
 
       .admin-section.active {
@@ -373,7 +384,7 @@
         border-radius: 50%;
         background: #0ea5e9;
         box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.2);
-        animation: pulse 2s infinite;
+        animation: none;
       }
 
       @keyframes pulse {
@@ -841,54 +852,6 @@
 
       .delay-1 {
         animation-delay: 0.1s;
-      }
-
-      @media (max-width: 1024px) {
-        .sidebar {
-          width: 88px;
-          min-width: 88px;
-          padding: 24px 14px;
-        }
-
-        .sidebar-text {
-          display: none;
-        }
-
-        .nav-btn,
-        .sidebar-logout {
-          justify-content: center;
-          padding: 14px 0;
-          font-size: 0;
-        }
-
-        .nav-btn::before,
-        .sidebar-logout::before {
-          font-size: 18px;
-        }
-
-        .nav-btn[data-section="dashboard"]::before {
-          content: "🏠";
-        }
-
-        .nav-btn[data-section="products"]::before {
-          content: "📦";
-        }
-
-        .nav-btn[data-section="orders"]::before {
-          content: "🧾";
-        }
-
-        .nav-btn[data-section="keys"]::before {
-          content: "🔑";
-        }
-
-        .sidebar-logout::before {
-          content: "⎋";
-        }
-
-        .sidebar-toggle {
-          display: flex;
-        }
       }
 
       @media (max-width: 768px) {
@@ -2549,7 +2512,6 @@ Game Key : ${key || "-"}
         const timeString = now.toLocaleTimeString("id-ID", {
           hour: "2-digit",
           minute: "2-digit",
-          second: "2-digit",
         });
 
         const greetingEl = document.getElementById("adminGreeting");
@@ -2559,7 +2521,7 @@ Game Key : ${key || "-"}
         if (clockEl) clockEl.innerText = "Waktu lokal: " + timeString;
       }
 
-      setInterval(updateClock, 1000); // Update setiap detik
+      setInterval(updateClock, 60000); // Update setiap detik
       updateClock(); // Jalankan pertama kali
       // ----------------------------------------------
     </script>
