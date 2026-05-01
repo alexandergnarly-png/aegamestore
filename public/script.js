@@ -300,7 +300,6 @@ async function buy() {
     });
 
     const data = await res.json();
-
     if (res.status === 401) {
       Swal.fire({
         icon: "warning",
