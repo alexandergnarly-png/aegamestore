@@ -343,7 +343,7 @@ async function checkLoginStatus() {
         <div class="auth-btn" style="background: rgba(255,255,255,0.8); color: #0284c7; cursor: default; box-shadow: none; border: 1px solid #bae6fd;">
             👤 Halo, <strong style="margin-left: 4px;">${data.username}</strong>
         </div>
-        <a href="/auth" class="auth-btn" style="background: rgba(255,255,255,0.9); color: #0284c7; border: 1px solid #bae6fd; padding: 8px 12px; text-decoration: none;">
+        <a href="/account.html" class="auth-btn" style="background: rgba(255,255,255,0.9); color: #0284c7; border: 1px solid #bae6fd; padding: 8px 12px; text-decoration: none;">
             Ganti Password
         </a>
         <button onclick="logoutUser()" class="auth-btn" style="background: linear-gradient(135deg, #fb7185, #e11d48); border: none; padding: 8px 12px;">

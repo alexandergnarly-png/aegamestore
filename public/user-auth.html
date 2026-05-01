@@ -280,18 +280,6 @@
             Sudah punya akun? <span onclick="toggleForm()">Masuk di sini</span>
           </div>
         </div>
-        <div id="changePasswordBox" style="display: none; margin-top: 18px">
-          <p style="font-size: 13px; color: #475569; margin-bottom: 8px">
-            Sudah login? Kamu bisa ubah password akun di sini.
-          </p>
-          <button
-            type="button"
-            class="btn-primary"
-            onclick="openChangePassword()"
-          >
-            Ganti Password
-          </button>
-        </div>
         <div style="margin-top: 20px; font-size: 12px">
           <a href="/" style="color: #94a3b8; text-decoration: none"
             >← Kembali ke Beranda</a
@@ -441,11 +429,7 @@
             timer: 1500,
           });
           setTimeout(() => {
-            checkLoginStatus();
-            document.getElementById("changePasswordBox").style.display =
-              "block";
-            btn.innerText = originalText;
-            btn.disabled = false;
+            window.location.href = "/";
           }, 1500); // Arahkan kembali ke beranda setelah login
         } catch {
           Swal.fire({
