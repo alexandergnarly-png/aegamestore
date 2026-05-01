@@ -613,6 +613,67 @@ app.post("/vouchers", requireAdminAuth, requireAdminCsrf, async (req, res) => {
   }
 });
 
+app.post("/voucher-preview", async (req, res) => {
+  const loggedInUser = getLoggedInUserFromRequest(req);
+
+  if (!loggedInUser) {
+    return res.status(401).json({
+      message: "Kamu harus login dulu untuk memakai voucher",
+    });
+  }
+
+  const cleanProductId = Number(req.body.product_id);
+  const cleanVoucherCode = normalizeVoucherCode(req.body.voucher_code);
+
+  if (!Number.isInteger(cleanProductId) || cleanProductId <= 0) {
+    return res.status(400).json({ message: "Produk tidak valid" });
+  }
+
+  try {
+    const productResult = await query(
+      "SELECT * FROM products WHERE id = $1 AND active = 1 LIMIT 1",
+      [cleanProductId],
+    );
+
+    const productRow = productResult.rows[0];
+
+    if (!productRow) {
+      return res.status(404).json({
+        message: "Produk tidak ditemukan atau tidak aktif",
+      });
+    }
+
+    const originalPrice = Number(productRow.price);
+
+    const voucherCheck = await getVoucherDiscount({
+      gameName: productRow.game,
+      voucherCode: cleanVoucherCode,
+      productPrice: originalPrice,
+    });
+
+    if (!voucherCheck.valid) {
+      return res.status(400).json({ message: voucherCheck.message });
+    }
+
+    const discountAmount = voucherCheck.discountAmount;
+    const netPrice = Math.max(originalPrice - discountAmount, 1000);
+    const finalPrice = calculateQrisGrossPrice(netPrice);
+    const paymentFee = finalPrice - netPrice;
+
+    return res.json({
+      message: voucherCheck.message || "Preview harga berhasil",
+      voucher_code: voucherCheck.code,
+      original_price: originalPrice,
+      discount_amount: discountAmount,
+      net_price: netPrice,
+      payment_fee: paymentFee,
+      final_price: finalPrice,
+    });
+  } catch (err) {
+    console.error("ERROR VOUCHER PREVIEW:", err);
+    return res.status(500).json({ message: "Gagal cek voucher" });
+  }
+});
 // buat order + pembayaran Midtrans
 app.post("/create-order", orderLimiter, async (req, res) => {
   const loggedInUser = getLoggedInUserFromRequest(req);

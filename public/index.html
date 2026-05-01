@@ -201,6 +201,40 @@
             <input type="text" id="contact" placeholder="No. WA / Email" />
           </div>
         </div>
+        <div class="form-group">
+          <label for="voucherCodeInput">Kode Voucher</label>
+          <div class="voucher-row">
+            <input
+              type="text"
+              id="voucherCodeInput"
+              placeholder="Contoh: DELTA5K"
+              autocomplete="off"
+            />
+            <button type="button" id="checkVoucherBtn" onclick="checkVoucher()">
+              Cek
+            </button>
+          </div>
+          <small id="voucherMessage" class="voucher-message"></small>
+        </div>
+
+        <div class="price-breakdown" id="priceBreakdown" style="display: none">
+          <div>
+            <span>Harga Produk</span>
+            <b id="originalPriceText">Rp 0</b>
+          </div>
+          <div>
+            <span>Diskon Voucher</span>
+            <b id="discountText">-Rp 0</b>
+          </div>
+          <div>
+            <span>Fee QRIS</span>
+            <b id="paymentFeeText">Rp 0</b>
+          </div>
+          <div class="price-total">
+            <span>Total Bayar</span>
+            <b id="finalPriceText">Rp 0</b>
+          </div>
+        </div>
 
         <div class="modal-summary">
           <div>

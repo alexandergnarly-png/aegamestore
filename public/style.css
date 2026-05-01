@@ -1295,3 +1295,63 @@ button#buyBtn:active {
     font-size: 22px;
   }
 }
+.voucher-row {
+  display: flex;
+  gap: 10px;
+}
+
+.voucher-row input {
+  flex: 1;
+}
+
+.voucher-row button {
+  flex: 0 0 auto;
+  padding: 12px 16px;
+}
+
+.voucher-message {
+  display: block;
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.voucher-message.success {
+  color: #059669;
+}
+
+.voucher-message.error {
+  color: #e11d48;
+}
+
+.price-breakdown {
+  margin: 14px 0;
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(240, 249, 255, 0.85);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+}
+
+.price-breakdown div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.price-breakdown .price-total {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(14, 165, 233, 0.35);
+  font-size: 16px;
+}
+@media (max-width: 480px) {
+  .voucher-row {
+    flex-direction: column;
+  }
+
+  .voucher-row button {
+    width: 100%;
+  }
+}

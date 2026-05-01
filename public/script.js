@@ -115,6 +115,8 @@ const fallbackImage = "https://via.placeholder.com/400x220?text=Game";
 
 let selectedGame = "";
 let currentCategory = "all";
+let selectedProductId = null;
+let appliedVoucherCode = "";
 
 const gameGrid = document.getElementById("gameGrid");
 const brandSelect = document.getElementById("brand");
@@ -234,6 +236,9 @@ function renderGames() {
 }
 
 async function openOrderModal(game) {
+  const voucherInput = document.getElementById("voucherCodeInput");
+  if (voucherInput) voucherInput.value = "";
+  resetVoucherPreview();
   try {
     const res = await fetch("/api/user/me");
     const data = await res.json();
@@ -387,6 +392,10 @@ async function buy() {
         product_id: selectedProduct.id,
         name,
         contact,
+        voucher_code:
+          appliedVoucherCode ||
+          document.getElementById("voucherCodeInput")?.value ||
+          "",
       }),
     });
 
@@ -531,6 +540,92 @@ function filterCategory(cat, btnElement) {
   renderGames();
 }
 
+function formatRupiah(value) {
+  return "Rp " + Number(value || 0).toLocaleString("id-ID");
+}
+
+function resetVoucherPreview() {
+  appliedVoucherCode = "";
+
+  const voucherMessage = document.getElementById("voucherMessage");
+  const priceBreakdown = document.getElementById("priceBreakdown");
+
+  if (voucherMessage) {
+    voucherMessage.innerText = "";
+    voucherMessage.className = "voucher-message";
+  }
+
+  if (priceBreakdown) {
+    priceBreakdown.style.display = "none";
+  }
+}
+
+async function checkVoucher() {
+  const voucherInput = document.getElementById("voucherCodeInput");
+  const voucherMessage = document.getElementById("voucherMessage");
+  const priceBreakdown = document.getElementById("priceBreakdown");
+
+  const voucherCode = String(voucherInput?.value || "").trim();
+
+  if (!selectedProductId) {
+    voucherMessage.innerText = "Pilih produk dulu.";
+    voucherMessage.className = "voucher-message error";
+    return;
+  }
+
+  if (!voucherCode) {
+    resetVoucherPreview();
+    voucherMessage.innerText = "Kode voucher kosong.";
+    voucherMessage.className = "voucher-message error";
+    return;
+  }
+
+  try {
+    const res = await fetch("/voucher-preview", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        product_id: selectedProductId,
+        voucher_code: voucherCode,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      appliedVoucherCode = "";
+      voucherMessage.innerText = data.message || "Voucher tidak valid.";
+      voucherMessage.className = "voucher-message error";
+      if (priceBreakdown) priceBreakdown.style.display = "none";
+      return;
+    }
+
+    appliedVoucherCode = data.voucher_code || "";
+
+    document.getElementById("originalPriceText").innerText = formatRupiah(
+      data.original_price,
+    );
+    document.getElementById("discountText").innerText =
+      "- " + formatRupiah(data.discount_amount);
+    document.getElementById("paymentFeeText").innerText = formatRupiah(
+      data.payment_fee,
+    );
+    document.getElementById("finalPriceText").innerText = formatRupiah(
+      data.final_price,
+    );
+
+    voucherMessage.innerText = data.message || "Voucher berhasil digunakan.";
+    voucherMessage.className = "voucher-message success";
+    priceBreakdown.style.display = "block";
+  } catch (err) {
+    appliedVoucherCode = "";
+    voucherMessage.innerText = "Gagal cek voucher. Coba lagi.";
+    voucherMessage.className = "voucher-message error";
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const closeBtn = document.getElementById("closeOrderModalBtn");
   const modal = document.getElementById("orderModal");
@@ -550,6 +645,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && modal && modal.classList.contains("show")) {
       closeOrderModal();
+      resetVoucherPreview();
     }
   });
 });
