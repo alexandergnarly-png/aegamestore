@@ -1076,6 +1076,11 @@ app.post("/keys/bulk", requireAdminAuth, requireAdminCsrf, async (req, res) => {
       message: "Daftar key tidak valid",
     });
   }
+  if (keys.length > 500) {
+    return res.status(400).json({
+      message: "Maksimal 500 key sekali upload",
+    });
+  }
 
   const cleanKeys = [
     ...new Set(
@@ -1496,11 +1501,15 @@ app.post("/user-login", userAuthLimiter, async (req, res) => {
     );
     const user = result.rows[0];
 
-    if (!user)
-      return res.status(400).json({ message: "Username tidak ditemukan" });
+    if (!user) {
+      return res.status(400).json({ message: "Username atau password salah" });
+    }
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Password salah!" });
+
+    if (!isMatch) {
+      return res.status(400).json({ message: "Username atau password salah" });
+    }
 
     // Buat "tiket masuk" (Token) untuk user
     const token = jwt.sign(
@@ -1512,8 +1521,10 @@ app.post("/user-login", userAuthLimiter, async (req, res) => {
     // Simpan tiket di cookie browser
     res.cookie("user_auth", token, {
       httpOnly: true,
+      sameSite: "strict",
       secure: process.env.NODE_ENV === "production",
-      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 hari
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+      path: "/",
     });
 
     return res.json({ message: "Login berhasil!" });
