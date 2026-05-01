@@ -249,7 +249,9 @@
                     Sudah punya akun? <span onclick="toggleForm()">Masuk di sini</span>
                 </div>
             </div>
-
+            <div id="changePasswordBox" style="display:none; margin-top: 18px;">
+                <button type="button" onclick="openChangePassword()">Ganti Password</button>
+            </div>
             <div style="margin-top: 20px; font-size: 12px;">
                 <a href="/" style="color: #94a3b8; text-decoration: none;">← Kembali ke Beranda</a>
             </div>
@@ -258,6 +260,67 @@
 
     <script>
         // Fitur Ganti Form Login/Register
+        async function checkLoginStatus() {
+            try {
+                const res = await fetch("/api/user/me");
+                const data = await res.json();
+
+                const box = document.getElementById("changePasswordBox");
+                if (box && data.loggedIn) {
+                    box.style.display = "block";
+                }
+            } catch (err) { }
+        }
+
+        async function openChangePassword() {
+            const result = await Swal.fire({
+                title: "Ganti Password",
+                html: `
+            <input id="oldPasswordInput" type="password" class="swal2-input" placeholder="Password lama / random">
+            <input id="newPasswordInput" type="password" class="swal2-input" placeholder="Password baru">
+        `,
+                showCancelButton: true,
+                confirmButtonText: "Simpan",
+                cancelButtonText: "Batal",
+                confirmButtonColor: "#0ea5e9",
+                preConfirm: () => {
+                    const oldPassword = document.getElementById("oldPasswordInput").value.trim();
+                    const newPassword = document.getElementById("newPasswordInput").value.trim();
+
+                    if (!oldPassword || newPassword.length < 6) {
+                        Swal.showValidationMessage("Isi password lama dan password baru minimal 6 karakter");
+                        return false;
+                    }
+
+                    return { oldPassword, newPassword };
+                }
+            });
+
+            if (!result.isConfirmed) return;
+
+            try {
+                const res = await fetch("/user/change-password", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(result.value)
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    Swal.fire("Gagal", data.message || "Gagal ganti password", "error");
+                    return;
+                }
+
+                Swal.fire("Berhasil", "Password berhasil diganti. Silakan pakai password baru untuk login berikutnya.", "success");
+            } catch (err) {
+                Swal.fire("Error", "Terjadi error server", "error");
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", checkLoginStatus);
         function toggleForm() {
             const loginForm = document.getElementById('loginForm');
             const registerForm = document.getElementById('registerForm');

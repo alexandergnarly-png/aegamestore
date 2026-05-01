@@ -1352,6 +1352,54 @@ app.post("/user-login", async (req, res) => {
     }
 });
 
+app.post("/user/change-password", async (req, res) => {
+    const token = req.cookies.user_auth;
+    const { oldPassword, newPassword } = req.body;
+
+    if (!token) {
+        return res.status(401).json({ message: "Kamu harus login dulu" });
+    }
+
+    const cleanOldPassword = String(oldPassword || "").trim();
+    const cleanNewPassword = String(newPassword || "").trim();
+
+    if (cleanNewPassword.length < 6) {
+        return res.status(400).json({ message: "Password baru minimal 6 karakter" });
+    }
+
+    try {
+        const decoded = jwt.verify(token, jwtSecret);
+
+        const result = await query(
+            "SELECT * FROM users WHERE id = $1 LIMIT 1",
+            [decoded.id]
+        );
+
+        const user = result.rows[0];
+
+        if (!user) {
+            return res.status(404).json({ message: "User tidak ditemukan" });
+        }
+
+        const isOldPasswordCorrect = await bcrypt.compare(cleanOldPassword, user.password);
+
+        if (!isOldPasswordCorrect) {
+            return res.status(400).json({ message: "Password lama salah" });
+        }
+
+        const hashedPassword = await bcrypt.hash(cleanNewPassword, 10);
+
+        await query(
+            "UPDATE users SET password = $1 WHERE id = $2",
+            [hashedPassword, decoded.id]
+        );
+
+        return res.json({ message: "Password berhasil diganti" });
+    } catch (err) {
+        return res.status(401).json({ message: "Sesi login tidak valid, silakan login ulang" });
+    }
+});
+
 app.post("/user-logout", (req, res) => {
     res.clearCookie("user_auth");
     return res.json({ message: "Logout berhasil" });
