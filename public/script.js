@@ -55,6 +55,16 @@ const translations = {
     invalidVoucherMsg: "Voucher tidak valid.",
     voucherCheckFailedMsg: "Gagal cek voucher. Coba lagi.",
     voucherSuccessMsg: "Voucher berhasil digunakan.",
+    safePaymentTitle: "Metode Pembayaran Aman",
+    privacyPolicyLink: "Kebijakan Privasi",
+    termsPolicyLink: "Syarat & Ketentuan",
+    privacyTitle: "Kebijakan Privasi",
+    privacyContent:
+      "AE Game Store menjaga data pengguna seperti username, kontak order, dan riwayat transaksi hanya untuk keperluan pemrosesan pesanan, pengiriman produk, dan bantuan pelanggan. Kami tidak menjual data pengguna kepada pihak lain.",
+    termsTitle: "Syarat & Ketentuan",
+    termsContent:
+      "Dengan menggunakan AE Game Store, buyer wajib mengisi data order dengan benar. Produk digital yang sudah berhasil dikirim tidak dapat dibatalkan kecuali ada kesalahan dari sistem. Pembayaran diproses melalui payment gateway yang tersedia.",
+    policyOk: "Mengerti",
   },
   en: {
     selectProduct: "Select Product",
@@ -111,6 +121,16 @@ const translations = {
     invalidVoucherMsg: "Invalid voucher.",
     voucherCheckFailedMsg: "Failed to check voucher. Please try again.",
     voucherSuccessMsg: "Voucher applied successfully.",
+    safePaymentTitle: "Secure Payment Methods",
+    privacyPolicyLink: "Privacy Policy",
+    termsPolicyLink: "Terms & Conditions",
+    privacyTitle: "Privacy Policy",
+    privacyContent:
+      "AE Game Store protects user data such as username, order contact, and transaction history only for order processing, product delivery, and customer support. We do not sell user data to third parties.",
+    termsTitle: "Terms & Conditions",
+    termsContent:
+      "By using AE Game Store, buyers must provide correct order information. Digital products that have been successfully delivered cannot be cancelled unless there is a system error. Payments are processed through the available payment gateway.",
+    policyOk: "Got it",
   },
 };
 
@@ -622,6 +642,32 @@ function showSocialProof() {
   sp.classList.add("show");
 
   setTimeout(() => sp.classList.remove("show"), 5000);
+}
+
+function showPrivacyPolicy() {
+  const t = translations[currentLanguage];
+
+  Swal.fire({
+    title: t.privacyTitle,
+    text: t.privacyContent,
+    icon: "info",
+    confirmButtonText: t.policyOk,
+    confirmButtonColor: "#0ea5e9",
+    background: "#f0f9ff",
+  });
+}
+
+function showTermsPolicy() {
+  const t = translations[currentLanguage];
+
+  Swal.fire({
+    title: t.termsTitle,
+    text: t.termsContent,
+    icon: "info",
+    confirmButtonText: t.policyOk,
+    confirmButtonColor: "#0ea5e9",
+    background: "#f0f9ff",
+  });
 }
 
 loadRecentPurchases();

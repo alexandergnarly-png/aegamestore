@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AE Game Store 🌊⛩️</title>
-    <link rel="stylesheet" href="style.css?v=5" />
+    <link rel="stylesheet" href="style.css?v=6" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </head>
 
@@ -317,10 +317,27 @@
           </p>
         </div>
         <div class="footer-payments">
-          <p>Metode Pembayaran Aman</p>
+          <p data-i18n="safePaymentTitle">Metode Pembayaran Aman</p>
           <div class="payment-icons">
             <span>QRIS</span> <span>GoPay</span> <span>OVO</span>
             <span>DANA</span> <span>ShopeePay</span>
+          </div>
+
+          <div class="footer-links">
+            <button
+              type="button"
+              onclick="showPrivacyPolicy()"
+              data-i18n="privacyPolicyLink"
+            >
+              Kebijakan Privasi
+            </button>
+            <button
+              type="button"
+              onclick="showTermsPolicy()"
+              data-i18n="termsPolicyLink"
+            >
+              Syarat & Ketentuan
+            </button>
           </div>
         </div>
       </div>
@@ -331,7 +348,7 @@
     </footer>
 
     <!-- SEMUA SCRIPT & STYLE DIPOSISIKAN DENGAN BENAR DI BAWAH FOOTER -->
-    <script src="script.js?v=10"></script>
+    <script src="script.js?v=11"></script>
     <style>
       /* Floating Button Admin */
       /* Floating Button Admin */
