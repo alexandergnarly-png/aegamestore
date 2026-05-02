@@ -1801,7 +1801,7 @@ button#buyBtn:active {
   }
 }
 /* ========================================= */
-/* ===== HEADBAR / NAVBAR FIX - TOP ONLY ===== */
+/* ===== MOBILE HEADER CLEAN FIX ===== */
 
 .site-header {
   position: sticky;
@@ -1841,50 +1841,110 @@ button#buyBtn:active {
 
 @media (max-width: 768px) {
   body {
-    padding-bottom: 0;
+    padding-bottom: 0 !important;
+  }
+
+  .site-header {
+    position: sticky;
+    top: 0;
   }
 
   .header-inner {
     display: grid !important;
-    grid-template-columns: 1fr auto !important;
+    grid-template-columns: 1fr !important;
     grid-template-areas:
-      "brand actions"
-      "nav nav" !important;
-    padding: 10px 14px !important;
-    gap: 8px !important;
+      "actions"
+      "nav" !important;
+    padding: 10px 12px 12px !important;
+    gap: 10px !important;
   }
 
   .brand {
-    min-width: 0;
-  }
-
-  .brand-copy strong,
-  .brand-copy span {
-    white-space: nowrap;
+    display: none !important;
   }
 
   .header-actions {
-    gap: 7px !important;
+    grid-area: actions !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 8px !important;
     flex-wrap: nowrap !important;
-    min-width: 0;
+    width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding-bottom: 2px !important;
+  }
+
+  .lang-switch {
+    flex: 0 0 auto !important;
+    padding: 3px !important;
+    gap: 3px !important;
+  }
+
+  .lang-btn {
+    flex: 0 0 auto !important;
+    width: 34px !important;
+    height: 34px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 11px !important;
+  }
+
+  #theme-toggle {
+    flex: 0 0 auto !important;
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  #userMenu {
+    flex: 0 0 auto !important;
+  }
+
+  #userMenu > div {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex-wrap: nowrap !important;
+  }
+
+  #userMenu > div > div:first-child {
+    display: none !important;
+  }
+
+  #userMenu .auth-btn {
+    flex: 0 0 auto !important;
+    min-height: 34px !important;
+    padding: 7px 12px !important;
+    border-radius: 999px !important;
+    font-size: 12px !important;
+    white-space: nowrap !important;
+  }
+
+  #userMenu a.auth-btn[href="/auth"] span {
+    display: none !important;
+  }
+
+  #userMenu a.auth-btn[href="/auth"]::before {
+    content: "Masuk";
   }
 
   .main-nav {
-    position: static !important;
     grid-area: nav !important;
+    position: static !important;
     width: 100% !important;
-
     display: flex !important;
-    justify-content: flex-start !important;
+    justify-content: center !important;
     align-items: center !important;
     gap: 8px !important;
-
-    padding: 4px 0 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
     border: 0 !important;
     box-shadow: none !important;
-    background: transparent !important;
     backdrop-filter: none !important;
-
     overflow-x: auto !important;
     overflow-y: hidden !important;
     -webkit-overflow-scrolling: touch !important;
@@ -1892,17 +1952,19 @@ button#buyBtn:active {
 
   .nav-link {
     flex: 0 0 auto !important;
-    min-height: 34px !important;
-    padding: 8px 12px !important;
+    min-height: 38px !important;
+    padding: 9px 14px !important;
     border-radius: 999px !important;
-
-    background: rgba(224, 242, 254, 0.75) !important;
+    background: rgba(224, 242, 254, 0.8) !important;
     color: #0284c7 !important;
     font-size: 12px !important;
     font-weight: 800 !important;
     line-height: 1 !important;
     white-space: nowrap !important;
-    text-align: center !important;
+  }
+
+  .nav-link::after {
+    display: none !important;
   }
 
   .nav-link:hover,
@@ -1911,40 +1973,40 @@ button#buyBtn:active {
     color: var(--ocean-deep) !important;
   }
 
-  .nav-link::after {
-    display: none !important;
-  }
-
-  .site-footer {
-    padding-bottom: 86px !important;
+  .page {
+    padding-top: 26px !important;
   }
 
   .floating-admin-btn {
     bottom: 18px !important;
   }
+
+  .site-footer {
+    padding-bottom: 90px !important;
+  }
 }
 
 @media (max-width: 420px) {
-  .brand-copy {
-    display: none !important;
-  }
-
   .header-inner {
-    grid-template-columns: auto 1fr !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
   }
 
   .header-actions {
-    justify-content: flex-end !important;
+    justify-content: flex-start !important;
   }
 
-  .lang-btn {
-    width: 30px !important;
-    height: 30px !important;
-    padding: 0 !important;
+  .main-nav {
+    justify-content: flex-start !important;
   }
 
   #userMenu .auth-btn {
     padding: 7px 10px !important;
     font-size: 11px !important;
+  }
+
+  .nav-link {
+    padding: 9px 13px !important;
+    font-size: 12px !important;
   }
 }
