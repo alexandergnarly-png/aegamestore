@@ -769,7 +769,7 @@ function showSocialProof() {
 }
 
 function showPrivacyPolicy() {
-  closeMobileNav();
+  document.body.classList.remove("mobile-nav-open");
 
   const t = translations[currentLanguage];
 
@@ -780,11 +780,17 @@ function showPrivacyPolicy() {
     confirmButtonText: t.policyOk,
     confirmButtonColor: "#0ea5e9",
     background: "#f0f9ff",
+    didOpen: () => {
+      document.body.classList.remove("mobile-nav-open");
+    },
+    willClose: () => {
+      document.body.classList.remove("mobile-nav-open");
+    },
   });
 }
 
 function showTermsPolicy() {
-  closeMobileNav();
+  document.body.classList.remove("mobile-nav-open");
 
   const t = translations[currentLanguage];
 
@@ -795,6 +801,12 @@ function showTermsPolicy() {
     confirmButtonText: t.policyOk,
     confirmButtonColor: "#0ea5e9",
     background: "#f0f9ff",
+    didOpen: () => {
+      document.body.classList.remove("mobile-nav-open");
+    },
+    willClose: () => {
+      document.body.classList.remove("mobile-nav-open");
+    },
   });
 }
 

@@ -2213,13 +2213,27 @@ body.dark-theme .order-modal-card {
 .swal2-container {
   z-index: 10000 !important;
 }
+/* ===== FORCE CLOSE MOBILE DRAWER WHEN SWEETALERT OPEN ===== */
 
-body:has(.swal2-container) .mobile-nav-backdrop {
+body.swal2-shown {
+  overflow: hidden !important;
+}
+
+body.swal2-shown .main-nav {
+  transform: translateX(110%) !important;
+  pointer-events: none !important;
+}
+
+body.swal2-shown .mobile-nav-backdrop {
   opacity: 0 !important;
   visibility: hidden !important;
   pointer-events: none !important;
 }
 
-body:has(.swal2-container) .main-nav {
-  transform: translateX(110%) !important;
+.swal2-container {
+  z-index: 20000 !important;
+}
+
+.swal2-popup {
+  z-index: 20001 !important;
 }
