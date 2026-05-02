@@ -1,440 +1,707 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Hasil Pembayaran - AE Game Store</title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        :root {
-            --primary: #0ea5e9;
-            --primary-hover: #0284c7;
-            --secondary: #fb7185;
-            --bg-color: #f0f9ff;
-            --card-bg: rgba(255, 255, 255, 0.85);
-            --text-main: #0c4a6e;
-            --text-muted: #475569;
-            --border-color: rgba(56, 189, 248, 0.4);
-            --shadow-lg: 0 24px 50px rgba(14, 165, 233, 0.1);
-            --radius-xl: 28px;
-            --radius-lg: 20px;
-            --radius-md: 14px;
+      :root {
+        --primary: #0ea5e9;
+        --primary-hover: #0284c7;
+        --secondary: #fb7185;
+        --bg-color: #f0f9ff;
+        --card-bg: rgba(255, 255, 255, 0.85);
+        --text-main: #0c4a6e;
+        --text-muted: #475569;
+        --border-color: rgba(56, 189, 248, 0.4);
+        --shadow-lg: 0 24px 50px rgba(14, 165, 233, 0.1);
+        --radius-xl: 28px;
+        --radius-lg: 20px;
+        --radius-md: 14px;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background-color: var(--bg-color);
+        background-image:
+          radial-gradient(
+            circle at 0% 0%,
+            rgba(56, 189, 248, 0.15) 0%,
+            transparent 40%
+          ),
+          radial-gradient(
+            circle at 100% 100%,
+            rgba(251, 113, 133, 0.1) 0%,
+            transparent 40%
+          );
+        color: var(--text-main);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 24px;
+        position: relative;
+        overflow-x: hidden;
+      }
+
+      .result-wrapper {
+        width: 100%;
+        max-width: 460px;
+        animation: fadeUp 0.6s ease-out forwards;
+        z-index: 10;
+      }
+
+      .card {
+        background: var(--card-bg);
+        backdrop-filter: blur(24px);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-xl);
+        padding: 40px 32px;
+        box-shadow: var(--shadow-lg);
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: linear-gradient(90deg, var(--primary), var(--secondary));
+      }
+
+      .logo-badge {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--secondary), #f43f5e);
+        color: white;
+        font-size: 24px;
+        box-shadow: 0 12px 24px rgba(251, 113, 133, 0.3);
+        margin: 0 auto 20px;
+      }
+
+      h1 {
+        font-size: 26px;
+        font-weight: 800;
+        color: var(--text-main);
+        margin-bottom: 8px;
+        letter-spacing: -0.5px;
+      }
+
+      .subtitle {
+        color: var(--text-muted);
+        font-size: 14px;
+        margin-bottom: 24px;
+        line-height: 1.6;
+      }
+
+      .status-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-bottom: 28px;
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 8px 16px;
+        border-radius: 99px;
+        font-size: 13px;
+        font-weight: 800;
+        text-transform: capitalize;
+        border: 1px solid transparent;
+      }
+
+      .badge.pending {
+        background: #fef08a;
+        color: #854d0e;
+        border-color: #fde047;
+      }
+
+      .badge.paid,
+      .badge.delivered {
+        background: #d1fae5;
+        color: #065f46;
+        border-color: #6ee7b7;
+      }
+
+      .badge.expired,
+      .badge.cancelled {
+        background: #ffe4e6;
+        color: #be123c;
+        border-color: #fecdd3;
+      }
+
+      .badge.waiting_payment {
+        background: #e0f2fe;
+        color: #0369a1;
+        border-color: #bae6fd;
+      }
+
+      .badge.manual {
+        background: #ffe4e6;
+        color: #be123c;
+        border-color: #fecdd3;
+      }
+
+      .summary {
+        background: rgba(255, 255, 255, 0.6);
+        border: 1px dashed #bae6fd;
+        border-radius: var(--radius-lg);
+        padding: 20px;
+        margin-bottom: 24px;
+        text-align: left;
+      }
+
+      .summary-item {
+        padding: 10px 0;
+        color: #334155;
+        font-size: 14px;
+        font-weight: 500;
+        border-bottom: 1px dashed #e0f2fe;
+        word-break: break-word;
+      }
+
+      .summary-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+
+      .summary-item:first-child {
+        padding-top: 0;
+      }
+
+      .key-box {
+        position: relative;
+        margin-top: 10px;
+        padding: 24px;
+        background: rgba(255, 255, 255, 0.8);
+        border: 2px solid var(--ocean-light);
+        border-radius: var(--radius-lg);
+        box-shadow: 0 8px 20px rgba(14, 165, 233, 0.1);
+        overflow: hidden;
+      }
+
+      .key-title {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--primary);
+        background: #e0f2fe;
+        padding: 4px 10px;
+        border-radius: 99px;
+        margin-bottom: 16px;
+      }
+
+      #keyBox {
+        font-size: 18px;
+        font-weight: 800;
+        color: #082f49;
+        word-break: break-all;
+        letter-spacing: 1px;
+        margin-bottom: 16px;
+        font-family: "Courier New", Courier, monospace;
+      }
+
+      .copy-btn {
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: var(--radius-md);
+        background: linear-gradient(
+          135deg,
+          var(--primary),
+          var(--primary-hover)
+        );
+        color: white;
+        font-size: 15px;
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 10px 20px rgba(14, 165, 233, 0.2);
+        transition:
+          transform 0.2s ease,
+          box-shadow 0.2s ease;
+      }
+
+      .copy-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 28px rgba(14, 165, 233, 0.3);
+      }
+
+      .copy-btn:active {
+        transform: translateY(0);
+      }
+
+      .helper-text {
+        margin-top: 24px;
+        font-size: 13px;
+        color: var(--text-muted);
+        line-height: 1.6;
+        padding: 0 10px;
+      }
+
+      .result-actions {
+        display: grid;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      .home-btn,
+      .secondary-btn {
+        width: 100%;
+        display: block;
+        padding: 14px;
+        border-radius: var(--radius-md);
+        font-size: 15px;
+        font-weight: 800;
+        text-align: center;
+        text-decoration: none;
+        cursor: pointer;
+        transition:
+          transform 0.2s ease,
+          box-shadow 0.2s ease,
+          background 0.2s ease;
+      }
+
+      .home-btn {
+        color: white;
+        background: linear-gradient(135deg, var(--secondary), #f43f5e);
+        box-shadow: 0 10px 20px rgba(251, 113, 133, 0.2);
+      }
+
+      .home-btn:hover,
+      .secondary-btn:hover {
+        transform: translateY(-2px);
+      }
+
+      .secondary-btn {
+        background: rgba(255, 255, 255, 0.9) !important;
+        color: var(--primary-hover) !important;
+        border: 1px solid #bae6fd !important;
+        box-shadow: 0 8px 18px rgba(14, 165, 233, 0.12) !important;
+      }
+
+      .status-message-card {
+        margin: 0 0 18px;
+        padding: 16px;
+        border-radius: var(--radius-lg);
+        background: rgba(224, 242, 254, 0.75);
+        border: 1px solid #bae6fd;
+        color: #0369a1;
+        font-size: 13px;
+        line-height: 1.55;
+        text-align: left;
+      }
+
+      .status-message-card.success {
+        background: #dcfce7;
+        border-color: #86efac;
+        color: #166534;
+      }
+
+      .status-message-card.warning {
+        background: #fef3c7;
+        border-color: #fde68a;
+        color: #92400e;
+      }
+
+      .status-message-card.danger {
+        background: #ffe4e6;
+        border-color: #fecdd3;
+        color: #be123c;
+      }
+
+      .summary-label {
+        display: block;
+        color: var(--primary-hover);
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+      }
+
+      .summary-value {
+        display: block;
+        color: #334155;
+        font-weight: 700;
+      }
+
+      .key-box.delivered {
+        border-color: #86efac;
+        background: #f0fdf4;
+      }
+
+      .key-box.pending {
+        border-color: #bae6fd;
+        background: #f0f9ff;
+      }
+
+      .key-box.problem {
+        border-color: #fecdd3;
+        background: #fff1f2;
+      }
+
+      /* Sakura Effect */
+      .sakura {
+        position: fixed;
+        top: -10%;
+        z-index: 1;
+        pointer-events: none;
+        background: #fbcfe8;
+        border-radius: 100% 0 100% 0;
+        animation:
+          fall linear infinite,
+          sway ease-in-out infinite alternate;
+      }
+
+      @keyframes fall {
+        to {
+          top: 110%;
+        }
+      }
+
+      @keyframes sway {
+        from {
+          transform: translateX(-20px) rotate(0deg);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        to {
+          transform: translateX(20px) rotate(45deg);
+        }
+      }
+
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
         }
 
-        body {
-            background-color: var(--bg-color);
-            background-image:
-                radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 100% 100%, rgba(251, 113, 133, 0.1) 0%, transparent 40%);
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 24px;
-            position: relative;
-            overflow-x: hidden;
+        to {
+          opacity: 1;
+          transform: translateY(0);
         }
+      }
 
-        .result-wrapper {
-            width: 100%;
-            max-width: 460px;
-            animation: fadeUp 0.6s ease-out forwards;
-            z-index: 10;
-        }
-
+      @media (max-width: 480px) {
         .card {
-            background: var(--card-bg);
-            backdrop-filter: blur(24px);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-xl);
-            padding: 40px 32px;
-            box-shadow: var(--shadow-lg);
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .card::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 6px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-        }
-
-        .logo-badge {
-            width: 56px;
-            height: 56px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, var(--secondary), #f43f5e);
-            color: white;
-            font-size: 24px;
-            box-shadow: 0 12px 24px rgba(251, 113, 133, 0.3);
-            margin: 0 auto 20px;
+          padding: 32px 20px;
         }
 
         h1 {
-            font-size: 26px;
-            font-weight: 800;
-            color: var(--text-main);
-            margin-bottom: 8px;
-            letter-spacing: -0.5px;
+          font-size: 22px;
         }
-
-        .subtitle {
-            color: var(--text-muted);
-            font-size: 14px;
-            margin-bottom: 24px;
-            line-height: 1.6;
-        }
-
-        .status-row {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-bottom: 28px;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 8px 16px;
-            border-radius: 99px;
-            font-size: 13px;
-            font-weight: 800;
-            text-transform: capitalize;
-            border: 1px solid transparent;
-        }
-
-        .badge.pending {
-            background: #fef08a;
-            color: #854d0e;
-            border-color: #fde047;
-        }
-
-        .badge.paid,
-        .badge.delivered {
-            background: #d1fae5;
-            color: #065f46;
-            border-color: #6ee7b7;
-        }
-
-        .badge.expired,
-        .badge.cancelled {
-            background: #ffe4e6;
-            color: #be123c;
-            border-color: #fecdd3;
-        }
-
-        .badge.waiting_payment {
-            background: #e0f2fe;
-            color: #0369a1;
-            border-color: #bae6fd;
-        }
-
-        .badge.manual {
-            background: #ffe4e6;
-            color: #be123c;
-            border-color: #fecdd3;
-        }
-
-        .summary {
-            background: rgba(255, 255, 255, 0.6);
-            border: 1px dashed #bae6fd;
-            border-radius: var(--radius-lg);
-            padding: 20px;
-            margin-bottom: 24px;
-            text-align: left;
-        }
-
-        .summary-item {
-            padding: 10px 0;
-            color: #334155;
-            font-size: 14px;
-            font-weight: 500;
-            border-bottom: 1px dashed #e0f2fe;
-            word-break: break-word;
-        }
-
-        .summary-item:last-child {
-            border-bottom: none;
-            padding-bottom: 0;
-        }
-
-        .summary-item:first-child {
-            padding-top: 0;
-        }
-
-        .key-box {
-            position: relative;
-            margin-top: 10px;
-            padding: 24px;
-            background: rgba(255, 255, 255, 0.8);
-            border: 2px solid var(--ocean-light);
-            border-radius: var(--radius-lg);
-            box-shadow: 0 8px 20px rgba(14, 165, 233, 0.1);
-            overflow: hidden;
-        }
-
-        .key-title {
-            display: inline-block;
-            font-size: 11px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--primary);
-            background: #e0f2fe;
-            padding: 4px 10px;
-            border-radius: 99px;
-            margin-bottom: 16px;
-        }
-
-        #keyBox {
-            font-size: 18px;
-            font-weight: 800;
-            color: #082f49;
-            word-break: break-all;
-            letter-spacing: 1px;
-            margin-bottom: 16px;
-            font-family: 'Courier New', Courier, monospace;
-        }
-
-        .copy-btn {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: var(--radius-md);
-            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
-            color: white;
-            font-size: 15px;
-            font-weight: 800;
-            cursor: pointer;
-            box-shadow: 0 10px 20px rgba(14, 165, 233, 0.2);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .copy-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 14px 28px rgba(14, 165, 233, 0.3);
-        }
-
-        .copy-btn:active {
-            transform: translateY(0);
-        }
-
-        .helper-text {
-            margin-top: 24px;
-            font-size: 13px;
-            color: var(--text-muted);
-            line-height: 1.6;
-            padding: 0 10px;
-        }
-
-        /* Sakura Effect */
-        .sakura {
-            position: fixed;
-            top: -10%;
-            z-index: 1;
-            pointer-events: none;
-            background: #fbcfe8;
-            border-radius: 100% 0 100% 0;
-            animation: fall linear infinite, sway ease-in-out infinite alternate;
-        }
-
-        @keyframes fall {
-            to {
-                top: 110%;
-            }
-        }
-
-        @keyframes sway {
-            from {
-                transform: translateX(-20px) rotate(0deg);
-            }
-
-            to {
-                transform: translateX(20px) rotate(45deg);
-            }
-        }
-
-        @keyframes fadeUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @media (max-width: 480px) {
-            .card {
-                padding: 32px 20px;
-            }
-
-            h1 {
-                font-size: 22px;
-            }
-        }
+      }
     </style>
-</head>
+  </head>
 
-<body>
+  <body>
     <div class="result-wrapper">
-        <div class="card">
-            <div class="logo-badge">⛩️</div>
-            <h1>Status Pesanan</h1>
-            <p class="subtitle">Berikut adalah detail pembayaran dan hasil pengiriman produk digital kamu.</p>
+      <div class="card">
+        <div class="logo-badge">⛩️</div>
+        <h1>Status Pesanan</h1>
+        <p class="subtitle">
+          Berikut adalah detail pembayaran dan hasil pengiriman produk digital
+          kamu.
+        </p>
 
-            <div class="status-row" id="statusRow">
-                <span class="badge waiting_payment">Memuat status...</span>
-            </div>
-
-            <div class="summary">
-                <div class="summary-item" id="nameText"></div>
-                <div class="summary-item" id="contactText"></div>
-                <div class="summary-item" id="gameText"></div>
-                <div class="summary-item" id="productText"></div>
-                <div class="summary-item" id="priceText"></div>
-            </div>
-
-            <div class="key-box">
-                <span class="key-title">Game Key / Voucher</span>
-                <div id="keyBox">Menunggu key...</div>
-                <button class="copy-btn" id="copyBtn" onclick="copyKey()" style="display:none;">Copy Kode</button>
-            </div>
-
-            <p class="helper-text" id="statusText">Memuat data order...</p>
+        <div class="status-row" id="statusRow">
+          <span class="badge waiting_payment">Memuat status...</span>
         </div>
+
+        <div class="summary">
+          <div class="summary-item" id="nameText"></div>
+          <div class="summary-item" id="contactText"></div>
+          <div class="summary-item" id="gameText"></div>
+          <div class="summary-item" id="productText"></div>
+          <div class="summary-item" id="priceText"></div>
+        </div>
+
+        <div class="key-box">
+          <span class="key-title">Game Key / Voucher</span>
+          <div id="keyBox">Menunggu key...</div>
+          <button
+            class="copy-btn"
+            id="copyBtn"
+            onclick="copyKey()"
+            style="display: none"
+          >
+            Copy Kode
+          </button>
+        </div>
+
+        <p class="helper-text" id="statusText">Memuat data order...</p>
+
+        <div class="result-actions">
+          <button
+            class="copy-btn secondary-btn"
+            type="button"
+            onclick="refreshOrder()"
+          >
+            Refresh Status
+          </button>
+
+          <a class="home-btn" href="/#store-section"> Kembali ke Katalog </a>
+        </div>
+      </div>
     </div>
 
     <script>
-        let latestGameKey = "";
+      let latestGameKey = "";
 
-        function formatRupiah(num) {
-            return "Rp " + Number(num).toLocaleString("id-ID");
-        }
+      function formatRupiah(num) {
+        return "Rp " + Number(num).toLocaleString("id-ID");
+      }
 
-        function badge(status) {
-            const safeStatus = String(status || "-").toLowerCase();
-            return `<span class="badge ${safeStatus}">${status || "-"}</span>`;
-        }
+      function badge(status) {
+        const safeStatus = String(status || "-").toLowerCase();
+        return `<span class="badge ${safeStatus}">${status || "-"}</span>`;
+      }
 
-        function copyKey() {
-            if (!latestGameKey) return;
-            navigator.clipboard.writeText(latestGameKey)
-                .then(() => {
-                    Swal.fire({ icon: 'success', title: 'Berhasil!', text: 'Game key berhasil dicopy!', confirmButtonColor: '#0ea5e9' });
-                })
-                .catch(() => {
-                    Swal.fire({ icon: 'error', title: 'Oops...', text: 'Gagal copy key.', confirmButtonColor: '#fb7185' });
-                });
-        }
+      function showToast(icon, title) {
+        const Toast = Swal.mixin({
+          toast: true,
+          position: "top-end",
+          showConfirmButton: false,
+          timer: 2400,
+          timerProgressBar: true,
+        });
 
-        async function loadOrder() {
-            const params = new URLSearchParams(window.location.search);
-            const orderId = params.get("order_id");
+        Toast.fire({ icon, title });
+      }
 
-            if (!orderId) {
-                document.getElementById("statusRow").innerHTML = `<span class="badge cancelled">Data tidak lengkap</span>`;
-                document.getElementById("statusText").innerText = "Data order tidak lengkap.";
-                document.getElementById("keyBox").innerText = "Link order tidak valid.";
-                return;
-            }
-
-            try {
-                const response = await fetch("/order/" + orderId);
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.message || "Gagal mengambil data order");
-                }
-
-                document.getElementById("statusRow").innerHTML = badge(data.payment_status) + badge(data.delivery_status);
-                document.getElementById("statusText").innerText = "Order berhasil ditemukan. Simpan halaman ini untuk cek status order kamu kapan saja.";
-
-                // FITUR BARU: Toast Notification yang estetik saat data berhasil dimuat
-                const Toast = Swal.mixin({
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 3000,
-                    timerProgressBar: true
-                });
-                if (data.payment_status === "paid") {
-                    Toast.fire({ icon: 'success', title: 'Pembayaran Lunas! 🎉' });
-                } else {
-                    Toast.fire({ icon: 'info', title: 'Data Order Ditemukan 🌊' });
-                }
-
-                document.getElementById("nameText").textContent = `Nama: ${data.name || "-"}`;
-                document.getElementById("contactText").textContent = `Kontak: ${data.contact || "-"}`;
-                document.getElementById("gameText").textContent = `Game: ${data.game || "-"}`;
-                document.getElementById("productText").textContent = `Produk: ${data.product || "-"}`;
-                document.getElementById("priceText").textContent = `Harga: ${data.price ? formatRupiah(data.price) : "-"}`;
-
-                const copyBtn = document.getElementById("copyBtn");
-
-                if (data.delivery_status === "manual") {
-                    latestGameKey = "";
-                    copyBtn.style.display = "none";
-                    document.getElementById("keyBox").innerText = data.gameKey || "Akan dikirim manual oleh admin";
-                } else if (data.gameKey && data.gameKey !== "Akan dikirim manual oleh admin") {
-                    latestGameKey = data.gameKey;
-                    copyBtn.style.display = "block";
-                    document.getElementById("keyBox").innerText = data.gameKey;
-                } else {
-                    latestGameKey = "";
-                    copyBtn.style.display = "none";
-                    document.getElementById("keyBox").innerHTML = `
-                        <div style="font-family:Segoe UI,sans-serif;font-size:14px;font-weight:800;margin-bottom:10px;color:#0ea5e9;">
-                            Pembayaran belum selesai.
-                        </div>
-                        <div style="font-family:Segoe UI,sans-serif;font-size:13px;font-weight:500;color:#475569;line-height:1.6;">
-                            Jika kamu sudah membayar, tunggu beberapa saat lalu refresh halaman ini.
-                            Game key akan muncul otomatis setelah dikonfirmasi sistem.
-                        </div>
-                    `;
-                }
-            } catch (error) {
-                document.getElementById("statusRow").innerHTML = `<span class="badge cancelled">Gagal memuat</span>`;
-                document.getElementById("statusText").innerText = error.message || "Gagal mengambil data order.";
-                document.getElementById("keyBox").innerText = "Data order tidak bisa dimuat.";
-            }
-        }
-
+      function refreshOrder() {
         loadOrder();
+      }
 
-        // Fitur Sakura Jatuh
-        function createSakura() {
-            const sakura = document.createElement('div');
-            sakura.classList.add('sakura');
-            const size = Math.random() * 10 + 5;
-            sakura.style.width = size + 'px';
-            sakura.style.height = size + 'px';
-            sakura.style.left = Math.random() * 100 + 'vw';
-            sakura.style.animationDuration = (Math.random() * 3 + 4) + 's, ' + (Math.random() * 2 + 2) + 's';
-            document.body.appendChild(sakura);
-            setTimeout(() => { sakura.remove(); }, 7000);
+      function copyKey() {
+        if (!latestGameKey) return;
+        navigator.clipboard
+          .writeText(latestGameKey)
+          .then(() => {
+            Swal.fire({
+              icon: "success",
+              title: "Berhasil!",
+              text: "Game key berhasil dicopy!",
+              confirmButtonColor: "#0ea5e9",
+            });
+          })
+          .catch(() => {
+            Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              text: "Gagal copy key.",
+              confirmButtonColor: "#fb7185",
+            });
+          });
+      }
+
+      async function loadOrder() {
+        const params = new URLSearchParams(window.location.search);
+        const orderId = params.get("order_id");
+
+        const statusRow = document.getElementById("statusRow");
+        const statusText = document.getElementById("statusText");
+        const keyBox = document.getElementById("keyBox");
+        const copyBtn = document.getElementById("copyBtn");
+        const keyWrapper = document.querySelector(".key-box");
+
+        if (!orderId) {
+          statusRow.innerHTML = `<span class="badge cancelled">Data tidak lengkap</span>`;
+          statusText.innerHTML = `
+            <div class="status-message-card danger">
+                Link order tidak valid. Pastikan kamu membuka halaman result dari link pembayaran yang benar.
+            </div>
+        `;
+          keyBox.innerText = "Link order tidak valid.";
+          copyBtn.style.display = "none";
+          if (keyWrapper) keyWrapper.className = "key-box problem";
+          return;
         }
-        setInterval(createSakura, 400);
-    </script>
-</body>
 
+        try {
+          const response = await fetch("/order/" + encodeURIComponent(orderId));
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.message || "Gagal mengambil data order");
+          }
+
+          const paymentStatus = String(data.payment_status || "").toLowerCase();
+          const deliveryStatus = String(
+            data.delivery_status || "",
+          ).toLowerCase();
+
+          statusRow.innerHTML =
+            badge(data.payment_status) + badge(data.delivery_status);
+
+          document.getElementById("nameText").innerHTML = `
+            <span class="summary-label">Nama</span>
+            <span class="summary-value">${data.name || "-"}</span>
+        `;
+
+          document.getElementById("contactText").innerHTML = `
+            <span class="summary-label">Kontak</span>
+            <span class="summary-value">${data.contact || "-"}</span>
+        `;
+
+          document.getElementById("gameText").innerHTML = `
+            <span class="summary-label">Game</span>
+            <span class="summary-value">${data.game || "-"}</span>
+        `;
+
+          document.getElementById("productText").innerHTML = `
+            <span class="summary-label">Produk</span>
+            <span class="summary-value">${data.product || "-"}</span>
+        `;
+
+          document.getElementById("priceText").innerHTML = `
+            <span class="summary-label">Total Bayar</span>
+            <span class="summary-value">${data.price ? formatRupiah(data.price) : "-"}</span>
+        `;
+
+          if (deliveryStatus === "delivered" && data.gameKey) {
+            latestGameKey = data.gameKey;
+            copyBtn.style.display = "block";
+            keyBox.innerText = data.gameKey;
+            if (keyWrapper) keyWrapper.className = "key-box delivered";
+
+            statusText.innerHTML = `
+                <div class="status-message-card success">
+                    Pembayaran berhasil dan produk sudah dikirim. Simpan game key ini dengan aman.
+                </div>
+            `;
+
+            showToast("success", "Game key sudah tersedia! 🎉");
+            return;
+          }
+
+          if (deliveryStatus === "manual") {
+            latestGameKey = "";
+            copyBtn.style.display = "none";
+            keyBox.innerText =
+              data.gameKey || "Akan dikirim manual oleh admin.";
+            if (keyWrapper) keyWrapper.className = "key-box problem";
+
+            statusText.innerHTML = `
+                <div class="status-message-card warning">
+                    Pembayaran sudah dicek, tapi order ini perlu dikirim manual oleh admin. Hubungi admin jika belum diproses.
+                </div>
+            `;
+
+            showToast("info", "Order perlu diproses manual 🌊");
+            return;
+          }
+
+          if (
+            paymentStatus === "pending" ||
+            deliveryStatus === "waiting_payment"
+          ) {
+            latestGameKey = "";
+            copyBtn.style.display = "none";
+            if (keyWrapper) keyWrapper.className = "key-box pending";
+
+            keyBox.innerHTML = `
+                <div style="font-family:Segoe UI,sans-serif;font-size:14px;font-weight:800;margin-bottom:10px;color:#0ea5e9;">
+                    Pembayaran belum selesai.
+                </div>
+                <div style="font-family:Segoe UI,sans-serif;font-size:13px;font-weight:500;color:#475569;line-height:1.6;">
+                    Jika kamu sudah membayar, tunggu beberapa saat lalu klik Refresh Status.
+                    Game key akan muncul otomatis setelah pembayaran dikonfirmasi.
+                </div>
+            `;
+
+            statusText.innerHTML = `
+                <div class="status-message-card warning">
+                    Order masih menunggu pembayaran. Selesaikan pembayaran terlebih dahulu agar key bisa dikirim otomatis.
+                </div>
+            `;
+
+            showToast("info", "Order masih menunggu pembayaran");
+            return;
+          }
+
+          if (
+            paymentStatus === "expired" ||
+            paymentStatus === "cancelled" ||
+            deliveryStatus === "cancelled"
+          ) {
+            latestGameKey = "";
+            copyBtn.style.display = "none";
+            if (keyWrapper) keyWrapper.className = "key-box problem";
+
+            keyBox.innerText = "Order tidak aktif.";
+            statusText.innerHTML = `
+                <div class="status-message-card danger">
+                    Order ini sudah expired atau dibatalkan. Silakan buat order baru dari katalog.
+                </div>
+            `;
+
+            showToast("error", "Order sudah tidak aktif");
+            return;
+          }
+
+          latestGameKey = "";
+          copyBtn.style.display = "none";
+          if (keyWrapper) keyWrapper.className = "key-box pending";
+
+          keyBox.innerText = "Menunggu update status order.";
+          statusText.innerHTML = `
+            <div class="status-message-card">
+                Order berhasil ditemukan. Simpan halaman ini untuk cek status order kamu kapan saja.
+            </div>
+        `;
+
+          showToast("info", "Data order ditemukan 🌊");
+        } catch (error) {
+          statusRow.innerHTML = `<span class="badge cancelled">Gagal memuat</span>`;
+          statusText.innerHTML = `
+            <div class="status-message-card danger">
+                ${error.message || "Gagal mengambil data order."}
+            </div>
+        `;
+          keyBox.innerText = "Data order tidak bisa dimuat.";
+          copyBtn.style.display = "none";
+          if (keyWrapper) keyWrapper.className = "key-box problem";
+        }
+      }
+
+      loadOrder();
+
+      // Fitur Sakura Jatuh
+      function createSakura() {
+        const sakura = document.createElement("div");
+        sakura.classList.add("sakura");
+        const size = Math.random() * 10 + 5;
+        sakura.style.width = size + "px";
+        sakura.style.height = size + "px";
+        sakura.style.left = Math.random() * 100 + "vw";
+        sakura.style.animationDuration =
+          Math.random() * 3 + 4 + "s, " + (Math.random() * 2 + 2) + "s";
+        document.body.appendChild(sakura);
+        setTimeout(() => {
+          sakura.remove();
+        }, 7000);
+      }
+      if (window.innerWidth > 768) {
+        setInterval(createSakura, 700);
+      }
+    </script>
+  </body>
 </html>
