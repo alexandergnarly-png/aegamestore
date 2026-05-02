@@ -1228,6 +1228,57 @@ app.post(
 );
 
 app.delete(
+  "/users/:id",
+  requireAdminAuth,
+  requireAdminCsrf,
+  async (req, res) => {
+    const userId = Number(req.params.id);
+
+    if (!Number.isInteger(userId) || userId <= 0) {
+      return res.status(400).json({
+        message: "ID user tidak valid",
+      });
+    }
+
+    try {
+      const orderCheck = await query(
+        "SELECT COUNT(*)::int AS total_orders FROM orders WHERE user_id = $1",
+        [userId],
+      );
+
+      const totalOrders = Number(orderCheck.rows[0]?.total_orders || 0);
+
+      if (totalOrders > 0) {
+        return res.status(400).json({
+          message:
+            "User ini punya riwayat order, jadi tidak bisa dihapus agar data order tetap aman",
+        });
+      }
+
+      const result = await query(
+        "DELETE FROM users WHERE id = $1 RETURNING id",
+        [userId],
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          message: "User tidak ditemukan",
+        });
+      }
+
+      return res.json({
+        message: "User berhasil dihapus",
+      });
+    } catch (err) {
+      console.error("ERROR DELETE USER:", err);
+      return res.status(500).json({
+        message: "Gagal hapus user: " + err.message,
+      });
+    }
+  },
+);
+
+app.delete(
   "/products/:id",
   requireAdminAuth,
   requireAdminCsrf,
