@@ -1187,21 +1187,51 @@ button#buyBtn:active {
 }
 @media (max-width: 768px) {
   .order-modal {
-    align-items: flex-end;
-    padding: 0;
+    align-items: flex-end !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    overflow: hidden !important;
   }
 
   .order-modal-backdrop {
-    backdrop-filter: none;
-    background: rgba(12, 74, 110, 0.35);
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 1 !important;
+    background: rgba(12, 74, 110, 0.42) !important;
+    backdrop-filter: none !important;
   }
 
   .order-modal-card {
-    max-width: 100%;
-    max-height: 88vh;
-    border-radius: 24px 24px 0 0;
-    padding: 22px;
+    position: relative !important;
+    z-index: 2 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 86vh !important;
+    overflow-y: auto !important;
+    margin: 0 !important;
+    padding: 22px !important;
+    border-radius: 24px 24px 0 0 !important;
+    background: #ffffff !important;
+    opacity: 1 !important;
+    transform: none;
     animation: mobileModalUp 0.22s ease;
+  }
+
+  body.dark-theme .order-modal-card {
+    background: #1e293b !important;
+  }
+
+  .modal-head,
+  .form-grid,
+  .form-group,
+  .price-breakdown,
+  .modal-summary,
+  .trust-text,
+  #buyBtn,
+  #loading {
+    position: relative !important;
+    z-index: 3 !important;
+    opacity: 1 !important;
   }
 
   .modal-head h2 {
@@ -2093,4 +2123,23 @@ button#buyBtn:active {
     padding: 7px 9px !important;
     font-size: 11px !important;
   }
+}
+/* ===== ORDER MODAL LAYER FIX ===== */
+
+.order-modal {
+  z-index: 9000 !important;
+}
+
+.order-modal-backdrop {
+  z-index: 1 !important;
+}
+
+.order-modal-card {
+  z-index: 2 !important;
+  background: #ffffff !important;
+  opacity: 1 !important;
+}
+
+body.dark-theme .order-modal-card {
+  background: #1e293b !important;
 }
