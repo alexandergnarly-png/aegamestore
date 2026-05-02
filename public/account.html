@@ -164,16 +164,70 @@
         font-size: 15px;
         text-decoration: none;
         cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 24px rgba(14, 165, 233, 0.22);
+        transition:
+          transform 0.2s ease,
+          box-shadow 0.2s ease,
+          filter 0.2s ease;
+      }
+
+      button::before,
+      a.btn::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -120%;
+        width: 80%;
+        height: 100%;
+        background: linear-gradient(
+          120deg,
+          transparent,
+          rgba(255, 255, 255, 0.35),
+          transparent
+        );
+        transform: skewX(-20deg);
+        transition: left 0.55s ease;
+      }
+
+      button:hover,
+      a.btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 30px rgba(14, 165, 233, 0.32);
+        filter: brightness(1.04);
+      }
+
+      button:hover::before,
+      a.btn:hover::before {
+        left: 130%;
+      }
+
+      button:active,
+      a.btn:active {
+        transform: translateY(0) scale(0.98);
+        box-shadow: 0 8px 18px rgba(14, 165, 233, 0.2);
       }
 
       .btn-secondary {
-        background: white !important;
+        background: rgba(255, 255, 255, 0.9) !important;
         color: var(--primary-dark) !important;
         border: 1px solid #bae6fd !important;
+        box-shadow: 0 8px 20px rgba(14, 165, 233, 0.12) !important;
+      }
+
+      .btn-secondary:hover {
+        background: #e0f2fe !important;
+        box-shadow: 0 12px 26px rgba(14, 165, 233, 0.2) !important;
       }
 
       .btn-danger {
         background: linear-gradient(135deg, #fb7185, #e11d48) !important;
+        box-shadow: 0 10px 24px rgba(225, 29, 72, 0.22) !important;
+      }
+
+      .btn-danger:hover {
+        box-shadow: 0 14px 30px rgba(225, 29, 72, 0.32) !important;
       }
 
       .note {
@@ -252,6 +306,34 @@
         text-align: center;
         color: var(--muted);
         font-size: 14px;
+      }
+
+      .section {
+        animation: sectionFadeUp 0.45s ease both;
+      }
+
+      .section:nth-of-type(1) {
+        animation-delay: 0.05s;
+      }
+
+      .section:nth-of-type(2) {
+        animation-delay: 0.1s;
+      }
+
+      .section:nth-of-type(3) {
+        animation-delay: 0.15s;
+      }
+
+      @keyframes sectionFadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
 
       @media (max-width: 520px) {
