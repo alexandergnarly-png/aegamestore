@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AE Game Store 🌊⛩️</title>
-    <link rel="stylesheet" href="style.css?v=16" />
+    <link rel="stylesheet" href="style.css?v=17" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </head>
 
@@ -584,12 +584,32 @@
         });
       }
 
-      // Fitur Menghilangkan Loading Screen
+      // Fitur Menghilangkan Loading Screen //
       window.addEventListener("load", function () {
         const preloader = document.getElementById("preloader");
         setTimeout(() => {
           preloader.classList.add("fade-out");
         }, 1000);
+      });
+      // Fitur Mobile Sidebar Menu //
+      function toggleMobileNav() {
+        document.body.classList.toggle("mobile-nav-open");
+      }
+
+      function closeMobileNav() {
+        document.body.classList.remove("mobile-nav-open");
+      }
+
+      document.querySelectorAll(".main-nav .nav-link").forEach((link) => {
+        link.addEventListener("click", () => {
+          closeMobileNav();
+        });
+      });
+
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") {
+          closeMobileNav();
+        }
       });
     </script>
   </body>
