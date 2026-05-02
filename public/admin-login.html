@@ -4,106 +4,179 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Login - AE Game Store</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
+      :root {
+        --primary: #0ea5e9;
+        --primary-hover: #0284c7;
+        --secondary: #fb7185;
+        --bg-color: #f0f9ff;
+        --card-bg: rgba(255, 255, 255, 0.75);
+        --text-main: #0c4a6e;
+        --text-muted: #475569;
+        --border-color: rgba(56, 189, 248, 0.4);
+        --shadow-lg: 0 24px 50px rgba(14, 165, 233, 0.15);
+        --radius-xl: 28px;
+        --radius-md: 14px;
+        --input-bg: rgba(255, 255, 255, 0.8);
+      }
+
+      /* Dark Mode Support */
+      @media (prefers-color-scheme: dark) {
+        body.auto-dark {
+          --bg-color: #0f172a;
+          --card-bg: rgba(30, 41, 59, 0.85);
+          --text-main: #f8fafc;
+          --text-muted: #94a3b8;
+          --border-color: rgba(56, 189, 248, 0.15);
+          --input-bg: rgba(15, 23, 42, 0.6);
+        }
+      }
+
+      body.dark-theme {
+        --bg-color: #0f172a;
+        --card-bg: rgba(30, 41, 59, 0.85);
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --border-color: rgba(56, 189, 248, 0.15);
+        --input-bg: rgba(15, 23, 42, 0.6);
+      }
+
       * {
         box-sizing: border-box;
         margin: 0;
         padding: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       }
 
       body {
-        font-family: "Segoe UI", Arial, sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-main);
         min-height: 100vh;
         display: flex;
-        align-items: center;
         justify-content: center;
-        background-color: #f0f9ff;
-        background-image:
-          radial-gradient(
-            circle at 10% 20%,
-            rgba(56, 189, 248, 0.15) 0%,
-            transparent 40%
-          ),
-          radial-gradient(
-            circle at 90% 80%,
-            rgba(251, 113, 133, 0.1) 0%,
-            transparent 40%
-          );
-        color: #0c4a6e;
+        align-items: center;
+        padding: 24px;
         overflow: hidden;
         position: relative;
+        transition:
+          background-color 0.3s ease,
+          color 0.3s ease;
+      }
+
+      /* Modern Blurred Background Blobs */
+      .bg-blob {
+        position: fixed;
+        filter: blur(80px);
+        z-index: -1;
+        opacity: 0.5;
+        border-radius: 50%;
+        pointer-events: none;
+      }
+      .blob-1 {
+        top: -10vh;
+        left: -10vw;
+        width: 50vw;
+        height: 50vw;
+        background: radial-gradient(circle, var(--primary), var(--bg-color));
+      }
+      .blob-2 {
+        bottom: -10vh;
+        right: -10vw;
+        width: 40vw;
+        height: 40vw;
+        background: radial-gradient(circle, var(--secondary), var(--bg-color));
       }
 
       .login-wrapper {
         width: 100%;
         max-width: 420px;
-        padding: 20px;
-        animation: fadeUp 0.6s ease-out;
-        z-index: 100; /* UBAH DARI 10 MENJADI 100 (ATAU LEBIH) */
-        position: relative; /* PASTIKAN ADA POSITION RELATIVE AGAR Z-INDEX BERFUNGSI */
+        animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        position: relative;
+        z-index: 100;
       }
 
       .card {
-        background: rgba(255, 255, 255, 0.85);
+        background: var(--card-bg);
         backdrop-filter: blur(24px);
-        border: 1px solid rgba(56, 189, 248, 0.4);
-        border-radius: 28px;
-        box-shadow: 0 24px 50px rgba(14, 165, 233, 0.15);
-        padding: 40px 32px;
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-xl);
+        padding: 48px 36px;
+        box-shadow: var(--shadow-lg);
         text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* Aksen garis atas pada card */
+      .card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, var(--secondary), #f43f5e);
       }
 
       .logo-badge {
-        width: 56px;
-        height: 56px;
-        border-radius: 16px;
+        width: 64px;
+        height: 64px;
+        border-radius: 18px;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: linear-gradient(135deg, #fb7185, #f43f5e);
+        background: linear-gradient(135deg, var(--secondary), #f43f5e);
         color: white;
-        font-size: 24px;
+        font-size: 32px;
         box-shadow: 0 12px 24px rgba(251, 113, 133, 0.3);
-        margin: 0 auto 20px;
+        margin: 0 auto 24px;
+        transform: rotate(-5deg);
+        transition: transform 0.3s ease;
+      }
+      .card:hover .logo-badge {
+        transform: rotate(0deg) scale(1.05);
       }
 
       .card h2 {
-        font-size: 24px;
+        font-size: 28px;
         font-weight: 800;
         margin-bottom: 8px;
         letter-spacing: -0.5px;
-        color: #0c4a6e;
+        color: var(--text-main);
       }
 
       .card p.subtitle {
-        color: #475569;
+        color: var(--text-muted);
         font-size: 14px;
-        margin-bottom: 30px;
-        line-height: 1.5;
+        margin-bottom: 32px;
+        line-height: 1.6;
       }
 
       .input-group {
         position: relative;
-        margin-bottom: 16px;
+        margin-bottom: 20px;
         text-align: left;
       }
 
       input {
         width: 100%;
-        padding: 16px 18px;
-        border-radius: 14px;
-        border: 1px solid #bae6fd;
-        background: rgba(255, 255, 255, 0.8);
-        color: #0c4a6e;
-        font-size: 14px;
-        transition: all 0.2s ease;
+        padding: 16px 20px;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border-color);
+        background: var(--input-bg);
+        color: var(--text-main);
+        font-size: 15px;
+        font-weight: 500;
+        transition: all 0.3s ease;
         outline: none;
       }
 
       input:focus {
-        border-color: #0ea5e9;
-        background: #ffffff;
-        box-shadow: 0 0 0 4px #e0f2fe;
+        border-color: var(--primary);
+        background: transparent;
+        box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
       }
 
       input::placeholder {
@@ -112,51 +185,74 @@
 
       .password-wrap .toggle {
         position: absolute;
-        right: 18px;
+        right: 20px;
         top: 50%;
         transform: translateY(-50%);
         cursor: pointer;
         font-size: 13px;
         font-weight: 800;
-        color: #0ea5e9;
+        color: var(--primary);
         user-select: none;
         transition: color 0.2s;
+        background: transparent;
       }
 
       .password-wrap .toggle:hover {
-        color: #0284c7;
+        color: var(--primary-hover);
       }
 
       button {
         width: 100%;
         padding: 16px;
         border: none;
-        border-radius: 14px;
-        background: linear-gradient(135deg, #0ea5e9, #0284c7);
+        border-radius: var(--radius-md);
+        background: linear-gradient(
+          135deg,
+          var(--primary),
+          var(--primary-hover)
+        );
         color: white;
-        font-size: 15px;
+        font-size: 16px;
         font-weight: 800;
         cursor: pointer;
-        margin-top: 10px;
-        box-shadow: 0 10px 20px rgba(14, 165, 233, 0.25);
-        transition:
-          transform 0.2s ease,
-          box-shadow 0.2s ease;
+        margin-top: 8px;
+        box-shadow: 0 10px 24px rgba(14, 165, 233, 0.25);
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        position: relative;
+        overflow: hidden;
       }
 
+      button::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(
+          to right,
+          transparent,
+          rgba(255, 255, 255, 0.3),
+          transparent
+        );
+        transform: skewX(-20deg);
+        transition: 0.5s;
+      }
+      button:hover::after {
+        left: 150%;
+      }
       button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 14px 28px rgba(14, 165, 233, 0.35);
+        transform: translateY(-3px);
+        box-shadow: 0 15px 30px rgba(14, 165, 233, 0.35);
       }
-
       button:active {
         transform: translateY(0);
       }
 
       .footer {
-        margin-top: 24px;
+        margin-top: 28px;
         font-size: 12px;
-        color: #94a3b8;
+        color: var(--text-muted);
         font-weight: 700;
         letter-spacing: 0.5px;
         text-transform: uppercase;
@@ -180,33 +276,31 @@
           top: 110%;
         }
       }
-
       @keyframes sway {
         from {
           transform: translateX(-20px) rotate(0deg);
         }
-
         to {
           transform: translateX(20px) rotate(45deg);
         }
       }
-
       @keyframes fadeUp {
         from {
           opacity: 0;
-          transform: translateY(20px);
+          transform: translateY(30px);
         }
-
         to {
           opacity: 1;
           transform: translateY(0);
         }
       }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </head>
 
   <body>
+    <div class="bg-blob blob-1"></div>
+    <div class="bg-blob blob-2"></div>
+
     <div class="login-wrapper">
       <div class="card">
         <div class="logo-badge">⛩️</div>
@@ -217,29 +311,44 @@
           <input
             type="text"
             id="username"
-            placeholder="Username"
+            placeholder="Username Admin"
             autocomplete="off"
           />
         </div>
 
         <div class="input-group password-wrap">
-          <input type="password" id="password" placeholder="Password" />
+          <input type="password" id="password" placeholder="Password Admin" />
           <span class="toggle" onclick="togglePass()">Show</span>
         </div>
 
         <button id="loginBtn" onclick="login()">Masuk Dashboard</button>
 
-        <div class="footer">Secure Admin Access</div>
+        <div class="footer">🔒 Secure Admin Access</div>
       </div>
     </div>
 
     <script>
+      // Sinkronisasi tema dengan web utama (Opsional, membaca localStorage user)
+      document.addEventListener("DOMContentLoaded", () => {
+        const savedTheme = localStorage.getItem("ae_theme");
+        if (savedTheme === "dark") {
+          document.body.classList.add("dark-theme");
+        }
+      });
+
       function togglePass() {
         const input = document.getElementById("password");
-        input.type = input.type === "password" ? "text" : "password";
+        const toggleBtn = document.querySelector(".toggle");
+        if (input.type === "password") {
+          input.type = "text";
+          toggleBtn.innerText = "Hide";
+        } else {
+          input.type = "password";
+          toggleBtn.innerText = "Show";
+        }
       }
 
-      // FITUR BARU: Bisa tekan 'Enter' untuk login
+      // Bisa tekan 'Enter' untuk login
       document
         .getElementById("password")
         .addEventListener("keypress", function (event) {
