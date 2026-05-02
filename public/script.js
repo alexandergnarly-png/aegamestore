@@ -968,10 +968,11 @@ async function checkVoucher() {
 
     if (!res.ok) {
       appliedVoucherCode = "";
+      resetVoucherPreview();
+
       voucherMessage.innerText =
         data.message || translations[currentLanguage].invalidVoucherMsg;
       voucherMessage.className = "voucher-message error";
-      resetVoucherPreview();
       return;
     }
 
