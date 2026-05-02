@@ -223,6 +223,13 @@ function setLoading(isLoading) {
 }
 
 async function loadAllProducts() {
+  gameGrid.innerHTML = `
+  <div class="game-skeleton"></div>
+  <div class="game-skeleton"></div>
+  <div class="game-skeleton"></div>
+  <div class="game-skeleton"></div>
+`;
+
   try {
     const res = await fetch("/public-products");
     const data = await res.json();
@@ -284,11 +291,26 @@ function renderGames() {
   const visibleGames = getVisibleGames();
 
   if (visibleGames.length === 0) {
+    const emptyTitle =
+      currentLanguage === "en"
+        ? "No products in this category yet"
+        : "Belum ada produk di kategori ini";
+
+    const emptyDesc =
+      currentLanguage === "en"
+        ? "Try another category or contact admin for product availability."
+        : "Coba kategori lain atau hubungi admin untuk cek ketersediaan produk.";
+
+    const emptyBtn = currentLanguage === "en" ? "Chat Admin" : "Chat Admin";
+
     gameGrid.innerHTML = `
-      <div style="grid-column: 1 / -1; text-align: center; color: #64748b; padding: 24px;">
-        Tidak ada game di kategori ini.
-      </div>
-    `;
+    <div class="empty-category-card">
+      <div class="empty-category-icon">🌊</div>
+      <h3>${emptyTitle}</h3>
+      <p>${emptyDesc}</p>
+      <a href="https://t.me/aegamestore" target="_blank">${emptyBtn}</a>
+    </div>
+  `;
     return;
   }
 

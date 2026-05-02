@@ -1621,3 +1621,78 @@ button#buyBtn:active {
     justify-content: center;
   }
 }
+.empty-category-card {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 34px 22px;
+  border-radius: 24px;
+  background: rgba(240, 249, 255, 0.9);
+  border: 1px dashed rgba(14, 165, 233, 0.45);
+  color: #0c4a6e;
+}
+
+.empty-category-icon {
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 14px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0ea5e9, #38bdf8);
+  color: #ffffff;
+  font-size: 26px;
+  box-shadow: 0 12px 24px rgba(14, 165, 233, 0.24);
+}
+
+.empty-category-card h3 {
+  font-size: 20px;
+  margin-bottom: 8px;
+  color: #0c4a6e;
+}
+
+.empty-category-card p {
+  max-width: 420px;
+  margin: 0 auto 16px;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.empty-category-card a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 11px 18px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #0ea5e9, #38bdf8);
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 13px;
+  box-shadow: 0 10px 22px rgba(14, 165, 233, 0.25);
+}
+
+.game-skeleton {
+  min-height: 128px;
+  border-radius: 20px;
+  background: linear-gradient(
+    90deg,
+    rgba(224, 242, 254, 0.65),
+    rgba(255, 255, 255, 0.95),
+    rgba(224, 242, 254, 0.65)
+  );
+  background-size: 220% 100%;
+  animation: skeletonWave 1.25s ease-in-out infinite;
+  border: 1px solid rgba(186, 230, 253, 0.9);
+}
+
+@keyframes skeletonWave {
+  0% {
+    background-position: 120% 0;
+  }
+
+  100% {
+    background-position: -120% 0;
+  }
+}
