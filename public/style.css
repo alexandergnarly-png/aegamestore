@@ -1801,151 +1801,155 @@ button#buyBtn:active {
   }
 }
 /* ========================================= */
-/* ========================================= */
-/* UPGRADE HEADER MOBILE (BOTTOM NAV STYLE)  */
-/* ========================================= */
+/* ===== HEADBAR / NAVBAR BUGFIX ===== */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 3000;
+}
+
+.header-inner {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas: "brand nav actions";
+  align-items: center;
+  gap: 18px;
+}
+
+.brand {
+  grid-area: brand;
+}
+
+.main-nav {
+  grid-area: nav;
+  justify-content: center;
+  min-width: 0;
+}
+
+.header-actions {
+  grid-area: actions;
+  justify-content: flex-end;
+}
+
+/* Biar link Cara Beli tidak kelihatan seperti link rusak */
+.nav-link[href="#"] {
+  cursor: pointer;
+}
+
+/* Mobile: header atas rapi, menu pindah ke bottom nav */
 @media (max-width: 768px) {
-  /* 1. Header Atas Dibuat Sangat Ramping (Hanya Logo & Aksi) */
+  body {
+    padding-bottom: 76px;
+  }
+
   .header-inner {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    padding: 10px 16px !important;
+    display: grid !important;
+    grid-template-columns: 1fr auto !important;
+    grid-template-areas: "brand actions" !important;
+    padding: 10px 14px !important;
+    gap: 10px !important;
   }
 
-  .brand-logo {
-    width: 36px !important;
-    height: 36px !important;
-    font-size: 18px !important;
-    border-radius: 10px !important;
+  .brand {
+    min-width: 0;
   }
 
-  .brand-copy strong {
-    font-size: 15px !important;
-  }
+  .brand-copy strong,
   .brand-copy span {
-    font-size: 11px !important;
+    white-space: nowrap;
   }
 
-  /* Tombol Aksi, Bahasa, dan Login Dibuat Minimalis */
   .header-actions {
     gap: 8px !important;
-  }
-  .lang-switch {
-    gap: 0 !important;
-    padding: 2px !important;
-  }
-  .lang-btn {
-    width: 30px !important;
-    height: 30px !important;
-    padding: 0 !important;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-wrap: nowrap !important;
+    min-width: 0;
   }
 
-  #userMenu .auth-btn {
-    padding: 6px 12px !important;
-  }
-  #userMenu .auth-btn span {
-    display: none !important;
-  } /* Sembunyikan teks asli */
-  #userMenu .auth-btn::after {
-    content: "Login"; /* Ganti jadi teks singkat */
-    font-size: 12px;
-  }
-  #userMenu > div > div:first-child {
-    display: none !important;
-  }
-
-  /* 2. MENU NAVIGASI PINDAH KE BAWAH (BOTTOM NAV BAR) */
   .main-nav {
     position: fixed !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    background: rgba(255, 255, 255, 0.95) !important;
+    left: 12px !important;
+    right: 12px !important;
+    bottom: calc(10px + env(safe-area-inset-bottom)) !important;
+    z-index: 4000 !important;
+
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 6px !important;
+
+    width: auto !important;
+    padding: 8px !important;
+    border-radius: 22px !important;
+    background: rgba(255, 255, 255, 0.94) !important;
+    border: 1px solid rgba(56, 189, 248, 0.35) !important;
+    box-shadow: 0 -8px 28px rgba(14, 165, 233, 0.16) !important;
     backdrop-filter: blur(16px) !important;
-    border-top: 1px solid rgba(56, 189, 248, 0.3) !important;
-    padding: 12px 16px calc(12px + env(safe-area-inset-bottom)) !important;
-    display: flex !important;
-    justify-content: space-around !important;
-    align-items: center !important;
-    gap: 0 !important;
-    z-index: 9999 !important;
-    box-shadow: 0 -4px 20px rgba(14, 165, 233, 0.08) !important;
-    flex-wrap: nowrap !important;
+
     overflow: visible !important;
   }
 
-  /* Gaya Tombol Menu Bawah */
+  body.dark-theme .main-nav {
+    background: rgba(15, 23, 42, 0.94) !important;
+  }
+
   .nav-link {
-    flex: 1 !important;
-    text-align: center !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    min-height: 42px !important;
+    padding: 8px 6px !important;
+    border-radius: 16px !important;
+
     background: transparent !important;
     color: var(--text-muted) !important;
-    padding: 8px 4px !important;
-    font-size: 12px !important;
-    border-radius: 12px !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    line-height: 1.1 !important;
+    text-align: center !important;
     white-space: normal !important;
   }
 
-  .nav-link:active,
-  .nav-link:hover {
+  .nav-link:hover,
+  .nav-link:active {
     background: var(--water-foam) !important;
     color: var(--ocean-deep) !important;
   }
 
-  /* 3. Penyesuaian Elemen Lain Agar Tidak Tertutup Menu Bawah */
+  .nav-link::after {
+    display: none !important;
+  }
+
   .site-footer {
-    padding-bottom: 90px !important;
+    padding-bottom: 110px !important;
   }
 
   .floating-admin-btn {
-    bottom: 80px !important;
+    bottom: 92px !important;
   }
-  /* ========================================= */
-  /* UPGRADE 2.0: SUPER COMPACT & NATIVE FEEL  */
-  /* ========================================= */
+}
 
-  /* 1. Sembunyikan Teks Brand di HP, Sisakan Logo ⛩️ Saja */
+@media (max-width: 420px) {
   .brand-copy {
     display: none !important;
   }
 
-  /* 2. Sulap Menu Bawah Jadi Berbasis Icon (Mirip App Asli) */
-  .nav-link {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-    font-size: 10px !important; /* Teks dikecilkan */
-    font-weight: 700 !important;
-    gap: 4px !important;
-    padding: 8px 0 !important;
+  .header-inner {
+    grid-template-columns: auto 1fr !important;
   }
 
-  /* Suntik Icon via CSS berdasarkan link tujuan (Tanpa sentuh HTML) */
-  .nav-link[href="#hero"]::before {
-    content: "🏠";
-    font-size: 18px;
+  .header-actions {
+    justify-content: flex-end !important;
   }
 
-  .nav-link[href="#store-section"]::before {
-    content: "🎮";
-    font-size: 18px;
+  .lang-btn {
+    width: 30px !important;
+    height: 30px !important;
+    padding: 0 !important;
   }
 
-  .nav-link[onclick="showGuide()"]::before {
-    content: "📖";
-    font-size: 18px;
-  }
-
-  /* Efek saat ditekan/aktif */
-  .nav-link:active::before,
-  .nav-link:hover::before {
-    transform: translateY(-2px);
-    transition: transform 0.2s ease;
+  #userMenu .auth-btn {
+    padding: 7px 10px !important;
+    font-size: 11px !important;
   }
 }
-/* ========================================= */
