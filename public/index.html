@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AE Game Store 🌊⛩️</title>
-    <link rel="stylesheet" href="style.css?v=4" />
+    <link rel="stylesheet" href="style.css?v=5" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </head>
 
@@ -211,8 +211,14 @@
               placeholder="Contoh: DELTA5K"
               autocomplete="off"
             />
-            <button type="button" id="checkVoucherBtn" onclick="checkVoucher()">
-              Cek
+            <button
+              type="button"
+              id="checkVoucherBtn"
+              class="voucher-check-btn"
+              onclick="checkVoucher()"
+            >
+              <span>🎟️</span>
+              <b>Cek</b>
             </button>
           </div>
           <small id="voucherMessage" class="voucher-message"></small>

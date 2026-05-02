@@ -1304,9 +1304,44 @@ button#buyBtn:active {
   flex: 1;
 }
 
-.voucher-row button {
-  flex: 0 0 auto;
-  padding: 12px 16px;
+.voucher-check-btn {
+  flex: 0 0 86px;
+  min-height: 58px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--ocean-deep), var(--ocean-light));
+  color: #ffffff;
+  font-weight: 900;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 10px 22px rgba(14, 165, 233, 0.25);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    opacity 0.18s ease;
+}
+
+.voucher-check-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(14, 165, 233, 0.35);
+}
+
+.voucher-check-btn:active {
+  transform: translateY(0);
+  opacity: 0.9;
+}
+
+.voucher-check-btn span {
+  font-size: 16px;
+}
+
+.voucher-check-btn b {
+  font: inherit;
 }
 
 .voucher-message {
@@ -1351,8 +1386,10 @@ button#buyBtn:active {
     flex-direction: column;
   }
 
-  .voucher-row button {
+  .voucher-check-btn {
     width: 100%;
+    flex: none;
+    min-height: 50px;
   }
 }
 .hero-cta {
