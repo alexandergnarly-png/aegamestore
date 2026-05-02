@@ -769,6 +769,8 @@ function showSocialProof() {
 }
 
 function showPrivacyPolicy() {
+  closeMobileNav();
+
   const t = translations[currentLanguage];
 
   Swal.fire({
@@ -782,6 +784,8 @@ function showPrivacyPolicy() {
 }
 
 function showTermsPolicy() {
+  closeMobileNav();
+
   const t = translations[currentLanguage];
 
   Swal.fire({

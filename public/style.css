@@ -2208,3 +2208,18 @@ body.dark-theme .order-modal-card {
     bottom: 18px !important;
   }
 }
+/* ===== SWEETALERT ABOVE MOBILE DRAWER FIX ===== */
+
+.swal2-container {
+  z-index: 10000 !important;
+}
+
+body:has(.swal2-container) .mobile-nav-backdrop {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+body:has(.swal2-container) .main-nav {
+  transform: translateX(110%) !important;
+}
