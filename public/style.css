@@ -2196,3 +2196,62 @@ html {
     scroll-behavior: auto;
   }
 }
+/* ===== GAME CARD PRICE + STOCK INFO ===== */
+
+.game-card-meta {
+  display: grid;
+  gap: 6px;
+  padding: 0 10px 11px;
+}
+
+.game-card-meta small {
+  color: var(--ocean-deep);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.game-card-meta b {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 24px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.game-card-meta b.ready {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.game-card-meta b.empty {
+  background: #ffe4e6;
+  color: #e11d48;
+}
+
+body.dark-theme .game-card-meta b.ready {
+  background: rgba(34, 197, 94, 0.18);
+  color: #86efac;
+}
+
+body.dark-theme .game-card-meta b.empty {
+  background: rgba(225, 29, 72, 0.18);
+  color: #fda4af;
+}
+
+@media (max-width: 480px) {
+  .game-card-meta {
+    padding: 0 8px 9px;
+  }
+
+  .game-card-meta small {
+    font-size: 10px;
+  }
+
+  .game-card-meta b {
+    font-size: 9px;
+    padding: 5px 7px;
+  }
+}

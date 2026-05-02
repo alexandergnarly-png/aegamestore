@@ -110,7 +110,8 @@ const translations = {
     contactLabel: "Contact / Email",
     voucherCodeLabel: "Voucher Code",
     playerNamePlaceholder: "Enter your player name",
-    contactPlaceholder: "Enter active WhatsApp / Email for contact if there are issues",
+    contactPlaceholder:
+      "Enter active WhatsApp / Email for contact if there are issues",
     voucherPlaceholder: "Example: DELTA5K",
     checkVoucherBtn: "Check",
     summaryGame: "Game",
@@ -213,6 +214,7 @@ let selectedGame = "";
 let currentCategory = "all";
 let selectedProductId = null;
 let appliedVoucherCode = "";
+let selectedProductBasePrice = 0;
 
 const gameGrid = document.getElementById("gameGrid");
 const brandSelect = document.getElementById("brand");
@@ -362,11 +364,43 @@ function renderGames() {
     card.className = "game-card";
 
     const imageUrl = gameImages[game] || fallbackImage;
+    const gameProducts = allProducts.filter((item) => item.game === game);
+    const availableProducts = gameProducts.filter(
+      (item) => Number(item.available_keys || 0) > 0,
+    );
+    const totalStock = gameProducts.reduce(
+      (total, item) => total + Number(item.available_keys || 0),
+      0,
+    );
+    const minPrice =
+      availableProducts.length > 0
+        ? Math.min(...availableProducts.map((item) => Number(item.price || 0)))
+        : 0;
+
+    const stockLabel =
+      totalStock > 0
+        ? currentLanguage === "en"
+          ? `${totalStock} stock ready`
+          : `${totalStock} stok ready`
+        : translations[currentLanguage].outOfStockLabel;
+
+    const priceLabel =
+      minPrice > 0
+        ? currentLanguage === "en"
+          ? `From ${formatRupiah(minPrice)}`
+          : `Mulai ${formatRupiah(minPrice)}`
+        : currentLanguage === "en"
+          ? "Not available"
+          : "Belum tersedia";
 
     card.innerHTML = `
-      <img src="${imageUrl}" alt="${game}" onerror="this.src='${fallbackImage}'">
-      <span>${game}</span>
-    `;
+  <img src="${imageUrl}" alt="${game}" onerror="this.src='${fallbackImage}'">
+  <span>${game}</span>
+  <div class="game-card-meta">
+    <small>${priceLabel}</small>
+    <b class="${totalStock > 0 ? "ready" : "empty"}">${stockLabel}</b>
+  </div>
+`;
 
     if (game === selectedGame) {
       card.classList.add("active");
@@ -534,6 +568,7 @@ function updatePreview() {
   }
 
   selectedProductId = selectedProduct.id;
+  selectedProductBasePrice = Number(selectedProduct.price || 0);
 
   const availableKeys = Number(selectedProduct.available_keys || 0);
   const isOutOfStock = availableKeys <= 0;
@@ -541,9 +576,7 @@ function updatePreview() {
   document.getElementById("previewGame").innerText = selectedProduct.game;
   document.getElementById("previewProduct").innerText =
     `${selectedProduct.brand} - ${selectedProduct.duration}`;
-  document.getElementById("previewPrice").innerText = formatRupiah(
-    selectedProduct.price,
-  );
+  showDefaultPriceBreakdown(selectedProduct.price);
 
   buyBtn.disabled = isOutOfStock;
   buyBtn.innerText = isOutOfStock
@@ -831,6 +864,54 @@ function formatRupiah(value) {
   return "Rp " + Number(value || 0).toLocaleString("id-ID");
 }
 
+function calculateQrisGrossPrice(netPrice) {
+  const qrisFeeRate = 0.007;
+  const ppnRate = 0.11;
+  const totalFeeRate = qrisFeeRate * (1 + ppnRate);
+
+  return Math.ceil(Number(netPrice || 0) / (1 - totalFeeRate));
+}
+
+function showPriceBreakdown({
+  originalPrice = 0,
+  discountAmount = 0,
+  paymentFee = 0,
+  finalPrice = 0,
+}) {
+  const priceBreakdown = document.getElementById("priceBreakdown");
+  const originalPriceText = document.getElementById("originalPriceText");
+  const discountText = document.getElementById("discountText");
+  const paymentFeeText = document.getElementById("paymentFeeText");
+  const finalPriceText = document.getElementById("finalPriceText");
+  const previewPrice = document.getElementById("previewPrice");
+
+  if (!priceBreakdown) return;
+
+  if (originalPriceText)
+    originalPriceText.innerText = formatRupiah(originalPrice);
+  if (discountText)
+    discountText.innerText = "- " + formatRupiah(discountAmount);
+  if (paymentFeeText) paymentFeeText.innerText = formatRupiah(paymentFee);
+  if (finalPriceText) finalPriceText.innerText = formatRupiah(finalPrice);
+  if (previewPrice) previewPrice.innerText = formatRupiah(finalPrice);
+
+  priceBreakdown.style.display = "block";
+}
+
+function showDefaultPriceBreakdown(productPrice) {
+  const originalPrice = Number(productPrice || 0);
+  const netPrice = Math.max(originalPrice, 1000);
+  const finalPrice = calculateQrisGrossPrice(netPrice);
+  const paymentFee = finalPrice - netPrice;
+
+  showPriceBreakdown({
+    originalPrice,
+    discountAmount: 0,
+    paymentFee,
+    finalPrice,
+  });
+}
+
 function resetVoucherPreview() {
   appliedVoucherCode = "";
 
@@ -842,7 +923,9 @@ function resetVoucherPreview() {
     voucherMessage.className = "voucher-message";
   }
 
-  if (priceBreakdown) {
+  if (selectedProductBasePrice > 0) {
+    showDefaultPriceBreakdown(selectedProductBasePrice);
+  } else if (priceBreakdown) {
     priceBreakdown.style.display = "none";
   }
 }
