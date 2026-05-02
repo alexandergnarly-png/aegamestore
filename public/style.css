@@ -1414,57 +1414,109 @@ button#buyBtn:active {
   }
 
   .header-inner {
-    padding: 12px 14px;
-    gap: 10px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "brand actions"
+      "nav nav";
+    align-items: center;
+    padding: 8px 12px 9px;
+    gap: 8px;
   }
 
   .brand {
-    width: 100%;
-    justify-content: center;
+    grid-area: brand;
+    width: auto;
+    justify-content: flex-start;
+    min-width: 0;
+    gap: 8px;
   }
 
   .brand-logo {
-    width: 44px;
-    height: 44px;
-    font-size: 22px;
+    width: 38px;
+    height: 38px;
+    font-size: 19px;
+    border-radius: 13px;
+  }
+
+  .brand-copy {
+    min-width: 0;
   }
 
   .brand-copy strong {
-    font-size: 18px;
+    font-size: 16px;
+    line-height: 1.05;
+    white-space: nowrap;
   }
 
   .brand-copy span {
-    font-size: 12px;
+    font-size: 11px;
+    line-height: 1.1;
+    white-space: nowrap;
   }
 
   .header-actions {
-    width: 100%;
+    grid-area: actions;
+    width: auto;
     margin-left: 0;
-    justify-content: center;
-    gap: 8px;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: nowrap;
+  }
+
+  .lang-switch {
+    padding: 3px;
+    gap: 3px;
+  }
+
+  .lang-btn {
+    padding: 5px 8px;
+    font-size: 10px;
   }
 
   #userMenu > div {
-    justify-content: center;
+    justify-content: flex-end;
+    gap: 5px !important;
+    flex-wrap: nowrap !important;
   }
 
   #userMenu .auth-btn {
-    padding: 8px 11px !important;
-    font-size: 12px !important;
+    min-height: 34px;
+    padding: 6px 9px !important;
+    font-size: 11px !important;
+    border-radius: 999px !important;
+    white-space: nowrap;
+  }
+
+  #userMenu .auth-btn:first-child {
+    max-width: 90px;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .main-nav {
-    padding-top: 8px;
-    gap: 8px;
+    grid-area: nav;
+    order: initial;
+    width: 100%;
+    justify-content: flex-start;
+    gap: 7px;
+    overflow-x: auto;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    -webkit-overflow-scrolling: touch;
   }
 
   .nav-link {
-    font-size: 12px;
-    padding: 8px 13px;
+    flex: 0 0 auto;
+    font-size: 11px;
+    padding: 7px 11px;
+    border-radius: 999px;
+    white-space: nowrap;
   }
 
   .page {
-    padding-top: 26px;
+    padding-top: 18px;
   }
 
   .hero {
@@ -1694,5 +1746,30 @@ button#buyBtn:active {
 
   100% {
     background-position: -120% 0;
+  }
+}
+@media (max-width: 420px) {
+  .header-inner {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "brand"
+      "actions"
+      "nav";
+  }
+
+  .brand {
+    justify-content: center;
+  }
+
+  .header-actions {
+    justify-content: center;
+  }
+
+  .brand-copy strong {
+    font-size: 15px;
+  }
+
+  #userMenu .auth-btn:first-child {
+    max-width: 105px;
   }
 }
