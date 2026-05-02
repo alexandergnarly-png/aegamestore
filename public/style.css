@@ -953,9 +953,8 @@ button#buyBtn:active {
 .site-footer {
   background: white;
   margin-top: auto;
-  /* Ini kunci rahasianya biar selalu nempel di bawah! */
   border-top: 1px solid var(--border-color);
-  padding: 60px 24px 20px;
+  padding: 42px 24px 18px;
   width: 100%;
 }
 
@@ -963,8 +962,9 @@ button#buyBtn:active {
   max-width: 1200px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 40px;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 28px;
+  align-items: start;
 }
 
 .footer-brand strong {
@@ -997,41 +997,76 @@ button#buyBtn:active {
 
 .footer-bottom {
   text-align: center;
-  margin-top: 60px;
+  margin-top: 34px;
   font-size: 12px;
   color: #94a3b8;
   border-top: 1px dashed #e2e8f0;
-  padding-top: 20px;
+  padding-top: 16px;
 }
+
 @media (max-width: 768px) {
   .site-footer {
-    padding: 42px 20px 90px;
+    padding: 30px 18px 46px !important;
   }
 
   .footer-inner {
     grid-template-columns: 1fr;
-    gap: 28px;
+    gap: 22px;
     text-align: center;
+  }
+
+  .footer-brand .brand-logo {
+    width: 48px !important;
+    height: 48px !important;
+    font-size: 22px !important;
+    margin: 0 auto 10px;
+  }
+
+  .footer-brand strong {
+    font-size: 22px;
+    margin: 8px 0;
   }
 
   .footer-brand p {
     margin: 0 auto;
+    font-size: 14px;
+    line-height: 1.45;
+    max-width: 320px;
+  }
+
+  .footer-payments p {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 14px;
   }
 
   .payment-icons {
     justify-content: center;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .payment-icons span {
+    padding: 7px 12px;
+    font-size: 11px;
+  }
+
+  .footer-links {
+    justify-content: center;
+    margin-top: 18px;
+    gap: 8px;
+  }
+
+  .footer-links button {
+    padding: 9px 13px;
+    font-size: 12px;
   }
 
   .footer-bottom {
-    margin-top: 36px;
-    line-height: 1.6;
-  }
-
-  .social-proof {
-    left: 14px;
-    right: 14px;
-    bottom: 86px;
-    width: auto;
+    margin-top: 28px;
+    padding-top: 16px;
+    font-size: 12px;
+    line-height: 1.5;
   }
 }
 .game-only-layout {
@@ -2143,4 +2178,33 @@ button#buyBtn:active {
 
 body.dark-theme .order-modal-card {
   background: #1e293b !important;
+}
+/* ===== SOCIAL PROOF MOBILE POSITION ===== */
+
+@media (max-width: 768px) {
+  .social-proof {
+    left: 14px !important;
+    right: 84px !important;
+    bottom: 22px !important;
+    width: auto !important;
+    max-width: none !important;
+    padding: 10px 12px !important;
+    font-size: 12px !important;
+    border-radius: 16px !important;
+    z-index: 1200 !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .social-proof {
+    display: flex !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .social-proof {
+    left: 12px !important;
+    right: 78px !important;
+    bottom: 18px !important;
+  }
 }
