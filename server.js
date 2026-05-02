@@ -232,6 +232,12 @@ const orderCheckLimiter = rateLimit({
   },
 });
 
+const webhookLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 60,
+  message: "Too many webhook requests",
+});
+
 const userAuthLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 20,
@@ -965,7 +971,7 @@ app.post("/create-order", orderLimiter, async (req, res) => {
   }
 });
 
-app.post("/midtrans-notification", async (req, res) => {
+app.post("/midtrans-notification", webhookLimiter, async (req, res) => {
   try {
     const notification = await snap.transaction.notification(req.body);
 
@@ -1107,7 +1113,6 @@ app.get("/order/:id", orderCheckLimiter, async (req, res) => {
     return res.json({
       id: order.id,
       name: order.name,
-      contact: order.contact,
       game: order.game,
       product: order.product,
       price: order.price,
@@ -2087,7 +2092,7 @@ app.post("/user/change-password", async (req, res) => {
 });
 
 app.post("/user-logout", (req, res) => {
-  res.clearCookie("user_auth");
+  res.clearCookie("user_auth", { path: "/" });
   return res.json({ message: "Logout berhasil" });
 });
 // ----------------------------------
