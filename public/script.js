@@ -65,6 +65,11 @@ const translations = {
     termsContent:
       "Dengan menggunakan AE Game Store, buyer wajib mengisi data order dengan benar. Produk digital yang sudah berhasil dikirim tidak dapat dibatalkan kecuali ada kesalahan dari sistem. Pembayaran diproses melalui payment gateway yang tersedia.",
     policyOk: "Mengerti",
+    stockLabel: "Stok",
+    outOfStockLabel: "Habis",
+    outOfStockTitle: "Stok Habis",
+    outOfStockText:
+      "Stok key untuk produk ini sedang habis. Silakan pilih produk lain atau hubungi admin.",
   },
   en: {
     selectProduct: "Select Product",
@@ -131,6 +136,11 @@ const translations = {
     termsContent:
       "By using AE Game Store, buyers must provide correct order information. Digital products that have been successfully delivered cannot be cancelled unless there is a system error. Payments are processed through the available payment gateway.",
     policyOk: "Got it",
+    stockLabel: "Stock",
+    outOfStockLabel: "Out of stock",
+    outOfStockTitle: "Out of Stock",
+    outOfStockText:
+      "The key stock for this product is currently empty. Please choose another product or contact admin.",
   },
 };
 
@@ -215,10 +225,24 @@ function formatRupiah(num) {
 }
 
 function setLoading(isLoading) {
+  const selectedProduct = allProducts.find(
+    (item) => String(item.id) === String(productSelect.value),
+  );
+
+  const availableKeys = Number(selectedProduct?.available_keys || 0);
+  const isOutOfStock = selectedProduct && availableKeys <= 0;
+
   loadingText.style.display = isLoading ? "block" : "none";
-  buyBtn.disabled = isLoading;
-  buyBtn.innerText = isLoading
-    ? translations[currentLanguage].processing
+
+  if (isLoading) {
+    buyBtn.disabled = true;
+    buyBtn.innerText = translations[currentLanguage].processing;
+    return;
+  }
+
+  buyBtn.disabled = Boolean(isOutOfStock);
+  buyBtn.innerText = isOutOfStock
+    ? translations[currentLanguage].outOfStockLabel
     : translations[currentLanguage].buyNow;
 }
 
@@ -451,11 +475,29 @@ function loadDurations() {
   productSelect.innerHTML = "";
 
   filteredProducts.forEach((item) => {
+    const availableKeys = Number(item.available_keys || 0);
+    const isOutOfStock = availableKeys <= 0;
+
+    const stockText = isOutOfStock
+      ? translations[currentLanguage].outOfStockLabel
+      : `${translations[currentLanguage].stockLabel} ${availableKeys}`;
+
     const option = document.createElement("option");
     option.value = item.id;
-    option.textContent = `${item.duration} - ${formatRupiah(item.price)}`;
+    option.disabled = isOutOfStock;
+    option.textContent = `${item.duration} - ${formatRupiah(item.price)} - ${stockText}`;
     productSelect.appendChild(option);
   });
+
+  const firstAvailable = filteredProducts.find(
+    (item) => Number(item.available_keys || 0) > 0,
+  );
+
+  if (firstAvailable) {
+    productSelect.value = firstAvailable.id;
+  } else if (filteredProducts[0]) {
+    productSelect.value = filteredProducts[0].id;
+  }
 
   updatePreview();
 }
@@ -479,12 +521,20 @@ function updatePreview() {
 
   selectedProductId = selectedProduct.id;
 
+  const availableKeys = Number(selectedProduct.available_keys || 0);
+  const isOutOfStock = availableKeys <= 0;
+
   document.getElementById("previewGame").innerText = selectedProduct.game;
   document.getElementById("previewProduct").innerText =
     `${selectedProduct.brand} - ${selectedProduct.duration}`;
   document.getElementById("previewPrice").innerText = formatRupiah(
     selectedProduct.price,
   );
+
+  buyBtn.disabled = isOutOfStock;
+  buyBtn.innerText = isOutOfStock
+    ? translations[currentLanguage].outOfStockLabel
+    : translations[currentLanguage].buyNow;
 
   resetVoucherPreview();
 }
@@ -516,6 +566,22 @@ async function buy() {
       text: "Pilih game dan durasi produknya dulu.",
       confirmButtonColor: "#0ea5e9",
     });
+    return;
+  }
+
+  const availableKeys = Number(selectedProduct.available_keys || 0);
+
+  if (availableKeys <= 0) {
+    closeOrderModal();
+    loadAllProducts();
+
+    Swal.fire({
+      icon: "error",
+      title: translations[currentLanguage].outOfStockTitle,
+      text: translations[currentLanguage].outOfStockText,
+      confirmButtonColor: "#fb7185",
+    });
+
     return;
   }
 
@@ -564,16 +630,25 @@ async function buy() {
     const errorMessage = data.message || "Gagal membuat pembayaran";
     const isOutOfStock = errorMessage.toLowerCase().includes("stok key habis");
 
+    if (isOutOfStock) {
+      closeOrderModal();
+      loadAllProducts();
+
+      Swal.fire({
+        icon: "error",
+        title: translations[currentLanguage].outOfStockTitle,
+        text: errorMessage,
+        confirmButtonColor: "#fb7185",
+      });
+
+      return;
+    }
+
     Swal.fire({
       icon: "error",
-      title: isOutOfStock ? "Stok Habis" : "Gagal",
+      title: "Gagal",
       text: errorMessage,
       confirmButtonColor: "#fb7185",
-    }).then(() => {
-      if (isOutOfStock) {
-        closeOrderModal();
-        loadAllProducts();
-      }
     });
   } catch (err) {
     Swal.fire({

@@ -1862,20 +1862,24 @@ app.patch(
 app.get("/public-products", async (req, res) => {
   try {
     const result = await query(`
-  SELECT *,
+  SELECT
+    p.*,
+    COUNT(k.id) FILTER (WHERE k.used = 0)::int AS available_keys,
     CASE
-      WHEN LOWER(duration) LIKE '%jam%' THEN
-        COALESCE(NULLIF(regexp_replace(duration, '[^0-9]', '', 'g'), '')::int, 0)
-      WHEN LOWER(duration) LIKE '%hari%' THEN
-        COALESCE(NULLIF(regexp_replace(duration, '[^0-9]', '', 'g'), '')::int, 0) * 24
-      WHEN LOWER(duration) LIKE '%bulan%' THEN
-        COALESCE(NULLIF(regexp_replace(duration, '[^0-9]', '', 'g'), '')::int, 0) * 24 * 30
+      WHEN LOWER(p.duration) LIKE '%jam%' THEN
+        COALESCE(NULLIF(regexp_replace(p.duration, '[^0-9]', '', 'g'), '')::int, 0)
+      WHEN LOWER(p.duration) LIKE '%hari%' THEN
+        COALESCE(NULLIF(regexp_replace(p.duration, '[^0-9]', '', 'g'), '')::int, 0) * 24
+      WHEN LOWER(p.duration) LIKE '%bulan%' THEN
+        COALESCE(NULLIF(regexp_replace(p.duration, '[^0-9]', '', 'g'), '')::int, 0) * 24 * 30
       ELSE
         999999
     END AS duration_order
-  FROM products
-  WHERE active = 1
-  ORDER BY game ASC, brand ASC, duration_order ASC, price ASC, id ASC
+  FROM products p
+  LEFT JOIN keys k ON k.product_id = p.id
+  WHERE p.active = 1
+  GROUP BY p.id
+  ORDER BY p.game ASC, p.brand ASC, duration_order ASC, p.price ASC, p.id ASC
 `);
 
     return res.json(result.rows);
