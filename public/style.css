@@ -1877,5 +1877,48 @@ button#buyBtn:active {
   .floating-admin-btn {
     bottom: 80px !important;
   }
+  /* ========================================= */
+  /* UPGRADE 2.0: SUPER COMPACT & NATIVE FEEL  */
+  /* ========================================= */
+
+  /* 1. Sembunyikan Teks Brand di HP, Sisakan Logo ⛩️ Saja */
+  .brand-copy {
+    display: none !important;
+  }
+
+  /* 2. Sulap Menu Bawah Jadi Berbasis Icon (Mirip App Asli) */
+  .nav-link {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 10px !important; /* Teks dikecilkan */
+    font-weight: 700 !important;
+    gap: 4px !important;
+    padding: 8px 0 !important;
+  }
+
+  /* Suntik Icon via CSS berdasarkan link tujuan (Tanpa sentuh HTML) */
+  .nav-link[href="#hero"]::before {
+    content: "🏠";
+    font-size: 18px;
+  }
+
+  .nav-link[href="#store-section"]::before {
+    content: "🎮";
+    font-size: 18px;
+  }
+
+  .nav-link[onclick="showGuide()"]::before {
+    content: "📖";
+    font-size: 18px;
+  }
+
+  /* Efek saat ditekan/aktif */
+  .nav-link:active::before,
+  .nav-link:hover::before {
+    transform: translateY(-2px);
+    transition: transform 0.2s ease;
+  }
 }
 /* ========================================= */
