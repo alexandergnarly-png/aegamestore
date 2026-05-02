@@ -183,6 +183,77 @@
         margin-top: 10px;
       }
 
+      .order-list {
+  display: grid;
+  gap: 12px;
+}
+
+.order-card {
+  padding: 16px;
+  border: 1px solid #bae6fd;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 10px 24px rgba(14, 165, 233, 0.08);
+}
+
+.order-card strong {
+  display: block;
+  font-size: 16px;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+.order-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 6px;
+  font-size: 13px;
+}
+
+.order-row span:first-child {
+  color: var(--muted);
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  background: #e0f2fe;
+  color: #0284c7;
+}
+
+.status-pill.paid,
+.status-pill.delivered {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.status-pill.pending,
+.status-pill.waiting_payment {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.status-pill.expired,
+.status-pill.cancelled {
+  background: #ffe4e6;
+  color: #e11d48;
+}
+
+.empty-state {
+  padding: 18px;
+  border: 1px dashed #bae6fd;
+  border-radius: 18px;
+  background: rgba(240, 249, 255, 0.75);
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+}
+
       @media (max-width: 520px) {
         .status-grid {
           grid-template-columns: 1fr;
@@ -208,13 +279,32 @@
           <span id="loginStatus">Aktif</span>
         </div>
         <div class="status-box">
-          <strong>Email</strong>
-          <span>Belum tersedia</span>
+          <strong>Kontak Order</strong>
+          <span id="contactStatus">Belum disimpan</span>
         </div>
       </div>
 
       <div class="section">
-        <div class="section-title">Ganti Password</div>
+  <div class="section-title">Data Order Default</div>
+
+  <input
+    type="text"
+    id="defaultName"
+    placeholder="Nama default untuk order"
+  />
+
+  <input
+    type="text"
+    id="defaultContact"
+    placeholder="Email / Nomor WA aktif"
+  />
+
+  <button onclick="saveDefaultOrderData()">Simpan Data Order</button>
+
+  <p class="note">
+    Data ini bisa dipakai untuk mengisi otomatis nama dan kontak saat checkout.
+  </p>
+</div>
         <input
           type="password"
           id="oldPassword"
@@ -354,29 +444,77 @@
           const data = await res.json();
 
           if (!Array.isArray(data) || data.length === 0) {
-            box.innerHTML = "Belum ada order yang terhubung ke akun ini.";
+            box.innerHTML = `
+  <div class="empty-state">
+    Belum ada order yang terhubung ke akun ini.
+  </div>
+`;
             return;
           }
 
-          box.innerHTML = data
-            .map(
-              (item) => `
-      <div style="padding: 14px; border: 1px solid #bae6fd; border-radius: 14px; margin-top: 10px; background: white;">
-        <strong>${item.game || "-"}</strong><br>
-        Produk: ${item.product || "-"}<br>
-        Harga: ${formatRupiah(item.price)}<br>
-        Pembayaran: ${item.payment_status || "-"}<br>
-        Pengiriman: ${item.delivery_status || "-"}<br>
-        Waktu: ${formatTanggal(item.created_at)}<br>
-        ${item.gamekey ? `Key: <code>${item.gamekey}</code>` : ""}
-      </div>
-    `,
-            )
-            .join("");
+          box.innerHTML = `
+  <div class="order-list">
+    ${data
+      .map(
+        (item) => `
+          <div class="order-card">
+            <strong>${item.game || "-"}</strong>
+
+            <div class="order-row">
+              <span>Produk</span>
+              <b>${item.product || "-"}</b>
+            </div>
+
+            <div class="order-row">
+              <span>Harga</span>
+              <b>${formatRupiah(item.price)}</b>
+            </div>
+
+            <div class="order-row">
+              <span>Pembayaran</span>
+              <b class="status-pill ${item.payment_status || ""}">
+                ${item.payment_status || "-"}
+              </b>
+            </div>
+
+            <div class="order-row">
+              <span>Pengiriman</span>
+              <b class="status-pill ${item.delivery_status || ""}">
+                ${item.delivery_status || "-"}
+              </b>
+            </div>
+
+            <div class="order-row">
+              <span>Waktu</span>
+              <b>${formatTanggal(item.created_at)}</b>
+            </div>
+
+            ${
+              item.gamekey
+                ? `<div class="order-row">
+                    <span>Key</span>
+                    <code>${item.gamekey}</code>
+                  </div>`
+                : ""
+            }
+          </div>
+        `,
+      )
+      .join("")}
+  </div>
+`;
         } catch (err) {
           box.innerHTML = "Gagal memuat riwayat order.";
         }
       }
+      function saveDefaultOrderData() {
+  Swal.fire({
+    title: "Fitur segera aktif",
+    text: "Nanti data ini bisa disimpan ke akun dan dipakai otomatis saat checkout.",
+    icon: "info",
+    confirmButtonColor: "#0ea5e9",
+  });
+}
       checkUser();
     </script>
   </body>
