@@ -184,75 +184,75 @@
       }
 
       .order-list {
-  display: grid;
-  gap: 12px;
-}
+        display: grid;
+        gap: 12px;
+      }
 
-.order-card {
-  padding: 16px;
-  border: 1px solid #bae6fd;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 10px 24px rgba(14, 165, 233, 0.08);
-}
+      .order-card {
+        padding: 16px;
+        border: 1px solid #bae6fd;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 10px 24px rgba(14, 165, 233, 0.08);
+      }
 
-.order-card strong {
-  display: block;
-  font-size: 16px;
-  margin-bottom: 8px;
-  color: var(--text);
-}
+      .order-card strong {
+        display: block;
+        font-size: 16px;
+        margin-bottom: 8px;
+        color: var(--text);
+      }
 
-.order-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 6px;
-  font-size: 13px;
-}
+      .order-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 6px;
+        font-size: 13px;
+      }
 
-.order-row span:first-child {
-  color: var(--muted);
-}
+      .order-row span:first-child {
+        color: var(--muted);
+      }
 
-.status-pill {
-  display: inline-flex;
-  align-items: center;
-  padding: 5px 9px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 800;
-  background: #e0f2fe;
-  color: #0284c7;
-}
+      .status-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 5px 9px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 800;
+        background: #e0f2fe;
+        color: #0284c7;
+      }
 
-.status-pill.paid,
-.status-pill.delivered {
-  background: #dcfce7;
-  color: #16a34a;
-}
+      .status-pill.paid,
+      .status-pill.delivered {
+        background: #dcfce7;
+        color: #16a34a;
+      }
 
-.status-pill.pending,
-.status-pill.waiting_payment {
-  background: #fef3c7;
-  color: #d97706;
-}
+      .status-pill.pending,
+      .status-pill.waiting_payment {
+        background: #fef3c7;
+        color: #d97706;
+      }
 
-.status-pill.expired,
-.status-pill.cancelled {
-  background: #ffe4e6;
-  color: #e11d48;
-}
+      .status-pill.expired,
+      .status-pill.cancelled {
+        background: #ffe4e6;
+        color: #e11d48;
+      }
 
-.empty-state {
-  padding: 18px;
-  border: 1px dashed #bae6fd;
-  border-radius: 18px;
-  background: rgba(240, 249, 255, 0.75);
-  text-align: center;
-  color: var(--muted);
-  font-size: 14px;
-}
+      .empty-state {
+        padding: 18px;
+        border: 1px dashed #bae6fd;
+        border-radius: 18px;
+        background: rgba(240, 249, 255, 0.75);
+        text-align: center;
+        color: var(--muted);
+        font-size: 14px;
+      }
 
       @media (max-width: 520px) {
         .status-grid {
@@ -285,37 +285,45 @@
       </div>
 
       <div class="section">
-  <div class="section-title">Data Order Default</div>
+        <div class="section-title">Data Order Default</div>
 
-  <input
-    type="text"
-    id="defaultName"
-    placeholder="Nama default untuk order"
-  />
+        <input
+          type="text"
+          id="defaultName"
+          placeholder="Nama default untuk order"
+        />
 
-  <input
-    type="text"
-    id="defaultContact"
-    placeholder="Email / Nomor WA aktif"
-  />
+        <input
+          type="text"
+          id="defaultContact"
+          placeholder="Email / Nomor WA aktif"
+        />
 
-  <button onclick="saveDefaultOrderData()">Simpan Data Order</button>
+        <button onclick="saveDefaultOrderData()">Simpan Data Order</button>
 
-  <p class="note">
-    Data ini bisa dipakai untuk mengisi otomatis nama dan kontak saat checkout.
-  </p>
-</div>
+        <p class="note">
+          Data ini bisa dipakai untuk mengisi otomatis nama dan kontak saat
+          checkout.
+        </p>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Ganti Password</div>
+
         <input
           type="password"
           id="oldPassword"
           placeholder="Password lama / password random"
         />
+
         <input
           type="password"
           id="newPassword"
           placeholder="Password baru minimal 6 karakter"
         />
+
         <button onclick="changePassword()">Simpan Password Baru</button>
+
         <p class="note">
           Kalau password kamu hasil reset admin, isi password random itu sebagai
           password lama.
@@ -508,13 +516,13 @@
         }
       }
       function saveDefaultOrderData() {
-  Swal.fire({
-    title: "Fitur segera aktif",
-    text: "Nanti data ini bisa disimpan ke akun dan dipakai otomatis saat checkout.",
-    icon: "info",
-    confirmButtonColor: "#0ea5e9",
-  });
-}
+        Swal.fire({
+          title: "Fitur segera aktif",
+          text: "Nanti data ini bisa disimpan ke akun dan dipakai otomatis saat checkout.",
+          icon: "info",
+          confirmButtonColor: "#0ea5e9",
+        });
+      }
       checkUser();
     </script>
   </body>
