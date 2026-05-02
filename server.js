@@ -391,6 +391,19 @@ function requireAdminCsrf(req, res, next) {
   next();
 }
 
+function requireUserCsrf(req, res, next) {
+  const csrfFromCookie = String(req.cookies.user_csrf || "").trim();
+  const csrfFromHeader = String(req.headers["x-user-csrf-token"] || "").trim();
+
+  if (!csrfFromCookie || !csrfFromHeader || csrfFromCookie !== csrfFromHeader) {
+    return res.status(403).json({
+      message: "Invalid user CSRF token",
+    });
+  }
+
+  next();
+}
+
 function requireSafeAdminAction(req, res, next) {
   const isWriteMethod = ["POST", "PUT", "PATCH", "DELETE"].includes(
     String(req.method || "").toUpperCase(),
@@ -2008,6 +2021,15 @@ app.post("/user-login", userAuthLimiter, async (req, res) => {
       path: "/",
     });
 
+    const userCsrfToken = generateCsrfToken();
+    res.cookie("user_csrf", userCsrfToken, {
+      httpOnly: false,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+      path: "/",
+    });
+
     return res.json({ message: "Login berhasil!" });
   } catch (err) {
     return res.status(500).json({ message: "Terjadi error server" });
@@ -2037,7 +2059,7 @@ app.get("/user/orders", async (req, res) => {
   }
 });
 
-app.post("/user/change-password", async (req, res) => {
+app.post("/user/change-password", requireUserCsrf, async (req, res) => {
   const token = req.cookies.user_auth;
   const { oldPassword, newPassword } = req.body;
 
@@ -2093,6 +2115,7 @@ app.post("/user/change-password", async (req, res) => {
 
 app.post("/user-logout", (req, res) => {
   res.clearCookie("user_auth", { path: "/" });
+  res.clearCookie("user_csrf", { path: "/" });
   return res.json({ message: "Logout berhasil" });
 });
 // ----------------------------------

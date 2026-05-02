@@ -256,6 +256,14 @@
     </div>
 
     <script>
+      function getCookie(name) {
+        return (
+          document.cookie
+            .split("; ")
+            .find((row) => row.startsWith(name + "="))
+            ?.split("=")[1] || ""
+        );
+      }
       async function checkUser() {
         try {
           const res = await fetch("/api/user/me");
@@ -290,6 +298,7 @@
             method: "POST",
             headers: {
               "Content-Type": "application/json",
+              "x-user-csrf-token": getCookie("user_csrf"),
             },
             body: JSON.stringify({ oldPassword, newPassword }),
           });
