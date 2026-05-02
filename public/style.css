@@ -1851,13 +1851,13 @@ button#buyBtn:active {
 
   .header-inner {
     display: grid !important;
-    grid-template-columns: 1fr !important;
+    grid-template-columns: auto 1fr !important;
     grid-template-areas:
-      "brand"
-      "actions"
-      "nav" !important;
-    padding: 10px 12px 12px !important;
-    gap: 10px !important;
+      "brand actions"
+      "nav nav" !important;
+    align-items: center !important;
+    padding: 8px 10px 10px !important;
+    gap: 8px !important;
   }
 
   .brand {
@@ -1880,7 +1880,7 @@ button#buyBtn:active {
   .header-actions {
     grid-area: actions !important;
     display: flex !important;
-    justify-content: center !important;
+    justify-content: flex-end !important;
     align-items: center !important;
     gap: 8px !important;
     flex-wrap: nowrap !important;
