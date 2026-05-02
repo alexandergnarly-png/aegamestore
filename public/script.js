@@ -234,6 +234,16 @@ async function loadAllProducts() {
     const res = await fetch("/public-products");
     const data = await res.json();
     if (!Array.isArray(data) || data.length === 0) {
+      allProducts = [];
+      gameGrid.innerHTML = `
+    <div class="empty-category-card">
+      <div class="empty-category-icon">🌊</div>
+      <h3>Produk belum tersedia</h3>
+      <p>Belum ada produk aktif saat ini. Silakan hubungi admin untuk info stok.</p>
+      <a href="https://t.me/aegamestore" target="_blank">Chat Admin</a>
+    </div>
+  `;
+
       Swal.fire({
         icon: "info",
         title: "Stok Kosong",
@@ -251,6 +261,15 @@ async function loadAllProducts() {
     renderGames();
     loadBrands();
   } catch (err) {
+    gameGrid.innerHTML = `
+  <div class="empty-category-card">
+    <div class="empty-category-icon">⚠️</div>
+    <h3>Gagal memuat produk</h3>
+    <p>Coba refresh halaman atau hubungi admin jika masalah masih terjadi.</p>
+    <a href="https://t.me/aegamestore" target="_blank">Chat Admin</a>
+  </div>
+`;
+
     Swal.fire({
       icon: "error",
       title: "Oops...",
@@ -542,11 +561,19 @@ async function buy() {
       return;
     }
 
+    const errorMessage = data.message || "Gagal membuat pembayaran";
+    const isOutOfStock = errorMessage.toLowerCase().includes("stok key habis");
+
     Swal.fire({
       icon: "error",
-      title: "Gagal",
-      text: data.message || "Gagal membuat pembayaran",
+      title: isOutOfStock ? "Stok Habis" : "Gagal",
+      text: errorMessage,
       confirmButtonColor: "#fb7185",
+    }).then(() => {
+      if (isOutOfStock) {
+        closeOrderModal();
+        loadAllProducts();
+      }
     });
   } catch (err) {
     Swal.fire({
