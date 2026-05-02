@@ -308,6 +308,62 @@
         font-size: 14px;
       }
 
+      .key-code {
+        display: inline-block;
+        max-width: 100%;
+        padding: 6px 8px;
+        border-radius: 8px;
+        background: #f0f9ff;
+        border: 1px solid #bae6fd;
+        color: #0c4a6e;
+        font-size: 12px;
+        word-break: break-all;
+      }
+
+      .copy-key-btn {
+        width: auto;
+        margin-top: 8px;
+        padding: 9px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        box-shadow: 0 8px 18px rgba(14, 165, 233, 0.14);
+      }
+
+      .order-actions {
+        display: grid;
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      .order-link-btn {
+        display: block;
+        width: 100%;
+        padding: 11px 12px;
+        border-radius: 999px;
+        background: rgba(224, 242, 254, 0.9);
+        color: #0284c7;
+        text-align: center;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 800;
+        border: 1px solid #bae6fd;
+      }
+
+      .discount-value {
+        color: #16a34a;
+      }
+
+      @media (max-width: 520px) {
+        .order-row {
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .copy-key-btn {
+          width: 100%;
+        }
+      }
+
       .section {
         animation: sectionFadeUp 0.45s ease both;
       }
@@ -526,6 +582,40 @@
         return new Date(dateString).toLocaleString("id-ID");
       }
 
+      function copyText(text, label = "Data") {
+        if (!text) {
+          Swal.fire({
+            icon: "info",
+            title: "Tidak ada data",
+            text: `${label} belum tersedia.`,
+            confirmButtonColor: "#0ea5e9",
+          });
+          return;
+        }
+
+        navigator.clipboard
+          .writeText(text)
+          .then(() => {
+            Swal.fire({
+              toast: true,
+              position: "top-end",
+              icon: "success",
+              title: `${label} berhasil dicopy`,
+              showConfirmButton: false,
+              timer: 1400,
+              timerProgressBar: true,
+            });
+          })
+          .catch(() => {
+            Swal.fire({
+              icon: "error",
+              title: "Gagal copy",
+              text: "Coba copy manual.",
+              confirmButtonColor: "#fb7185",
+            });
+          });
+      }
+
       async function loadOrderHistory() {
         const box = document.getElementById("orderHistory");
 
@@ -541,66 +631,106 @@
 
           if (!Array.isArray(data) || data.length === 0) {
             box.innerHTML = `
-  <div class="empty-state">
-    Belum ada order yang terhubung ke akun ini.
-  </div>
-`;
+        <div class="empty-state">
+          Belum ada order yang terhubung ke akun ini.
+        </div>
+      `;
             return;
           }
 
           box.innerHTML = `
-  <div class="order-list">
-    ${data
-      .map(
-        (item) => `
-          <div class="order-card">
-            <strong>${item.game || "-"}</strong>
+      <div class="order-list">
+        ${data
+          .map((item) => {
+            const gameKey = item.gamekey || item.gameKey || "";
+            const voucherCode = item.voucher_code || "";
+            const discountAmount = Number(item.discount_amount || 0);
+            const orderId = item.id || item.order_id || "";
 
-            <div class="order-row">
-              <span>Produk</span>
-              <b>${item.product || "-"}</b>
-            </div>
+            return `
+              <div class="order-card">
+                <strong>${item.game || "-"}</strong>
 
-            <div class="order-row">
-              <span>Harga</span>
-              <b>${formatRupiah(item.price)}</b>
-            </div>
+                <div class="order-row">
+                  <span>Produk</span>
+                  <b>${item.product || "-"}</b>
+                </div>
 
-            <div class="order-row">
-              <span>Pembayaran</span>
-              <b class="status-pill ${item.payment_status || ""}">
-                ${item.payment_status || "-"}
-              </b>
-            </div>
+                <div class="order-row">
+                  <span>Total Bayar</span>
+                  <b>${formatRupiah(item.price)}</b>
+                </div>
 
-            <div class="order-row">
-              <span>Pengiriman</span>
-              <b class="status-pill ${item.delivery_status || ""}">
-                ${item.delivery_status || "-"}
-              </b>
-            </div>
+                <div class="order-row">
+                  <span>Voucher</span>
+                  <b>${voucherCode || "-"}</b>
+                </div>
 
-            <div class="order-row">
-              <span>Waktu</span>
-              <b>${formatTanggal(item.created_at)}</b>
-            </div>
+                <div class="order-row">
+                  <span>Diskon</span>
+                  <b class="discount-value">
+                    ${discountAmount > 0 ? "- " + formatRupiah(discountAmount) : "-"}
+                  </b>
+                </div>
 
-            ${
-              item.gamekey
-                ? `<div class="order-row">
-                    <span>Key</span>
-                    <code>${item.gamekey}</code>
-                  </div>`
-                : ""
-            }
-          </div>
-        `,
-      )
-      .join("")}
-  </div>
-`;
+                <div class="order-row">
+                  <span>Pembayaran</span>
+                  <b class="status-pill ${item.payment_status || ""}">
+                    ${item.payment_status || "-"}
+                  </b>
+                </div>
+
+                <div class="order-row">
+                  <span>Pengiriman</span>
+                  <b class="status-pill ${item.delivery_status || ""}">
+                    ${item.delivery_status || "-"}
+                  </b>
+                </div>
+
+                <div class="order-row">
+                  <span>Waktu</span>
+                  <b>${formatTanggal(item.created_at)}</b>
+                </div>
+
+                ${
+                  gameKey
+                    ? `<div class="order-row">
+                        <span>Key</span>
+                        <div>
+                          <code class="key-code">${gameKey}</code>
+                          <button
+                            type="button"
+                            class="copy-key-btn"
+                            onclick='copyText(${JSON.stringify(gameKey)}, "Game key")'
+                          >
+                            Copy Key
+                          </button>
+                        </div>
+                      </div>`
+                    : ""
+                }
+
+                <div class="order-actions">
+                  ${
+                    orderId
+                      ? `<a class="order-link-btn" href="/result.html?order_id=${encodeURIComponent(orderId)}">
+                          Lihat Detail Order
+                        </a>`
+                      : ""
+                  }
+                </div>
+              </div>
+            `;
+          })
+          .join("")}
+      </div>
+    `;
         } catch (err) {
-          box.innerHTML = "Gagal memuat riwayat order.";
+          box.innerHTML = `
+      <div class="empty-state">
+        Gagal memuat riwayat order.
+      </div>
+    `;
         }
       }
       function saveDefaultOrderData() {
