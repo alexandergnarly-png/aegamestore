@@ -953,5 +953,31 @@ document.addEventListener("DOMContentLoaded", () => {
     if (themeToggleBtn) themeToggleBtn.innerText = "☀️";
   }
 });
+
+function openMobileNav() {
+  document.body.classList.add("mobile-nav-open");
+}
+
+function closeMobileNav() {
+  document.body.classList.remove("mobile-nav-open");
+}
+
+function toggleMobileNav() {
+  document.body.classList.toggle("mobile-nav-open");
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".main-nav .nav-link").forEach((link) => {
+    link.addEventListener("click", () => {
+      closeMobileNav();
+    });
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeMobileNav();
+    }
+  });
+});
 setLanguage(currentLanguage);
 loadAllProducts();

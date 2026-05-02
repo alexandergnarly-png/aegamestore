@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AE Game Store 🌊⛩️</title>
-    <link rel="stylesheet" href="style.css?v=14" />
+    <link rel="stylesheet" href="style.css?v=16" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </head>
 
@@ -34,6 +34,15 @@
         </div>
 
         <div class="header-actions">
+          <button
+            type="button"
+            class="mobile-menu-btn"
+            onclick="toggleMobileNav()"
+            aria-label="Buka menu"
+          >
+            ☰
+          </button>
+
           <div class="lang-switch">
             <button
               type="button"
@@ -102,6 +111,8 @@
         </nav>
       </div>
     </header>
+
+    <div class="mobile-nav-backdrop" onclick="closeMobileNav()"></div>
 
     <!-- INI BAGIAN YANG TIDAK SENGAJA TERHAPUS TADI -->
     <main class="page">
@@ -375,7 +386,7 @@
     </footer>
 
     <!-- SEMUA SCRIPT & STYLE DIPOSISIKAN DENGAN BENAR DI BAWAH FOOTER -->
-    <script src="script.js?v=13"></script>
+    <script src="script.js?v=15"></script>
     <style>
       /* Floating Button Admin */
       /* Floating Button Admin */
