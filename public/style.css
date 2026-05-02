@@ -1853,6 +1853,7 @@ button#buyBtn:active {
     display: grid !important;
     grid-template-columns: 1fr !important;
     grid-template-areas:
+      "brand"
       "actions"
       "nav" !important;
     padding: 10px 12px 12px !important;
@@ -1860,7 +1861,20 @@ button#buyBtn:active {
   }
 
   .brand {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+
+  .brand-copy {
     display: none !important;
+  }
+
+  .brand-logo {
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 22px !important;
+    border-radius: 14px !important;
   }
 
   .header-actions {
@@ -1993,11 +2007,11 @@ button#buyBtn:active {
   }
 
   .header-actions {
-    justify-content: flex-start !important;
+    justify-content: center !important;
   }
 
   .main-nav {
-    justify-content: flex-start !important;
+    justify-content: center !important;
   }
 
   #userMenu .auth-btn {
