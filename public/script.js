@@ -926,5 +926,32 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
+// --- FITUR DARK MODE ---
+function toggleTheme() {
+  const body = document.body;
+  const themeToggleBtn = document.getElementById("theme-toggle");
+
+  body.classList.toggle("dark-theme");
+
+  if (body.classList.contains("dark-theme")) {
+    localStorage.setItem("ae_theme", "dark");
+    themeToggleBtn.innerText = "☀️"; // Ganti icon jadi matahari
+  } else {
+    localStorage.setItem("ae_theme", "light");
+    themeToggleBtn.innerText = "🌙"; // Ganti icon jadi bulan
+  }
+}
+
+// Cek tema saat halaman pertama kali dimuat
+document.addEventListener("DOMContentLoaded", () => {
+  const savedTheme = localStorage.getItem("ae_theme");
+  const themeToggleBtn = document.getElementById("theme-toggle");
+
+  if (savedTheme === "dark") {
+    document.body.classList.add("dark-theme");
+    if (themeToggleBtn) themeToggleBtn.innerText = "☀️";
+  }
+});
 setLanguage(currentLanguage);
 loadAllProducts();

@@ -19,13 +19,6 @@
   --radius-md: 14px;
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-}
-
 body {
   background-color: var(--bg-color);
   color: var(--text-main);
@@ -34,6 +27,36 @@ body {
   flex-direction: column;
   overflow-x: hidden;
   position: relative;
+}
+
+/* ===== DARK MODE VARIABLES ===== */
+body.dark-theme {
+  --bg-color: #0f172a; /* Warna biru dongker sangat gelap */
+  --card-bg: rgba(30, 41, 59, 0.85);
+  --text-main: #f8fafc; /* Putih terang */
+  --text-muted: #94a3b8;
+  --border-color: rgba(56, 189, 248, 0.15);
+  --water-foam: #1e293b; /* Warna latar elemen redup */
+  --ocean-deep: #38bdf8; /* Dibalik agar lebih terang di dark mode */
+  --ocean-light: #0ea5e9;
+}
+
+/* Penyesuaian agar header dan modal tetap elegan di Dark Mode */
+body.dark-theme .site-header {
+  background: rgba(15, 23, 42, 0.85);
+}
+body.dark-theme .order-modal-card {
+  background: rgba(30, 41, 59, 0.95);
+}
+body.dark-theme .main-nav {
+  background: rgba(15, 23, 42, 0.95) !important;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 /* Watercolor Blobs Effects */
