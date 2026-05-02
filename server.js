@@ -449,8 +449,18 @@ app.use(globalLimiter);
 app.use(express.json({ limit: "50kb" }));
 app.use(cookieParser());
 app.use((req, res, next) => {
-  res.setHeader("X-Powered-By", "AE Game Store");
-  res.setHeader("Cache-Control", "no-store");
+  if (
+    req.path.startsWith("/orders") ||
+    req.path.startsWith("/users") ||
+    req.path.startsWith("/keys") ||
+    req.path.startsWith("/vouchers") ||
+    req.path.startsWith("/products") ||
+    req.path.startsWith("/security-audit") ||
+    req.path.startsWith("/api/user")
+  ) {
+    res.setHeader("Cache-Control", "no-store");
+  }
+
   next();
 });
 app.use(express.static("public"));
