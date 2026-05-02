@@ -39,7 +39,7 @@ const translations = {
     contactLabel: "Kontak / Email",
     voucherCodeLabel: "Kode Voucher",
     playerNamePlaceholder: "Masukkan nama kamu",
-    contactPlaceholder: "No. WA / Email",
+    contactPlaceholder: "Isi WA / Email aktif untuk kontak ketika ada kendala",
     voucherPlaceholder: "Contoh: DELTA5K",
     checkVoucherBtn: "Cek",
     summaryGame: "Game",
@@ -110,7 +110,7 @@ const translations = {
     contactLabel: "Contact / Email",
     voucherCodeLabel: "Voucher Code",
     playerNamePlaceholder: "Enter your player name",
-    contactPlaceholder: "WhatsApp / Email",
+    contactPlaceholder: "Enter active WhatsApp / Email for contact if there are issues",
     voucherPlaceholder: "Example: DELTA5K",
     checkVoucherBtn: "Check",
     summaryGame: "Game",
@@ -389,7 +389,12 @@ function renderGames() {
 async function openOrderModal(game) {
   const voucherInput = document.getElementById("voucherCodeInput");
   if (voucherInput) voucherInput.value = "";
+
+  const nameInput = document.getElementById("name");
+  const contactInput = document.getElementById("contact");
+
   resetVoucherPreview();
+
   try {
     const res = await fetch("/api/user/me");
     const data = await res.json();
@@ -405,6 +410,14 @@ async function openOrderModal(game) {
         window.location.href = "/auth";
       });
       return;
+    }
+
+    if (nameInput && !nameInput.value.trim()) {
+      nameInput.value = data.username || "";
+    }
+
+    if (contactInput && data.contact && !contactInput.value.trim()) {
+      contactInput.value = data.contact;
     }
   } catch (err) {
     Swal.fire({
