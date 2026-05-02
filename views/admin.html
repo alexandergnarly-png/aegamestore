@@ -989,6 +989,73 @@
           padding: 10px 14px;
         }
       }
+      .admin-alerts-box {
+        margin: 18px 0;
+        padding: 18px;
+        border-radius: 18px;
+        background: #fff7ed;
+        border: 1px solid #fed7aa;
+        color: #9a3412;
+        box-shadow: 0 10px 24px rgba(251, 146, 60, 0.12);
+      }
+
+      .admin-alerts-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+
+      .admin-alerts-head strong {
+        font-size: 16px;
+      }
+
+      .admin-alert-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .admin-alert-item {
+        padding: 12px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.75);
+        border: 1px solid #fed7aa;
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      .admin-alert-item b {
+        color: #7c2d12;
+      }
+
+      .admin-alert-tag {
+        display: inline-flex;
+        padding: 4px 8px;
+        border-radius: 999px;
+        background: #ffedd5;
+        color: #9a3412;
+        font-size: 11px;
+        font-weight: 800;
+        margin-bottom: 6px;
+      }
+
+      .admin-alert-actions {
+        margin-top: 12px;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .admin-alert-actions button {
+        border: none;
+        border-radius: 999px;
+        padding: 9px 12px;
+        background: #f97316;
+        color: white;
+        font-weight: 800;
+        cursor: pointer;
+      }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </head>
@@ -1103,7 +1170,11 @@
             <div class="mini-pill">Secured System</div>
           </div>
         </div>
-
+        <div
+          id="adminAlertsBox"
+          class="admin-alerts-box"
+          style="display: none"
+        ></div>
         <div class="stats delay-1">
           <div class="stat-card">
             <div class="stat-top">
@@ -1600,6 +1671,7 @@
         loadKeys();
         loadOrders();
         loadStockSummary();
+        loadAdminAlerts();
       }
 
       function formatRupiah(num) {
@@ -2013,6 +2085,84 @@
                         <td colspan="11" class="empty">Terjadi error saat mengambil order.</td>
                     </tr>
                 `;
+        }
+      }
+
+      async function loadAdminAlerts() {
+        const box = document.getElementById("adminAlertsBox");
+        if (!box) return;
+
+        try {
+          const res = await fetch("/admin-alerts");
+
+          if (!res.ok) {
+            box.style.display = "none";
+            return;
+          }
+
+          const data = await res.json();
+
+          const manualOrders = Array.isArray(data.manual_orders)
+            ? data.manual_orders
+            : [];
+
+          const lowStockProducts = Array.isArray(data.low_stock_products)
+            ? data.low_stock_products
+            : [];
+
+          if (manualOrders.length === 0 && lowStockProducts.length === 0) {
+            box.style.display = "none";
+            box.innerHTML = "";
+            return;
+          }
+
+          const manualHtml = manualOrders
+            .map(
+              (item) => `
+          <div class="admin-alert-item">
+            <span class="admin-alert-tag">ORDER MANUAL</span><br>
+            <b>${item.id}</b><br>
+            ${item.game || "-"} • ${item.product || "-"}<br>
+            Buyer: ${item.name || "-"}<br>
+            Status: ${item.payment_status || "-"} / ${item.delivery_status || "-"}
+          </div>
+        `,
+            )
+            .join("");
+
+          const lowStockHtml = lowStockProducts
+            .map(
+              (item) => `
+          <div class="admin-alert-item">
+            <span class="admin-alert-tag">STOK RENDAH</span><br>
+            <b>${item.game || "-"}</b><br>
+            ${item.brand || "-"} • ${item.duration || "-"}<br>
+            Sisa key: <b>${item.available_keys || 0}</b>
+          </div>
+        `,
+            )
+            .join("");
+
+          box.innerHTML = `
+      <div class="admin-alerts-head">
+        <strong>⚠️ Perlu Perhatian</strong>
+        <span>${manualOrders.length} order manual • ${lowStockProducts.length} stok rendah</span>
+      </div>
+
+      <div class="admin-alert-list">
+        ${manualHtml}
+        ${lowStockHtml}
+      </div>
+
+      <div class="admin-alert-actions">
+        <button type="button" onclick="loadOrders()">Refresh Order</button>
+        <button type="button" onclick="loadProducts()">Refresh Produk</button>
+      </div>
+    `;
+
+          box.style.display = "block";
+        } catch (err) {
+          box.style.display = "none";
         }
       }
 
@@ -2974,6 +3124,7 @@ Game Key : ${key || "-"}
       }
 
       document.addEventListener("DOMContentLoaded", () => {
+        loadAdminAlerts();
         const searchInput = document.getElementById("orderSearchInput");
         if (searchInput) {
           searchInput.addEventListener("input", applyOrderFilters);
