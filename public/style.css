@@ -2128,11 +2128,6 @@ body.dark-theme .order-modal-card {
   }
 }
 /* ===== SWEETALERT ABOVE MOBILE DRAWER FIX ===== */
-
-.swal2-container {
-  z-index: 10000 !important;
-}
-
 .swal2-container {
   z-index: 20000 !important;
 }
