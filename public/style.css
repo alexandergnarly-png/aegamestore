@@ -1216,7 +1216,7 @@ button#buyBtn:active {
   }
 }
 .modal-close-btn {
-  z-index: 3;
+  z-index: 99999 !important;
 }
 
 .order-modal-card {
@@ -2151,6 +2151,28 @@ body.dark-theme .order-modal-card {
 }
 
 .modal-close-btn {
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
+}
+/* ===== STRONG MODAL CLOSE FIX ===== */
+
+.order-modal.show {
+  display: flex !important;
+}
+
+.order-modal-card {
+  position: relative !important;
+  z-index: 20 !important;
+  pointer-events: auto !important;
+}
+
+.order-modal-backdrop {
+  z-index: 1 !important;
+}
+
+.modal-close-btn {
+  position: absolute !important;
+  z-index: 99999 !important;
   pointer-events: auto !important;
   touch-action: manipulation !important;
 }

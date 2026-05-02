@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AE Game Store 🌊⛩️</title>
-    <link rel="stylesheet" href="style.css?v=21" />
+    <link rel="stylesheet" href="style.css?v=22" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </head>
 
@@ -192,7 +192,13 @@
       <div class="order-modal-backdrop" onclick="closeOrderModal()"></div>
 
       <div class="order-modal-card">
-        <button type="button" class="modal-close-btn" id="closeOrderModalBtn">
+        <button
+          type="button"
+          class="modal-close-btn"
+          id="closeOrderModalBtn"
+          onclick="closeOrderModal()"
+          aria-label="Tutup popup order"
+        >
           ×
         </button>
 
@@ -373,9 +379,8 @@
     </footer>
 
     <!-- SEMUA SCRIPT & STYLE DIPOSISIKAN DENGAN BENAR DI BAWAH FOOTER -->
-    <script src="script.js?v=19"></script>
+    <script src="script.js?v=20"></script>
     <style>
-      /* Floating Button Admin */
       /* Floating Button Admin */
       .floating-admin-btn {
         position: fixed;
