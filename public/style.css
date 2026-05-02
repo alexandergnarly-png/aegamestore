@@ -1515,3 +1515,41 @@ button#buyBtn:active {
     font-size: 28px;
   }
 }
+@media (max-width: 640px) {
+  .floating-admin-btn {
+    width: 56px !important;
+    height: 56px !important;
+    min-width: 56px !important;
+    right: 16px !important;
+    bottom: 18px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+  }
+
+  .floating-admin-icon {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 50% !important;
+    margin: 0 !important;
+  }
+
+  .floating-admin-content,
+  .floating-admin-badge {
+    display: none !important;
+  }
+
+  .site-footer {
+    padding-bottom: 86px !important;
+  }
+
+  .footer-bottom {
+    margin-bottom: 0 !important;
+  }
+}
+@media (max-width: 640px) {
+  .social-proof {
+    display: none !important;
+  }
+}
