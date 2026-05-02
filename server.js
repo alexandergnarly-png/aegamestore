@@ -180,17 +180,17 @@ db.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS voucher_code TEXT`);
 
 db.query(
   `
-  CREATE TABLE IF NOT EXISTS vouchers (CREATE TABLE IF NOT EXISTS vouchers (
-  id SERIAL PRIMARY KEY,
-  code TEXT UNIQUE NOT NULL,
-  game_name TEXT,
-  brand_name TEXT,
-  duration_name TEXT,
-  discount_amount INTEGER NOT NULL DEFAULT 0,
-  active INTEGER DEFAULT 1,
-  expires_at TEXT,
-  created_at TEXT NOT NULL
-)
+  CREATE TABLE IF NOT EXISTS vouchers (
+    id SERIAL PRIMARY KEY,
+    code TEXT UNIQUE NOT NULL,
+    game_name TEXT,
+    brand_name TEXT,
+    duration_name TEXT,
+    discount_amount INTEGER NOT NULL DEFAULT 0,
+    active INTEGER DEFAULT 1,
+    expires_at TEXT,
+    created_at TEXT NOT NULL
+  )
 `,
   (err) => {
     if (err) {
