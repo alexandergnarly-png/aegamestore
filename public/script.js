@@ -46,6 +46,14 @@ const translations = {
     summaryProduct: "Produk",
     summaryTotalPayment: "Total Pembayaran",
     trustText: "🔒 Pembayaran aman via QRIS GoPay Merchant • Pengiriman instan",
+    originalPriceLabel: "Harga Produk",
+    voucherDiscountLabel: "Diskon Voucher",
+    qrisFeeLabel: "Fee QRIS",
+    finalPriceLabel: "Total Bayar",
+    selectProductFirstMsg: "Pilih produk dulu.",
+    emptyVoucherMsg: "Kode voucher kosong.",
+    invalidVoucherMsg: "Voucher tidak valid.",
+    voucherCheckFailedMsg: "Gagal cek voucher. Coba lagi.",
   },
   en: {
     selectProduct: "Select Product",
@@ -93,6 +101,14 @@ const translations = {
     summaryProduct: "Product",
     summaryTotalPayment: "Total Payment",
     trustText: "🔒 Secure payment via QRIS GoPay Merchant • Instant delivery",
+    originalPriceLabel: "Product Price",
+    voucherDiscountLabel: "Voucher Discount",
+    qrisFeeLabel: "QRIS Fee",
+    finalPriceLabel: "Final Payment",
+    selectProductFirstMsg: "Please select a product first.",
+    emptyVoucherMsg: "Voucher code is empty.",
+    invalidVoucherMsg: "Invalid voucher.",
+    voucherCheckFailedMsg: "Failed to check voucher. Please try again.",
   },
 };
 
@@ -629,14 +645,15 @@ async function checkVoucher() {
   const voucherCode = String(voucherInput?.value || "").trim();
 
   if (!selectedProductId) {
-    voucherMessage.innerText = "Pilih produk dulu.";
+    voucherMessage.innerText =
+      translations[currentLanguage].selectProductFirstMsg;
     voucherMessage.className = "voucher-message error";
     return;
   }
 
   if (!voucherCode) {
     resetVoucherPreview();
-    voucherMessage.innerText = "Kode voucher kosong.";
+    voucherMessage.innerText = translations[currentLanguage].emptyVoucherMsg;
     voucherMessage.className = "voucher-message error";
     return;
   }
@@ -657,7 +674,8 @@ async function checkVoucher() {
 
     if (!res.ok) {
       appliedVoucherCode = "";
-      voucherMessage.innerText = data.message || "Voucher tidak valid.";
+      voucherMessage.innerText =
+        data.message || translations[currentLanguage].invalidVoucherMsg;
       voucherMessage.className = "voucher-message error";
       if (priceBreakdown) priceBreakdown.style.display = "none";
       return;
@@ -682,7 +700,8 @@ async function checkVoucher() {
     priceBreakdown.style.display = "block";
   } catch (err) {
     appliedVoucherCode = "";
-    voucherMessage.innerText = "Gagal cek voucher. Coba lagi.";
+    voucherMessage.innerText =
+      translations[currentLanguage].voucherCheckFailedMsg;
     voucherMessage.className = "voucher-message error";
   }
 }
