@@ -607,12 +607,17 @@ function showSocialProof() {
   const item =
     recentPurchases[Math.floor(Math.random() * recentPurchases.length)];
 
+  const socialText =
+    currentLanguage === "en"
+      ? `<b>${item.name}</b> just bought <b>${item.game}</b>`
+      : `<b>${item.name}</b> baru saja membeli <b>${item.game}</b>`;
+
   sp.innerHTML = `
-    🚀 
-    <div style="font-size: 13px;">
-      <b>${item.name}</b> baru saja membeli <b>${item.game}</b>
-    </div>
-  `;
+  🚀
+  <div style="font-size: 13px;">
+    ${socialText}
+  </div>
+`;
 
   sp.classList.add("show");
 
