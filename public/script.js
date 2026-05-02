@@ -581,27 +581,46 @@ function nextSlide() {
 setInterval(nextSlide, 5000);
 
 // --- SOCIAL PROOF SIMULATOR ---
-const buyerNames = ["Budi", "Andi", "Siska", "Rian", "Wati", "Reza", "Dewi"];
-const purchaseGames = [
-  "PUBG Mobile",
-  "Mobile Legends",
-  "Free Fire",
-  "Delta Force",
-];
+let recentPurchases = [];
+
+async function loadRecentPurchases() {
+  try {
+    const res = await fetch("/recent-purchases");
+    const data = await res.json();
+
+    if (Array.isArray(data)) {
+      recentPurchases = data;
+    }
+  } catch (err) {
+    recentPurchases = [];
+  }
+}
 
 function showSocialProof() {
   const sp = document.getElementById("social-proof");
   if (!sp) return;
 
-  const name = buyerNames[Math.floor(Math.random() * buyerNames.length)];
-  const game = purchaseGames[Math.floor(Math.random() * purchaseGames.length)];
+  if (!Array.isArray(recentPurchases) || recentPurchases.length === 0) {
+    return;
+  }
 
-  sp.innerHTML = `🚀 <div style="font-size: 13px;"><b>${name}</b> baru saja membeli <b>${game}</b></div>`;
+  const item =
+    recentPurchases[Math.floor(Math.random() * recentPurchases.length)];
+
+  sp.innerHTML = `
+    🚀 
+    <div style="font-size: 13px;">
+      <b>${item.name}</b> baru saja membeli <b>${item.game}</b>
+    </div>
+  `;
+
   sp.classList.add("show");
 
   setTimeout(() => sp.classList.remove("show"), 5000);
 }
-// Munculkan setiap 20 detik
+
+loadRecentPurchases();
+setInterval(loadRecentPurchases, 60000);
 setInterval(showSocialProof, 20000);
 
 // --- FILTER CATEGORY ---

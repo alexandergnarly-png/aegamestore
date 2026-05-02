@@ -2021,7 +2021,38 @@ app.get("/api/user/me", (req, res) => {
   }
 });
 // ----------------------------------------------
+app.get("/recent-purchases", async (req, res) => {
+  try {
+    const result = await query(
+      `
+      SELECT name, game, product, created_at
+      FROM orders
+      WHERE payment_status = 'paid'
+      ORDER BY created_at DESC
+      LIMIT 10
+      `,
+    );
 
+    const purchases = result.rows.map((item) => {
+      const rawName = String(item.name || "Buyer").trim();
+      const maskedName =
+        rawName.length <= 2 ? rawName[0] + "***" : rawName.slice(0, 2) + "***";
+
+      return {
+        name: maskedName,
+        game: item.game || "Game",
+        product: item.product || "",
+      };
+    });
+
+    return res.json(purchases);
+  } catch (err) {
+    console.error("ERROR RECENT PURCHASES:", err);
+    return res.status(500).json({
+      message: "Gagal mengambil pembelian terbaru",
+    });
+  }
+});
 app.listen(port, () => {
   console.log("Server jalan di port", port);
 });
