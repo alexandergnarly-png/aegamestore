@@ -2368,11 +2368,11 @@ app.post("/reviews", reviewLimiter, requireUserCsrf, async (req, res) => {
     });
   }
 
-  const safeCommentRegex = /^[a-zA-Z0-9\s.,!?'"()_\-:;@#&/]+$/;
+  const hasDangerousTag = /<\s*\/?\s*script/i.test(comment);
 
-  if (!safeCommentRegex.test(comment)) {
+  if (hasDangerousTag) {
     return res.status(400).json({
-      message: "Komentar mengandung karakter yang tidak diizinkan",
+      message: "Komentar mengandung teks yang tidak diizinkan",
     });
   }
 
