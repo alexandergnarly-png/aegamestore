@@ -988,11 +988,20 @@ button#buyBtn:active {
 
 .payment-icons span {
   background: var(--bg-color);
-  padding: 6px 12px;
-  border-radius: 6px;
+  padding: 7px 12px;
+  border-radius: 10px;
   font-size: 11px;
   font-weight: 800;
   color: var(--ocean-deep);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.payment-icons iconify-icon {
+  font-size: 17px;
+  color: var(--ocean-deep);
+  flex-shrink: 0;
 }
 
 .footer-bottom {
