@@ -1801,7 +1801,7 @@ button#buyBtn:active {
   }
 }
 /* ========================================= */
-/* ===== HEADBAR / NAVBAR BUGFIX ===== */
+/* ===== HEADBAR / NAVBAR FIX - TOP ONLY ===== */
 
 .site-header {
   position: sticky;
@@ -1823,7 +1823,10 @@ button#buyBtn:active {
 
 .main-nav {
   grid-area: nav;
+  display: flex;
   justify-content: center;
+  align-items: center;
+  gap: 22px;
   min-width: 0;
 }
 
@@ -1832,23 +1835,23 @@ button#buyBtn:active {
   justify-content: flex-end;
 }
 
-/* Biar link Cara Beli tidak kelihatan seperti link rusak */
 .nav-link[href="#"] {
   cursor: pointer;
 }
 
-/* Mobile: header atas rapi, menu pindah ke bottom nav */
 @media (max-width: 768px) {
   body {
-    padding-bottom: 76px;
+    padding-bottom: 0;
   }
 
   .header-inner {
     display: grid !important;
     grid-template-columns: 1fr auto !important;
-    grid-template-areas: "brand actions" !important;
+    grid-template-areas:
+      "brand actions"
+      "nav nav" !important;
     padding: 10px 14px !important;
-    gap: 10px !important;
+    gap: 8px !important;
   }
 
   .brand {
@@ -1861,53 +1864,45 @@ button#buyBtn:active {
   }
 
   .header-actions {
-    gap: 8px !important;
+    gap: 7px !important;
     flex-wrap: nowrap !important;
     min-width: 0;
   }
 
   .main-nav {
-    position: fixed !important;
-    left: 12px !important;
-    right: 12px !important;
-    bottom: calc(10px + env(safe-area-inset-bottom)) !important;
-    z-index: 4000 !important;
+    position: static !important;
+    grid-area: nav !important;
+    width: 100% !important;
 
-    display: grid !important;
-    grid-template-columns: repeat(3, 1fr) !important;
-    gap: 6px !important;
+    display: flex !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    gap: 8px !important;
 
-    width: auto !important;
-    padding: 8px !important;
-    border-radius: 22px !important;
-    background: rgba(255, 255, 255, 0.94) !important;
-    border: 1px solid rgba(56, 189, 248, 0.35) !important;
-    box-shadow: 0 -8px 28px rgba(14, 165, 233, 0.16) !important;
-    backdrop-filter: blur(16px) !important;
+    padding: 4px 0 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
 
-    overflow: visible !important;
-  }
-
-  body.dark-theme .main-nav {
-    background: rgba(15, 23, 42, 0.94) !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
   }
 
   .nav-link {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+    flex: 0 0 auto !important;
+    min-height: 34px !important;
+    padding: 8px 12px !important;
+    border-radius: 999px !important;
 
-    min-height: 42px !important;
-    padding: 8px 6px !important;
-    border-radius: 16px !important;
-
-    background: transparent !important;
-    color: var(--text-muted) !important;
-    font-size: 11px !important;
+    background: rgba(224, 242, 254, 0.75) !important;
+    color: #0284c7 !important;
+    font-size: 12px !important;
     font-weight: 800 !important;
-    line-height: 1.1 !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
     text-align: center !important;
-    white-space: normal !important;
   }
 
   .nav-link:hover,
@@ -1921,11 +1916,11 @@ button#buyBtn:active {
   }
 
   .site-footer {
-    padding-bottom: 110px !important;
+    padding-bottom: 86px !important;
   }
 
   .floating-admin-btn {
-    bottom: 92px !important;
+    bottom: 18px !important;
   }
 }
 
