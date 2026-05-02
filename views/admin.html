@@ -3486,12 +3486,29 @@
       }
 
       function resetProductForm() {
-        document.getElementById("editingProductId").value = "";
-        document.getElementById("productGame").value = "";
-        document.getElementById("productBrand").value = "";
-        document.getElementById("productDuration").value = "";
-        document.getElementById("productPrice").value = "";
-        document.getElementById("saveProductBtn").innerText = "Tambah Produk";
+        const editingInput = document.getElementById("editingProductId");
+        const gameInput = document.getElementById("productGame");
+        const brandInput = document.getElementById("productBrand");
+        const durationInput = document.getElementById("productDuration");
+        const priceInput = document.getElementById("productPrice");
+        const saveBtn = document.getElementById("saveProductBtn");
+
+        if (editingInput) editingInput.value = "";
+        if (gameInput) gameInput.value = "";
+        if (brandInput) brandInput.value = "";
+        if (durationInput) durationInput.value = "";
+        if (priceInput) priceInput.value = "";
+        if (saveBtn) saveBtn.innerText = "Tambah Produk";
+
+        Swal.fire({
+          toast: true,
+          position: "top-end",
+          icon: "success",
+          title: "Form produk sudah direset",
+          showConfirmButton: false,
+          timer: 1200,
+          timerProgressBar: true,
+        });
       }
 
       function editProduct(id, game, brand, duration, price) {
