@@ -1245,25 +1245,121 @@ async function loadMyReview() {
   } catch (err) {}
 }
 
-async function submitReview() {
-  const commentInput = document.getElementById("reviewComment");
-  const submitBtn = document.querySelector(".submit-review-btn");
-  const comment = String(commentInput?.value || "").trim();
+async function openReviewPopup() {
+  let popupRating = selectedReviewRating || 5;
+  let existingComment = "";
 
-  if (comment.length < 8) {
+  try {
+    const res = await fetch("/reviews/me");
+
+    if (res.status === 401) {
+      Swal.fire({
+        icon: "warning",
+        title: "Login dulu",
+        text: "Kamu harus login dan pernah berhasil order untuk kasih review.",
+        confirmButtonText: "Login Sekarang",
+        confirmButtonColor: "#0ea5e9",
+      }).then(() => {
+        window.location.href = "/auth";
+      });
+      return;
+    }
+
+    const data = await res.json();
+
+    if (data.review) {
+      popupRating = Number(data.review.rating || 5);
+      existingComment = data.review.comment || "";
+    }
+  } catch (err) {}
+
+  const renderPopupStars = () =>
+    [1, 2, 3, 4, 5]
+      .map(
+        (rating) => `
+          <button
+            type="button"
+            class="${rating <= popupRating ? "active" : ""}"
+            data-popup-rating="${rating}"
+          >
+            ★
+          </button>
+        `,
+      )
+      .join("");
+
+  const result = await Swal.fire({
+    title: "Kasih Review ⭐",
+    html: `
+      <div class="review-popup-stars" id="reviewPopupStars">
+        ${renderPopupStars()}
+      </div>
+
+      <textarea
+        id="reviewPopupComment"
+        class="review-popup-textarea"
+        maxlength="240"
+        placeholder="Tulis pengalaman kamu belanja di AE Game Store..."
+      >${escapeHtml(existingComment)}</textarea>
+
+      <div class="review-popup-note">
+        Review hanya bisa dikirim oleh akun yang sudah pernah berhasil order.
+      </div>
+    `,
+    showCancelButton: true,
+    confirmButtonText: "Kirim Review",
+    cancelButtonText: "Batal",
+    confirmButtonColor: "#0ea5e9",
+    cancelButtonColor: "#64748b",
+    didOpen: () => {
+      const starsBox = document.getElementById("reviewPopupStars");
+
+      if (!starsBox) return;
+
+      starsBox.querySelectorAll("button").forEach((button) => {
+        button.addEventListener("click", () => {
+          popupRating = Number(button.dataset.popupRating || 5);
+
+          starsBox.querySelectorAll("button").forEach((starButton) => {
+            const rating = Number(starButton.dataset.popupRating || 0);
+            starButton.classList.toggle("active", rating <= popupRating);
+          });
+        });
+      });
+    },
+    preConfirm: () => {
+      const comment =
+        document.getElementById("reviewPopupComment")?.value || "";
+
+      if (String(comment).trim().length < 8) {
+        Swal.showValidationMessage("Review minimal 8 karakter.");
+        return false;
+      }
+
+      return {
+        rating: popupRating,
+        comment,
+      };
+    },
+  });
+
+  if (!result.isConfirmed) return;
+
+  selectedReviewRating = popupRating;
+  await submitReview(result.value);
+}
+
+async function submitReview({ rating, comment }) {
+  const cleanComment = String(comment || "").trim();
+
+  if (cleanComment.length < 8) {
     Swal.fire({
       icon: "warning",
       title: "Komentar terlalu pendek",
       text: "Tulis review minimal 8 karakter.",
       confirmButtonColor: "#0ea5e9",
     });
-    return;
-  }
-
-  const originalText = submitBtn ? submitBtn.innerText : "";
-  if (submitBtn) {
-    submitBtn.disabled = true;
-    submitBtn.innerText = "Mengirim review...";
+    return false;
   }
 
   try {
@@ -1274,8 +1370,8 @@ async function submitReview() {
         "x-user-csrf-token": getCookie("user_csrf"),
       },
       body: JSON.stringify({
-        rating: selectedReviewRating,
-        comment,
+        rating,
+        comment: cleanComment,
       }),
     });
 
@@ -1288,7 +1384,7 @@ async function submitReview() {
         text: data.message || "Gagal menyimpan review",
         confirmButtonColor: "#fb7185",
       });
-      return;
+      return false;
     }
 
     Swal.fire({
@@ -1299,6 +1395,8 @@ async function submitReview() {
     });
 
     loadReviews();
+    loadMyReview();
+    return true;
   } catch (err) {
     Swal.fire({
       icon: "error",
@@ -1306,23 +1404,11 @@ async function submitReview() {
       text: "Terjadi error server saat menyimpan review.",
       confirmButtonColor: "#fb7185",
     });
-  } finally {
-    if (submitBtn) {
-      submitBtn.disabled = false;
-      submitBtn.innerText = originalText || "Kirim Review";
-    }
+    return false;
   }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  document.querySelectorAll("#ratingPicker button").forEach((button) => {
-    button.addEventListener("click", () => {
-      selectedReviewRating = Number(button.dataset.rating || 5);
-      updateRatingPicker();
-    });
-  });
-
-  updateRatingPicker();
   loadReviews();
   loadMyReview();
 });

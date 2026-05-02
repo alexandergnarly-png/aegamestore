@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AE Game Store 🌊⛩️</title>
-    <link rel="stylesheet" href="style.css?v=27" />
+    <link rel="stylesheet" href="style.css?v=28" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
   </head>
@@ -161,36 +161,19 @@
           <span>Memuat review buyer...</span>
         </div>
 
-        <div class="review-form-card" id="reviewFormCard">
-          <div>
-            <strong>Kasih rating untuk AE Game Store</strong>
-            <p>
-              Review hanya bisa dikirim oleh akun yang sudah pernah berhasil
-              order.
-            </p>
-          </div>
-
-          <div class="rating-picker" id="ratingPicker">
-            <button type="button" data-rating="1">★</button>
-            <button type="button" data-rating="2">★</button>
-            <button type="button" data-rating="3">★</button>
-            <button type="button" data-rating="4">★</button>
-            <button type="button" data-rating="5">★</button>
-          </div>
-
-          <textarea
-            id="reviewComment"
-            maxlength="240"
-            placeholder="Tulis pengalaman kamu belanja di sini..."
-          ></textarea>
-
+        <div class="review-action-card">
           <button
             type="button"
-            class="submit-review-btn"
-            onclick="submitReview()"
+            class="open-review-btn"
+            onclick="openReviewPopup()"
           >
-            Kirim Review
+            <span>⭐</span>
+            <b>Kasih Review</b>
           </button>
+          <p>
+            Review hanya bisa dikirim oleh buyer yang sudah pernah berhasil
+            order.
+          </p>
         </div>
 
         <div class="testi-scroll-container">
@@ -467,7 +450,7 @@
     </footer>
 
     <!-- SEMUA SCRIPT & STYLE DIPOSISIKAN DENGAN BENAR DI BAWAH FOOTER -->
-    <script src="script.js?v=24"></script>
+    <script src="script.js?v=25"></script>
     <style>
       /* Floating Button Admin */
       .floating-admin-btn {
