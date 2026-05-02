@@ -54,6 +54,7 @@ const translations = {
     emptyVoucherMsg: "Kode voucher kosong.",
     invalidVoucherMsg: "Voucher tidak valid.",
     voucherCheckFailedMsg: "Gagal cek voucher. Coba lagi.",
+    voucherSuccessMsg: "Voucher berhasil digunakan.",
   },
   en: {
     selectProduct: "Select Product",
@@ -109,6 +110,7 @@ const translations = {
     emptyVoucherMsg: "Voucher code is empty.",
     invalidVoucherMsg: "Invalid voucher.",
     voucherCheckFailedMsg: "Failed to check voucher. Please try again.",
+    voucherSuccessMsg: "Voucher applied successfully.",
   },
 };
 
@@ -695,7 +697,8 @@ async function checkVoucher() {
       data.final_price,
     );
 
-    voucherMessage.innerText = data.message || "Voucher berhasil digunakan.";
+    voucherMessage.innerText =
+      data.message || translations[currentLanguage].voucherSuccessMsg;
     voucherMessage.className = "voucher-message success";
     priceBreakdown.style.display = "block";
   } catch (err) {
