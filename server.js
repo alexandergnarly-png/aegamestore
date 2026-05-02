@@ -11,6 +11,7 @@ const rateLimit = require("express-rate-limit");
 const jwt = require("jsonwebtoken");
 
 const app = express();
+app.disable("x-powered-by");
 app.set("trust proxy", 1);
 const port = process.env.PORT || 3000;
 const isMidtransProduction = process.env.MIDTRANS_IS_PRODUCTION === "true";
@@ -384,6 +385,27 @@ function requireAdminCsrf(req, res, next) {
   next();
 }
 
+function requireSafeAdminAction(req, res, next) {
+  const isWriteMethod = ["POST", "PUT", "PATCH", "DELETE"].includes(
+    String(req.method || "").toUpperCase(),
+  );
+
+  if (!isWriteMethod) {
+    return next();
+  }
+
+  const csrfFromCookie = String(req.cookies.admin_csrf || "").trim();
+  const csrfFromHeader = String(req.headers["x-csrf-token"] || "").trim();
+
+  if (!csrfFromCookie || !csrfFromHeader || csrfFromCookie !== csrfFromHeader) {
+    return res.status(403).json({
+      message: "Invalid CSRF token",
+    });
+  }
+
+  return next();
+}
+
 async function requireAdminAuth(req, res, next) {
   const isLoggedIn = await isAdminLoggedIn(req);
 
@@ -426,6 +448,11 @@ app.use(
 app.use(globalLimiter);
 app.use(express.json({ limit: "50kb" }));
 app.use(cookieParser());
+app.use((req, res, next) => {
+  res.setHeader("X-Powered-By", "AE Game Store");
+  res.setHeader("Cache-Control", "no-store");
+  next();
+});
 app.use(express.static("public"));
 
 app.get("/", (req, res) => {
@@ -2104,6 +2131,24 @@ app.get("/recent-purchases", async (req, res) => {
     });
   }
 });
+app.get("/security-audit", requireAdminAuth, async (req, res) => {
+  return res.json({
+    helmet: true,
+    csrf_admin_actions: true,
+    rate_limit: true,
+    password_hashing: true,
+    jwt_secret_configured: Boolean(jwtSecret && jwtSecret.length >= 32),
+    midtrans_production: isMidtransProduction,
+    notes: [
+      "Pastikan .env tidak pernah dipush ke GitHub.",
+      "Gunakan password admin yang kuat.",
+      "Pastikan Render memakai HTTPS.",
+      "Jangan tampilkan kontak/email buyer ke public.",
+      "Backup database secara rutin.",
+    ],
+  });
+});
+
 app.listen(port, () => {
   console.log("Server jalan di port", port);
 });
