@@ -1164,7 +1164,35 @@
             </div>
             <div class="section-badge">Product Manager</div>
           </div>
+          <div class="toolbar">
+            <div class="field">
+              <input
+                type="text"
+                id="productSearchInput"
+                placeholder="Cari game / brand / durasi"
+              />
+            </div>
 
+            <div class="field">
+              <select id="productGameFilter" onchange="applyProductFilters()">
+                <option value="">Semua Game</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <select id="productBrandFilter" onchange="applyProductFilters()">
+                <option value="">Semua Brand</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <select id="productStatusFilter" onchange="applyProductFilters()">
+                <option value="">Semua Status</option>
+                <option value="1">Active</option>
+                <option value="0">Inactive</option>
+              </select>
+            </div>
+          </div>
           <div class="toolbar">
             <input type="hidden" id="editingProductId" />
             <div class="field">
@@ -1514,6 +1542,7 @@
     <script>
       let allOrders = [];
       let selectedOrderIds = new Set();
+      let allProducts = [];
 
       function toggleSidebar() {
         document.body.classList.toggle("sidebar-collapsed");
@@ -2370,50 +2399,28 @@ Game Key : ${key || "-"}
           const data = await res.json();
 
           if (!Array.isArray(data) || data.length === 0) {
+            allProducts = [];
             updateProductStats([]);
+            populateProductFilters([]);
             statusText.innerText = "Belum ada produk.";
             tableBody.innerHTML = `
-                        <tr>
-                            <td colspan="7" class="empty">Belum ada produk di database.</td>
-                        </tr>
-                    `;
+        <tr>
+          <td colspan="7" class="empty">Belum ada produk di database.</td>
+        </tr>
+      `;
             return;
           }
 
-          updateProductStats(data);
-          statusText.innerText = `Total produk: ${data.length}`;
-
-          tableBody.innerHTML = data
-            .map((item) => {
-              const safeGame = JSON.stringify(String(item.game || ""));
-              const safeBrand = JSON.stringify(String(item.brand || ""));
-              const safeDuration = JSON.stringify(String(item.duration || ""));
-              return `
-                        <tr>
-                            <td>${item.id}</td>
-                            <td>${escapeHtml(item.game)}</td>
-                            <td>${escapeHtml(item.brand)}</td>
-                            <td>${escapeHtml(item.duration)}</td>
-                            <td>${formatRupiah(item.price)}</td>
-                            <td>${activeBadge(item.active)}</td>
-                            <td>
-                                <button onclick='editProduct(${item.id}, ${safeGame}, ${safeBrand}, ${safeDuration}, ${Number(item.price || 0)})'>Edit</button>
-                                <button class="ghost-btn" onclick="toggleProductActive(${item.id}, ${Number(item.active) === 1 ? 0 : 1})">
-                                    ${Number(item.active) === 1 ? "Nonaktifkan" : "Aktifkan"}
-                                </button>
-                                <button class="danger-btn" onclick="deleteProduct(${item.id})">Hapus</button>
-                            </td>
-                        </tr>
-                    `;
-            })
-            .join("");
+          allProducts = data;
+          populateProductFilters(data);
+          applyProductFilters();
         } catch (err) {
           statusText.innerText = "Gagal memuat daftar produk.";
           tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="7" class="empty">Terjadi error saat mengambil produk.</td>
-                    </tr>
-                `;
+      <tr>
+        <td colspan="7" class="empty">Terjadi error saat mengambil produk.</td>
+      </tr>
+    `;
         }
       }
 
@@ -2584,6 +2591,131 @@ Game Key : ${key || "-"}
         } catch (err) {
           Swal.fire("Terjadi error server saat mengubah status produk");
         }
+      }
+
+      function populateProductFilters(products) {
+        const gameFilter = document.getElementById("productGameFilter");
+        const brandFilter = document.getElementById("productBrandFilter");
+
+        if (!gameFilter || !brandFilter) return;
+
+        const currentGame = gameFilter.value;
+        const currentBrand = brandFilter.value;
+
+        const games = [
+          ...new Set(products.map((item) => item.game).filter(Boolean)),
+        ].sort((a, b) => String(a).localeCompare(String(b)));
+
+        const brands = [
+          ...new Set(products.map((item) => item.brand).filter(Boolean)),
+        ].sort((a, b) => String(a).localeCompare(String(b)));
+
+        gameFilter.innerHTML = `<option value="">Semua Game</option>`;
+        brandFilter.innerHTML = `<option value="">Semua Brand</option>`;
+
+        games.forEach((game) => {
+          const option = document.createElement("option");
+          option.value = game;
+          option.textContent = game;
+          gameFilter.appendChild(option);
+        });
+
+        brands.forEach((brand) => {
+          const option = document.createElement("option");
+          option.value = brand;
+          option.textContent = brand;
+          brandFilter.appendChild(option);
+        });
+
+        if (games.includes(currentGame)) gameFilter.value = currentGame;
+        if (brands.includes(currentBrand)) brandFilter.value = currentBrand;
+      }
+
+      function applyProductFilters() {
+        const statusText = document.getElementById("productStatusText");
+        const tableBody = document.getElementById("productTableBody");
+
+        const searchValue = String(
+          document.getElementById("productSearchInput")?.value || "",
+        )
+          .trim()
+          .toLowerCase();
+
+        const gameValue = String(
+          document.getElementById("productGameFilter")?.value || "",
+        );
+
+        const brandValue = String(
+          document.getElementById("productBrandFilter")?.value || "",
+        );
+
+        const statusValue = String(
+          document.getElementById("productStatusFilter")?.value || "",
+        );
+
+        const filteredProducts = allProducts.filter((item) => {
+          const matchesSearch =
+            !searchValue ||
+            String(item.game || "")
+              .toLowerCase()
+              .includes(searchValue) ||
+            String(item.brand || "")
+              .toLowerCase()
+              .includes(searchValue) ||
+            String(item.duration || "")
+              .toLowerCase()
+              .includes(searchValue) ||
+            String(item.price || "")
+              .toLowerCase()
+              .includes(searchValue);
+
+          const matchesGame =
+            !gameValue || String(item.game || "") === gameValue;
+          const matchesBrand =
+            !brandValue || String(item.brand || "") === brandValue;
+          const matchesStatus =
+            statusValue === "" || String(Number(item.active)) === statusValue;
+
+          return matchesSearch && matchesGame && matchesBrand && matchesStatus;
+        });
+
+        updateProductStats(filteredProducts);
+        statusText.innerText = `Menampilkan ${filteredProducts.length} dari ${allProducts.length} produk`;
+
+        if (filteredProducts.length === 0) {
+          tableBody.innerHTML = `
+      <tr>
+        <td colspan="7" class="empty">Tidak ada produk yang sesuai filter.</td>
+      </tr>
+    `;
+          return;
+        }
+
+        tableBody.innerHTML = filteredProducts
+          .map((item) => {
+            const safeGame = JSON.stringify(String(item.game || ""));
+            const safeBrand = JSON.stringify(String(item.brand || ""));
+            const safeDuration = JSON.stringify(String(item.duration || ""));
+
+            return `
+        <tr>
+          <td>${item.id}</td>
+          <td>${escapeHtml(item.game)}</td>
+          <td>${escapeHtml(item.brand)}</td>
+          <td>${escapeHtml(item.duration)}</td>
+          <td>${formatRupiah(item.price)}</td>
+          <td>${activeBadge(item.active)}</td>
+          <td>
+            <button onclick='editProduct(${item.id}, ${safeGame}, ${safeBrand}, ${safeDuration}, ${Number(item.price || 0)})'>Edit</button>
+            <button class="ghost-btn" onclick="toggleProductActive(${item.id}, ${Number(item.active) === 1 ? 0 : 1})">
+              ${Number(item.active) === 1 ? "Nonaktifkan" : "Aktifkan"}
+            </button>
+            <button class="danger-btn" onclick="deleteProduct(${item.id})">Hapus</button>
+          </td>
+        </tr>
+      `;
+          })
+          .join("");
       }
 
       function resetVoucherForm() {
@@ -2847,6 +2979,12 @@ Game Key : ${key || "-"}
           searchInput.addEventListener("input", applyOrderFilters);
         }
 
+        const productSearchInput =
+          document.getElementById("productSearchInput");
+        if (productSearchInput) {
+          productSearchInput.addEventListener("input", applyProductFilters);
+        }
+
         showSection("dashboard");
       });
     </script>
@@ -2873,7 +3011,7 @@ Game Key : ${key || "-"}
         if (clockEl) clockEl.innerText = "Waktu lokal: " + timeString;
       }
 
-      setInterval(updateClock, 60000); // Update setiap detik
+      setInterval(updateClock, 60000);
       updateClock(); // Jalankan pertama kali
       // ----------------------------------------------
     </script>
