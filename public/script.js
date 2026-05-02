@@ -31,6 +31,21 @@ const translations = {
     filterMobile: "Mobile",
     filterPC: "PC Games",
     filterVoucher: "Voucher",
+    orderGameBadge: "Order Game",
+    modalOrderDesc: "Lengkapi data order kamu di bawah ini.",
+    brandLabel: "Brand",
+    durationLabel: "Nominal / Durasi",
+    playerNameLabel: "Nama Player",
+    contactLabel: "Kontak / Email",
+    voucherCodeLabel: "Kode Voucher",
+    playerNamePlaceholder: "Masukkan nama kamu",
+    contactPlaceholder: "No. WA / Email",
+    voucherPlaceholder: "Contoh: DELTA5K",
+    checkVoucherBtn: "Cek",
+    summaryGame: "Game",
+    summaryProduct: "Produk",
+    summaryTotalPayment: "Total Pembayaran",
+    trustText: "🔒 Pembayaran aman via QRIS GoPay Merchant • Pengiriman instan",
   },
   en: {
     selectProduct: "Select Product",
@@ -63,14 +78,47 @@ const translations = {
     filterMobile: "Mobile",
     filterPC: "PC Games",
     filterVoucher: "Voucher",
+    orderGameBadge: "Order Game",
+    modalOrderDesc: "Complete your order details below.",
+    brandLabel: "Brand",
+    durationLabel: "Nominal / Duration",
+    playerNameLabel: "Player Name",
+    contactLabel: "Contact / Email",
+    voucherCodeLabel: "Voucher Code",
+    playerNamePlaceholder: "Enter your player name",
+    contactPlaceholder: "WhatsApp / Email",
+    voucherPlaceholder: "Example: DELTA5K",
+    checkVoucherBtn: "Check",
+    summaryGame: "Game",
+    summaryProduct: "Product",
+    summaryTotalPayment: "Total Payment",
+    trustText: "🔒 Secure payment via QRIS GoPay Merchant • Instant delivery",
   },
 };
 
-let currentLanguage = localStorage.getItem("language") || "id";
+function detectBrowserLanguage() {
+  const savedLanguage = localStorage.getItem("ae_language");
+
+  if (savedLanguage === "id" || savedLanguage === "en") {
+    return savedLanguage;
+  }
+
+  const browserLanguage = String(
+    navigator.language || navigator.userLanguage || "id",
+  ).toLowerCase();
+
+  if (browserLanguage.startsWith("id")) {
+    return "id";
+  }
+
+  return "en";
+}
+
+let currentLanguage = detectBrowserLanguage();
 
 function setLanguage(lang) {
   currentLanguage = lang;
-  localStorage.setItem("language", lang);
+  localStorage.setItem("ae_language", lang);
 
   document.querySelectorAll("[data-i18n]").forEach((element) => {
     const key = element.getAttribute("data-i18n");
@@ -498,6 +546,7 @@ async function logoutUser() {
 
 // Jalankan fungsi saat halaman beranda pertama kali dibuka
 document.addEventListener("DOMContentLoaded", () => {
+  setLanguage(currentLanguage);
   checkLoginStatus();
 });
 // --------------------------------

@@ -173,42 +173,61 @@
 
         <div class="modal-head">
           <div>
-            <span class="summary-badge">ORDER GAME</span>
+            <span class="summary-badge" data-i18n="orderGameBadge"
+              >ORDER GAME</span
+            >
             <h2 id="modalGameTitle">Pilih Game</h2>
-            <p>Lengkapi data order kamu di bawah ini.</p>
+            <p data-i18n="modalOrderDesc">
+              Lengkapi data order kamu di bawah ini.
+            </p>
           </div>
         </div>
 
         <div class="form-grid">
           <div class="field">
-            <label for="brand">Brand</label>
+            <label for="brand" data-i18n="brandLabel">Brand</label>
             <select id="brand"></select>
           </div>
 
           <div class="field">
-            <label for="product">Nominal / Durasi</label>
+            <label for="product" data-i18n="durationLabel"
+              >Nominal / Durasi</label
+            >
             <select id="product"></select>
           </div>
         </div>
 
         <div class="form-grid">
           <div class="field">
-            <label for="name">Nama Player</label>
-            <input type="text" id="name" placeholder="Masukkan nama kamu" />
+            <label for="name" data-i18n="playerNameLabel">Nama Player</label>
+            <input
+              type="text"
+              id="name"
+              placeholder="Masukkan nama kamu"
+              data-i18n-placeholder="playerNamePlaceholder"
+            />
           </div>
 
           <div class="field">
-            <label for="contact">Kontak / Email</label>
-            <input type="text" id="contact" placeholder="No. WA / Email" />
+            <label for="contact" data-i18n="contactLabel">Kontak / Email</label>
+            <input
+              type="text"
+              id="contact"
+              placeholder="No. WA / Email"
+              data-i18n-placeholder="contactPlaceholder"
+            />
           </div>
         </div>
         <div class="form-group">
-          <label for="voucherCodeInput">Kode Voucher</label>
+          <label for="voucherCodeInput" data-i18n="voucherCodeLabel"
+            >Kode Voucher</label
+          >
           <div class="voucher-row">
             <input
               type="text"
               id="voucherCodeInput"
               placeholder="Contoh: DELTA5K"
+              data-i18n-placeholder="voucherPlaceholder"
               autocomplete="off"
             />
             <button
@@ -218,7 +237,7 @@
               onclick="checkVoucher()"
             >
               <span>🎟️</span>
-              <b>Cek</b>
+              <b data-i18n="checkVoucherBtn">Cek</b>
             </button>
           </div>
           <small id="voucherMessage" class="voucher-message"></small>
@@ -245,15 +264,15 @@
 
         <div class="modal-summary">
           <div>
-            <small>Game</small>
+            <small data-i18n="summaryGame">Game</small>
             <strong id="previewGame">Memuat data...</strong>
           </div>
           <div>
-            <small>Produk</small>
+            <small data-i18n="summaryProduct">Produk</small>
             <strong id="previewProduct">Menunggu pilihan...</strong>
           </div>
           <div>
-            <small>Total Pembayaran</small>
+            <small data-i18n="summaryTotalPayment">Total Pembayaran</small>
             <strong id="previewPrice">Rp 0</strong>
           </div>
         </div>
@@ -265,7 +284,7 @@
           Memproses pesanan...
         </div>
 
-        <p class="trust-text">
+        <p class="trust-text" data-i18n="trustText">
           🔒 Pembayaran aman via QRIS GoPay Merchant • Pengiriman instan
         </p>
       </div>
@@ -312,7 +331,7 @@
     </footer>
 
     <!-- SEMUA SCRIPT & STYLE DIPOSISIKAN DENGAN BENAR DI BAWAH FOOTER -->
-    <script src="script.js?v=7"></script>
+    <script src="script.js?v=9"></script>
     <style>
       /* Floating Button Admin */
       /* Floating Button Admin */
