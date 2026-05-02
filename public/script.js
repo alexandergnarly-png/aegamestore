@@ -446,6 +446,7 @@ function closeOrderModal() {
 
   resetVoucherPreview();
 }
+
 function loadBrands() {
   const brands = [
     ...new Set(
@@ -908,7 +909,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const modal = document.getElementById("orderModal");
 
   if (closeBtn) {
-    closeBtn.addEventListener("click", closeOrderModal);
+    closeBtn.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      closeOrderModal();
+    });
+
+    closeBtn.addEventListener("touchend", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      closeOrderModal();
+    });
   }
 
   document.addEventListener("click", (e) => {

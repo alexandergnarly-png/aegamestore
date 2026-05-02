@@ -1126,18 +1126,23 @@ button#buyBtn:active {
 }
 
 .modal-close-btn {
-  position: absolute;
-  top: 18px;
-  right: 18px;
-  width: 38px;
-  height: 38px;
-  border: none;
-  border-radius: 12px;
-  background: #e0f2fe;
-  color: #0284c7;
-  font-size: 24px;
-  font-weight: 800;
-  cursor: pointer;
+  position: absolute !important;
+  top: 18px !important;
+  right: 18px !important;
+  width: 42px !important;
+  height: 42px !important;
+  border: none !important;
+  border-radius: 14px !important;
+  background: #e0f2fe !important;
+  color: #0284c7 !important;
+  font-size: 26px !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+  z-index: 9999 !important;
+  pointer-events: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .modal-head {
@@ -2134,4 +2139,18 @@ body.dark-theme .order-modal-card {
 
 .swal2-popup {
   z-index: 20001 !important;
+}
+/* ===== MODAL CLOSE BUTTON CLICK FIX ===== */
+
+.order-modal-card {
+  pointer-events: auto !important;
+}
+
+.order-modal-backdrop {
+  pointer-events: auto !important;
+}
+
+.modal-close-btn {
+  pointer-events: auto !important;
+  touch-action: manipulation !important;
 }
