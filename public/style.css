@@ -2176,3 +2176,14 @@ body.dark-theme .order-modal-card {
   pointer-events: auto !important;
   touch-action: manipulation !important;
 }
+/* ===== SMOOTH SCROLL ===== */
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}

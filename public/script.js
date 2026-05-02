@@ -964,5 +964,41 @@ document.addEventListener("DOMContentLoaded", () => {
     if (themeToggleBtn) themeToggleBtn.innerText = "☀️";
   }
 });
+
+// ===== SMOOTH SCROLL WITH STICKY HEADER OFFSET =====
+document.addEventListener("click", (event) => {
+  const anchor = event.target.closest('a[href^="#"]');
+
+  if (!anchor) return;
+
+  const targetId = anchor.getAttribute("href");
+
+  if (!targetId || targetId === "#") return;
+
+  const targetElement = document.querySelector(targetId);
+
+  if (!targetElement) return;
+
+  event.preventDefault();
+
+  const header = document.querySelector(".site-header");
+  const headerHeight = header ? header.offsetHeight : 0;
+  const extraGap = 14;
+
+  const targetTop =
+    targetElement.getBoundingClientRect().top +
+    window.pageYOffset -
+    headerHeight -
+    extraGap;
+
+  window.scrollTo({
+    top: targetTop,
+    behavior: "smooth",
+  });
+
+  if (typeof closeMobileNav === "function") {
+    closeMobileNav();
+  }
+});
 setLanguage(currentLanguage);
 loadAllProducts();
