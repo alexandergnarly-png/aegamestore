@@ -869,7 +869,10 @@ button#buyBtn:active {
   position: absolute;
   inset: 0;
   opacity: 0;
-  transition: opacity 0.8s ease;
+  visibility: hidden; /* Tambahkan baris ini */
+  transition:
+    opacity 0.5s ease,
+    visibility 0.5s ease; /* Ubah transisi jadi lebih cepat dan tambahkan visibility */
   display: flex;
   align-items: center;
   padding: 0 40px;
@@ -878,7 +881,8 @@ button#buyBtn:active {
 
 .promo-slide.active {
   opacity: 1;
-  z-index: 1;
+  visibility: visible; /* Tambahkan baris ini */
+  z-index: 2; /* Naikkan z-index */
 }
 
 .promo-content span {
