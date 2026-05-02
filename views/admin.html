@@ -1557,6 +1557,21 @@
                 placeholder="Nama game, contoh: Delta Force"
               />
             </div>
+            <div class="field">
+              <input
+                type="text"
+                id="voucherBrandName"
+                placeholder="Brand optional, contoh: Aorus"
+              />
+            </div>
+
+            <div class="field">
+              <input
+                type="text"
+                id="voucherDurationName"
+                placeholder="Durasi optional, contoh: 6 Jam"
+              />
+            </div>
 
             <div class="field">
               <input
@@ -1602,6 +1617,8 @@
                   <th style="width: 80px">ID</th>
                   <th>Kode</th>
                   <th>Game</th>
+                  <th>Brand</th>
+                  <th>Durasi</th>
                   <th>Diskon</th>
                   <th>Status</th>
                   <th>Expired</th>
@@ -2612,7 +2629,7 @@ Game Key : ${key || "-"}
             statusText.innerText = "Belum ada produk.";
             tableBody.innerHTML = `
         <tr>
-          <td colspan="7" class="empty">Belum ada produk di database.</td>
+          <td colspan="9" class="empty">Belum ada produk di database.</td>
         </tr>
       `;
             return;
@@ -2625,7 +2642,7 @@ Game Key : ${key || "-"}
           statusText.innerText = "Gagal memuat daftar produk.";
           tableBody.innerHTML = `
       <tr>
-        <td colspan="7" class="empty">Terjadi error saat mengambil produk.</td>
+        <td colspan="9" class="empty">Terjadi error saat mengambil produk.</td>
       </tr>
     `;
         }
@@ -2892,7 +2909,7 @@ Game Key : ${key || "-"}
         if (filteredProducts.length === 0) {
           tableBody.innerHTML = `
       <tr>
-        <td colspan="7" class="empty">Tidak ada produk yang sesuai filter.</td>
+        <td colspan="9" class="empty">Tidak ada produk yang sesuai filter.</td>
       </tr>
     `;
           return;
@@ -2929,6 +2946,8 @@ Game Key : ${key || "-"}
         document.getElementById("editingVoucherId").value = "";
         document.getElementById("voucherCode").value = "";
         document.getElementById("voucherGameName").value = "";
+        document.getElementById("voucherBrandName").value = "";
+        document.getElementById("voucherDurationName").value = "";
         document.getElementById("voucherDiscount").value = "";
         document.getElementById("voucherExpiresAt").value = "";
         document.getElementById("saveVoucherBtn").innerText = "Simpan Voucher";
@@ -2955,7 +2974,7 @@ Game Key : ${key || "-"}
             statusText.innerText = "Belum ada voucher.";
             tableBody.innerHTML = `
         <tr>
-          <td colspan="7" class="empty">Belum ada voucher yang dibuat.</td>
+          <td colspan="9" class="empty">Belum ada voucher yang dibuat.</td>
         </tr>
       `;
             return;
@@ -2968,6 +2987,12 @@ Game Key : ${key || "-"}
               const active = Number(item.active) === 1;
               const safeCode = JSON.stringify(String(item.code || ""));
               const safeGameName = JSON.stringify(String(item.game_name || ""));
+              const safeBrandName = JSON.stringify(
+                String(item.brand_name || ""),
+              );
+              const safeDurationName = JSON.stringify(
+                String(item.duration_name || ""),
+              );
               const safeDiscount = Number(item.discount_amount || 0);
               const safeExpiresAt = JSON.stringify(
                 String(item.expires_at || ""),
@@ -2978,11 +3003,13 @@ Game Key : ${key || "-"}
             <td>${item.id}</td>
             <td><b>${escapeHtml(item.code || "-")}</b></td>
             <td>${escapeHtml(item.game_name || "-")}</td>
+            <td>${escapeHtml(item.brand_name || "Semua")}</td>
+            <td>${escapeHtml(item.duration_name || "Semua")}</td>
             <td>${formatRupiah(item.discount_amount || 0)}</td>
             <td>${active ? '<span class="badge available">Active</span>' : '<span class="badge used">Inactive</span>'}</td>
             <td>${escapeHtml(item.expires_at || "-")}</td>
             <td>
-              <button onclick='editVoucher(${item.id}, ${safeCode}, ${safeGameName}, ${safeDiscount}, ${safeExpiresAt})'>Edit</button>
+              <button onclick='editVoucher(${item.id}, ${safeCode}, ${safeGameName}, ${safeBrandName}, ${safeDurationName}, ${safeDiscount}, ${safeExpiresAt})'>Edit</button>
               <button class="ghost-btn" onclick="toggleVoucherActive(${item.id}, ${active ? 0 : 1})">
                 ${active ? "Nonaktifkan" : "Aktifkan"}
               </button>
@@ -2996,16 +3023,27 @@ Game Key : ${key || "-"}
           statusText.innerText = "Gagal memuat daftar voucher.";
           tableBody.innerHTML = `
       <tr>
-        <td colspan="7" class="empty">Terjadi error saat mengambil voucher.</td>
+        <td colspan="9" class="empty">Terjadi error saat mengambil voucher.</td>
       </tr>
     `;
         }
       }
 
-      function editVoucher(id, code, gameName, discountAmount, expiresAt) {
+      function editVoucher(
+        id,
+        code,
+        gameName,
+        brandName,
+        durationName,
+        discountAmount,
+        expiresAt,
+      ) {
         document.getElementById("editingVoucherId").value = id;
         document.getElementById("voucherCode").value = code;
         document.getElementById("voucherGameName").value = gameName;
+        document.getElementById("voucherBrandName").value = brandName || "";
+        document.getElementById("voucherDurationName").value =
+          durationName || "";
         document.getElementById("voucherDiscount").value = discountAmount;
         document.getElementById("voucherExpiresAt").value = expiresAt || "";
         document.getElementById("saveVoucherBtn").innerText = "Update Voucher";
@@ -3018,6 +3056,12 @@ Game Key : ${key || "-"}
           .value.trim();
         const discountAmount = document
           .getElementById("voucherDiscount")
+          .value.trim();
+        const brandName = document
+          .getElementById("voucherBrandName")
+          .value.trim();
+        const durationName = document
+          .getElementById("voucherDurationName")
           .value.trim();
         const expiresAt = document
           .getElementById("voucherExpiresAt")
@@ -3038,6 +3082,8 @@ Game Key : ${key || "-"}
             body: JSON.stringify({
               code,
               game_name: gameName,
+              brand_name: brandName || null,
+              duration_name: durationName || null,
               discount_amount: Number(discountAmount),
               expires_at: expiresAt || null,
             }),

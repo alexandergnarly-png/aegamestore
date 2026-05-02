@@ -180,15 +180,17 @@ db.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS voucher_code TEXT`);
 
 db.query(
   `
-  CREATE TABLE IF NOT EXISTS vouchers (
-    id SERIAL PRIMARY KEY,
-    code TEXT UNIQUE NOT NULL,
-    game_name TEXT,
-    discount_amount INTEGER NOT NULL DEFAULT 0,
-    active INTEGER DEFAULT 1,
-    expires_at TEXT,
-    created_at TEXT NOT NULL
-  )
+  CREATE TABLE IF NOT EXISTS vouchers (CREATE TABLE IF NOT EXISTS vouchers (
+  id SERIAL PRIMARY KEY,
+  code TEXT UNIQUE NOT NULL,
+  game_name TEXT,
+  brand_name TEXT,
+  duration_name TEXT,
+  discount_amount INTEGER NOT NULL DEFAULT 0,
+  active INTEGER DEFAULT 1,
+  expires_at TEXT,
+  created_at TEXT NOT NULL
+)
 `,
   (err) => {
     if (err) {
@@ -198,7 +200,8 @@ db.query(
     }
   },
 );
-
+db.query(`ALTER TABLE vouchers ADD COLUMN IF NOT EXISTS brand_name TEXT`);
+db.query(`ALTER TABLE vouchers ADD COLUMN IF NOT EXISTS duration_name TEXT`);
 // limit umum (global)
 const globalLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 menit
@@ -306,7 +309,13 @@ function normalizeVoucherCode(code) {
     .toUpperCase();
 }
 
-async function getVoucherDiscount({ gameName, voucherCode, productPrice }) {
+async function getVoucherDiscount({
+  gameName,
+  brandName,
+  durationName,
+  voucherCode,
+  productPrice,
+}) {
   const cleanCode = normalizeVoucherCode(voucherCode);
 
   if (!cleanCode) {
@@ -346,7 +355,20 @@ async function getVoucherDiscount({ gameName, voucherCode, productPrice }) {
   const targetGame = String(voucher.game_name || "")
     .trim()
     .toLowerCase();
+  const targetBrand = String(voucher.brand_name || "")
+    .trim()
+    .toLowerCase();
+  const targetDuration = String(voucher.duration_name || "")
+    .trim()
+    .toLowerCase();
+
   const currentGame = String(gameName || "")
+    .trim()
+    .toLowerCase();
+  const currentBrand = String(brandName || "")
+    .trim()
+    .toLowerCase();
+  const currentDuration = String(durationName || "")
     .trim()
     .toLowerCase();
 
@@ -354,6 +376,20 @@ async function getVoucherDiscount({ gameName, voucherCode, productPrice }) {
     return {
       valid: false,
       message: "Voucher ini tidak berlaku untuk game ini",
+    };
+  }
+
+  if (targetBrand && targetBrand !== currentBrand) {
+    return {
+      valid: false,
+      message: "Voucher ini tidak berlaku untuk brand ini",
+    };
+  }
+
+  if (targetDuration && targetDuration !== currentDuration) {
+    return {
+      valid: false,
+      message: "Voucher ini tidak berlaku untuk durasi ini",
     };
   }
 
@@ -631,10 +667,19 @@ app.get("/ae-control", requireAdminAuth, (req, res) => {
 });
 
 app.post("/vouchers", requireAdminAuth, requireAdminCsrf, async (req, res) => {
-  const { code, game_name, discount_amount, expires_at } = req.body;
+  const {
+    code,
+    game_name,
+    brand_name,
+    duration_name,
+    discount_amount,
+    expires_at,
+  } = req.body;
 
   const cleanCode = normalizeVoucherCode(code);
   const cleanGameName = String(game_name || "").trim();
+  const cleanBrandName = String(brand_name || "").trim();
+  const cleanDurationName = String(duration_name || "").trim();
   const discountAmount = Number(discount_amount);
   const expiresAt = expires_at ? String(expires_at).trim() : null;
 
@@ -660,18 +705,22 @@ app.post("/vouchers", requireAdminAuth, requireAdminCsrf, async (req, res) => {
   try {
     await query(
       `INSERT INTO vouchers
-        (code, game_name, discount_amount, active, expires_at, created_at)
-       VALUES
-        ($1, $2, $3, 1, $4, $5)
-       ON CONFLICT (code)
-       DO UPDATE SET
-        game_name = EXCLUDED.game_name,
-        discount_amount = EXCLUDED.discount_amount,
-        active = 1,
-        expires_at = EXCLUDED.expires_at`,
+  (code, game_name, brand_name, duration_name, discount_amount, active, expires_at, created_at)
+ VALUES
+  ($1, $2, $3, $4, $5, 1, $6, $7)
+ ON CONFLICT (code)
+ DO UPDATE SET
+  game_name = EXCLUDED.game_name,
+  brand_name = EXCLUDED.brand_name,
+  duration_name = EXCLUDED.duration_name,
+  discount_amount = EXCLUDED.discount_amount,
+  active = 1,
+  expires_at = EXCLUDED.expires_at`,
       [
         cleanCode,
         cleanGameName,
+        cleanBrandName || null,
+        cleanDurationName || null,
         discountAmount,
         expiresAt,
         new Date().toISOString(),
@@ -807,6 +856,8 @@ app.post("/voucher-preview", async (req, res) => {
 
     const voucherCheck = await getVoucherDiscount({
       gameName: productRow.game,
+      brandName: productRow.brand,
+      durationName: productRow.duration,
       voucherCode: cleanVoucherCode,
       productPrice: originalPrice,
     });
@@ -910,6 +961,8 @@ app.post("/create-order", orderLimiter, async (req, res) => {
 
     const voucherCheck = await getVoucherDiscount({
       gameName: game,
+      brandName: productRow.brand,
+      durationName: productRow.duration,
       voucherCode: voucher_code,
       productPrice: originalPrice,
     });
