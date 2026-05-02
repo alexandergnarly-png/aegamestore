@@ -557,6 +557,7 @@ function updatePreview() {
 
   if (!selectedProduct) {
     selectedProductId = null;
+    selectedProductBasePrice = 0;
 
     document.getElementById("previewGame").innerText =
       translations[currentLanguage].previewEmpty;
@@ -970,28 +971,22 @@ async function checkVoucher() {
       voucherMessage.innerText =
         data.message || translations[currentLanguage].invalidVoucherMsg;
       voucherMessage.className = "voucher-message error";
-      if (priceBreakdown) priceBreakdown.style.display = "none";
+      resetVoucherPreview();
       return;
     }
 
     appliedVoucherCode = data.voucher_code || "";
 
-    document.getElementById("originalPriceText").innerText = formatRupiah(
-      data.original_price,
-    );
-    document.getElementById("discountText").innerText =
-      "- " + formatRupiah(data.discount_amount);
-    document.getElementById("paymentFeeText").innerText = formatRupiah(
-      data.payment_fee,
-    );
-    document.getElementById("finalPriceText").innerText = formatRupiah(
-      data.final_price,
-    );
+    showPriceBreakdown({
+      originalPrice: data.original_price,
+      discountAmount: data.discount_amount,
+      paymentFee: data.payment_fee,
+      finalPrice: data.final_price,
+    });
 
     voucherMessage.innerText =
       data.message || translations[currentLanguage].voucherSuccessMsg;
     voucherMessage.className = "voucher-message success";
-    priceBreakdown.style.display = "block";
   } catch (err) {
     appliedVoucherCode = "";
     voucherMessage.innerText =
