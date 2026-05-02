@@ -2292,6 +2292,63 @@ app.get("/security-audit", requireAdminAuth, async (req, res) => {
   });
 });
 
+app.get("/admin-stats", requireAdminAuth, async (req, res) => {
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+    const month = new Date().toISOString().slice(0, 7);
+
+    const todayRevenue = await query(
+      `
+      SELECT COALESCE(SUM(price), 0)::int AS total
+      FROM orders
+      WHERE payment_status = 'paid'
+        AND created_at LIKE $1
+      `,
+      [`${today}%`],
+    );
+
+    const monthRevenue = await query(
+      `
+      SELECT COALESCE(SUM(price), 0)::int AS total
+      FROM orders
+      WHERE payment_status = 'paid'
+        AND created_at LIKE $1
+      `,
+      [`${month}%`],
+    );
+
+    const paidToday = await query(
+      `
+      SELECT COUNT(*)::int AS total
+      FROM orders
+      WHERE payment_status = 'paid'
+        AND created_at LIKE $1
+      `,
+      [`${today}%`],
+    );
+
+    const pendingOrders = await query(
+      `
+      SELECT COUNT(*)::int AS total
+      FROM orders
+      WHERE payment_status = 'pending'
+      `,
+    );
+
+    return res.json({
+      revenue_today: Number(todayRevenue.rows[0]?.total || 0),
+      revenue_month: Number(monthRevenue.rows[0]?.total || 0),
+      paid_today: Number(paidToday.rows[0]?.total || 0),
+      pending_orders: Number(pendingOrders.rows[0]?.total || 0),
+    });
+  } catch (err) {
+    console.error("ERROR ADMIN STATS:", err);
+    return res.status(500).json({
+      message: "Gagal mengambil statistik admin",
+    });
+  }
+});
+
 app.get("/admin-alerts", requireAdminAuth, async (req, res) => {
   try {
     const manualOrders = await query(`
