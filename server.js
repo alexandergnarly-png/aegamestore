@@ -202,6 +202,29 @@ db.query(
 );
 db.query(`ALTER TABLE vouchers ADD COLUMN IF NOT EXISTS brand_name TEXT`);
 db.query(`ALTER TABLE vouchers ADD COLUMN IF NOT EXISTS duration_name TEXT`);
+db.query(
+  `
+  CREATE TABLE IF NOT EXISTS reviews (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL UNIQUE,
+    username TEXT NOT NULL,
+    rating INTEGER NOT NULL,
+    comment TEXT NOT NULL,
+    active INTEGER DEFAULT 1,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  )
+`,
+  (err) => {
+    if (err) {
+      console.error("CREATE TABLE reviews ERROR:", err);
+    } else {
+      console.log("Table reviews ready");
+    }
+  },
+);
+
+db.query(`CREATE INDEX IF NOT EXISTS idx_reviews_active ON reviews(active)`);
 // limit umum (global)
 const globalLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 menit
@@ -262,6 +285,14 @@ const registerLimiter = rateLimit({
   },
 });
 
+const reviewLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 5,
+  message: {
+    message: "Terlalu banyak mengirim review, coba lagi nanti",
+  },
+});
+
 async function isAdminLoggedIn(req) {
   const sessionToken = String(req.cookies.admin_auth || "").trim();
 
@@ -301,6 +332,16 @@ function calculateQrisGrossPrice(netPrice) {
   const totalFeeRate = qrisFeeRate * (1 + ppnRate);
 
   return Math.ceil(Number(netPrice) / (1 - totalFeeRate));
+}
+
+function maskPublicUsername(username) {
+  const cleanName = String(username || "Buyer").trim();
+
+  if (cleanName.length <= 2) {
+    return cleanName[0] + "***";
+  }
+
+  return cleanName.slice(0, 2) + "***";
 }
 
 function normalizeVoucherCode(code) {
@@ -2242,6 +2283,148 @@ app.get("/api/user/me", (req, res) => {
   }
 });
 // ----------------------------------------------
+app.get("/reviews", async (req, res) => {
+  try {
+    const result = await query(
+      `
+      SELECT username, rating, comment, created_at
+      FROM reviews
+      WHERE active = 1
+      ORDER BY updated_at DESC, id DESC
+      LIMIT 12
+      `,
+    );
+
+    const reviews = result.rows.map((item) => ({
+      username: maskPublicUsername(item.username),
+      rating: Number(item.rating || 0),
+      comment: item.comment || "",
+      created_at: item.created_at,
+    }));
+
+    return res.json(reviews);
+  } catch (err) {
+    console.error("ERROR GET REVIEWS:", err);
+    return res.status(500).json({
+      message: "Gagal mengambil review",
+    });
+  }
+});
+
+app.get("/reviews/me", async (req, res) => {
+  const loggedInUser = getLoggedInUserFromRequest(req);
+
+  if (!loggedInUser) {
+    return res.status(401).json({
+      message: "Kamu harus login dulu",
+    });
+  }
+
+  try {
+    const result = await query(
+      `
+      SELECT rating, comment
+      FROM reviews
+      WHERE user_id = $1
+      LIMIT 1
+      `,
+      [loggedInUser.id],
+    );
+
+    const review = result.rows[0] || null;
+
+    return res.json({
+      review,
+    });
+  } catch (err) {
+    console.error("ERROR GET MY REVIEW:", err);
+    return res.status(500).json({
+      message: "Gagal mengambil review kamu",
+    });
+  }
+});
+
+app.post("/reviews", reviewLimiter, requireUserCsrf, async (req, res) => {
+  const loggedInUser = getLoggedInUserFromRequest(req);
+
+  if (!loggedInUser) {
+    return res.status(401).json({
+      message: "Kamu harus login dulu untuk memberi rating",
+    });
+  }
+
+  const rating = Number(req.body.rating);
+  const comment = String(req.body.comment || "").trim();
+
+  if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+    return res.status(400).json({
+      message: "Rating harus 1 sampai 5 bintang",
+    });
+  }
+
+  if (comment.length < 8 || comment.length > 240) {
+    return res.status(400).json({
+      message: "Komentar harus 8 sampai 240 karakter",
+    });
+  }
+
+  const safeCommentRegex = /^[a-zA-Z0-9\s.,!?'"()_\-:;@#&/]+$/;
+
+  if (!safeCommentRegex.test(comment)) {
+    return res.status(400).json({
+      message: "Komentar mengandung karakter yang tidak diizinkan",
+    });
+  }
+
+  try {
+    const paidOrderCheck = await query(
+      `
+      SELECT id
+      FROM orders
+      WHERE user_id = $1
+        AND payment_status = 'paid'
+      LIMIT 1
+      `,
+      [loggedInUser.id],
+    );
+
+    if (paidOrderCheck.rows.length === 0) {
+      return res.status(403).json({
+        message:
+          "Review hanya bisa diberikan oleh akun yang sudah pernah berhasil order",
+      });
+    }
+
+    const now = new Date().toISOString();
+
+    await query(
+      `
+      INSERT INTO reviews
+        (user_id, username, rating, comment, active, created_at, updated_at)
+      VALUES
+        ($1, $2, $3, $4, 1, $5, $5)
+      ON CONFLICT (user_id)
+      DO UPDATE SET
+        username = EXCLUDED.username,
+        rating = EXCLUDED.rating,
+        comment = EXCLUDED.comment,
+        active = 1,
+        updated_at = EXCLUDED.updated_at
+      `,
+      [loggedInUser.id, loggedInUser.username, rating, comment, now],
+    );
+
+    return res.json({
+      message: "Terima kasih! Review kamu berhasil disimpan",
+    });
+  } catch (err) {
+    console.error("ERROR SAVE REVIEW:", err);
+    return res.status(500).json({
+      message: "Gagal menyimpan review",
+    });
+  }
+});
+
 app.get("/recent-purchases", async (req, res) => {
   try {
     const result = await query(

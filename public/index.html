@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AE Game Store 🌊⛩️</title>
-    <link rel="stylesheet" href="style.css?v=26" />
+    <link rel="stylesheet" href="style.css?v=27" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
   </head>
@@ -144,6 +144,71 @@
         <div class="promo-dots" id="promoDots"></div>
       </section>
 
+      <section class="testimonial-section" id="review-section">
+        <div
+          class="section-head text-center"
+          style="max-width: 600px; margin: 0 auto 32px; border-bottom: none"
+        >
+          <h2 data-i18n="testiTitle">Kepercayaan Gamers</h2>
+          <p data-i18n="testiDesc">
+            Review asli dari buyer yang sudah pernah bertransaksi di AE Game
+            Store.
+          </p>
+        </div>
+
+        <div class="review-summary" id="reviewSummary">
+          <strong>⭐ 0.0</strong>
+          <span>Memuat review buyer...</span>
+        </div>
+
+        <div class="review-form-card" id="reviewFormCard">
+          <div>
+            <strong>Kasih rating untuk AE Game Store</strong>
+            <p>
+              Review hanya bisa dikirim oleh akun yang sudah pernah berhasil
+              order.
+            </p>
+          </div>
+
+          <div class="rating-picker" id="ratingPicker">
+            <button type="button" data-rating="1">★</button>
+            <button type="button" data-rating="2">★</button>
+            <button type="button" data-rating="3">★</button>
+            <button type="button" data-rating="4">★</button>
+            <button type="button" data-rating="5">★</button>
+          </div>
+
+          <textarea
+            id="reviewComment"
+            maxlength="240"
+            placeholder="Tulis pengalaman kamu belanja di sini..."
+          ></textarea>
+
+          <button
+            type="button"
+            class="submit-review-btn"
+            onclick="submitReview()"
+          >
+            Kirim Review
+          </button>
+        </div>
+
+        <div class="testi-scroll-container">
+          <div class="testi-track" id="reviewTrack">
+            <div class="testi-card">
+              <div class="testi-header">
+                <div class="testi-avatar">⛩️</div>
+                <div>
+                  <strong>AE Game Store</strong>
+                  <span class="testi-game">Review Buyer</span>
+                </div>
+                <div class="testi-rating">⭐⭐⭐⭐⭐</div>
+              </div>
+              <p>Memuat review...</p>
+            </div>
+          </div>
+        </div>
+      </section>
       <section class="store-layout game-only-layout" id="store-section">
         <div class="shop-card">
           <div class="section-head">
@@ -402,7 +467,7 @@
     </footer>
 
     <!-- SEMUA SCRIPT & STYLE DIPOSISIKAN DENGAN BENAR DI BAWAH FOOTER -->
-    <script src="script.js?v=23"></script>
+    <script src="script.js?v=24"></script>
     <style>
       /* Floating Button Admin */
       .floating-admin-btn {

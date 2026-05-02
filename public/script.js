@@ -215,6 +215,7 @@ let currentCategory = "all";
 let selectedProductId = null;
 let appliedVoucherCode = "";
 let selectedProductBasePrice = 0;
+let selectedReviewRating = 5;
 
 const gameGrid = document.getElementById("gameGrid");
 const brandSelect = document.getElementById("brand");
@@ -1091,6 +1092,239 @@ document.addEventListener("click", (event) => {
   if (typeof closeMobileNav === "function") {
     closeMobileNav();
   }
+});
+// ===== TESTIMONI SCROLL HINT =====
+document.addEventListener("DOMContentLoaded", () => {
+  const testiContainer = document.querySelector(".testi-scroll-container");
+
+  if (testiContainer) {
+    // Tunggu 2 detik setelah halaman dimuat
+    setTimeout(() => {
+      // Geser 100px ke kanan secara halus
+      testiContainer.scrollBy({ left: 100, behavior: "smooth" });
+
+      // Kembalikan ke posisi awal setelah 600ms
+      setTimeout(() => {
+        testiContainer.scrollBy({ left: -100, behavior: "smooth" });
+      }, 600);
+    }, 2000);
+  }
+});
+function getCookie(name) {
+  return (
+    document.cookie
+      .split("; ")
+      .find((row) => row.startsWith(name + "="))
+      ?.split("=")[1] || ""
+  );
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function renderStars(rating) {
+  const total = Math.max(1, Math.min(Number(rating || 0), 5));
+  return "⭐".repeat(total);
+}
+
+function updateRatingPicker() {
+  document.querySelectorAll("#ratingPicker button").forEach((button) => {
+    const rating = Number(button.dataset.rating || 0);
+    button.classList.toggle("active", rating <= selectedReviewRating);
+  });
+}
+
+async function loadReviews() {
+  const reviewTrack = document.getElementById("reviewTrack");
+  const reviewSummary = document.getElementById("reviewSummary");
+
+  if (!reviewTrack) return;
+
+  try {
+    const res = await fetch("/reviews");
+    const data = await res.json();
+
+    if (!Array.isArray(data) || data.length === 0) {
+      reviewTrack.innerHTML = `
+        <div class="testi-card">
+          <div class="testi-header">
+            <div class="testi-avatar">A</div>
+            <div>
+              <strong>AE Buyer</strong>
+              <span class="testi-game">Review Buyer</span>
+            </div>
+            <div class="testi-rating">⭐⭐⭐⭐⭐</div>
+          </div>
+          <p>Jadilah buyer pertama yang kasih review setelah order berhasil.</p>
+        </div>
+      `;
+
+      if (reviewSummary) {
+        reviewSummary.innerHTML = `
+          <strong>⭐ 0.0</strong>
+          <span>Belum ada review buyer.</span>
+        `;
+      }
+
+      return;
+    }
+
+    const average =
+      data.reduce((total, item) => total + Number(item.rating || 0), 0) /
+      data.length;
+
+    if (reviewSummary) {
+      reviewSummary.innerHTML = `
+        <strong>⭐ ${average.toFixed(1)}</strong>
+        <span>Dari ${data.length} review buyer.</span>
+      `;
+    }
+
+    reviewTrack.innerHTML = data
+      .map((item) => {
+        const initial = String(item.username || "B")
+          .charAt(0)
+          .toUpperCase();
+
+        return `
+          <div class="testi-card">
+            <div class="testi-header">
+              <div class="testi-avatar">${escapeHtml(initial)}</div>
+              <div>
+                <strong>${escapeHtml(item.username || "Buyer")}</strong>
+                <span class="testi-game">Verified Buyer</span>
+              </div>
+              <div class="testi-rating">${renderStars(item.rating)}</div>
+            </div>
+            <p>${escapeHtml(item.comment || "-")}</p>
+          </div>
+        `;
+      })
+      .join("");
+  } catch (err) {
+    reviewTrack.innerHTML = `
+      <div class="testi-card">
+        <div class="testi-header">
+          <div class="testi-avatar">!</div>
+          <div>
+            <strong>Review</strong>
+            <span class="testi-game">Gagal dimuat</span>
+          </div>
+          <div class="testi-rating">⭐⭐⭐⭐⭐</div>
+        </div>
+        <p>Review belum bisa dimuat. Coba refresh halaman.</p>
+      </div>
+    `;
+  }
+}
+
+async function loadMyReview() {
+  try {
+    const res = await fetch("/reviews/me");
+
+    if (res.status === 401) return;
+
+    const data = await res.json();
+
+    if (data.review) {
+      selectedReviewRating = Number(data.review.rating || 5);
+      const commentInput = document.getElementById("reviewComment");
+
+      if (commentInput) {
+        commentInput.value = data.review.comment || "";
+      }
+
+      updateRatingPicker();
+    }
+  } catch (err) {}
+}
+
+async function submitReview() {
+  const commentInput = document.getElementById("reviewComment");
+  const submitBtn = document.querySelector(".submit-review-btn");
+  const comment = String(commentInput?.value || "").trim();
+
+  if (comment.length < 8) {
+    Swal.fire({
+      icon: "warning",
+      title: "Komentar terlalu pendek",
+      text: "Tulis review minimal 8 karakter.",
+      confirmButtonColor: "#0ea5e9",
+    });
+    return;
+  }
+
+  const originalText = submitBtn ? submitBtn.innerText : "";
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Mengirim review...";
+  }
+
+  try {
+    const res = await fetch("/reviews", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-user-csrf-token": getCookie("user_csrf"),
+      },
+      body: JSON.stringify({
+        rating: selectedReviewRating,
+        comment,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      Swal.fire({
+        icon: "error",
+        title: "Gagal",
+        text: data.message || "Gagal menyimpan review",
+        confirmButtonColor: "#fb7185",
+      });
+      return;
+    }
+
+    Swal.fire({
+      icon: "success",
+      title: "Review Tersimpan",
+      text: data.message || "Terima kasih untuk review kamu!",
+      confirmButtonColor: "#0ea5e9",
+    });
+
+    loadReviews();
+  } catch (err) {
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Terjadi error server saat menyimpan review.",
+      confirmButtonColor: "#fb7185",
+    });
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerText = originalText || "Kirim Review";
+    }
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("#ratingPicker button").forEach((button) => {
+    button.addEventListener("click", () => {
+      selectedReviewRating = Number(button.dataset.rating || 5);
+      updateRatingPicker();
+    });
+  });
+
+  updateRatingPicker();
+  loadReviews();
+  loadMyReview();
 });
 setLanguage(currentLanguage);
 loadAllProducts();

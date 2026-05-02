@@ -2255,3 +2255,265 @@ body.dark-theme .game-card-meta b.empty {
     padding: 5px 7px;
   }
 }
+/* ===== TESTIMONIALS UPGRADE ===== */
+.testimonial-section {
+  max-width: 1200px;
+  margin: 0 auto 60px;
+  padding: 0 24px;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.testi-scroll-container {
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: 24px;
+  /* Scroll Snapping agar mulus berhenti di setiap kartu */
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  /* Menyembunyikan scrollbar di semua browser */
+  -ms-overflow-style: none; /* IE dan Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+/* Menyembunyikan scrollbar di Chrome, Safari, dan Opera */
+.testi-scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+.testi-track {
+  display: inline-flex;
+  gap: 20px;
+  padding: 10px 4px; /* Memberi ruang untuk efek shadow saat di-hover */
+}
+
+.testi-card {
+  width: 320px;
+  min-width: 320px;
+  background: var(--card-bg);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+  white-space: normal;
+  /* Snap ke tengah layar HP */
+  scroll-snap-align: center;
+}
+
+.testi-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.testi-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.testi-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--ocean-deep), var(--ocean-light));
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 18px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(14, 165, 233, 0.2);
+}
+
+.testi-header strong {
+  display: block;
+  font-size: 15px;
+  color: var(--text-main);
+  line-height: 1.2;
+}
+
+.testi-game {
+  font-size: 11px;
+  color: var(--ocean-deep);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.testi-rating {
+  margin-left: auto;
+  font-size: 13px;
+  filter: drop-shadow(
+    0 2px 4px rgba(251, 191, 36, 0.3)
+  ); /* Sedikit efek menyala di bintang */
+}
+
+.testi-card p {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  font-style: italic;
+  position: relative;
+  padding-left: 14px;
+}
+
+/* Ornamen kutipan " */
+.testi-card p::before {
+  content: '"';
+  position: absolute;
+  left: 0;
+  top: -8px;
+  font-size: 32px;
+  color: var(--ocean-light);
+  opacity: 0.3;
+  font-family: serif;
+}
+
+/* Dark Mode Fix untuk Testimoni */
+body.dark-theme .testi-card {
+  background: rgba(30, 41, 59, 0.6);
+  border-color: rgba(56, 189, 248, 0.1);
+}
+
+@media (max-width: 640px) {
+  .testi-card {
+    width: 280px;
+    min-width: 280px;
+    padding: 20px;
+  }
+}
+/* ===== SERVER REVIEWS / RATING ===== */
+
+.review-summary {
+  width: min(520px, 100%);
+  margin: -12px auto 22px;
+  padding: 14px 18px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-main);
+}
+
+.review-summary strong {
+  font-size: 20px;
+  color: #f59e0b;
+}
+
+.review-summary span {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.review-form-card {
+  width: min(620px, 100%);
+  margin: 0 auto 26px;
+  padding: 20px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  box-shadow: var(--shadow-sm);
+  display: grid;
+  gap: 14px;
+}
+
+.review-form-card strong {
+  color: var(--text-main);
+  font-size: 17px;
+}
+
+.review-form-card p {
+  color: var(--text-muted);
+  font-size: 13px;
+  margin-top: 4px;
+  line-height: 1.45;
+}
+
+.rating-picker {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.rating-picker button {
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 14px;
+  background: #e0f2fe;
+  color: #94a3b8;
+  font-size: 24px;
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+.rating-picker button:hover,
+.rating-picker button.active {
+  transform: translateY(-2px);
+  background: #fef3c7;
+  color: #f59e0b;
+}
+
+#reviewComment {
+  width: 100%;
+  min-height: 94px;
+  resize: vertical;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid #bae6fd;
+  background: rgba(255, 255, 255, 0.86);
+  color: var(--text-main);
+  font-size: 14px;
+  outline: none;
+}
+
+#reviewComment:focus {
+  border-color: var(--ocean-light);
+  box-shadow: 0 0 0 4px var(--water-foam);
+}
+
+.submit-review-btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--ocean-deep), var(--ocean-light));
+  color: white;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 10px 22px rgba(14, 165, 233, 0.24);
+}
+
+body.dark-theme .review-summary,
+body.dark-theme .review-form-card,
+body.dark-theme #reviewComment {
+  background: rgba(30, 41, 59, 0.78);
+  border-color: rgba(56, 189, 248, 0.2);
+}
+
+@media (max-width: 640px) {
+  .review-form-card {
+    padding: 16px;
+  }
+
+  .rating-picker button {
+    width: 38px;
+    height: 38px;
+    font-size: 22px;
+  }
+}
