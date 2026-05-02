@@ -892,7 +892,6 @@ app.post("/create-order", orderLimiter, async (req, res) => {
         order_id: orderId,
         gross_amount: price,
       },
-      enabled_payments: ["qris"],
       customer_details: {
         first_name: cleanName,
         email: isValidEmail ? cleanContact : "customer@example.com",
