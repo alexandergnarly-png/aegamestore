@@ -1175,6 +1175,11 @@
           class="admin-alerts-box"
           style="display: none"
         ></div>
+        <div
+          id="adminSessionsBox"
+          class="admin-alerts-box"
+          style="display: none"
+        ></div>
         <div class="stats delay-1">
           <div class="stat-card">
             <div class="stat-top">
@@ -1672,6 +1677,7 @@
         loadOrders();
         loadStockSummary();
         loadAdminAlerts();
+        loadAdminSessions();
       }
 
       function formatRupiah(num) {
@@ -2157,6 +2163,57 @@
       <div class="admin-alert-actions">
         <button type="button" onclick="loadOrders()">Refresh Order</button>
         <button type="button" onclick="loadProducts()">Refresh Produk</button>
+      </div>
+    `;
+
+          box.style.display = "block";
+        } catch (err) {
+          box.style.display = "none";
+        }
+      }
+
+      async function loadAdminSessions() {
+        const box = document.getElementById("adminSessionsBox");
+        if (!box) return;
+
+        try {
+          const res = await fetch("/admin-sessions");
+
+          if (!res.ok) {
+            box.style.display = "none";
+            return;
+          }
+
+          const sessions = await res.json();
+
+          if (!Array.isArray(sessions) || sessions.length <= 1) {
+            box.style.display = "none";
+            box.innerHTML = "";
+            return;
+          }
+
+          box.innerHTML = `
+      <div class="admin-alerts-head">
+        <strong>🔐 Admin Login Terdeteksi</strong>
+        <span>${sessions.length} sesi aktif</span>
+      </div>
+
+      <div class="admin-alert-list">
+        ${sessions
+          .map(
+            (item) => `
+              <div class="admin-alert-item">
+                <span class="admin-alert-tag">
+                  ${item.current_session ? "SESSION KAMU" : "SESSION LAIN"}
+                </span><br>
+                <b>${escapeHtml(item.username || "-")}</b><br>
+                IP: ${escapeHtml(item.ip_address || "-")}<br>
+                Browser: ${escapeHtml(item.user_agent || "-")}<br>
+                Login: ${formatTanggal(item.created_at)}
+              </div>
+            `,
+          )
+          .join("")}
       </div>
     `;
 
@@ -3135,7 +3192,8 @@ Game Key : ${key || "-"}
         if (productSearchInput) {
           productSearchInput.addEventListener("input", applyProductFilters);
         }
-
+        loadAdminSessions();
+        setInterval(loadAdminSessions, 60000);
         showSection("dashboard");
       });
     </script>

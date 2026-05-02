@@ -127,6 +127,8 @@ db.query(
     created_at TEXT NOT NULL,
     expires_at TEXT NOT NULL
   )
+
+  
     
 `,
   (err) => {
@@ -137,6 +139,9 @@ db.query(
     }
   },
 );
+
+db.query(`ALTER TABLE admin_sessions ADD COLUMN IF NOT EXISTS ip_address TEXT`);
+db.query(`ALTER TABLE admin_sessions ADD COLUMN IF NOT EXISTS user_agent TEXT`);
 
 db.query(
   `
@@ -533,14 +538,24 @@ app.post("/admin-login", loginLimiter, async (req, res) => {
       const createdAt = new Date();
       const expiresAt = new Date(createdAt.getTime() + 1000 * 60 * 60 * 8);
 
+      const ipAddress =
+        req.headers["x-forwarded-for"]?.split(",")[0]?.trim() ||
+        req.socket.remoteAddress ||
+        "";
+
+      const userAgent = String(req.headers["user-agent"] || "").slice(0, 255);
+
       await query(
-        `INSERT INTO admin_sessions (session_token, username, created_at, expires_at)
-                 VALUES ($1, $2, $3, $4)`,
+        `INSERT INTO admin_sessions
+    (session_token, username, created_at, expires_at, ip_address, user_agent)
+   VALUES ($1, $2, $3, $4, $5, $6)`,
         [
           sessionToken,
           cleanUsername,
           createdAt.toISOString(),
           expiresAt.toISOString(),
+          ipAddress,
+          userAgent,
         ],
       );
 
@@ -2256,6 +2271,38 @@ app.get("/admin-alerts", requireAdminAuth, async (req, res) => {
     console.error("ERROR ADMIN ALERTS:", err);
     return res.status(500).json({
       message: "Gagal mengambil admin alerts",
+    });
+  }
+});
+
+app.get("/admin-sessions", requireAdminAuth, async (req, res) => {
+  try {
+    await deleteExpiredAdminSessions();
+
+    const currentToken = String(req.cookies.admin_auth || "").trim();
+
+    const result = await query(
+      `
+      SELECT
+        id,
+        username,
+        created_at,
+        expires_at,
+        ip_address,
+        user_agent,
+        CASE WHEN session_token = $1 THEN true ELSE false END AS current_session
+      FROM admin_sessions
+      WHERE expires_at > $2
+      ORDER BY created_at DESC
+      `,
+      [currentToken, new Date().toISOString()],
+    );
+
+    return res.json(result.rows);
+  } catch (err) {
+    console.error("ERROR ADMIN SESSIONS:", err);
+    return res.status(500).json({
+      message: "Gagal mengambil admin sessions",
     });
   }
 });
