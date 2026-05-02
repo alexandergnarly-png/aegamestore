@@ -1347,7 +1347,35 @@ app.delete(
     }
 
     try {
-      await query("DELETE FROM keys WHERE product_id = $1", [productId]);
+      const orderCheck = await query(
+        "SELECT COUNT(*)::int AS total_orders FROM orders WHERE product_id = $1",
+        [productId],
+      );
+
+      const keyCheck = await query(
+        "SELECT COUNT(*)::int AS total_keys FROM keys WHERE product_id = $1",
+        [productId],
+      );
+
+      const totalOrders = Number(orderCheck.rows[0]?.total_orders || 0);
+      const totalKeys = Number(keyCheck.rows[0]?.total_keys || 0);
+
+      if (totalOrders > 0 || totalKeys > 0) {
+        const updateResult = await query(
+          "UPDATE products SET active = 0 WHERE id = $1 RETURNING id",
+          [productId],
+        );
+
+        if (updateResult.rows.length === 0) {
+          return res.status(404).json({
+            message: "Produk tidak ditemukan",
+          });
+        }
+
+        return res.json({
+          message: "Produk dipakai oleh order/key, jadi dinonaktifkan saja",
+        });
+      }
 
       const deleteResult = await query(
         "DELETE FROM products WHERE id = $1 RETURNING id",
@@ -1361,7 +1389,7 @@ app.delete(
       }
 
       return res.json({
-        message: "Produk dan key terkait berhasil dihapus permanen",
+        message: "Produk berhasil dihapus",
       });
     } catch (err) {
       console.error("ERROR DELETE PRODUCT:", err);
