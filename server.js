@@ -1229,30 +1229,40 @@ app.post(
 );
 
 app.delete(
-  "/users/:id",
+  "/products/:id",
   requireAdminAuth,
   requireAdminCsrf,
   async (req, res) => {
-    const userId = Number(req.params.id);
+    const productId = Number(req.params.id);
 
-    if (!Number.isInteger(userId) || userId <= 0) {
-      return res.status(400).json({ message: "ID user tidak valid" });
+    if (!Number.isInteger(productId) || productId <= 0) {
+      return res.status(400).json({
+        message: "ID produk tidak valid",
+      });
     }
 
     try {
-      const result = await query(
-        "DELETE FROM users WHERE id = $1 RETURNING id",
-        [userId],
+      await query("DELETE FROM keys WHERE product_id = $1", [productId]);
+
+      const deleteResult = await query(
+        "DELETE FROM products WHERE id = $1 RETURNING id",
+        [productId],
       );
 
-      if (result.rows.length === 0) {
-        return res.status(404).json({ message: "User tidak ditemukan" });
+      if (deleteResult.rows.length === 0) {
+        return res.status(404).json({
+          message: "Produk tidak ditemukan",
+        });
       }
 
-      return res.json({ message: "User berhasil dihapus" });
+      return res.json({
+        message: "Produk dan key terkait berhasil dihapus permanen",
+      });
     } catch (err) {
-      console.error("ERROR DELETE USER:", err);
-      return res.status(500).json({ message: "Gagal hapus user" });
+      console.error("ERROR DELETE PRODUCT:", err);
+      return res.status(500).json({
+        message: "Gagal menghapus produk: " + err.message,
+      });
     }
   },
 );
