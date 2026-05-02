@@ -11,13 +11,35 @@
         --primary-hover: #0284c7;
         --secondary: #fb7185;
         --bg-color: #f0f9ff;
-        --card-bg: rgba(255, 255, 255, 0.85);
+        --card-bg: rgba(255, 255, 255, 0.75);
         --text-main: #0c4a6e;
         --text-muted: #475569;
         --border-color: rgba(56, 189, 248, 0.4);
         --shadow-lg: 0 24px 50px rgba(14, 165, 233, 0.15);
         --radius-xl: 28px;
         --radius-md: 14px;
+        --input-bg: rgba(255, 255, 255, 0.8);
+      }
+
+      /* Dark Mode Fallback */
+      @media (prefers-color-scheme: dark) {
+        body.auto-dark {
+          --bg-color: #0f172a;
+          --card-bg: rgba(30, 41, 59, 0.85);
+          --text-main: #f8fafc;
+          --text-muted: #94a3b8;
+          --border-color: rgba(56, 189, 248, 0.15);
+          --input-bg: rgba(15, 23, 42, 0.6);
+        }
+      }
+
+      body.dark-theme {
+        --bg-color: #0f172a;
+        --card-bg: rgba(30, 41, 59, 0.85);
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --border-color: rgba(56, 189, 248, 0.15);
+        --input-bg: rgba(15, 23, 42, 0.6);
       }
 
       * {
@@ -29,17 +51,6 @@
 
       body {
         background-color: var(--bg-color);
-        background-image:
-          radial-gradient(
-            circle at 0% 0%,
-            rgba(56, 189, 248, 0.15) 0%,
-            transparent 40%
-          ),
-          radial-gradient(
-            circle at 100% 100%,
-            rgba(251, 113, 133, 0.1) 0%,
-            transparent 40%
-          );
         color: var(--text-main);
         min-height: 100vh;
         display: flex;
@@ -48,12 +59,39 @@
         padding: 24px;
         overflow: hidden;
         position: relative;
+        transition:
+          background-color 0.3s ease,
+          color 0.3s ease;
+      }
+
+      /* Background Ornaments */
+      .bg-blob {
+        position: fixed;
+        filter: blur(80px);
+        z-index: -1;
+        opacity: 0.5;
+        border-radius: 50%;
+        pointer-events: none;
+      }
+      .blob-1 {
+        top: -10vh;
+        left: -10vw;
+        width: 50vw;
+        height: 50vw;
+        background: radial-gradient(circle, var(--primary), var(--bg-color));
+      }
+      .blob-2 {
+        bottom: -10vh;
+        right: -10vw;
+        width: 40vw;
+        height: 40vw;
+        background: radial-gradient(circle, var(--secondary), var(--bg-color));
       }
 
       .auth-wrapper {
         width: 100%;
-        max-width: 400px;
-        animation: fadeUp 0.6s ease-out forwards;
+        max-width: 420px;
+        animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         position: relative;
         z-index: 10;
       }
@@ -61,41 +99,37 @@
       .card {
         background: var(--card-bg);
         backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
         border: 1px solid var(--border-color);
         border-radius: var(--radius-xl);
-        padding: 40px 32px;
+        padding: 48px 36px;
         box-shadow: var(--shadow-lg);
         text-align: center;
         position: relative;
         overflow: hidden;
       }
 
-      .card::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 6px;
-        background: linear-gradient(90deg, var(--primary), var(--secondary));
-      }
-
       .logo-badge {
-        width: 56px;
-        height: 56px;
-        border-radius: 16px;
+        width: 64px;
+        height: 64px;
+        border-radius: 18px;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: linear-gradient(135deg, var(--primary), var(--ocean-light));
+        background: linear-gradient(135deg, var(--secondary), #f43f5e);
         color: white;
-        font-size: 24px;
-        box-shadow: 0 12px 24px rgba(14, 165, 233, 0.3);
-        margin: 0 auto 20px;
+        font-size: 32px;
+        box-shadow: 0 12px 24px rgba(251, 113, 133, 0.3);
+        margin: 0 auto 24px;
+        transform: rotate(-5deg);
+        transition: transform 0.3s ease;
+      }
+      .card:hover .logo-badge {
+        transform: rotate(0deg) scale(1.05);
       }
 
       h2 {
-        font-size: 24px;
+        font-size: 28px;
         font-weight: 800;
         color: var(--text-main);
         margin-bottom: 8px;
@@ -105,31 +139,54 @@
       p.subtitle {
         color: var(--text-muted);
         font-size: 14px;
-        margin-bottom: 30px;
-        line-height: 1.5;
+        margin-bottom: 32px;
+        line-height: 1.6;
       }
 
+      /* Modern Input Group */
       .input-group {
-        margin-bottom: 16px;
+        position: relative;
+        margin-bottom: 20px;
         text-align: left;
       }
 
-      input {
+      .input-group input {
         width: 100%;
-        padding: 16px 18px;
+        padding: 16px 20px;
         border-radius: var(--radius-md);
-        border: 1px solid #bae6fd;
-        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid var(--border-color);
+        background: var(--input-bg);
         color: var(--text-main);
-        font-size: 14px;
-        transition: all 0.2s ease;
+        font-size: 15px;
+        font-weight: 500;
+        transition: all 0.3s ease;
         outline: none;
       }
 
-      input:focus {
+      .input-group input:focus {
         border-color: var(--primary);
-        background: #ffffff;
-        box-shadow: 0 0 0 4px #e0f2fe;
+        background: transparent;
+        box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
+      }
+
+      /* Animasi form berpindah */
+      .form-container {
+        display: none;
+        animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+      .form-container.active {
+        display: block;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateX(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
       }
 
       button.btn-primary {
@@ -143,21 +200,45 @@
           var(--primary-hover)
         );
         color: white;
-        font-size: 15px;
+        font-size: 16px;
         font-weight: 800;
         cursor: pointer;
-        margin-top: 10px;
-        box-shadow: 0 10px 20px rgba(14, 165, 233, 0.25);
-        transition: all 0.2s ease;
+        margin-top: 8px;
+        box-shadow: 0 10px 24px rgba(14, 165, 233, 0.25);
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        position: relative;
+        overflow: hidden;
       }
 
+      button.btn-primary::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(
+          to right,
+          transparent,
+          rgba(255, 255, 255, 0.3),
+          transparent
+        );
+        transform: skewX(-20deg);
+        transition: 0.5s;
+      }
+      button.btn-primary:hover::after {
+        left: 150%;
+      }
       button.btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 14px 28px rgba(14, 165, 233, 0.35);
+        transform: translateY(-3px);
+        box-shadow: 0 15px 30px rgba(14, 165, 233, 0.35);
+      }
+      button.btn-primary:active {
+        transform: translateY(0);
       }
 
       .switch-form {
-        margin-top: 24px;
+        margin-top: 28px;
         font-size: 14px;
         color: var(--text-muted);
       }
@@ -167,11 +248,29 @@
         font-weight: 800;
         cursor: pointer;
         transition: color 0.2s;
+        text-decoration: none;
+        padding: 4px 8px;
+        border-radius: 8px;
+        background: rgba(14, 165, 233, 0.1);
       }
 
       .switch-form span:hover {
-        color: var(--primary-hover);
-        text-decoration: underline;
+        background: rgba(14, 165, 233, 0.2);
+      }
+
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 24px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-decoration: none;
+        transition: color 0.2s;
+      }
+      .back-link:hover {
+        color: var(--primary);
       }
 
       /* Sakura Effect */
@@ -186,48 +285,42 @@
           fall linear infinite,
           sway ease-in-out infinite alternate;
       }
-
       @keyframes fall {
         to {
           top: 110%;
         }
       }
-
       @keyframes sway {
         from {
           transform: translateX(-20px) rotate(0deg);
         }
-
         to {
           transform: translateX(20px) rotate(45deg);
         }
       }
-
       @keyframes fadeUp {
         from {
           opacity: 0;
-          transform: translateY(20px);
+          transform: translateY(30px);
         }
-
         to {
           opacity: 1;
           transform: translateY(0);
         }
       }
-
-      /* Toggle Forms */
-      #registerForm {
-        display: none;
-      }
     </style>
   </head>
 
   <body>
+    <div class="bg-blob blob-1"></div>
+    <div class="bg-blob blob-2"></div>
+
     <div class="auth-wrapper">
       <div class="card">
         <div class="logo-badge">⛩️</div>
 
-        <div id="loginForm">
+        <!-- FORM LOGIN -->
+        <div id="loginForm" class="form-container active">
           <h2>Selamat Datang 🌊</h2>
           <p class="subtitle">Masuk untuk melanjutkan petualanganmu.</p>
 
@@ -235,12 +328,16 @@
             <input
               type="text"
               id="loginUsername"
-              placeholder="Username"
+              placeholder="Username (Min. 3 huruf)"
               autocomplete="off"
             />
           </div>
           <div class="input-group">
-            <input type="password" id="loginPassword" placeholder="Password" />
+            <input
+              type="password"
+              id="loginPassword"
+              placeholder="Password (Min. 6 huruf)"
+            />
           </div>
 
           <button class="btn-primary" id="btnLogin" onclick="login()">
@@ -248,11 +345,12 @@
           </button>
 
           <div class="switch-form">
-            Belum punya akun? <span onclick="toggleForm()">Daftar di sini</span>
+            Belum punya akun? <span onclick="toggleForm()">Daftar Akun</span>
           </div>
         </div>
 
-        <div id="registerForm">
+        <!-- FORM DAFTAR -->
+        <div id="registerForm" class="form-container">
           <h2>Buat Akun Baru ✨</h2>
           <p class="subtitle">Daftar sekarang dan nikmati kemudahan top-up.</p>
 
@@ -277,24 +375,44 @@
           </button>
 
           <div class="switch-form">
-            Sudah punya akun? <span onclick="toggleForm()">Masuk di sini</span>
+            Sudah punya akun? <span onclick="toggleForm()">Masuk Sini</span>
           </div>
         </div>
-        <div style="margin-top: 20px; font-size: 12px">
-          <a href="/" style="color: #94a3b8; text-decoration: none"
-            >← Kembali ke Beranda</a
-          >
+
+        <div>
+          <a href="/" class="back-link"> <span>←</span> Kembali ke Beranda </a>
         </div>
       </div>
     </div>
 
     <script>
-      // Fitur Ganti Form Login/Register
+      // Sinkronisasi dengan Dark Mode di halaman utama
+      document.addEventListener("DOMContentLoaded", () => {
+        const savedTheme = localStorage.getItem("ae_theme");
+        if (savedTheme === "dark") {
+          document.body.classList.add("dark-theme");
+        }
+        checkLoginStatus();
+      });
+
+      // Fitur Ganti Form Login/Register (Diperbarui dengan class untuk animasi)
+      function toggleForm() {
+        const loginForm = document.getElementById("loginForm");
+        const registerForm = document.getElementById("registerForm");
+
+        if (loginForm.classList.contains("active")) {
+          loginForm.classList.remove("active");
+          registerForm.classList.add("active");
+        } else {
+          loginForm.classList.add("active");
+          registerForm.classList.remove("active");
+        }
+      }
+
       async function checkLoginStatus() {
         try {
           const res = await fetch("/api/user/me");
           const data = await res.json();
-
           const box = document.getElementById("changePasswordBox");
           if (box && data.loggedIn) {
             box.style.display = "block";
@@ -327,7 +445,6 @@
               );
               return false;
             }
-
             return { oldPassword, newPassword };
           },
         });
@@ -337,9 +454,7 @@
         try {
           const res = await fetch("/user/change-password", {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(result.value),
           });
 
@@ -349,7 +464,6 @@
             Swal.fire("Gagal", data.message || "Gagal ganti password", "error");
             return;
           }
-
           Swal.fire(
             "Berhasil",
             "Password berhasil diganti. Silakan pakai password baru untuk login berikutnya.",
@@ -360,20 +474,6 @@
         }
       }
 
-      document.addEventListener("DOMContentLoaded", checkLoginStatus);
-      function toggleForm() {
-        const loginForm = document.getElementById("loginForm");
-        const registerForm = document.getElementById("registerForm");
-
-        if (loginForm.style.display === "none") {
-          loginForm.style.display = "block";
-          registerForm.style.display = "none";
-        } else {
-          loginForm.style.display = "none";
-          registerForm.style.display = "block";
-        }
-      }
-
       // Tombol Enter untuk Login
       document
         .getElementById("loginPassword")
@@ -381,7 +481,7 @@
           if (event.key === "Enter") login();
         });
 
-      // Fungsi Login User
+      // Fungsi Login User (Logic Tetap)
       async function login() {
         const username = document.getElementById("loginUsername").value.trim();
         const password = document.getElementById("loginPassword").value.trim();
@@ -430,7 +530,7 @@
           });
           setTimeout(() => {
             window.location.href = "/";
-          }, 1500); // Arahkan kembali ke beranda setelah login
+          }, 1500);
         } catch {
           Swal.fire({
             icon: "error",
@@ -443,7 +543,7 @@
         }
       }
 
-      // Fungsi Register User
+      // Fungsi Register User (Logic Tetap)
       async function register() {
         const username = document.getElementById("regUsername").value.trim();
         const password = document.getElementById("regPassword").value.trim();
@@ -489,9 +589,9 @@
             text: "Silakan masuk menggunakan akun baru kamu.",
             confirmButtonColor: "#0ea5e9",
           }).then(() => {
-            document.getElementById("loginUsername").value = username; // Auto fill username
-            document.getElementById("regPassword").value = ""; // Clear reg password
-            toggleForm(); // Pindah ke form login
+            document.getElementById("loginUsername").value = username;
+            document.getElementById("regPassword").value = "";
+            toggleForm();
           });
 
           btn.innerText = originalText;
