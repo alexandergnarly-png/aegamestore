@@ -379,6 +379,37 @@
         border: 1px solid #bae6fd;
       }
 
+      .admin-role-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 14px;
+        border-radius: 999px;
+        background: #fef3c7;
+        color: #92400e;
+        border: 1px solid #facc15;
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      .admin-role-chip.admin {
+        background: #e0f2fe;
+        color: #0369a1;
+        border-color: #7dd3fc;
+      }
+
+      .admin-role-chip.staff {
+        background: #f1f5f9;
+        color: #475569;
+        border-color: #cbd5e1;
+      }
+
+      .admin-role-chip.owner {
+        background: #fef3c7;
+        color: #92400e;
+        border-color: #facc15;
+      }
+
       .chip-dot {
         width: 8px;
         height: 8px;
@@ -1159,6 +1190,8 @@
             </div>
           </div>
           <div class="nav-actions">
+            <div class="admin-role-chip owner" id="adminRoleChip">👑 Owner</div>
+
             <div class="nav-chip">
               <span class="chip-dot"></span>
               <span>Sistem Aktif & Terlindungi</span>
@@ -3626,6 +3659,36 @@
       });
     </script>
     <script>
+      async function loadAdminProfile() {
+        try {
+          const res = await fetch("/api/admin/me");
+
+          if (res.status === 401) {
+            window.location.href = "/ae-auth";
+            return;
+          }
+
+          const data = await res.json();
+
+          if (!data.loggedIn) {
+            window.location.href = "/ae-auth";
+            return;
+          }
+
+          const badge = data.badge || {};
+          const roleChip = document.getElementById("adminRoleChip");
+
+          if (roleChip) {
+            roleChip.className = `admin-role-chip ${badge.code || "owner"}`;
+            roleChip.innerText = `${badge.emoji || "👑"} ${badge.label || "Owner"}`;
+            roleChip.title = badge.description || "Admin AE Game Store";
+          }
+
+          window.currentAdminName = data.username || "Admin";
+        } catch (err) {
+          console.error("Gagal memuat profil admin");
+        }
+      }
       // --- FITUR TAMBAHAN: Jam & Sapaan Real-Time ---
       function updateClock() {
         const now = new Date();
@@ -3644,12 +3707,16 @@
         const greetingEl = document.getElementById("adminGreeting");
         const clockEl = document.getElementById("adminClock");
 
-        if (greetingEl) greetingEl.innerText = greeting + ", Admin!";
+        if (greetingEl) {
+          const adminName = window.currentAdminName || "Admin";
+          greetingEl.innerText = `${greeting}, ${adminName}!`;
+        }
         if (clockEl) clockEl.innerText = "Waktu lokal: " + timeString;
       }
 
       setInterval(updateClock, 60000);
       updateClock(); // Jalankan pertama kali
+      loadAdminProfile();
       // ----------------------------------------------
     </script>
   </body>

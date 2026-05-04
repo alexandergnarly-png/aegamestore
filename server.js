@@ -402,6 +402,37 @@ function getBuyerBadge({
   };
 }
 
+function getAdminBadge() {
+  const role = String(process.env.ADMIN_BADGE || "owner")
+    .trim()
+    .toLowerCase();
+
+  if (role === "staff") {
+    return {
+      code: "staff",
+      label: "Staff",
+      emoji: "⚙️",
+      description: "Staff operasional AE Game Store",
+    };
+  }
+
+  if (role === "admin") {
+    return {
+      code: "admin",
+      label: "Admin",
+      emoji: "🛡️",
+      description: "Admin AE Game Store",
+    };
+  }
+
+  return {
+    code: "owner",
+    label: "Owner",
+    emoji: "👑",
+    description: "Owner AE Game Store",
+  };
+}
+
 async function getVoucherDiscount({
   gameName,
   brandName,
@@ -614,7 +645,8 @@ app.use((req, res, next) => {
     req.path.startsWith("/vouchers") ||
     req.path.startsWith("/products") ||
     req.path.startsWith("/security-audit") ||
-    req.path.startsWith("/api/user")
+    req.path.startsWith("/api/user") ||
+    req.path.startsWith("/api/admin")
   ) {
     res.setHeader("Cache-Control", "no-store");
   }
@@ -757,6 +789,48 @@ app.post(
 
 app.get("/ae-control", requireAdminAuth, (req, res) => {
   res.sendFile(path.join(__dirname, "views", "admin.html"));
+});
+
+app.get("/api/admin/me", requireAdminAuth, async (req, res) => {
+  const sessionToken = String(req.cookies.admin_auth || "").trim();
+
+  try {
+    const result = await query(
+      `
+      SELECT username, created_at, expires_at
+      FROM admin_sessions
+      WHERE session_token = $1
+        AND expires_at > $2
+      LIMIT 1
+      `,
+      [sessionToken, new Date().toISOString()],
+    );
+
+    const session = result.rows[0];
+
+    if (!session) {
+      return res.status(401).json({
+        loggedIn: false,
+        message: "Admin session tidak valid",
+      });
+    }
+
+    return res.json({
+      loggedIn: true,
+      username: session.username,
+      badge: getAdminBadge(),
+      session: {
+        created_at: session.created_at,
+        expires_at: session.expires_at,
+      },
+    });
+  } catch (err) {
+    console.error("ERROR GET ADMIN ME:", err);
+    return res.status(500).json({
+      loggedIn: false,
+      message: "Gagal mengambil data admin",
+    });
+  }
 });
 
 app.post("/vouchers", requireAdminAuth, requireAdminCsrf, async (req, res) => {
