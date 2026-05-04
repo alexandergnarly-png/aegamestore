@@ -169,6 +169,48 @@
         box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
       }
 
+      .password-toggle-btn {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        border: none;
+        background: rgba(14, 165, 233, 0.1);
+        color: var(--primary);
+        border-radius: 999px;
+        padding: 6px 10px;
+        font-size: 12px;
+        font-weight: 800;
+        cursor: pointer;
+      }
+
+      .password-toggle-btn:hover {
+        background: rgba(14, 165, 233, 0.2);
+      }
+
+      .input-group.has-toggle input {
+        padding-right: 78px;
+      }
+
+      .forgot-password-link {
+        margin-top: 12px;
+        font-size: 13px;
+        color: var(--text-muted);
+      }
+
+      .forgot-password-link a {
+        color: var(--primary);
+        font-weight: 800;
+        text-decoration: none;
+        background: rgba(14, 165, 233, 0.1);
+        padding: 5px 9px;
+        border-radius: 999px;
+      }
+
+      .forgot-password-link a:hover {
+        background: rgba(14, 165, 233, 0.2);
+      }
+
       /* Animasi form berpindah */
       .form-container {
         display: none;
@@ -332,17 +374,31 @@
               autocomplete="off"
             />
           </div>
-          <div class="input-group">
+          <div class="input-group has-toggle">
             <input
               type="password"
               id="loginPassword"
               placeholder="Password (Min. 6 huruf)"
             />
+            <button
+              type="button"
+              class="password-toggle-btn"
+              onclick="togglePasswordVisibility('loginPassword', this)"
+            >
+              Lihat
+            </button>
           </div>
 
           <button class="btn-primary" id="btnLogin" onclick="login()">
             Masuk Sekarang
           </button>
+
+          <div class="forgot-password-link">
+            Lupa password?
+            <a href="https://t.me/aegamestore" target="_blank" rel="noopener">
+              Hubungi Admin
+            </a>
+          </div>
 
           <div class="switch-form">
             Belum punya akun? <span onclick="toggleForm()">Daftar Akun</span>
@@ -362,12 +418,19 @@
               autocomplete="off"
             />
           </div>
-          <div class="input-group">
+          <div class="input-group has-toggle">
             <input
               type="password"
               id="regPassword"
               placeholder="Buat Password (Min. 6 Huruf)"
             />
+            <button
+              type="button"
+              class="password-toggle-btn"
+              onclick="togglePasswordVisibility('regPassword', this)"
+            >
+              Lihat
+            </button>
           </div>
 
           <button class="btn-primary" id="btnRegister" onclick="register()">
@@ -473,7 +536,15 @@
           Swal.fire("Error", "Terjadi error server", "error");
         }
       }
+      function togglePasswordVisibility(inputId, buttonEl) {
+        const input = document.getElementById(inputId);
 
+        if (!input || !buttonEl) return;
+
+        const isPassword = input.type === "password";
+        input.type = isPassword ? "text" : "password";
+        buttonEl.innerText = isPassword ? "Sembunyi" : "Lihat";
+      }
       // Tombol Enter untuk Login
       document
         .getElementById("loginPassword")
