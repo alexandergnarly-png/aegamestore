@@ -814,6 +814,31 @@
         border-color: #bae6fd;
       }
 
+      .badge.vip {
+        background: #fef3c7;
+        color: #92400e;
+        border-color: #facc15;
+      }
+
+      .badge.loyal {
+        background: #dbeafe;
+        color: #1d4ed8;
+        border-color: #93c5fd;
+      }
+
+      .badge.verified,
+      .badge.reviewer {
+        background: #dcfce7;
+        color: #166534;
+        border-color: #86efac;
+      }
+
+      .badge.new {
+        background: #f1f5f9;
+        color: #475569;
+        border-color: #cbd5e1;
+      }
+
       .badge.manual,
       .badge.stock_empty {
         background: #ffe4e6;
@@ -1484,6 +1509,9 @@
                 <tr>
                   <th style="width: 90px">ID</th>
                   <th>Username</th>
+                  <th>Badge</th>
+                  <th>Order Paid</th>
+                  <th>Total Belanja</th>
                   <th>Waktu Daftar</th>
                   <th style="width: 220px">Aksi</th>
                 </tr>
@@ -1815,6 +1843,14 @@
         return `<span class="badge available">Available</span>`;
       }
 
+      function buyerBadge(badge) {
+        const code = String(badge?.code || "new").toLowerCase();
+        const label = String(badge?.label || "New Buyer");
+        const emoji = String(badge?.emoji || "🎐");
+
+        return `<span class="badge ${code}">${escapeHtml(emoji)} ${escapeHtml(label)}</span>`;
+      }
+
       function updateKeyStats(keys) {
         const total = keys.length;
         const available = keys.filter((item) => Number(item.used) === 0).length;
@@ -2080,7 +2116,7 @@
             statusText.innerText = "Belum ada user buyer.";
             tableBody.innerHTML = `
                                         <tr>
-                                            <td colspan="4" class="empty">Belum ada user yang daftar.</td>
+                                            <td colspan="7" class="empty">Belum ada user yang daftar.</td>
                                         </tr>
                                     `;
             return;
@@ -2094,6 +2130,9 @@
                             <tr>
                                 <td>${item.id}</td>
                                 <td>${escapeHtml(item.username || "-")}</td>
+                                <td>${buyerBadge(item.badge)}</td>
+                                <td>${Number(item.paid_order_count || 0)} order</td>
+                                <td>${formatRupiah(item.total_spend || 0)}</td>
                                 <td>${formatTanggal(item.created_at)}</td>
                                 <td>
                                     <button class="ghost-btn" onclick="resetUserPassword(${item.id})">Reset Password</button>
@@ -2107,7 +2146,7 @@
           statusText.innerText = "Gagal memuat daftar user.";
           tableBody.innerHTML = `
                                     <tr>
-                                        <td colspan="4" class="empty">Terjadi error saat mengambil user.</td>
+                                        <td colspan="7" class="empty">Terjadi error saat mengambil user.</td>
                                     </tr>
                                 `;
         }

@@ -350,6 +350,58 @@ function normalizeVoucherCode(code) {
     .toUpperCase();
 }
 
+function getBuyerBadge({
+  paidOrderCount = 0,
+  totalSpend = 0,
+  hasReview = false,
+}) {
+  const paidOrders = Number(paidOrderCount || 0);
+  const spend = Number(totalSpend || 0);
+
+  if (hasReview) {
+    return {
+      code: "reviewer",
+      label: "Reviewer",
+      emoji: "⭐",
+      description: "Buyer yang sudah memberi review",
+    };
+  }
+
+  if (paidOrders >= 10 || spend >= 500000) {
+    return {
+      code: "vip",
+      label: "VIP Buyer",
+      emoji: "👑",
+      description: "Buyer premium AE Game Store",
+    };
+  }
+
+  if (paidOrders >= 3) {
+    return {
+      code: "loyal",
+      label: "Loyal Buyer",
+      emoji: "🌊",
+      description: "Buyer yang sering transaksi",
+    };
+  }
+
+  if (paidOrders >= 1) {
+    return {
+      code: "verified",
+      label: "Verified Buyer",
+      emoji: "✅",
+      description: "Sudah pernah berhasil order",
+    };
+  }
+
+  return {
+    code: "new",
+    label: "New Buyer",
+    emoji: "🎐",
+    description: "Buyer baru AE Game Store",
+  };
+}
+
 async function getVoucherDiscount({
   gameName,
   brandName,
@@ -1348,8 +1400,35 @@ app.post(
 app.get("/users", requireAdminAuth, async (req, res) => {
   try {
     const result = await query(
-      "SELECT id, username, created_at FROM users ORDER BY created_at DESC",
+      `
+  SELECT
+    u.id,
+    u.username,
+    u.created_at,
+    COUNT(o.id) FILTER (WHERE o.payment_status = 'paid')::int AS paid_order_count,
+    COALESCE(SUM(o.price) FILTER (WHERE o.payment_status = 'paid'), 0)::int AS total_spend,
+    CASE WHEN MAX(r.id) IS NULL THEN false ELSE true END AS has_review
+  FROM users u
+  LEFT JOIN orders o ON o.user_id = u.id
+  LEFT JOIN reviews r ON r.user_id = u.id AND r.active = 1
+  GROUP BY u.id
+  ORDER BY u.created_at DESC
+  `,
     );
+
+    const users = result.rows.map((item) => ({
+      ...item,
+      paid_order_count: Number(item.paid_order_count || 0),
+      total_spend: Number(item.total_spend || 0),
+      has_review: Boolean(item.has_review),
+      badge: getBuyerBadge({
+        paidOrderCount: item.paid_order_count,
+        totalSpend: item.total_spend,
+        hasReview: item.has_review,
+      }),
+    }));
+
+    return res.json(users);
 
     return res.json(result.rows);
   } catch (err) {
@@ -2267,18 +2346,53 @@ app.post("/user-logout", (req, res) => {
 // ----------------------------------
 
 // --- FITUR BARU: Cek User yang sedang Login ---
-app.get("/api/user/me", (req, res) => {
+app.get("/api/user/me", async (req, res) => {
   const token = req.cookies.user_auth;
 
-  // Kalau tidak ada token/belum login
   if (!token) return res.json({ loggedIn: false });
 
   try {
-    // Cek apakah tokennya valid dan cocok dengan JWT_SECRET
     const decoded = jwt.verify(token, jwtSecret);
-    return res.json({ loggedIn: true, username: decoded.username });
+
+    const statsResult = await query(
+      `
+      SELECT
+        COUNT(*) FILTER (WHERE payment_status = 'paid')::int AS paid_order_count,
+        COALESCE(SUM(price) FILTER (WHERE payment_status = 'paid'), 0)::int AS total_spend
+      FROM orders
+      WHERE user_id = $1
+      `,
+      [decoded.id],
+    );
+
+    const reviewResult = await query(
+      `
+      SELECT id
+      FROM reviews
+      WHERE user_id = $1
+        AND active = 1
+      LIMIT 1
+      `,
+      [decoded.id],
+    );
+
+    const paidOrderCount = Number(statsResult.rows[0]?.paid_order_count || 0);
+    const totalSpend = Number(statsResult.rows[0]?.total_spend || 0);
+    const hasReview = reviewResult.rows.length > 0;
+    const badge = getBuyerBadge({ paidOrderCount, totalSpend, hasReview });
+
+    return res.json({
+      loggedIn: true,
+      id: decoded.id,
+      username: decoded.username,
+      badge,
+      stats: {
+        paid_order_count: paidOrderCount,
+        total_spend: totalSpend,
+        has_review: hasReview,
+      },
+    });
   } catch (err) {
-    // Kalau token kadaluarsa atau error
     return res.json({ loggedIn: false });
   }
 });
@@ -2287,20 +2401,39 @@ app.get("/reviews", async (req, res) => {
   try {
     const result = await query(
       `
-      SELECT username, rating, comment, created_at
-      FROM reviews
-      WHERE active = 1
-      ORDER BY updated_at DESC, id DESC
-      LIMIT 12
-      `,
+  SELECT
+    r.user_id,
+    r.username,
+    r.rating,
+    r.comment,
+    r.created_at,
+    COUNT(o.id) FILTER (WHERE o.payment_status = 'paid')::int AS paid_order_count,
+    COALESCE(SUM(o.price) FILTER (WHERE o.payment_status = 'paid'), 0)::int AS total_spend
+  FROM reviews r
+  LEFT JOIN orders o ON o.user_id = r.user_id
+  WHERE r.active = 1
+  GROUP BY r.id
+  ORDER BY r.updated_at DESC, r.id DESC
+  LIMIT 12
+  `,
     );
 
-    const reviews = result.rows.map((item) => ({
-      username: maskPublicUsername(item.username),
-      rating: Number(item.rating || 0),
-      comment: item.comment || "",
-      created_at: item.created_at,
-    }));
+    const reviews = result.rows.map((item) => {
+      const paidOrderCount = Number(item.paid_order_count || 0);
+      const totalSpend = Number(item.total_spend || 0);
+
+      return {
+        username: maskPublicUsername(item.username),
+        rating: Number(item.rating || 0),
+        comment: item.comment || "",
+        created_at: item.created_at,
+        badge: getBuyerBadge({
+          paidOrderCount,
+          totalSpend,
+          hasReview: true,
+        }),
+      };
+    });
 
     return res.json(reviews);
   } catch (err) {

@@ -1198,7 +1198,9 @@ async function loadReviews() {
               <div class="testi-avatar">${escapeHtml(initial)}</div>
               <div>
                 <strong>${escapeHtml(item.username || "Buyer")}</strong>
-                <span class="testi-game">Verified Buyer</span>
+                <span class="testi-game">
+  ${escapeHtml(item.badge?.emoji || "✅")} ${escapeHtml(item.badge?.label || "Verified Buyer")}
+</span>
               </div>
               <div class="testi-rating">${renderStars(item.rating)}</div>
             </div>

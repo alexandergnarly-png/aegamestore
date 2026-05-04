@@ -353,6 +353,45 @@
         color: #16a34a;
       }
 
+      .buyer-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 10px;
+        padding: 7px 12px;
+        border-radius: 999px;
+        background: #e0f2fe;
+        border: 1px solid #bae6fd;
+        color: #0284c7;
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      .buyer-badge.vip {
+        background: #fef3c7;
+        border-color: #facc15;
+        color: #92400e;
+      }
+
+      .buyer-badge.loyal {
+        background: #dbeafe;
+        border-color: #93c5fd;
+        color: #1d4ed8;
+      }
+
+      .buyer-badge.verified,
+      .buyer-badge.reviewer {
+        background: #dcfce7;
+        border-color: #86efac;
+        color: #166534;
+      }
+
+      .buyer-stats-mini {
+        margin-top: 10px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
       @media (max-width: 520px) {
         .order-row {
           flex-direction: column;
@@ -413,6 +452,8 @@
         <div class="avatar">👤</div>
         <h1>Akun Saya</h1>
         <p class="subtitle" id="userText">Mengecek akun...</p>
+        <div id="buyerBadgeBox"></div>
+        <div id="buyerStatsBox" class="buyer-stats-mini"></div>
       </div>
 
       <div class="status-grid">
@@ -518,6 +559,20 @@
 
           document.getElementById("userText").innerText =
             `Login sebagai: ${data.username}`;
+
+          const badge = data.badge || {};
+          const stats = data.stats || {};
+
+          document.getElementById("buyerBadgeBox").innerHTML = `
+  <span class="buyer-badge ${badge.code || "new"}">
+    <span>${badge.emoji || "🎐"}</span>
+    <span>${badge.label || "New Buyer"}</span>
+  </span>
+`;
+
+          document.getElementById("buyerStatsBox").innerText =
+            `${Number(stats.paid_order_count || 0)} order sukses • ${formatRupiah(stats.total_spend || 0)} total belanja`;
+
           loadOrderHistory();
         } catch (err) {
           window.location.href = "/auth";
