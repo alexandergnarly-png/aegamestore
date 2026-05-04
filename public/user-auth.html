@@ -353,7 +353,7 @@
     </style>
   </head>
 
-  <body>
+  <body onload="applyAuthLanguage()">
     <div class="bg-blob blob-1"></div>
     <div class="bg-blob blob-2"></div>
 
@@ -363,14 +363,17 @@
 
         <!-- FORM LOGIN -->
         <div id="loginForm" class="form-container active">
-          <h2>Selamat Datang 🌊</h2>
-          <p class="subtitle">Masuk untuk melanjutkan petualanganmu.</p>
+          <h2 data-auth-i18n="loginTitle">Selamat Datang 🌊</h2>
+          <p class="subtitle" data-auth-i18n="loginSubtitle">
+            Masuk untuk melanjutkan petualanganmu.
+          </p>
 
           <div class="input-group">
             <input
               type="text"
               id="loginUsername"
               placeholder="Username (Min. 3 huruf)"
+              data-auth-placeholder="usernamePlaceholder"
               autocomplete="off"
             />
           </div>
@@ -379,42 +382,71 @@
               type="password"
               id="loginPassword"
               placeholder="Password (Min. 6 huruf)"
+              data-auth-placeholder="passwordPlaceholder"
             />
             <button
               type="button"
               class="password-toggle-btn"
+              data-password-target="loginPassword"
               onclick="togglePasswordVisibility('loginPassword', this)"
             >
               Lihat
             </button>
           </div>
 
-          <button class="btn-primary" id="btnLogin" onclick="login()">
+          <button
+            class="btn-primary"
+            id="btnLogin"
+            onclick="login()"
+            data-auth-i18n="loginButton"
+          >
             Masuk Sekarang
           </button>
 
           <div class="forgot-password-link">
-            Lupa password?
-            <a href="https://t.me/aegamestore" target="_blank" rel="noopener">
+            <span data-auth-i18n="forgotPassword">Lupa password?</span>
+            <a
+              href="https://t.me/aegamestore"
+              target="_blank"
+              rel="noopener"
+              data-auth-i18n="contactAdmin"
+            >
               Hubungi Admin
             </a>
           </div>
 
           <div class="switch-form">
-            Belum punya akun? <span onclick="toggleForm()">Daftar Akun</span>
+            <span
+              style="
+                background: transparent;
+                padding: 0;
+                color: var(--text-muted);
+                cursor: default;
+              "
+              data-auth-i18n="switchToRegister"
+            >
+              Belum punya akun?
+            </span>
+            <span onclick="toggleForm()" data-auth-i18n="registerLink"
+              >Daftar</span
+            >
           </div>
+          X
         </div>
 
         <!-- FORM DAFTAR -->
         <div id="registerForm" class="form-container">
-          <h2>Buat Akun Baru ✨</h2>
-          <p class="subtitle">Daftar sekarang dan nikmati kemudahan top-up.</p>
+          <h2 data-auth-i18n="registerTitle">Buat Akun Baru ✨</h2>
+          <p class="subtitle" data-auth-i18n="registerSubtitle">
+            Daftar sekarang dan nikmati kemudahan top-up.
+          </p>
 
           <div class="input-group">
             <input
               type="text"
               id="regUsername"
               placeholder="Pilih Username (Min. 3 Huruf)"
+              data-auth-placeholder="registerUsernamePlaceholder"
               autocomplete="off"
             />
           </div>
@@ -423,27 +455,48 @@
               type="password"
               id="regPassword"
               placeholder="Buat Password (Min. 6 Huruf)"
+              data-auth-placeholder="registerPasswordPlaceholder"
             />
             <button
               type="button"
               class="password-toggle-btn"
+              data-password-target="regPassword"
               onclick="togglePasswordVisibility('regPassword', this)"
             >
               Lihat
             </button>
           </div>
 
-          <button class="btn-primary" id="btnRegister" onclick="register()">
-            Daftar Akun
+          <button
+            class="btn-primary"
+            id="btnRegister"
+            onclick="register()"
+            data-auth-i18n="registerButton"
+          >
+            Daftar Sekarang
           </button>
 
           <div class="switch-form">
-            Sudah punya akun? <span onclick="toggleForm()">Masuk Sini</span>
+            <span
+              style="
+                background: transparent;
+                padding: 0;
+                color: var(--text-muted);
+                cursor: default;
+              "
+              data-auth-i18n="switchToLogin"
+            >
+              Sudah punya akun?
+            </span>
+            <span onclick="toggleForm()" data-auth-i18n="loginLink">Masuk</span>
           </div>
         </div>
 
         <div>
-          <a href="/" class="back-link"> <span>←</span> Kembali ke Beranda </a>
+          <a href="/" class="back-link">
+            <span>←</span>
+            <span data-auth-i18n="backHome">Kembali ke Beranda</span>
+          </a>
         </div>
       </div>
     </div>
@@ -541,9 +594,12 @@
 
         if (!input || !buttonEl) return;
 
+        const lang = getSavedAuthLanguage();
+        const dict = authTranslations[lang] || authTranslations.id;
+
         const isPassword = input.type === "password";
         input.type = isPassword ? "text" : "password";
-        buttonEl.innerText = isPassword ? "Sembunyi" : "Lihat";
+        buttonEl.innerText = isPassword ? dict.hidePassword : dict.showPassword;
       }
       // Tombol Enter untuk Login
       document
@@ -677,6 +733,92 @@
           btn.innerText = originalText;
           btn.disabled = false;
         }
+      }
+
+      const authTranslations = {
+        id: {
+          loginTitle: "Selamat Datang 🌊",
+          loginSubtitle:
+            "Masuk ke akun kamu untuk lanjut order dan melihat riwayat transaksi.",
+          loginButton: "Masuk Sekarang",
+          registerTitle: "Buat Akun Baru ⛩️",
+          registerSubtitle:
+            "Daftar untuk menyimpan riwayat order dan memakai voucher.",
+          registerButton: "Daftar Sekarang",
+          forgotPassword: "Lupa password?",
+          contactAdmin: "Hubungi Admin",
+          showPassword: "Lihat",
+          hidePassword: "Sembunyi",
+          switchToRegister: "Belum punya akun?",
+          switchToLogin: "Sudah punya akun?",
+          registerLink: "Daftar",
+          loginLink: "Masuk",
+          backHome: "Kembali ke Home",
+          usernamePlaceholder: "Username (Min. 3 huruf)",
+          passwordPlaceholder: "Password (Min. 6 huruf)",
+          registerUsernamePlaceholder: "Pilih Username (Min. 3 Huruf)",
+          registerPasswordPlaceholder: "Buat Password (Min. 6 Huruf)",
+        },
+        en: {
+          loginTitle: "Welcome Back 🌊",
+          loginSubtitle:
+            "Log in to continue ordering and view your transaction history.",
+          loginButton: "Login Now",
+          registerTitle: "Create New Account ⛩️",
+          registerSubtitle:
+            "Register to save your order history and use vouchers.",
+          registerButton: "Register Now",
+          forgotPassword: "Forgot password?",
+          contactAdmin: "Contact Admin",
+          showPassword: "Show",
+          hidePassword: "Hide",
+          switchToRegister: "Don't have an account?",
+          switchToLogin: "Already have an account?",
+          registerLink: "Register",
+          loginLink: "Login",
+          backHome: "Back to Home",
+          usernamePlaceholder: "Username (Min. 3 characters)",
+          passwordPlaceholder: "Password (Min. 6 characters)",
+          registerUsernamePlaceholder: "Choose Username (Min. 3 characters)",
+          registerPasswordPlaceholder: "Create Password (Min. 6 characters)",
+        },
+      };
+
+      function getSavedAuthLanguage() {
+        const savedLanguage = localStorage.getItem("ae_language");
+        return savedLanguage === "en" ? "en" : "id";
+      }
+
+      function applyAuthLanguage() {
+        const lang = getSavedAuthLanguage();
+        const dict = authTranslations[lang] || authTranslations.id;
+
+        document.querySelectorAll("[data-auth-i18n]").forEach((element) => {
+          const key = element.getAttribute("data-auth-i18n");
+          if (dict[key]) {
+            element.innerText = dict[key];
+          }
+        });
+
+        document
+          .querySelectorAll("[data-auth-placeholder]")
+          .forEach((element) => {
+            const key = element.getAttribute("data-auth-placeholder");
+            if (dict[key]) {
+              element.placeholder = dict[key];
+            }
+          });
+
+        document.querySelectorAll(".password-toggle-btn").forEach((button) => {
+          const inputId = button.getAttribute("data-password-target");
+          const input = document.getElementById(inputId);
+
+          if (input && input.type === "text") {
+            button.innerText = dict.hidePassword;
+          } else {
+            button.innerText = dict.showPassword;
+          }
+        });
       }
 
       // Fitur Sakura Jatuh
