@@ -55,9 +55,10 @@
         min-height: 100vh;
         display: flex;
         justify-content: center;
-        align-items: center;
-        padding: 24px;
-        overflow: hidden;
+        align-items: flex-start;
+        padding: 48px 24px;
+        overflow-x: hidden;
+        overflow-y: auto;
         position: relative;
         transition:
           background-color 0.3s ease,
@@ -106,7 +107,7 @@
         box-shadow: var(--shadow-lg);
         text-align: center;
         position: relative;
-        overflow: hidden;
+        overflow: visible;
       }
 
       .logo-badge {
@@ -348,6 +349,26 @@
         to {
           opacity: 1;
           transform: translateY(0);
+        }
+      }
+
+      @media (max-height: 760px) {
+        body {
+          align-items: flex-start;
+          padding-top: 28px;
+          padding-bottom: 28px;
+        }
+
+        .card {
+          padding: 34px 28px;
+        }
+
+        .logo-badge {
+          margin-bottom: 18px;
+        }
+
+        p.subtitle {
+          margin-bottom: 24px;
         }
       }
     </style>
