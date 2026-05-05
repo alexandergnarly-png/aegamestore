@@ -70,26 +70,9 @@
       }
 
       /* Aesthetic Watermarks (Ukiyo-e Feel) */
-      body::before {
-        content: "🌊";
-        position: fixed;
-        bottom: -50px;
-        right: -20px;
-        font-size: 350px;
-        opacity: 0.04;
-        z-index: -1;
-        pointer-events: none;
-      }
-
+      body::before,
       body::after {
-        content: "⛩️";
-        position: fixed;
-        bottom: 50px;
-        right: 320px;
-        font-size: 200px;
-        opacity: 0.03;
-        z-index: -1;
-        pointer-events: none;
+        display: none;
       }
 
       /* ===== SIDEBAR ===== */
@@ -1112,6 +1095,212 @@
         font-weight: 800;
         cursor: pointer;
       }
+
+      /* ===== CLEAN COMPACT ADMIN MODE ===== */
+
+      body {
+        background-image:
+          radial-gradient(
+            circle at 10% 10%,
+            rgba(56, 189, 248, 0.08),
+            transparent 32%
+          ),
+          radial-gradient(
+            circle at 90% 90%,
+            rgba(251, 113, 133, 0.06),
+            transparent 32%
+          );
+      }
+
+      .page {
+        padding: 20px 24px 48px;
+      }
+
+      .sidebar {
+        background: rgba(255, 255, 255, 0.78);
+        padding: 20px 16px;
+        gap: 18px;
+      }
+
+      .nav-btn {
+        padding: 11px 13px;
+        border-radius: 12px;
+        font-size: 13px;
+      }
+
+      .top-nav {
+        top: 12px;
+        padding: 11px 16px;
+        margin-bottom: 18px;
+        border-radius: 16px;
+      }
+
+      .hero {
+        padding: 24px;
+        margin-bottom: 20px;
+        border-radius: 22px;
+        background: linear-gradient(135deg, #0284c7, #38bdf8);
+      }
+
+      .hero h1 {
+        font-size: 28px;
+        margin-bottom: 8px;
+      }
+
+      .hero p {
+        font-size: 13px;
+        max-width: 560px;
+      }
+
+      .hero-badge {
+        padding: 5px 10px;
+        margin-bottom: 10px;
+        font-size: 10px;
+      }
+
+      .hero-mini {
+        margin-top: 16px;
+        gap: 8px;
+      }
+
+      .mini-pill {
+        padding: 6px 10px;
+        font-size: 11px;
+      }
+
+      .stats {
+        gap: 14px;
+        margin-bottom: 20px;
+      }
+
+      .stat-card {
+        padding: 18px;
+        border-radius: 16px;
+      }
+
+      .stat-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        font-size: 15px;
+      }
+
+      .stat-value {
+        font-size: 26px;
+      }
+
+      .stat-label,
+      .stat-note {
+        font-size: 12px;
+      }
+
+      .card {
+        padding: 22px;
+        border-radius: 20px;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .card-header {
+        margin-bottom: 18px;
+        padding-bottom: 16px;
+      }
+
+      .card-title-wrap h2 {
+        font-size: 20px;
+      }
+
+      .card-subtitle {
+        font-size: 13px;
+      }
+
+      .toolbar {
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      input[type="text"],
+      select,
+      textarea {
+        padding: 11px 13px;
+        border-radius: 12px;
+        font-size: 13px;
+      }
+
+      button {
+        padding: 11px 15px;
+        border-radius: 12px;
+        font-size: 13px;
+      }
+
+      .table-wrap {
+        border-radius: 16px;
+      }
+
+      th,
+      td {
+        padding: 12px 14px;
+        font-size: 13px;
+      }
+
+      th {
+        font-size: 11px;
+      }
+
+      .badge {
+        padding: 5px 9px;
+        border-radius: 999px;
+        font-size: 11px;
+      }
+
+      .key-mask {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 9px;
+        border-radius: 10px;
+        background: #f8fafc;
+        border: 1px solid #cbd5e1;
+        color: #334155;
+        font-family: "Courier New", monospace;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.4px;
+        word-break: break-all;
+      }
+
+      .key-action-row {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-top: 7px;
+      }
+
+      .key-action-row button {
+        padding: 7px 10px;
+        font-size: 11px;
+        box-shadow: none;
+      }
+
+      @media (max-width: 768px) {
+        .page {
+          padding: 16px 14px 40px;
+        }
+
+        .hero {
+          padding: 20px;
+        }
+
+        .hero h1 {
+          font-size: 23px;
+        }
+
+        .nav-chip {
+          display: none;
+        }
+
+        .card {
+          padding: 18px;
+        }
+      }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </head>
@@ -1209,11 +1398,11 @@
         <div class="hero">
           <div class="hero-row">
             <div style="max-width: 600px">
-              <div class="hero-badge">🌊 AE GAME STORE • DASHBOARD</div>
-              <h1>Pantau operasional tokomu setenang ombak lautan</h1>
+              <div class="hero-badge">AE GAME STORE • ADMIN</div>
+              <h1>Dashboard Operasional</h1>
               <p>
-                Kelola produk, periksa stok voucher, dan pantau pesanan yang
-                masuk dalam satu tempat yang nyaman dan tertata rapi.
+                Kelola produk, order, stok key, voucher, dan buyer dari satu
+                panel yang clean.
               </p>
             </div>
             <div>
@@ -1223,9 +1412,9 @@
             </div>
           </div>
           <div class="hero-mini">
-            <div class="mini-pill">Live Monitoring</div>
-            <div class="mini-pill">Aesthetic UI</div>
-            <div class="mini-pill">Secured System</div>
+            <div class="mini-pill">Order</div>
+            <div class="mini-pill">Stok Key</div>
+            <div class="mini-pill">Voucher</div>
           </div>
         </div>
         <div
@@ -1901,6 +2090,64 @@
         return match ? decodeURIComponent(match[1]) : "";
       }
 
+      function maskSecretKey(value) {
+        const key = String(value || "").trim();
+
+        if (!key) return "-";
+
+        if (key.length <= 8) {
+          return key.slice(0, 2) + "••••" + key.slice(-2);
+        }
+
+        return key.slice(0, 4) + "••••" + key.slice(-4);
+      }
+
+      function showSecretKey(value) {
+        Swal.fire({
+          title: "Game Key",
+          html: `
+      <code style="
+        display:block;
+        padding:14px;
+        border-radius:12px;
+        background:#f0f9ff;
+        border:1px solid #bae6fd;
+        color:#0c4a6e;
+        font-weight:800;
+        word-break:break-all;
+      ">
+        ${escapeHtml(value || "-")}
+      </code>
+    `,
+          confirmButtonText: "Copy Key",
+          showCancelButton: true,
+          cancelButtonText: "Tutup",
+          confirmButtonColor: "#0ea5e9",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            copyToClipboard(value || "");
+          }
+        });
+      }
+
+      function renderMaskedKey(value) {
+        const rawKey = String(value || "");
+
+        return `
+    <div>
+      <code class="key-mask">${escapeHtml(maskSecretKey(rawKey))}</code>
+      <div class="key-action-row">
+        <button class="ghost-btn" onclick='copyToClipboard(${JSON.stringify(rawKey)})'>
+          Copy
+        </button>
+        <button class="ghost-btn" onclick='showSecretKey(${JSON.stringify(rawKey)})'>
+          Show
+        </button>
+      </div>
+    </div>
+  `;
+      }
+
       function copyToClipboard(text) {
         if (!text) {
           Swal.fire("Tidak ada data untuk dicopy.");
@@ -2012,7 +2259,7 @@
         <tr>
           <td>${item.id}</td>
           <td>${escapeHtml(item.game || "-")} - ${escapeHtml(item.brand || "-")} - ${escapeHtml(item.duration || "-")}</td>
-          <td>${escapeHtml(item.key)}</td>
+          <td>${renderMaskedKey(item.key)}</td>
           <td>${keyBadge(item.used)}</td>
           <td>
             <button class="danger-btn" onclick="deleteKey(${item.id})">Hapus</button>
