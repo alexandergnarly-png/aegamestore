@@ -220,7 +220,8 @@ const gameImages = {
     "https://cdn.cloudflare.steamstatic.com/steam/apps/2507950/header.jpg",
 };
 
-const fallbackImage = "https://via.placeholder.com/400x220?text=Game";
+const fallbackImage =
+  "https://placehold.co/400x220/e0f2fe/0284c7?text=AE+Game+Store";
 
 function normalizeGameImageKey(gameName) {
   return String(gameName || "")
