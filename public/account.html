@@ -625,7 +625,13 @@
       }
 
       async function logoutUser() {
-        await fetch("/user-logout", { method: "POST" });
+        await fetch("/user-logout", {
+          method: "POST",
+          headers: {
+            "x-user-csrf-token": getCookie("user_csrf"),
+          },
+        });
+
         window.location.href = "/";
       }
       function formatRupiah(num) {

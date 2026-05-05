@@ -350,6 +350,32 @@ function normalizeVoucherCode(code) {
     .toUpperCase();
 }
 
+function verifyMidtransSignature(notification) {
+  const orderId = String(notification.order_id || "");
+  const statusCode = String(notification.status_code || "");
+  const grossAmount = String(notification.gross_amount || "");
+  const signatureKey = String(notification.signature_key || "");
+  const serverKey = String(process.env.MIDTRANS_SERVER_KEY || "");
+
+  if (!orderId || !statusCode || !grossAmount || !signatureKey || !serverKey) {
+    return false;
+  }
+
+  const expectedSignature = crypto
+    .createHash("sha512")
+    .update(orderId + statusCode + grossAmount + serverKey)
+    .digest("hex");
+
+  const actualBuffer = Buffer.from(signatureKey, "hex");
+  const expectedBuffer = Buffer.from(expectedSignature, "hex");
+
+  if (actualBuffer.length !== expectedBuffer.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(actualBuffer, expectedBuffer);
+}
+
 function getBuyerBadge({
   paidOrderCount = 0,
   totalSpend = 0,
@@ -1227,6 +1253,10 @@ app.post("/create-order", orderLimiter, async (req, res) => {
 app.post("/midtrans-notification", webhookLimiter, async (req, res) => {
   try {
     const notification = await snap.transaction.notification(req.body);
+
+    if (!verifyMidtransSignature(notification)) {
+      return res.status(403).send("INVALID SIGNATURE");
+    }
 
     const orderId = String(notification.order_id || "").trim();
     const transactionStatus = String(
@@ -2412,7 +2442,7 @@ app.post("/user/change-password", requireUserCsrf, async (req, res) => {
   }
 });
 
-app.post("/user-logout", (req, res) => {
+app.post("/user-logout", requireUserCsrf, (req, res) => {
   res.clearCookie("user_auth", { path: "/" });
   res.clearCookie("user_csrf", { path: "/" });
   return res.json({ message: "Logout berhasil" });

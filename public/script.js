@@ -215,7 +215,7 @@ const gameImages = {
     "https://commons.wikimedia.org/wiki/Special:Redirect/file/Call%20of%20Duty%20Mobile%20Logo.png",
   callofduty:
     "https://commons.wikimedia.org/wiki/Special:Redirect/file/Call%20of%20Duty%20Mobile%20Logo.png",
-    
+
   bloodstrike: "https://www.blood-strike.com/favicon.ico",
 
   deltaforce:
@@ -774,7 +774,12 @@ async function logoutUser() {
     confirmButtonText: "Ya, Keluar",
   }).then(async (result) => {
     if (result.isConfirmed) {
-      await fetch("/user-logout", { method: "POST" });
+      await fetch("/user-logout", {
+        method: "POST",
+        headers: {
+          "x-user-csrf-token": getCookie("user_csrf"),
+        },
+      });
       window.location.reload(); // Refresh halaman agar kembali jadi tombol Masuk
     }
   });
