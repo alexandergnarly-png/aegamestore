@@ -201,19 +201,21 @@ const gameImages = {
   pubgm: "https://cdn.cloudflare.steamstatic.com/steam/apps/578080/header.jpg",
 
   mobilelegends:
-    "https://www.svgrepo.com/show/517888/mobile-legends-bang-bang.svg",
+    "https://play-lh.googleusercontent.com/7oS5oPpR2z6kV1U1vVZrXW6Y7n4Zs3l7J9v0V0p0m8V0Q0h3R0Z0J0U0R0I0M0Y=s512",
   mobilelegend:
-    "https://www.svgrepo.com/show/517888/mobile-legends-bang-bang.svg",
-  mlbb: "https://www.svgrepo.com/show/517888/mobile-legends-bang-bang.svg",
+    "https://play-lh.googleusercontent.com/7oS5oPpR2z6kV1U1vVZrXW6Y7n4Zs3l7J9v0V0p0m8V0Q0h3R0Z0J0U0R0I0M0Y=s512",
+  mlbb: "https://play-lh.googleusercontent.com/7oS5oPpR2z6kV1U1vVZrXW6Y7n4Zs3l7J9v0V0p0m8V0Q0h3R0Z0J0U0R0I0M0Y=s512",
 
   freefire:
     "https://play-lh.googleusercontent.com/6llpraFcTI0rEUuRpWEG9NWWblvm106y5JXcDzu60ACuaUYDD3i70a-p9_QM65NsGDE=s512",
   ff: "https://play-lh.googleusercontent.com/6llpraFcTI0rEUuRpWEG9NWWblvm106y5JXcDzu60ACuaUYDD3i70a-p9_QM65NsGDE=s512",
 
-  codm: "https://www.svgrepo.com/show/331342/call-of-duty.svg",
-  callofdutymobile: "https://www.svgrepo.com/show/331342/call-of-duty.svg",
-  callofduty: "https://www.svgrepo.com/show/331342/call-of-duty.svg",
-
+  codm: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Call%20of%20Duty%20Mobile%20Logo.png",
+  callofdutymobile:
+    "https://commons.wikimedia.org/wiki/Special:Redirect/file/Call%20of%20Duty%20Mobile%20Logo.png",
+  callofduty:
+    "https://commons.wikimedia.org/wiki/Special:Redirect/file/Call%20of%20Duty%20Mobile%20Logo.png",
+    
   bloodstrike: "https://www.blood-strike.com/favicon.ico",
 
   deltaforce:
