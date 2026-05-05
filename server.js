@@ -666,6 +666,8 @@ app.use(cookieParser());
 app.use((req, res, next) => {
   if (
     req.path.startsWith("/orders") ||
+    req.path.startsWith("/order/") ||
+    req.path.startsWith("/user/orders") ||
     req.path.startsWith("/users") ||
     req.path.startsWith("/keys") ||
     req.path.startsWith("/vouchers") ||
@@ -674,13 +676,18 @@ app.use((req, res, next) => {
     req.path.startsWith("/api/user") ||
     req.path.startsWith("/api/admin")
   ) {
-    res.setHeader("Cache-Control", "no-store");
+    res.setHeader(
+      "Cache-Control",
+      "no-store, no-cache, must-revalidate, private",
+    );
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
   }
 
   next();
 });
-app.use(express.static("public"));
 
+app.use(express.static("public"));
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
