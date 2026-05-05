@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Akun Saya - AE Game Store</title>
+    <title>My Account - AE Game Store</title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
       :root {
@@ -446,81 +446,111 @@
       }
     </style>
   </head>
-  <body>
+  <body
+    onload="
+      applyAccountLanguage();
+      checkUser();
+    "
+  >
     <div class="account-card">
       <div class="profile-head">
         <div class="avatar">👤</div>
-        <h1>Akun Saya</h1>
-        <p class="subtitle" id="userText">Mengecek akun...</p>
+        <h1 data-account-i18n="accountTitle">Akun Saya</h1>
+        <p class="subtitle" id="userText" data-account-i18n="checkingAccount">
+          Mengecek akun...
+        </p>
         <div id="buyerBadgeBox"></div>
         <div id="buyerStatsBox" class="buyer-stats-mini"></div>
       </div>
 
       <div class="status-grid">
         <div class="status-box">
-          <strong>Status Login</strong>
-          <span id="loginStatus">Aktif</span>
+          <strong data-account-i18n="loginStatusTitle">Status Login</strong>
+          <span id="loginStatus" data-account-i18n="loginStatusActive"
+            >Aktif</span
+          >
         </div>
         <div class="status-box">
-          <strong>Kontak Order</strong>
-          <span id="contactStatus">Belum disimpan</span>
+          <strong data-account-i18n="contactOrderTitle">Kontak Order</strong>
+          <span id="contactStatus" data-account-i18n="contactNotSaved"
+            >Belum disimpan</span
+          >
         </div>
       </div>
 
       <div class="section">
-        <div class="section-title">Data Order Default</div>
+        <div class="section-title" data-account-i18n="defaultOrderTitle">
+          Data Order Default
+        </div>
 
         <input
           type="text"
           id="defaultName"
           placeholder="Nama default untuk order"
+          data-account-placeholder="defaultNamePlaceholder"
         />
 
         <input
           type="text"
           id="defaultContact"
           placeholder="Email / Nomor WA aktif"
+          data-account-placeholder="defaultContactPlaceholder"
         />
 
-        <button onclick="saveDefaultOrderData()">
+        <button
+          onclick="saveDefaultOrderData()"
+          data-account-i18n="saveDefaultOrder"
+        >
           Simpan Data Order (Segera)
         </button>
 
-        <p class="note">
+        <p class="note" data-account-i18n="defaultOrderNote">
           Data ini bisa dipakai untuk mengisi otomatis nama dan kontak saat
           checkout.
         </p>
       </div>
 
       <div class="section">
-        <div class="section-title">Ganti Password</div>
+        <div class="section-title" data-account-i18n="changePasswordTitle">
+          Ganti Password
+        </div>
 
         <input
           type="password"
           id="oldPassword"
           placeholder="Password lama / password random"
+          data-account-placeholder="oldPasswordPlaceholder"
         />
 
         <input
           type="password"
           id="newPassword"
           placeholder="Password baru minimal 6 karakter"
+          data-account-placeholder="newPasswordPlaceholder"
         />
 
-        <button onclick="changePassword()">Simpan Password Baru</button>
+        <button onclick="changePassword()" data-account-i18n="saveNewPassword">
+          Simpan Password Baru
+        </button>
 
-        <p class="note">
+        <p class="note" data-account-i18n="changePasswordNote">
           Kalau password kamu hasil reset admin, isi password random itu sebagai
           password lama.
         </p>
       </div>
 
       <div class="section">
-        <div class="section-title">Verifikasi Email</div>
-        <button class="btn-secondary" onclick="emailComingSoon()">
+        <div class="section-title" data-account-i18n="verifyEmailTitle">
+          Verifikasi Email
+        </div>
+        <button
+          class="btn-secondary"
+          onclick="emailComingSoon()"
+          data-account-i18n="verifyEmailButton"
+        >
           Verify Email
         </button>
-        <p class="note">
+        <p class="note" data-account-i18n="verifyEmailNote">
           Fitur ini butuh tambahan email di database dan layanan kirim email
           seperti Resend, Brevo, atau SMTP.
         </p>
@@ -528,17 +558,188 @@
 
       <div class="section">
         <div style="margin-top: 22px; text-align: left">
-          <h3 style="margin-bottom: 10px">Riwayat Order</h3>
-          <div id="orderHistory" style="font-size: 14px; color: #475569">
+          <h3 style="margin-bottom: 10px" data-account-i18n="orderHistoryTitle">
+            Riwayat Order
+          </h3>
+          <div
+            id="orderHistory"
+            style="font-size: 14px; color: #475569"
+            data-account-i18n="loadingOrderHistory"
+          >
             Memuat riwayat order...
           </div>
         </div>
-        <a href="/" class="btn btn-secondary">Kembali ke Home</a>
-        <button class="btn-danger" onclick="logoutUser()">Logout</button>
+        <a href="/" class="btn btn-secondary" data-account-i18n="backHome"
+          >Kembali ke Home</a
+        >
+        <button
+          class="btn-danger"
+          onclick="logoutUser()"
+          data-account-i18n="logout"
+        >
+          Logout
+        </button>
       </div>
     </div>
 
     <script>
+      const accountTranslations = {
+        id: {
+          accountTitle: "Akun Saya",
+          pageTitle: "Akun Saya - AE Game Store",
+          checkingAccount: "Mengecek akun...",
+          loggedInAs: "Login sebagai",
+          loginStatusTitle: "Status Login",
+          loginStatusActive: "Aktif",
+          contactOrderTitle: "Kontak Order",
+          contactNotSaved: "Belum disimpan",
+          defaultOrderTitle: "Data Order Default",
+          defaultNamePlaceholder: "Nama default untuk order",
+          defaultContactPlaceholder: "Email / Nomor WA aktif",
+          saveDefaultOrder: "Simpan Data Order (Segera)",
+          defaultOrderNote:
+            "Data ini bisa dipakai untuk mengisi otomatis nama dan kontak saat checkout.",
+          changePasswordTitle: "Ganti Password",
+          oldPasswordPlaceholder: "Password lama / password random",
+          newPasswordPlaceholder: "Password baru minimal 6 karakter",
+          saveNewPassword: "Simpan Password Baru",
+          changePasswordNote:
+            "Kalau password kamu hasil reset admin, isi password random itu sebagai password lama.",
+          verifyEmailTitle: "Verifikasi Email",
+          verifyEmailButton: "Verify Email",
+          verifyEmailNote:
+            "Fitur ini butuh tambahan email di database dan layanan kirim email seperti Resend, Brevo, atau SMTP.",
+          orderHistoryTitle: "Riwayat Order",
+          loadingOrderHistory: "Memuat riwayat order...",
+          backHome: "Kembali ke Home",
+          logout: "Logout",
+          paidOrder: "order sukses",
+          totalSpend: "total belanja",
+          noOrders: "Belum ada order yang terhubung ke akun ini.",
+          failedLoadOrders: "Gagal memuat riwayat order.",
+          product: "Produk",
+          totalPayment: "Total Bayar",
+          voucher: "Voucher",
+          discount: "Diskon",
+          payment: "Pembayaran",
+          delivery: "Pengiriman",
+          time: "Waktu",
+          key: "Key",
+          copyKey: "Copy Key",
+          viewOrderDetail: "Lihat Detail Order",
+          noDataTitle: "Tidak ada data",
+          notAvailable: "belum tersedia.",
+          copied: "berhasil dicopy",
+          copyFailedTitle: "Gagal copy",
+          copyFailedText: "Coba copy manual.",
+          passwordValidation:
+            "Password lama wajib diisi dan password baru minimal 6 karakter",
+          failedTitle: "Gagal",
+          changePasswordFailed: "Gagal ganti password",
+          successTitle: "Berhasil",
+          passwordChanged: "Password berhasil diganti",
+          errorTitle: "Error",
+          serverError: "Terjadi error server",
+          verifyEmailComingSoonTitle: "Verify Email belum aktif",
+          verifyEmailComingSoonText:
+            "Kita perlu tambah kolom email, token verifikasi, dan layanan kirim email dulu.",
+          featureSoonTitle: "Fitur segera aktif",
+          featureSoonText:
+            "Nanti data ini bisa disimpan ke akun dan dipakai otomatis saat checkout.",
+        },
+        en: {
+          accountTitle: "My Account",
+          pageTitle: "My Account - AE Game Store",
+          checkingAccount: "Checking account...",
+          loggedInAs: "Logged in as",
+          loginStatusTitle: "Login Status",
+          loginStatusActive: "Active",
+          contactOrderTitle: "Order Contact",
+          contactNotSaved: "Not saved yet",
+          defaultOrderTitle: "Default Order Data",
+          defaultNamePlaceholder: "Default name for orders",
+          defaultContactPlaceholder: "Active email / WhatsApp number",
+          saveDefaultOrder: "Save Order Data (Soon)",
+          defaultOrderNote:
+            "This data can be used to auto-fill your name and contact during checkout.",
+          changePasswordTitle: "Change Password",
+          oldPasswordPlaceholder: "Old password / random password",
+          newPasswordPlaceholder: "New password, minimum 6 characters",
+          saveNewPassword: "Save New Password",
+          changePasswordNote:
+            "If your password was reset by admin, use the random password as your old password.",
+          verifyEmailTitle: "Email Verification",
+          verifyEmailButton: "Verify Email",
+          verifyEmailNote:
+            "This feature needs an email column, verification token, and email service such as Resend, Brevo, or SMTP.",
+          orderHistoryTitle: "Order History",
+          loadingOrderHistory: "Loading order history...",
+          backHome: "Back to Home",
+          logout: "Logout",
+          paidOrder: "successful orders",
+          totalSpend: "total spent",
+          noOrders: "No orders are connected to this account yet.",
+          failedLoadOrders: "Failed to load order history.",
+          product: "Product",
+          totalPayment: "Total Payment",
+          voucher: "Voucher",
+          discount: "Discount",
+          payment: "Payment",
+          delivery: "Delivery",
+          time: "Time",
+          key: "Key",
+          copyKey: "Copy Key",
+          viewOrderDetail: "View Order Detail",
+          noDataTitle: "No data",
+          notAvailable: "is not available yet.",
+          copied: "copied successfully",
+          copyFailedTitle: "Copy failed",
+          copyFailedText: "Please copy manually.",
+          passwordValidation:
+            "Old password is required and the new password must be at least 6 characters",
+          failedTitle: "Failed",
+          changePasswordFailed: "Failed to change password",
+          successTitle: "Success",
+          passwordChanged: "Password changed successfully",
+          errorTitle: "Error",
+          serverError: "Server error occurred",
+          verifyEmailComingSoonTitle: "Email verification is not active yet",
+          verifyEmailComingSoonText:
+            "We need to add an email column, verification token, and email delivery service first.",
+          featureSoonTitle: "Feature coming soon",
+          featureSoonText:
+            "Later, this data can be saved to your account and used automatically during checkout.",
+        },
+      };
+
+      function getAccountLanguage() {
+        return localStorage.getItem("ae_language") === "en" ? "en" : "id";
+      }
+
+      function tAccount(key) {
+        const lang = getAccountLanguage();
+        return (
+          accountTranslations[lang]?.[key] || accountTranslations.id[key] || key
+        );
+      }
+
+      function applyAccountLanguage() {
+        document.documentElement.lang = getAccountLanguage();
+        document.title = tAccount("pageTitle");
+
+        document.querySelectorAll("[data-account-i18n]").forEach((element) => {
+          const key = element.getAttribute("data-account-i18n");
+          element.innerText = tAccount(key);
+        });
+
+        document
+          .querySelectorAll("[data-account-placeholder]")
+          .forEach((element) => {
+            const key = element.getAttribute("data-account-placeholder");
+            element.placeholder = tAccount(key);
+          });
+      }
+
       function getCookie(name) {
         return (
           document.cookie
@@ -558,7 +759,7 @@
           }
 
           document.getElementById("userText").innerText =
-            `Login sebagai: ${data.username}`;
+            `${tAccount("loggedInAs")}: ${data.username}`;
 
           const badge = data.badge || {};
           const stats = data.stats || {};
@@ -571,7 +772,7 @@
 `;
 
           document.getElementById("buyerStatsBox").innerText =
-            `${Number(stats.paid_order_count || 0)} order sukses • ${formatRupiah(stats.total_spend || 0)} total belanja`;
+            `${Number(stats.paid_order_count || 0)} ${tAccount("paidOrder")} • ${formatRupiah(stats.total_spend || 0)} ${tAccount("totalSpend")}`;
 
           loadOrderHistory();
         } catch (err) {
@@ -584,9 +785,7 @@
         const newPassword = document.getElementById("newPassword").value.trim();
 
         if (!oldPassword || newPassword.length < 6) {
-          Swal.fire(
-            "Password lama wajib diisi dan password baru minimal 6 karakter",
-          );
+          Swal.fire(tAccount("passwordValidation"));
           return;
         }
 
@@ -603,22 +802,30 @@
           const data = await res.json();
 
           if (!res.ok) {
-            Swal.fire("Gagal", data.message || "Gagal ganti password", "error");
+            Swal.fire(
+              tAccount("failedTitle"),
+              data.message || tAccount("changePasswordFailed"),
+              "error",
+            );
             return;
           }
 
-          Swal.fire("Berhasil", "Password berhasil diganti", "success");
+          Swal.fire(
+            tAccount("successTitle"),
+            tAccount("passwordChanged"),
+            "success",
+          );
           document.getElementById("oldPassword").value = "";
           document.getElementById("newPassword").value = "";
         } catch (err) {
-          Swal.fire("Error", "Terjadi error server", "error");
+          Swal.fire(tAccount("errorTitle"), tAccount("serverError"), "error");
         }
       }
 
       function emailComingSoon() {
         Swal.fire({
-          title: "Verify Email belum aktif",
-          text: "Kita perlu tambah kolom email, token verifikasi, dan layanan kirim email dulu.",
+          title: tAccount("verifyEmailComingSoonTitle"),
+          text: tAccount("verifyEmailComingSoonText"),
           icon: "info",
           confirmButtonColor: "#0ea5e9",
         });
@@ -647,8 +854,8 @@
         if (!text) {
           Swal.fire({
             icon: "info",
-            title: "Tidak ada data",
-            text: `${label} belum tersedia.`,
+            title: tAccount("noDataTitle"),
+            text: `${label} ${tAccount("notAvailable")}`,
             confirmButtonColor: "#0ea5e9",
           });
           return;
@@ -661,7 +868,7 @@
               toast: true,
               position: "top-end",
               icon: "success",
-              title: `${label} berhasil dicopy`,
+              title: `${label} ${tAccount("copied")}`,
               showConfirmButton: false,
               timer: 1400,
               timerProgressBar: true,
@@ -670,8 +877,8 @@
           .catch(() => {
             Swal.fire({
               icon: "error",
-              title: "Gagal copy",
-              text: "Coba copy manual.",
+              title: tAccount("copyFailedTitle"),
+              text: tAccount("copyFailedText"),
               confirmButtonColor: "#fb7185",
             });
           });
@@ -693,7 +900,7 @@
           if (!Array.isArray(data) || data.length === 0) {
             box.innerHTML = `
         <div class="empty-state">
-          Belum ada order yang terhubung ke akun ini.
+          ${tAccount("noOrders")}
         </div>
       `;
             return;
@@ -713,50 +920,50 @@
                 <strong>${item.game || "-"}</strong>
 
                 <div class="order-row">
-                  <span>Produk</span>
+                  <span>${tAccount("product")}</span>
                   <b>${item.product || "-"}</b>
                 </div>
 
                 <div class="order-row">
-                  <span>Total Bayar</span>
+                  <span>${tAccount("totalPayment")}</span>
                   <b>${formatRupiah(item.price)}</b>
                 </div>
 
                 <div class="order-row">
-                  <span>Voucher</span>
+                  <span>${tAccount("voucher")}</span>
                   <b>${voucherCode || "-"}</b>
                 </div>
 
                 <div class="order-row">
-                  <span>Diskon</span>
+                  <span>${tAccount("discount")}</span>
                   <b class="discount-value">
                     ${discountAmount > 0 ? "- " + formatRupiah(discountAmount) : "-"}
                   </b>
                 </div>
 
                 <div class="order-row">
-                  <span>Pembayaran</span>
+                  <span>${tAccount("payment")}</span>
                   <b class="status-pill ${item.payment_status || ""}">
                     ${item.payment_status || "-"}
                   </b>
                 </div>
 
                 <div class="order-row">
-                  <span>Pengiriman</span>
+                  <span>${tAccount("delivery")}</span>
                   <b class="status-pill ${item.delivery_status || ""}">
                     ${item.delivery_status || "-"}
                   </b>
                 </div>
 
                 <div class="order-row">
-                  <span>Waktu</span>
+                  <span>${tAccount("time")}</span>
                   <b>${formatTanggal(item.created_at)}</b>
                 </div>
 
                 ${
                   gameKey
                     ? `<div class="order-row">
-                        <span>Key</span>
+                        <span>${tAccount("key")}</span>
                         <div>
                           <code class="key-code">${gameKey}</code>
                           <button
@@ -764,7 +971,7 @@
                             class="copy-key-btn"
                             onclick='copyText(${JSON.stringify(gameKey)}, "Game key")'
                           >
-                            Copy Key
+                            ${tAccount("copyKey")}
                           </button>
                         </div>
                       </div>`
@@ -775,7 +982,7 @@
                   ${
                     orderId
                       ? `<a class="order-link-btn" href="/result.html?order_id=${encodeURIComponent(orderId)}">
-                          Lihat Detail Order
+                          ${tAccount("viewOrderDetail")}
                         </a>`
                       : ""
                   }
@@ -789,20 +996,19 @@
         } catch (err) {
           box.innerHTML = `
       <div class="empty-state">
-        Gagal memuat riwayat order.
+        ${tAccount("failedLoadOrders")}
       </div>
     `;
         }
       }
       function saveDefaultOrderData() {
         Swal.fire({
-          title: "Fitur segera aktif",
-          text: "Nanti data ini bisa disimpan ke akun dan dipakai otomatis saat checkout.",
+          title: tAccount("featureSoonTitle"),
+          text: tAccount("featureSoonText"),
           icon: "info",
           confirmButtonColor: "#0ea5e9",
         });
       }
-      checkUser();
     </script>
   </body>
 </html>
