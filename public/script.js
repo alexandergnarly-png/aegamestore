@@ -196,19 +196,41 @@ function setLanguage(lang) {
 let allProducts = [];
 
 const gameImages = {
-  "PUBG Mobile":
+  pubgmobile:
     "https://cdn.cloudflare.steamstatic.com/steam/apps/578080/header.jpg",
-  "Pubg M":
-    "https://cdn.cloudflare.steamstatic.com/steam/apps/578080/header.jpg",
-  "Mobile Legends":
-    "https://play-lh.googleusercontent.com/7oS5oPpR2z6kV1U1vVZrXW6Y7n4Zs3l7J9v0V0p0m8V0Q0h3R0Z0J0U0R0I0M0Y=s512",
-  "Free Fire":
-    "https://cdn2.unrealengine.com/egs-garena-freefire-garena-s1-2560x1440-0d1cfd2e3c8d.jpg",
-  "Delta Force":
+  pubgm: "https://cdn.cloudflare.steamstatic.com/steam/apps/578080/header.jpg",
+
+  mobilelegends:
+    "https://cdn.cloudflare.steamstatic.com/steam/apps/989530/header.jpg",
+  mobilelegend:
+    "https://cdn.cloudflare.steamstatic.com/steam/apps/989530/header.jpg",
+  mlbb: "https://cdn.cloudflare.steamstatic.com/steam/apps/989530/header.jpg",
+
+  freefire:
+    "https://play-lh.googleusercontent.com/6llpraFcTI0rEUuRpWEG9NWWblvm106y5JXcDzu60ACuaUYDD3i70a-p9_QM65NsGDE=s512",
+  ff: "https://play-lh.googleusercontent.com/6llpraFcTI0rEUuRpWEG9NWWblvm106y5JXcDzu60ACuaUYDD3i70a-p9_QM65NsGDE=s512",
+
+  codm: "https://www.callofduty.com/content/dam/atvi/callofduty/cod-touchui/mobile/common/cod-mobile-logo.jpg",
+  callofdutymobile:
+    "https://www.callofduty.com/content/dam/atvi/callofduty/cod-touchui/mobile/common/cod-mobile-logo.jpg",
+
+  bloodstrike: "https://www.blood-strike.com/favicon.ico",
+
+  deltaforce:
     "https://cdn.cloudflare.steamstatic.com/steam/apps/2507950/header.jpg",
 };
 
 const fallbackImage = "https://via.placeholder.com/400x220?text=Game";
+
+function normalizeGameImageKey(gameName) {
+  return String(gameName || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+}
+
+function getGameImage(gameName) {
+  return gameImages[normalizeGameImageKey(gameName)] || fallbackImage;
+}
 
 let selectedGame = "";
 let currentCategory = "all";
@@ -364,7 +386,7 @@ function renderGames() {
     const card = document.createElement("div");
     card.className = "game-card";
 
-    const imageUrl = gameImages[game] || fallbackImage;
+    const imageUrl = getGameImage(game);
     const gameProducts = allProducts.filter((item) => item.game === game);
     const availableProducts = gameProducts.filter(
       (item) => Number(item.available_keys || 0) > 0,
