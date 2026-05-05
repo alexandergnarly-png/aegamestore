@@ -201,10 +201,10 @@ const gameImages = {
   pubgm: "https://cdn.cloudflare.steamstatic.com/steam/apps/578080/header.jpg",
 
   mobilelegends:
-    "https://cdn.cloudflare.steamstatic.com/steam/apps/989530/header.jpg",
+    "https://www.svgrepo.com/show/517888/mobile-legends-bang-bang.svg",
   mobilelegend:
-    "https://cdn.cloudflare.steamstatic.com/steam/apps/989530/header.jpg",
-  mlbb: "https://cdn.cloudflare.steamstatic.com/steam/apps/989530/header.jpg",
+    "https://www.svgrepo.com/show/517888/mobile-legends-bang-bang.svg",
+  mlbb: "https://www.svgrepo.com/show/517888/mobile-legends-bang-bang.svg",
 
   freefire:
     "https://play-lh.googleusercontent.com/6llpraFcTI0rEUuRpWEG9NWWblvm106y5JXcDzu60ACuaUYDD3i70a-p9_QM65NsGDE=s512",
