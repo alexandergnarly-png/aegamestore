@@ -2783,8 +2783,11 @@
                                                 <td>${orderBadge(item.payment_status)}</td>
                                                 <td>${deliveryBadge(item.delivery_status)}</td>
                                                 <td>
-                                                    ${escapeHtml(item.gameKey || item.gamekey || "-")}
-                                                    ${item.gameKey || item.gamekey ? `<br><button class="ghost-btn" onclick='copyToClipboard(${safeGameKey})'>Copy Key</button>` : ""}
+                                                  ${
+                                                    item.gameKey || item.gamekey
+                                                      ? renderMaskedKey(item.gameKey || item.gamekey)
+                                                      : "-"
+                                                  }
                                                 </td>
                                                 <td>${formatTanggal(item.created_at)}</td>
                                                 <td>
