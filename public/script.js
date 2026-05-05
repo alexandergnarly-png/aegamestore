@@ -210,9 +210,9 @@ const gameImages = {
     "https://play-lh.googleusercontent.com/6llpraFcTI0rEUuRpWEG9NWWblvm106y5JXcDzu60ACuaUYDD3i70a-p9_QM65NsGDE=s512",
   ff: "https://play-lh.googleusercontent.com/6llpraFcTI0rEUuRpWEG9NWWblvm106y5JXcDzu60ACuaUYDD3i70a-p9_QM65NsGDE=s512",
 
-  codm: "https://www.callofduty.com/content/dam/atvi/callofduty/cod-touchui/mobile/common/cod-mobile-logo.jpg",
-  callofdutymobile:
-    "https://www.callofduty.com/content/dam/atvi/callofduty/cod-touchui/mobile/common/cod-mobile-logo.jpg",
+  codm: "https://www.svgrepo.com/show/331342/call-of-duty.svg",
+  callofdutymobile: "https://www.svgrepo.com/show/331342/call-of-duty.svg",
+  callofduty: "https://www.svgrepo.com/show/331342/call-of-duty.svg",
 
   bloodstrike: "https://www.blood-strike.com/favicon.ico",
 
