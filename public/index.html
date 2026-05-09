@@ -654,38 +654,34 @@
         setTimeout(() => {
           preloader.classList.add("fade-out");
 
-          // --- UI/UX UPGRADE: POPUP TELEGRAM PREMIUM ---
-          const lastShown = localStorage.getItem("tg_popup_last_shown");
-          const today = new Date().toDateString();
+          // --- LOGIKA SEMBUNYIKAN BERDASARKAN JAM ---
+          const hideUntil = localStorage.getItem("tg_popup_hide_until");
+          const now = new Date().getTime();
 
-          if (lastShown !== today) {
+          // Jika belum pernah disembunyikan atau waktu sembunyi sudah habis
+          if (!hideUntil || now > parseInt(hideUntil)) {
             setTimeout(() => {
               Swal.fire({
                 html: `
-                  <div style="text-align:center; padding: 10px 0;">
-                    <div style="background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%); width: 90px; height: 90px; border-radius: 24px; display: flex; align-items: center; justify-content: center; margin: 0 auto 22px; box-shadow: 0 10px 20px rgba(14, 165, 233, 0.15);">
-                      <iconify-icon icon="logos:telegram" width="54"></iconify-icon>
-                    </div>
-                    
-                    <h2 style="color: #0c4a6e; font-size: 22px; font-weight: 800; margin-bottom: 12px; letter-spacing: -0.5px;">Eksklusif Community ⛩️</h2>
-                    
-                    <p style="color: #475569; font-size: 14px; line-height: 1.6; margin-bottom: 5px;">
-                      Jangan ketinggalan <b>update stok tercepat</b> dan <b>voucher diskon harian</b> yang hanya dibagikan lewat Telegram.
-                    </p>
-
-                    <div style="font-size: 12px; color: #0ea5e9; font-weight: 700; margin-top: 18px; display: inline-flex; align-items: center; gap: 6px; background: #e0f2fe; padding: 6px 14px; border-radius: 99px;">
-                       <span style="width: 8px; height: 8px; background: #0ea5e9; border-radius: 50%; display: inline-block; animation: pulse 2s infinite;"></span>
-                       Join 2,400+ Gamers Lainnya
-                    </div>
-                  </div>
-                `,
-                showCancelButton: true,
-                showDenyButton: true,
-                confirmButtonText: "Ya, Gabung Sekarang! 🚀",
-                cancelButtonText: "Nanti Dulu",
-                denyButtonText: "Sembunyikan Hari Ini",
+            <div style="text-align:center; padding: 10px 0;">
+              <div style="background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%); width: 90px; height: 90px; border-radius: 24px; display: flex; align-items: center; justify-content: center; margin: 0 auto 22px; box-shadow: 0 10px 20px rgba(14, 165, 233, 0.15);">
+                <iconify-icon icon="logos:telegram" width="54"></iconify-icon>
+              </div>
+              <h2 style="color: #0c4a6e; font-size: 22px; font-weight: 800; margin-bottom: 12px; letter-spacing: -0.5px;">Eksklusif Community ⛩️</h2>
+              <p style="color: #475569; font-size: 14px; line-height: 1.6; margin-bottom: 5px;">
+                Dapatkan <b>voucher diskon harian</b> dan update stok tercepat hanya di Telegram.
+              </p>
+              <div style="font-size: 12px; color: #0ea5e9; font-weight: 700; margin-top: 18px; display: inline-flex; align-items: center; gap: 6px; background: #e0f2fe; padding: 6px 14px; border-radius: 99px;">
+                 <span style="width: 8px; height: 8px; background: #0ea5e9; border-radius: 50%; display: inline-block; animation: bluePulse 2s infinite;"></span>
+                 Join 2,400+ Gamers Lainnya
+              </div>
+            </div>
+          `,
+                showCancelButton: false, // Menghilangkan tombol 'Nanti Dulu'
+                showDenyButton: true, // Mengaktifkan tombol kedua
+                confirmButtonText: "Gabung Sekarang! 🚀",
+                denyButtonText: "Sembunyikan",
                 confirmButtonColor: "#0ea5e9",
-                cancelButtonColor: "#64748b",
                 denyButtonColor: "#94a3b8",
                 padding: "2em",
                 background: document.body.classList.contains("dark-theme")
@@ -704,12 +700,29 @@
                     "noopener,noreferrer",
                   );
                 } else if (result.isDenied) {
-                  localStorage.setItem("tg_popup_last_shown", today);
+                  // SET DURASI SEMBUNYI (Pilih salah satu di bawah):
+                  // const hours = 3; // Sembunyikan selama 3 jam
+                  const hours = 24; // Sembunyikan selama 24 jam (1 hari)
+
+                  const hideDuration = hours * 60 * 60 * 1000;
+                  localStorage.setItem(
+                    "tg_popup_hide_until",
+                    now + hideDuration,
+                  );
+
+                  Swal.fire({
+                    toast: true,
+                    position: "top-end",
+                    icon: "success",
+                    title: `Pop-up disembunyikan selama ${hours} jam`,
+                    showConfirmButton: false,
+                    timer: 3000,
+                  });
                 }
               });
-            }, 700); // UX: Delay 6 detik agar user tidak kaget
+            }, 6000);
           }
-        }, 1000);
+        }, 2500);
       });
 
       function showTelegramPopupAfterLoading() {
