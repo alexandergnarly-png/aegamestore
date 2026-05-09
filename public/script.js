@@ -1070,10 +1070,10 @@ function toggleTheme() {
   body.classList.toggle("dark-theme");
 
   if (body.classList.contains("dark-theme")) {
-    localStorage.setItem("theme", "dark");
+    localStorage.setItem("ae_theme", "dark");
     if (themeBtn) themeBtn.innerText = "☀️"; // Ganti jadi cerah
   } else {
-    localStorage.setItem("theme", "light");
+    localStorage.setItem("ae_theme", "light");
     if (themeBtn) themeBtn.innerText = "🌙"; // Kembali malam
   }
 }
