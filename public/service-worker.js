@@ -1,4 +1,4 @@
-const CACHE_NAME = "ae-game-store-v1";
+const CACHE_NAME = "ae-game-store-v2";
 
 const STATIC_ASSETS = [
   "/",
@@ -32,7 +32,26 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
+  const requestUrl = new URL(event.request.url);
+
   if (event.request.method !== "GET") {
+    return;
+  }
+
+  // Jangan ganggu request gambar/file dari domain luar
+  if (requestUrl.origin !== self.location.origin) {
+    return;
+  }
+
+  // Jangan cache API/data dinamis
+  if (
+    requestUrl.pathname.startsWith("/public-products") ||
+    requestUrl.pathname.startsWith("/api/") ||
+    requestUrl.pathname.startsWith("/reviews") ||
+    requestUrl.pathname.startsWith("/recent-purchases") ||
+    requestUrl.pathname.startsWith("/voucher-preview") ||
+    requestUrl.pathname.startsWith("/create-order")
+  ) {
     return;
   }
 
