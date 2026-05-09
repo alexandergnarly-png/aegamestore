@@ -662,18 +662,12 @@
       });
 
       function showTelegramPopupAfterLoading() {
-        const today = new Date().toISOString().slice(0, 10);
+        const today = new Date().toLocaleDateString("en-CA");
         const hideDate = localStorage.getItem("ae_telegram_popup_hide_date");
 
         if (hideDate === today) {
           return;
         }
-
-        if (sessionStorage.getItem("ae_telegram_popup_seen") === "true") {
-          return;
-        }
-
-        sessionStorage.setItem("ae_telegram_popup_seen", "true");
 
         setTimeout(() => {
           Swal.fire({
