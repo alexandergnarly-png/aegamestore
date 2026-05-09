@@ -648,12 +648,62 @@
       }
 
       // Fitur Menghilangkan Loading Screen //
+      // Fitur Menghilangkan Loading Screen + Popup Telegram //
       window.addEventListener("load", function () {
         const preloader = document.getElementById("preloader");
+
         setTimeout(() => {
-          preloader.classList.add("fade-out");
+          if (preloader) {
+            preloader.classList.add("fade-out");
+          }
+
+          showTelegramPopupAfterLoading();
         }, 1000);
       });
+
+      function showTelegramPopupAfterLoading() {
+        const popupKey = "ae_telegram_popup_seen";
+
+        if (sessionStorage.getItem(popupKey) === "true") {
+          return;
+        }
+
+        sessionStorage.setItem(popupKey, "true");
+
+        setTimeout(() => {
+          Swal.fire({
+            title: "Gabung Channel Telegram?",
+            html: `
+        <div style="text-align:center; line-height:1.6; color:#334155;">
+          <div style="font-size:42px; margin-bottom:10px;">💬</div>
+          <b>Dapatkan update AE Game Store lebih cepat!</b><br>
+          Info promo, stok terbaru, voucher, dan pengumuman order langsung dari Telegram.
+        </div>
+      `,
+            icon: "info",
+            showCancelButton: true,
+            confirmButtonText: "Gabung Sekarang",
+            cancelButtonText: "Nanti Dulu",
+            confirmButtonColor: "#0ea5e9",
+            cancelButtonColor: "#64748b",
+            background: document.body.classList.contains("dark-theme")
+              ? "#1e293b"
+              : "#f0f9ff",
+            color: document.body.classList.contains("dark-theme")
+              ? "#f8fafc"
+              : "#0c4a6e",
+            backdrop: "rgba(12, 74, 110, 0.4)",
+          }).then((result) => {
+            if (result.isConfirmed) {
+              window.open(
+                "https://t.me/aegamestore",
+                "_blank",
+                "noopener,noreferrer",
+              );
+            }
+          });
+        }, 700);
+      }
     </script>
   </body>
 </html>
