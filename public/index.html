@@ -662,13 +662,18 @@
       });
 
       function showTelegramPopupAfterLoading() {
-        const popupKey = "ae_telegram_popup_seen";
+        const today = new Date().toISOString().slice(0, 10);
+        const hideDate = localStorage.getItem("ae_telegram_popup_hide_date");
 
-        if (sessionStorage.getItem(popupKey) === "true") {
+        if (hideDate === today) {
           return;
         }
 
-        sessionStorage.setItem(popupKey, "true");
+        if (sessionStorage.getItem("ae_telegram_popup_seen") === "true") {
+          return;
+        }
+
+        sessionStorage.setItem("ae_telegram_popup_seen", "true");
 
         setTimeout(() => {
           Swal.fire({
@@ -682,10 +687,13 @@
       `,
             icon: "info",
             showCancelButton: true,
+            showDenyButton: true,
             confirmButtonText: "Gabung Sekarang",
             cancelButtonText: "Nanti Dulu",
+            denyButtonText: "Sembunyikan hari ini",
             confirmButtonColor: "#0ea5e9",
             cancelButtonColor: "#64748b",
+            denyButtonColor: "#94a3b8",
             background: document.body.classList.contains("dark-theme")
               ? "#1e293b"
               : "#f0f9ff",
@@ -700,6 +708,11 @@
                 "_blank",
                 "noopener,noreferrer",
               );
+              return;
+            }
+
+            if (result.isDenied) {
+              localStorage.setItem("ae_telegram_popup_hide_date", today);
             }
           });
         }, 700);
