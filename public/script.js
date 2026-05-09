@@ -1062,18 +1062,19 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // --- FITUR DARK MODE ---
+// Mengganti ikon Bulan ke Matahari saat diklik
 function toggleTheme() {
   const body = document.body;
-  const themeToggleBtn = document.getElementById("theme-toggle");
+  const themeBtn = document.getElementById("theme-toggle");
 
   body.classList.toggle("dark-theme");
 
   if (body.classList.contains("dark-theme")) {
-    localStorage.setItem("ae_theme", "dark");
-    themeToggleBtn.innerText = "☀️"; // Ganti icon jadi matahari
+    localStorage.setItem("theme", "dark");
+    if (themeBtn) themeBtn.innerText = "☀️"; // Ganti jadi cerah
   } else {
-    localStorage.setItem("ae_theme", "light");
-    themeToggleBtn.innerText = "🌙"; // Ganti icon jadi bulan
+    localStorage.setItem("theme", "light");
+    if (themeBtn) themeBtn.innerText = "🌙"; // Kembali malam
   }
 }
 
@@ -1443,6 +1444,13 @@ async function submitReview({ rating, comment }) {
 document.addEventListener("DOMContentLoaded", () => {
   loadReviews();
   loadMyReview();
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  const themeBtn = document.getElementById("theme-toggle");
+  if (document.body.classList.contains("dark-theme") && themeBtn) {
+    themeBtn.innerText = "☀️";
+  }
 });
 setLanguage(currentLanguage);
 loadAllProducts();
