@@ -1,0 +1,25 @@
+{
+  "name": "AE Game Store",
+  "short_name": "AE Store",
+  "description": "Top-up game dan digital keys AE Game Store",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f0f9ff",
+  "theme_color": "#0ea5e9",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://placehold.co/192x192/0ea5e9/ffffff.png?text=AE",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://placehold.co/512x512/0ea5e9/ffffff.png?text=AE",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
