@@ -955,6 +955,106 @@ app.post("/vouchers", requireAdminAuth, requireAdminCsrf, async (req, res) => {
   }
 });
 
+app.put(
+  "/vouchers/:id",
+  requireAdminAuth,
+  requireAdminCsrf,
+  async (req, res) => {
+    const voucherId = Number(req.params.id);
+    const {
+      code,
+      game_name,
+      brand_name,
+      duration_name,
+      discount_amount,
+      expires_at,
+    } = req.body;
+
+    const cleanCode = normalizeVoucherCode(code);
+    const cleanGameName = String(game_name || "").trim();
+    const cleanBrandName = String(brand_name || "").trim();
+    const cleanDurationName = String(duration_name || "").trim();
+    const discountAmount = Number(discount_amount);
+    const expiresAt = expires_at ? String(expires_at).trim() : null;
+
+    if (!Number.isInteger(voucherId) || voucherId <= 0) {
+      return res.status(400).json({ message: "ID voucher tidak valid" });
+    }
+
+    if (!/^[A-Z0-9_-]{3,30}$/.test(cleanCode)) {
+      return res.status(400).json({
+        message:
+          "Kode voucher hanya boleh huruf, angka, underscore, strip, 3-30 karakter",
+      });
+    }
+
+    if (
+      !cleanGameName ||
+      cleanGameName.length < 2 ||
+      cleanGameName.length > 80
+    ) {
+      return res.status(400).json({
+        message: "Nama game voucher tidak valid",
+      });
+    }
+
+    if (!Number.isInteger(discountAmount) || discountAmount <= 0) {
+      return res.status(400).json({
+        message: "Diskon tidak valid",
+      });
+    }
+
+    try {
+      const duplicateCheck = await query(
+        "SELECT id FROM vouchers WHERE code = $1 AND id <> $2 LIMIT 1",
+        [cleanCode, voucherId],
+      );
+
+      if (duplicateCheck.rows.length > 0) {
+        return res.status(400).json({
+          message: "Kode voucher sudah dipakai voucher lain",
+        });
+      }
+
+      const result = await query(
+        `UPDATE vouchers
+         SET code = $1,
+             game_name = $2,
+             brand_name = $3,
+             duration_name = $4,
+             discount_amount = $5,
+             expires_at = $6
+         WHERE id = $7
+         RETURNING id`,
+        [
+          cleanCode,
+          cleanGameName,
+          cleanBrandName || null,
+          cleanDurationName || null,
+          discountAmount,
+          expiresAt,
+          voucherId,
+        ],
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          message: "Voucher tidak ditemukan",
+        });
+      }
+
+      return res.json({
+        message: "Voucher berhasil diupdate",
+      });
+    } catch (err) {
+      console.error("ERROR UPDATE VOUCHER:", err);
+      return res.status(500).json({
+        message: "Gagal update voucher",
+      });
+    }
+  },
+);
+
 app.get("/vouchers", requireAdminAuth, async (req, res) => {
   try {
     const result = await query(

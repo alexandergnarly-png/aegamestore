@@ -3549,7 +3549,7 @@
         if (filteredProducts.length === 0) {
           tableBody.innerHTML = `
                               <tr>
-                                <td colspan="9" class="empty">Tidak ada produk yang sesuai filter.</td>
+                                <td colspan="7" class="empty">Tidak ada produk yang sesuai filter.</td>
                               </tr>
                             `;
           return;
@@ -3758,6 +3758,10 @@
         const expiresAt = document
           .getElementById("voucherExpiresAt")
           .value.trim();
+        const editingId = document.getElementById("editingVoucherId").value;
+        const isEditMode = Boolean(editingId);
+        const url = isEditMode ? `/vouchers/${editingId}` : "/vouchers";
+        const method = isEditMode ? "PUT" : "POST";
 
         if (!code || !gameName || !discountAmount) {
           Swal.fire("Kode, nama game, dan nominal diskon wajib diisi.");
@@ -3765,8 +3769,8 @@
         }
 
         try {
-          const res = await fetch("/vouchers", {
-            method: "POST",
+          const res = await fetch(url, {
+            method,
             headers: {
               "Content-Type": "application/json",
               "x-csrf-token": getCsrfToken(),
