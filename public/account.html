@@ -3,584 +3,1438 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Kelola akun, riwayat order, dan keamanan AE Game Store kamu."
+    />
     <title>My Account - AE Game Store</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script
+      type="module"
+      src="https://cdn.jsdelivr.net/npm/iconify-icon@2.1.0/dist/iconify-icon.min.js"
+    ></script>
     <style>
       :root {
-        --primary: #0ea5e9;
-        --primary-dark: #0284c7;
-        --secondary: #fb7185;
-        --bg: #f0f9ff;
-        --text: #0c4a6e;
-        --muted: #64748b;
-        --border: rgba(56, 189, 248, 0.35);
-        --card: rgba(255, 255, 255, 0.86);
+        --ocean-deep: #0284c7;
+        --ocean: #0ea5e9;
+        --ocean-light: #38bdf8;
+        --water-foam: #e0f2fe;
+        --sakura: #fbcfe8;
+        --sakura-strong: #f472b6;
+        --torii-red: #fb7185;
+        --torii-red-strong: #e11d48;
+
+        --bg-color: #f5fbff;
+        --bg-grad:
+          radial-gradient(120% 90% at 0% 0%, #e0f2fe 0%, transparent 60%),
+          radial-gradient(120% 90% at 100% 100%, #fce7f3 0%, transparent 60%),
+          linear-gradient(180deg, #f5fbff, #ffffff);
+
+        --card-bg: rgba(255, 255, 255, 0.78);
+        --card-bg-strong: rgba(255, 255, 255, 0.92);
+        --border-color: rgba(56, 189, 248, 0.35);
+        --border-soft: rgba(14, 165, 233, 0.15);
+
+        --text-main: #0c4a6e;
+        --text-strong: #082f49;
+        --text-muted: #475569;
+
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #f43f5e;
+
+        --shadow-xs: 0 2px 6px rgba(14, 165, 233, 0.08);
+        --shadow-sm: 0 6px 18px rgba(14, 165, 233, 0.1);
+        --shadow-md: 0 14px 32px rgba(14, 165, 233, 0.14);
+        --shadow-lg: 0 24px 60px rgba(14, 165, 233, 0.18);
+        --shadow-pink: 0 14px 28px rgba(244, 114, 182, 0.22);
+        --ring: 0 0 0 4px rgba(56, 189, 248, 0.25);
+
+        --radius-sm: 12px;
+        --radius-md: 16px;
+        --radius-lg: 22px;
+        --radius-xl: 28px;
+        --radius-pill: 999px;
+
+        --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+        --dur-fast: 0.18s;
+        --dur: 0.28s;
       }
 
-      * {
+      body.dark-theme {
+        --bg-color: #060b1c;
+        --bg-grad:
+          radial-gradient(
+            120% 90% at 0% 0%,
+            rgba(14, 165, 233, 0.18) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            120% 90% at 100% 100%,
+            rgba(244, 114, 182, 0.14) 0%,
+            transparent 60%
+          ),
+          linear-gradient(180deg, #060b1c, #0b1226);
+        --card-bg: rgba(20, 30, 56, 0.78);
+        --card-bg-strong: rgba(20, 30, 56, 0.92);
+        --border-color: rgba(56, 189, 248, 0.22);
+        --border-soft: rgba(56, 189, 248, 0.12);
+
+        --text-main: #e2e8f0;
+        --text-strong: #f8fafc;
+        --text-muted: #94a3b8;
+
+        --water-foam: rgba(56, 189, 248, 0.12);
+        --shadow-xs: 0 2px 6px rgba(0, 0, 0, 0.35);
+        --shadow-sm: 0 6px 18px rgba(0, 0, 0, 0.4);
+        --shadow-md: 0 14px 32px rgba(0, 0, 0, 0.45);
+        --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.5);
+      }
+
+      *,
+      *::before,
+      *::after {
         box-sizing: border-box;
-        font-family: "Segoe UI", Tahoma, sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        scroll-behavior: smooth;
       }
 
       body {
-        margin: 0;
+        font-family: "Plus Jakarta Sans", "Segoe UI", Tahoma, sans-serif;
+        background: var(--bg-color);
+        background-image: var(--bg-grad);
+        background-attachment: fixed;
+        color: var(--text-main);
         min-height: 100vh;
-        background:
-          radial-gradient(
-            circle at 10% 10%,
-            rgba(56, 189, 248, 0.18),
-            transparent 35%
-          ),
-          radial-gradient(
-            circle at 90% 90%,
-            rgba(251, 113, 133, 0.13),
-            transparent 35%
-          ),
-          var(--bg);
-        color: var(--text);
-        padding: 24px;
+        line-height: 1.55;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      button {
+        font-family: inherit;
+        cursor: pointer;
+        border: none;
+        background: none;
+        color: inherit;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      :focus-visible {
+        outline: none;
+        box-shadow: var(--ring);
+        border-radius: 6px;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.001ms !important;
+          transition-duration: 0.001ms !important;
+        }
+      }
+
+      /* Background blobs */
+      .blob {
+        position: fixed;
+        filter: blur(80px);
+        z-index: -1;
+        opacity: 0.45;
+        border-radius: 50%;
+        pointer-events: none;
+      }
+
+      .blob-1 {
+        top: -120px;
+        left: -120px;
+        width: 520px;
+        height: 520px;
+        background: radial-gradient(
+          circle,
+          var(--water-foam),
+          rgba(56, 189, 248, 0.5)
+        );
+      }
+
+      .blob-2 {
+        bottom: -160px;
+        right: -120px;
+        width: 480px;
+        height: 480px;
+        background: radial-gradient(circle, var(--sakura), #bae6fd);
+      }
+
+      body.dark-theme .blob {
+        opacity: 0.3;
+      }
+
+      /* Header */
+      .site-header {
+        position: sticky;
+        top: 0;
+        z-index: 80;
+        background: rgba(255, 255, 255, 0.78);
+        backdrop-filter: saturate(180%) blur(18px);
+        -webkit-backdrop-filter: saturate(180%) blur(18px);
+        border-bottom: 1px solid var(--border-soft);
+      }
+
+      body.dark-theme .site-header {
+        background: rgba(8, 14, 32, 0.78);
+      }
+
+      .header-inner {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 14px 24px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .brand-logo {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        background: linear-gradient(
+          135deg,
+          var(--torii-red),
+          var(--torii-red-strong)
+        );
+        color: white;
         display: flex;
         align-items: center;
         justify-content: center;
+        font-size: 22px;
+        box-shadow: var(--shadow-pink);
       }
 
-      .account-card {
-        width: 100%;
-        max-width: 480px;
-        background: var(--card);
-        backdrop-filter: blur(22px);
-        border: 1px solid var(--border);
-        border-radius: 30px;
-        box-shadow: 0 24px 60px rgba(14, 165, 233, 0.16);
-        padding: 30px;
-        overflow: hidden;
+      .brand-copy strong {
+        display: block;
+        font-size: 17px;
+        font-weight: 800;
+        color: var(--text-strong);
+        letter-spacing: -0.2px;
+      }
+
+      .brand-copy span {
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--ocean-deep);
+      }
+
+      body.dark-theme .brand-copy strong {
+        color: var(--text-strong);
+      }
+
+      body.dark-theme .brand-copy span {
+        color: var(--ocean-light);
+      }
+
+      .header-actions {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .lang-switch {
+        display: inline-flex;
+        background: rgba(56, 189, 248, 0.12);
+        padding: 4px;
+        border-radius: var(--radius-pill);
+        border: 1px solid var(--border-soft);
+      }
+
+      .lang-btn {
+        padding: 6px 12px;
+        font-size: 12px;
+        font-weight: 800;
+        color: var(--text-muted);
+        border-radius: var(--radius-pill);
+        letter-spacing: 0.5px;
+        transition: all var(--dur-fast) var(--ease-out);
+      }
+
+      .lang-btn.active {
+        background: linear-gradient(135deg, var(--ocean), var(--ocean-light));
+        color: white;
+        box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);
+      }
+
+      .icon-btn {
+        width: 36px;
+        height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(56, 189, 248, 0.12);
+        border: 1px solid var(--border-soft);
+        border-radius: var(--radius-pill);
+        font-size: 16px;
+      }
+
+      .icon-btn:hover {
+        background: rgba(56, 189, 248, 0.22);
+      }
+
+      .header-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 14px;
+        font-size: 13px;
+        font-weight: 800;
+        color: var(--ocean-deep);
+        background: rgba(255, 255, 255, 0.78);
+        border: 1px solid var(--border-soft);
+        border-radius: var(--radius-pill);
+        transition: transform var(--dur-fast) var(--ease-out);
+      }
+
+      body.dark-theme .header-back {
+        background: rgba(20, 30, 56, 0.78);
+        color: var(--ocean-light);
+      }
+
+      .header-back:hover {
+        transform: translateY(-1px);
+      }
+
+      /* Layout */
+      .page {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 36px 24px 80px;
+        display: grid;
+        grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
+        gap: 24px;
+      }
+
+      .surface {
+        background: var(--card-bg-strong);
+        backdrop-filter: blur(18px);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-xl);
+        padding: 28px;
+        box-shadow: var(--shadow-md);
         position: relative;
       }
 
-      .account-card::before {
+      /* Profile card (left column) */
+      .profile-card {
+        text-align: center;
+        overflow: hidden;
+      }
+
+      .profile-card::before {
         content: "";
         position: absolute;
         inset: 0 0 auto 0;
-        height: 7px;
-        background: linear-gradient(90deg, var(--primary), var(--secondary));
-      }
-
-      .profile-head {
-        text-align: center;
-        margin-bottom: 24px;
+        height: 6px;
+        background: linear-gradient(
+          90deg,
+          var(--ocean),
+          var(--sakura-strong),
+          var(--torii-red)
+        );
       }
 
       .avatar {
-        width: 72px;
-        height: 72px;
-        border-radius: 22px;
-        background: linear-gradient(135deg, var(--primary), var(--secondary));
-        display: flex;
+        width: 88px;
+        height: 88px;
+        border-radius: 26px;
+        background: linear-gradient(135deg, var(--ocean), var(--sakura-strong));
+        color: white;
+        font-size: 38px;
+        display: inline-flex;
         align-items: center;
         justify-content: center;
-        color: white;
-        font-size: 30px;
-        margin: 0 auto 14px;
-        box-shadow: 0 14px 30px rgba(14, 165, 233, 0.25);
+        margin: 4px auto 14px;
+        box-shadow: 0 14px 30px rgba(14, 165, 233, 0.28);
       }
 
-      h1 {
-        margin: 0;
-        font-size: 28px;
+      .profile-card h1 {
+        margin: 0 0 6px;
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: -0.4px;
+        color: var(--text-strong);
       }
 
       .subtitle {
-        margin: 8px 0 0;
-        color: var(--muted);
-        font-size: 14px;
-      }
-
-      .status-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-        margin-bottom: 20px;
-      }
-
-      .status-box {
-        background: rgba(255, 255, 255, 0.75);
-        border: 1px solid #bae6fd;
-        border-radius: 18px;
-        padding: 14px;
         font-size: 13px;
-      }
-
-      .status-box strong {
-        display: block;
-        margin-bottom: 4px;
-      }
-
-      .section {
-        margin-top: 18px;
-        padding-top: 18px;
-        border-top: 1px dashed #bae6fd;
-      }
-
-      .section-title {
-        font-size: 15px;
-        font-weight: 800;
-        margin-bottom: 10px;
-      }
-
-      input {
-        width: 100%;
-        padding: 15px;
-        margin-top: 10px;
-        border-radius: 15px;
-        border: 1px solid #bae6fd;
-        background: rgba(255, 255, 255, 0.85);
-        color: var(--text);
-        font-size: 14px;
-        outline: none;
-      }
-
-      input:focus {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 4px #e0f2fe;
-        background: white;
-      }
-
-      button,
-      a.btn {
-        width: 100%;
-        display: block;
-        border: none;
-        text-align: center;
-        margin-top: 12px;
-        padding: 15px;
-        border-radius: 15px;
-        background: linear-gradient(
-          135deg,
-          var(--primary),
-          var(--primary-dark)
-        );
-        color: white;
-        font-weight: 800;
-        font-size: 15px;
-        text-decoration: none;
-        cursor: pointer;
-        position: relative;
-        overflow: hidden;
-        box-shadow: 0 10px 24px rgba(14, 165, 233, 0.22);
-        transition:
-          transform 0.2s ease,
-          box-shadow 0.2s ease,
-          filter 0.2s ease;
-      }
-
-      button::before,
-      a.btn::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: -120%;
-        width: 80%;
-        height: 100%;
-        background: linear-gradient(
-          120deg,
-          transparent,
-          rgba(255, 255, 255, 0.35),
-          transparent
-        );
-        transform: skewX(-20deg);
-        transition: left 0.55s ease;
-      }
-
-      button:hover,
-      a.btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 14px 30px rgba(14, 165, 233, 0.32);
-        filter: brightness(1.04);
-      }
-
-      button:hover::before,
-      a.btn:hover::before {
-        left: 130%;
-      }
-
-      button:active,
-      a.btn:active {
-        transform: translateY(0) scale(0.98);
-        box-shadow: 0 8px 18px rgba(14, 165, 233, 0.2);
-      }
-
-      .btn-secondary {
-        background: rgba(255, 255, 255, 0.9) !important;
-        color: var(--primary-dark) !important;
-        border: 1px solid #bae6fd !important;
-        box-shadow: 0 8px 20px rgba(14, 165, 233, 0.12) !important;
-      }
-
-      .btn-secondary:hover {
-        background: #e0f2fe !important;
-        box-shadow: 0 12px 26px rgba(14, 165, 233, 0.2) !important;
-      }
-
-      .btn-danger {
-        background: linear-gradient(135deg, #fb7185, #e11d48) !important;
-        box-shadow: 0 10px 24px rgba(225, 29, 72, 0.22) !important;
-      }
-
-      .btn-danger:hover {
-        box-shadow: 0 14px 30px rgba(225, 29, 72, 0.32) !important;
-      }
-
-      .note {
-        font-size: 12px;
-        color: var(--muted);
-        line-height: 1.5;
-        margin-top: 10px;
-      }
-
-      .order-list {
-        display: grid;
-        gap: 12px;
-      }
-
-      .order-card {
-        padding: 16px;
-        border: 1px solid #bae6fd;
-        border-radius: 18px;
-        background: rgba(255, 255, 255, 0.9);
-        box-shadow: 0 10px 24px rgba(14, 165, 233, 0.08);
-      }
-
-      .order-card strong {
-        display: block;
-        font-size: 16px;
-        margin-bottom: 8px;
-        color: var(--text);
-      }
-
-      .order-row {
-        display: flex;
-        justify-content: space-between;
-        gap: 12px;
-        margin-top: 6px;
-        font-size: 13px;
-      }
-
-      .order-row span:first-child {
-        color: var(--muted);
-      }
-
-      .status-pill {
-        display: inline-flex;
-        align-items: center;
-        padding: 5px 9px;
-        border-radius: 999px;
-        font-size: 11px;
-        font-weight: 800;
-        background: #e0f2fe;
-        color: #0284c7;
-      }
-
-      .status-pill.paid,
-      .status-pill.delivered {
-        background: #dcfce7;
-        color: #16a34a;
-      }
-
-      .status-pill.pending,
-      .status-pill.waiting_payment {
-        background: #fef3c7;
-        color: #d97706;
-      }
-
-      .status-pill.expired,
-      .status-pill.cancelled {
-        background: #ffe4e6;
-        color: #e11d48;
-      }
-
-      .empty-state {
-        padding: 18px;
-        border: 1px dashed #bae6fd;
-        border-radius: 18px;
-        background: rgba(240, 249, 255, 0.75);
-        text-align: center;
-        color: var(--muted);
-        font-size: 14px;
-      }
-
-      .key-code {
-        display: inline-block;
-        max-width: 100%;
-        padding: 6px 8px;
-        border-radius: 8px;
-        background: #f0f9ff;
-        border: 1px solid #bae6fd;
-        color: #0c4a6e;
-        font-size: 12px;
-        word-break: break-all;
-      }
-
-      .copy-key-btn {
-        width: auto;
-        margin-top: 8px;
-        padding: 9px 12px;
-        border-radius: 999px;
-        font-size: 12px;
-        box-shadow: 0 8px 18px rgba(14, 165, 233, 0.14);
-      }
-
-      .order-actions {
-        display: grid;
-        gap: 8px;
-        margin-top: 12px;
-      }
-
-      .order-link-btn {
-        display: block;
-        width: 100%;
-        padding: 11px 12px;
-        border-radius: 999px;
-        background: rgba(224, 242, 254, 0.9);
-        color: #0284c7;
-        text-align: center;
-        text-decoration: none;
-        font-size: 12px;
-        font-weight: 800;
-        border: 1px solid #bae6fd;
-      }
-
-      .discount-value {
-        color: #16a34a;
+        color: var(--text-muted);
       }
 
       .buyer-badge {
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        margin-top: 10px;
-        padding: 7px 12px;
-        border-radius: 999px;
-        background: #e0f2fe;
-        border: 1px solid #bae6fd;
-        color: #0284c7;
+        margin-top: 12px;
+        padding: 7px 14px;
+        border-radius: var(--radius-pill);
+        background: var(--water-foam);
+        border: 1px solid rgba(56, 189, 248, 0.4);
+        color: var(--ocean-deep);
         font-size: 12px;
-        font-weight: 900;
+        font-weight: 800;
+      }
+
+      body.dark-theme .buyer-badge {
+        color: var(--ocean-light);
       }
 
       .buyer-badge.vip {
-        background: #fef3c7;
+        background: rgba(245, 158, 11, 0.15);
         border-color: #facc15;
-        color: #92400e;
+        color: #b45309;
+      }
+
+      body.dark-theme .buyer-badge.vip {
+        color: #fcd34d;
       }
 
       .buyer-badge.loyal {
-        background: #dbeafe;
+        background: rgba(99, 102, 241, 0.15);
         border-color: #93c5fd;
         color: #1d4ed8;
       }
 
+      body.dark-theme .buyer-badge.loyal {
+        color: #93c5fd;
+      }
+
       .buyer-badge.verified,
       .buyer-badge.reviewer {
-        background: #dcfce7;
+        background: rgba(16, 185, 129, 0.15);
         border-color: #86efac;
         color: #166534;
       }
 
+      body.dark-theme .buyer-badge.verified,
+      body.dark-theme .buyer-badge.reviewer {
+        color: #6ee7b7;
+      }
+
       .buyer-stats-mini {
-        margin-top: 10px;
+        margin-top: 12px;
         font-size: 12px;
-        color: var(--muted);
+        color: var(--text-muted);
       }
 
-      @media (max-width: 520px) {
-        .order-row {
-          flex-direction: column;
-          gap: 4px;
-        }
-
-        .copy-key-btn {
-          width: 100%;
-        }
+      .status-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 22px;
       }
 
-      .section {
-        animation: sectionFadeUp 0.45s ease both;
+      .status-box {
+        padding: 12px 14px;
+        background: rgba(56, 189, 248, 0.08);
+        border: 1px solid var(--border-soft);
+        border-radius: var(--radius-md);
+        text-align: left;
+        font-size: 12px;
       }
 
-      .section:nth-of-type(1) {
-        animation-delay: 0.05s;
+      .status-box strong {
+        display: block;
+        font-size: 11px;
+        font-weight: 800;
+        color: var(--ocean-deep);
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        margin-bottom: 4px;
       }
 
-      .section:nth-of-type(2) {
-        animation-delay: 0.1s;
+      body.dark-theme .status-box strong {
+        color: var(--ocean-light);
       }
 
-      .section:nth-of-type(3) {
-        animation-delay: 0.15s;
+      .status-box span {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text-strong);
       }
 
-      .section:nth-of-type(4) {
-        animation-delay: 0.2s;
+      .profile-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 22px;
       }
 
-      @keyframes sectionFadeUp {
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        padding: 13px 18px;
+        border-radius: var(--radius-md);
+        font-size: 14px;
+        font-weight: 800;
+        font-family: inherit;
+        cursor: pointer;
+        border: none;
+        transition:
+          transform var(--dur-fast) var(--ease-out),
+          box-shadow var(--dur-fast) var(--ease-out),
+          background var(--dur-fast) var(--ease-out),
+          filter var(--dur-fast) var(--ease-out);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .btn-primary {
+        background: linear-gradient(
+          135deg,
+          var(--ocean-deep),
+          var(--ocean-light)
+        );
+        color: white;
+        box-shadow: 0 12px 26px rgba(14, 165, 233, 0.3);
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 16px 32px rgba(14, 165, 233, 0.4);
+      }
+
+      .btn-secondary {
+        background: rgba(255, 255, 255, 0.78);
+        color: var(--ocean-deep);
+        border: 1px solid var(--border-soft);
+        box-shadow: var(--shadow-xs);
+      }
+
+      body.dark-theme .btn-secondary {
+        background: rgba(20, 30, 56, 0.78);
+        color: var(--ocean-light);
+      }
+
+      .btn-secondary:hover {
+        background: white;
+        transform: translateY(-1px);
+      }
+
+      body.dark-theme .btn-secondary:hover {
+        background: rgba(20, 30, 56, 1);
+      }
+
+      .btn-danger {
+        background: linear-gradient(
+          135deg,
+          var(--torii-red),
+          var(--torii-red-strong)
+        );
+        color: white;
+        box-shadow: var(--shadow-pink);
+      }
+
+      .btn-danger:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 16px 32px rgba(244, 63, 94, 0.36);
+      }
+
+      /* Right column tabs */
+      .tab-card {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding: 6px;
+        border-radius: var(--radius-pill);
+        background: var(--card-bg);
+        border: 1px solid var(--border-soft);
+        backdrop-filter: blur(14px);
+        margin-bottom: 16px;
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+
+      .tab-btn {
+        flex: 1;
+        min-width: 100px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px 14px;
+        border-radius: var(--radius-pill);
+        font-size: 13px;
+        font-weight: 800;
+        color: var(--text-muted);
+        font-family: inherit;
+        transition:
+          background var(--dur-fast) var(--ease-out),
+          color var(--dur-fast) var(--ease-out);
+      }
+
+      .tab-btn:hover {
+        color: var(--ocean-deep);
+      }
+
+      body.dark-theme .tab-btn:hover {
+        color: var(--ocean-light);
+      }
+
+      .tab-btn.active {
+        color: white;
+        background: linear-gradient(
+          135deg,
+          var(--ocean-deep),
+          var(--ocean-light)
+        );
+        box-shadow: 0 6px 14px rgba(14, 165, 233, 0.3);
+      }
+
+      .tab-btn iconify-icon {
+        font-size: 16px;
+      }
+
+      .panel {
+        display: none;
+      }
+
+      .panel.active {
+        display: block;
+        animation: fadeUp 0.4s var(--ease-out) both;
+      }
+
+      @keyframes fadeUp {
         from {
           opacity: 0;
-          transform: translateY(12px);
+          transform: translateY(10px);
         }
-
         to {
           opacity: 1;
           transform: translateY(0);
         }
       }
 
+      .section-title {
+        font-size: 16px;
+        font-weight: 800;
+        color: var(--text-strong);
+        letter-spacing: -0.2px;
+        margin-bottom: 4px;
+      }
+
+      .section-desc {
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-bottom: 18px;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-bottom: 14px;
+      }
+
+      .field label {
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.2px;
+        color: var(--ocean-deep);
+      }
+
+      body.dark-theme .field label {
+        color: var(--ocean-light);
+      }
+
+      .input-wrap {
+        position: relative;
+      }
+
+      .input-wrap iconify-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 16px;
+        color: var(--text-muted);
+      }
+
+      input {
+        width: 100%;
+        padding: 13px 14px;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border-color);
+        background: rgba(255, 255, 255, 0.78);
+        color: var(--text-main);
+        font-size: 14px;
+        font-weight: 500;
+        font-family: inherit;
+        outline: none;
+        transition:
+          border-color var(--dur-fast) var(--ease-out),
+          background var(--dur-fast) var(--ease-out),
+          box-shadow var(--dur-fast) var(--ease-out);
+      }
+
+      body.dark-theme input {
+        background: rgba(20, 30, 56, 0.78);
+      }
+
+      .input-wrap input {
+        padding-left: 42px;
+      }
+
+      input:focus {
+        background: white;
+        border-color: var(--ocean-light);
+        box-shadow: var(--ring);
+      }
+
+      body.dark-theme input:focus {
+        background: rgba(20, 30, 56, 1);
+      }
+
+      .password-toggle {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        font-size: 16px;
+        color: var(--text-muted);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .password-toggle:hover {
+        background: rgba(56, 189, 248, 0.12);
+        color: var(--ocean-deep);
+      }
+
+      .note {
+        font-size: 12px;
+        color: var(--text-muted);
+        line-height: 1.6;
+        margin-top: 8px;
+      }
+
+      .badge-soon {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin-left: 8px;
+        padding: 2px 8px;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.4px;
+        background: rgba(245, 158, 11, 0.18);
+        color: #b45309;
+        border-radius: var(--radius-pill);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+      }
+
+      body.dark-theme .badge-soon {
+        color: #fcd34d;
+      }
+
+      /* Order list */
+      .orders-empty,
+      .orders-error {
+        padding: 28px 18px;
+        text-align: center;
+        background: rgba(56, 189, 248, 0.08);
+        border: 1px dashed var(--border-color);
+        border-radius: var(--radius-lg);
+        color: var(--text-muted);
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .orders-empty iconify-icon,
+      .orders-error iconify-icon {
+        display: block;
+        margin: 0 auto 8px;
+        font-size: 36px;
+        color: var(--ocean);
+      }
+
+      .order-list {
+        display: grid;
+        gap: 14px;
+      }
+
+      .order-card {
+        padding: 18px;
+        border: 1px solid var(--border-soft);
+        border-radius: var(--radius-lg);
+        background: var(--card-bg);
+        backdrop-filter: blur(14px);
+        box-shadow: var(--shadow-xs);
+        transition:
+          transform var(--dur-fast) var(--ease-out),
+          box-shadow var(--dur-fast) var(--ease-out);
+      }
+
+      .order-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .order-card-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+
+      .order-card-head strong {
+        font-size: 15px;
+        font-weight: 800;
+        color: var(--text-strong);
+      }
+
+      .order-card-head .status-pill {
+        flex-shrink: 0;
+      }
+
+      .order-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 6px 0;
+        font-size: 13px;
+      }
+
+      .order-row + .order-row {
+        border-top: 1px dashed rgba(56, 189, 248, 0.25);
+      }
+
+      .order-row span:first-child {
+        color: var(--text-muted);
+        flex-shrink: 0;
+      }
+
+      .order-row b {
+        color: var(--text-main);
+        font-weight: 700;
+        text-align: right;
+        word-break: break-word;
+      }
+
+      .status-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        border-radius: var(--radius-pill);
+        font-size: 11px;
+        font-weight: 800;
+        background: rgba(56, 189, 248, 0.16);
+        color: var(--ocean-deep);
+        text-transform: capitalize;
+        white-space: nowrap;
+      }
+
+      body.dark-theme .status-pill {
+        background: rgba(56, 189, 248, 0.22);
+        color: var(--ocean-light);
+      }
+
+      .status-pill.paid,
+      .status-pill.delivered {
+        background: rgba(16, 185, 129, 0.18);
+        color: #047857;
+      }
+
+      body.dark-theme .status-pill.paid,
+      body.dark-theme .status-pill.delivered {
+        color: #6ee7b7;
+      }
+
+      .status-pill.pending,
+      .status-pill.waiting_payment {
+        background: rgba(245, 158, 11, 0.18);
+        color: #b45309;
+      }
+
+      body.dark-theme .status-pill.pending,
+      body.dark-theme .status-pill.waiting_payment {
+        color: #fcd34d;
+      }
+
+      .status-pill.expired,
+      .status-pill.cancelled {
+        background: rgba(244, 63, 94, 0.18);
+        color: #be123c;
+      }
+
+      body.dark-theme .status-pill.expired,
+      body.dark-theme .status-pill.cancelled {
+        color: #fda4af;
+      }
+
+      .key-row {
+        margin-top: 12px;
+        padding: 10px 12px;
+        border: 1px solid var(--border-soft);
+        background: rgba(56, 189, 248, 0.08);
+        border-radius: var(--radius-md);
+      }
+
+      .key-row-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 6px;
+      }
+
+      .key-row-head span {
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.4px;
+        color: var(--ocean-deep);
+        text-transform: uppercase;
+      }
+
+      body.dark-theme .key-row-head span {
+        color: var(--ocean-light);
+      }
+
+      .copy-key-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 6px 12px;
+        font-size: 11px;
+        font-weight: 800;
+        color: white;
+        background: linear-gradient(
+          135deg,
+          var(--torii-red),
+          var(--torii-red-strong)
+        );
+        border-radius: var(--radius-pill);
+        font-family: inherit;
+        transition: transform var(--dur-fast) var(--ease-out);
+      }
+
+      .copy-key-btn:hover {
+        transform: translateY(-1px);
+      }
+
+      .key-code {
+        display: block;
+        padding: 8px 10px;
+        background: var(--card-bg-strong);
+        border: 1px solid var(--border-soft);
+        border-radius: var(--radius-sm);
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 12px;
+        color: var(--text-strong);
+        word-break: break-all;
+      }
+
+      .order-actions {
+        margin-top: 12px;
+      }
+
+      .order-link-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 9px 14px;
+        font-size: 12px;
+        font-weight: 800;
+        color: var(--ocean-deep);
+        background: rgba(56, 189, 248, 0.14);
+        border: 1px solid var(--border-soft);
+        border-radius: var(--radius-pill);
+        transition: background var(--dur-fast) var(--ease-out);
+      }
+
+      body.dark-theme .order-link-btn {
+        color: var(--ocean-light);
+      }
+
+      .order-link-btn:hover {
+        background: rgba(56, 189, 248, 0.24);
+      }
+
+      .discount-value {
+        color: var(--success);
+        font-weight: 800;
+      }
+
+      .skeleton-list {
+        display: grid;
+        gap: 12px;
+      }
+
+      .skeleton-card {
+        height: 120px;
+        border-radius: var(--radius-lg);
+        background: linear-gradient(
+          100deg,
+          rgba(56, 189, 248, 0.08) 30%,
+          rgba(56, 189, 248, 0.18) 50%,
+          rgba(56, 189, 248, 0.08) 70%
+        );
+        background-size: 200% 100%;
+        animation: shimmer 1.4s linear infinite;
+        border: 1px solid var(--border-soft);
+      }
+
+      @keyframes shimmer {
+        0% {
+          background-position: 200% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
+      }
+
+      /* Swal overrides */
+      .swal2-popup {
+        border-radius: var(--radius-xl) !important;
+        font-family: "Plus Jakarta Sans", "Segoe UI", sans-serif !important;
+      }
+
+      body.dark-theme .swal2-popup {
+        background: #0f1730 !important;
+        color: #e2e8f0 !important;
+      }
+
+      body.dark-theme .swal2-title,
+      body.dark-theme .swal2-html-container {
+        color: #f8fafc !important;
+      }
+
+      /* Responsive */
+      @media (max-width: 880px) {
+        .page {
+          grid-template-columns: 1fr;
+          padding: 24px 16px 64px;
+        }
+
+        .surface {
+          padding: 22px;
+        }
+      }
+
       @media (max-width: 520px) {
+        .header-inner {
+          padding: 12px 16px;
+          flex-wrap: wrap;
+        }
+
+        .brand-copy {
+          display: none;
+        }
+
+        .header-back span {
+          display: none;
+        }
+
         .status-grid {
           grid-template-columns: 1fr;
         }
 
-        .account-card {
-          padding: 24px;
+        .order-card-head {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .order-row {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 2px;
+        }
+
+        .order-row b {
+          text-align: left;
         }
       }
     </style>
   </head>
   <body
     onload="
+      applyAccountTheme();
       applyAccountLanguage();
       checkUser();
     "
   >
-    <div class="account-card">
-      <div class="profile-head">
-        <div class="avatar">👤</div>
+    <span class="blob blob-1" aria-hidden="true"></span>
+    <span class="blob blob-2" aria-hidden="true"></span>
+
+    <header class="site-header">
+      <div class="header-inner">
+        <a href="/" class="brand" aria-label="AE Game Store - Beranda">
+          <span class="brand-logo" aria-hidden="true">⛩️</span>
+          <span class="brand-copy">
+            <strong>AE Game Store</strong>
+            <span data-account-i18n="brandTagline">Premium Digital Keys</span>
+          </span>
+        </a>
+
+        <div class="header-actions">
+          <div class="lang-switch" role="group" aria-label="Language switcher">
+            <button
+              type="button"
+              id="btn-id"
+              class="lang-btn"
+              onclick="setAccountLanguage('id')"
+              aria-pressed="true"
+            >
+              ID
+            </button>
+            <button
+              type="button"
+              id="btn-en"
+              class="lang-btn"
+              onclick="setAccountLanguage('en')"
+              aria-pressed="false"
+            >
+              EN
+            </button>
+          </div>
+
+          <button
+            type="button"
+            id="theme-toggle"
+            class="icon-btn"
+            onclick="toggleAccountTheme()"
+            aria-label="Toggle dark mode"
+          >
+            🌙
+          </button>
+
+          <a
+            href="/"
+            class="header-back"
+            aria-label="Kembali ke Beranda"
+            data-account-i18n="backHome"
+          >
+            <iconify-icon
+              icon="mdi:arrow-left"
+              aria-hidden="true"
+            ></iconify-icon>
+            <span>Kembali ke Home</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <main class="page">
+      <!-- Profile column -->
+      <aside class="surface profile-card" aria-label="Profil pengguna">
+        <div class="avatar" aria-hidden="true">👤</div>
         <h1 data-account-i18n="accountTitle">Akun Saya</h1>
         <p class="subtitle" id="userText" data-account-i18n="checkingAccount">
           Mengecek akun...
         </p>
-        <div id="buyerBadgeBox"></div>
-        <div id="buyerStatsBox" class="buyer-stats-mini"></div>
-      </div>
 
-      <div class="status-grid">
-        <div class="status-box">
-          <strong data-account-i18n="loginStatusTitle">Status Login</strong>
-          <span id="loginStatus" data-account-i18n="loginStatusActive"
-            >Aktif</span
+        <div id="buyerBadgeBox" aria-live="polite"></div>
+        <div
+          id="buyerStatsBox"
+          class="buyer-stats-mini"
+          aria-live="polite"
+        ></div>
+
+        <div class="status-grid">
+          <div class="status-box">
+            <strong data-account-i18n="loginStatusTitle">Status Login</strong>
+            <span id="loginStatus" data-account-i18n="loginStatusActive"
+              >Aktif</span
+            >
+          </div>
+          <div class="status-box">
+            <strong data-account-i18n="contactOrderTitle">Kontak Order</strong>
+            <span id="contactStatus" data-account-i18n="contactNotSaved"
+              >Belum disimpan</span
+            >
+          </div>
+        </div>
+
+        <div class="profile-actions">
+          <a href="/" class="btn btn-secondary" data-account-i18n="backHome">
+            Kembali ke Home
+          </a>
+          <button
+            type="button"
+            class="btn btn-danger"
+            onclick="logoutUser()"
+            data-account-i18n="logout"
           >
+            Logout
+          </button>
         </div>
-        <div class="status-box">
-          <strong data-account-i18n="contactOrderTitle">Kontak Order</strong>
-          <span id="contactStatus" data-account-i18n="contactNotSaved"
-            >Belum disimpan</span
+      </aside>
+
+      <!-- Main column with tabs -->
+      <section class="surface" aria-label="Pengaturan akun">
+        <nav class="tab-card" role="tablist" aria-label="Account section tabs">
+          <button
+            type="button"
+            class="tab-btn active"
+            data-tab="orders"
+            role="tab"
+            aria-selected="true"
+            onclick="switchTab('orders')"
           >
-        </div>
-      </div>
+            <iconify-icon icon="mdi:history" aria-hidden="true"></iconify-icon>
+            <span data-account-i18n="orderHistoryTitle">Riwayat Order</span>
+          </button>
+          <button
+            type="button"
+            class="tab-btn"
+            data-tab="default"
+            role="tab"
+            aria-selected="false"
+            onclick="switchTab('default')"
+          >
+            <iconify-icon
+              icon="mdi:account-edit-outline"
+              aria-hidden="true"
+            ></iconify-icon>
+            <span data-account-i18n="defaultOrderTitle">Data Default</span>
+          </button>
+          <button
+            type="button"
+            class="tab-btn"
+            data-tab="security"
+            role="tab"
+            aria-selected="false"
+            onclick="switchTab('security')"
+          >
+            <iconify-icon
+              icon="mdi:shield-lock-outline"
+              aria-hidden="true"
+            ></iconify-icon>
+            <span data-account-i18n="changePasswordTitle">Keamanan</span>
+          </button>
+        </nav>
 
-      <div class="section">
-        <div class="section-title" data-account-i18n="defaultOrderTitle">
-          Data Order Default
-        </div>
-
-        <input
-          type="text"
-          id="defaultName"
-          placeholder="Nama default untuk order"
-          data-account-placeholder="defaultNamePlaceholder"
-        />
-
-        <input
-          type="text"
-          id="defaultContact"
-          placeholder="Email / Nomor WA aktif"
-          data-account-placeholder="defaultContactPlaceholder"
-        />
-
-        <button
-          onclick="saveDefaultOrderData()"
-          data-account-i18n="saveDefaultOrder"
+        <!-- Orders panel -->
+        <div
+          id="panel-orders"
+          class="panel active"
+          role="tabpanel"
+          aria-labelledby="tab-orders"
         >
-          Simpan Data Order (Segera)
-        </button>
-
-        <p class="note" data-account-i18n="defaultOrderNote">
-          Data ini bisa dipakai untuk mengisi otomatis nama dan kontak saat
-          checkout.
-        </p>
-      </div>
-
-      <div class="section">
-        <div class="section-title" data-account-i18n="changePasswordTitle">
-          Ganti Password
-        </div>
-
-        <input
-          type="password"
-          id="oldPassword"
-          placeholder="Password lama / password random"
-          data-account-placeholder="oldPasswordPlaceholder"
-        />
-
-        <input
-          type="password"
-          id="newPassword"
-          placeholder="Password baru minimal 6 karakter"
-          data-account-placeholder="newPasswordPlaceholder"
-        />
-
-        <button onclick="changePassword()" data-account-i18n="saveNewPassword">
-          Simpan Password Baru
-        </button>
-
-        <p class="note" data-account-i18n="changePasswordNote">
-          Kalau password kamu hasil reset admin, isi password random itu sebagai
-          password lama.
-        </p>
-      </div>
-
-      <div class="section">
-        <div class="section-title" data-account-i18n="verifyEmailTitle">
-          Verifikasi Email
-        </div>
-        <button
-          class="btn-secondary"
-          onclick="emailComingSoon()"
-          data-account-i18n="verifyEmailButton"
-        >
-          Verify Email
-        </button>
-        <p class="note" data-account-i18n="verifyEmailNote">
-          Fitur ini butuh tambahan email di database dan layanan kirim email
-          seperti Resend, Brevo, atau SMTP.
-        </p>
-      </div>
-
-      <div class="section">
-        <div style="margin-top: 22px; text-align: left">
-          <h3 style="margin-bottom: 10px" data-account-i18n="orderHistoryTitle">
+          <div class="section-title" data-account-i18n="orderHistoryTitle">
             Riwayat Order
-          </h3>
+          </div>
+          <p class="section-desc" data-account-i18n="orderHistoryDesc">
+            Semua transaksi yang terhubung ke akunmu, lengkap dengan key game
+            dan detail pembayaran.
+          </p>
+
           <div
             id="orderHistory"
-            style="font-size: 14px; color: #475569"
+            class="orders-content"
             data-account-i18n="loadingOrderHistory"
           >
             Memuat riwayat order...
           </div>
         </div>
-        <a href="/" class="btn btn-secondary" data-account-i18n="backHome"
-          >Kembali ke Home</a
+
+        <!-- Default order data panel -->
+        <div
+          id="panel-default"
+          class="panel"
+          role="tabpanel"
+          aria-labelledby="tab-default"
         >
-        <button
-          class="btn-danger"
-          onclick="logoutUser()"
-          data-account-i18n="logout"
+          <div class="section-title">
+            <span data-account-i18n="defaultOrderTitle"
+              >Data Order Default</span
+            >
+            <span class="badge-soon" data-account-i18n="badgeSoon">SEGERA</span>
+          </div>
+          <p class="section-desc" data-account-i18n="defaultOrderNote">
+            Data ini bisa dipakai untuk mengisi otomatis nama dan kontak saat
+            checkout.
+          </p>
+
+          <div class="field">
+            <label for="defaultName" data-account-i18n="defaultNameLabel">
+              Nama Default
+            </label>
+            <div class="input-wrap">
+              <iconify-icon
+                icon="mdi:account-outline"
+                aria-hidden="true"
+              ></iconify-icon>
+              <input
+                type="text"
+                id="defaultName"
+                placeholder="Nama default untuk order"
+                data-account-placeholder="defaultNamePlaceholder"
+                autocomplete="name"
+              />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="defaultContact" data-account-i18n="defaultContactLabel">
+              Kontak Default
+            </label>
+            <div class="input-wrap">
+              <iconify-icon
+                icon="mdi:email-outline"
+                aria-hidden="true"
+              ></iconify-icon>
+              <input
+                type="text"
+                id="defaultContact"
+                placeholder="Email / Nomor WA aktif"
+                data-account-placeholder="defaultContactPlaceholder"
+                autocomplete="email"
+              />
+            </div>
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-primary"
+            onclick="saveDefaultOrderData()"
+            data-account-i18n="saveDefaultOrder"
+          >
+            Simpan Data Order (Segera)
+          </button>
+        </div>
+
+        <!-- Security panel -->
+        <div
+          id="panel-security"
+          class="panel"
+          role="tabpanel"
+          aria-labelledby="tab-security"
         >
-          Logout
-        </button>
-      </div>
-    </div>
+          <div class="section-title" data-account-i18n="changePasswordTitle">
+            Ganti Password
+          </div>
+          <p class="section-desc" data-account-i18n="changePasswordNote">
+            Kalau password kamu hasil reset admin, isi password random itu
+            sebagai password lama.
+          </p>
+
+          <div class="field">
+            <label for="oldPassword" data-account-i18n="oldPasswordLabel">
+              Password Lama
+            </label>
+            <div class="input-wrap">
+              <iconify-icon
+                icon="mdi:lock-outline"
+                aria-hidden="true"
+              ></iconify-icon>
+              <input
+                type="password"
+                id="oldPassword"
+                placeholder="Password lama / password random"
+                data-account-placeholder="oldPasswordPlaceholder"
+                autocomplete="current-password"
+              />
+              <button
+                type="button"
+                class="password-toggle"
+                onclick="togglePassword('oldPassword', this)"
+                aria-label="Tampilkan password"
+              >
+                <iconify-icon
+                  icon="mdi:eye-outline"
+                  aria-hidden="true"
+                ></iconify-icon>
+              </button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="newPassword" data-account-i18n="newPasswordLabel">
+              Password Baru
+            </label>
+            <div class="input-wrap">
+              <iconify-icon
+                icon="mdi:lock-reset"
+                aria-hidden="true"
+              ></iconify-icon>
+              <input
+                type="password"
+                id="newPassword"
+                placeholder="Password baru minimal 6 karakter"
+                data-account-placeholder="newPasswordPlaceholder"
+                autocomplete="new-password"
+              />
+              <button
+                type="button"
+                class="password-toggle"
+                onclick="togglePassword('newPassword', this)"
+                aria-label="Tampilkan password"
+              >
+                <iconify-icon
+                  icon="mdi:eye-outline"
+                  aria-hidden="true"
+                ></iconify-icon>
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-primary"
+            onclick="changePassword()"
+            data-account-i18n="saveNewPassword"
+          >
+            Simpan Password Baru
+          </button>
+
+          <div style="height: 22px"></div>
+
+          <div class="section-title">
+            <span data-account-i18n="verifyEmailTitle">Verifikasi Email</span>
+            <span class="badge-soon" data-account-i18n="badgeSoon">SEGERA</span>
+          </div>
+          <p class="section-desc" data-account-i18n="verifyEmailNote">
+            Fitur ini butuh tambahan email di database dan layanan kirim email
+            seperti Resend, Brevo, atau SMTP.
+          </p>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            onclick="emailComingSoon()"
+            data-account-i18n="verifyEmailButton"
+          >
+            Verify Email
+          </button>
+        </div>
+      </section>
+    </main>
 
     <script>
       const accountTranslations = {
@@ -593,13 +1447,18 @@
           loginStatusActive: "Aktif",
           contactOrderTitle: "Kontak Order",
           contactNotSaved: "Belum disimpan",
+          brandTagline: "Premium Digital Keys",
           defaultOrderTitle: "Data Order Default",
+          defaultNameLabel: "Nama Default",
+          defaultContactLabel: "Kontak Default",
           defaultNamePlaceholder: "Nama default untuk order",
           defaultContactPlaceholder: "Email / Nomor WA aktif",
           saveDefaultOrder: "Simpan Data Order (Segera)",
           defaultOrderNote:
             "Data ini bisa dipakai untuk mengisi otomatis nama dan kontak saat checkout.",
           changePasswordTitle: "Ganti Password",
+          oldPasswordLabel: "Password Lama",
+          newPasswordLabel: "Password Baru",
           oldPasswordPlaceholder: "Password lama / password random",
           newPasswordPlaceholder: "Password baru minimal 6 karakter",
           saveNewPassword: "Simpan Password Baru",
@@ -610,6 +1469,8 @@
           verifyEmailNote:
             "Fitur ini butuh tambahan email di database dan layanan kirim email seperti Resend, Brevo, atau SMTP.",
           orderHistoryTitle: "Riwayat Order",
+          orderHistoryDesc:
+            "Semua transaksi yang terhubung ke akunmu, lengkap dengan key game dan detail pembayaran.",
           loadingOrderHistory: "Memuat riwayat order...",
           backHome: "Kembali ke Home",
           logout: "Logout",
@@ -646,6 +1507,7 @@
           featureSoonTitle: "Fitur segera aktif",
           featureSoonText:
             "Nanti data ini bisa disimpan ke akun dan dipakai otomatis saat checkout.",
+          badgeSoon: "SEGERA",
         },
         en: {
           accountTitle: "My Account",
@@ -656,13 +1518,18 @@
           loginStatusActive: "Active",
           contactOrderTitle: "Order Contact",
           contactNotSaved: "Not saved yet",
+          brandTagline: "Premium Digital Keys",
           defaultOrderTitle: "Default Order Data",
+          defaultNameLabel: "Default Name",
+          defaultContactLabel: "Default Contact",
           defaultNamePlaceholder: "Default name for orders",
           defaultContactPlaceholder: "Active email / WhatsApp number",
           saveDefaultOrder: "Save Order Data (Soon)",
           defaultOrderNote:
             "This data can be used to auto-fill your name and contact during checkout.",
           changePasswordTitle: "Change Password",
+          oldPasswordLabel: "Old Password",
+          newPasswordLabel: "New Password",
           oldPasswordPlaceholder: "Old password / random password",
           newPasswordPlaceholder: "New password, minimum 6 characters",
           saveNewPassword: "Save New Password",
@@ -673,6 +1540,8 @@
           verifyEmailNote:
             "This feature needs an email column, verification token, and email service such as Resend, Brevo, or SMTP.",
           orderHistoryTitle: "Order History",
+          orderHistoryDesc:
+            "All transactions linked to your account, complete with game keys and payment details.",
           loadingOrderHistory: "Loading order history...",
           backHome: "Back to Home",
           logout: "Logout",
@@ -709,6 +1578,7 @@
           featureSoonTitle: "Feature coming soon",
           featureSoonText:
             "Later, this data can be saved to your account and used automatically during checkout.",
+          badgeSoon: "SOON",
         },
       };
 
@@ -724,7 +1594,8 @@
       }
 
       function applyAccountLanguage() {
-        document.documentElement.lang = getAccountLanguage();
+        const lang = getAccountLanguage();
+        document.documentElement.lang = lang;
         document.title = tAccount("pageTitle");
 
         document.querySelectorAll("[data-account-i18n]").forEach((element) => {
@@ -738,6 +1609,75 @@
             const key = element.getAttribute("data-account-placeholder");
             element.placeholder = tAccount(key);
           });
+
+        const btnId = document.getElementById("btn-id");
+        const btnEn = document.getElementById("btn-en");
+        if (btnId && btnEn) {
+          btnId.classList.toggle("active", lang === "id");
+          btnEn.classList.toggle("active", lang === "en");
+          btnId.setAttribute("aria-pressed", lang === "id" ? "true" : "false");
+          btnEn.setAttribute("aria-pressed", lang === "en" ? "true" : "false");
+        }
+      }
+
+      function setAccountLanguage(lang) {
+        localStorage.setItem("ae_language", lang);
+        applyAccountLanguage();
+        // Re-localize dynamic regions that aren't bound via data-account-i18n
+        const userText = document.getElementById("userText");
+        if (userText && userText.dataset.username) {
+          userText.innerText = `${tAccount("loggedInAs")}: ${userText.dataset.username}`;
+        }
+        if (orderHistoryCache) {
+          renderOrderHistory(
+            document.getElementById("orderHistory"),
+            orderHistoryCache,
+          );
+        }
+        const buyerStats = document.getElementById("buyerStatsBox");
+        if (buyerStats && buyerStats.dataset.paid && buyerStats.dataset.spend) {
+          buyerStats.innerText = `${buyerStats.dataset.paid} ${tAccount("paidOrder")} • ${buyerStats.dataset.spend} ${tAccount("totalSpend")}`;
+        }
+      }
+
+      function applyAccountTheme() {
+        const stored = localStorage.getItem("ae_theme");
+        const isDark = stored === "dark";
+        document.body.classList.toggle("dark-theme", isDark);
+        const btn = document.getElementById("theme-toggle");
+        if (btn) btn.innerText = isDark ? "☀️" : "🌙";
+      }
+
+      function toggleAccountTheme() {
+        const isDark = document.body.classList.toggle("dark-theme");
+        localStorage.setItem("ae_theme", isDark ? "dark" : "light");
+        const btn = document.getElementById("theme-toggle");
+        if (btn) btn.innerText = isDark ? "☀️" : "🌙";
+      }
+
+      function switchTab(name) {
+        document.querySelectorAll(".tab-btn").forEach((btn) => {
+          const isActive = btn.getAttribute("data-tab") === name;
+          btn.classList.toggle("active", isActive);
+          btn.setAttribute("aria-selected", isActive ? "true" : "false");
+        });
+        document.querySelectorAll(".panel").forEach((panel) => {
+          panel.classList.toggle("active", panel.id === "panel-" + name);
+        });
+      }
+
+      function togglePassword(inputId, btn) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+        const showing = input.type === "text";
+        input.type = showing ? "password" : "text";
+        const icon = btn.querySelector("iconify-icon");
+        if (icon) {
+          icon.setAttribute(
+            "icon",
+            showing ? "mdi:eye-outline" : "mdi:eye-off-outline",
+          );
+        }
       }
 
       function getCookie(name) {
@@ -748,6 +1688,7 @@
             ?.split("=")[1] || ""
         );
       }
+
       async function checkUser() {
         try {
           const res = await fetch("/api/user/me");
@@ -758,21 +1699,34 @@
             return;
           }
 
-          document.getElementById("userText").innerText =
-            `${tAccount("loggedInAs")}: ${data.username}`;
+          const userText = document.getElementById("userText");
+          userText.innerText = `${tAccount("loggedInAs")}: ${data.username}`;
+          // Cache username so language switches can re-render the line
+          userText.dataset.username = data.username;
+          userText.removeAttribute("data-account-i18n");
+
+          if (data.contact) {
+            const contactStatus = document.getElementById("contactStatus");
+            contactStatus.innerText = data.contact;
+            contactStatus.removeAttribute("data-account-i18n");
+          }
 
           const badge = data.badge || {};
           const stats = data.stats || {};
 
           document.getElementById("buyerBadgeBox").innerHTML = `
-  <span class="buyer-badge ${badge.code || "new"}">
-    <span>${badge.emoji || "🎐"}</span>
-    <span>${badge.label || "New Buyer"}</span>
-  </span>
-`;
+            <span class="buyer-badge ${badge.code || "new"}">
+              <span aria-hidden="true">${badge.emoji || "🎐"}</span>
+              <span>${badge.label || "New Buyer"}</span>
+            </span>
+          `;
 
-          document.getElementById("buyerStatsBox").innerText =
-            `${Number(stats.paid_order_count || 0)} ${tAccount("paidOrder")} • ${formatRupiah(stats.total_spend || 0)} ${tAccount("totalSpend")}`;
+          const buyerStats = document.getElementById("buyerStatsBox");
+          const paidCount = String(Number(stats.paid_order_count || 0));
+          const spendStr = formatRupiah(stats.total_spend || 0);
+          buyerStats.dataset.paid = paidCount;
+          buyerStats.dataset.spend = spendStr;
+          buyerStats.innerText = `${paidCount} ${tAccount("paidOrder")} • ${spendStr} ${tAccount("totalSpend")}`;
 
           loadOrderHistory();
         } catch (err) {
@@ -785,7 +1739,12 @@
         const newPassword = document.getElementById("newPassword").value.trim();
 
         if (!oldPassword || newPassword.length < 6) {
-          Swal.fire(tAccount("passwordValidation"));
+          Swal.fire({
+            icon: "warning",
+            title: tAccount("failedTitle"),
+            text: tAccount("passwordValidation"),
+            confirmButtonColor: "#0ea5e9",
+          });
           return;
         }
 
@@ -832,15 +1791,17 @@
       }
 
       async function logoutUser() {
-        await fetch("/user-logout", {
-          method: "POST",
-          headers: {
-            "x-user-csrf-token": getCookie("user_csrf"),
-          },
-        });
-
+        try {
+          await fetch("/user-logout", {
+            method: "POST",
+            headers: {
+              "x-user-csrf-token": getCookie("user_csrf"),
+            },
+          });
+        } catch (err) {}
         window.location.href = "/";
       }
+
       function formatRupiah(num) {
         return "Rp " + Number(num || 0).toLocaleString("id-ID");
       }
@@ -848,6 +1809,15 @@
       function formatTanggal(dateString) {
         if (!dateString) return "-";
         return new Date(dateString).toLocaleString("id-ID");
+      }
+
+      function escapeHtml(value) {
+        return String(value ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
       }
 
       function copyText(text, label = "Data") {
@@ -884,8 +1854,20 @@
           });
       }
 
+      let orderHistoryCache = null;
+
       async function loadOrderHistory() {
         const box = document.getElementById("orderHistory");
+        // Drop the i18n placeholder once we manage this region dynamically
+        box.removeAttribute("data-account-i18n");
+
+        box.innerHTML = `
+          <div class="skeleton-list">
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+          </div>
+        `;
 
         try {
           const res = await fetch("/user/orders");
@@ -896,111 +1878,135 @@
           }
 
           const data = await res.json();
-
-          if (!Array.isArray(data) || data.length === 0) {
-            box.innerHTML = `
-        <div class="empty-state">
-          ${tAccount("noOrders")}
-        </div>
-      `;
-            return;
-          }
-
-          box.innerHTML = `
-      <div class="order-list">
-        ${data
-          .map((item) => {
-            const gameKey = item.gamekey || item.gameKey || "";
-            const voucherCode = item.voucher_code || "";
-            const discountAmount = Number(item.discount_amount || 0);
-            const orderId = item.id || item.order_id || "";
-
-            return `
-              <div class="order-card">
-                <strong>${item.game || "-"}</strong>
-
-                <div class="order-row">
-                  <span>${tAccount("product")}</span>
-                  <b>${item.product || "-"}</b>
-                </div>
-
-                <div class="order-row">
-                  <span>${tAccount("totalPayment")}</span>
-                  <b>${formatRupiah(item.price)}</b>
-                </div>
-
-                <div class="order-row">
-                  <span>${tAccount("voucher")}</span>
-                  <b>${voucherCode || "-"}</b>
-                </div>
-
-                <div class="order-row">
-                  <span>${tAccount("discount")}</span>
-                  <b class="discount-value">
-                    ${discountAmount > 0 ? "- " + formatRupiah(discountAmount) : "-"}
-                  </b>
-                </div>
-
-                <div class="order-row">
-                  <span>${tAccount("payment")}</span>
-                  <b class="status-pill ${item.payment_status || ""}">
-                    ${item.payment_status || "-"}
-                  </b>
-                </div>
-
-                <div class="order-row">
-                  <span>${tAccount("delivery")}</span>
-                  <b class="status-pill ${item.delivery_status || ""}">
-                    ${item.delivery_status || "-"}
-                  </b>
-                </div>
-
-                <div class="order-row">
-                  <span>${tAccount("time")}</span>
-                  <b>${formatTanggal(item.created_at)}</b>
-                </div>
-
-                ${
-                  gameKey
-                    ? `<div class="order-row">
-                        <span>${tAccount("key")}</span>
-                        <div>
-                          <code class="key-code">${gameKey}</code>
-                          <button
-                            type="button"
-                            class="copy-key-btn"
-                            onclick='copyText(${JSON.stringify(gameKey)}, "Game key")'
-                          >
-                            ${tAccount("copyKey")}
-                          </button>
-                        </div>
-                      </div>`
-                    : ""
-                }
-
-                <div class="order-actions">
-                  ${
-                    orderId
-                      ? `<a class="order-link-btn" href="/result.html?order_id=${encodeURIComponent(orderId)}">
-                          ${tAccount("viewOrderDetail")}
-                        </a>`
-                      : ""
-                  }
-                </div>
-              </div>
-            `;
-          })
-          .join("")}
-      </div>
-    `;
+          orderHistoryCache = Array.isArray(data) ? data : [];
+          renderOrderHistory(box, orderHistoryCache);
         } catch (err) {
+          orderHistoryCache = null;
           box.innerHTML = `
-      <div class="empty-state">
-        ${tAccount("failedLoadOrders")}
-      </div>
-    `;
+            <div class="orders-error">
+              <iconify-icon icon="mdi:alert-circle-outline" aria-hidden="true"></iconify-icon>
+              ${tAccount("failedLoadOrders")}
+            </div>
+          `;
         }
       }
+
+      function renderOrderHistory(box, data) {
+        if (!box) box = document.getElementById("orderHistory");
+        if (!Array.isArray(data) || data.length === 0) {
+          box.innerHTML = `
+            <div class="orders-empty">
+              <iconify-icon icon="mdi:cart-outline" aria-hidden="true"></iconify-icon>
+              ${tAccount("noOrders")}
+            </div>
+          `;
+          return;
+        }
+
+        box.innerHTML = `
+            <div class="order-list">
+              ${data
+                .map((item) => {
+                  const gameKey = item.gamekey || item.gameKey || "";
+                  const voucherCode = item.voucher_code || "";
+                  const discountAmount = Number(item.discount_amount || 0);
+                  const orderId = item.id || item.order_id || "";
+
+                  return `
+                    <article class="order-card">
+                      <div class="order-card-head">
+                        <strong>${escapeHtml(item.game || "-")}</strong>
+                        <span class="status-pill ${escapeHtml(
+                          item.payment_status || "",
+                        )}">
+                          ${escapeHtml(item.payment_status || "-")}
+                        </span>
+                      </div>
+
+                      <div class="order-row">
+                        <span>${tAccount("product")}</span>
+                        <b>${escapeHtml(item.product || "-")}</b>
+                      </div>
+
+                      <div class="order-row">
+                        <span>${tAccount("totalPayment")}</span>
+                        <b>${formatRupiah(item.price)}</b>
+                      </div>
+
+                      <div class="order-row">
+                        <span>${tAccount("voucher")}</span>
+                        <b>${escapeHtml(voucherCode || "-")}</b>
+                      </div>
+
+                      <div class="order-row">
+                        <span>${tAccount("discount")}</span>
+                        <b class="discount-value">
+                          ${
+                            discountAmount > 0
+                              ? "- " + formatRupiah(discountAmount)
+                              : "-"
+                          }
+                        </b>
+                      </div>
+
+                      <div class="order-row">
+                        <span>${tAccount("delivery")}</span>
+                        <span class="status-pill ${escapeHtml(
+                          item.delivery_status || "",
+                        )}">
+                          ${escapeHtml(item.delivery_status || "-")}
+                        </span>
+                      </div>
+
+                      <div class="order-row">
+                        <span>${tAccount("time")}</span>
+                        <b>${formatTanggal(item.created_at)}</b>
+                      </div>
+
+                      ${
+                        gameKey
+                          ? `<div class="key-row">
+                              <div class="key-row-head">
+                                <span>${tAccount("key")}</span>
+                                <button
+                                  type="button"
+                                  class="copy-key-btn"
+                                  onclick='copyText(${JSON.stringify(
+                                    gameKey,
+                                  )}, "Game key")'
+                                >
+                                  <iconify-icon icon="mdi:content-copy" aria-hidden="true"></iconify-icon>
+                                  ${tAccount("copyKey")}
+                                </button>
+                              </div>
+                              <code class="key-code">${escapeHtml(gameKey)}</code>
+                            </div>`
+                          : ""
+                      }
+
+                      ${
+                        orderId
+                          ? `<div class="order-actions">
+                              <a
+                                class="order-link-btn"
+                                href="/result.html?order_id=${encodeURIComponent(
+                                  orderId,
+                                )}"
+                              >
+                                <iconify-icon icon="mdi:open-in-new" aria-hidden="true"></iconify-icon>
+                                ${tAccount("viewOrderDetail")}
+                              </a>
+                            </div>`
+                          : ""
+                      }
+                    </article>
+                  `;
+                })
+                .join("")}
+            </div>
+          `;
+      }
+
       function saveDefaultOrderData() {
         Swal.fire({
           title: tAccount("featureSoonTitle"),

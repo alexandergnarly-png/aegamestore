@@ -450,18 +450,10 @@ function renderGames() {
 
     const imageUrl = getGameImage(game);
     const gameProducts = allProducts.filter((item) => item.game === game);
-    const availableProducts = gameProducts.filter(
-      (item) => Number(item.available_keys || 0) > 0,
-    );
     const totalStock = gameProducts.reduce(
       (total, item) => total + Number(item.available_keys || 0),
       0,
     );
-    const minPrice =
-      availableProducts.length > 0
-        ? Math.min(...availableProducts.map((item) => Number(item.price || 0)))
-        : 0;
-
     const stockLabel =
       totalStock > 0
         ? currentLanguage === "en"
