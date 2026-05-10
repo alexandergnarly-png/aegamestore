@@ -3,281 +3,343 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin Panel - AE Game Store 🌊</title>
+    <title>Admin Panel — AE Game Store</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
+      /* =============================================
+       ROOT — DARK PREMIUM THEME
+    ============================================= */
       :root {
-        /* Ocean Vibes Japan Palette */
-        --primary: #0ea5e9;
-        /* Ocean Deep */
-        --primary-hover: #0284c7;
-        --secondary: #fb7185;
-        /* Torii Red / Sakura */
-        --bg-color: #f0f9ff;
-        --card-bg: rgba(255, 255, 255, 0.75);
-        --text-main: #0c4a6e;
-        --text-muted: #475569;
-        --border-color: rgba(56, 189, 248, 0.4);
+        --bg: #0b0f14;
+        --bg-2: #111620;
+        --bg-3: #181e2a;
+        --bg-4: #1e2535;
+        --border: rgba(255, 255, 255, 0.06);
+        --border-2: rgba(255, 255, 255, 0.11);
+        --text: #e2e8f0;
+        --text-2: #94a3b8;
+        --text-3: #475569;
 
-        --shadow-sm: 0 4px 12px rgba(14, 165, 233, 0.08);
-        --shadow-md: 0 12px 30px rgba(14, 165, 233, 0.12);
-        --shadow-lg: 0 24px 50px rgba(14, 165, 233, 0.15);
-        --radius-xl: 28px;
-        --radius-lg: 20px;
-        --radius-md: 14px;
-        --radius-sm: 10px;
+        --ocean: #38bdf8;
+        --ocean-d: #0ea5e9;
+        --ocean-dk: #0284c7;
+        --ocean-glow: rgba(56, 189, 248, 0.15);
+        --sakura: #fb7185;
+        --sakura-d: #f43f5e;
+        --matcha: #34d399;
+        --gold: #fbbf24;
 
-        /* Zen Badges */
-        --success-bg: #d1fae5;
-        /* Matcha Light */
-        --success-text: #065f46;
-        --warn-bg: #fef08a;
-        /* Sunset Gold */
-        --warn-text: #854d0e;
-        --danger-bg: #ffe4e6;
-        /* Sakura Pink */
-        --danger-text: #be123c;
+        --success-bg: rgba(52, 211, 153, 0.12);
+        --success-text: #34d399;
+        --warn-bg: rgba(251, 191, 36, 0.12);
+        --warn-text: #fbbf24;
+        --danger-bg: rgba(251, 113, 133, 0.12);
+        --danger-text: #fb7185;
+        --info-bg: rgba(56, 189, 248, 0.12);
+        --info-text: #38bdf8;
+
+        --card: rgba(17, 22, 32, 0.9);
+        --card-2: rgba(24, 30, 42, 0.95);
+        --r-2xl: 24px;
+        --r-xl: 18px;
+        --r-lg: 14px;
+        --r-md: 10px;
+        --r-sm: 6px;
       }
 
-      * {
+      /* =============================================
+       RESET & BASE
+    ============================================= */
+      *,
+      *::before,
+      *::after {
         box-sizing: border-box;
         margin: 0;
         padding: 0;
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       }
-
       html {
         scroll-behavior: smooth;
       }
 
       body {
-        background-color: var(--bg-color);
-        background-image:
-          radial-gradient(
-            circle at 10% 20%,
-            rgba(56, 189, 248, 0.15) 0%,
-            transparent 40%
-          ),
-          radial-gradient(
-            circle at 90% 80%,
-            rgba(251, 113, 133, 0.1) 0%,
-            transparent 40%
-          );
-        color: var(--text-main);
+        font-family: "Outfit", system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--text);
         min-height: 100vh;
         display: flex;
         position: relative;
+        overflow-x: hidden;
+      }
+
+      /* subtle grid texture */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(56, 189, 248, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(56, 189, 248, 0.03) 1px, transparent 1px);
+        background-size: 48px 48px;
+        pointer-events: none;
         z-index: 0;
       }
 
-      /* Aesthetic Watermarks (Ukiyo-e Feel) */
-      body::before,
+      /* ambient blobs */
       body::after {
-        display: none;
+        content: "";
+        position: fixed;
+        inset: 0;
+        background:
+          radial-gradient(
+            ellipse 60% 50% at 5% 10%,
+            rgba(56, 189, 248, 0.06) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            ellipse 50% 40% at 95% 90%,
+            rgba(251, 113, 133, 0.05) 0%,
+            transparent 60%
+          );
+        pointer-events: none;
+        z-index: 0;
       }
 
-      /* ===== SIDEBAR ===== */
+      /* =============================================
+       SIDEBAR
+    ============================================= */
       .sidebar {
-        width: 260px;
-        min-width: 260px;
-        flex: 0 0 260px;
-        background: rgba(255, 255, 255, 0.6);
+        width: 240px;
+        min-width: 240px;
+        flex: 0 0 240px;
+        background: rgba(11, 15, 20, 0.97);
         backdrop-filter: blur(24px);
-        border-right: 1px solid var(--border-color);
-        padding: 24px 20px;
+        border-right: 1px solid var(--border);
+        padding: 20px 14px;
         display: flex;
         flex-direction: column;
-        gap: 24px;
+        gap: 20px;
         position: sticky;
         top: 0;
         height: 100vh;
-        transition: none;
         overflow-x: hidden;
+        overflow-y: auto;
         z-index: 50;
+        transition:
+          width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+          min-width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+          flex-basis 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+          padding 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
+      .sidebar::-webkit-scrollbar {
+        width: 3px;
+      }
+      .sidebar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .sidebar::-webkit-scrollbar-thumb {
+        background: var(--border-2);
+        border-radius: 99px;
+      }
+
+      /* brand */
       .sidebar-brand {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 12px;
-        padding-bottom: 20px;
-        border-bottom: 1px dashed var(--border-color);
+        gap: 10px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--border);
+        flex-shrink: 0;
       }
-
       .sidebar-brand-left {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 10px;
         min-width: 0;
       }
 
       .sidebar-logo {
-        width: 44px;
-        height: 44px;
-        border-radius: var(--radius-md);
+        width: 40px;
+        height: 40px;
+        border-radius: var(--r-md);
+        background: linear-gradient(135deg, var(--sakura), var(--sakura-d));
         display: flex;
         align-items: center;
         justify-content: center;
-        background: linear-gradient(135deg, var(--secondary), #f43f5e);
-        color: white;
-        font-weight: bold;
-        font-size: 20px;
-        box-shadow: 0 8px 16px rgba(251, 113, 133, 0.3);
+        font-size: 18px;
         flex-shrink: 0;
+        box-shadow:
+          0 0 0 1px rgba(251, 113, 133, 0.3),
+          0 8px 20px rgba(251, 113, 133, 0.2);
       }
 
       .sidebar-text {
         min-width: 0;
+        overflow: hidden;
+      }
+      .sidebar-kicker {
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--ocean);
+        white-space: nowrap;
+      }
+      .sidebar-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text);
         white-space: nowrap;
       }
 
-      .sidebar-kicker {
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: var(--primary);
-        font-weight: 800;
-      }
-
-      .sidebar-title {
-        font-size: 16px;
-        font-weight: 800;
-        color: var(--text-main);
-      }
-
+      /* nav */
       .sidebar-nav {
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 3px;
       }
 
       .nav-btn {
         width: 100%;
         text-align: left;
         background: transparent;
-        color: var(--text-muted);
-        padding: 14px 16px;
-        border-radius: var(--radius-md);
+        color: var(--text-2);
+        padding: 11px 13px;
+        border-radius: var(--r-lg);
         font-weight: 600;
-        font-size: 14px;
+        font-size: 13.5px;
         cursor: pointer;
         border: none;
-        transition: all 0.2s ease;
+        transition: all 0.18s ease;
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 10px;
+        white-space: nowrap;
+        overflow: hidden;
+        box-shadow: none;
       }
-
       .nav-btn:hover {
-        background: rgba(14, 165, 233, 0.1);
-        color: var(--primary);
+        background: rgba(56, 189, 248, 0.08);
+        color: var(--ocean);
       }
-
       .nav-btn.active {
         background: linear-gradient(
           135deg,
-          var(--primary),
-          var(--primary-hover)
+          rgba(56, 189, 248, 0.18),
+          rgba(14, 165, 233, 0.1)
         );
-        color: white;
-        box-shadow: 0 8px 16px rgba(14, 165, 233, 0.25);
+        color: var(--ocean);
+        border: 1px solid rgba(56, 189, 248, 0.2);
+        box-shadow: 0 0 0 0 transparent;
+      }
+      .nav-icon {
+        font-size: 16px;
+        flex-shrink: 0;
+        line-height: 1;
       }
 
+      /* footer */
       .sidebar-footer {
         margin-top: auto;
       }
 
-      .sidebar-logout,
-      .sidebar-toggle {
+      .sidebar-logout {
         width: 100%;
-        background: rgba(255, 255, 255, 0.8);
-        color: var(--text-main);
-        border: 1px solid var(--border-color);
-        padding: 14px;
-        border-radius: var(--radius-md);
+        background: rgba(251, 113, 133, 0.08);
+        color: var(--sakura);
+        border: 1px solid rgba(251, 113, 133, 0.15);
+        padding: 11px 13px;
+        border-radius: var(--r-lg);
         font-weight: 700;
+        font-size: 13px;
         cursor: pointer;
-        transition: all 0.2s ease;
         display: flex;
         align-items: center;
         justify-content: center;
+        gap: 8px;
+        transition: all 0.18s ease;
       }
-
       .sidebar-logout:hover {
-        background: #fff1f2;
-        color: var(--danger-text);
-        border-color: #fecdd3;
+        background: rgba(251, 113, 133, 0.15);
+        border-color: rgba(251, 113, 133, 0.3);
       }
 
       .sidebar-toggle {
-        width: auto;
-        padding: 10px;
-        color: var(--primary);
-        background: rgba(14, 165, 233, 0.1);
-        border: none;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border);
+        border-radius: var(--r-md);
+        color: var(--text-2);
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.18s ease;
+        flex-shrink: 0;
       }
-
       .sidebar-toggle:hover {
-        background: rgba(14, 165, 233, 0.2);
+        background: rgba(56, 189, 248, 0.1);
+        color: var(--ocean);
+        border-color: rgba(56, 189, 248, 0.2);
       }
 
-      /* Collapsed State */
-      .sidebar-collapsed .sidebar {
-        width: 88px;
-        min-width: 88px; /* Pastikan min-width juga berubah */
-        /* Hapus flex-basis: 88px; jika ada */
-        padding: 24px 14px;
+      /* COLLAPSED */
+      body.sidebar-collapsed .sidebar {
+        width: 64px;
+        min-width: 64px;
+        flex: 0 0 64px;
+        padding: 20px 10px;
       }
-
-      .sidebar-collapsed .sidebar-text {
+      body.sidebar-collapsed .sidebar-text,
+      body.sidebar-collapsed .nav-label {
         opacity: 0;
         display: none;
       }
-
-      /* --- TAMBAHAN UNTUK FIX BUG ICON GATE --- */
-      .sidebar-collapsed .sidebar-brand {
+      body.sidebar-collapsed .sidebar-brand {
         flex-direction: column;
-        align-items: center;
-        gap: 16px;
-        padding-bottom: 16px;
+        gap: 10px;
       }
-
-      .sidebar-collapsed .sidebar-brand-left {
+      body.sidebar-collapsed .sidebar-brand-left {
         margin: 0;
       }
-
-      .sidebar-collapsed .sidebar-toggle {
+      body.sidebar-collapsed .sidebar-toggle {
         width: 100%;
       }
-
-      /* ---------------------------------------- */
-
-      .sidebar-collapsed .nav-btn,
-      .sidebar-collapsed .sidebar-logout {
+      body.sidebar-collapsed .nav-btn {
         justify-content: center;
-        padding: 14px 0;
+        padding: 11px 0;
+      }
+      body.sidebar-collapsed .sidebar-logout {
+        padding: 11px 0;
         font-size: 0;
       }
+      body.sidebar-collapsed .sidebar-logout::before {
+        content: "🚪";
+        font-size: 16px;
+      }
+
       body:not(.sidebar-collapsed) .sidebar {
-        width: 260px;
-        min-width: 260px;
-        flex: 0 0 260px;
+        width: 240px;
+        min-width: 240px;
+        flex: 0 0 240px;
       }
 
-      body.sidebar-collapsed .sidebar {
-        width: 88px;
-        min-width: 88px;
-        flex: 0 0 88px;
-      }
-
-      /* ===== MAIN CONTENT ===== */
+      /* =============================================
+       MAIN CONTENT
+    ============================================= */
       .page {
         flex: 1 1 auto;
         min-width: 0;
-        width: auto;
-        max-width: none;
-        margin: 0;
-        padding: 24px 32px 60px;
+        padding: 20px 28px 60px;
         overflow-x: hidden;
         position: relative;
         z-index: 10;
@@ -285,29 +347,40 @@
 
       .admin-section {
         display: none;
-        animation: none;
       }
-
       .admin-section.active {
         display: block;
+        animation: sectionIn 0.22s ease both;
+      }
+      @keyframes sectionIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
 
+      /* =============================================
+       TOP NAV BAR
+    ============================================= */
       .top-nav {
         position: sticky;
-        top: 16px;
+        top: 12px;
         z-index: 20;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 14px 20px;
-        margin-bottom: 24px;
-        background: var(--card-bg);
-        backdrop-filter: blur(24px);
-        border: 1px solid var(--border-color);
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-sm);
+        padding: 12px 18px;
+        margin-bottom: 22px;
+        background: rgba(11, 15, 20, 0.85);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--border-2);
+        border-radius: var(--r-xl);
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
       }
-
       .top-nav-left {
         display: flex;
         align-items: center;
@@ -315,135 +388,146 @@
       }
 
       .logo-badge {
-        width: 38px;
-        height: 38px;
-        border-radius: 10px;
-        background: var(--text-main);
+        width: 36px;
+        height: 36px;
+        border-radius: var(--r-md);
+        background: linear-gradient(135deg, var(--ocean), var(--ocean-dk));
         color: white;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-weight: bold;
-        font-size: 14px;
+        font-weight: 900;
+        font-size: 12px;
+        letter-spacing: 0.5px;
       }
 
       .nav-kicker {
-        font-size: 10px;
+        font-size: 11px;
         letter-spacing: 0.5px;
-        color: var(--primary);
+        color: var(--ocean);
         text-transform: uppercase;
         font-weight: 800;
       }
-
       .nav-title {
-        font-size: 14px;
-        font-weight: 800;
-        color: var(--text-main);
-        min-width: 190px;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text);
         font-variant-numeric: tabular-nums;
       }
 
       .nav-actions {
         display: flex;
-        gap: 12px;
+        gap: 10px;
         align-items: center;
       }
 
       .nav-chip {
         display: inline-flex;
         align-items: center;
-        gap: 8px;
-        padding: 8px 14px;
+        gap: 7px;
+        padding: 6px 12px;
         border-radius: 99px;
-        background: #e0f2fe;
-        color: #0369a1;
-        font-size: 12px;
+        background: rgba(52, 211, 153, 0.1);
+        color: var(--matcha);
+        font-size: 11.5px;
         font-weight: 700;
-        border: 1px solid #bae6fd;
+        border: 1px solid rgba(52, 211, 153, 0.2);
+      }
+      .chip-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--matcha);
+        box-shadow: 0 0 6px var(--matcha);
+        animation: blink 2s ease infinite;
+      }
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.4;
+        }
       }
 
       .admin-role-chip {
         display: inline-flex;
         align-items: center;
-        gap: 8px;
-        padding: 8px 14px;
-        border-radius: 999px;
-        background: #fef3c7;
-        color: #92400e;
-        border: 1px solid #facc15;
-        font-size: 12px;
+        gap: 7px;
+        padding: 6px 12px;
+        border-radius: 99px;
+        background: rgba(251, 191, 36, 0.1);
+        color: var(--gold);
+        border: 1px solid rgba(251, 191, 36, 0.2);
+        font-size: 11.5px;
         font-weight: 900;
       }
-
       .admin-role-chip.admin {
-        background: #e0f2fe;
-        color: #0369a1;
-        border-color: #7dd3fc;
+        background: var(--info-bg);
+        color: var(--ocean);
+        border-color: rgba(56, 189, 248, 0.2);
       }
-
       .admin-role-chip.staff {
-        background: #f1f5f9;
-        color: #475569;
-        border-color: #cbd5e1;
+        background: rgba(148, 163, 184, 0.08);
+        color: var(--text-2);
+        border-color: var(--border-2);
       }
-
       .admin-role-chip.owner {
-        background: #fef3c7;
-        color: #92400e;
-        border-color: #facc15;
+        background: rgba(251, 191, 36, 0.1);
+        color: var(--gold);
+        border-color: rgba(251, 191, 36, 0.2);
       }
 
-      .chip-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: #0ea5e9;
-        box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.2);
-        animation: none;
-      }
-
-      @keyframes pulse {
-        0% {
-          box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.4);
-        }
-
-        70% {
-          box-shadow: 0 0 0 6px rgba(14, 165, 233, 0);
-        }
-
-        100% {
-          box-shadow: 0 0 0 0 rgba(14, 165, 233, 0);
-        }
-      }
-
-      /* ===== HERO BANNER ===== */
+      /* =============================================
+       HERO BANNER
+    ============================================= */
       .hero {
         position: relative;
-        padding: 40px;
-        border-radius: var(--radius-xl);
-        background: linear-gradient(135deg, #0284c7, #38bdf8, #fbcfe8);
-        /* Ocean to Sakura */
-        color: white;
-        box-shadow: var(--shadow-md);
-        margin-bottom: 28px;
+        padding: 32px 36px;
+        border-radius: var(--r-2xl);
+        background: linear-gradient(
+          135deg,
+          #0c1829 0%,
+          #0f2744 50%,
+          #1a1035 100%
+        );
+        border: 1px solid rgba(56, 189, 248, 0.15);
+        box-shadow:
+          0 0 0 1px rgba(56, 189, 248, 0.05),
+          inset 0 1px 0 rgba(255, 255, 255, 0.04),
+          0 20px 60px rgba(0, 0, 0, 0.4);
+        margin-bottom: 24px;
         overflow: hidden;
       }
-
+      .hero::before {
+        content: "";
+        position: absolute;
+        top: -80px;
+        right: -80px;
+        width: 320px;
+        height: 320px;
+        background: radial-gradient(
+          circle,
+          rgba(56, 189, 248, 0.12) 0%,
+          transparent 70%
+        );
+        pointer-events: none;
+      }
       .hero::after {
         content: "";
         position: absolute;
-        width: 300px;
-        height: 300px;
+        bottom: -60px;
+        left: -40px;
+        width: 240px;
+        height: 240px;
         background: radial-gradient(
           circle,
-          rgba(255, 255, 255, 0.15) 0%,
+          rgba(251, 113, 133, 0.07) 0%,
           transparent 70%
         );
-        top: -100px;
-        right: -50px;
-        border-radius: 50%;
+        pointer-events: none;
       }
-
       .hero-row {
         display: flex;
         justify-content: space-between;
@@ -453,172 +537,185 @@
         gap: 24px;
         flex-wrap: wrap;
       }
-
       .hero-badge {
         display: inline-block;
-        padding: 6px 12px;
-        background: rgba(255, 255, 255, 0.2);
+        padding: 4px 10px;
+        background: rgba(56, 189, 248, 0.15);
         backdrop-filter: blur(4px);
-        border-radius: 6px;
-        font-size: 11px;
+        border-radius: var(--r-sm);
+        font-size: 10px;
         font-weight: 800;
-        letter-spacing: 1px;
-        margin-bottom: 16px;
-        border: 1px solid rgba(255, 255, 255, 0.3);
+        letter-spacing: 1.5px;
+        color: var(--ocean);
+        border: 1px solid rgba(56, 189, 248, 0.25);
+        margin-bottom: 14px;
       }
-
       .hero h1 {
-        font-size: 36px;
+        font-size: 30px;
         font-weight: 800;
         line-height: 1.2;
-        margin-bottom: 12px;
+        margin-bottom: 10px;
         letter-spacing: -0.5px;
-        color: white;
+        color: var(--text);
       }
-
+      .hero h1 span {
+        color: var(--ocean);
+      }
       .hero p {
-        color: rgba(255, 255, 255, 0.9);
-        font-size: 15px;
+        color: var(--text-2);
+        font-size: 14px;
         line-height: 1.6;
-        max-width: 600px;
+        max-width: 520px;
       }
 
       .hero-mini {
         display: flex;
-        gap: 12px;
-        margin-top: 24px;
+        gap: 8px;
+        margin-top: 20px;
         position: relative;
         z-index: 2;
         flex-wrap: wrap;
       }
-
       .mini-pill {
-        padding: 8px 14px;
-        background: rgba(0, 0, 0, 0.15);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 5px 12px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 99px;
-        font-size: 12px;
+        font-size: 11.5px;
         font-weight: 600;
+        color: var(--text-2);
       }
 
-      /* ===== STAT CARDS & FORMS ===== */
+      /* =============================================
+       STAT CARDS
+    ============================================= */
       .stats {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 20px;
-        margin-bottom: 28px;
+        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+        gap: 14px;
+        margin-bottom: 24px;
       }
-
       .stat-card {
-        background: var(--card-bg);
-        backdrop-filter: blur(24px);
-        border: 1px solid var(--border-color);
-        border-radius: var(--radius-lg);
-        padding: 24px;
-        box-shadow: var(--shadow-sm);
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--r-xl);
+        padding: 20px;
+        position: relative;
+        overflow: hidden;
         transition:
-          transform 0.2s ease,
-          box-shadow 0.2s ease;
+          border-color 0.2s ease,
+          transform 0.2s ease;
       }
-
+      .stat-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--ocean), transparent);
+        opacity: 0;
+        transition: opacity 0.2s ease;
+      }
       .stat-card:hover {
-        box-shadow: var(--shadow-md);
-        border-color: var(--primary);
+        border-color: rgba(56, 189, 248, 0.2);
+        transform: translateY(-2px);
+      }
+      .stat-card:hover::before {
+        opacity: 1;
       }
 
       .stat-top {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 16px;
+        margin-bottom: 14px;
       }
-
       .stat-label {
-        font-size: 13px;
-        color: var(--text-muted);
-        font-weight: 800;
+        font-size: 12px;
+        color: var(--text-2);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
       }
-
       .stat-icon {
-        width: 40px;
-        height: 40px;
-        background: var(--water-foam);
-        color: var(--primary);
-        border-radius: 12px;
+        width: 36px;
+        height: 36px;
+        border-radius: var(--r-md);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 18px;
+        font-size: 16px;
+        background: rgba(56, 189, 248, 0.1);
       }
-
       .stat-value {
-        font-size: 32px;
+        font-size: 28px;
         font-weight: 800;
-        color: var(--text-main);
+        color: var(--text);
         margin-bottom: 4px;
+        letter-spacing: -0.5px;
       }
-
       .stat-note {
-        font-size: 12px;
-        color: var(--text-muted);
+        font-size: 11.5px;
+        color: var(--text-3);
       }
 
+      /* =============================================
+       CARD / SECTION CONTAINER
+    ============================================= */
       .card {
-        background: var(--card-bg);
-        backdrop-filter: blur(24px);
-        border: 1px solid var(--border-color);
-        border-radius: var(--radius-xl);
-        padding: 32px;
-        box-shadow: var(--shadow-md);
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--r-2xl);
+        padding: 26px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
       }
-
       .card-header {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        margin-bottom: 24px;
+        margin-bottom: 20px;
         flex-wrap: wrap;
-        gap: 16px;
-        border-bottom: 1px dashed rgba(56, 189, 248, 0.5);
-        padding-bottom: 20px;
+        gap: 14px;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 18px;
       }
-
       .card-title-wrap h2 {
-        font-size: 24px;
+        font-size: 20px;
         font-weight: 800;
-        color: var(--text-main);
-        margin-bottom: 6px;
-        letter-spacing: -0.5px;
+        color: var(--text);
+        margin-bottom: 5px;
+        letter-spacing: -0.3px;
       }
-
       .card-subtitle {
-        font-size: 14px;
-        color: var(--text-muted);
+        font-size: 13px;
+        color: var(--text-2);
       }
 
       .section-badge {
-        background: #e0f2fe;
-        color: var(--primary);
-        border: 1px solid #bae6fd;
-        padding: 8px 14px;
+        background: rgba(56, 189, 248, 0.1);
+        color: var(--ocean);
+        border: 1px solid rgba(56, 189, 248, 0.2);
+        padding: 6px 13px;
         border-radius: 99px;
-        font-size: 12px;
+        font-size: 11.5px;
         font-weight: 800;
       }
 
+      /* =============================================
+       TOOLBAR & INPUTS
+    ============================================= */
       .toolbar {
         display: flex;
-        gap: 16px;
+        gap: 12px;
         flex-wrap: wrap;
-        margin-bottom: 20px;
+        margin-bottom: 16px;
       }
-
       .field,
       .field-wide {
         flex: 1;
         min-width: 200px;
       }
-
       .field-wide {
         min-width: 100%;
       }
@@ -627,119 +724,137 @@
       select,
       textarea {
         width: 100%;
-        padding: 14px 16px;
-        border-radius: var(--radius-md);
-        border: 1px solid #bae6fd;
-        background: rgba(255, 255, 255, 0.8);
-        color: var(--text-main);
-        font-size: 14px;
+        padding: 11px 14px;
+        border-radius: var(--r-lg);
+        border: 1px solid var(--border-2);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--text);
+        font-size: 13.5px;
         font-weight: 500;
+        font-family: "Outfit", sans-serif;
         outline: none;
-        transition: all 0.2s ease;
+        transition: all 0.18s ease;
+        appearance: none;
+      }
+      textarea {
+        min-height: 110px;
+        resize: vertical;
       }
 
-      textarea {
-        min-height: 120px;
-        resize: vertical;
+      input[type="text"]::placeholder,
+      textarea::placeholder {
+        color: var(--text-3);
+      }
+
+      select option {
+        background: #181e2a;
+        color: var(--text);
       }
 
       input:focus,
       select:focus,
       textarea:focus {
-        border-color: var(--primary);
-        background: white;
-        box-shadow: 0 0 0 4px #e0f2fe;
+        border-color: rgba(56, 189, 248, 0.4);
+        background: rgba(56, 189, 248, 0.05);
+        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
       }
 
-      /* ===== BUTTONS ===== */
+      /* =============================================
+       BUTTONS
+    ============================================= */
       .btn-group {
         display: flex;
-        gap: 12px;
+        gap: 10px;
         flex-wrap: wrap;
       }
 
       button {
-        padding: 14px 20px;
+        padding: 11px 18px;
         border: none;
-        border-radius: var(--radius-md);
-        background: linear-gradient(
-          135deg,
-          var(--primary),
-          var(--primary-hover)
-        );
+        border-radius: var(--r-lg);
+        background: linear-gradient(135deg, var(--ocean), var(--ocean-dk));
         color: white;
-        font-size: 14px;
-        font-weight: 800;
+        font-size: 13px;
+        font-weight: 700;
+        font-family: "Outfit", sans-serif;
         cursor: pointer;
-        box-shadow: 0 8px 16px rgba(14, 165, 233, 0.2);
-        transition:
-          transform 0.2s ease,
-          box-shadow 0.2s ease;
+        box-shadow: 0 4px 14px rgba(14, 165, 233, 0.25);
+        transition: all 0.18s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
       }
-
       button:hover {
-        box-shadow: 0 12px 24px rgba(14, 165, 233, 0.3);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(14, 165, 233, 0.35);
       }
-
       button:active {
         transform: translateY(0);
       }
 
       .ghost-btn {
-        background: rgba(255, 255, 255, 0.9);
-        color: var(--primary);
-        border: 1px solid var(--border-color);
-        box-shadow: var(--shadow-sm);
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text-2);
+        border: 1px solid var(--border-2);
+        box-shadow: none;
       }
-
       .ghost-btn:hover {
-        background: #e0f2fe;
-        box-shadow: var(--shadow-md);
-        border-color: #bae6fd;
+        background: rgba(255, 255, 255, 0.09);
+        color: var(--text);
+        border-color: var(--border-2);
+        box-shadow: none;
       }
 
       .danger-btn {
-        background: rgba(255, 255, 255, 0.9);
-        color: var(--danger-text);
-        border: 1px solid #fecaca;
+        background: rgba(251, 113, 133, 0.1);
+        color: var(--sakura);
+        border: 1px solid rgba(251, 113, 133, 0.2);
         box-shadow: none;
       }
-
       .danger-btn:hover {
-        background: var(--danger-bg);
+        background: rgba(251, 113, 133, 0.18);
+        border-color: rgba(251, 113, 133, 0.35);
         box-shadow: none;
-        border-color: #fda4af;
       }
 
       .logout-btn {
-        background: rgba(255, 255, 255, 0.9);
-        color: var(--text-main);
-        border: 1px solid transparent;
+        background: rgba(255, 255, 255, 0.07);
+        color: var(--text);
+        border: 1px solid var(--border-2);
+        box-shadow: none;
+      }
+      .logout-btn:hover {
+        background: rgba(255, 255, 255, 0.12);
+        box-shadow: none;
       }
 
-      .hero .logout-btn {
-        color: var(--text-main);
-        font-weight: 800;
-      }
-
-      /* ===== TABLES ===== */
+      /* =============================================
+       TABLE
+    ============================================= */
       .info-row {
-        margin-bottom: 16px;
+        margin-bottom: 12px;
       }
-
       .info {
-        font-size: 13px;
-        color: var(--text-muted);
+        font-size: 12.5px;
+        color: var(--text-2);
         font-weight: 600;
       }
 
       .table-wrap {
         overflow-x: auto;
-        background: rgba(255, 255, 255, 0.6);
-        border: 1px solid var(--border-color);
-        border-radius: var(--radius-lg);
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
-        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--border);
+        border-radius: var(--r-xl);
+      }
+      .table-wrap::-webkit-scrollbar {
+        height: 4px;
+      }
+      .table-wrap::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .table-wrap::-webkit-scrollbar-thumb {
+        background: var(--border-2);
+        border-radius: 99px;
       }
 
       table {
@@ -750,155 +865,303 @@
 
       th,
       td {
-        padding: 16px 20px;
+        padding: 13px 16px;
         text-align: left;
-        border-bottom: 1px solid #e0f2fe;
-        font-size: 14px;
+        border-bottom: 1px solid var(--border);
+        font-size: 13px;
         vertical-align: middle;
       }
-
       th {
-        background: #f0f9ff;
-        color: var(--primary);
+        background: rgba(56, 189, 248, 0.04);
+        color: var(--ocean);
         font-weight: 800;
-        font-size: 12px;
+        font-size: 11px;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.7px;
         position: sticky;
         top: 0;
         z-index: 10;
+        white-space: nowrap;
       }
-
       tbody tr {
-        transition: background 0.2s ease;
+        transition: background 0.15s ease;
       }
-
       tbody tr:hover {
-        background: rgba(224, 242, 254, 0.5);
+        background: rgba(56, 189, 248, 0.04);
       }
-
-      /* Soft blue hover */
       tbody tr:last-child td {
         border-bottom: none;
       }
 
       td button {
-        padding: 8px 12px;
-        font-size: 12px;
+        padding: 7px 11px;
+        font-size: 11.5px;
         margin-right: 4px;
         margin-bottom: 4px;
       }
 
-      /* ===== BADGES ===== */
+      /* =============================================
+       BADGES
+    ============================================= */
       .badge {
         display: inline-flex;
-        padding: 6px 12px;
-        border-radius: 6px;
-        font-size: 12px;
+        padding: 4px 10px;
+        border-radius: 99px;
+        font-size: 11px;
         font-weight: 800;
-        text-transform: capitalize;
         border: 1px solid transparent;
+        white-space: nowrap;
       }
-
       .badge.pending {
         background: var(--warn-bg);
         color: var(--warn-text);
-        border-color: #fde047;
+        border-color: rgba(251, 191, 36, 0.2);
       }
-
       .badge.paid,
       .badge.delivered,
       .badge.available {
         background: var(--success-bg);
         color: var(--success-text);
-        border-color: #6ee7b7;
+        border-color: rgba(52, 211, 153, 0.2);
       }
-
       .badge.expired,
       .badge.cancelled,
       .badge.used {
         background: var(--danger-bg);
         color: var(--danger-text);
-        border-color: #fecdd3;
+        border-color: rgba(251, 113, 133, 0.2);
       }
-
       .badge.waiting_payment {
-        background: #e0f2fe;
-        color: #0369a1;
-        border-color: #bae6fd;
+        background: var(--info-bg);
+        color: var(--info-text);
+        border-color: rgba(56, 189, 248, 0.2);
       }
-
       .badge.vip {
-        background: #fef3c7;
-        color: #92400e;
-        border-color: #facc15;
+        background: rgba(251, 191, 36, 0.1);
+        color: var(--gold);
+        border-color: rgba(251, 191, 36, 0.2);
       }
-
       .badge.loyal {
-        background: #dbeafe;
-        color: #1d4ed8;
-        border-color: #93c5fd;
+        background: rgba(56, 189, 248, 0.1);
+        color: var(--ocean);
+        border-color: rgba(56, 189, 248, 0.2);
       }
-
       .badge.verified,
       .badge.reviewer {
-        background: #dcfce7;
-        color: #166534;
-        border-color: #86efac;
+        background: var(--success-bg);
+        color: var(--success-text);
+        border-color: rgba(52, 211, 153, 0.2);
       }
-
       .badge.new {
-        background: #f1f5f9;
-        color: #475569;
-        border-color: #cbd5e1;
+        background: rgba(148, 163, 184, 0.08);
+        color: var(--text-2);
+        border-color: var(--border-2);
       }
-
       .badge.manual,
       .badge.stock_empty {
-        background: #ffe4e6;
-        color: #be123c;
-        border-color: #fecdd3;
+        background: var(--danger-bg);
+        color: var(--danger-text);
+        border-color: rgba(251, 113, 133, 0.2);
       }
 
-      /* Empty State Aesthetic 🎐 */
+      /* =============================================
+       EMPTY STATE
+    ============================================= */
       .empty {
         text-align: center;
-        padding: 60px !important;
-        color: var(--text-muted);
+        padding: 60px 40px !important;
+        color: var(--text-3);
         font-style: italic;
-        font-weight: 500;
-        font-size: 15px;
+        font-size: 14px;
       }
-
       .empty::before {
         content: "🎐";
         display: block;
-        font-size: 36px;
+        font-size: 32px;
         margin-bottom: 12px;
-        opacity: 0.8;
+        opacity: 0.5;
       }
 
-      @keyframes fadeUp {
+      /* =============================================
+       KEY DISPLAY
+    ============================================= */
+      .key-mask {
+        display: inline-flex;
+        align-items: center;
+        padding: 5px 9px;
+        border-radius: var(--r-md);
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border-2);
+        color: var(--ocean);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11.5px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        word-break: break-all;
+      }
+      .key-action-row {
+        display: flex;
+        gap: 5px;
+        flex-wrap: wrap;
+        margin-top: 6px;
+      }
+      .key-action-row button {
+        padding: 6px 9px;
+        font-size: 11px;
+        box-shadow: none;
+      }
+
+      /* =============================================
+       ADMIN ALERTS BOX
+    ============================================= */
+      .admin-alerts-box {
+        margin: 0 0 20px;
+        padding: 18px;
+        border-radius: var(--r-xl);
+        background: rgba(251, 191, 36, 0.06);
+        border: 1px solid rgba(251, 191, 36, 0.18);
+        color: var(--warn-text);
+      }
+      .admin-alerts-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+      .admin-alerts-head strong {
+        font-size: 15px;
+      }
+      .admin-alert-list {
+        display: grid;
+        gap: 10px;
+      }
+      .admin-alert-item {
+        padding: 12px 14px;
+        border-radius: var(--r-lg);
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(251, 191, 36, 0.12);
+        font-size: 12.5px;
+        line-height: 1.5;
+        color: var(--text-2);
+      }
+      .admin-alert-item b {
+        color: var(--gold);
+      }
+      .admin-alert-tag {
+        display: inline-flex;
+        padding: 3px 8px;
+        border-radius: 99px;
+        background: rgba(251, 191, 36, 0.12);
+        color: var(--gold);
+        font-size: 10px;
+        font-weight: 800;
+        margin-bottom: 5px;
+        letter-spacing: 0.5px;
+      }
+      .admin-alert-actions {
+        margin-top: 12px;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .admin-alert-actions button {
+        border-radius: 99px;
+        padding: 8px 14px;
+        background: rgba(251, 191, 36, 0.15);
+        color: var(--gold);
+        border: 1px solid rgba(251, 191, 36, 0.25);
+        font-weight: 700;
+        font-size: 12px;
+        box-shadow: none;
+      }
+      .admin-alert-actions button:hover {
+        background: rgba(251, 191, 36, 0.25);
+      }
+
+      /* =============================================
+       TOAST NOTIFICATION (UI ONLY, NO SERVER)
+    ============================================= */
+      #toast-container {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        z-index: 9999;
+        pointer-events: none;
+      }
+      .toast {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 18px;
+        background: var(--bg-3);
+        border: 1px solid var(--border-2);
+        border-radius: var(--r-lg);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        color: var(--text);
+        font-size: 13px;
+        font-weight: 600;
+        min-width: 220px;
+        animation: toastIn 0.25s ease both;
+        pointer-events: all;
+      }
+      .toast.hide {
+        animation: toastOut 0.25s ease forwards;
+      }
+      @keyframes toastIn {
         from {
           opacity: 0;
-          transform: translateY(15px);
+          transform: translateX(20px);
         }
-
         to {
           opacity: 1;
-          transform: translateY(0);
+          transform: none;
+        }
+      }
+      @keyframes toastOut {
+        from {
+          opacity: 1;
+          transform: none;
+        }
+        to {
+          opacity: 0;
+          transform: translateX(20px);
         }
       }
 
-      .delay-1 {
-        animation-delay: 0.1s;
+      /* =============================================
+       LOADING SKELETON (UI ONLY)
+    ============================================= */
+      .skeleton {
+        background: linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0.04) 25%,
+          rgba(255, 255, 255, 0.08) 50%,
+          rgba(255, 255, 255, 0.04) 75%
+        );
+        background-size: 400% 100%;
+        animation: shimmer 1.4s ease infinite;
+        border-radius: var(--r-md);
+      }
+      @keyframes shimmer {
+        from {
+          background-position: 100% 0;
+        }
+        to {
+          background-position: -100% 0;
+        }
       }
 
+      /* =============================================
+       RESPONSIVE
+    ============================================= */
       @media (max-width: 768px) {
         body {
           flex-direction: column;
         }
-
         .sidebar {
           width: 100% !important;
           min-width: 100% !important;
@@ -907,405 +1170,84 @@
           position: sticky;
           top: 0;
           border-right: none;
-          border-bottom: 1px solid var(--border-color);
+          border-bottom: 1px solid var(--border);
+          padding: 10px 12px;
+          gap: 10px;
           flex-direction: column;
-          align-items: stretch;
-          padding: 12px;
-          gap: 12px;
-          z-index: 100;
+          overflow-y: visible;
         }
-
         .sidebar-brand {
           border-bottom: none;
           padding-bottom: 0;
         }
-
         .sidebar-nav {
           display: flex;
           flex-direction: row;
           flex: none;
-          justify-content: flex-start;
-          gap: 8px;
           overflow-x: auto;
-          padding-bottom: 4px;
+          gap: 6px;
+          padding-bottom: 2px;
           -webkit-overflow-scrolling: touch;
         }
-
-        .sidebar-toggle {
-          display: none;
+        .sidebar-nav::-webkit-scrollbar {
+          height: 0;
         }
-
+        .sidebar-toggle,
         .sidebar-footer {
           display: none;
         }
-
         .nav-btn {
           width: auto;
           min-width: max-content;
-          padding: 10px 14px;
+          padding: 8px 14px;
           font-size: 12px;
-          border-radius: 999px;
+          border-radius: 99px;
           white-space: nowrap;
         }
-
         .page {
-          padding: 16px;
+          padding: 14px 14px 40px;
         }
-
         .hero {
-          padding: 24px;
-        }
-
-        .hero h1 {
-          font-size: 28px;
-        }
-
-        .card {
           padding: 20px;
         }
-
+        .hero h1 {
+          font-size: 22px;
+        }
+        .card {
+          padding: 18px;
+        }
         .top-nav {
           flex-direction: column;
           align-items: flex-start;
-          gap: 16px;
+          gap: 12px;
         }
-        .toolbar {
-          gap: 10px;
-        }
-
-        .btn-group {
-          width: 100%;
-          gap: 10px;
-        }
-
-        .btn-group button {
-          flex: 1 1 140px;
-          min-height: 44px;
-        }
-
-        td button {
-          min-height: 38px;
-          padding: 10px 12px;
-          font-size: 12px;
-        }
-
-        .table-wrap {
-          border-radius: 18px;
-        }
-
         .nav-actions {
           width: 100%;
           flex-wrap: wrap;
         }
-
         .nav-chip {
-          width: 100%;
-          justify-content: center;
+          display: none;
         }
-
-        .top-nav .ghost-btn {
-          width: 100%;
+        .btn-group button {
+          flex: 1 1 130px;
         }
         body.sidebar-collapsed .sidebar {
           width: 100% !important;
           min-width: 100% !important;
           flex: none !important;
-          padding: 12px;
+          padding: 10px 12px;
         }
-
-        body.sidebar-collapsed .sidebar-brand {
-          flex-direction: row;
-          align-items: center;
-        }
-
-        body.sidebar-collapsed .sidebar-text {
+        body.sidebar-collapsed .sidebar-text,
+        body.sidebar-collapsed .nav-label {
           display: block;
           opacity: 1;
         }
-
-        body.sidebar-collapsed .nav-btn {
-          font-size: 12px;
-          padding: 10px 14px;
-        }
-      }
-      .admin-alerts-box {
-        margin: 18px 0;
-        padding: 18px;
-        border-radius: 18px;
-        background: #fff7ed;
-        border: 1px solid #fed7aa;
-        color: #9a3412;
-        box-shadow: 0 10px 24px rgba(251, 146, 60, 0.12);
-      }
-
-      .admin-alerts-head {
-        display: flex;
-        justify-content: space-between;
-        gap: 12px;
-        align-items: center;
-        margin-bottom: 12px;
-      }
-
-      .admin-alerts-head strong {
-        font-size: 16px;
-      }
-
-      .admin-alert-list {
-        display: grid;
-        gap: 10px;
-      }
-
-      .admin-alert-item {
-        padding: 12px;
-        border-radius: 14px;
-        background: rgba(255, 255, 255, 0.75);
-        border: 1px solid #fed7aa;
-        font-size: 13px;
-        line-height: 1.45;
-      }
-
-      .admin-alert-item b {
-        color: #7c2d12;
-      }
-
-      .admin-alert-tag {
-        display: inline-flex;
-        padding: 4px 8px;
-        border-radius: 999px;
-        background: #ffedd5;
-        color: #9a3412;
-        font-size: 11px;
-        font-weight: 800;
-        margin-bottom: 6px;
-      }
-
-      .admin-alert-actions {
-        margin-top: 12px;
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-      }
-
-      .admin-alert-actions button {
-        border: none;
-        border-radius: 999px;
-        padding: 9px 12px;
-        background: #f97316;
-        color: white;
-        font-weight: 800;
-        cursor: pointer;
-      }
-
-      /* ===== CLEAN COMPACT ADMIN MODE ===== */
-
-      body {
-        background-image:
-          radial-gradient(
-            circle at 10% 10%,
-            rgba(56, 189, 248, 0.08),
-            transparent 32%
-          ),
-          radial-gradient(
-            circle at 90% 90%,
-            rgba(251, 113, 133, 0.06),
-            transparent 32%
-          );
-      }
-
-      .page {
-        padding: 20px 24px 48px;
-      }
-
-      .sidebar {
-        background: rgba(255, 255, 255, 0.78);
-        padding: 20px 16px;
-        gap: 18px;
-      }
-
-      .nav-btn {
-        padding: 11px 13px;
-        border-radius: 12px;
-        font-size: 13px;
-      }
-
-      .top-nav {
-        top: 12px;
-        padding: 11px 16px;
-        margin-bottom: 18px;
-        border-radius: 16px;
-      }
-
-      .hero {
-        padding: 24px;
-        margin-bottom: 20px;
-        border-radius: 22px;
-        background: linear-gradient(135deg, #0284c7, #38bdf8);
-      }
-
-      .hero h1 {
-        font-size: 28px;
-        margin-bottom: 8px;
-      }
-
-      .hero p {
-        font-size: 13px;
-        max-width: 560px;
-      }
-
-      .hero-badge {
-        padding: 5px 10px;
-        margin-bottom: 10px;
-        font-size: 10px;
-      }
-
-      .hero-mini {
-        margin-top: 16px;
-        gap: 8px;
-      }
-
-      .mini-pill {
-        padding: 6px 10px;
-        font-size: 11px;
-      }
-
-      .stats {
-        gap: 14px;
-        margin-bottom: 20px;
-      }
-
-      .stat-card {
-        padding: 18px;
-        border-radius: 16px;
-      }
-
-      .stat-icon {
-        width: 34px;
-        height: 34px;
-        border-radius: 10px;
-        font-size: 15px;
-      }
-
-      .stat-value {
-        font-size: 26px;
-      }
-
-      .stat-label,
-      .stat-note {
-        font-size: 12px;
-      }
-
-      .card {
-        padding: 22px;
-        border-radius: 20px;
-        box-shadow: var(--shadow-sm);
-      }
-
-      .card-header {
-        margin-bottom: 18px;
-        padding-bottom: 16px;
-      }
-
-      .card-title-wrap h2 {
-        font-size: 20px;
-      }
-
-      .card-subtitle {
-        font-size: 13px;
-      }
-
-      .toolbar {
-        gap: 12px;
-        margin-bottom: 16px;
-      }
-
-      input[type="text"],
-      select,
-      textarea {
-        padding: 11px 13px;
-        border-radius: 12px;
-        font-size: 13px;
-      }
-
-      button {
-        padding: 11px 15px;
-        border-radius: 12px;
-        font-size: 13px;
-      }
-
-      .table-wrap {
-        border-radius: 16px;
-      }
-
-      th,
-      td {
-        padding: 12px 14px;
-        font-size: 13px;
-      }
-
-      th {
-        font-size: 11px;
-      }
-
-      .badge {
-        padding: 5px 9px;
-        border-radius: 999px;
-        font-size: 11px;
-      }
-
-      .key-mask {
-        display: inline-flex;
-        align-items: center;
-        padding: 6px 9px;
-        border-radius: 10px;
-        background: #f8fafc;
-        border: 1px solid #cbd5e1;
-        color: #334155;
-        font-family: "Courier New", monospace;
-        font-size: 12px;
-        font-weight: 800;
-        letter-spacing: 0.4px;
-        word-break: break-all;
-      }
-
-      .key-action-row {
-        display: flex;
-        gap: 6px;
-        flex-wrap: wrap;
-        margin-top: 7px;
-      }
-
-      .key-action-row button {
-        padding: 7px 10px;
-        font-size: 11px;
-        box-shadow: none;
-      }
-
-      @media (max-width: 768px) {
-        .page {
-          padding: 16px 14px 40px;
-        }
-
-        .hero {
-          padding: 20px;
-        }
-
-        .hero h1 {
-          font-size: 23px;
-        }
-
-        .nav-chip {
-          display: none;
-        }
-
-        .card {
-          padding: 18px;
-        }
       }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </head>
 
   <body>
+    <!-- ===================== SIDEBAR ===================== -->
     <div class="sidebar">
       <div class="sidebar-brand">
         <div class="sidebar-brand-left">
@@ -1315,7 +1257,13 @@
             <div class="sidebar-title">Admin Panel</div>
           </div>
         </div>
-        <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+        <button
+          class="sidebar-toggle"
+          onclick="toggleSidebar()"
+          title="Toggle sidebar"
+        >
+          ☰
+        </button>
       </div>
 
       <nav class="sidebar-nav">
@@ -1324,66 +1272,72 @@
           data-section="dashboard"
           onclick="showSection('dashboard', this)"
         >
-          Dashboard
+          <span class="nav-icon">🏠</span
+          ><span class="nav-label">Dashboard</span>
         </button>
         <button
           class="nav-btn"
           data-section="products"
           onclick="showSection('products', this)"
         >
-          Produk
+          <span class="nav-icon">📦</span><span class="nav-label">Produk</span>
         </button>
         <button
           class="nav-btn"
           data-section="orders"
           onclick="showSection('orders', this)"
         >
-          Order
+          <span class="nav-icon">🧾</span><span class="nav-label">Order</span>
         </button>
         <button
           class="nav-btn"
           data-section="users"
           onclick="showSection('users', this)"
         >
-          User Buyer
+          <span class="nav-icon">👥</span
+          ><span class="nav-label">User Buyer</span>
         </button>
         <button
           class="nav-btn"
           data-section="keys"
           onclick="showSection('keys', this)"
         >
-          Game Key
+          <span class="nav-icon">🔑</span
+          ><span class="nav-label">Game Key</span>
         </button>
         <button
           class="nav-btn"
           data-section="vouchers"
           onclick="showSection('vouchers', this)"
         >
-          Voucher
+          <span class="nav-icon">🎟️</span><span class="nav-label">Voucher</span>
         </button>
       </nav>
 
       <div class="sidebar-footer">
-        <button class="sidebar-logout" onclick="logoutAdmin()">Logout</button>
+        <button class="sidebar-logout" onclick="logoutAdmin()">
+          🚪 &nbsp;Logout
+        </button>
       </div>
     </div>
 
+    <!-- ===================== MAIN ===================== -->
     <main class="page">
+      <!-- ===== DASHBOARD ===== -->
       <section id="section-dashboard" class="admin-section active">
         <div class="top-nav">
           <div class="top-nav-left">
             <div class="logo-badge">AE</div>
             <div>
               <div class="nav-kicker" id="adminGreeting">AE Game Store</div>
-              <div class="nav-title" id="adminClock">Zen Admin Dashboard</div>
+              <div class="nav-title" id="adminClock">Admin Dashboard</div>
             </div>
           </div>
           <div class="nav-actions">
             <div class="admin-role-chip owner" id="adminRoleChip">👑 Owner</div>
-
             <div class="nav-chip">
               <span class="chip-dot"></span>
-              <span>Sistem Aktif & Terlindungi</span>
+              <span>Sistem Aktif</span>
             </div>
             <button
               class="ghost-btn"
@@ -1397,26 +1351,34 @@
 
         <div class="hero">
           <div class="hero-row">
-            <div style="max-width: 600px">
+            <div style="max-width: 560px">
               <div class="hero-badge">AE GAME STORE • ADMIN</div>
-              <h1>Dashboard Operasional</h1>
+              <h1>Dashboard <span>Operasional</span></h1>
               <p>
                 Kelola produk, order, stok key, voucher, dan buyer dari satu
                 panel yang clean.
               </p>
             </div>
-            <div>
+            <div
+              style="
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-end;
+              "
+            >
               <button class="logout-btn" onclick="refreshAllData()">
-                Refresh Semua Data 🌊
+                🌊 Refresh Semua Data
               </button>
             </div>
           </div>
           <div class="hero-mini">
-            <div class="mini-pill">Order</div>
-            <div class="mini-pill">Stok Key</div>
-            <div class="mini-pill">Voucher</div>
+            <div class="mini-pill">📦 Order</div>
+            <div class="mini-pill">🔑 Stok Key</div>
+            <div class="mini-pill">🎟️ Voucher</div>
           </div>
         </div>
+
         <div
           id="adminAlertsBox"
           class="admin-alerts-box"
@@ -1427,49 +1389,46 @@
           class="admin-alerts-box"
           style="display: none"
         ></div>
-        <div class="stats delay-1">
+
+        <div class="stats">
           <div class="stat-card">
             <div class="stat-top">
               <div class="stat-label">Total Key</div>
               <div class="stat-icon">🔑</div>
             </div>
-            <div class="stat-value" id="totalKeyStat">0</div>
-            <div class="stat-note">Seluruh key di database.</div>
+            <div class="stat-value" id="totalKeyStat">—</div>
+            <div class="stat-note">Seluruh key di database</div>
           </div>
-
           <div class="stat-card">
             <div class="stat-top">
               <div class="stat-label">Key Available</div>
               <div class="stat-icon">✅</div>
             </div>
-            <div class="stat-value" id="availableKeyStat">0</div>
-            <div class="stat-note">Stok key yang belum dipakai.</div>
+            <div class="stat-value" id="availableKeyStat">—</div>
+            <div class="stat-note">Stok key belum dipakai</div>
           </div>
-
           <div class="stat-card">
             <div class="stat-top">
               <div class="stat-label">Total Order</div>
               <div class="stat-icon">🧾</div>
             </div>
-            <div class="stat-value" id="totalOrderStat">0</div>
-            <div class="stat-note">Jumlah order yang tercatat.</div>
+            <div class="stat-value" id="totalOrderStat">—</div>
+            <div class="stat-note">Jumlah order tercatat</div>
           </div>
-
           <div class="stat-card">
             <div class="stat-top">
               <div class="stat-label">Total Produk</div>
               <div class="stat-icon">📦</div>
             </div>
-            <div class="stat-value" id="totalProductStat">0</div>
-            <div class="stat-note">Produk tersedia di panel.</div>
+            <div class="stat-value" id="totalProductStat">—</div>
+            <div class="stat-note">Produk tersedia di panel</div>
           </div>
-
           <div class="stat-card">
             <div class="stat-top">
               <div class="stat-label">Produk Hampir Habis</div>
               <div class="stat-icon">⚠️</div>
             </div>
-            <div class="stat-value" id="lowStockStat">0</div>
+            <div class="stat-value" id="lowStockStat">—</div>
             <div class="stat-note">Produk dengan stok &lt; 5</div>
           </div>
           <div class="stat-card">
@@ -1477,72 +1436,67 @@
               <div class="stat-label">Revenue Hari Ini</div>
               <div class="stat-icon">💰</div>
             </div>
-            <div class="stat-value" id="revenueTodayStat">Rp 0</div>
-            <div class="stat-note">Total order paid hari ini.</div>
+            <div class="stat-value" id="revenueTodayStat">Rp —</div>
+            <div class="stat-note">Total order paid hari ini</div>
           </div>
-
           <div class="stat-card">
             <div class="stat-top">
               <div class="stat-label">Revenue Bulan Ini</div>
               <div class="stat-icon">📈</div>
             </div>
-            <div class="stat-value" id="revenueMonthStat">Rp 0</div>
-            <div class="stat-note">Total order paid bulan ini.</div>
+            <div class="stat-value" id="revenueMonthStat">Rp —</div>
+            <div class="stat-note">Total order paid bulan ini</div>
           </div>
-
           <div class="stat-card">
             <div class="stat-top">
               <div class="stat-label">Paid Hari Ini</div>
               <div class="stat-icon">✅</div>
             </div>
-            <div class="stat-value" id="paidTodayStat">0</div>
-            <div class="stat-note">Order berhasil dibayar hari ini.</div>
+            <div class="stat-value" id="paidTodayStat">—</div>
+            <div class="stat-note">Order berhasil dibayar hari ini</div>
           </div>
-
           <div class="stat-card">
             <div class="stat-top">
               <div class="stat-label">Order Pending</div>
               <div class="stat-icon">⏳</div>
             </div>
-            <div class="stat-value" id="pendingOrderStat">0</div>
-            <div class="stat-note">Order belum dibayar.</div>
+            <div class="stat-value" id="pendingOrderStat">—</div>
+            <div class="stat-note">Order belum dibayar</div>
           </div>
         </div>
       </section>
 
+      <!-- ===== PRODUCTS ===== -->
       <section id="section-products" class="admin-section">
-        <div class="card delay-1">
+        <div class="card">
           <div class="card-header">
             <div class="card-title-wrap">
               <h2>Kelola Produk</h2>
               <p class="card-subtitle">
-                Tambahkan, edit, aktifkan, atau hapus produk dari store dengan
-                cepat.
+                Tambah, edit, aktifkan, atau hapus produk dari store.
               </p>
             </div>
-            <div class="section-badge">Product Manager</div>
+            <div class="section-badge">📦 Product Manager</div>
           </div>
+
           <div class="toolbar">
             <div class="field">
               <input
                 type="text"
                 id="productSearchInput"
-                placeholder="Cari game / brand / durasi"
+                placeholder="🔍 Cari game / brand / durasi"
               />
             </div>
-
             <div class="field">
               <select id="productGameFilter" onchange="applyProductFilters()">
                 <option value="">Semua Game</option>
               </select>
             </div>
-
             <div class="field">
               <select id="productBrandFilter" onchange="applyProductFilters()">
                 <option value="">Semua Brand</option>
               </select>
             </div>
-
             <div class="field">
               <select id="productStatusFilter" onchange="applyProductFilters()">
                 <option value="">Semua Status</option>
@@ -1551,6 +1505,7 @@
               </select>
             </div>
           </div>
+
           <div class="toolbar">
             <input type="hidden" id="editingProductId" />
             <div class="field">
@@ -1586,13 +1541,13 @@
           <div class="toolbar">
             <div class="btn-group">
               <button id="saveProductBtn" onclick="saveProduct()">
-                Tambah Produk
+                💾 Tambah Produk
               </button>
               <button class="ghost-btn" onclick="resetProductForm()">
-                Reset Form
+                🔄 Reset Form
               </button>
               <button class="ghost-btn" onclick="loadProducts()">
-                Refresh Produk
+                ↻ Refresh
               </button>
             </div>
           </div>
@@ -1602,7 +1557,6 @@
               Memuat daftar produk...
             </div>
           </div>
-
           <div class="table-wrap">
             <table>
               <thead>
@@ -1613,7 +1567,7 @@
                   <th>Durasi</th>
                   <th>Harga</th>
                   <th>Status</th>
-                  <th style="width: 220px">Aksi</th>
+                  <th style="width: 240px">Aksi</th>
                 </tr>
               </thead>
               <tbody id="productTableBody"></tbody>
@@ -1622,16 +1576,17 @@
         </div>
       </section>
 
+      <!-- ===== ORDERS ===== -->
       <section id="section-orders" class="admin-section">
-        <div class="card delay-1">
+        <div class="card">
           <div class="card-header">
             <div class="card-title-wrap">
               <h2>Daftar Order</h2>
               <p class="card-subtitle">
-                Lihat transaksi masuk, filter pembayaran, dan copy detail order.
+                Lihat transaksi masuk, filter pembayaran, copy detail order.
               </p>
             </div>
-            <div class="section-badge">Order Monitor</div>
+            <div class="section-badge">🧾 Order Monitor</div>
           </div>
 
           <div class="toolbar">
@@ -1639,10 +1594,9 @@
               <input
                 type="text"
                 id="orderSearchInput"
-                placeholder="Cari order id / nama / kontak / game / produk"
+                placeholder="🔍 Cari order id / nama / kontak / game / produk"
               />
             </div>
-
             <div class="field">
               <select id="paymentFilter" onchange="applyOrderFilters()">
                 <option value="">Semua Pembayaran</option>
@@ -1651,7 +1605,6 @@
                 <option value="expired">Expired</option>
               </select>
             </div>
-
             <div class="field">
               <select id="deliveryFilter" onchange="applyOrderFilters()">
                 <option value="">Semua Pengiriman</option>
@@ -1661,17 +1614,16 @@
                 <option value="cancelled">Cancelled</option>
               </select>
             </div>
-
             <div class="btn-group">
-              <button onclick="loadOrders()">Refresh Order</button>
+              <button onclick="loadOrders()">↻ Refresh</button>
               <button class="ghost-btn" onclick="selectAllFilteredOrders()">
-                Pilih Semua Filter
+                ☑ Pilih Semua
               </button>
               <button class="danger-btn" onclick="deleteSelectedOrders()">
-                Hapus Terpilih
+                🗑 Hapus Terpilih
               </button>
               <button class="ghost-btn" onclick="clearSelectedOrders()">
-                Batal Pilih
+                ✕ Batal
               </button>
             </div>
           </div>
@@ -1679,7 +1631,6 @@
           <div class="info-row">
             <div class="info" id="orderStatusText">Memuat daftar order...</div>
           </div>
-
           <div class="table-wrap">
             <table>
               <thead>
@@ -1697,7 +1648,7 @@
                   <th>Pengiriman</th>
                   <th>Game Key</th>
                   <th>Waktu</th>
-                  <th style="width: 160px">Aksi</th>
+                  <th style="width: 180px">Aksi</th>
                 </tr>
               </thead>
               <tbody id="orderTableBody"></tbody>
@@ -1705,26 +1656,25 @@
           </div>
         </div>
       </section>
+
+      <!-- ===== USERS ===== -->
       <section id="section-users" class="admin-section">
-        <div class="card delay-1">
+        <div class="card">
           <div class="card-header">
             <div class="card-title-wrap">
               <h2>Daftar User Buyer</h2>
               <p class="card-subtitle">Lihat akun buyer yang sudah daftar.</p>
             </div>
-            <div class="section-badge">User Monitor</div>
+            <div class="section-badge">👥 User Monitor</div>
           </div>
-
           <div class="toolbar">
             <div class="btn-group">
-              <button onclick="loadUsers()">Refresh User</button>
+              <button onclick="loadUsers()">↻ Refresh User</button>
             </div>
           </div>
-
           <div class="info-row">
             <div class="info" id="userStatusText">Memuat daftar user...</div>
           </div>
-
           <div class="table-wrap">
             <table>
               <thead>
@@ -1744,8 +1694,9 @@
         </div>
       </section>
 
+      <!-- ===== GAME KEYS ===== -->
       <section id="section-keys" class="admin-section">
-        <div class="card delay-1">
+        <div class="card">
           <div class="card-header">
             <div class="card-title-wrap">
               <h2>Tambah Game Key</h2>
@@ -1753,7 +1704,7 @@
                 Tambahkan key satuan atau bulk untuk setiap produk yang aktif.
               </p>
             </div>
-            <div class="section-badge">Key Stock</div>
+            <div class="section-badge">🔑 Key Stock</div>
           </div>
 
           <div class="toolbar">
@@ -1761,10 +1712,9 @@
               <input
                 type="text"
                 id="keySearchInput"
-                placeholder="Cari key / game / brand / durasi"
+                placeholder="🔍 Cari key / game / brand / durasi"
               />
             </div>
-
             <div class="field">
               <select id="keyStatusFilter" onchange="applyKeyFilters()">
                 <option value="">Semua Status</option>
@@ -1789,7 +1739,7 @@
               />
             </div>
             <div class="btn-group">
-              <button onclick="addSingleKey()">Tambah 1 Key</button>
+              <button onclick="addSingleKey()">➕ Tambah 1 Key</button>
             </div>
           </div>
 
@@ -1804,9 +1754,9 @@
 
           <div class="toolbar">
             <div class="btn-group">
-              <button onclick="addBulkKeys()">Tambah Bulk Key</button>
+              <button onclick="addBulkKeys()">📥 Tambah Bulk Key</button>
               <button class="ghost-btn" onclick="loadKeys()">
-                Refresh Key
+                ↻ Refresh Key
               </button>
             </div>
           </div>
@@ -1814,7 +1764,6 @@
           <div class="info-row">
             <div class="info" id="keyStatusText">Memuat daftar key...</div>
           </div>
-
           <div class="table-wrap">
             <table>
               <thead>
@@ -1822,8 +1771,8 @@
                   <th style="width: 90px">ID</th>
                   <th>Produk</th>
                   <th>Key</th>
-                  <th style="width: 180px">Status</th>
-                  <th style="width: 140px">Aksi</th>
+                  <th style="width: 160px">Status</th>
+                  <th style="width: 120px">Aksi</th>
                 </tr>
               </thead>
               <tbody id="keyTableBody"></tbody>
@@ -1831,8 +1780,10 @@
           </div>
         </div>
       </section>
+
+      <!-- ===== VOUCHERS ===== -->
       <section id="section-vouchers" class="admin-section">
-        <div class="card delay-1">
+        <div class="card">
           <div class="card-header">
             <div class="card-title-wrap">
               <h2>Kelola Voucher</h2>
@@ -1841,17 +1792,17 @@
                 Delta Force.
               </p>
             </div>
-            <div class="section-badge">Voucher Manager</div>
+            <div class="section-badge">🎟️ Voucher Manager</div>
           </div>
+
           <div class="toolbar">
             <div class="field-wide">
               <input
                 type="text"
                 id="voucherSearchInput"
-                placeholder="Cari kode / game / brand / durasi voucher"
+                placeholder="🔍 Cari kode / game / brand / durasi voucher"
               />
             </div>
-
             <div class="field">
               <select id="voucherStatusFilter" onchange="applyVoucherFilters()">
                 <option value="">Semua Status</option>
@@ -1863,7 +1814,6 @@
 
           <div class="toolbar">
             <input type="hidden" id="editingVoucherId" />
-
             <div class="field">
               <input
                 type="text"
@@ -1871,7 +1821,6 @@
                 placeholder="Kode voucher, contoh: DELTA5K"
               />
             </div>
-
             <div class="field">
               <input
                 type="text"
@@ -1886,7 +1835,6 @@
                 placeholder="Brand optional, contoh: Aorus"
               />
             </div>
-
             <div class="field">
               <input
                 type="text"
@@ -1894,7 +1842,6 @@
                 placeholder="Durasi optional, contoh: 6 Jam"
               />
             </div>
-
             <div class="field">
               <input
                 type="text"
@@ -1902,7 +1849,6 @@
                 placeholder="Nominal diskon, contoh: 5000"
               />
             </div>
-
             <div class="field">
               <input
                 type="text"
@@ -1915,13 +1861,13 @@
           <div class="toolbar">
             <div class="btn-group">
               <button id="saveVoucherBtn" onclick="saveVoucher()">
-                Simpan Voucher
+                💾 Simpan Voucher
               </button>
               <button class="ghost-btn" onclick="resetVoucherForm()">
-                Reset Form
+                🔄 Reset Form
               </button>
               <button class="ghost-btn" onclick="loadVouchers()">
-                Refresh Voucher
+                ↻ Refresh
               </button>
             </div>
           </div>
@@ -1931,7 +1877,6 @@
               Memuat daftar voucher...
             </div>
           </div>
-
           <div class="table-wrap">
             <table>
               <thead>
@@ -1944,7 +1889,7 @@
                   <th>Diskon</th>
                   <th>Status</th>
                   <th>Expired</th>
-                  <th style="width: 220px">Aksi</th>
+                  <th style="width: 230px">Aksi</th>
                 </tr>
               </thead>
               <tbody id="voucherTableBody"></tbody>
@@ -1954,6 +1899,13 @@
       </section>
     </main>
 
+    <!-- ===== TOAST CONTAINER (UI only) ===== -->
+    <div id="toast-container"></div>
+
+    <!-- =====================================================================
+       JAVASCRIPT — semua logic server/DB sama persis dengan aslinya.
+       Tambahan UI-only: showToast(), animasi section, badge-update counter
+  ===================================================================== -->
     <script>
       let allOrders = [];
       let selectedOrderIds = new Set();
@@ -1961,6 +1913,46 @@
       let allVouchers = [];
       let allKeys = [];
 
+      /* ── UI ADDITION: lightweight toast (tidak menyentuh server/DB) ── */
+      function showToast(msg, type = "info") {
+        const container = document.getElementById("toast-container");
+        const icons = { info: "💬", success: "✅", error: "❌", warn: "⚠️" };
+        const el = document.createElement("div");
+        el.className = "toast";
+        el.innerHTML = `<span>${icons[type] || "💬"}</span><span>${msg}</span>`;
+        container.appendChild(el);
+        setTimeout(() => {
+          el.classList.add("hide");
+          el.addEventListener("animationend", () => el.remove(), {
+            once: true,
+          });
+        }, 3000);
+      }
+
+      /* ── UI ADDITION: nav badge counter helper (tidak menyentuh server/DB) ── */
+      function setNavBadge(section, count) {
+        const btn = document.querySelector(
+          `.nav-btn[data-section="${section}"]`,
+        );
+        if (!btn) return;
+        const existing = btn.querySelector(".nav-count");
+        if (existing) existing.remove();
+        if (count > 0) {
+          const badge = document.createElement("span");
+          badge.className = "nav-count";
+          badge.style.cssText = `
+          margin-left:auto; background:rgba(251,113,133,0.8);
+          color:#fff; font-size:10px; font-weight:800;
+          padding:1px 6px; border-radius:99px; line-height:1.6;
+        `;
+          badge.textContent = count > 99 ? "99+" : count;
+          btn.appendChild(badge);
+        }
+      }
+
+      /* ─────────────────────────────────────────────────────────────────
+       ORIGINAL LOGIC — TIDAK DIUBAH SAMA SEKALI
+    ───────────────────────────────────────────────────────────────── */
       function toggleSidebar() {
         document.body.classList.toggle("sidebar-collapsed");
       }
@@ -2021,6 +2013,8 @@
         loadAdminStats();
         loadAdminAlerts();
         loadAdminSessions();
+        /* UI only: toast feedback */
+        showToast("Semua data di-refresh 🌊", "info");
       }
 
       function formatRupiah(num) {
@@ -2079,10 +2073,20 @@
 
         document.getElementById("totalKeyStat").innerText = total;
         document.getElementById("availableKeyStat").innerText = available;
+
+        /* UI only: badge on nav */
+        const lowStock = total - available;
+        setNavBadge("keys", available === 0 ? total : 0);
       }
 
       function updateOrderStats(orders) {
         document.getElementById("totalOrderStat").innerText = orders.length;
+
+        /* UI only: badge for pending orders on nav */
+        const pendingCount = orders.filter(
+          (o) => String(o.payment_status || "").toLowerCase() === "pending",
+        ).length;
+        setNavBadge("orders", pendingCount);
       }
 
       function getCsrfToken() {
@@ -2110,11 +2114,12 @@
         display:block;
         padding:14px;
         border-radius:12px;
-        background:#f0f9ff;
-        border:1px solid #bae6fd;
-        color:#0c4a6e;
+        background:#0f172a;
+        border:1px solid rgba(56,189,248,0.2);
+        color:#38bdf8;
         font-weight:800;
         word-break:break-all;
+        font-family:'JetBrains Mono',monospace;
       ">
         ${escapeHtml(value || "-")}
       </code>
@@ -2123,6 +2128,8 @@
           showCancelButton: true,
           cancelButtonText: "Tutup",
           confirmButtonColor: "#0ea5e9",
+          background: "#111620",
+          color: "#e2e8f0",
         }).then((result) => {
           if (result.isConfirmed) {
             copyToClipboard(value || "");
@@ -2157,7 +2164,7 @@
         navigator.clipboard
           .writeText(text)
           .then(() => {
-            Swal.fire("Berhasil dicopy!");
+            showToast("Berhasil dicopy!", "success"); /* UI only */
           })
           .catch(() => {
             Swal.fire("Gagal copy.");
@@ -2375,6 +2382,7 @@
           Swal.fire("Terjadi error server saat menambahkan bulk key");
         }
       }
+
       async function loadUsers() {
         const statusText = document.getElementById("userStatusText");
         const tableBody = document.getElementById("userTableBody");
@@ -2441,6 +2449,8 @@
           confirmButtonText: "Ya, Reset",
           cancelButtonText: "Batal",
           confirmButtonColor: "#0ea5e9",
+          background: "#111620",
+          color: "#e2e8f0",
         });
 
         if (!result.isConfirmed) return;
@@ -2470,6 +2480,8 @@
             confirmButtonText: "Copy Password",
             showCancelButton: true,
             cancelButtonText: "Tutup",
+            background: "#111620",
+            color: "#e2e8f0",
           }).then((copyResult) => {
             if (copyResult.isConfirmed) {
               navigator.clipboard.writeText(data.newPassword || "");
@@ -2490,6 +2502,8 @@
           confirmButtonText: "Ya, Hapus",
           cancelButtonText: "Batal",
           confirmButtonColor: "#fb7185",
+          background: "#111620",
+          color: "#e2e8f0",
         });
 
         if (!result.isConfirmed) return;
@@ -2515,6 +2529,7 @@
           Swal.fire("Terjadi error server saat hapus user");
         }
       }
+
       async function loadOrders() {
         const statusText = document.getElementById("orderStatusText");
         const tableBody = document.getElementById("orderTableBody");
@@ -2785,7 +2800,10 @@
                                                 <td>
                                                   ${
                                                     item.gameKey || item.gamekey
-                                                      ? renderMaskedKey(item.gameKey || item.gamekey)
+                                                      ? renderMaskedKey(
+                                                          item.gameKey ||
+                                                            item.gamekey,
+                                                        )
                                                       : "-"
                                                   }
                                                 </td>
@@ -2847,6 +2865,7 @@
 
         copyToClipboard(text);
       }
+
       async function confirmPayment(orderId) {
         const result = await Swal.fire({
           title: "Konfirmasi Pembayaran?",
@@ -2857,6 +2876,8 @@
           cancelButtonText: "Batal",
           confirmButtonColor: "#0ea5e9",
           cancelButtonColor: "#64748b",
+          background: "#111620",
+          color: "#e2e8f0",
         });
 
         if (!result.isConfirmed) return;
@@ -2880,6 +2901,8 @@
               title: "Gagal",
               text: data.message || "Gagal konfirmasi pembayaran",
               confirmButtonColor: "#0ea5e9",
+              background: "#111620",
+              color: "#e2e8f0",
             });
             return;
           }
@@ -2889,6 +2912,8 @@
             title: "Berhasil",
             text: data.message || "Pembayaran dikonfirmasi",
             confirmButtonColor: "#0ea5e9",
+            background: "#111620",
+            color: "#e2e8f0",
           });
 
           loadOrders();
@@ -2901,9 +2926,12 @@
             title: "Error",
             text: "Terjadi error saat konfirmasi pembayaran",
             confirmButtonColor: "#0ea5e9",
+            background: "#111620",
+            color: "#e2e8f0",
           });
         }
       }
+
       function getFilteredDeletableOrders() {
         const searchValue = document
           .getElementById("orderSearchInput")
@@ -2979,6 +3007,8 @@
             title: "Belum ada order dipilih",
             text: "Pilih order yang ingin dihapus dulu.",
             confirmButtonColor: "#0ea5e9",
+            background: "#111620",
+            color: "#e2e8f0",
           });
           return;
         }
@@ -2992,6 +3022,8 @@
           cancelButtonText: "Batal",
           confirmButtonColor: "#fb7185",
           cancelButtonColor: "#64748b",
+          background: "#111620",
+          color: "#e2e8f0",
         });
 
         if (!result.isConfirmed) return;
@@ -3024,6 +3056,8 @@
           title: "Selesai",
           text: `Berhasil: ${success}, gagal: ${failed}`,
           confirmButtonColor: "#0ea5e9",
+          background: "#111620",
+          color: "#e2e8f0",
         });
 
         loadOrders();
@@ -3040,6 +3074,8 @@
           cancelButtonText: "Batal",
           confirmButtonColor: "#fb7185",
           cancelButtonColor: "#64748b",
+          background: "#111620",
+          color: "#e2e8f0",
         });
 
         if (!result.isConfirmed) return;
@@ -3065,6 +3101,8 @@
               title: "Gagal",
               text: data.message || "Gagal menghapus order",
               confirmButtonColor: "#0ea5e9",
+              background: "#111620",
+              color: "#e2e8f0",
             });
             return;
           }
@@ -3074,6 +3112,8 @@
             title: "Berhasil",
             text: data.message || "Order berhasil dihapus",
             confirmButtonColor: "#0ea5e9",
+            background: "#111620",
+            color: "#e2e8f0",
           });
 
           loadOrders();
@@ -3084,6 +3124,8 @@
             title: "Error",
             text: "Terjadi error server saat menghapus order",
             confirmButtonColor: "#0ea5e9",
+            background: "#111620",
+            color: "#e2e8f0",
           });
         }
       }
@@ -3098,6 +3140,8 @@
           cancelButtonText: "Batal",
           confirmButtonColor: "#fb7185",
           cancelButtonColor: "#64748b",
+          background: "#111620",
+          color: "#e2e8f0",
         });
 
         if (!result.isConfirmed) return;
@@ -3123,6 +3167,8 @@
               title: "Gagal",
               text: data.message || "Gagal menghapus key",
               confirmButtonColor: "#0ea5e9",
+              background: "#111620",
+              color: "#e2e8f0",
             });
             return;
           }
@@ -3132,6 +3178,8 @@
             title: "Berhasil",
             text: data.message || "Key berhasil dihapus",
             confirmButtonColor: "#0ea5e9",
+            background: "#111620",
+            color: "#e2e8f0",
           });
 
           loadKeys();
@@ -3142,6 +3190,8 @@
             title: "Error",
             text: "Terjadi error server saat menghapus key",
             confirmButtonColor: "#0ea5e9",
+            background: "#111620",
+            color: "#e2e8f0",
           });
         }
       }
@@ -3255,6 +3305,9 @@
             data.paid_today || 0;
           document.getElementById("pendingOrderStat").innerText =
             data.pending_orders || 0;
+
+          /* UI only: badge pending on nav */
+          setNavBadge("orders", data.pending_orders || 0);
         } catch (err) {
           console.error("Gagal load admin stats");
         }
@@ -3320,12 +3373,13 @@
           text: "Produk yang dihapus tidak bisa dikembalikan!",
           icon: "warning",
           showCancelButton: true,
-          confirmButtonColor: "#fb7185", // Warna Torii Red
+          confirmButtonColor: "#fb7185",
           cancelButtonColor: "#475569",
           confirmButtonText: "Ya, Hapus!",
           cancelButtonText: "Batal",
+          background: "#111620",
+          color: "#e2e8f0",
         }).then(async (result) => {
-          // Semua logika fetch HARUS masuk ke dalam blok ini
           if (result.isConfirmed) {
             try {
               const res = await fetch(`/products/${id}`, {
@@ -3641,7 +3695,7 @@
             return `
         <tr>
           <td>${item.id}</td>
-          <td><b>${escapeHtml(item.code || "-")}</b></td>
+          <td><b style="color:var(--ocean);font-family:'JetBrains Mono',monospace">${escapeHtml(item.code || "-")}</b></td>
           <td>${escapeHtml(item.game_name || "-")}</td>
           <td>${escapeHtml(item.brand_name || "Semua")}</td>
           <td>${escapeHtml(item.duration_name || "Semua")}</td>
@@ -3781,6 +3835,8 @@
           confirmButtonText: "Ya, Hapus",
           cancelButtonText: "Batal",
           confirmButtonColor: "#fb7185",
+          background: "#111620",
+          color: "#e2e8f0",
         });
 
         if (!result.isConfirmed) return;
@@ -3820,7 +3876,7 @@
         if (brandInput) brandInput.value = "";
         if (durationInput) durationInput.value = "";
         if (priceInput) priceInput.value = "";
-        if (saveBtn) saveBtn.innerText = "Tambah Produk";
+        if (saveBtn) saveBtn.innerText = "💾 Tambah Produk";
 
         Swal.fire({
           toast: true,
@@ -3830,6 +3886,8 @@
           showConfirmButton: false,
           timer: 1200,
           timerProgressBar: true,
+          background: "#111620",
+          color: "#e2e8f0",
         });
       }
 
@@ -3839,7 +3897,8 @@
         document.getElementById("productBrand").value = brand;
         document.getElementById("productDuration").value = duration;
         document.getElementById("productPrice").value = price;
-        document.getElementById("saveProductBtn").innerText = "Update Produk";
+        document.getElementById("saveProductBtn").innerText =
+          "💾 Update Produk";
 
         window.scrollTo({
           top: 0,
@@ -3908,6 +3967,7 @@
         showSection("dashboard");
       });
     </script>
+
     <script>
       async function loadAdminProfile() {
         try {
@@ -3939,7 +3999,7 @@
           console.error("Gagal memuat profil admin");
         }
       }
-      // --- FITUR TAMBAHAN: Jam & Sapaan Real-Time ---
+
       function updateClock() {
         const now = new Date();
         const hours = now.getHours();
@@ -3965,9 +4025,8 @@
       }
 
       setInterval(updateClock, 60000);
-      updateClock(); // Jalankan pertama kali
+      updateClock();
       loadAdminProfile();
-      // ----------------------------------------------
     </script>
   </body>
 </html>
