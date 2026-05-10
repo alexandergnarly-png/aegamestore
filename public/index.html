@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AE Game Store 🌊⛩️</title>
-    <link rel="stylesheet" href="style.css?v=31" />
+    <link rel="stylesheet" href="style.css?v=32" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#0ea5e9" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -61,20 +61,8 @@
           <button
             type="button"
             onclick="toggleTheme()"
-            class="lang-btn"
+            class="lang-btn theme-toggle-btn"
             id="theme-toggle"
-            style="
-              background: rgba(255, 255, 255, 0.5);
-              backdrop-filter: blur(12px);
-              border: 1px solid rgba(56, 189, 248, 0.4);
-              border-radius: 50%;
-              width: 32px;
-              height: 32px;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15);
-            "
           >
             🌙
           </button>
@@ -124,20 +112,14 @@
 
       <section class="promo-container">
         <div class="promo-slider" id="promoSlider">
-          <div
-            class="promo-slide active"
-            style="background: linear-gradient(135deg, #0ea5e9, #6366f1)"
-          >
+          <div class="promo-slide promo-slide-blue active">
             <div class="promo-content">
               <span>🔥 PROMO WEEKEND</span>
               <h3>Diskon Top-Up s/d 20%</h3>
               <p>Berlaku untuk semua platform iOS & Android. Cek sekarang!</p>
             </div>
           </div>
-          <div
-            class="promo-slide"
-            style="background: linear-gradient(135deg, #fb7185, #f43f5e)"
-          >
+          <div class="promo-slide promo-slide-pink">
             <div class="promo-content">
               <span>✨ MEMBER BARU</span>
               <h3>Bonus Poin Melimpah</h3>
@@ -149,10 +131,7 @@
       </section>
 
       <section class="testimonial-section" id="review-section">
-        <div
-          class="section-head text-center"
-          style="max-width: 600px; margin: 0 auto 32px; border-bottom: none"
-        >
+        <div class="section-head text-center review-section-head">
           <h2 data-i18n="testiTitle">Kepercayaan Gamers</h2>
           <p data-i18n="testiDesc">
             Review asli dari buyer yang sudah pernah bertransaksi di AE Game

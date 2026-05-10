@@ -2732,3 +2732,30 @@ body {
     font-size: 18px;
   }
 }
+/* ===== CLEANED INLINE STYLES ===== */
+.theme-toggle-btn {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15);
+}
+
+.promo-slide-blue {
+  background: linear-gradient(135deg, #0ea5e9, #6366f1);
+}
+
+.promo-slide-pink {
+  background: linear-gradient(135deg, #fb7185, #f43f5e);
+}
+
+.review-section-head {
+  max-width: 600px;
+  margin: 0 auto 32px;
+  border-bottom: none;
+}
