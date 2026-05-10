@@ -70,6 +70,29 @@ const translations = {
     outOfStockTitle: "Stok Habis",
     outOfStockText:
       "Stok key untuk produk ini sedang habis. Silakan pilih produk lain atau hubungi admin.",
+    skipToContent: "Lewati ke konten",
+    brandTagline: "Premium Digital Keys",
+    navReviews: "Review Buyer",
+    heroBadge: "\uD83C\uDF0A SEAMLESS TOP-UP EXPERIENCE",
+    heroCtaPrimary: "Lihat Katalog Game",
+    heroCtaGuide: "\uD83D\uDCD6 Cara Beli",
+    trustInstantTitle: "Pengiriman Instan",
+    trustInstantDesc: "Key terkirim otomatis setelah bayar",
+    trustSecureTitle: "Pembayaran Aman",
+    trustSecureDesc: "QRIS GoPay Merchant resmi",
+    trustSupportTitle: "Support 24/7",
+    trustSupportDesc: "Admin standby setiap saat",
+    filterTools: "Tools / GBox",
+    testiTitle: "Kepercayaan Gamers",
+    testiDesc:
+      "Review asli dari buyer yang sudah pernah bertransaksi di AE Game Store.",
+    giveReviewBtn: "Kasih Review",
+    reviewNote:
+      "Review hanya bisa dikirim oleh buyer yang sudah pernah berhasil order.",
+    chatAdminTitle: "Chat Admin",
+    chatAdminSub: "Fast response",
+    footerTagline:
+      "Solusi top-up game tercepat dan terpercaya di Indonesia. Otomatis 24 jam non-stop.",
   },
   en: {
     selectProduct: "Select Product",
@@ -142,6 +165,29 @@ const translations = {
     outOfStockTitle: "Out of Stock",
     outOfStockText:
       "The key stock for this product is currently empty. Please choose another product or contact admin.",
+    skipToContent: "Skip to content",
+    brandTagline: "Premium Digital Keys",
+    navReviews: "Buyer Reviews",
+    heroBadge: "\uD83C\uDF0A SEAMLESS TOP-UP EXPERIENCE",
+    heroCtaPrimary: "Browse Game Catalog",
+    heroCtaGuide: "\uD83D\uDCD6 How to Buy",
+    trustInstantTitle: "Instant Delivery",
+    trustInstantDesc: "Key delivered automatically after payment",
+    trustSecureTitle: "Secure Payment",
+    trustSecureDesc: "Official QRIS GoPay Merchant",
+    trustSupportTitle: "24/7 Support",
+    trustSupportDesc: "Admin standby anytime",
+    filterTools: "Tools / GBox",
+    testiTitle: "Trusted by Gamers",
+    testiDesc:
+      "Real reviews from buyers who have completed orders on AE Game Store.",
+    giveReviewBtn: "Leave a Review",
+    reviewNote:
+      "Reviews can only be submitted by buyers who have completed an order.",
+    chatAdminTitle: "Chat Admin",
+    chatAdminSub: "Fast response",
+    footerTagline:
+      "The fastest and most trusted game top-up service in Indonesia. Automatic 24/7.",
   },
 };
 
@@ -190,7 +236,18 @@ function setLanguage(lang) {
   if (btnId && btnEn) {
     btnId.classList.remove("active");
     btnEn.classList.remove("active");
+    btnId.setAttribute("aria-pressed", lang === "id" ? "true" : "false");
+    btnEn.setAttribute("aria-pressed", lang === "en" ? "true" : "false");
     document.getElementById("btn-" + lang).classList.add("active");
+  }
+
+  document.documentElement.setAttribute("lang", lang);
+
+  // Re-render localized user menu (if present) so labels follow language
+  if (typeof checkLoginStatus === "function") {
+    try {
+      checkLoginStatus();
+    } catch (e) {}
   }
 }
 let allProducts = [];
@@ -276,6 +333,8 @@ function setLoading(isLoading) {
 
 async function loadAllProducts() {
   gameGrid.innerHTML = `
+  <div class="game-skeleton"></div>
+  <div class="game-skeleton"></div>
   <div class="game-skeleton"></div>
   <div class="game-skeleton"></div>
   <div class="game-skeleton"></div>
@@ -744,17 +803,22 @@ async function checkLoginStatus() {
 
     // Kalau user sudah login dan elemen userMenu ditemukan
     if (data.loggedIn && userMenu) {
+      const accountLabel = currentLanguage === "en" ? "Account" : "Akun";
+      const logoutLabel = currentLanguage === "en" ? "Logout" : "Keluar";
       userMenu.innerHTML = `
-    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-        <div class="auth-btn" style="background: rgba(255,255,255,0.8); color: #0284c7; cursor: default; box-shadow: none; border: 1px solid #bae6fd;">
-            👤 Halo, <strong style="margin-left: 4px;">${data.username}</strong>
-        </div>
-        <a href="/account.html" class="auth-btn" style="background: rgba(255,255,255,0.9); color: #0284c7; border: 1px solid #bae6fd; padding: 8px 12px; text-decoration: none;">
-            Akun Saya
-        </a>
-        <button onclick="logoutUser()" class="auth-btn" style="background: linear-gradient(135deg, #fb7185, #e11d48); border: none; padding: 8px 12px;">
-            Keluar
-        </button>
+    <div class="user-menu">
+      <span class="user-greeting">
+        <span aria-hidden="true">👤</span>
+        <strong>${escapeHtml(data.username || "")}</strong>
+      </span>
+      <a href="/account.html" class="user-action-btn">
+        <iconify-icon icon="mdi:account-circle-outline" aria-hidden="true"></iconify-icon>
+        <span>${escapeHtml(accountLabel)}</span>
+      </a>
+      <button type="button" onclick="logoutUser()" class="user-action-btn user-action-danger">
+        <iconify-icon icon="mdi:logout" aria-hidden="true"></iconify-icon>
+        <span>${escapeHtml(logoutLabel)}</span>
+      </button>
     </div>
 `;
     }
@@ -792,16 +856,78 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 // --------------------------------
 
-// --- AUTO SLIDER BANNER ---
+// --- AUTO SLIDER BANNER (with prev/next + dots) ---
 let currentSlide = 0;
-function nextSlide() {
+let promoTimer = null;
+
+function goToSlide(index) {
   const slides = document.querySelectorAll(".promo-slide");
   if (slides.length === 0) return;
-  slides[currentSlide].classList.remove("active");
-  currentSlide = (currentSlide + 1) % slides.length;
-  slides[currentSlide].classList.add("active");
+  slides[currentSlide]?.classList.remove("active");
+  currentSlide = ((index % slides.length) + slides.length) % slides.length;
+  slides[currentSlide]?.classList.add("active");
+  updatePromoDots();
 }
-setInterval(nextSlide, 5000);
+
+function nextSlide() {
+  goToSlide(currentSlide + 1);
+}
+
+function prevSlide() {
+  goToSlide(currentSlide - 1);
+}
+
+function updatePromoDots() {
+  document.querySelectorAll("#promoDots .promo-dot").forEach((dot, idx) => {
+    dot.classList.toggle("active", idx === currentSlide);
+    dot.setAttribute("aria-selected", idx === currentSlide ? "true" : "false");
+  });
+}
+
+function renderPromoDots() {
+  const dotsBox = document.getElementById("promoDots");
+  const slides = document.querySelectorAll(".promo-slide");
+  if (!dotsBox || slides.length === 0) return;
+  dotsBox.innerHTML = "";
+  slides.forEach((_, idx) => {
+    const dot = document.createElement("button");
+    dot.type = "button";
+    dot.className = "promo-dot" + (idx === currentSlide ? " active" : "");
+    dot.setAttribute("role", "tab");
+    dot.setAttribute("aria-label", `Promo ${idx + 1}`);
+    dot.setAttribute("aria-selected", idx === currentSlide ? "true" : "false");
+    dot.addEventListener("click", () => {
+      goToSlide(idx);
+      restartPromoAutoplay();
+    });
+    dotsBox.appendChild(dot);
+  });
+}
+
+function restartPromoAutoplay() {
+  if (promoTimer) clearInterval(promoTimer);
+  promoTimer = setInterval(nextSlide, 5500);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  renderPromoDots();
+  restartPromoAutoplay();
+  document.getElementById("promoPrevBtn")?.addEventListener("click", () => {
+    prevSlide();
+    restartPromoAutoplay();
+  });
+  document.getElementById("promoNextBtn")?.addEventListener("click", () => {
+    nextSlide();
+    restartPromoAutoplay();
+  });
+  const slider = document.getElementById("promoSlider");
+  if (slider) {
+    slider.addEventListener("mouseenter", () => {
+      if (promoTimer) clearInterval(promoTimer);
+    });
+    slider.addEventListener("mouseleave", restartPromoAutoplay);
+  }
+});
 
 // --- SOCIAL PROOF SIMULATOR ---
 let recentPurchases = [];
@@ -1455,6 +1581,98 @@ document.addEventListener("DOMContentLoaded", () => {
 setLanguage(currentLanguage);
 loadAllProducts();
 // ===== HOMEPAGE INLINE SCRIPT CLEANUP =====
+
+// --- MOBILE NAV TOGGLE ---
+function toggleMobileNav() {
+  const nav = document.getElementById("mainNav");
+  const toggle = document.getElementById("navToggle");
+  if (!nav || !toggle) return;
+  const isOpen = nav.classList.toggle("open");
+  toggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  toggle.setAttribute(
+    "aria-label",
+    isOpen ? "Tutup menu navigasi" : "Buka menu navigasi",
+  );
+}
+
+function closeMobileNav() {
+  const nav = document.getElementById("mainNav");
+  const toggle = document.getElementById("navToggle");
+  if (!nav || !toggle) return;
+  nav.classList.remove("open");
+  toggle.setAttribute("aria-expanded", "false");
+  toggle.setAttribute("aria-label", "Buka menu navigasi");
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const toggle = document.getElementById("navToggle");
+  if (toggle) {
+    toggle.addEventListener("click", toggleMobileNav);
+  }
+
+  document.addEventListener("click", (event) => {
+    const nav = document.getElementById("mainNav");
+    const navToggle = document.getElementById("navToggle");
+    if (!nav || !navToggle) return;
+    if (
+      nav.classList.contains("open") &&
+      !nav.contains(event.target) &&
+      !navToggle.contains(event.target)
+    ) {
+      closeMobileNav();
+    }
+  });
+});
+
+// --- BACK TO TOP BUTTON ---
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("backToTop");
+  if (!btn) return;
+  const onScroll = () => {
+    if (window.scrollY > 480) {
+      btn.classList.add("show");
+    } else {
+      btn.classList.remove("show");
+    }
+  };
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+  btn.addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+});
+
+// --- ACTIVE NAV LINK HIGHLIGHT ---
+document.addEventListener("DOMContentLoaded", () => {
+  const links = document.querySelectorAll('.main-nav .nav-link[href^="#"]');
+  if (!links.length || !("IntersectionObserver" in window)) return;
+
+  const sectionMap = new Map();
+  links.forEach((link) => {
+    const id = link.getAttribute("href");
+    if (!id || id === "#") return;
+    const section = document.querySelector(id);
+    if (section) sectionMap.set(section, link);
+  });
+
+  if (sectionMap.size === 0) return;
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        const link = sectionMap.get(entry.target);
+        if (!link) return;
+        if (entry.isIntersecting) {
+          links.forEach((l) => l.classList.remove("active"));
+          link.classList.add("active");
+        }
+      });
+    },
+    { rootMargin: "-40% 0px -55% 0px", threshold: 0 },
+  );
+
+  sectionMap.forEach((_, section) => observer.observe(section));
+});
 
 function searchGame() {
   const input =

@@ -3,8 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AE Game Store 🌊⛩️</title>
-    <link rel="stylesheet" href="style.css?v=32" />
+    <title>AE Game Store — Premium Top-Up & Digital Keys</title>
+    <meta
+      name="description"
+      content="Top-up game favoritmu instan, aman, dan terenkripsi. QRIS, GoPay, OVO, DANA, ShopeePay. Otomatis 24 jam non-stop."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css?v=33" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#0ea5e9" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -14,6 +24,10 @@
   </head>
 
   <body>
+    <a href="#store-section" class="skip-link" data-i18n="skipToContent">
+      Lewati ke konten
+    </a>
+
     <div id="preloader">
       <div class="loader-content">
         <div class="loader-logo">⛩️</div>
@@ -25,8 +39,9 @@
         </div>
       </div>
     </div>
-    <div class="watercolor-blob blob-1"></div>
-    <div class="watercolor-blob blob-2"></div>
+
+    <div class="watercolor-blob blob-1" aria-hidden="true"></div>
+    <div class="watercolor-blob blob-2" aria-hidden="true"></div>
 
     <header class="site-header">
       <div class="header-inner">
@@ -34,52 +49,18 @@
           <div class="brand-logo">⛩️</div>
           <div class="brand-copy">
             <strong>AE Game Store</strong>
-            <span>Premium Digital Keys</span>
+            <span data-i18n="brandTagline">Premium Digital Keys</span>
           </div>
         </div>
 
-        <div class="header-actions">
-          <div class="lang-switch">
-            <button
-              type="button"
-              onclick="setLanguage('id')"
-              class="lang-btn active"
-              id="btn-id"
-            >
-              ID
-            </button>
-            <button
-              type="button"
-              onclick="setLanguage('en')"
-              class="lang-btn"
-              id="btn-en"
-            >
-              EN
-            </button>
-          </div>
-
-          <button
-            type="button"
-            onclick="toggleTheme()"
-            class="lang-btn theme-toggle-btn"
-            id="theme-toggle"
-          >
-            🌙
-          </button>
-          <div id="userMenu">
-            <a href="/auth" class="auth-btn">
-              <span data-i18n="loginBtn">Masuk / Daftar</span> ⛩️
-            </a>
-          </div>
-        </div>
-
-        <nav class="main-nav">
+        <nav class="main-nav" id="mainNav" aria-label="Main navigation">
           <a href="#hero" class="nav-link" data-i18n="navHome">Beranda</a>
-
           <a href="#store-section" class="nav-link" data-i18n="navStore">
             Katalog Game
           </a>
-
+          <a href="#review-section" class="nav-link" data-i18n="navReviews">
+            Review Buyer
+          </a>
           <a
             href="#"
             class="nav-link"
@@ -92,13 +73,67 @@
             Cara Beli
           </a>
         </nav>
+
+        <div class="header-actions">
+          <div class="lang-switch" role="group" aria-label="Language switcher">
+            <button
+              type="button"
+              onclick="setLanguage('id')"
+              class="lang-btn active"
+              id="btn-id"
+              aria-pressed="true"
+            >
+              ID
+            </button>
+            <button
+              type="button"
+              onclick="setLanguage('en')"
+              class="lang-btn"
+              id="btn-en"
+              aria-pressed="false"
+            >
+              EN
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onclick="toggleTheme()"
+            class="lang-btn theme-toggle-btn"
+            id="theme-toggle"
+            aria-label="Toggle dark mode"
+          >
+            🌙
+          </button>
+
+          <div id="userMenu">
+            <a href="/auth" class="auth-btn">
+              <span data-i18n="loginBtn">Masuk / Daftar</span> ⛩️
+            </a>
+          </div>
+
+          <button
+            type="button"
+            class="nav-toggle"
+            id="navToggle"
+            aria-label="Buka menu navigasi"
+            aria-expanded="false"
+            aria-controls="mainNav"
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        </div>
       </div>
     </header>
-    <!-- INI BAGIAN YANG TIDAK SENGAJA TERHAPUS TADI -->
+
     <main class="page">
       <section class="hero" id="hero">
         <div class="hero-copy">
-          <span class="hero-badge">🌊 SEAMLESS TOP-UP EXPERIENCE</span>
+          <span class="hero-badge" data-i18n="heroBadge">
+            🌊 SEAMLESS TOP-UP EXPERIENCE
+          </span>
           <h1 data-i18n="heroTitle">
             Arungi petualangan barumu dengan top-up yang lebih mudah
           </h1>
@@ -106,11 +141,57 @@
             Temukan game favoritmu, pilih produk, dan selesaikan pembayaran
             setenang ombak di lautan. Transaksi instan dan terenkripsi.
           </p>
-          <a href="#store-section" class="hero-cta">Lihat Katalog Game</a>
+          <div class="hero-cta-row">
+            <a
+              href="#store-section"
+              class="hero-cta"
+              data-i18n="heroCtaPrimary"
+            >
+              Lihat Katalog Game
+            </a>
+            <button
+              type="button"
+              class="hero-cta hero-cta-ghost"
+              onclick="showGuide()"
+              data-i18n="heroCtaGuide"
+            >
+              📖 Cara Beli
+            </button>
+          </div>
+
+          <ul class="hero-trust" aria-label="Trust badges">
+            <li>
+              <span class="hero-trust-icon" aria-hidden="true">⚡</span>
+              <div>
+                <strong data-i18n="trustInstantTitle">Pengiriman Instan</strong>
+                <small data-i18n="trustInstantDesc">
+                  Key terkirim otomatis setelah bayar
+                </small>
+              </div>
+            </li>
+            <li>
+              <span class="hero-trust-icon" aria-hidden="true">🔒</span>
+              <div>
+                <strong data-i18n="trustSecureTitle">Pembayaran Aman</strong>
+                <small data-i18n="trustSecureDesc">
+                  QRIS GoPay Merchant resmi
+                </small>
+              </div>
+            </li>
+            <li>
+              <span class="hero-trust-icon" aria-hidden="true">💬</span>
+              <div>
+                <strong data-i18n="trustSupportTitle">Support 24/7</strong>
+                <small data-i18n="trustSupportDesc">
+                  Admin standby setiap saat
+                </small>
+              </div>
+            </li>
+          </ul>
         </div>
       </section>
 
-      <section class="promo-container">
+      <section class="promo-container" aria-label="Promo">
         <div class="promo-slider" id="promoSlider">
           <div class="promo-slide promo-slide-blue active">
             <div class="promo-content">
@@ -127,7 +208,25 @@
             </div>
           </div>
         </div>
-        <div class="promo-dots" id="promoDots"></div>
+        <div class="promo-controls">
+          <button
+            type="button"
+            class="promo-arrow"
+            id="promoPrevBtn"
+            aria-label="Promo sebelumnya"
+          >
+            ‹
+          </button>
+          <div class="promo-dots" id="promoDots" role="tablist"></div>
+          <button
+            type="button"
+            class="promo-arrow"
+            id="promoNextBtn"
+            aria-label="Promo berikutnya"
+          >
+            ›
+          </button>
+        </div>
       </section>
 
       <section class="testimonial-section" id="review-section">
@@ -150,10 +249,10 @@
             class="open-review-btn"
             onclick="openReviewPopup()"
           >
-            <span>⭐</span>
-            <b>Kasih Review</b>
+            <span aria-hidden="true">⭐</span>
+            <b data-i18n="giveReviewBtn">Kasih Review</b>
           </button>
-          <p>
+          <p data-i18n="reviewNote">
             Review hanya bisa dikirim oleh buyer yang sudah pernah berhasil
             order.
           </p>
@@ -175,6 +274,7 @@
           </div>
         </div>
       </section>
+
       <section class="store-layout game-only-layout" id="store-section">
         <div class="shop-card">
           <div class="section-head">
@@ -186,31 +286,47 @@
             </div>
           </div>
 
-          <div class="filter-pills">
-            <button type="button" class="pill active" data-category="all">
+          <div class="filter-pills" role="tablist" aria-label="Kategori game">
+            <button
+              type="button"
+              class="pill active"
+              data-category="all"
+              data-i18n="filterAll"
+            >
               Semua
             </button>
-            <button type="button" class="pill" data-category="Mobile">
+            <button
+              type="button"
+              class="pill"
+              data-category="Mobile"
+              data-i18n="filterMobile"
+            >
               Mobile
             </button>
-            <button type="button" class="pill" data-category="Tools">
+            <button
+              type="button"
+              class="pill"
+              data-category="Tools"
+              data-i18n="filterTools"
+            >
               Tools / GBox
             </button>
           </div>
 
           <div class="block">
             <div class="search-header">
-              <label class="section-label" data-i18n="selectGame"
-                >Pilih Game</label
-              >
+              <label class="section-label" data-i18n="selectGame">
+                Pilih Game
+              </label>
               <div class="search-box">
-                <span class="search-icon">🔍</span>
+                <span class="search-icon" aria-hidden="true">🔍</span>
                 <input
                   type="text"
                   id="gameSearch"
                   data-i18n-placeholder="searchGamePlaceholder"
                   placeholder="Cari nama game (contoh: PUBG)..."
                   onkeyup="searchGame()"
+                  aria-label="Cari game"
                 />
               </div>
             </div>
@@ -220,7 +336,14 @@
         </div>
       </section>
     </main>
-    <div class="order-modal" id="orderModal">
+
+    <div
+      class="order-modal"
+      id="orderModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modalGameTitle"
+    >
       <div class="order-modal-backdrop" onclick="closeOrderModal()"></div>
 
       <div class="order-modal-card">
@@ -236,9 +359,9 @@
 
         <div class="modal-head">
           <div>
-            <span class="summary-badge" data-i18n="orderGameBadge"
-              >ORDER GAME</span
-            >
+            <span class="summary-badge" data-i18n="orderGameBadge">
+              ORDER GAME
+            </span>
             <h2 id="modalGameTitle">Pilih Game</h2>
             <p data-i18n="modalOrderDesc">
               Lengkapi data order kamu di bawah ini.
@@ -249,14 +372,14 @@
         <div class="form-grid">
           <div class="field">
             <label for="brand" data-i18n="brandLabel">Brand</label>
-            <select id="brand"></select>
+            <select id="brand" aria-label="Brand"></select>
           </div>
 
           <div class="field">
-            <label for="product" data-i18n="durationLabel"
-              >Nominal / Durasi</label
-            >
-            <select id="product"></select>
+            <label for="product" data-i18n="durationLabel">
+              Nominal / Durasi
+            </label>
+            <select id="product" aria-label="Nominal atau durasi"></select>
           </div>
         </div>
 
@@ -268,6 +391,7 @@
               id="name"
               placeholder="Masukkan nama kamu"
               data-i18n-placeholder="playerNamePlaceholder"
+              autocomplete="name"
             />
           </div>
 
@@ -278,13 +402,16 @@
               id="contact"
               placeholder="No. WA / Email"
               data-i18n-placeholder="contactPlaceholder"
+              autocomplete="email"
+              inputmode="email"
             />
           </div>
         </div>
+
         <div class="form-group">
-          <label for="voucherCodeInput" data-i18n="voucherCodeLabel"
-            >Kode Voucher</label
-          >
+          <label for="voucherCodeInput" data-i18n="voucherCodeLabel">
+            Kode Voucher
+          </label>
           <div class="voucher-row">
             <input
               type="text"
@@ -299,11 +426,15 @@
               class="voucher-check-btn"
               onclick="checkVoucher()"
             >
-              <span>🎟️</span>
+              <span aria-hidden="true">🎟️</span>
               <b data-i18n="checkVoucherBtn">Cek</b>
             </button>
           </div>
-          <small id="voucherMessage" class="voucher-message"></small>
+          <small
+            id="voucherMessage"
+            class="voucher-message"
+            aria-live="polite"
+          ></small>
         </div>
 
         <div class="price-breakdown" id="priceBreakdown" style="display: none">
@@ -356,25 +487,35 @@
     <a
       href="https://t.me/aegamestore"
       target="_blank"
+      rel="noopener noreferrer"
       class="floating-admin-btn"
-      aria-label="Hubungi Admin"
+      aria-label="Hubungi Admin via Telegram"
     >
-      <span class="floating-admin-icon">💬</span>
+      <span class="floating-admin-icon" aria-hidden="true">💬</span>
       <span class="floating-admin-content">
-        <strong>Chat Admin</strong>
-        <small>Fast response</small>
+        <strong data-i18n="chatAdminTitle">Chat Admin</strong>
+        <small data-i18n="chatAdminSub">Fast response</small>
       </span>
-      <span class="floating-admin-badge"></span>
+      <span class="floating-admin-badge" aria-hidden="true"></span>
     </a>
 
-    <div id="social-proof" class="social-proof"></div>
+    <button
+      type="button"
+      class="back-to-top"
+      id="backToTop"
+      aria-label="Kembali ke atas"
+    >
+      <span aria-hidden="true">↑</span>
+    </button>
+
+    <div id="social-proof" class="social-proof" aria-live="polite"></div>
 
     <footer class="site-footer">
       <div class="footer-inner">
         <div class="footer-brand">
           <div class="brand-logo">⛩️</div>
           <strong>AE Game Store</strong>
-          <p>
+          <p data-i18n="footerTagline">
             Solusi top-up game tercepat dan terpercaya di Indonesia. Otomatis 24
             jam non-stop.
           </p>
@@ -386,22 +527,18 @@
               <iconify-icon icon="mdi:qrcode-scan"></iconify-icon>
               QRIS
             </span>
-
             <span>
               <iconify-icon icon="mdi:wallet"></iconify-icon>
               GoPay
             </span>
-
             <span>
               <iconify-icon icon="mdi:credit-card-outline"></iconify-icon>
               OVO
             </span>
-
             <span>
               <iconify-icon icon="mdi:cash-fast"></iconify-icon>
               DANA
             </span>
-
             <span>
               <iconify-icon icon="mdi:shopping-outline"></iconify-icon>
               ShopeePay
@@ -432,7 +569,6 @@
       </div>
     </footer>
 
-    <!-- SEMUA SCRIPT & STYLE DIPOSISIKAN DENGAN BENAR DI BAWAH FOOTER -->
-    <script src="script.js?v=31"></script>
+    <script src="script.js?v=33"></script>
   </body>
 </html>
