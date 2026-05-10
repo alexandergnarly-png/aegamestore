@@ -293,6 +293,23 @@ const reviewLimiter = rateLimit({
   },
 });
 
+const changePasswordLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: {
+    message:
+      "Terlalu banyak percobaan ganti password, coba lagi 15 menit nanti",
+  },
+});
+
+const voucherPreviewLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 20,
+  message: {
+    message: "Terlalu banyak cek voucher, coba lagi nanti",
+  },
+});
+
 async function isAdminLoggedIn(req) {
   const sessionToken = String(req.cookies.admin_auth || "").trim();
 
@@ -1022,7 +1039,7 @@ app.delete(
   },
 );
 
-app.post("/voucher-preview", async (req, res) => {
+app.post("/voucher-preview", voucherPreviewLimiter, async (req, res) => {
   const loggedInUser = getLoggedInUserFromRequest(req);
 
   if (!loggedInUser) {
@@ -1632,73 +1649,6 @@ app.delete(
       console.error("ERROR DELETE USER:", err);
       return res.status(500).json({
         message: "Gagal hapus user: " + err.message,
-      });
-    }
-  },
-);
-
-app.delete(
-  "/products/:id",
-  requireAdminAuth,
-  requireAdminCsrf,
-  async (req, res) => {
-    const productId = Number(req.params.id);
-
-    if (!Number.isInteger(productId) || productId <= 0) {
-      return res.status(400).json({
-        message: "ID produk tidak valid",
-      });
-    }
-
-    try {
-      const orderCheck = await query(
-        "SELECT COUNT(*)::int AS total_orders FROM orders WHERE product_id = $1",
-        [productId],
-      );
-
-      const keyCheck = await query(
-        "SELECT COUNT(*)::int AS total_keys FROM keys WHERE product_id = $1",
-        [productId],
-      );
-
-      const totalOrders = Number(orderCheck.rows[0]?.total_orders || 0);
-      const totalKeys = Number(keyCheck.rows[0]?.total_keys || 0);
-
-      if (totalOrders > 0 || totalKeys > 0) {
-        const updateResult = await query(
-          "UPDATE products SET active = 0 WHERE id = $1 RETURNING id",
-          [productId],
-        );
-
-        if (updateResult.rows.length === 0) {
-          return res.status(404).json({
-            message: "Produk tidak ditemukan",
-          });
-        }
-
-        return res.json({
-          message: "Produk dipakai oleh order/key, jadi dinonaktifkan saja",
-        });
-      }
-
-      const deleteResult = await query(
-        "DELETE FROM products WHERE id = $1 RETURNING id",
-        [productId],
-      );
-
-      if (deleteResult.rows.length === 0) {
-        return res.status(404).json({
-          message: "Produk tidak ditemukan",
-        });
-      }
-
-      return res.json({
-        message: "Produk berhasil dihapus",
-      });
-    } catch (err) {
-      console.error("ERROR DELETE PRODUCT:", err);
-      return res.status(500).json({
-        message: "Gagal menghapus produk: " + err.message,
       });
     }
   },
@@ -2395,59 +2345,64 @@ app.get("/user/orders", async (req, res) => {
   }
 });
 
-app.post("/user/change-password", requireUserCsrf, async (req, res) => {
-  const token = req.cookies.user_auth;
-  const { oldPassword, newPassword } = req.body;
+app.post(
+  "/user/change-password",
+  changePasswordLimiter,
+  requireUserCsrf,
+  async (req, res) => {
+    const token = req.cookies.user_auth;
+    const { oldPassword, newPassword } = req.body;
 
-  if (!token) {
-    return res.status(401).json({ message: "Kamu harus login dulu" });
-  }
-
-  const cleanOldPassword = String(oldPassword || "").trim();
-  const cleanNewPassword = String(newPassword || "").trim();
-
-  if (cleanNewPassword.length < 6) {
-    return res
-      .status(400)
-      .json({ message: "Password baru minimal 6 karakter" });
-  }
-
-  try {
-    const decoded = jwt.verify(token, jwtSecret);
-
-    const result = await query("SELECT * FROM users WHERE id = $1 LIMIT 1", [
-      decoded.id,
-    ]);
-
-    const user = result.rows[0];
-
-    if (!user) {
-      return res.status(404).json({ message: "User tidak ditemukan" });
+    if (!token) {
+      return res.status(401).json({ message: "Kamu harus login dulu" });
     }
 
-    const isOldPasswordCorrect = await bcrypt.compare(
-      cleanOldPassword,
-      user.password,
-    );
+    const cleanOldPassword = String(oldPassword || "").trim();
+    const cleanNewPassword = String(newPassword || "").trim();
 
-    if (!isOldPasswordCorrect) {
-      return res.status(400).json({ message: "Password lama salah" });
+    if (cleanNewPassword.length < 6) {
+      return res
+        .status(400)
+        .json({ message: "Password baru minimal 6 karakter" });
     }
 
-    const hashedPassword = await bcrypt.hash(cleanNewPassword, 10);
+    try {
+      const decoded = jwt.verify(token, jwtSecret);
 
-    await query("UPDATE users SET password = $1 WHERE id = $2", [
-      hashedPassword,
-      decoded.id,
-    ]);
+      const result = await query("SELECT * FROM users WHERE id = $1 LIMIT 1", [
+        decoded.id,
+      ]);
 
-    return res.json({ message: "Password berhasil diganti" });
-  } catch (err) {
-    return res
-      .status(401)
-      .json({ message: "Sesi login tidak valid, silakan login ulang" });
-  }
-});
+      const user = result.rows[0];
+
+      if (!user) {
+        return res.status(404).json({ message: "User tidak ditemukan" });
+      }
+
+      const isOldPasswordCorrect = await bcrypt.compare(
+        cleanOldPassword,
+        user.password,
+      );
+
+      if (!isOldPasswordCorrect) {
+        return res.status(400).json({ message: "Password lama salah" });
+      }
+
+      const hashedPassword = await bcrypt.hash(cleanNewPassword, 10);
+
+      await query("UPDATE users SET password = $1 WHERE id = $2", [
+        hashedPassword,
+        decoded.id,
+      ]);
+
+      return res.json({ message: "Password berhasil diganti" });
+    } catch (err) {
+      return res
+        .status(401)
+        .json({ message: "Sesi login tidak valid, silakan login ulang" });
+    }
+  },
+);
 
 app.post("/user-logout", requireUserCsrf, (req, res) => {
   res.clearCookie("user_auth", { path: "/" });
