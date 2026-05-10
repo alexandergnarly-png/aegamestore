@@ -1365,12 +1365,12 @@ body.dark-theme .search-box input:focus {
 /* ===== GAME GRID ===== */
 .game-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: 12px;
 }
 
 .compact-game-grid {
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
 }
 
 .game-card {
@@ -1426,8 +1426,9 @@ body.dark-theme .search-box input:focus {
 
 .game-card img {
   width: 100%;
-  aspect-ratio: 16 / 10;
-  object-fit: cover;
+  height: 78px;
+  object-fit: contain;
+  padding: 8px;
   background: #ffffff;
   border-bottom: 1px solid var(--border-soft);
   transition: transform var(--dur) var(--ease-out);
@@ -1443,11 +1444,12 @@ body.dark-theme .game-card img {
 
 .game-card span {
   display: block;
-  padding: 12px 14px 4px;
-  font-size: 14px;
+  padding: 10px 10px 4px;
+  font-size: 13px;
   font-weight: 800;
   color: var(--text-strong);
   letter-spacing: -0.2px;
+  text-align: center;
   position: relative;
   z-index: 2;
 }
@@ -1455,24 +1457,17 @@ body.dark-theme .game-card img {
 .game-card-meta {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 4px 14px 14px;
+  justify-content: center;
+  padding: 4px 10px 12px;
   position: relative;
   z-index: 2;
 }
 
-.game-card-meta small {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--text-muted);
-}
-
 .game-card-meta b {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.2px;
-  padding: 4px 10px;
+  padding: 4px 9px;
   border-radius: var(--radius-pill);
   background: rgba(16, 185, 129, 0.12);
   color: var(--success);
@@ -2576,4 +2571,35 @@ body.dark-theme .swal2-html-container {
 /* ===== UTILITY ===== */
 .fade-in {
   animation: fadeUp 0.5s var(--ease-out) both;
+}
+@media (max-width: 520px) {
+  .game-grid,
+  .compact-game-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .game-card {
+    border-radius: 16px;
+  }
+
+  .game-card img {
+    height: 62px;
+    padding: 7px;
+  }
+
+  .game-card span {
+    font-size: 11px;
+    padding: 8px 6px 3px;
+    line-height: 1.25;
+  }
+
+  .game-card-meta {
+    padding: 3px 6px 9px;
+  }
+
+  .game-card-meta b {
+    font-size: 9px;
+    padding: 3px 7px;
+  }
 }

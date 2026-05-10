@@ -469,20 +469,10 @@ function renderGames() {
           : `${totalStock} stok ready`
         : translations[currentLanguage].outOfStockLabel;
 
-    const priceLabel =
-      minPrice > 0
-        ? currentLanguage === "en"
-          ? `From ${formatRupiah(minPrice)}`
-          : `Mulai ${formatRupiah(minPrice)}`
-        : currentLanguage === "en"
-          ? "Not available"
-          : "Belum tersedia";
-
     card.innerHTML = `
   <img src="${imageUrl}" alt="${game}" onerror="this.src='${fallbackImage}'">
   <span>${game}</span>
   <div class="game-card-meta">
-    <small>${priceLabel}</small>
     <b class="${totalStock > 0 ? "ready" : "empty"}">${stockLabel}</b>
   </div>
 `;
