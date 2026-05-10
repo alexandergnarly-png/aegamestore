@@ -3,69 +3,348 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Status pembayaran dan pengiriman key game digital di AE Game Store."
+    />
     <title>Hasil Pembayaran - AE Game Store</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script
+      type="module"
+      src="https://cdn.jsdelivr.net/npm/iconify-icon@2.1.0/dist/iconify-icon.min.js"
+    ></script>
     <style>
       :root {
-        --primary: #0ea5e9;
-        --primary-hover: #0284c7;
-        --secondary: #fb7185;
-        --bg-color: #f0f9ff;
-        --card-bg: rgba(255, 255, 255, 0.85);
+        --ocean-deep: #0284c7;
+        --ocean: #0ea5e9;
+        --ocean-light: #38bdf8;
+        --water-foam: #e0f2fe;
+        --sakura: #fbcfe8;
+        --sakura-strong: #f472b6;
+        --torii-red: #fb7185;
+        --torii-red-strong: #e11d48;
+
+        --bg-color: #f5fbff;
+        --bg-grad:
+          radial-gradient(120% 90% at 0% 0%, #e0f2fe 0%, transparent 60%),
+          radial-gradient(120% 90% at 100% 100%, #fce7f3 0%, transparent 60%),
+          linear-gradient(180deg, #f5fbff, #ffffff);
+
+        --card-bg: rgba(255, 255, 255, 0.78);
+        --card-bg-strong: rgba(255, 255, 255, 0.94);
+        --border-color: rgba(56, 189, 248, 0.35);
+        --border-soft: rgba(14, 165, 233, 0.16);
+
         --text-main: #0c4a6e;
+        --text-strong: #082f49;
         --text-muted: #475569;
-        --border-color: rgba(56, 189, 248, 0.4);
-        --shadow-lg: 0 24px 50px rgba(14, 165, 233, 0.1);
-        --radius-xl: 28px;
-        --radius-lg: 20px;
-        --radius-md: 14px;
+
+        --success: #10b981;
+        --success-bg: #d1fae5;
+        --success-strong: #047857;
+
+        --warning: #f59e0b;
+        --warning-bg: #fef3c7;
+        --warning-strong: #b45309;
+
+        --danger: #f43f5e;
+        --danger-bg: #ffe4e6;
+        --danger-strong: #be123c;
+
+        --info-bg: #e0f2fe;
+        --info-strong: #0369a1;
+
+        --shadow-xs: 0 2px 6px rgba(14, 165, 233, 0.08);
+        --shadow-sm: 0 6px 18px rgba(14, 165, 233, 0.12);
+        --shadow-md: 0 14px 32px rgba(14, 165, 233, 0.16);
+        --shadow-lg: 0 24px 60px rgba(14, 165, 233, 0.2);
+        --shadow-pink: 0 14px 28px rgba(244, 114, 182, 0.22);
+        --ring: 0 0 0 4px rgba(56, 189, 248, 0.25);
+
+        --radius-sm: 12px;
+        --radius-md: 16px;
+        --radius-lg: 22px;
+        --radius-xl: 30px;
+        --radius-pill: 999px;
+
+        --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+        --dur-fast: 0.18s;
+        --dur: 0.32s;
       }
 
-      * {
+      body.dark-theme {
+        --bg-color: #060b1c;
+        --bg-grad:
+          radial-gradient(
+            120% 90% at 0% 0%,
+            rgba(14, 165, 233, 0.18) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            120% 90% at 100% 100%,
+            rgba(244, 114, 182, 0.14) 0%,
+            transparent 60%
+          ),
+          linear-gradient(180deg, #060b1c, #0b1226);
+
+        --card-bg: rgba(20, 30, 56, 0.78);
+        --card-bg-strong: rgba(20, 30, 56, 0.92);
+        --border-color: rgba(56, 189, 248, 0.22);
+        --border-soft: rgba(56, 189, 248, 0.12);
+
+        --text-main: #e2e8f0;
+        --text-strong: #f8fafc;
+        --text-muted: #94a3b8;
+
+        --water-foam: rgba(56, 189, 248, 0.12);
+        --success-bg: rgba(16, 185, 129, 0.18);
+        --success-strong: #6ee7b7;
+        --warning-bg: rgba(245, 158, 11, 0.18);
+        --warning-strong: #fcd34d;
+        --danger-bg: rgba(244, 63, 94, 0.18);
+        --danger-strong: #fda4af;
+        --info-bg: rgba(56, 189, 248, 0.18);
+        --info-strong: #7dd3fc;
+
+        --shadow-xs: 0 2px 6px rgba(0, 0, 0, 0.35);
+        --shadow-sm: 0 6px 18px rgba(0, 0, 0, 0.4);
+        --shadow-md: 0 14px 32px rgba(0, 0, 0, 0.45);
+        --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.5);
+      }
+
+      *,
+      *::before,
+      *::after {
         box-sizing: border-box;
         margin: 0;
         padding: 0;
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      html {
+        scroll-behavior: smooth;
       }
 
       body {
-        background-color: var(--bg-color);
-        background-image:
-          radial-gradient(
-            circle at 0% 0%,
-            rgba(56, 189, 248, 0.15) 0%,
-            transparent 40%
-          ),
-          radial-gradient(
-            circle at 100% 100%,
-            rgba(251, 113, 133, 0.1) 0%,
-            transparent 40%
-          );
+        font-family: "Plus Jakarta Sans", "Segoe UI", Tahoma, sans-serif;
+        background: var(--bg-color);
+        background-image: var(--bg-grad);
+        background-attachment: fixed;
         color: var(--text-main);
         min-height: 100vh;
+        line-height: 1.55;
+        -webkit-font-smoothing: antialiased;
         display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 24px;
-        position: relative;
+        flex-direction: column;
         overflow-x: hidden;
+      }
+
+      button {
+        font-family: inherit;
+        cursor: pointer;
+        border: none;
+        background: none;
+        color: inherit;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      :focus-visible {
+        outline: none;
+        box-shadow: var(--ring);
+        border-radius: 6px;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.001ms !important;
+          transition-duration: 0.001ms !important;
+        }
+        .sakura {
+          display: none !important;
+        }
+      }
+
+      /* Background blobs */
+      .blob {
+        position: fixed;
+        filter: blur(80px);
+        z-index: -1;
+        opacity: 0.45;
+        border-radius: 50%;
+        pointer-events: none;
+      }
+
+      .blob-1 {
+        top: -120px;
+        left: -120px;
+        width: 520px;
+        height: 520px;
+        background: radial-gradient(
+          circle,
+          var(--water-foam),
+          rgba(56, 189, 248, 0.5)
+        );
+      }
+
+      .blob-2 {
+        bottom: -160px;
+        right: -120px;
+        width: 480px;
+        height: 480px;
+        background: radial-gradient(circle, var(--sakura), #bae6fd);
+      }
+
+      body.dark-theme .blob {
+        opacity: 0.3;
+      }
+
+      /* Header */
+      .site-header {
+        position: sticky;
+        top: 0;
+        z-index: 80;
+        background: rgba(255, 255, 255, 0.78);
+        backdrop-filter: saturate(180%) blur(18px);
+        -webkit-backdrop-filter: saturate(180%) blur(18px);
+        border-bottom: 1px solid var(--border-soft);
+      }
+
+      body.dark-theme .site-header {
+        background: rgba(8, 14, 32, 0.78);
+      }
+
+      .header-inner {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 14px 20px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .brand-logo {
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        background: linear-gradient(
+          135deg,
+          var(--torii-red),
+          var(--torii-red-strong)
+        );
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        box-shadow: var(--shadow-pink);
+      }
+
+      .brand-copy strong {
+        display: block;
+        font-size: 16px;
+        font-weight: 800;
+        color: var(--text-strong);
+        letter-spacing: -0.2px;
+      }
+
+      .brand-copy span {
+        display: block;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--ocean-deep);
+      }
+
+      body.dark-theme .brand-copy span {
+        color: var(--ocean-light);
+      }
+
+      .header-actions {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .lang-switch {
+        display: inline-flex;
+        background: rgba(56, 189, 248, 0.12);
+        padding: 3px;
+        border-radius: var(--radius-pill);
+        border: 1px solid var(--border-soft);
+      }
+
+      .lang-btn {
+        padding: 5px 11px;
+        font-size: 11px;
+        font-weight: 800;
+        color: var(--text-muted);
+        border-radius: var(--radius-pill);
+        letter-spacing: 0.5px;
+        transition: all var(--dur-fast) var(--ease-out);
+      }
+
+      .lang-btn.active {
+        background: linear-gradient(135deg, var(--ocean), var(--ocean-light));
+        color: white;
+        box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);
+      }
+
+      .icon-btn {
+        width: 34px;
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(56, 189, 248, 0.12);
+        border: 1px solid var(--border-soft);
+        border-radius: var(--radius-pill);
+        font-size: 16px;
+      }
+
+      .icon-btn:hover {
+        background: rgba(56, 189, 248, 0.22);
+      }
+
+      /* Layout */
+      main.page {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 36px 20px 64px;
+        z-index: 2;
       }
 
       .result-wrapper {
         width: 100%;
-        max-width: 460px;
-        animation: fadeUp 0.6s ease-out forwards;
-        z-index: 10;
+        max-width: 520px;
+        animation: fadeUp 0.5s var(--ease-out) both;
       }
 
       .card {
-        background: var(--card-bg);
-        backdrop-filter: blur(24px);
+        background: var(--card-bg-strong);
+        backdrop-filter: blur(22px);
         border: 1px solid var(--border-color);
         border-radius: var(--radius-xl);
-        padding: 40px 32px;
+        padding: 32px 28px 28px;
         box-shadow: var(--shadow-lg);
-        text-align: center;
         position: relative;
         overflow: hidden;
       }
@@ -73,108 +352,289 @@
       .card::before {
         content: "";
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
+        inset: 0 0 auto 0;
         height: 6px;
-        background: linear-gradient(90deg, var(--primary), var(--secondary));
+        background: linear-gradient(
+          90deg,
+          var(--ocean),
+          var(--sakura-strong),
+          var(--torii-red)
+        );
       }
 
       .logo-badge {
-        width: 56px;
-        height: 56px;
-        border-radius: 16px;
-        display: flex;
+        width: 64px;
+        height: 64px;
+        border-radius: 20px;
+        display: inline-flex;
         align-items: center;
         justify-content: center;
-        background: linear-gradient(135deg, var(--secondary), #f43f5e);
+        background: linear-gradient(
+          135deg,
+          var(--torii-red),
+          var(--torii-red-strong)
+        );
         color: white;
-        font-size: 24px;
-        box-shadow: 0 12px 24px rgba(251, 113, 133, 0.3);
-        margin: 0 auto 20px;
+        font-size: 28px;
+        box-shadow: 0 14px 30px rgba(244, 63, 94, 0.32);
+        margin: 0 auto 16px;
+      }
+
+      .card-head {
+        text-align: center;
+        margin-bottom: 22px;
       }
 
       h1 {
-        font-size: 26px;
+        font-size: 24px;
         font-weight: 800;
-        color: var(--text-main);
-        margin-bottom: 8px;
-        letter-spacing: -0.5px;
+        color: var(--text-strong);
+        letter-spacing: -0.4px;
+        margin-bottom: 6px;
       }
 
       .subtitle {
         color: var(--text-muted);
         font-size: 14px;
-        margin-bottom: 24px;
         line-height: 1.6;
       }
 
+      /* Status pills + progress */
       .status-row {
         display: flex;
-        gap: 10px;
+        gap: 8px;
         flex-wrap: wrap;
         justify-content: center;
-        margin-bottom: 28px;
+        margin-bottom: 20px;
       }
 
       .badge {
-        display: inline-block;
-        padding: 8px 16px;
-        border-radius: 99px;
-        font-size: 13px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 14px;
+        border-radius: var(--radius-pill);
+        font-size: 12px;
         font-weight: 800;
         text-transform: capitalize;
-        border: 1px solid transparent;
+        letter-spacing: 0.2px;
+        background: var(--info-bg);
+        color: var(--info-strong);
+        border: 1px solid rgba(56, 189, 248, 0.3);
       }
 
-      .badge.pending {
-        background: #fef08a;
-        color: #854d0e;
-        border-color: #fde047;
+      .badge::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: currentColor;
+        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.45);
+      }
+
+      body.dark-theme .badge::before {
+        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.12);
       }
 
       .badge.paid,
       .badge.delivered {
-        background: #d1fae5;
-        color: #065f46;
-        border-color: #6ee7b7;
+        background: var(--success-bg);
+        color: var(--success-strong);
+        border-color: rgba(16, 185, 129, 0.3);
+      }
+
+      .badge.pending,
+      .badge.waiting_payment {
+        background: var(--warning-bg);
+        color: var(--warning-strong);
+        border-color: rgba(245, 158, 11, 0.3);
       }
 
       .badge.expired,
       .badge.cancelled {
-        background: #ffe4e6;
-        color: #be123c;
-        border-color: #fecdd3;
-      }
-
-      .badge.waiting_payment {
-        background: #e0f2fe;
-        color: #0369a1;
-        border-color: #bae6fd;
+        background: var(--danger-bg);
+        color: var(--danger-strong);
+        border-color: rgba(244, 63, 94, 0.3);
       }
 
       .badge.manual {
-        background: #ffe4e6;
-        color: #be123c;
-        border-color: #fecdd3;
+        background: var(--warning-bg);
+        color: var(--warning-strong);
+        border-color: rgba(245, 158, 11, 0.3);
       }
 
+      .progress-track {
+        position: relative;
+        margin: 10px auto 24px;
+        padding: 0 6px;
+      }
+
+      .progress-steps {
+        display: flex;
+        justify-content: space-between;
+        gap: 6px;
+        list-style: none;
+        position: relative;
+      }
+
+      .progress-steps::before {
+        content: "";
+        position: absolute;
+        top: 14px;
+        left: 14px;
+        right: 14px;
+        height: 3px;
+        background: var(--border-soft);
+        border-radius: 999px;
+        z-index: 0;
+      }
+
+      .progress-fill {
+        position: absolute;
+        top: 14px;
+        left: 14px;
+        height: 3px;
+        background: linear-gradient(90deg, var(--ocean), var(--sakura-strong));
+        border-radius: 999px;
+        width: 0%;
+        transition: width 0.6s var(--ease-out);
+        z-index: 1;
+      }
+
+      .progress-step {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        position: relative;
+        z-index: 2;
+      }
+
+      .step-dot {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: var(--card-bg-strong);
+        border: 2px solid var(--border-color);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        color: var(--text-muted);
+        transition:
+          background var(--dur) var(--ease-out),
+          color var(--dur) var(--ease-out),
+          border-color var(--dur) var(--ease-out),
+          transform var(--dur) var(--ease-out);
+      }
+
+      .progress-step.done .step-dot {
+        background: linear-gradient(135deg, var(--ocean), var(--ocean-light));
+        color: white;
+        border-color: var(--ocean-light);
+      }
+
+      .progress-step.active .step-dot {
+        background: linear-gradient(
+          135deg,
+          var(--sakura-strong),
+          var(--torii-red)
+        );
+        color: white;
+        border-color: var(--sakura-strong);
+        transform: scale(1.08);
+        box-shadow: 0 8px 18px rgba(244, 114, 182, 0.32);
+      }
+
+      .progress-step.failed .step-dot {
+        background: linear-gradient(
+          135deg,
+          var(--torii-red),
+          var(--torii-red-strong)
+        );
+        color: white;
+        border-color: var(--torii-red);
+      }
+
+      .step-label {
+        font-size: 11px;
+        font-weight: 800;
+        color: var(--text-muted);
+        text-align: center;
+        letter-spacing: 0.2px;
+      }
+
+      .progress-step.done .step-label,
+      .progress-step.active .step-label {
+        color: var(--text-strong);
+      }
+
+      .progress-step.failed .step-label {
+        color: var(--danger-strong);
+      }
+
+      /* Status message card */
+      .status-message-card {
+        margin: 0 0 20px;
+        padding: 14px 16px;
+        border-radius: var(--radius-md);
+        background: var(--info-bg);
+        border: 1px solid rgba(56, 189, 248, 0.25);
+        color: var(--info-strong);
+        font-size: 13px;
+        line-height: 1.6;
+        text-align: left;
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+      }
+
+      .status-message-card iconify-icon {
+        flex-shrink: 0;
+        font-size: 20px;
+        margin-top: 1px;
+      }
+
+      .status-message-card.success {
+        background: var(--success-bg);
+        border-color: rgba(16, 185, 129, 0.3);
+        color: var(--success-strong);
+      }
+
+      .status-message-card.warning {
+        background: var(--warning-bg);
+        border-color: rgba(245, 158, 11, 0.3);
+        color: var(--warning-strong);
+      }
+
+      .status-message-card.danger {
+        background: var(--danger-bg);
+        border-color: rgba(244, 63, 94, 0.3);
+        color: var(--danger-strong);
+      }
+
+      /* Summary */
       .summary {
-        background: rgba(255, 255, 255, 0.6);
-        border: 1px dashed #bae6fd;
+        background: var(--card-bg);
+        backdrop-filter: blur(14px);
+        border: 1px solid var(--border-soft);
         border-radius: var(--radius-lg);
-        padding: 20px;
-        margin-bottom: 24px;
+        padding: 18px 20px;
+        margin-bottom: 20px;
         text-align: left;
       }
 
       .summary-item {
         padding: 10px 0;
-        color: #334155;
         font-size: 14px;
         font-weight: 500;
-        border-bottom: 1px dashed #e0f2fe;
+        border-bottom: 1px dashed rgba(56, 189, 248, 0.22);
         word-break: break-word;
+      }
+
+      .summary-item:first-child {
+        padding-top: 0;
       }
 
       .summary-item:last-child {
@@ -182,193 +642,291 @@
         padding-bottom: 0;
       }
 
-      .summary-item:first-child {
-        padding-top: 0;
-      }
-
-      .key-box {
-        position: relative;
-        margin-top: 10px;
-        padding: 24px;
-        background: rgba(255, 255, 255, 0.8);
-        border: 2px solid var(--ocean-light);
-        border-radius: var(--radius-lg);
-        box-shadow: 0 8px 20px rgba(14, 165, 233, 0.1);
-        overflow: hidden;
-      }
-
-      .key-title {
-        display: inline-block;
-        font-size: 11px;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        color: var(--primary);
-        background: #e0f2fe;
-        padding: 4px 10px;
-        border-radius: 99px;
-        margin-bottom: 16px;
-      }
-
-      #keyBox {
-        font-size: 18px;
-        font-weight: 800;
-        color: #082f49;
-        word-break: break-all;
-        letter-spacing: 1px;
-        margin-bottom: 16px;
-        font-family: "Courier New", Courier, monospace;
-      }
-
-      .copy-btn {
-        width: 100%;
-        padding: 14px;
-        border: none;
-        border-radius: var(--radius-md);
-        background: linear-gradient(
-          135deg,
-          var(--primary),
-          var(--primary-hover)
-        );
-        color: white;
-        font-size: 15px;
-        font-weight: 800;
-        cursor: pointer;
-        box-shadow: 0 10px 20px rgba(14, 165, 233, 0.2);
-        transition:
-          transform 0.2s ease,
-          box-shadow 0.2s ease;
-      }
-
-      .copy-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 14px 28px rgba(14, 165, 233, 0.3);
-      }
-
-      .copy-btn:active {
-        transform: translateY(0);
-      }
-
-      .helper-text {
-        margin-top: 24px;
-        font-size: 13px;
-        color: var(--text-muted);
-        line-height: 1.6;
-        padding: 0 10px;
-      }
-
-      .result-actions {
-        display: grid;
-        gap: 10px;
-        margin-top: 18px;
-      }
-
-      .home-btn,
-      .secondary-btn {
-        width: 100%;
-        display: block;
-        padding: 14px;
-        border-radius: var(--radius-md);
-        font-size: 15px;
-        font-weight: 800;
-        text-align: center;
-        text-decoration: none;
-        cursor: pointer;
-        transition:
-          transform 0.2s ease,
-          box-shadow 0.2s ease,
-          background 0.2s ease;
-      }
-
-      .home-btn {
-        color: white;
-        background: linear-gradient(135deg, var(--secondary), #f43f5e);
-        box-shadow: 0 10px 20px rgba(251, 113, 133, 0.2);
-      }
-
-      .home-btn:hover,
-      .secondary-btn:hover {
-        transform: translateY(-2px);
-      }
-
-      .secondary-btn {
-        background: rgba(255, 255, 255, 0.9) !important;
-        color: var(--primary-hover) !important;
-        border: 1px solid #bae6fd !important;
-        box-shadow: 0 8px 18px rgba(14, 165, 233, 0.12) !important;
-      }
-
-      .status-message-card {
-        margin: 0 0 18px;
-        padding: 16px;
-        border-radius: var(--radius-lg);
-        background: rgba(224, 242, 254, 0.75);
-        border: 1px solid #bae6fd;
-        color: #0369a1;
-        font-size: 13px;
-        line-height: 1.55;
-        text-align: left;
-      }
-
-      .status-message-card.success {
-        background: #dcfce7;
-        border-color: #86efac;
-        color: #166534;
-      }
-
-      .status-message-card.warning {
-        background: #fef3c7;
-        border-color: #fde68a;
-        color: #92400e;
-      }
-
-      .status-message-card.danger {
-        background: #ffe4e6;
-        border-color: #fecdd3;
-        color: #be123c;
-      }
-
       .summary-label {
         display: block;
-        color: var(--primary-hover);
+        color: var(--ocean-deep);
         font-size: 11px;
         font-weight: 800;
         text-transform: uppercase;
-        margin-bottom: 4px;
+        letter-spacing: 0.5px;
+        margin-bottom: 3px;
+      }
+
+      body.dark-theme .summary-label {
+        color: var(--ocean-light);
       }
 
       .summary-value {
         display: block;
-        color: #334155;
+        color: var(--text-strong);
         font-weight: 700;
       }
 
+      /* Key box */
+      .key-box {
+        position: relative;
+        margin-top: 8px;
+        padding: 22px;
+        background: var(--card-bg);
+        backdrop-filter: blur(14px);
+        border: 2px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-xs);
+        overflow: hidden;
+        text-align: left;
+        transition:
+          background var(--dur) var(--ease-out),
+          border-color var(--dur) var(--ease-out);
+      }
+
+      .key-title {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        color: var(--ocean-deep);
+        background: var(--water-foam);
+        padding: 5px 12px;
+        border-radius: var(--radius-pill);
+        margin-bottom: 14px;
+      }
+
+      body.dark-theme .key-title {
+        color: var(--ocean-light);
+      }
+
+      #keyBox {
+        font-family: "JetBrains Mono", "Courier New", Courier, monospace;
+        font-size: 17px;
+        font-weight: 700;
+        color: var(--text-strong);
+        word-break: break-all;
+        letter-spacing: 1px;
+        margin-bottom: 14px;
+        line-height: 1.5;
+      }
+
+      #keyBox .pending-msg {
+        font-family: "Plus Jakarta Sans", sans-serif;
+        font-size: 14px;
+        font-weight: 800;
+        color: var(--ocean-deep);
+        letter-spacing: 0;
+        margin-bottom: 8px;
+      }
+
+      body.dark-theme #keyBox .pending-msg {
+        color: var(--ocean-light);
+      }
+
+      #keyBox .pending-sub {
+        font-family: "Plus Jakarta Sans", sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-muted);
+        line-height: 1.6;
+        letter-spacing: 0;
+      }
+
       .key-box.delivered {
-        border-color: #86efac;
-        background: #f0fdf4;
+        border-color: rgba(16, 185, 129, 0.45);
+        background: var(--success-bg);
+      }
+
+      .key-box.delivered .key-title {
+        color: var(--success-strong);
+        background: rgba(16, 185, 129, 0.18);
       }
 
       .key-box.pending {
-        border-color: #bae6fd;
-        background: #f0f9ff;
+        border-color: rgba(56, 189, 248, 0.4);
+        background: var(--info-bg);
       }
 
       .key-box.problem {
-        border-color: #fecdd3;
-        background: #fff1f2;
+        border-color: rgba(244, 63, 94, 0.4);
+        background: var(--danger-bg);
+      }
+
+      .key-box.problem .key-title {
+        color: var(--danger-strong);
+        background: rgba(244, 63, 94, 0.18);
+      }
+
+      /* Buttons */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        padding: 13px 16px;
+        border-radius: var(--radius-md);
+        font-size: 14px;
+        font-weight: 800;
+        font-family: inherit;
+        cursor: pointer;
+        border: none;
+        transition:
+          transform var(--dur-fast) var(--ease-out),
+          box-shadow var(--dur-fast) var(--ease-out),
+          background var(--dur-fast) var(--ease-out);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .btn:hover {
+        transform: translateY(-1px);
+      }
+
+      .copy-btn {
+        background: linear-gradient(
+          135deg,
+          var(--ocean-deep),
+          var(--ocean-light)
+        );
+        color: white;
+        box-shadow: 0 12px 26px rgba(14, 165, 233, 0.32);
+      }
+
+      .copy-btn:hover {
+        box-shadow: 0 16px 32px rgba(14, 165, 233, 0.42);
+      }
+
+      .secondary-btn {
+        background: var(--card-bg-strong);
+        color: var(--ocean-deep);
+        border: 1px solid var(--border-soft);
+        box-shadow: var(--shadow-xs);
+      }
+
+      body.dark-theme .secondary-btn {
+        color: var(--ocean-light);
+      }
+
+      .secondary-btn:hover {
+        background: white;
+      }
+
+      body.dark-theme .secondary-btn:hover {
+        background: rgba(20, 30, 56, 1);
+      }
+
+      .home-btn {
+        color: white;
+        background: linear-gradient(
+          135deg,
+          var(--torii-red),
+          var(--torii-red-strong)
+        );
+        box-shadow: var(--shadow-pink);
+      }
+
+      .home-btn:hover {
+        box-shadow: 0 16px 32px rgba(244, 63, 94, 0.36);
+      }
+
+      .helper-text {
+        margin: 18px 0 0;
+        font-size: 13px;
+        color: var(--text-muted);
+        line-height: 1.6;
+        text-align: center;
+      }
+
+      .result-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      .result-actions .span-2 {
+        grid-column: 1 / -1;
+      }
+
+      /* Skeleton */
+      .skeleton {
+        position: relative;
+        background: linear-gradient(
+          100deg,
+          rgba(56, 189, 248, 0.08) 30%,
+          rgba(56, 189, 248, 0.18) 50%,
+          rgba(56, 189, 248, 0.08) 70%
+        );
+        background-size: 200% 100%;
+        animation: shimmer 1.4s linear infinite;
+        border-radius: var(--radius-sm);
+        color: transparent !important;
+      }
+
+      .skeleton .summary-label,
+      .skeleton .summary-value {
+        opacity: 0;
+      }
+
+      .skeleton-line {
+        display: block;
+        height: 14px;
+        border-radius: 999px;
+        background: linear-gradient(
+          100deg,
+          rgba(56, 189, 248, 0.12) 30%,
+          rgba(56, 189, 248, 0.22) 50%,
+          rgba(56, 189, 248, 0.12) 70%
+        );
+        background-size: 200% 100%;
+        animation: shimmer 1.4s linear infinite;
+        margin-bottom: 6px;
+      }
+
+      .skeleton-line.long {
+        width: 80%;
+      }
+
+      .skeleton-line.short {
+        width: 50%;
+      }
+
+      @keyframes shimmer {
+        0% {
+          background-position: 200% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
+      }
+
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
 
       /* Sakura Effect */
       .sakura {
         position: fixed;
         top: -10%;
-        z-index: 1;
+        z-index: 0;
         pointer-events: none;
-        background: #fbcfe8;
+        background: var(--sakura);
         border-radius: 100% 0 100% 0;
+        opacity: 0.7;
         animation:
           fall linear infinite,
           sway ease-in-out infinite alternate;
+      }
+
+      body.dark-theme .sakura {
+        background: rgba(244, 114, 182, 0.6);
       }
 
       @keyframes fall {
@@ -381,97 +939,443 @@
         from {
           transform: translateX(-20px) rotate(0deg);
         }
-
         to {
           transform: translateX(20px) rotate(45deg);
         }
       }
 
-      @keyframes fadeUp {
-        from {
-          opacity: 0;
-          transform: translateY(20px);
-        }
-
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
+      /* Swal overrides */
+      .swal2-popup {
+        border-radius: var(--radius-xl) !important;
+        font-family: "Plus Jakarta Sans", "Segoe UI", sans-serif !important;
       }
 
-      @media (max-width: 480px) {
-        .card {
-          padding: 32px 20px;
-        }
+      body.dark-theme .swal2-popup {
+        background: #0f1730 !important;
+        color: #e2e8f0 !important;
+      }
 
+      body.dark-theme .swal2-title,
+      body.dark-theme .swal2-html-container {
+        color: #f8fafc !important;
+      }
+
+      /* Responsive */
+      @media (max-width: 520px) {
+        .header-inner {
+          padding: 12px 16px;
+        }
+        .brand-copy {
+          display: none;
+        }
+        main.page {
+          padding: 22px 14px 56px;
+        }
+        .card {
+          padding: 26px 20px 22px;
+        }
         h1 {
-          font-size: 22px;
+          font-size: 20px;
+        }
+        .step-label {
+          font-size: 10px;
+        }
+        .result-actions {
+          grid-template-columns: 1fr;
         }
       }
     </style>
   </head>
 
   <body>
-    <div class="result-wrapper">
-      <div class="card">
-        <div class="logo-badge">⛩️</div>
-        <h1>Status Pesanan</h1>
-        <p class="subtitle">
-          Berikut adalah detail pembayaran dan hasil pengiriman produk digital
-          kamu.
-        </p>
+    <span class="blob blob-1" aria-hidden="true"></span>
+    <span class="blob blob-2" aria-hidden="true"></span>
 
-        <div class="status-row" id="statusRow">
-          <span class="badge waiting_payment">Memuat status...</span>
-        </div>
+    <header class="site-header">
+      <div class="header-inner">
+        <a href="/" class="brand" aria-label="AE Game Store - Beranda">
+          <span class="brand-logo" aria-hidden="true">⛩️</span>
+          <span class="brand-copy">
+            <strong>AE Game Store</strong>
+            <span data-result-i18n="brandTagline">Premium Digital Keys</span>
+          </span>
+        </a>
 
-        <div class="summary">
-          <div class="summary-item" id="nameText"></div>
-          <div class="summary-item" id="contactText"></div>
-          <div class="summary-item" id="gameText"></div>
-          <div class="summary-item" id="productText"></div>
-          <div class="summary-item" id="priceText"></div>
-        </div>
+        <div class="header-actions">
+          <div class="lang-switch" role="group" aria-label="Language switcher">
+            <button
+              type="button"
+              id="btn-id"
+              class="lang-btn"
+              onclick="setResultLanguage('id')"
+              aria-pressed="true"
+            >
+              ID
+            </button>
+            <button
+              type="button"
+              id="btn-en"
+              class="lang-btn"
+              onclick="setResultLanguage('en')"
+              aria-pressed="false"
+            >
+              EN
+            </button>
+          </div>
 
-        <div class="key-box">
-          <span class="key-title">Game Key / Voucher</span>
-          <div id="keyBox">Menunggu key...</div>
           <button
-            class="copy-btn"
-            id="copyBtn"
-            onclick="copyKey()"
-            style="display: none"
-          >
-            Copy Kode
-          </button>
-        </div>
-
-        <p class="helper-text" id="statusText">Memuat data order...</p>
-
-        <div class="result-actions">
-          <button
-            class="copy-btn secondary-btn"
             type="button"
-            onclick="refreshOrder()"
+            id="theme-toggle"
+            class="icon-btn"
+            onclick="toggleResultTheme()"
+            aria-label="Toggle dark mode"
           >
-            Refresh Status
+            🌙
           </button>
-
-          <a class="home-btn" href="/#store-section"> Kembali ke Katalog </a>
         </div>
       </div>
-    </div>
+    </header>
+
+    <main class="page">
+      <div class="result-wrapper">
+        <div class="card">
+          <div class="card-head">
+            <div class="logo-badge" aria-hidden="true">⛩️</div>
+            <h1 data-result-i18n="title">Status Pesanan</h1>
+            <p class="subtitle" data-result-i18n="subtitle">
+              Berikut adalah detail pembayaran dan hasil pengiriman produk
+              digital kamu.
+            </p>
+          </div>
+
+          <div
+            class="status-row"
+            id="statusRow"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            <span class="badge waiting_payment" data-result-i18n="loadingStatus"
+              >Memuat status...</span
+            >
+          </div>
+
+          <div class="progress-track" id="progressTrack" aria-hidden="true">
+            <ol class="progress-steps">
+              <li class="progress-step done" data-step="created">
+                <span class="step-dot">
+                  <iconify-icon icon="mdi:cart-outline"></iconify-icon>
+                </span>
+                <span class="step-label" data-result-i18n="stepCreated"
+                  >Order</span
+                >
+              </li>
+              <li class="progress-step" data-step="payment">
+                <span class="step-dot">
+                  <iconify-icon icon="mdi:credit-card-outline"></iconify-icon>
+                </span>
+                <span class="step-label" data-result-i18n="stepPayment"
+                  >Pembayaran</span
+                >
+              </li>
+              <li class="progress-step" data-step="delivery">
+                <span class="step-dot">
+                  <iconify-icon icon="mdi:gift-outline"></iconify-icon>
+                </span>
+                <span class="step-label" data-result-i18n="stepDelivery"
+                  >Pengiriman</span
+                >
+              </li>
+            </ol>
+            <span class="progress-fill" id="progressFill"></span>
+          </div>
+
+          <div class="summary" id="summary">
+            <div class="summary-item" id="nameText">
+              <span class="skeleton-line long"></span>
+              <span class="skeleton-line short"></span>
+            </div>
+            <div class="summary-item" id="contactText">
+              <span class="skeleton-line long"></span>
+              <span class="skeleton-line short"></span>
+            </div>
+            <div class="summary-item" id="gameText">
+              <span class="skeleton-line long"></span>
+              <span class="skeleton-line short"></span>
+            </div>
+            <div class="summary-item" id="productText">
+              <span class="skeleton-line long"></span>
+              <span class="skeleton-line short"></span>
+            </div>
+            <div class="summary-item" id="priceText">
+              <span class="skeleton-line long"></span>
+              <span class="skeleton-line short"></span>
+            </div>
+          </div>
+
+          <div class="key-box">
+            <span class="key-title">
+              <iconify-icon
+                icon="mdi:key-variant"
+                aria-hidden="true"
+              ></iconify-icon>
+              <span data-result-i18n="keyTitle">Game Key / Voucher</span>
+            </span>
+            <div id="keyBox" data-result-i18n="awaitingKey">
+              Menunggu key...
+            </div>
+            <button
+              class="btn copy-btn"
+              id="copyBtn"
+              type="button"
+              onclick="copyKey()"
+              style="display: none"
+              data-result-i18n="copyKey"
+            >
+              Copy Kode
+            </button>
+          </div>
+
+          <p
+            class="helper-text"
+            id="statusText"
+            data-result-i18n="loadingOrder"
+          >
+            Memuat data order...
+          </p>
+
+          <div class="result-actions">
+            <button
+              type="button"
+              class="btn secondary-btn"
+              onclick="refreshOrder()"
+              data-result-i18n="refresh"
+            >
+              <iconify-icon
+                icon="mdi:refresh"
+                aria-hidden="true"
+              ></iconify-icon>
+              <span>Refresh Status</span>
+            </button>
+            <a
+              href="/account.html"
+              class="btn secondary-btn"
+              data-result-i18n="myAccount"
+            >
+              <iconify-icon
+                icon="mdi:account-circle-outline"
+                aria-hidden="true"
+              ></iconify-icon>
+              <span>Akun Saya</span>
+            </a>
+            <a
+              class="btn home-btn span-2"
+              href="/#store-section"
+              data-result-i18n="backToCatalog"
+            >
+              <iconify-icon
+                icon="mdi:storefront-outline"
+                aria-hidden="true"
+              ></iconify-icon>
+              <span>Kembali ke Katalog</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </main>
 
     <script>
+      const resultTranslations = {
+        id: {
+          pageTitle: "Hasil Pembayaran - AE Game Store",
+          brandTagline: "Premium Digital Keys",
+          title: "Status Pesanan",
+          subtitle:
+            "Berikut adalah detail pembayaran dan hasil pengiriman produk digital kamu.",
+          loadingStatus: "Memuat status...",
+          stepCreated: "Order",
+          stepPayment: "Pembayaran",
+          stepDelivery: "Pengiriman",
+          keyTitle: "Game Key / Voucher",
+          awaitingKey: "Menunggu key...",
+          copyKey: "Copy Kode",
+          refresh: "Refresh Status",
+          myAccount: "Akun Saya",
+          backToCatalog: "Kembali ke Katalog",
+          loadingOrder: "Memuat data order...",
+          labelName: "Nama",
+          labelContact: "Kontak",
+          labelGame: "Game",
+          labelProduct: "Produk",
+          labelTotal: "Total Bayar",
+          dash: "-",
+          // States
+          incompleteBadge: "Data tidak lengkap",
+          incompleteMessage:
+            "Link order tidak valid. Pastikan kamu membuka halaman result dari link pembayaran yang benar.",
+          incompleteKey: "Link order tidak valid.",
+          deliveredMessage:
+            "Pembayaran berhasil dan produk sudah dikirim. Simpan game key ini dengan aman.",
+          deliveredToast: "Game key sudah tersedia! 🎉",
+          manualKeyFallback: "Akan dikirim manual oleh admin.",
+          manualMessage:
+            "Pembayaran sudah dicek, tapi order ini perlu dikirim manual oleh admin. Hubungi admin jika belum diproses.",
+          manualToast: "Order perlu diproses manual 🌊",
+          pendingTitle: "Pembayaran belum selesai.",
+          pendingSub:
+            "Jika kamu sudah membayar, tunggu beberapa saat lalu klik Refresh Status. Game key akan muncul otomatis setelah pembayaran dikonfirmasi.",
+          pendingMessage:
+            "Order masih menunggu pembayaran. Selesaikan pembayaran terlebih dahulu agar key bisa dikirim otomatis.",
+          pendingToast: "Order masih menunggu pembayaran",
+          inactiveKey: "Order tidak aktif.",
+          inactiveMessage:
+            "Order ini sudah expired atau dibatalkan. Silakan buat order baru dari katalog.",
+          inactiveToast: "Order sudah tidak aktif",
+          fallbackKey: "Menunggu update status order.",
+          fallbackMessage:
+            "Order berhasil ditemukan. Simpan halaman ini untuk cek status order kamu kapan saja.",
+          fallbackToast: "Data order ditemukan 🌊",
+          loadFailedBadge: "Gagal memuat",
+          loadFailedKey: "Data order tidak bisa dimuat.",
+          loadFailedFallback: "Gagal mengambil data order.",
+          copySuccessTitle: "Berhasil!",
+          copySuccessText: "Game key berhasil dicopy!",
+          copyFailTitle: "Oops...",
+          copyFailText: "Gagal copy key.",
+        },
+        en: {
+          pageTitle: "Order Result - AE Game Store",
+          brandTagline: "Premium Digital Keys",
+          title: "Order Status",
+          subtitle:
+            "Here are your payment details and the delivery status of your digital product.",
+          loadingStatus: "Loading status...",
+          stepCreated: "Order",
+          stepPayment: "Payment",
+          stepDelivery: "Delivery",
+          keyTitle: "Game Key / Voucher",
+          awaitingKey: "Waiting for key...",
+          copyKey: "Copy Code",
+          refresh: "Refresh Status",
+          myAccount: "My Account",
+          backToCatalog: "Back to Catalog",
+          loadingOrder: "Loading order data...",
+          labelName: "Name",
+          labelContact: "Contact",
+          labelGame: "Game",
+          labelProduct: "Product",
+          labelTotal: "Total Payment",
+          dash: "-",
+          incompleteBadge: "Incomplete data",
+          incompleteMessage:
+            "Invalid order link. Make sure you open this page from the correct payment link.",
+          incompleteKey: "Order link is invalid.",
+          deliveredMessage:
+            "Payment confirmed and product has been delivered. Save this game key safely.",
+          deliveredToast: "Game key is ready! 🎉",
+          manualKeyFallback: "Will be delivered manually by admin.",
+          manualMessage:
+            "Payment was confirmed, but this order needs manual delivery by admin. Contact admin if it hasn't been processed.",
+          manualToast: "Order needs manual processing 🌊",
+          pendingTitle: "Payment not completed yet.",
+          pendingSub:
+            "If you have already paid, wait a moment and click Refresh Status. The game key will appear automatically once payment is confirmed.",
+          pendingMessage:
+            "Order is still awaiting payment. Please complete payment so the key can be sent automatically.",
+          pendingToast: "Order is awaiting payment",
+          inactiveKey: "Order is inactive.",
+          inactiveMessage:
+            "This order has expired or was cancelled. Please place a new order from the catalog.",
+          inactiveToast: "Order is no longer active",
+          fallbackKey: "Awaiting order status update.",
+          fallbackMessage:
+            "Order found. Save this page to check your order status anytime.",
+          fallbackToast: "Order data found 🌊",
+          loadFailedBadge: "Failed to load",
+          loadFailedKey: "Order data could not be loaded.",
+          loadFailedFallback: "Failed to fetch order data.",
+          copySuccessTitle: "Success!",
+          copySuccessText: "Game key copied successfully!",
+          copyFailTitle: "Oops...",
+          copyFailText: "Failed to copy key.",
+        },
+      };
+
+      function getResultLanguage() {
+        return localStorage.getItem("ae_language") === "en" ? "en" : "id";
+      }
+
+      function tResult(key) {
+        const lang = getResultLanguage();
+        return (
+          resultTranslations[lang]?.[key] || resultTranslations.id[key] || key
+        );
+      }
+
+      function applyResultLanguage() {
+        const lang = getResultLanguage();
+        document.documentElement.lang = lang;
+        document.title = tResult("pageTitle");
+
+        document.querySelectorAll("[data-result-i18n]").forEach((el) => {
+          const key = el.getAttribute("data-result-i18n");
+          el.innerText = tResult(key);
+        });
+
+        const btnId = document.getElementById("btn-id");
+        const btnEn = document.getElementById("btn-en");
+        if (btnId && btnEn) {
+          btnId.classList.toggle("active", lang === "id");
+          btnEn.classList.toggle("active", lang === "en");
+          btnId.setAttribute("aria-pressed", lang === "id" ? "true" : "false");
+          btnEn.setAttribute("aria-pressed", lang === "en" ? "true" : "false");
+        }
+      }
+
+      function setResultLanguage(lang) {
+        localStorage.setItem("ae_language", lang);
+        applyResultLanguage();
+        // Re-render the order using the cached payload, if any
+        if (lastOrderData) {
+          renderOrder(lastOrderData);
+        }
+      }
+
+      function applyResultTheme() {
+        const stored = localStorage.getItem("ae_theme");
+        const isDark = stored === "dark";
+        document.body.classList.toggle("dark-theme", isDark);
+        const btn = document.getElementById("theme-toggle");
+        if (btn) btn.innerText = isDark ? "☀️" : "🌙";
+      }
+
+      function toggleResultTheme() {
+        const isDark = document.body.classList.toggle("dark-theme");
+        localStorage.setItem("ae_theme", isDark ? "dark" : "light");
+        const btn = document.getElementById("theme-toggle");
+        if (btn) btn.innerText = isDark ? "☀️" : "🌙";
+      }
+
       let latestGameKey = "";
+      let lastOrderData = null;
 
       function formatRupiah(num) {
-        return "Rp " + Number(num).toLocaleString("id-ID");
+        return "Rp " + Number(num || 0).toLocaleString("id-ID");
+      }
+
+      function escapeHtml(value) {
+        return String(value ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
       }
 
       function badge(status) {
         const safeStatus = String(status || "-").toLowerCase();
-        return `<span class="badge ${safeStatus}">${status || "-"}</span>`;
+        return `<span class="badge ${escapeHtml(safeStatus)}">${escapeHtml(
+          status || tResult("dash"),
+        )}</span>`;
       }
 
       function showToast(icon, title) {
@@ -482,7 +1386,6 @@
           timer: 2400,
           timerProgressBar: true,
         });
-
         Toast.fire({ icon, title });
       }
 
@@ -497,19 +1400,202 @@
           .then(() => {
             Swal.fire({
               icon: "success",
-              title: "Berhasil!",
-              text: "Game key berhasil dicopy!",
+              title: tResult("copySuccessTitle"),
+              text: tResult("copySuccessText"),
               confirmButtonColor: "#0ea5e9",
             });
           })
           .catch(() => {
             Swal.fire({
               icon: "error",
-              title: "Oops...",
-              text: "Gagal copy key.",
+              title: tResult("copyFailTitle"),
+              text: tResult("copyFailText"),
               confirmButtonColor: "#fb7185",
             });
           });
+      }
+
+      function setProgress(state) {
+        // state: 'created' | 'payment' | 'delivered' | 'manual' | 'failed'
+        const fill = document.getElementById("progressFill");
+        const steps = document.querySelectorAll(".progress-step");
+
+        steps.forEach((s) => s.classList.remove("done", "active", "failed"));
+
+        const setStep = (idx, cls) => {
+          if (steps[idx]) steps[idx].classList.add(cls);
+        };
+
+        if (state === "delivered") {
+          setStep(0, "done");
+          setStep(1, "done");
+          setStep(2, "done");
+          if (fill) fill.style.width = "100%";
+        } else if (state === "manual") {
+          setStep(0, "done");
+          setStep(1, "done");
+          setStep(2, "active");
+          if (fill) fill.style.width = "70%";
+        } else if (state === "payment") {
+          setStep(0, "done");
+          setStep(1, "active");
+          if (fill) fill.style.width = "35%";
+        } else if (state === "failed") {
+          setStep(0, "done");
+          setStep(1, "failed");
+          setStep(2, "failed");
+          if (fill) fill.style.width = "100%";
+        } else {
+          setStep(0, "active");
+          if (fill) fill.style.width = "0%";
+        }
+      }
+
+      function clearSkeleton() {
+        const items = document.querySelectorAll(".summary-item");
+        items.forEach((el) => {
+          el.querySelectorAll(".skeleton-line").forEach((s) => s.remove());
+        });
+      }
+
+      function fillSummary(data) {
+        clearSkeleton();
+        const summaryEl = document.getElementById("summary");
+        if (summaryEl) summaryEl.style.display = "";
+        document.getElementById("nameText").innerHTML = `
+          <span class="summary-label">${tResult("labelName")}</span>
+          <span class="summary-value">${escapeHtml(
+            data.name || tResult("dash"),
+          )}</span>
+        `;
+        document.getElementById("contactText").innerHTML = `
+          <span class="summary-label">${tResult("labelContact")}</span>
+          <span class="summary-value">${escapeHtml(
+            data.contact || tResult("dash"),
+          )}</span>
+        `;
+        document.getElementById("gameText").innerHTML = `
+          <span class="summary-label">${tResult("labelGame")}</span>
+          <span class="summary-value">${escapeHtml(
+            data.game || tResult("dash"),
+          )}</span>
+        `;
+        document.getElementById("productText").innerHTML = `
+          <span class="summary-label">${tResult("labelProduct")}</span>
+          <span class="summary-value">${escapeHtml(
+            data.product || tResult("dash"),
+          )}</span>
+        `;
+        document.getElementById("priceText").innerHTML = `
+          <span class="summary-label">${tResult("labelTotal")}</span>
+          <span class="summary-value">${
+            data.price ? formatRupiah(data.price) : tResult("dash")
+          }</span>
+        `;
+      }
+
+      function renderOrder(data) {
+        lastOrderData = data;
+        const statusRow = document.getElementById("statusRow");
+        const statusText = document.getElementById("statusText");
+        const keyBox = document.getElementById("keyBox");
+        const copyBtn = document.getElementById("copyBtn");
+        const keyWrapper = document.querySelector(".key-box");
+
+        const paymentStatus = String(data.payment_status || "").toLowerCase();
+        const deliveryStatus = String(data.delivery_status || "").toLowerCase();
+
+        statusRow.innerHTML =
+          badge(data.payment_status) + badge(data.delivery_status);
+
+        fillSummary(data);
+
+        // Detach static i18n binding once we render dynamic content
+        statusText.removeAttribute("data-result-i18n");
+        keyBox.removeAttribute("data-result-i18n");
+
+        if (deliveryStatus === "delivered" && data.gameKey) {
+          latestGameKey = data.gameKey;
+          copyBtn.style.display = "flex";
+          keyBox.innerText = data.gameKey;
+          if (keyWrapper) keyWrapper.className = "key-box delivered";
+          statusText.innerHTML = `
+            <div class="status-message-card success">
+              <iconify-icon icon="mdi:check-circle" aria-hidden="true"></iconify-icon>
+              <span>${tResult("deliveredMessage")}</span>
+            </div>
+          `;
+          setProgress("delivered");
+          return "deliveredToast";
+        }
+
+        if (deliveryStatus === "manual") {
+          latestGameKey = "";
+          copyBtn.style.display = "none";
+          keyBox.innerText = data.gameKey || tResult("manualKeyFallback");
+          if (keyWrapper) keyWrapper.className = "key-box problem";
+          statusText.innerHTML = `
+            <div class="status-message-card warning">
+              <iconify-icon icon="mdi:account-clock-outline" aria-hidden="true"></iconify-icon>
+              <span>${tResult("manualMessage")}</span>
+            </div>
+          `;
+          setProgress("manual");
+          return "manualToast";
+        }
+
+        if (
+          paymentStatus === "pending" ||
+          deliveryStatus === "waiting_payment"
+        ) {
+          latestGameKey = "";
+          copyBtn.style.display = "none";
+          if (keyWrapper) keyWrapper.className = "key-box pending";
+          keyBox.innerHTML = `
+            <div class="pending-msg">${tResult("pendingTitle")}</div>
+            <div class="pending-sub">${tResult("pendingSub")}</div>
+          `;
+          statusText.innerHTML = `
+            <div class="status-message-card warning">
+              <iconify-icon icon="mdi:timer-sand" aria-hidden="true"></iconify-icon>
+              <span>${tResult("pendingMessage")}</span>
+            </div>
+          `;
+          setProgress("payment");
+          return "pendingToast";
+        }
+
+        if (
+          paymentStatus === "expired" ||
+          paymentStatus === "cancelled" ||
+          deliveryStatus === "cancelled"
+        ) {
+          latestGameKey = "";
+          copyBtn.style.display = "none";
+          if (keyWrapper) keyWrapper.className = "key-box problem";
+          keyBox.innerText = tResult("inactiveKey");
+          statusText.innerHTML = `
+            <div class="status-message-card danger">
+              <iconify-icon icon="mdi:alert-circle-outline" aria-hidden="true"></iconify-icon>
+              <span>${tResult("inactiveMessage")}</span>
+            </div>
+          `;
+          setProgress("failed");
+          return "inactiveToast";
+        }
+
+        latestGameKey = "";
+        copyBtn.style.display = "none";
+        if (keyWrapper) keyWrapper.className = "key-box pending";
+        keyBox.innerText = tResult("fallbackKey");
+        statusText.innerHTML = `
+          <div class="status-message-card">
+            <iconify-icon icon="mdi:information-outline" aria-hidden="true"></iconify-icon>
+            <span>${tResult("fallbackMessage")}</span>
+          </div>
+        `;
+        setProgress("payment");
+        return "fallbackToast";
       }
 
       async function loadOrder() {
@@ -523,15 +1609,23 @@
         const keyWrapper = document.querySelector(".key-box");
 
         if (!orderId) {
-          statusRow.innerHTML = `<span class="badge cancelled">Data tidak lengkap</span>`;
+          lastOrderData = null;
+          statusRow.innerHTML = `<span class="badge cancelled">${tResult(
+            "incompleteBadge",
+          )}</span>`;
           statusText.innerHTML = `
             <div class="status-message-card danger">
-                Link order tidak valid. Pastikan kamu membuka halaman result dari link pembayaran yang benar.
+              <iconify-icon icon="mdi:link-off" aria-hidden="true"></iconify-icon>
+              <span>${tResult("incompleteMessage")}</span>
             </div>
-        `;
-          keyBox.innerText = "Link order tidak valid.";
+          `;
+          // Hide the summary block since we have no data to show
+          const summaryEl = document.getElementById("summary");
+          if (summaryEl) summaryEl.style.display = "none";
+          keyBox.innerText = tResult("incompleteKey");
           copyBtn.style.display = "none";
           if (keyWrapper) keyWrapper.className = "key-box problem";
+          setProgress("failed");
           return;
         }
 
@@ -540,152 +1634,48 @@
           const data = await response.json();
 
           if (!response.ok) {
-            throw new Error(data.message || "Gagal mengambil data order");
+            throw new Error(data.message || tResult("loadFailedFallback"));
           }
 
-          const paymentStatus = String(data.payment_status || "").toLowerCase();
-          const deliveryStatus = String(
-            data.delivery_status || "",
-          ).toLowerCase();
-
-          statusRow.innerHTML =
-            badge(data.payment_status) + badge(data.delivery_status);
-
-          document.getElementById("nameText").innerHTML = `
-            <span class="summary-label">Nama</span>
-            <span class="summary-value">${data.name || "-"}</span>
-        `;
-
-          document.getElementById("contactText").innerHTML = `
-            <span class="summary-label">Kontak</span>
-            <span class="summary-value">${data.contact || "-"}</span>
-        `;
-
-          document.getElementById("gameText").innerHTML = `
-            <span class="summary-label">Game</span>
-            <span class="summary-value">${data.game || "-"}</span>
-        `;
-
-          document.getElementById("productText").innerHTML = `
-            <span class="summary-label">Produk</span>
-            <span class="summary-value">${data.product || "-"}</span>
-        `;
-
-          document.getElementById("priceText").innerHTML = `
-            <span class="summary-label">Total Bayar</span>
-            <span class="summary-value">${data.price ? formatRupiah(data.price) : "-"}</span>
-        `;
-
-          if (deliveryStatus === "delivered" && data.gameKey) {
-            latestGameKey = data.gameKey;
-            copyBtn.style.display = "block";
-            keyBox.innerText = data.gameKey;
-            if (keyWrapper) keyWrapper.className = "key-box delivered";
-
-            statusText.innerHTML = `
-                <div class="status-message-card success">
-                    Pembayaran berhasil dan produk sudah dikirim. Simpan game key ini dengan aman.
-                </div>
-            `;
-
-            showToast("success", "Game key sudah tersedia! 🎉");
-            return;
+          const toastKey = renderOrder(data);
+          if (toastKey) {
+            const iconMap = {
+              deliveredToast: "success",
+              manualToast: "info",
+              pendingToast: "info",
+              inactiveToast: "error",
+              fallbackToast: "info",
+            };
+            showToast(iconMap[toastKey] || "info", tResult(toastKey));
           }
-
-          if (deliveryStatus === "manual") {
-            latestGameKey = "";
-            copyBtn.style.display = "none";
-            keyBox.innerText =
-              data.gameKey || "Akan dikirim manual oleh admin.";
-            if (keyWrapper) keyWrapper.className = "key-box problem";
-
-            statusText.innerHTML = `
-                <div class="status-message-card warning">
-                    Pembayaran sudah dicek, tapi order ini perlu dikirim manual oleh admin. Hubungi admin jika belum diproses.
-                </div>
-            `;
-
-            showToast("info", "Order perlu diproses manual 🌊");
-            return;
-          }
-
-          if (
-            paymentStatus === "pending" ||
-            deliveryStatus === "waiting_payment"
-          ) {
-            latestGameKey = "";
-            copyBtn.style.display = "none";
-            if (keyWrapper) keyWrapper.className = "key-box pending";
-
-            keyBox.innerHTML = `
-                <div style="font-family:Segoe UI,sans-serif;font-size:14px;font-weight:800;margin-bottom:10px;color:#0ea5e9;">
-                    Pembayaran belum selesai.
-                </div>
-                <div style="font-family:Segoe UI,sans-serif;font-size:13px;font-weight:500;color:#475569;line-height:1.6;">
-                    Jika kamu sudah membayar, tunggu beberapa saat lalu klik Refresh Status.
-                    Game key akan muncul otomatis setelah pembayaran dikonfirmasi.
-                </div>
-            `;
-
-            statusText.innerHTML = `
-                <div class="status-message-card warning">
-                    Order masih menunggu pembayaran. Selesaikan pembayaran terlebih dahulu agar key bisa dikirim otomatis.
-                </div>
-            `;
-
-            showToast("info", "Order masih menunggu pembayaran");
-            return;
-          }
-
-          if (
-            paymentStatus === "expired" ||
-            paymentStatus === "cancelled" ||
-            deliveryStatus === "cancelled"
-          ) {
-            latestGameKey = "";
-            copyBtn.style.display = "none";
-            if (keyWrapper) keyWrapper.className = "key-box problem";
-
-            keyBox.innerText = "Order tidak aktif.";
-            statusText.innerHTML = `
-                <div class="status-message-card danger">
-                    Order ini sudah expired atau dibatalkan. Silakan buat order baru dari katalog.
-                </div>
-            `;
-
-            showToast("error", "Order sudah tidak aktif");
-            return;
-          }
-
-          latestGameKey = "";
-          copyBtn.style.display = "none";
-          if (keyWrapper) keyWrapper.className = "key-box pending";
-
-          keyBox.innerText = "Menunggu update status order.";
-          statusText.innerHTML = `
-            <div class="status-message-card">
-                Order berhasil ditemukan. Simpan halaman ini untuk cek status order kamu kapan saja.
-            </div>
-        `;
-
-          showToast("info", "Data order ditemukan 🌊");
         } catch (error) {
-          statusRow.innerHTML = `<span class="badge cancelled">Gagal memuat</span>`;
+          lastOrderData = null;
+          statusRow.innerHTML = `<span class="badge cancelled">${tResult(
+            "loadFailedBadge",
+          )}</span>`;
           statusText.innerHTML = `
             <div class="status-message-card danger">
-                ${error.message || "Gagal mengambil data order."}
+              <iconify-icon icon="mdi:alert-circle-outline" aria-hidden="true"></iconify-icon>
+              <span>${escapeHtml(
+                error.message || tResult("loadFailedFallback"),
+              )}</span>
             </div>
-        `;
-          keyBox.innerText = "Data order tidak bisa dimuat.";
+          `;
+          const summaryEl = document.getElementById("summary");
+          if (summaryEl) summaryEl.style.display = "none";
+          keyBox.innerText = tResult("loadFailedKey");
           copyBtn.style.display = "none";
           if (keyWrapper) keyWrapper.className = "key-box problem";
+          setProgress("failed");
         }
       }
 
-      loadOrder();
-
-      // Fitur Sakura Jatuh
+      // Sakura petals (only on wider screens, respects reduced motion)
       function createSakura() {
+        const reduced = window.matchMedia(
+          "(prefers-reduced-motion: reduce)",
+        ).matches;
+        if (reduced) return;
         const sakura = document.createElement("div");
         sakura.classList.add("sakura");
         const size = Math.random() * 10 + 5;
@@ -699,8 +1689,14 @@
           sakura.remove();
         }, 7000);
       }
+
+      // Bootstrap
+      applyResultTheme();
+      applyResultLanguage();
+      loadOrder();
+
       if (window.innerWidth > 768) {
-        setInterval(createSakura, 700);
+        setInterval(createSakura, 900);
       }
     </script>
   </body>
