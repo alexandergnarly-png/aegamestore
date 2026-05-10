@@ -1454,3 +1454,145 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 setLanguage(currentLanguage);
 loadAllProducts();
+// ===== HOMEPAGE INLINE SCRIPT CLEANUP =====
+
+function searchGame() {
+  const input =
+    document.getElementById("gameSearch")?.value.toLowerCase() || "";
+  const cards = document.querySelectorAll(".game-card");
+
+  cards.forEach((card) => {
+    const gameName = card.querySelector("span")?.innerText.toLowerCase() || "";
+    card.style.display = gameName.includes(input) ? "flex" : "none";
+  });
+}
+
+function createSakura() {
+  const sakura = document.createElement("div");
+  sakura.classList.add("sakura");
+
+  const size = Math.random() * 10 + 5;
+  sakura.style.width = size + "px";
+  sakura.style.height = size + "px";
+  sakura.style.left = Math.random() * 100 + "vw";
+  sakura.style.animationDuration =
+    Math.random() * 3 + 4 + "s, " + (Math.random() * 2 + 2) + "s";
+
+  document.body.appendChild(sakura);
+
+  setTimeout(() => {
+    sakura.remove();
+  }, 7000);
+}
+
+function showGuide() {
+  const t = translations[currentLanguage];
+
+  Swal.fire({
+    title: t.guideTitle,
+    html: `
+      <div style="text-align: left; font-size: 14px; line-height: 1.6; color: #334155;">
+        <b>1.</b> ${t.guideStep1}<br><br>
+        <b>2.</b> ${t.guideStep2}<br><br>
+        <b>3.</b> ${t.guideStep3}<br><br>
+        <b>4.</b> ${t.guideStep4}<br><br>
+        <b>5.</b> ${t.guideStep5}
+      </div>
+    `,
+    icon: "info",
+    confirmButtonText: t.guideOk,
+    confirmButtonColor: "#0ea5e9",
+    background: "#f0f9ff",
+    backdrop: "rgba(12, 74, 110, 0.4)",
+  });
+}
+
+function showTelegramPopup() {
+  const hideUntil = Number(localStorage.getItem("tg_popup_hide_until") || 0);
+  const now = Date.now();
+
+  if (hideUntil && !Number.isNaN(hideUntil) && now <= hideUntil) {
+    return;
+  }
+
+  setTimeout(() => {
+    Swal.fire({
+      html: `
+        <div style="text-align:center; padding: 10px 0;">
+          <div style="background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%); width: 90px; height: 90px; border-radius: 24px; display: flex; align-items: center; justify-content: center; margin: 0 auto 22px; box-shadow: 0 10px 20px rgba(14, 165, 233, 0.15);">
+            <iconify-icon icon="logos:telegram" width="54"></iconify-icon>
+          </div>
+          <h2 style="color: #0c4a6e; font-size: 22px; font-weight: 800; margin-bottom: 12px; letter-spacing: -0.5px;">Eksklusif Community ⛩️</h2>
+          <p style="color: #475569; font-size: 14px; line-height: 1.6; margin-bottom: 5px;">
+            Dapatkan <b>voucher diskon harian</b> dan update stok tercepat hanya di Telegram.
+          </p>
+          <div style="font-size: 12px; color: #0ea5e9; font-weight: 700; margin-top: 18px; display: inline-flex; align-items: center; gap: 6px; background: #e0f2fe; padding: 6px 14px; border-radius: 99px;">
+            <span style="width: 8px; height: 8px; background: #0ea5e9; border-radius: 50%; display: inline-block; animation: bluePulse 2s infinite;"></span>
+            Join 2,400+ Gamers Lainnya
+          </div>
+        </div>
+      `,
+      showCancelButton: false,
+      showDenyButton: true,
+      confirmButtonText: "Gabung Sekarang! 🚀",
+      denyButtonText: "Sembunyikan",
+      confirmButtonColor: "#0ea5e9",
+      denyButtonColor: "#94a3b8",
+      padding: "2em",
+      background: document.body.classList.contains("dark-theme")
+        ? "#1e293b"
+        : "#ffffff",
+      color: document.body.classList.contains("dark-theme")
+        ? "#f8fafc"
+        : "#0c4a6e",
+      borderRadius: "28px",
+      backdrop: "rgba(12, 74, 110, 0.4)",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.open(
+          "https://t.me/aegamestore",
+          "_blank",
+          "noopener,noreferrer",
+        );
+      }
+
+      if (result.isDenied) {
+        const hours = 24;
+        const hideDuration = hours * 60 * 60 * 1000;
+
+        localStorage.setItem("tg_popup_hide_until", now + hideDuration);
+
+        Swal.fire({
+          toast: true,
+          position: "top-end",
+          icon: "success",
+          title: `Pop-up disembunyikan selama ${hours} jam`,
+          showConfirmButton: false,
+          timer: 3000,
+        });
+      }
+    });
+  }, 700);
+}
+
+window.addEventListener("load", () => {
+  const preloader = document.getElementById("preloader");
+
+  setTimeout(() => {
+    if (preloader) {
+      preloader.classList.add("fade-out");
+    }
+
+    showTelegramPopup();
+  }, 1000);
+
+  if (window.innerWidth > 768) {
+    setInterval(createSakura, 700);
+  }
+
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/service-worker.js").catch((error) => {
+      console.error("Service worker registration failed:", error);
+    });
+  }
+});
