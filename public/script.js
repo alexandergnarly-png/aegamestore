@@ -2206,12 +2206,17 @@ function searchGame() {
       card.querySelector(".game-card-title")?.innerText ||
       ""
     ).toLowerCase();
+
     const matches = gameName.includes(input);
     card.style.display = matches ? "flex" : "none";
-    if (matches) visibleCount += 1;
+
+    if (matches) {
+      visibleCount += 1;
+    }
   });
 
   const emptyHint = document.getElementById("searchEmptyHint");
+
   if (emptyHint) {
     emptyHint.hidden = visibleCount !== 0 || !input;
   }
