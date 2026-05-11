@@ -3452,3 +3452,7 @@ body.dark-theme .order-step-dot {
     box-shadow: var(--shadow-xs);
   }
 }
+/* Hide promo countdown */
+.promo-countdown {
+  display: none !important;
+}
