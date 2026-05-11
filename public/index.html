@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="style.css?v=34" />
+    <link rel="stylesheet" href="style.css?v=35" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#0ea5e9" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -198,6 +198,18 @@
               <span>🔥 PROMO WEEKEND</span>
               <h3>Diskon Top-Up s/d 20%</h3>
               <p>Berlaku untuk semua platform iOS & Android. Cek sekarang!</p>
+              <div
+                class="promo-countdown"
+                id="promoCountdown"
+                aria-live="polite"
+              >
+                <span class="promo-countdown-label" data-i18n="promoEndsIn">
+                  Berakhir dalam
+                </span>
+                <span class="promo-countdown-time" id="promoCountdownTime">
+                  00:00:00
+                </span>
+              </div>
             </div>
           </div>
           <div class="promo-slide promo-slide-pink">
@@ -284,40 +296,74 @@
                 Klik game yang kamu mau, lalu isi detail order di popup.
               </p>
             </div>
+            <div class="catalog-meta" id="catalogMeta" aria-live="polite">
+              <div class="catalog-meta-item">
+                <span class="catalog-meta-value" id="catalogGameCount">0</span>
+                <span class="catalog-meta-label" data-i18n="metaGames">
+                  Game tersedia
+                </span>
+              </div>
+              <div class="catalog-meta-divider" aria-hidden="true"></div>
+              <div class="catalog-meta-item">
+                <span class="catalog-meta-value" id="catalogStockCount">
+                  0
+                </span>
+                <span class="catalog-meta-label" data-i18n="metaStock">
+                  Stok ready
+                </span>
+              </div>
+            </div>
           </div>
 
-          <div class="filter-pills" role="tablist" aria-label="Kategori game">
-            <button
-              type="button"
-              class="pill active"
-              data-category="all"
-              data-i18n="filterAll"
-            >
-              Semua
-            </button>
-            <button
-              type="button"
-              class="pill"
-              data-category="Mobile"
-              data-i18n="filterMobile"
-            >
-              Mobile
-            </button>
-            <button
-              type="button"
-              class="pill"
-              data-category="Tools"
-              data-i18n="filterTools"
-            >
-              Tools / GBox
-            </button>
+          <div
+            class="recent-viewed-rail"
+            id="recentViewedRail"
+            hidden
+            aria-label="Recently viewed games"
+          >
+            <div class="recent-viewed-head">
+              <span class="recent-viewed-title" data-i18n="recentTitle">
+                Terakhir dilihat
+              </span>
+              <button
+                type="button"
+                class="recent-viewed-clear"
+                id="recentViewedClear"
+                data-i18n="recentClear"
+              >
+                Bersihkan
+              </button>
+            </div>
+            <div class="recent-viewed-track" id="recentViewedTrack"></div>
           </div>
 
-          <div class="block">
-            <div class="search-header">
-              <label class="section-label" data-i18n="selectGame">
-                Pilih Game
-              </label>
+          <div class="catalog-toolbar" id="catalogToolbar">
+            <div class="filter-pills" role="tablist" aria-label="Kategori game">
+              <button type="button" class="pill active" data-category="all">
+                <span data-i18n="filterAll">Semua</span>
+                <span class="pill-count" data-count-for="all"></span>
+              </button>
+              <button type="button" class="pill" data-category="Mobile">
+                <span data-i18n="filterMobile">Mobile</span>
+                <span class="pill-count" data-count-for="Mobile"></span>
+              </button>
+              <button type="button" class="pill" data-category="Tools">
+                <span data-i18n="filterTools">Tools / GBox</span>
+                <span class="pill-count" data-count-for="Tools"></span>
+              </button>
+              <button
+                type="button"
+                class="pill pill-favorite"
+                data-category="Favorites"
+                aria-label="Filter favorit"
+              >
+                <span aria-hidden="true">❤️</span>
+                <span data-i18n="filterFavorites">Favorit</span>
+                <span class="pill-count" data-count-for="Favorites"></span>
+              </button>
+            </div>
+
+            <div class="catalog-toolbar-right">
               <div class="search-box">
                 <span class="search-icon" aria-hidden="true">🔍</span>
                 <input
@@ -328,9 +374,33 @@
                   onkeyup="searchGame()"
                   aria-label="Cari game"
                 />
+                <kbd class="search-kbd" aria-hidden="true">/</kbd>
+              </div>
+              <div class="sort-control">
+                <label
+                  class="sort-label"
+                  for="sortSelect"
+                  data-i18n="sortLabel"
+                >
+                  Urutkan
+                </label>
+                <select id="sortSelect" aria-label="Urutkan game">
+                  <option value="default" data-i18n="sortDefault">
+                    Rekomendasi
+                  </option>
+                  <option value="price-asc" data-i18n="sortCheapest">
+                    Termurah
+                  </option>
+                  <option value="az" data-i18n="sortAZ">A–Z</option>
+                  <option value="stock" data-i18n="sortStock">
+                    Stok Terbanyak
+                  </option>
+                </select>
               </div>
             </div>
+          </div>
 
+          <div class="block">
             <div class="game-grid compact-game-grid" id="gameGrid"></div>
           </div>
         </div>
@@ -368,6 +438,25 @@
             </p>
           </div>
         </div>
+
+        <ol class="order-steps" aria-label="Langkah pemesanan" id="orderSteps">
+          <li class="order-step is-active">
+            <span class="order-step-dot">1</span>
+            <span class="order-step-label" data-i18n="orderStep1">
+              Pilih produk
+            </span>
+          </li>
+          <li class="order-step">
+            <span class="order-step-dot">2</span>
+            <span class="order-step-label" data-i18n="orderStep2">
+              Detail player
+            </span>
+          </li>
+          <li class="order-step">
+            <span class="order-step-dot">3</span>
+            <span class="order-step-label" data-i18n="orderStep3"> Bayar </span>
+          </li>
+        </ol>
 
         <div class="form-grid">
           <div class="field">
@@ -497,7 +586,10 @@
         <small data-i18n="chatAdminSub">Fast response</small>
       </span>
       <span class="floating-admin-badge" aria-hidden="true"></span>
+      <span class="floating-admin-online" aria-hidden="true"></span>
     </a>
+
+    <div id="toastStack" class="toast-stack" aria-live="polite"></div>
 
     <button
       type="button"
@@ -569,6 +661,6 @@
       </div>
     </footer>
 
-    <script src="script.js?v=34"></script>
+    <script src="script.js?v=35"></script>
   </body>
 </html>
