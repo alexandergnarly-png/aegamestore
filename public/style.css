@@ -1,5 +1,5 @@
 /* =========================================================
-   AE Game Store — UI/UX v33
+   AE Game Store — UI/UX v35
    Notes: This file ONLY changes presentation. All selectors
    referenced by script.js and index.html are preserved
    exactly so server / database integration keeps working.
@@ -1826,9 +1826,10 @@ body.dark-theme .game-card-fav.is-active {
   line-height: 1.25;
   overflow: hidden;
   text-overflow: ellipsis;
-  display: -webkit-box;
+  line-clamp: 1;
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
+  display: -webkit-box;
 }
 
 .game-card-meta {
