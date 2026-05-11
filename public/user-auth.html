@@ -4,326 +4,182 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Masuk / Daftar - AE Game Store</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap"
+    />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
       :root {
         --primary: #0ea5e9;
-        --primary-hover: #0284c7;
+        --primary-strong: #0284c7;
+        --primary-deep: #075985;
+        --primary-soft: rgba(14, 165, 233, 0.12);
+        --primary-foam: #e0f2fe;
         --secondary: #fb7185;
-        --bg-color: #f0f9ff;
-        --card-bg: rgba(255, 255, 255, 0.75);
-        --text-main: #0c4a6e;
-        --text-muted: #475569;
-        --border-color: rgba(56, 189, 248, 0.4);
-        --shadow-lg: 0 24px 50px rgba(14, 165, 233, 0.15);
-        --radius-xl: 28px;
-        --radius-md: 14px;
-        --input-bg: rgba(255, 255, 255, 0.8);
-      }
+        --secondary-strong: #e11d48;
+        --secondary-soft: rgba(251, 113, 133, 0.12);
+        --sakura: #fbcfe8;
+        --sakura-strong: #f472b6;
+        --success: #10b981;
+        --success-soft: rgba(16, 185, 129, 0.12);
+        --warning: #f59e0b;
+        --warning-soft: rgba(245, 158, 11, 0.14);
+        --danger: #ef4444;
+        --danger-soft: rgba(239, 68, 68, 0.14);
 
-      /* Dark Mode Fallback */
-      @media (prefers-color-scheme: dark) {
-        body.auto-dark {
-          --bg-color: #0f172a;
-          --card-bg: rgba(30, 41, 59, 0.85);
-          --text-main: #f8fafc;
-          --text-muted: #94a3b8;
-          --border-color: rgba(56, 189, 248, 0.15);
-          --input-bg: rgba(15, 23, 42, 0.6);
-        }
+        --bg: #f0f9ff;
+        --bg-glow-a: #dbeafe;
+        --bg-glow-b: #fde2ed;
+
+        --card-bg: rgba(255, 255, 255, 0.78);
+        --card-border: rgba(56, 189, 248, 0.28);
+        --card-shadow: 0 30px 60px -28px rgba(14, 116, 144, 0.32);
+
+        --text-main: #0c4a6e;
+        --text-soft: #475569;
+        --text-muted: #64748b;
+        --text-strong: #082f49;
+        --text-on-primary: #ffffff;
+
+        --input-bg: rgba(255, 255, 255, 0.92);
+        --input-border: rgba(56, 189, 248, 0.4);
+        --input-border-focus: rgba(14, 165, 233, 0.7);
+        --input-shadow-focus: 0 0 0 4px rgba(14, 165, 233, 0.14);
+
+        --ring: 0 0 0 3px rgba(14, 165, 233, 0.35);
+
+        --radius-sm: 10px;
+        --radius-md: 14px;
+        --radius-lg: 20px;
+        --radius-xl: 28px;
+
+        --shadow-soft: 0 10px 28px rgba(14, 165, 233, 0.14);
+        --shadow-strong: 0 24px 50px rgba(14, 165, 233, 0.22);
       }
 
       body.dark-theme {
-        --bg-color: #0f172a;
-        --card-bg: rgba(30, 41, 59, 0.85);
-        --text-main: #f8fafc;
+        --bg: #020617;
+        --bg-glow-a: #1e3a8a;
+        --bg-glow-b: #831843;
+
+        --card-bg: rgba(15, 23, 42, 0.72);
+        --card-border: rgba(56, 189, 248, 0.22);
+        --card-shadow: 0 40px 80px -32px rgba(2, 6, 23, 0.7);
+
+        --text-main: #e0f2fe;
+        --text-soft: #cbd5e1;
         --text-muted: #94a3b8;
-        --border-color: rgba(56, 189, 248, 0.15);
-        --input-bg: rgba(15, 23, 42, 0.6);
+        --text-strong: #f0f9ff;
+
+        --input-bg: rgba(15, 23, 42, 0.78);
+        --input-border: rgba(56, 189, 248, 0.34);
+        --input-border-focus: rgba(56, 189, 248, 0.75);
+        --input-shadow-focus: 0 0 0 4px rgba(14, 165, 233, 0.24);
+
+        --primary-foam: rgba(14, 165, 233, 0.18);
+        --primary-soft: rgba(14, 165, 233, 0.22);
+        --secondary-soft: rgba(251, 113, 133, 0.24);
+        --success-soft: rgba(16, 185, 129, 0.2);
+        --warning-soft: rgba(245, 158, 11, 0.22);
+        --danger-soft: rgba(239, 68, 68, 0.22);
       }
 
       * {
         box-sizing: border-box;
         margin: 0;
         padding: 0;
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      html,
+      body {
+        font-family:
+          "Plus Jakarta Sans",
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
       }
 
       body {
-        background-color: var(--bg-color);
+        background: var(--bg);
         color: var(--text-main);
         min-height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        padding: 48px 24px;
         overflow-x: hidden;
-        overflow-y: auto;
         position: relative;
         transition:
-          background-color 0.3s ease,
+          background 0.3s ease,
           color 0.3s ease;
+        line-height: 1.55;
       }
 
-      /* Background Ornaments */
+      /* Animated background blobs */
       .bg-blob {
         position: fixed;
-        filter: blur(80px);
-        z-index: -1;
-        opacity: 0.5;
+        filter: blur(90px);
+        z-index: 0;
+        opacity: 0.65;
         border-radius: 50%;
         pointer-events: none;
+        will-change: transform;
+      }
+      body.dark-theme .bg-blob {
+        opacity: 0.4;
       }
       .blob-1 {
-        top: -10vh;
+        top: -12vh;
         left: -10vw;
-        width: 50vw;
-        height: 50vw;
-        background: radial-gradient(circle, var(--primary), var(--bg-color));
+        width: 46vw;
+        height: 46vw;
+        background: radial-gradient(circle, var(--primary), transparent 65%);
+        animation: blobFloat 16s ease-in-out infinite alternate;
       }
       .blob-2 {
-        bottom: -10vh;
-        right: -10vw;
-        width: 40vw;
-        height: 40vw;
-        background: radial-gradient(circle, var(--secondary), var(--bg-color));
+        bottom: -14vh;
+        right: -12vw;
+        width: 42vw;
+        height: 42vw;
+        background: radial-gradient(circle, var(--secondary), transparent 65%);
+        animation: blobFloat2 18s ease-in-out infinite alternate;
       }
-
-      .auth-wrapper {
-        width: 100%;
-        max-width: 420px;
-        animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        position: relative;
-        z-index: 10;
+      .blob-3 {
+        top: 40%;
+        left: 55%;
+        width: 28vw;
+        height: 28vw;
+        background: radial-gradient(circle, var(--sakura), transparent 60%);
+        opacity: 0.4;
+        animation: blobFloat 22s ease-in-out infinite alternate-reverse;
       }
-
-      .card {
-        background: var(--card-bg);
-        backdrop-filter: blur(24px);
-        -webkit-backdrop-filter: blur(24px);
-        border: 1px solid var(--border-color);
-        border-radius: var(--radius-xl);
-        padding: 48px 36px;
-        box-shadow: var(--shadow-lg);
-        text-align: center;
-        position: relative;
-        overflow: visible;
-      }
-
-      .logo-badge {
-        width: 64px;
-        height: 64px;
-        border-radius: 18px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: linear-gradient(135deg, var(--secondary), #f43f5e);
-        color: white;
-        font-size: 32px;
-        box-shadow: 0 12px 24px rgba(251, 113, 133, 0.3);
-        margin: 0 auto 24px;
-        transform: rotate(-5deg);
-        transition: transform 0.3s ease;
-      }
-      .card:hover .logo-badge {
-        transform: rotate(0deg) scale(1.05);
-      }
-
-      h2 {
-        font-size: 28px;
-        font-weight: 800;
-        color: var(--text-main);
-        margin-bottom: 8px;
-        letter-spacing: -0.5px;
-      }
-
-      p.subtitle {
-        color: var(--text-muted);
-        font-size: 14px;
-        margin-bottom: 32px;
-        line-height: 1.6;
-      }
-
-      /* Modern Input Group */
-      .input-group {
-        position: relative;
-        margin-bottom: 20px;
-        text-align: left;
-      }
-
-      .input-group input {
-        width: 100%;
-        padding: 16px 20px;
-        border-radius: var(--radius-md);
-        border: 1px solid var(--border-color);
-        background: var(--input-bg);
-        color: var(--text-main);
-        font-size: 15px;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        outline: none;
-      }
-
-      .input-group input:focus {
-        border-color: var(--primary);
-        background: transparent;
-        box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
-      }
-
-      .password-toggle-btn {
-        position: absolute;
-        right: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        border: none;
-        background: rgba(14, 165, 233, 0.1);
-        color: var(--primary);
-        border-radius: 999px;
-        padding: 6px 10px;
-        font-size: 12px;
-        font-weight: 800;
-        cursor: pointer;
-      }
-
-      .password-toggle-btn:hover {
-        background: rgba(14, 165, 233, 0.2);
-      }
-
-      .input-group.has-toggle input {
-        padding-right: 78px;
-      }
-
-      .forgot-password-link {
-        margin-top: 12px;
-        font-size: 13px;
-        color: var(--text-muted);
-      }
-
-      .forgot-password-link a {
-        color: var(--primary);
-        font-weight: 800;
-        text-decoration: none;
-        background: rgba(14, 165, 233, 0.1);
-        padding: 5px 9px;
-        border-radius: 999px;
-      }
-
-      .forgot-password-link a:hover {
-        background: rgba(14, 165, 233, 0.2);
-      }
-
-      /* Animasi form berpindah */
-      .form-container {
-        display: none;
-        animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      }
-      .form-container.active {
-        display: block;
-      }
-
-      @keyframes slideIn {
+      @keyframes blobFloat {
         from {
-          opacity: 0;
-          transform: translateX(20px);
+          transform: translate(0, 0) scale(1);
         }
         to {
-          opacity: 1;
-          transform: translateX(0);
+          transform: translate(40px, 30px) scale(1.08);
+        }
+      }
+      @keyframes blobFloat2 {
+        from {
+          transform: translate(0, 0) scale(1);
+        }
+        to {
+          transform: translate(-50px, -20px) scale(1.1);
         }
       }
 
-      button.btn-primary {
-        width: 100%;
-        padding: 16px;
-        border: none;
-        border-radius: var(--radius-md);
-        background: linear-gradient(
-          135deg,
-          var(--primary),
-          var(--primary-hover)
-        );
-        color: white;
-        font-size: 16px;
-        font-weight: 800;
-        cursor: pointer;
-        margin-top: 8px;
-        box-shadow: 0 10px 24px rgba(14, 165, 233, 0.25);
-        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-        position: relative;
-        overflow: hidden;
-      }
-
-      button.btn-primary::after {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 50%;
-        height: 100%;
-        background: linear-gradient(
-          to right,
-          transparent,
-          rgba(255, 255, 255, 0.3),
-          transparent
-        );
-        transform: skewX(-20deg);
-        transition: 0.5s;
-      }
-      button.btn-primary:hover::after {
-        left: 150%;
-      }
-      button.btn-primary:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 15px 30px rgba(14, 165, 233, 0.35);
-      }
-      button.btn-primary:active {
-        transform: translateY(0);
-      }
-
-      .switch-form {
-        margin-top: 28px;
-        font-size: 14px;
-        color: var(--text-muted);
-      }
-
-      .switch-form span {
-        color: var(--primary);
-        font-weight: 800;
-        cursor: pointer;
-        transition: color 0.2s;
-        text-decoration: none;
-        padding: 4px 8px;
-        border-radius: 8px;
-        background: rgba(14, 165, 233, 0.1);
-      }
-
-      .switch-form span:hover {
-        background: rgba(14, 165, 233, 0.2);
-      }
-
-      .back-link {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        margin-top: 24px;
-        font-size: 13px;
-        font-weight: 600;
-        color: var(--text-muted);
-        text-decoration: none;
-        transition: color 0.2s;
-      }
-      .back-link:hover {
-        color: var(--primary);
-      }
-
-      /* Sakura Effect */
+      /* Sakura petals */
       .sakura {
-        position: absolute;
+        position: fixed;
         top: -10%;
         z-index: 1;
         pointer-events: none;
-        background: #fbcfe8;
+        background: var(--sakura);
         border-radius: 100% 0 100% 0;
+        opacity: 0.7;
         animation:
           fall linear infinite,
           sway ease-in-out infinite alternate;
@@ -341,10 +197,570 @@
           transform: translateX(20px) rotate(45deg);
         }
       }
-      @keyframes fadeUp {
+
+      /* Page layout */
+      .page {
+        position: relative;
+        z-index: 5;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Top header */
+      .top-bar {
+        position: sticky;
+        top: 0;
+        z-index: 30;
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        background: linear-gradient(
+          180deg,
+          rgba(240, 249, 255, 0.85),
+          rgba(240, 249, 255, 0.55)
+        );
+        border-bottom: 1px solid var(--card-border);
+        padding: 14px 20px;
+      }
+      body.dark-theme .top-bar {
+        background: linear-gradient(
+          180deg,
+          rgba(2, 6, 23, 0.85),
+          rgba(2, 6, 23, 0.55)
+        );
+      }
+      .top-bar-inner {
+        max-width: 1180px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-decoration: none;
+        color: inherit;
+      }
+      .brand-mark {
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, var(--sakura), var(--secondary));
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        box-shadow: 0 10px 22px rgba(251, 113, 133, 0.32);
+      }
+      .brand-text {
+        line-height: 1.2;
+      }
+      .brand-name {
+        font-weight: 800;
+        font-size: 15px;
+        color: var(--text-strong);
+        letter-spacing: -0.2px;
+      }
+      .brand-sub {
+        font-size: 11px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+      }
+      .top-actions {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .lang-switch {
+        display: inline-flex;
+        background: var(--primary-soft);
+        padding: 4px;
+        border-radius: 999px;
+        gap: 2px;
+      }
+      .lang-btn {
+        border: none;
+        background: transparent;
+        color: var(--text-soft);
+        padding: 6px 12px;
+        border-radius: 999px;
+        font: inherit;
+        font-weight: 700;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      .lang-btn.active {
+        background: linear-gradient(
+          135deg,
+          var(--primary),
+          var(--primary-strong)
+        );
+        color: white;
+        box-shadow: 0 6px 14px rgba(14, 165, 233, 0.32);
+      }
+      .icon-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        border: 1px solid var(--card-border);
+        background: var(--input-bg);
+        color: var(--text-main);
+        font-size: 16px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+      }
+      .icon-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-soft);
+        border-color: var(--primary);
+      }
+      .icon-btn:focus-visible {
+        outline: none;
+        box-shadow: var(--ring);
+      }
+
+      /* Main grid */
+      .main {
+        flex: 1;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 48px;
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 56px 24px 32px;
+        width: 100%;
+      }
+
+      /* Hero side */
+      .hero {
+        position: relative;
+        animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+        align-self: center;
+      }
+      .hero-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 14px;
+        background: var(--primary-soft);
+        color: var(--primary-strong);
+        font-weight: 700;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        border-radius: 999px;
+        margin-bottom: 18px;
+      }
+      .hero-eyebrow .pulse {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--success);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
+        animation: pulseRing 2s ease-out infinite;
+      }
+      @keyframes pulseRing {
+        0% {
+          box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
+        }
+        100% {
+          box-shadow: 0 0 0 12px rgba(16, 185, 129, 0);
+        }
+      }
+      .hero-title {
+        font-size: clamp(28px, 4vw, 44px);
+        line-height: 1.08;
+        letter-spacing: -1.2px;
+        font-weight: 800;
+        color: var(--text-strong);
+        margin-bottom: 18px;
+      }
+      .hero-title .grad {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .hero-desc {
+        font-size: 16px;
+        color: var(--text-soft);
+        max-width: 480px;
+        margin-bottom: 28px;
+      }
+      .hero-features {
+        display: grid;
+        gap: 12px;
+        margin-bottom: 28px;
+      }
+      .hero-feature {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 14px 16px;
+        background: var(--card-bg);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-md);
+        transition: transform 0.25s ease;
+      }
+      .hero-feature:hover {
+        transform: translateX(4px);
+      }
+      .hero-feature-icon {
+        width: 40px;
+        height: 40px;
+        flex: 0 0 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--primary-soft);
+        color: var(--primary-strong);
+        border-radius: 12px;
+        font-size: 20px;
+      }
+      .hero-feature-title {
+        font-weight: 700;
+        font-size: 14px;
+        color: var(--text-strong);
+      }
+      .hero-feature-desc {
+        font-size: 13px;
+        color: var(--text-muted);
+      }
+
+      .hero-trust {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        flex-wrap: wrap;
+      }
+      .avatar-stack {
+        display: flex;
+      }
+      .avatar-stack .ava {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        font-weight: 800;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid var(--bg);
+        margin-left: -8px;
+      }
+      .avatar-stack .ava:first-child {
+        margin-left: 0;
+      }
+      .trust-text {
+        font-size: 13px;
+        color: var(--text-soft);
+      }
+      .trust-text b {
+        color: var(--text-strong);
+      }
+
+      /* Auth side */
+      .auth-side {
+        animation: fadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+        animation-delay: 0.1s;
+      }
+      .auth-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(28px);
+        -webkit-backdrop-filter: blur(28px);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-xl);
+        padding: 40px 36px;
+        box-shadow: var(--card-shadow);
+        position: relative;
+        overflow: hidden;
+      }
+      .auth-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(
+          90deg,
+          var(--primary),
+          var(--sakura-strong),
+          var(--secondary)
+        );
+      }
+
+      .auth-tabs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        background: var(--primary-soft);
+        padding: 4px;
+        border-radius: 999px;
+        position: relative;
+        margin-bottom: 28px;
+      }
+      .auth-tab {
+        border: none;
+        background: transparent;
+        color: var(--text-soft);
+        padding: 12px 14px;
+        font: inherit;
+        font-weight: 700;
+        font-size: 14px;
+        cursor: pointer;
+        border-radius: 999px;
+        position: relative;
+        z-index: 2;
+        transition: color 0.25s ease;
+      }
+      .auth-tab.active {
+        color: white;
+      }
+      .auth-tab-indicator {
+        position: absolute;
+        top: 4px;
+        bottom: 4px;
+        width: calc(50% - 4px);
+        left: 4px;
+        background: linear-gradient(
+          135deg,
+          var(--primary),
+          var(--primary-strong)
+        );
+        border-radius: 999px;
+        box-shadow: 0 8px 18px rgba(14, 165, 233, 0.34);
+        transition: transform 0.4s cubic-bezier(0.65, 0, 0.35, 1);
+        z-index: 1;
+      }
+      .auth-tabs[data-tab="register"] .auth-tab-indicator {
+        transform: translateX(100%);
+      }
+
+      .auth-head {
+        text-align: center;
+        margin-bottom: 22px;
+      }
+      .auth-emoji {
+        display: inline-flex;
+        width: 62px;
+        height: 62px;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, var(--sakura), var(--secondary));
+        color: white;
+        box-shadow: 0 12px 24px rgba(251, 113, 133, 0.32);
+        margin-bottom: 14px;
+        transform: rotate(-4deg);
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        animation: float 6s ease-in-out infinite;
+      }
+      .auth-card:hover .auth-emoji {
+        transform: rotate(0deg) scale(1.06);
+      }
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0) rotate(-4deg);
+        }
+        50% {
+          transform: translateY(-6px) rotate(-4deg);
+        }
+      }
+      .auth-title {
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--text-strong);
+        letter-spacing: -0.5px;
+        margin-bottom: 6px;
+      }
+      .auth-subtitle {
+        font-size: 14px;
+        color: var(--text-soft);
+        line-height: 1.55;
+      }
+
+      /* Form container with slide animation */
+      .form-container {
+        display: none;
+        animation: slideIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+      .form-container.active {
+        display: block;
+      }
+      @keyframes slideIn {
         from {
           opacity: 0;
-          transform: translateY(30px);
+          transform: translateX(18px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      /* Input group */
+      .input-group {
+        position: relative;
+        margin-bottom: 16px;
+        text-align: left;
+      }
+      .input-label {
+        display: block;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text-soft);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 8px;
+      }
+      .input-wrap {
+        position: relative;
+      }
+      .input-icon {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        font-size: 16px;
+        pointer-events: none;
+        transition: color 0.2s ease;
+      }
+      .input-group input {
+        width: 100%;
+        padding: 14px 16px 14px 44px;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--input-border);
+        background: var(--input-bg);
+        color: var(--text-main);
+        font-family: inherit;
+        font-size: 15px;
+        font-weight: 500;
+        transition:
+          border-color 0.2s ease,
+          box-shadow 0.2s ease,
+          background 0.2s ease;
+        outline: none;
+      }
+      .input-group input::placeholder {
+        color: var(--text-muted);
+        opacity: 0.85;
+      }
+      .input-group input:focus {
+        border-color: var(--input-border-focus);
+        box-shadow: var(--input-shadow-focus);
+      }
+      .input-group input:focus ~ .input-icon,
+      .input-group .input-wrap:focus-within .input-icon {
+        color: var(--primary-strong);
+      }
+      .input-group.has-toggle input {
+        padding-right: 96px;
+      }
+      .input-group.has-status input {
+        padding-right: 44px;
+      }
+      .input-status-icon {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%) scale(0);
+        opacity: 0;
+        font-size: 16px;
+        transition:
+          transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+          opacity 0.2s ease;
+        pointer-events: none;
+      }
+      .input-status-icon.show {
+        transform: translateY(-50%) scale(1);
+        opacity: 1;
+      }
+      .input-status-icon.ok {
+        color: var(--success);
+      }
+      .input-status-icon.warn {
+        color: var(--warning);
+      }
+
+      .password-toggle-btn {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        border: none;
+        background: var(--primary-soft);
+        color: var(--primary-strong);
+        border-radius: 999px;
+        padding: 8px 12px;
+        font: inherit;
+        font-size: 12px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: background 0.2s ease;
+      }
+      .password-toggle-btn:hover {
+        background: rgba(14, 165, 233, 0.22);
+      }
+      .password-toggle-btn:focus-visible {
+        outline: none;
+        box-shadow: var(--ring);
+      }
+
+      .input-hint {
+        margin-top: 6px;
+        font-size: 12px;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 16px;
+        transition: color 0.2s ease;
+      }
+      .input-hint.ok {
+        color: var(--success);
+      }
+      .input-hint.warn {
+        color: var(--warning);
+      }
+
+      /* Caps Lock warning */
+      .caps-warning {
+        margin-top: 8px;
+        padding: 8px 12px;
+        background: var(--warning-soft);
+        color: var(--warning);
+        border-left: 3px solid var(--warning);
+        font-size: 12px;
+        font-weight: 600;
+        border-radius: 8px;
+        display: none;
+        animation: slideDown 0.3s ease;
+      }
+      .caps-warning.show {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-4px);
         }
         to {
           opacity: 1;
@@ -352,172 +768,901 @@
         }
       }
 
-      @media (max-height: 760px) {
-        body {
-          align-items: flex-start;
-          padding-top: 28px;
-          padding-bottom: 28px;
-        }
+      /* Password strength meter */
+      .strength-meter {
+        display: flex;
+        gap: 4px;
+        margin-top: 8px;
+        height: 4px;
+      }
+      .strength-bar {
+        flex: 1;
+        background: rgba(148, 163, 184, 0.28);
+        border-radius: 999px;
+        transition: background 0.25s ease;
+      }
+      .strength-meter[data-strength="1"] .strength-bar:nth-child(-n + 1) {
+        background: var(--danger);
+      }
+      .strength-meter[data-strength="2"] .strength-bar:nth-child(-n + 2) {
+        background: var(--warning);
+      }
+      .strength-meter[data-strength="3"] .strength-bar:nth-child(-n + 3) {
+        background: #84cc16;
+      }
+      .strength-meter[data-strength="4"] .strength-bar:nth-child(-n + 4) {
+        background: var(--success);
+      }
+      .strength-label {
+        margin-top: 6px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-muted);
+        min-height: 14px;
+      }
+      .strength-label[data-strength="1"] {
+        color: var(--danger);
+      }
+      .strength-label[data-strength="2"] {
+        color: var(--warning);
+      }
+      .strength-label[data-strength="3"] {
+        color: #65a30d;
+      }
+      .strength-label[data-strength="4"] {
+        color: var(--success);
+      }
 
-        .card {
-          padding: 34px 28px;
-        }
+      /* Remember me row */
+      .form-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 14px 0 18px;
+        font-size: 13px;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .checkbox-row {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        user-select: none;
+        color: var(--text-soft);
+        font-weight: 600;
+      }
+      .checkbox-row input {
+        appearance: none;
+        -webkit-appearance: none;
+        width: 18px;
+        height: 18px;
+        border-radius: 6px;
+        border: 1.5px solid var(--input-border);
+        background: var(--input-bg);
+        cursor: pointer;
+        position: relative;
+        transition: all 0.2s ease;
+      }
+      .checkbox-row input:checked {
+        background: linear-gradient(
+          135deg,
+          var(--primary),
+          var(--primary-strong)
+        );
+        border-color: var(--primary-strong);
+      }
+      .checkbox-row input:checked::after {
+        content: "✓";
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 11px;
+        font-weight: 900;
+      }
+      .checkbox-row input:focus-visible {
+        outline: none;
+        box-shadow: var(--ring);
+      }
+      .forgot-link {
+        color: var(--primary-strong);
+        font-weight: 700;
+        font-size: 13px;
+        text-decoration: none;
+        padding: 6px 10px;
+        border-radius: 8px;
+        transition: background 0.2s ease;
+      }
+      .forgot-link:hover {
+        background: var(--primary-soft);
+      }
 
-        .logo-badge {
-          margin-bottom: 18px;
-        }
+      /* Primary button */
+      button.btn-primary {
+        width: 100%;
+        padding: 16px;
+        border: none;
+        border-radius: var(--radius-md);
+        background: linear-gradient(
+          135deg,
+          var(--primary),
+          var(--primary-strong)
+        );
+        color: white;
+        font: inherit;
+        font-size: 15px;
+        font-weight: 800;
+        letter-spacing: 0.02em;
+        cursor: pointer;
+        box-shadow: 0 12px 24px rgba(14, 165, 233, 0.32);
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        position: relative;
+        overflow: hidden;
+      }
+      button.btn-primary::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(
+          to right,
+          transparent,
+          rgba(255, 255, 255, 0.32),
+          transparent
+        );
+        transform: skewX(-22deg);
+        transition: left 0.6s ease;
+      }
+      button.btn-primary:hover:not(:disabled)::after {
+        left: 150%;
+      }
+      button.btn-primary:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 18px 34px rgba(14, 165, 233, 0.42);
+      }
+      button.btn-primary:active:not(:disabled) {
+        transform: translateY(0);
+      }
+      button.btn-primary:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+      button.btn-primary:focus-visible {
+        outline: none;
+        box-shadow:
+          0 0 0 3px var(--bg),
+          0 0 0 6px var(--primary);
+      }
 
-        p.subtitle {
-          margin-bottom: 24px;
+      /* Divider */
+      .divider {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 18px 0;
+        color: var(--text-muted);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-weight: 700;
+      }
+      .divider::before,
+      .divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--card-border);
+      }
+
+      .helper-row {
+        margin-top: 20px;
+        text-align: center;
+        font-size: 13px;
+        color: var(--text-soft);
+      }
+      .helper-row a,
+      .helper-row .link-action {
+        color: var(--primary-strong);
+        font-weight: 700;
+        text-decoration: none;
+        padding: 4px 8px;
+        border-radius: 8px;
+        background: var(--primary-soft);
+        margin-left: 4px;
+        cursor: pointer;
+        transition: background 0.2s ease;
+      }
+      .helper-row a:hover,
+      .helper-row .link-action:hover {
+        background: rgba(14, 165, 233, 0.22);
+      }
+
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 22px;
+        padding: 8px 14px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text-soft);
+        text-decoration: none;
+        background: transparent;
+        border: 1px solid transparent;
+        transition: all 0.2s ease;
+      }
+      .back-link:hover {
+        color: var(--primary-strong);
+        background: var(--primary-soft);
+      }
+
+      .footer-note {
+        text-align: center;
+        padding: 28px 24px 36px;
+        font-size: 12px;
+        color: var(--text-muted);
+        position: relative;
+        z-index: 5;
+      }
+      .footer-note a {
+        color: var(--primary-strong);
+        text-decoration: none;
+        font-weight: 700;
+      }
+
+      /* Social proof toast */
+      .social-proof {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        z-index: 40;
+        background: var(--card-bg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--card-border);
+        border-radius: 14px;
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: var(--shadow-strong);
+        max-width: 280px;
+        font-size: 13px;
+        transform: translateY(120%);
+        opacity: 0;
+        transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .social-proof.show {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      .social-proof-emoji {
+        width: 36px;
+        height: 36px;
+        flex: 0 0 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--success-soft);
+        color: var(--success);
+        border-radius: 10px;
+        font-size: 18px;
+      }
+      .social-proof-name {
+        font-weight: 800;
+        color: var(--text-strong);
+      }
+      .social-proof-desc {
+        color: var(--text-muted);
+        font-size: 12px;
+      }
+
+      /* Sparkles for success */
+      .sparkle {
+        position: fixed;
+        pointer-events: none;
+        z-index: 9999;
+        font-size: 24px;
+        animation: sparkleOut 1.4s ease-out forwards;
+      }
+      @keyframes sparkleOut {
+        0% {
+          transform: translate(0, 0) scale(0.4) rotate(0deg);
+          opacity: 1;
+        }
+        100% {
+          transform: translate(var(--dx), var(--dy)) scale(1.2) rotate(360deg);
+          opacity: 0;
+        }
+      }
+
+      /* Spinner inside button */
+      .btn-spinner {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border: 2px solid rgba(255, 255, 255, 0.45);
+        border-top-color: white;
+        border-radius: 50%;
+        margin-right: 8px;
+        vertical-align: middle;
+        animation: spin 0.7s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* SweetAlert tuning */
+      .swal2-popup {
+        font-family: inherit !important;
+        border-radius: 22px !important;
+      }
+      body.dark-theme .swal2-popup {
+        background: #0f172a !important;
+        color: var(--text-strong) !important;
+      }
+      body.dark-theme .swal2-title,
+      body.dark-theme .swal2-html-container {
+        color: var(--text-strong) !important;
+      }
+
+      /* Skip link */
+      .skip-link {
+        position: absolute;
+        top: -40px;
+        left: 8px;
+        background: var(--primary);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-weight: 700;
+        text-decoration: none;
+        z-index: 100;
+      }
+      .skip-link:focus {
+        top: 8px;
+      }
+
+      /* Responsive */
+      @media (max-width: 960px) {
+        .main {
+          grid-template-columns: 1fr;
+          gap: 28px;
+          padding: 32px 18px 24px;
+        }
+        .hero {
+          text-align: center;
+        }
+        .hero-features {
+          max-width: 480px;
+          margin-left: auto;
+          margin-right: auto;
+          margin-bottom: 22px;
+        }
+        .hero-trust {
+          justify-content: center;
+        }
+        .hero-desc {
+          margin-left: auto;
+          margin-right: auto;
+        }
+      }
+      @media (max-width: 540px) {
+        .auth-card {
+          padding: 28px 22px;
+          border-radius: 22px;
+        }
+        .top-bar {
+          padding: 12px 14px;
+        }
+        .brand-sub {
+          display: none;
+        }
+        .hero-title {
+          font-size: 30px;
+        }
+        .social-proof {
+          left: 12px;
+          right: 12px;
+          bottom: 12px;
+          max-width: none;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.001ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.05ms !important;
+        }
+        .sakura,
+        .bg-blob {
+          animation: none !important;
         }
       }
     </style>
   </head>
 
   <body onload="applyAuthLanguage()">
+    <a href="#auth-card" class="skip-link" data-auth-i18n="skipToForm"
+      >Lewati ke form</a
+    >
+
     <div class="bg-blob blob-1"></div>
     <div class="bg-blob blob-2"></div>
+    <div class="bg-blob blob-3"></div>
 
-    <div class="auth-wrapper">
-      <div class="card">
-        <div class="logo-badge">⛩️</div>
-
-        <!-- FORM LOGIN -->
-        <div id="loginForm" class="form-container active">
-          <h2 data-auth-i18n="loginTitle">Selamat Datang 🌊</h2>
-          <p class="subtitle" data-auth-i18n="loginSubtitle">
-            Masuk untuk melanjutkan petualanganmu.
-          </p>
-
-          <div class="input-group">
-            <input
-              type="text"
-              id="loginUsername"
-              placeholder="Username"
-              data-auth-placeholder="usernamePlaceholder"
-              autocomplete="off"
-            />
-          </div>
-          <div class="input-group has-toggle">
-            <input
-              type="password"
-              id="loginPassword"
-              placeholder="Password"
-              data-auth-placeholder="passwordPlaceholder"
-            />
-            <button
-              type="button"
-              class="password-toggle-btn"
-              data-password-target="loginPassword"
-              onclick="togglePasswordVisibility('loginPassword', this)"
-            >
-              Lihat
-            </button>
-          </div>
-
-          <button
-            class="btn-primary"
-            id="btnLogin"
-            onclick="login()"
-            data-auth-i18n="loginButton"
-          >
-            Masuk Sekarang
-          </button>
-
-          <div class="forgot-password-link">
-            <span data-auth-i18n="forgotPassword">Lupa password?</span>
-            <a
-              href="https://t.me/aegamestore"
-              target="_blank"
-              rel="noopener"
-              data-auth-i18n="contactAdmin"
-            >
-              Hubungi Admin
-            </a>
-          </div>
-
-          <div class="switch-form">
-            <span
-              style="
-                background: transparent;
-                padding: 0;
-                color: var(--text-muted);
-                cursor: default;
-              "
-              data-auth-i18n="switchToRegister"
-            >
-              Belum punya akun?
-            </span>
-            <span onclick="toggleForm()" data-auth-i18n="registerLink"
-              >Daftar</span
-            >
-          </div>
-          X
-        </div>
-
-        <!-- FORM DAFTAR -->
-        <div id="registerForm" class="form-container">
-          <h2 data-auth-i18n="registerTitle">Buat Akun Baru ✨</h2>
-          <p class="subtitle" data-auth-i18n="registerSubtitle">
-            Daftar sekarang dan nikmati kemudahan top-up.
-          </p>
-
-          <div class="input-group">
-            <input
-              type="text"
-              id="regUsername"
-              placeholder="Pilih Username (Min. 3 Huruf)"
-              data-auth-placeholder="registerUsernamePlaceholder"
-              autocomplete="off"
-            />
-          </div>
-          <div class="input-group has-toggle">
-            <input
-              type="password"
-              id="regPassword"
-              placeholder="Buat Password (Min. 6 Huruf)"
-              data-auth-placeholder="registerPasswordPlaceholder"
-            />
-            <button
-              type="button"
-              class="password-toggle-btn"
-              data-password-target="regPassword"
-              onclick="togglePasswordVisibility('regPassword', this)"
-            >
-              Lihat
-            </button>
-          </div>
-
-          <button
-            class="btn-primary"
-            id="btnRegister"
-            onclick="register()"
-            data-auth-i18n="registerButton"
-          >
-            Daftar Sekarang
-          </button>
-
-          <div class="switch-form">
-            <span
-              style="
-                background: transparent;
-                padding: 0;
-                color: var(--text-muted);
-                cursor: default;
-              "
-              data-auth-i18n="switchToLogin"
-            >
-              Sudah punya akun?
-            </span>
-            <span onclick="toggleForm()" data-auth-i18n="loginLink">Masuk</span>
-          </div>
-        </div>
-
-        <div>
-          <a href="/" class="back-link">
-            <span>←</span>
-            <span data-auth-i18n="backHome">Kembali ke Beranda</span>
+    <div class="page">
+      <header class="top-bar">
+        <div class="top-bar-inner">
+          <a href="/" class="brand" aria-label="AE Game Store home">
+            <div class="brand-mark" aria-hidden="true">⛩️</div>
+            <div class="brand-text">
+              <div class="brand-name">AE Game Store</div>
+              <div class="brand-sub" data-auth-i18n="brandSub">
+                Top-up Cepat & Aman
+              </div>
+            </div>
           </a>
+          <div class="top-actions">
+            <div
+              class="lang-switch"
+              role="group"
+              aria-label="Language switcher"
+            >
+              <button
+                type="button"
+                class="lang-btn"
+                id="langBtnId"
+                onclick="setAuthLanguage('id')"
+                aria-pressed="true"
+              >
+                ID
+              </button>
+              <button
+                type="button"
+                class="lang-btn"
+                id="langBtnEn"
+                onclick="setAuthLanguage('en')"
+                aria-pressed="false"
+              >
+                EN
+              </button>
+            </div>
+            <button
+              type="button"
+              class="icon-btn"
+              id="themeToggle"
+              onclick="toggleAuthTheme()"
+              aria-label="Toggle theme"
+              title="Toggle theme"
+            >
+              🌙
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main class="main">
+        <section class="hero" aria-label="Welcome panel">
+          <span class="hero-eyebrow">
+            <span class="pulse" aria-hidden="true"></span>
+            <span data-auth-i18n="heroBadge">SISTEM AMAN & TERPERCAYA</span>
+          </span>
+          <h1 class="hero-title">
+            <span data-auth-i18n="heroTitle1">Top-up game lebih</span>
+            <span class="grad" data-auth-i18n="heroTitle2">cepat & aman</span>
+          </h1>
+          <p class="hero-desc" data-auth-i18n="heroDesc">
+            Login atau daftar untuk simpan riwayat order, pakai voucher khusus
+            member, dan dapat instant delivery setiap saat.
+          </p>
+
+          <div class="hero-features">
+            <div class="hero-feature">
+              <div class="hero-feature-icon" aria-hidden="true">⚡</div>
+              <div>
+                <div
+                  class="hero-feature-title"
+                  data-auth-i18n="featureInstantTitle"
+                >
+                  Instant Delivery
+                </div>
+                <div
+                  class="hero-feature-desc"
+                  data-auth-i18n="featureInstantDesc"
+                >
+                  Game key dikirim otomatis setelah pembayaran sukses.
+                </div>
+              </div>
+            </div>
+            <div class="hero-feature">
+              <div class="hero-feature-icon" aria-hidden="true">🛡️</div>
+              <div>
+                <div
+                  class="hero-feature-title"
+                  data-auth-i18n="featureSecureTitle"
+                >
+                  Pembayaran Aman
+                </div>
+                <div
+                  class="hero-feature-desc"
+                  data-auth-i18n="featureSecureDesc"
+                >
+                  QRIS resmi dengan enkripsi end-to-end & log transparan.
+                </div>
+              </div>
+            </div>
+            <div class="hero-feature">
+              <div class="hero-feature-icon" aria-hidden="true">🎟️</div>
+              <div>
+                <div
+                  class="hero-feature-title"
+                  data-auth-i18n="featureVoucherTitle"
+                >
+                  Voucher Member
+                </div>
+                <div
+                  class="hero-feature-desc"
+                  data-auth-i18n="featureVoucherDesc"
+                >
+                  Diskon eksklusif untuk pengguna yang sudah login.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-trust">
+            <div class="avatar-stack" aria-hidden="true">
+              <span class="ava">A</span>
+              <span class="ava">P</span>
+              <span class="ava">R</span>
+              <span class="ava">M</span>
+            </div>
+            <div class="trust-text">
+              <b id="trustCount">12.480+</b>
+              <span data-auth-i18n="trustText">
+                gamer aktif sudah top-up bareng kami.
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <section class="auth-side" aria-label="Authentication form">
+          <div class="auth-card" id="auth-card">
+            <div
+              class="auth-tabs"
+              id="authTabs"
+              data-tab="login"
+              role="tablist"
+            >
+              <span class="auth-tab-indicator" aria-hidden="true"></span>
+              <button
+                type="button"
+                class="auth-tab active"
+                id="tabLogin"
+                role="tab"
+                aria-selected="true"
+                onclick="setAuthTab('login')"
+              >
+                <span data-auth-i18n="tabLogin">Masuk</span>
+              </button>
+              <button
+                type="button"
+                class="auth-tab"
+                id="tabRegister"
+                role="tab"
+                aria-selected="false"
+                onclick="setAuthTab('register')"
+              >
+                <span data-auth-i18n="tabRegister">Daftar</span>
+              </button>
+            </div>
+
+            <!-- FORM LOGIN -->
+            <div
+              id="loginForm"
+              class="form-container active"
+              role="tabpanel"
+              aria-labelledby="tabLogin"
+            >
+              <div class="auth-head">
+                <div class="auth-emoji" aria-hidden="true">⛩️</div>
+                <h2 class="auth-title" data-auth-i18n="loginTitle">
+                  Selamat Datang Kembali
+                </h2>
+                <p class="auth-subtitle" data-auth-i18n="loginSubtitle">
+                  Masuk untuk melanjutkan petualanganmu.
+                </p>
+              </div>
+
+              <div class="input-group has-status">
+                <label
+                  class="input-label"
+                  for="loginUsername"
+                  data-auth-i18n="usernameLabel"
+                  >Username</label
+                >
+                <div class="input-wrap">
+                  <span class="input-icon" aria-hidden="true">👤</span>
+                  <input
+                    type="text"
+                    id="loginUsername"
+                    placeholder="Username"
+                    data-auth-placeholder="usernamePlaceholder"
+                    autocomplete="username"
+                  />
+                  <span
+                    class="input-status-icon ok"
+                    id="loginUsernameOk"
+                    aria-hidden="true"
+                    >✓</span
+                  >
+                </div>
+              </div>
+              <div class="input-group has-toggle">
+                <label
+                  class="input-label"
+                  for="loginPassword"
+                  data-auth-i18n="passwordLabel"
+                  >Password</label
+                >
+                <div class="input-wrap">
+                  <span class="input-icon" aria-hidden="true">🔒</span>
+                  <input
+                    type="password"
+                    id="loginPassword"
+                    placeholder="Password"
+                    data-auth-placeholder="passwordPlaceholder"
+                    autocomplete="current-password"
+                  />
+                  <button
+                    type="button"
+                    class="password-toggle-btn"
+                    data-password-target="loginPassword"
+                    onclick="togglePasswordVisibility('loginPassword', this)"
+                  >
+                    Lihat
+                  </button>
+                </div>
+                <div
+                  class="caps-warning"
+                  id="loginCapsWarn"
+                  role="status"
+                  aria-live="polite"
+                >
+                  <span aria-hidden="true">⚠️</span>
+                  <span data-auth-i18n="capsLock">Caps Lock aktif</span>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <label class="checkbox-row">
+                  <input
+                    type="checkbox"
+                    id="rememberMe"
+                    onchange="onRememberToggle(this)"
+                  />
+                  <span data-auth-i18n="rememberMe">Ingat saya</span>
+                </label>
+                <a
+                  href="https://t.me/aegamestore"
+                  target="_blank"
+                  rel="noopener"
+                  class="forgot-link"
+                  data-auth-i18n="forgotPassword"
+                  >Lupa password?</a
+                >
+              </div>
+
+              <button
+                class="btn-primary"
+                id="btnLogin"
+                onclick="login()"
+                data-auth-i18n="loginButton"
+              >
+                Masuk Sekarang
+              </button>
+
+              <div class="divider">
+                <span data-auth-i18n="orDivider">atau</span>
+              </div>
+
+              <div class="helper-row">
+                <span data-auth-i18n="switchToRegister">Belum punya akun?</span>
+                <span
+                  class="link-action"
+                  onclick="setAuthTab('register')"
+                  data-auth-i18n="registerLink"
+                  >Daftar sekarang</span
+                >
+              </div>
+            </div>
+
+            <!-- FORM DAFTAR -->
+            <div
+              id="registerForm"
+              class="form-container"
+              role="tabpanel"
+              aria-labelledby="tabRegister"
+            >
+              <div class="auth-head">
+                <div class="auth-emoji" aria-hidden="true">✨</div>
+                <h2 class="auth-title" data-auth-i18n="registerTitle">
+                  Buat Akun Baru
+                </h2>
+                <p class="auth-subtitle" data-auth-i18n="registerSubtitle">
+                  Daftar dan nikmati kemudahan top-up + voucher eksklusif.
+                </p>
+              </div>
+
+              <div class="input-group has-status">
+                <label
+                  class="input-label"
+                  for="regUsername"
+                  data-auth-i18n="usernameLabel"
+                  >Username</label
+                >
+                <div class="input-wrap">
+                  <span class="input-icon" aria-hidden="true">👤</span>
+                  <input
+                    type="text"
+                    id="regUsername"
+                    placeholder="Pilih Username (Min. 3 Huruf)"
+                    data-auth-placeholder="registerUsernamePlaceholder"
+                    autocomplete="off"
+                  />
+                  <span
+                    class="input-status-icon"
+                    id="regUsernameStatus"
+                    aria-hidden="true"
+                    >✓</span
+                  >
+                </div>
+                <div class="input-hint" id="regUsernameHint">
+                  <span data-auth-i18n="usernameHint"
+                    >Min. 3 karakter, tanpa spasi.</span
+                  >
+                </div>
+              </div>
+
+              <div class="input-group has-toggle">
+                <label
+                  class="input-label"
+                  for="regPassword"
+                  data-auth-i18n="passwordLabel"
+                  >Password</label
+                >
+                <div class="input-wrap">
+                  <span class="input-icon" aria-hidden="true">🔒</span>
+                  <input
+                    type="password"
+                    id="regPassword"
+                    placeholder="Buat Password (Min. 6 Huruf)"
+                    data-auth-placeholder="registerPasswordPlaceholder"
+                    autocomplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    class="password-toggle-btn"
+                    data-password-target="regPassword"
+                    onclick="togglePasswordVisibility('regPassword', this)"
+                  >
+                    Lihat
+                  </button>
+                </div>
+                <div
+                  class="strength-meter"
+                  id="regStrength"
+                  data-strength="0"
+                  aria-hidden="true"
+                >
+                  <span class="strength-bar"></span>
+                  <span class="strength-bar"></span>
+                  <span class="strength-bar"></span>
+                  <span class="strength-bar"></span>
+                </div>
+                <div
+                  class="strength-label"
+                  id="regStrengthLabel"
+                  data-strength="0"
+                ></div>
+                <div
+                  class="caps-warning"
+                  id="regCapsWarn"
+                  role="status"
+                  aria-live="polite"
+                >
+                  <span aria-hidden="true">⚠️</span>
+                  <span data-auth-i18n="capsLock">Caps Lock aktif</span>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <label class="checkbox-row">
+                  <input type="checkbox" id="acceptTerms" />
+                  <span data-auth-i18n="acceptTerms">Saya setuju ke S&K</span>
+                </label>
+              </div>
+
+              <button
+                class="btn-primary"
+                id="btnRegister"
+                onclick="register()"
+                data-auth-i18n="registerButton"
+              >
+                Daftar Sekarang
+              </button>
+
+              <div class="divider">
+                <span data-auth-i18n="orDivider">atau</span>
+              </div>
+
+              <div class="helper-row">
+                <span data-auth-i18n="switchToLogin">Sudah punya akun?</span>
+                <span
+                  class="link-action"
+                  onclick="setAuthTab('login')"
+                  data-auth-i18n="loginLink"
+                  >Masuk</span
+                >
+              </div>
+            </div>
+
+            <div style="text-align: center">
+              <a href="/" class="back-link">
+                <span aria-hidden="true">←</span>
+                <span data-auth-i18n="backHome">Kembali ke Beranda</span>
+              </a>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer-note">
+        <span data-auth-i18n="footerNote">
+          Dengan masuk atau mendaftar, kamu menyetujui Syarat & Kebijakan kami.
+        </span>
+        <a href="https://t.me/aegamestore" target="_blank" rel="noopener">
+          @aegamestore
+        </a>
+      </footer>
+    </div>
+
+    <div class="social-proof" id="socialProof" role="status" aria-live="polite">
+      <div class="social-proof-emoji" aria-hidden="true">🎉</div>
+      <div>
+        <div>
+          <span class="social-proof-name" id="socialProofName">Andra</span>
+          <span data-auth-i18n="socialProofJoined">
+            baru saja daftar &amp; top-up.
+          </span>
+        </div>
+        <div class="social-proof-desc" data-auth-i18n="socialProofTime">
+          2 menit lalu
         </div>
       </div>
     </div>
@@ -526,23 +1671,84 @@
       // Sinkronisasi dengan Dark Mode di halaman utama
       document.addEventListener("DOMContentLoaded", () => {
         const savedTheme = localStorage.getItem("ae_theme");
+        const themeBtn = document.getElementById("themeToggle");
         if (savedTheme === "dark") {
           document.body.classList.add("dark-theme");
+          if (themeBtn) themeBtn.innerText = "☀️";
         }
+        // Prefill remembered username
+        const remembered = localStorage.getItem("ae_remember_username");
+        if (remembered) {
+          const u = document.getElementById("loginUsername");
+          const r = document.getElementById("rememberMe");
+          if (u) u.value = remembered;
+          if (r) r.checked = true;
+          validateLoginUsername();
+        }
+        applyAuthLanguage();
+        bindLiveValidation();
+        startSocialProof();
         checkLoginStatus();
       });
 
-      // Fitur Ganti Form Login/Register (Diperbarui dengan class untuk animasi)
-      function toggleForm() {
+      function toggleAuthTheme() {
+        const isDark = document.body.classList.toggle("dark-theme");
+        localStorage.setItem("ae_theme", isDark ? "dark" : "light");
+        const themeBtn = document.getElementById("themeToggle");
+        if (themeBtn) themeBtn.innerText = isDark ? "☀️" : "🌙";
+      }
+
+      function setAuthLanguage(lang) {
+        localStorage.setItem("ae_language", lang);
+        document
+          .getElementById("langBtnId")
+          .setAttribute("aria-pressed", lang === "id" ? "true" : "false");
+        document
+          .getElementById("langBtnEn")
+          .setAttribute("aria-pressed", lang === "en" ? "true" : "false");
+        document
+          .getElementById("langBtnId")
+          .classList.toggle("active", lang === "id");
+        document
+          .getElementById("langBtnEn")
+          .classList.toggle("active", lang === "en");
+        applyAuthLanguage();
+      }
+
+      // Tab UI sync + form toggle
+      function setAuthTab(target) {
+        const tabs = document.getElementById("authTabs");
         const loginForm = document.getElementById("loginForm");
         const registerForm = document.getElementById("registerForm");
+        const tabLogin = document.getElementById("tabLogin");
+        const tabReg = document.getElementById("tabRegister");
 
-        if (loginForm.classList.contains("active")) {
+        if (target === "register") {
+          tabs.setAttribute("data-tab", "register");
+          tabLogin.classList.remove("active");
+          tabReg.classList.add("active");
+          tabLogin.setAttribute("aria-selected", "false");
+          tabReg.setAttribute("aria-selected", "true");
           loginForm.classList.remove("active");
           registerForm.classList.add("active");
         } else {
+          tabs.setAttribute("data-tab", "login");
+          tabLogin.classList.add("active");
+          tabReg.classList.remove("active");
+          tabLogin.setAttribute("aria-selected", "true");
+          tabReg.setAttribute("aria-selected", "false");
           loginForm.classList.add("active");
           registerForm.classList.remove("active");
+        }
+      }
+
+      // Backward-compatible toggleForm() — kept so any legacy invocation still works
+      function toggleForm() {
+        const loginForm = document.getElementById("loginForm");
+        if (loginForm.classList.contains("active")) {
+          setAuthTab("register");
+        } else {
+          setAuthTab("login");
         }
       }
 
@@ -558,15 +1764,17 @@
       }
 
       async function openChangePassword() {
+        const lang = getSavedAuthLanguage();
+        const dict = authTranslations[lang] || authTranslations.id;
         const result = await Swal.fire({
-          title: "Ganti Password",
+          title: dict.changePasswordTitle,
           html: `
-            <input id="oldPasswordInput" type="password" class="swal2-input" placeholder="Password lama / random">
-            <input id="newPasswordInput" type="password" class="swal2-input" placeholder="Password baru">
-        `,
+            <input id="oldPasswordInput" type="password" class="swal2-input" placeholder="${dict.oldPasswordPlaceholder}">
+            <input id="newPasswordInput" type="password" class="swal2-input" placeholder="${dict.newPasswordPlaceholder}">
+          `,
           showCancelButton: true,
-          confirmButtonText: "Simpan",
-          cancelButtonText: "Batal",
+          confirmButtonText: dict.saveBtn,
+          cancelButtonText: dict.cancelBtn,
           confirmButtonColor: "#0ea5e9",
           preConfirm: () => {
             const oldPassword = document
@@ -575,79 +1783,229 @@
             const newPassword = document
               .getElementById("newPasswordInput")
               .value.trim();
-
             if (!oldPassword || newPassword.length < 6) {
-              Swal.showValidationMessage(
-                "Isi password lama dan password baru minimal 6 karakter",
-              );
+              Swal.showValidationMessage(dict.changePasswordValidation);
               return false;
             }
             return { oldPassword, newPassword };
           },
         });
-
         if (!result.isConfirmed) return;
-
         try {
           const res = await fetch("/user/change-password", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(result.value),
           });
-
           const data = await res.json();
-
           if (!res.ok) {
-            Swal.fire("Gagal", data.message || "Gagal ganti password", "error");
+            Swal.fire(
+              dict.failedTitle,
+              data.message || dict.changePasswordFailed,
+              "error",
+            );
             return;
           }
-          Swal.fire(
-            "Berhasil",
-            "Password berhasil diganti. Silakan pakai password baru untuk login berikutnya.",
-            "success",
-          );
+          Swal.fire(dict.successTitle, dict.changePasswordSuccess, "success");
         } catch (err) {
-          Swal.fire("Error", "Terjadi error server", "error");
+          Swal.fire(dict.errorTitle, dict.serverError, "error");
         }
       }
+
       function togglePasswordVisibility(inputId, buttonEl) {
         const input = document.getElementById(inputId);
-
         if (!input || !buttonEl) return;
-
         const lang = getSavedAuthLanguage();
         const dict = authTranslations[lang] || authTranslations.id;
-
         const isPassword = input.type === "password";
         input.type = isPassword ? "text" : "password";
         buttonEl.innerText = isPassword ? dict.hidePassword : dict.showPassword;
       }
-      // Tombol Enter untuk Login
+
+      // Enter to submit
       document
         .getElementById("loginPassword")
         .addEventListener("keypress", function (event) {
           if (event.key === "Enter") login();
         });
+      document
+        .getElementById("regPassword")
+        .addEventListener("keypress", function (event) {
+          if (event.key === "Enter") register();
+        });
 
-      // Fungsi Login User (Logic Tetap)
+      function bindLiveValidation() {
+        const loginUser = document.getElementById("loginUsername");
+        const regUser = document.getElementById("regUsername");
+        const regPass = document.getElementById("regPassword");
+        const loginPass = document.getElementById("loginPassword");
+
+        if (loginUser) {
+          loginUser.addEventListener("input", validateLoginUsername);
+        }
+        if (regUser) {
+          regUser.addEventListener("input", validateRegUsername);
+        }
+        if (regPass) {
+          regPass.addEventListener("input", updatePasswordStrength);
+        }
+
+        // Caps Lock detection
+        [loginPass, regPass].forEach((el) => {
+          if (!el) return;
+          const warnId =
+            el.id === "loginPassword" ? "loginCapsWarn" : "regCapsWarn";
+          const warn = document.getElementById(warnId);
+          const handler = (e) => {
+            const on = e.getModifierState && e.getModifierState("CapsLock");
+            if (warn) warn.classList.toggle("show", !!on);
+          };
+          el.addEventListener("keydown", handler);
+          el.addEventListener("keyup", handler);
+          el.addEventListener("blur", () => {
+            if (warn) warn.classList.remove("show");
+          });
+        });
+      }
+
+      function validateLoginUsername() {
+        const u = document.getElementById("loginUsername");
+        const ok = document.getElementById("loginUsernameOk");
+        if (!u || !ok) return;
+        ok.classList.toggle("show", u.value.trim().length >= 3);
+      }
+
+      function validateRegUsername() {
+        const u = document.getElementById("regUsername");
+        const s = document.getElementById("regUsernameStatus");
+        const h = document.getElementById("regUsernameHint");
+        if (!u || !s || !h) return;
+        const v = u.value.trim();
+        const lang = getSavedAuthLanguage();
+        const dict = authTranslations[lang] || authTranslations.id;
+        if (v.length === 0) {
+          s.classList.remove("show", "ok", "warn");
+          h.classList.remove("ok", "warn");
+          h.querySelector("span").innerText = dict.usernameHint;
+          return;
+        }
+        if (/\s/.test(v)) {
+          s.classList.add("show", "warn");
+          s.classList.remove("ok");
+          s.innerText = "!";
+          h.classList.add("warn");
+          h.classList.remove("ok");
+          h.querySelector("span").innerText = dict.usernameSpaceWarning;
+          return;
+        }
+        if (v.length < 3) {
+          s.classList.add("show", "warn");
+          s.classList.remove("ok");
+          s.innerText = "!";
+          h.classList.add("warn");
+          h.classList.remove("ok");
+          h.querySelector("span").innerText = dict.usernameTooShort;
+          return;
+        }
+        s.classList.add("show", "ok");
+        s.classList.remove("warn");
+        s.innerText = "✓";
+        h.classList.add("ok");
+        h.classList.remove("warn");
+        h.querySelector("span").innerText = dict.usernameOk;
+      }
+
+      function calcStrength(pw) {
+        if (!pw) return 0;
+        let score = 0;
+        if (pw.length >= 6) score++;
+        if (pw.length >= 10) score++;
+        if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++;
+        if (/\d/.test(pw) && /[^A-Za-z0-9]/.test(pw)) score++;
+        return Math.min(score, 4);
+      }
+      function updatePasswordStrength() {
+        const pw = document.getElementById("regPassword").value;
+        const meter = document.getElementById("regStrength");
+        const label = document.getElementById("regStrengthLabel");
+        const score = calcStrength(pw);
+        const lang = getSavedAuthLanguage();
+        const dict = authTranslations[lang] || authTranslations.id;
+        meter.setAttribute("data-strength", String(score));
+        label.setAttribute("data-strength", String(score));
+        if (!pw) {
+          label.innerText = "";
+          return;
+        }
+        const map = [
+          "",
+          dict.strengthWeak,
+          dict.strengthFair,
+          dict.strengthGood,
+          dict.strengthStrong,
+        ];
+        label.innerText = map[score] || "";
+      }
+
+      function onRememberToggle(el) {
+        if (!el.checked) {
+          localStorage.removeItem("ae_remember_username");
+        }
+      }
+
+      function spawnSparkles() {
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches)
+          return;
+        const emojis = ["✨", "🎉", "⭐", "💫", "🌸"];
+        for (let i = 0; i < 14; i++) {
+          const s = document.createElement("div");
+          s.className = "sparkle";
+          s.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+          s.style.left = window.innerWidth / 2 + "px";
+          s.style.top = window.innerHeight / 2 + "px";
+          const angle = (Math.PI * 2 * i) / 14;
+          const dist = 140 + Math.random() * 120;
+          s.style.setProperty("--dx", Math.cos(angle) * dist + "px");
+          s.style.setProperty("--dy", Math.sin(angle) * dist + "px");
+          document.body.appendChild(s);
+          setTimeout(() => s.remove(), 1500);
+        }
+      }
+
+      function btnLoading(btn, label) {
+        btn.dataset.originalText = btn.innerText;
+        btn.innerHTML =
+          '<span class="btn-spinner"></span>' + (label || "Loading...");
+        btn.disabled = true;
+      }
+      function btnReset(btn) {
+        if (btn.dataset.originalText) {
+          btn.innerText = btn.dataset.originalText;
+          delete btn.dataset.originalText;
+        }
+        btn.disabled = false;
+      }
+
+      // Fungsi Login User (Endpoint & Body TETAP)
       async function login() {
         const username = document.getElementById("loginUsername").value.trim();
         const password = document.getElementById("loginPassword").value.trim();
         const btn = document.getElementById("btnLogin");
+        const remember = document.getElementById("rememberMe").checked;
+        const lang = getSavedAuthLanguage();
+        const dict = authTranslations[lang] || authTranslations.id;
 
         if (!username || !password) {
           Swal.fire({
             icon: "warning",
-            title: "Oops!",
-            text: "Isi username dan password dulu ya.",
+            title: dict.oopsTitle,
+            text: dict.fillUsernamePassword,
             confirmButtonColor: "#0ea5e9",
           });
           return;
         }
 
-        const originalText = btn.innerText;
-        btn.innerText = "Memverifikasi... 🌊";
-        btn.disabled = true;
+        btnLoading(btn, dict.verifying);
 
         try {
           const res = await fetch("/user-login", {
@@ -660,19 +2018,25 @@
           if (!res.ok) {
             Swal.fire({
               icon: "error",
-              title: "Gagal Masuk",
+              title: dict.failedLoginTitle,
               text: data.message,
               confirmButtonColor: "#fb7185",
             });
-            btn.innerText = originalText;
-            btn.disabled = false;
+            btnReset(btn);
             return;
           }
 
+          if (remember) {
+            localStorage.setItem("ae_remember_username", username);
+          } else {
+            localStorage.removeItem("ae_remember_username");
+          }
+
+          spawnSparkles();
           Swal.fire({
             icon: "success",
-            title: "Berhasil!",
-            text: "Selamat datang kembali!",
+            title: dict.successTitle,
+            text: dict.welcomeBack,
             showConfirmButton: false,
             timer: 1500,
           });
@@ -682,34 +2046,43 @@
         } catch {
           Swal.fire({
             icon: "error",
-            title: "Error",
-            text: "Terjadi kesalahan server.",
+            title: dict.errorTitle,
+            text: dict.serverError,
             confirmButtonColor: "#fb7185",
           });
-          btn.innerText = originalText;
-          btn.disabled = false;
+          btnReset(btn);
         }
       }
 
-      // Fungsi Register User (Logic Tetap)
+      // Fungsi Register User (Endpoint & Body TETAP)
       async function register() {
         const username = document.getElementById("regUsername").value.trim();
         const password = document.getElementById("regPassword").value.trim();
         const btn = document.getElementById("btnRegister");
+        const terms = document.getElementById("acceptTerms");
+        const lang = getSavedAuthLanguage();
+        const dict = authTranslations[lang] || authTranslations.id;
 
         if (username.length < 3 || password.length < 6) {
           Swal.fire({
             icon: "warning",
-            title: "Tidak Valid",
-            text: "Username min. 3 karakter & Password min. 6 karakter.",
+            title: dict.invalidTitle,
+            text: dict.invalidUserPass,
+            confirmButtonColor: "#0ea5e9",
+          });
+          return;
+        }
+        if (terms && !terms.checked) {
+          Swal.fire({
+            icon: "info",
+            title: dict.termsTitle,
+            text: dict.termsText,
             confirmButtonColor: "#0ea5e9",
           });
           return;
         }
 
-        const originalText = btn.innerText;
-        btn.innerText = "Mendaftarkan... ✨";
-        btn.disabled = true;
+        btnLoading(btn, dict.registering);
 
         try {
           const res = await fetch("/register", {
@@ -722,49 +2095,65 @@
           if (!res.ok) {
             Swal.fire({
               icon: "error",
-              title: "Gagal Daftar",
+              title: dict.failedRegisterTitle,
               text: data.message,
               confirmButtonColor: "#fb7185",
             });
-            btn.innerText = originalText;
-            btn.disabled = false;
+            btnReset(btn);
             return;
           }
 
+          spawnSparkles();
           Swal.fire({
             icon: "success",
-            title: "Akun Dibuat! 🎉",
-            text: "Silakan masuk menggunakan akun baru kamu.",
+            title: dict.accountCreatedTitle,
+            text: dict.accountCreatedText,
             confirmButtonColor: "#0ea5e9",
           }).then(() => {
             document.getElementById("loginUsername").value = username;
             document.getElementById("regPassword").value = "";
-            toggleForm();
+            updatePasswordStrength();
+            setAuthTab("login");
+            validateLoginUsername();
           });
-
-          btn.innerText = originalText;
-          btn.disabled = false;
+          btnReset(btn);
         } catch {
           Swal.fire({
             icon: "error",
-            title: "Error",
-            text: "Terjadi kesalahan server.",
+            title: dict.errorTitle,
+            text: dict.serverError,
             confirmButtonColor: "#fb7185",
           });
-          btn.innerText = originalText;
-          btn.disabled = false;
+          btnReset(btn);
         }
       }
 
       const authTranslations = {
         id: {
-          loginTitle: "Selamat Datang 🌊",
-          loginSubtitle:
-            "Masuk ke akun kamu untuk lanjut order dan melihat riwayat transaksi.",
+          brandSub: "Top-up Cepat & Aman",
+          heroBadge: "SISTEM AMAN & TERPERCAYA",
+          heroTitle1: "Top-up game lebih",
+          heroTitle2: "cepat & aman",
+          heroDesc:
+            "Login atau daftar untuk simpan riwayat order, pakai voucher khusus member, dan dapat instant delivery setiap saat.",
+          featureInstantTitle: "Instant Delivery",
+          featureInstantDesc:
+            "Game key dikirim otomatis setelah pembayaran sukses.",
+          featureSecureTitle: "Pembayaran Aman",
+          featureSecureDesc:
+            "QRIS resmi dengan enkripsi end-to-end & log transparan.",
+          featureVoucherTitle: "Voucher Member",
+          featureVoucherDesc:
+            "Diskon eksklusif untuk pengguna yang sudah login.",
+          trustText: "gamer aktif sudah top-up bareng kami.",
+          tabLogin: "Masuk",
+          tabRegister: "Daftar",
+          loginTitle: "Selamat Datang Kembali",
+          loginSubtitle: "Masuk untuk melanjutkan petualanganmu.",
           loginButton: "Masuk Sekarang",
-          registerTitle: "Buat Akun Baru ⛩️",
+          registerTitle: "Buat Akun Baru",
           registerSubtitle:
-            "Daftar untuk menyimpan riwayat order dan memakai voucher.",
+            "Daftar dan nikmati kemudahan top-up + voucher eksklusif.",
           registerButton: "Daftar Sekarang",
           forgotPassword: "Lupa password?",
           contactAdmin: "Hubungi Admin",
@@ -772,22 +2161,86 @@
           hidePassword: "Sembunyi",
           switchToRegister: "Belum punya akun?",
           switchToLogin: "Sudah punya akun?",
-          registerLink: "Daftar",
+          registerLink: "Daftar sekarang",
           loginLink: "Masuk",
-          backHome: "Kembali ke Home",
+          backHome: "Kembali ke Beranda",
+          usernameLabel: "Username",
+          passwordLabel: "Password",
           usernamePlaceholder: "Username",
           passwordPlaceholder: "Password",
           registerUsernamePlaceholder: "Pilih Username (Min. 3 Huruf)",
           registerPasswordPlaceholder: "Buat Password (Min. 6 Huruf)",
+          rememberMe: "Ingat saya",
+          acceptTerms: "Saya setuju ke Syarat & Kebijakan",
+          orDivider: "atau",
+          capsLock: "Caps Lock aktif",
+          usernameHint: "Min. 3 karakter, tanpa spasi.",
+          usernameTooShort: "Minimal 3 karakter ya.",
+          usernameSpaceWarning: "Username tidak boleh pakai spasi.",
+          usernameOk: "Username terlihat bagus 👍",
+          strengthWeak: "Lemah",
+          strengthFair: "Cukup",
+          strengthGood: "Bagus",
+          strengthStrong: "Kuat",
+          oopsTitle: "Oops!",
+          fillUsernamePassword: "Isi username dan password dulu ya.",
+          verifying: "Memverifikasi...",
+          registering: "Mendaftarkan...",
+          failedLoginTitle: "Gagal Masuk",
+          failedRegisterTitle: "Gagal Daftar",
+          successTitle: "Berhasil!",
+          welcomeBack: "Selamat datang kembali!",
+          invalidTitle: "Tidak Valid",
+          invalidUserPass:
+            "Username min. 3 karakter & Password min. 6 karakter.",
+          termsTitle: "Setujui dulu",
+          termsText: "Centang Syarat & Kebijakan untuk lanjut.",
+          accountCreatedTitle: "Akun Dibuat! 🎉",
+          accountCreatedText: "Silakan masuk menggunakan akun baru kamu.",
+          errorTitle: "Error",
+          serverError: "Terjadi kesalahan server.",
+          skipToForm: "Lewati ke form",
+          socialProofJoined: "baru saja daftar & top-up.",
+          socialProofTime: "2 menit lalu",
+          footerNote:
+            "Dengan masuk atau mendaftar, kamu menyetujui Syarat & Kebijakan kami.",
+          changePasswordTitle: "Ganti Password",
+          oldPasswordPlaceholder: "Password lama / random",
+          newPasswordPlaceholder: "Password baru",
+          saveBtn: "Simpan",
+          cancelBtn: "Batal",
+          changePasswordValidation:
+            "Isi password lama dan password baru minimal 6 karakter",
+          changePasswordFailed: "Gagal ganti password",
+          changePasswordSuccess:
+            "Password berhasil diganti. Silakan pakai password baru untuk login berikutnya.",
+          failedTitle: "Gagal",
         },
         en: {
-          loginTitle: "Welcome Back 🌊",
+          brandSub: "Fast & Secure Top-up",
+          heroBadge: "SAFE & TRUSTED SYSTEM",
+          heroTitle1: "Top-up game faster &",
+          heroTitle2: "safer than ever",
+          heroDesc:
+            "Log in or register to save your order history, use member-only vouchers, and get instant delivery anytime.",
+          featureInstantTitle: "Instant Delivery",
+          featureInstantDesc:
+            "Game keys delivered automatically after successful payment.",
+          featureSecureTitle: "Secure Payment",
+          featureSecureDesc:
+            "Official QRIS with end-to-end encryption and clear logs.",
+          featureVoucherTitle: "Member Vouchers",
+          featureVoucherDesc: "Exclusive discounts for signed-in members.",
+          trustText: "active gamers top-up with us.",
+          tabLogin: "Login",
+          tabRegister: "Register",
+          loginTitle: "Welcome Back",
           loginSubtitle:
             "Log in to continue ordering and view your transaction history.",
           loginButton: "Login Now",
-          registerTitle: "Create New Account ⛩️",
+          registerTitle: "Create New Account",
           registerSubtitle:
-            "Register to save your order history and use vouchers.",
+            "Register and enjoy easy top-ups & exclusive vouchers.",
           registerButton: "Register Now",
           forgotPassword: "Forgot password?",
           contactAdmin: "Contact Admin",
@@ -795,13 +2248,59 @@
           hidePassword: "Hide",
           switchToRegister: "Don't have an account?",
           switchToLogin: "Already have an account?",
-          registerLink: "Register",
+          registerLink: "Register now",
           loginLink: "Login",
           backHome: "Back to Home",
+          usernameLabel: "Username",
+          passwordLabel: "Password",
           usernamePlaceholder: "Username",
           passwordPlaceholder: "Password",
           registerUsernamePlaceholder: "Choose Username (Min. 3 characters)",
           registerPasswordPlaceholder: "Create Password (Min. 6 characters)",
+          rememberMe: "Remember me",
+          acceptTerms: "I agree to the Terms & Policy",
+          orDivider: "or",
+          capsLock: "Caps Lock is on",
+          usernameHint: "Min. 3 characters, no spaces.",
+          usernameTooShort: "Use at least 3 characters.",
+          usernameSpaceWarning: "Username can't contain spaces.",
+          usernameOk: "Username looks good 👍",
+          strengthWeak: "Weak",
+          strengthFair: "Fair",
+          strengthGood: "Good",
+          strengthStrong: "Strong",
+          oopsTitle: "Oops!",
+          fillUsernamePassword: "Please enter username and password.",
+          verifying: "Verifying...",
+          registering: "Creating...",
+          failedLoginTitle: "Login Failed",
+          failedRegisterTitle: "Registration Failed",
+          successTitle: "Success!",
+          welcomeBack: "Welcome back!",
+          invalidTitle: "Invalid",
+          invalidUserPass: "Username min. 3 chars & Password min. 6 chars.",
+          termsTitle: "Please accept",
+          termsText: "Check Terms & Policy to continue.",
+          accountCreatedTitle: "Account Created! 🎉",
+          accountCreatedText: "Please log in with your new account.",
+          errorTitle: "Error",
+          serverError: "A server error occurred.",
+          skipToForm: "Skip to form",
+          socialProofJoined: "just joined & topped up.",
+          socialProofTime: "2 mins ago",
+          footerNote:
+            "By signing in or registering, you agree to our Terms & Policy.",
+          changePasswordTitle: "Change Password",
+          oldPasswordPlaceholder: "Old / random password",
+          newPasswordPlaceholder: "New password",
+          saveBtn: "Save",
+          cancelBtn: "Cancel",
+          changePasswordValidation:
+            "Enter old password and new password (min. 6 characters)",
+          changePasswordFailed: "Failed to change password",
+          changePasswordSuccess:
+            "Password changed. Use the new password to log in next time.",
+          failedTitle: "Failed",
         },
       };
 
@@ -833,17 +2332,32 @@
         document.querySelectorAll(".password-toggle-btn").forEach((button) => {
           const inputId = button.getAttribute("data-password-target");
           const input = document.getElementById(inputId);
-
           if (input && input.type === "text") {
             button.innerText = dict.hidePassword;
           } else {
             button.innerText = dict.showPassword;
           }
         });
+
+        // Sync lang switch UI
+        const idBtn = document.getElementById("langBtnId");
+        const enBtn = document.getElementById("langBtnEn");
+        if (idBtn && enBtn) {
+          idBtn.classList.toggle("active", lang === "id");
+          enBtn.classList.toggle("active", lang === "en");
+          idBtn.setAttribute("aria-pressed", lang === "id" ? "true" : "false");
+          enBtn.setAttribute("aria-pressed", lang === "en" ? "true" : "false");
+        }
+        // Re-run inline validators since their text depends on language
+        validateLoginUsername();
+        validateRegUsername();
+        updatePasswordStrength();
       }
 
-      // Fitur Sakura Jatuh
+      // Sakura petals
       function createSakura() {
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches)
+          return;
         const sakura = document.createElement("div");
         sakura.classList.add("sakura");
         const size = Math.random() * 10 + 5;
@@ -857,7 +2371,35 @@
           sakura.remove();
         }, 7000);
       }
-      setInterval(createSakura, 400);
+      setInterval(createSakura, 500);
+
+      // Social proof rotator
+      const proofNames = [
+        "Andra",
+        "Putri",
+        "Raka",
+        "Maya",
+        "Dimas",
+        "Sari",
+        "Bayu",
+        "Nadia",
+        "Reza",
+        "Citra",
+      ];
+      let proofTimer = null;
+      function startSocialProof() {
+        const el = document.getElementById("socialProof");
+        const nameEl = document.getElementById("socialProofName");
+        if (!el || !nameEl) return;
+        const show = () => {
+          nameEl.innerText =
+            proofNames[Math.floor(Math.random() * proofNames.length)];
+          el.classList.add("show");
+          setTimeout(() => el.classList.remove("show"), 4500);
+        };
+        setTimeout(show, 2500);
+        proofTimer = setInterval(show, 10000);
+      }
     </script>
   </body>
 </html>
