@@ -1688,7 +1688,6 @@
         applyAuthLanguage();
         bindLiveValidation();
         startSocialProof();
-        checkLoginStatus();
       });
 
       function toggleAuthTheme() {
@@ -1749,66 +1748,6 @@
           setAuthTab("register");
         } else {
           setAuthTab("login");
-        }
-      }
-
-      async function checkLoginStatus() {
-        try {
-          const res = await fetch("/api/user/me");
-          const data = await res.json();
-          const box = document.getElementById("changePasswordBox");
-          if (box && data.loggedIn) {
-            box.style.display = "block";
-          }
-        } catch (err) {}
-      }
-
-      async function openChangePassword() {
-        const lang = getSavedAuthLanguage();
-        const dict = authTranslations[lang] || authTranslations.id;
-        const result = await Swal.fire({
-          title: dict.changePasswordTitle,
-          html: `
-            <input id="oldPasswordInput" type="password" class="swal2-input" placeholder="${dict.oldPasswordPlaceholder}">
-            <input id="newPasswordInput" type="password" class="swal2-input" placeholder="${dict.newPasswordPlaceholder}">
-          `,
-          showCancelButton: true,
-          confirmButtonText: dict.saveBtn,
-          cancelButtonText: dict.cancelBtn,
-          confirmButtonColor: "#0ea5e9",
-          preConfirm: () => {
-            const oldPassword = document
-              .getElementById("oldPasswordInput")
-              .value.trim();
-            const newPassword = document
-              .getElementById("newPasswordInput")
-              .value.trim();
-            if (!oldPassword || newPassword.length < 6) {
-              Swal.showValidationMessage(dict.changePasswordValidation);
-              return false;
-            }
-            return { oldPassword, newPassword };
-          },
-        });
-        if (!result.isConfirmed) return;
-        try {
-          const res = await fetch("/user/change-password", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(result.value),
-          });
-          const data = await res.json();
-          if (!res.ok) {
-            Swal.fire(
-              dict.failedTitle,
-              data.message || dict.changePasswordFailed,
-              "error",
-            );
-            return;
-          }
-          Swal.fire(dict.successTitle, dict.changePasswordSuccess, "success");
-        } catch (err) {
-          Swal.fire(dict.errorTitle, dict.serverError, "error");
         }
       }
 
@@ -2371,7 +2310,9 @@
           sakura.remove();
         }, 7000);
       }
-      setInterval(createSakura, 500);
+      if (window.innerWidth > 768) {
+        setInterval(createSakura, 800);
+      }
 
       // Social proof rotator
       const proofNames = [
@@ -2388,6 +2329,8 @@
       ];
       let proofTimer = null;
       function startSocialProof() {
+        if (proofTimer) clearInterval(proofTimer);
+
         const el = document.getElementById("socialProof");
         const nameEl = document.getElementById("socialProofName");
         if (!el || !nameEl) return;
