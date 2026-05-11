@@ -1430,7 +1430,9 @@ function showTermsPolicy() {
 
 loadRecentPurchases();
 setInterval(loadRecentPurchases, 60000);
-setInterval(showSocialProof, 20000);
+if (window.innerWidth > 768) {
+  setInterval(showSocialProof, 20000);
+}
 
 // --- FILTER CATEGORY ---
 function filterCategory(cat, btnElement) {
@@ -2338,7 +2340,9 @@ window.addEventListener("load", () => {
       preloader.classList.add("fade-out");
     }
 
-    showTelegramPopup();
+    if (window.innerWidth > 768) {
+      showTelegramPopup();
+    }
   }, 1000);
 
   if (window.innerWidth > 768) {

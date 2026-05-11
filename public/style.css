@@ -3395,3 +3395,60 @@ body.dark-theme .order-step-dot {
 .empty-cta-btn:hover {
   transform: translateY(-2px);
 }
+/* ===== MOBILE PERFORMANCE PATCH ===== */
+@media (max-width: 768px) {
+  body {
+    background-attachment: scroll;
+  }
+
+  .watercolor-blob,
+  .blob,
+  .bg-blob,
+  .sakura {
+    display: none !important;
+  }
+
+  .site-header,
+  .shop-card,
+  .catalog-toolbar,
+  .order-modal-card,
+  .review-summary,
+  .review-action-card,
+  .testi-card,
+  .floating-admin-btn,
+  .social-proof,
+  .toast,
+  .modal-summary,
+  .price-breakdown {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .hero-copy,
+  .loader-logo,
+  .promo-slide,
+  .game-card,
+  .testi-card,
+  .floating-admin-btn,
+  .back-to-top {
+    animation: none !important;
+  }
+
+  .game-card:hover,
+  .testi-card:hover,
+  .hero-cta:hover,
+  .floating-admin-btn:hover,
+  .back-to-top:hover {
+    transform: none !important;
+  }
+
+  .promo-slider {
+    box-shadow: var(--shadow-xs);
+  }
+
+  .game-card,
+  .shop-card,
+  .order-modal-card {
+    box-shadow: var(--shadow-xs);
+  }
+}
