@@ -3,124 +3,210 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin Panel — AE Game Store</title>
+    <title>Admin Panel - AE Game Store 🌊</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap"
       rel="stylesheet"
     />
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-      /* =============================================
-       ROOT — DARK PREMIUM THEME
-    ============================================= */
       :root {
-        --bg: #0b0f14;
-        --bg-2: #111620;
-        --bg-3: #181e2a;
-        --bg-4: #1e2535;
-        --border: rgba(255, 255, 255, 0.06);
-        --border-2: rgba(255, 255, 255, 0.11);
-        --text: #e2e8f0;
-        --text-2: #94a3b8;
-        --text-3: #475569;
+        /* Ocean × Sakura palette (consistent with index/account/result) */
+        --primary: #0ea5e9;
+        --primary-hover: #0284c7;
+        --primary-strong: #0369a1;
+        --secondary: #fb7185;
+        --secondary-strong: #e11d48;
+        --accent: #f472b6;
+        --sakura: #fbcfe8;
+        --water-foam: #e0f2fe;
+        --water-foam-deep: #bae6fd;
 
-        --ocean: #38bdf8;
-        --ocean-d: #0ea5e9;
-        --ocean-dk: #0284c7;
-        --ocean-glow: rgba(56, 189, 248, 0.15);
-        --sakura: #fb7185;
-        --sakura-d: #f43f5e;
-        --matcha: #34d399;
-        --gold: #fbbf24;
+        --bg-color: #f0f9ff;
+        --bg-grad:
+          radial-gradient(
+            circle at 12% 18%,
+            rgba(56, 189, 248, 0.18) 0%,
+            transparent 45%
+          ),
+          radial-gradient(
+            circle at 88% 82%,
+            rgba(251, 113, 133, 0.13) 0%,
+            transparent 45%
+          );
+        --card-bg: rgba(255, 255, 255, 0.78);
+        --card-bg-strong: rgba(255, 255, 255, 0.92);
+        --card-border: rgba(56, 189, 248, 0.32);
+        --card-border-soft: rgba(186, 230, 253, 0.6);
+        --divider: rgba(56, 189, 248, 0.22);
+        --table-bg: rgba(255, 255, 255, 0.6);
+        --table-head-bg: rgba(224, 242, 254, 0.7);
+        --table-row-hover: rgba(224, 242, 254, 0.45);
+        --table-row-zebra: rgba(240, 249, 255, 0.45);
 
-        --success-bg: rgba(52, 211, 153, 0.12);
-        --success-text: #34d399;
-        --warn-bg: rgba(251, 191, 36, 0.12);
-        --warn-text: #fbbf24;
-        --danger-bg: rgba(251, 113, 133, 0.12);
-        --danger-text: #fb7185;
-        --info-bg: rgba(56, 189, 248, 0.12);
-        --info-text: #38bdf8;
+        --text-main: #0c4a6e;
+        --text-strong: #082f49;
+        --text-muted: #475569;
+        --text-soft: #64748b;
+        --text-inverse: #ffffff;
 
-        --card: rgba(17, 22, 32, 0.9);
-        --card-2: rgba(24, 30, 42, 0.95);
-        --r-2xl: 24px;
-        --r-xl: 18px;
-        --r-lg: 14px;
-        --r-md: 10px;
-        --r-sm: 6px;
+        --input-bg: rgba(255, 255, 255, 0.9);
+        --input-border: #bae6fd;
+        --input-focus-bg: #ffffff;
+        --input-focus-ring: rgba(14, 165, 233, 0.25);
+
+        --shadow-xs: 0 2px 6px rgba(14, 165, 233, 0.06);
+        --shadow-sm: 0 6px 18px rgba(14, 165, 233, 0.1);
+        --shadow-md: 0 14px 32px rgba(14, 165, 233, 0.14);
+        --shadow-lg: 0 24px 50px rgba(14, 165, 233, 0.18);
+        --ring: 0 0 0 3px rgba(14, 165, 233, 0.25);
+
+        --radius-xl: 24px;
+        --radius-lg: 18px;
+        --radius-md: 12px;
+        --radius-sm: 8px;
+        --radius-pill: 999px;
+
+        --success-bg: #d1fae5;
+        --success-text: #065f46;
+        --success-border: #6ee7b7;
+        --warn-bg: #fef3c7;
+        --warn-text: #854d0e;
+        --warn-border: #fde047;
+        --danger-bg: #ffe4e6;
+        --danger-text: #be123c;
+        --danger-border: #fecdd3;
+        --info-bg: #e0f2fe;
+        --info-text: #0369a1;
+        --info-border: #bae6fd;
+        --neutral-bg: #f1f5f9;
+        --neutral-text: #475569;
+        --neutral-border: #cbd5e1;
+        --gold-bg: #fef3c7;
+        --gold-text: #92400e;
+        --gold-border: #facc15;
       }
 
-      /* =============================================
-       RESET & BASE
-    ============================================= */
-      *,
-      *::before,
-      *::after {
+      body.dark-theme {
+        --bg-color: #050b1a;
+        --bg-grad:
+          radial-gradient(
+            circle at 12% 18%,
+            rgba(56, 189, 248, 0.16) 0%,
+            transparent 45%
+          ),
+          radial-gradient(
+            circle at 88% 82%,
+            rgba(251, 113, 133, 0.1) 0%,
+            transparent 45%
+          );
+        --card-bg: rgba(15, 23, 42, 0.78);
+        --card-bg-strong: rgba(15, 23, 42, 0.92);
+        --card-border: rgba(56, 189, 248, 0.22);
+        --card-border-soft: rgba(56, 189, 248, 0.18);
+        --divider: rgba(56, 189, 248, 0.2);
+        --table-bg: rgba(15, 23, 42, 0.55);
+        --table-head-bg: rgba(2, 132, 199, 0.18);
+        --table-row-hover: rgba(56, 189, 248, 0.1);
+        --table-row-zebra: rgba(15, 23, 42, 0.35);
+
+        --text-main: #e0f2fe;
+        --text-strong: #f0f9ff;
+        --text-muted: #94a3b8;
+        --text-soft: #64748b;
+
+        --input-bg: rgba(15, 23, 42, 0.75);
+        --input-border: rgba(56, 189, 248, 0.32);
+        --input-focus-bg: rgba(15, 23, 42, 0.95);
+        --input-focus-ring: rgba(56, 189, 248, 0.35);
+
+        --shadow-xs: 0 2px 8px rgba(0, 0, 0, 0.35);
+        --shadow-sm: 0 8px 22px rgba(0, 0, 0, 0.45);
+        --shadow-md: 0 16px 36px rgba(0, 0, 0, 0.5);
+        --shadow-lg: 0 28px 56px rgba(0, 0, 0, 0.55);
+        --ring: 0 0 0 3px rgba(56, 189, 248, 0.35);
+
+        --success-bg: rgba(16, 185, 129, 0.18);
+        --success-text: #6ee7b7;
+        --success-border: rgba(110, 231, 183, 0.4);
+        --warn-bg: rgba(250, 204, 21, 0.16);
+        --warn-text: #fde047;
+        --warn-border: rgba(253, 224, 71, 0.4);
+        --danger-bg: rgba(225, 29, 72, 0.2);
+        --danger-text: #fda4af;
+        --danger-border: rgba(253, 164, 175, 0.35);
+        --info-bg: rgba(56, 189, 248, 0.18);
+        --info-text: #7dd3fc;
+        --info-border: rgba(125, 211, 252, 0.35);
+        --neutral-bg: rgba(148, 163, 184, 0.18);
+        --neutral-text: #cbd5e1;
+        --neutral-border: rgba(203, 213, 225, 0.3);
+        --gold-bg: rgba(250, 204, 21, 0.2);
+        --gold-text: #fde68a;
+        --gold-border: rgba(250, 204, 21, 0.45);
+      }
+
+      * {
         box-sizing: border-box;
         margin: 0;
         padding: 0;
       }
+
       html {
         scroll-behavior: smooth;
       }
 
       body {
-        font-family: "Outfit", system-ui, sans-serif;
-        background: var(--bg);
-        color: var(--text);
+        font-family: "Plus Jakarta Sans", "Segoe UI", Tahoma, sans-serif;
+        background-color: var(--bg-color);
+        background-image: var(--bg-grad);
+        background-attachment: fixed;
+        color: var(--text-main);
         min-height: 100vh;
         display: flex;
         position: relative;
-        overflow-x: hidden;
-      }
-
-      /* subtle grid texture */
-      body::before {
-        content: "";
-        position: fixed;
-        inset: 0;
-        background-image:
-          linear-gradient(rgba(56, 189, 248, 0.03) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(56, 189, 248, 0.03) 1px, transparent 1px);
-        background-size: 48px 48px;
-        pointer-events: none;
         z-index: 0;
+        -webkit-font-smoothing: antialiased;
+        line-height: 1.5;
+        transition:
+          background-color 0.3s ease,
+          color 0.3s ease;
       }
 
-      /* ambient blobs */
-      body::after {
-        content: "";
-        position: fixed;
-        inset: 0;
-        background:
-          radial-gradient(
-            ellipse 60% 50% at 5% 10%,
-            rgba(56, 189, 248, 0.06) 0%,
-            transparent 60%
-          ),
-          radial-gradient(
-            ellipse 50% 40% at 95% 90%,
-            rgba(251, 113, 133, 0.05) 0%,
-            transparent 60%
-          );
-        pointer-events: none;
-        z-index: 0;
+      a {
+        color: var(--primary);
+        text-decoration: none;
       }
 
-      /* =============================================
-       SIDEBAR
-    ============================================= */
+      a:hover {
+        color: var(--primary-hover);
+      }
+
+      :focus-visible {
+        outline: none;
+        box-shadow: var(--ring);
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.001ms !important;
+          transition-duration: 0.001ms !important;
+        }
+      }
+
+      /* ===== SIDEBAR ===== */
       .sidebar {
-        width: 240px;
-        min-width: 240px;
-        flex: 0 0 240px;
-        background: rgba(11, 15, 20, 0.97);
-        backdrop-filter: blur(24px);
-        border-right: 1px solid var(--border);
-        padding: 20px 14px;
+        width: 260px;
+        min-width: 260px;
+        flex: 0 0 260px;
+        background: var(--card-bg-strong);
+        backdrop-filter: blur(22px);
+        -webkit-backdrop-filter: blur(22px);
+        border-right: 1px solid var(--card-border);
+        padding: 22px 18px;
         display: flex;
         flex-direction: column;
         gap: 20px;
@@ -128,218 +214,236 @@
         top: 0;
         height: 100vh;
         overflow-x: hidden;
-        overflow-y: auto;
         z-index: 50;
         transition:
-          width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-          min-width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-          flex-basis 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-          padding 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+          background 0.3s ease,
+          border-color 0.3s ease;
       }
 
-      .sidebar::-webkit-scrollbar {
-        width: 3px;
-      }
-      .sidebar::-webkit-scrollbar-track {
-        background: transparent;
-      }
-      .sidebar::-webkit-scrollbar-thumb {
-        background: var(--border-2);
-        border-radius: 99px;
-      }
-
-      /* brand */
       .sidebar-brand {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 10px;
+        gap: 12px;
         padding-bottom: 16px;
-        border-bottom: 1px solid var(--border);
-        flex-shrink: 0;
+        border-bottom: 1px dashed var(--divider);
       }
+
       .sidebar-brand-left {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
         min-width: 0;
       }
 
       .sidebar-logo {
-        width: 40px;
-        height: 40px;
-        border-radius: var(--r-md);
-        background: linear-gradient(135deg, var(--sakura), var(--sakura-d));
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 18px;
+        background: linear-gradient(
+          135deg,
+          var(--secondary) 0%,
+          var(--secondary-strong) 100%
+        );
+        color: white;
+        font-size: 22px;
+        box-shadow: 0 10px 22px rgba(251, 113, 133, 0.35);
         flex-shrink: 0;
-        box-shadow:
-          0 0 0 1px rgba(251, 113, 133, 0.3),
-          0 8px 20px rgba(251, 113, 133, 0.2);
       }
 
       .sidebar-text {
         min-width: 0;
-        overflow: hidden;
-      }
-      .sidebar-kicker {
-        font-size: 10px;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        color: var(--ocean);
-        white-space: nowrap;
-      }
-      .sidebar-title {
-        font-size: 14px;
-        font-weight: 700;
-        color: var(--text);
         white-space: nowrap;
       }
 
-      /* nav */
+      .sidebar-kicker {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--primary);
+        font-weight: 800;
+      }
+
+      .sidebar-title {
+        font-size: 15px;
+        font-weight: 800;
+        color: var(--text-main);
+      }
+
       .sidebar-nav {
         display: flex;
         flex-direction: column;
-        gap: 3px;
+        gap: 6px;
+      }
+
+      .sidebar-section-label {
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        color: var(--text-soft);
+        padding: 4px 12px 8px;
       }
 
       .nav-btn {
         width: 100%;
         text-align: left;
         background: transparent;
-        color: var(--text-2);
-        padding: 11px 13px;
-        border-radius: var(--r-lg);
+        color: var(--text-muted);
+        padding: 11px 14px;
+        border-radius: var(--radius-md);
         font-weight: 600;
-        font-size: 13.5px;
+        font-size: 13px;
         cursor: pointer;
         border: none;
-        transition: all 0.18s ease;
+        font-family: inherit;
+        transition:
+          background 0.2s ease,
+          color 0.2s ease,
+          transform 0.2s ease;
         display: flex;
         align-items: center;
-        gap: 10px;
-        white-space: nowrap;
-        overflow: hidden;
-        box-shadow: none;
+        gap: 12px;
       }
+
       .nav-btn:hover {
-        background: rgba(56, 189, 248, 0.08);
-        color: var(--ocean);
+        background: var(--water-foam);
+        color: var(--primary-strong);
       }
+
+      body.dark-theme .nav-btn:hover {
+        background: rgba(56, 189, 248, 0.14);
+        color: var(--primary);
+      }
+
       .nav-btn.active {
         background: linear-gradient(
           135deg,
-          rgba(56, 189, 248, 0.18),
-          rgba(14, 165, 233, 0.1)
+          var(--primary) 0%,
+          var(--primary-hover) 100%
         );
-        color: var(--ocean);
-        border: 1px solid rgba(56, 189, 248, 0.2);
-        box-shadow: 0 0 0 0 transparent;
-      }
-      .nav-icon {
-        font-size: 16px;
-        flex-shrink: 0;
-        line-height: 1;
+        color: white;
+        box-shadow: 0 10px 20px rgba(14, 165, 233, 0.28);
       }
 
-      /* footer */
+      .nav-btn .nav-ico {
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+      }
+
       .sidebar-footer {
         margin-top: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
       }
 
       .sidebar-logout {
         width: 100%;
-        background: rgba(251, 113, 133, 0.08);
-        color: var(--sakura);
-        border: 1px solid rgba(251, 113, 133, 0.15);
-        padding: 11px 13px;
-        border-radius: var(--r-lg);
+        background: var(--card-bg);
+        color: var(--text-main);
+        border: 1px solid var(--card-border);
+        padding: 12px;
+        border-radius: var(--radius-md);
         font-weight: 700;
         font-size: 13px;
+        font-family: inherit;
         cursor: pointer;
+        transition:
+          background 0.2s ease,
+          color 0.2s ease,
+          border-color 0.2s ease;
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 8px;
-        transition: all 0.18s ease;
       }
+
       .sidebar-logout:hover {
-        background: rgba(251, 113, 133, 0.15);
-        border-color: rgba(251, 113, 133, 0.3);
+        background: var(--danger-bg);
+        color: var(--danger-text);
+        border-color: var(--danger-border);
       }
 
       .sidebar-toggle {
-        width: 32px;
-        height: 32px;
-        display: flex;
+        flex: 0 0 auto;
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        border-radius: 10px;
+        background: var(--water-foam);
+        color: var(--primary-strong);
+        border: 1px solid var(--water-foam-deep);
+        font-family: inherit;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
         align-items: center;
         justify-content: center;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid var(--border);
-        border-radius: var(--r-md);
-        color: var(--text-2);
-        font-size: 14px;
-        cursor: pointer;
-        transition: all 0.18s ease;
-        flex-shrink: 0;
-      }
-      .sidebar-toggle:hover {
-        background: rgba(56, 189, 248, 0.1);
-        color: var(--ocean);
-        border-color: rgba(56, 189, 248, 0.2);
+        transition:
+          background 0.2s ease,
+          color 0.2s ease,
+          border-color 0.2s ease;
       }
 
-      /* COLLAPSED */
-      body.sidebar-collapsed .sidebar {
-        width: 64px;
-        min-width: 64px;
-        flex: 0 0 64px;
-        padding: 20px 10px;
+      body.dark-theme .sidebar-toggle {
+        background: rgba(14, 165, 233, 0.18);
+        color: var(--primary);
+        border-color: rgba(56, 189, 248, 0.25);
       }
-      body.sidebar-collapsed .sidebar-text,
-      body.sidebar-collapsed .nav-label {
+
+      .sidebar-toggle:hover {
+        background: var(--water-foam-deep);
+      }
+
+      /* Collapsed sidebar */
+      .sidebar-collapsed .sidebar {
+        width: 80px;
+        min-width: 80px;
+        flex: 0 0 80px;
+        padding: 22px 12px;
+      }
+
+      .sidebar-collapsed .sidebar-text,
+      .sidebar-collapsed .sidebar-section-label {
         opacity: 0;
         display: none;
       }
-      body.sidebar-collapsed .sidebar-brand {
+
+      .sidebar-collapsed .sidebar-brand {
         flex-direction: column;
-        gap: 10px;
+        align-items: center;
+        gap: 14px;
+        padding-bottom: 14px;
       }
-      body.sidebar-collapsed .sidebar-brand-left {
-        margin: 0;
-      }
-      body.sidebar-collapsed .sidebar-toggle {
-        width: 100%;
-      }
-      body.sidebar-collapsed .nav-btn {
+
+      .sidebar-collapsed .nav-btn {
         justify-content: center;
-        padding: 11px 0;
-      }
-      body.sidebar-collapsed .sidebar-logout {
-        padding: 11px 0;
-        font-size: 0;
-      }
-      body.sidebar-collapsed .sidebar-logout::before {
-        content: "🚪";
-        font-size: 16px;
+        padding: 12px 0;
       }
 
-      body:not(.sidebar-collapsed) .sidebar {
-        width: 240px;
-        min-width: 240px;
-        flex: 0 0 240px;
+      .sidebar-collapsed .nav-btn span:not(.nav-ico) {
+        display: none;
       }
 
-      /* =============================================
-       MAIN CONTENT
-    ============================================= */
+      .sidebar-collapsed .sidebar-logout span {
+        display: none;
+      }
+
+      /* ===== MAIN ===== */
       .page {
         flex: 1 1 auto;
         min-width: 0;
-        padding: 20px 28px 60px;
+        padding: 22px 28px 64px;
         overflow-x: hidden;
         position: relative;
         z-index: 10;
@@ -348,11 +452,13 @@
       .admin-section {
         display: none;
       }
+
       .admin-section.active {
         display: block;
-        animation: sectionIn 0.22s ease both;
+        animation: fadeUp 0.3s ease both;
       }
-      @keyframes sectionIn {
+
+      @keyframes fadeUp {
         from {
           opacity: 0;
           transform: translateY(10px);
@@ -363,55 +469,63 @@
         }
       }
 
-      /* =============================================
-       TOP NAV BAR
-    ============================================= */
+      /* ===== TOP NAV ===== */
       .top-nav {
         position: sticky;
-        top: 12px;
+        top: 14px;
         z-index: 20;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        gap: 16px;
         padding: 12px 18px;
         margin-bottom: 22px;
-        background: rgba(11, 15, 20, 0.85);
-        backdrop-filter: blur(20px);
-        border: 1px solid var(--border-2);
-        border-radius: var(--r-xl);
-        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+        background: var(--card-bg-strong);
+        backdrop-filter: blur(22px);
+        -webkit-backdrop-filter: blur(22px);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
       }
+
       .top-nav-left {
         display: flex;
         align-items: center;
         gap: 12px;
+        min-width: 0;
       }
 
       .logo-badge {
-        width: 36px;
-        height: 36px;
-        border-radius: var(--r-md);
-        background: linear-gradient(135deg, var(--ocean), var(--ocean-dk));
+        width: 38px;
+        height: 38px;
+        border-radius: 11px;
+        background: linear-gradient(
+          135deg,
+          var(--primary) 0%,
+          var(--primary-hover) 100%
+        );
         color: white;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-weight: 900;
-        font-size: 12px;
-        letter-spacing: 0.5px;
+        font-weight: 800;
+        font-size: 14px;
+        box-shadow: 0 8px 18px rgba(14, 165, 233, 0.3);
       }
 
       .nav-kicker {
-        font-size: 11px;
-        letter-spacing: 0.5px;
-        color: var(--ocean);
+        font-size: 10px;
+        letter-spacing: 0.6px;
+        color: var(--primary);
         text-transform: uppercase;
         font-weight: 800;
       }
+
       .nav-title {
-        font-size: 13px;
-        font-weight: 700;
-        color: var(--text);
+        font-size: 14px;
+        font-weight: 800;
+        color: var(--text-main);
+        min-width: 190px;
         font-variant-numeric: tabular-nums;
       }
 
@@ -419,257 +533,285 @@
         display: flex;
         gap: 10px;
         align-items: center;
+        flex-wrap: wrap;
       }
 
       .nav-chip {
         display: inline-flex;
         align-items: center;
-        gap: 7px;
-        padding: 6px 12px;
-        border-radius: 99px;
-        background: rgba(52, 211, 153, 0.1);
-        color: var(--matcha);
-        font-size: 11.5px;
+        gap: 8px;
+        padding: 7px 13px;
+        border-radius: var(--radius-pill);
+        background: var(--water-foam);
+        color: var(--info-text);
+        font-size: 12px;
         font-weight: 700;
-        border: 1px solid rgba(52, 211, 153, 0.2);
+        border: 1px solid var(--info-border);
       }
-      .chip-dot {
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: var(--matcha);
-        box-shadow: 0 0 6px var(--matcha);
-        animation: blink 2s ease infinite;
-      }
-      @keyframes blink {
-        0%,
-        100% {
-          opacity: 1;
-        }
-        50% {
-          opacity: 0.4;
-        }
+
+      body.dark-theme .nav-chip {
+        background: var(--info-bg);
+        color: var(--info-text);
+        border-color: var(--info-border);
       }
 
       .admin-role-chip {
         display: inline-flex;
         align-items: center;
-        gap: 7px;
-        padding: 6px 12px;
-        border-radius: 99px;
-        background: rgba(251, 191, 36, 0.1);
-        color: var(--gold);
-        border: 1px solid rgba(251, 191, 36, 0.2);
-        font-size: 11.5px;
-        font-weight: 900;
-      }
-      .admin-role-chip.admin {
-        background: var(--info-bg);
-        color: var(--ocean);
-        border-color: rgba(56, 189, 248, 0.2);
-      }
-      .admin-role-chip.staff {
-        background: rgba(148, 163, 184, 0.08);
-        color: var(--text-2);
-        border-color: var(--border-2);
-      }
-      .admin-role-chip.owner {
-        background: rgba(251, 191, 36, 0.1);
-        color: var(--gold);
-        border-color: rgba(251, 191, 36, 0.2);
+        gap: 8px;
+        padding: 7px 13px;
+        border-radius: var(--radius-pill);
+        background: var(--gold-bg);
+        color: var(--gold-text);
+        border: 1px solid var(--gold-border);
+        font-size: 12px;
+        font-weight: 800;
       }
 
-      /* =============================================
-       HERO BANNER
-    ============================================= */
+      .admin-role-chip.admin {
+        background: var(--info-bg);
+        color: var(--info-text);
+        border-color: var(--info-border);
+      }
+
+      .admin-role-chip.staff {
+        background: var(--neutral-bg);
+        color: var(--neutral-text);
+        border-color: var(--neutral-border);
+      }
+
+      .admin-role-chip.owner {
+        background: var(--gold-bg);
+        color: var(--gold-text);
+        border-color: var(--gold-border);
+      }
+
+      .chip-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--primary);
+        box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.18);
+      }
+
+      .top-action-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 11px;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        color: var(--text-main);
+        font-family: inherit;
+        font-size: 16px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition:
+          background 0.2s ease,
+          transform 0.2s ease,
+          border-color 0.2s ease;
+      }
+
+      .top-action-btn:hover {
+        background: var(--water-foam);
+        border-color: var(--water-foam-deep);
+      }
+
+      body.dark-theme .top-action-btn:hover {
+        background: rgba(56, 189, 248, 0.15);
+      }
+
+      /* ===== HERO ===== */
       .hero {
         position: relative;
-        padding: 32px 36px;
-        border-radius: var(--r-2xl);
+        padding: 28px 32px;
+        border-radius: var(--radius-xl);
         background: linear-gradient(
           135deg,
-          #0c1829 0%,
-          #0f2744 50%,
-          #1a1035 100%
+          #0284c7 0%,
+          #0ea5e9 45%,
+          #38bdf8 80%,
+          #fbcfe8 120%
         );
-        border: 1px solid rgba(56, 189, 248, 0.15);
-        box-shadow:
-          0 0 0 1px rgba(56, 189, 248, 0.05),
-          inset 0 1px 0 rgba(255, 255, 255, 0.04),
-          0 20px 60px rgba(0, 0, 0, 0.4);
+        color: white;
+        box-shadow: var(--shadow-md);
         margin-bottom: 24px;
         overflow: hidden;
       }
-      .hero::before {
+
+      .hero::after {
         content: "";
         position: absolute;
-        top: -80px;
-        right: -80px;
         width: 320px;
         height: 320px;
         background: radial-gradient(
           circle,
-          rgba(56, 189, 248, 0.12) 0%,
+          rgba(255, 255, 255, 0.18) 0%,
           transparent 70%
         );
+        top: -120px;
+        right: -60px;
+        border-radius: 50%;
         pointer-events: none;
       }
-      .hero::after {
+
+      .hero::before {
         content: "";
         position: absolute;
-        bottom: -60px;
-        left: -40px;
         width: 240px;
         height: 240px;
         background: radial-gradient(
           circle,
-          rgba(251, 113, 133, 0.07) 0%,
+          rgba(251, 207, 232, 0.32) 0%,
           transparent 70%
         );
+        bottom: -100px;
+        left: -50px;
+        border-radius: 50%;
         pointer-events: none;
       }
+
       .hero-row {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
         position: relative;
         z-index: 2;
-        gap: 24px;
+        gap: 20px;
         flex-wrap: wrap;
       }
+
       .hero-badge {
         display: inline-block;
-        padding: 4px 10px;
-        background: rgba(56, 189, 248, 0.15);
-        backdrop-filter: blur(4px);
-        border-radius: var(--r-sm);
+        padding: 6px 11px;
+        background: rgba(255, 255, 255, 0.22);
+        backdrop-filter: blur(6px);
+        border-radius: 8px;
         font-size: 10px;
         font-weight: 800;
-        letter-spacing: 1.5px;
-        color: var(--ocean);
-        border: 1px solid rgba(56, 189, 248, 0.25);
-        margin-bottom: 14px;
+        letter-spacing: 1px;
+        margin-bottom: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.35);
       }
+
       .hero h1 {
-        font-size: 30px;
+        font-size: 28px;
         font-weight: 800;
         line-height: 1.2;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
         letter-spacing: -0.5px;
-        color: var(--text);
+        color: white;
       }
-      .hero h1 span {
-        color: var(--ocean);
-      }
+
       .hero p {
-        color: var(--text-2);
-        font-size: 14px;
-        line-height: 1.6;
-        max-width: 520px;
+        color: rgba(255, 255, 255, 0.92);
+        font-size: 13px;
+        line-height: 1.55;
+        max-width: 560px;
       }
 
       .hero-mini {
         display: flex;
         gap: 8px;
-        margin-top: 20px;
+        margin-top: 16px;
         position: relative;
         z-index: 2;
         flex-wrap: wrap;
       }
+
       .mini-pill {
-        padding: 5px 12px;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 99px;
-        font-size: 11.5px;
-        font-weight: 600;
-        color: var(--text-2);
+        padding: 6px 11px;
+        background: rgba(0, 0, 0, 0.18);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: var(--radius-pill);
+        font-size: 11px;
+        font-weight: 700;
       }
 
-      /* =============================================
-       STAT CARDS
-    ============================================= */
+      /* ===== STATS ===== */
       .stats {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
         gap: 14px;
         margin-bottom: 24px;
       }
+
       .stat-card {
-        background: var(--card);
-        border: 1px solid var(--border);
-        border-radius: var(--r-xl);
-        padding: 20px;
-        position: relative;
-        overflow: hidden;
+        background: var(--card-bg);
+        backdrop-filter: blur(22px);
+        -webkit-backdrop-filter: blur(22px);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-lg);
+        padding: 18px;
+        box-shadow: var(--shadow-xs);
         transition:
-          border-color 0.2s ease,
-          transform 0.2s ease;
+          transform 0.2s ease,
+          box-shadow 0.2s ease,
+          border-color 0.2s ease;
       }
-      .stat-card::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background: linear-gradient(90deg, var(--ocean), transparent);
-        opacity: 0;
-        transition: opacity 0.2s ease;
-      }
+
       .stat-card:hover {
-        border-color: rgba(56, 189, 248, 0.2);
+        box-shadow: var(--shadow-sm);
+        border-color: var(--primary);
         transform: translateY(-2px);
-      }
-      .stat-card:hover::before {
-        opacity: 1;
       }
 
       .stat-top {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 14px;
+        margin-bottom: 12px;
       }
+
       .stat-label {
         font-size: 12px;
-        color: var(--text-2);
+        color: var(--text-muted);
         font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
       }
+
       .stat-icon {
         width: 36px;
         height: 36px;
-        border-radius: var(--r-md);
+        background: var(--water-foam);
+        color: var(--primary-strong);
+        border-radius: 11px;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 16px;
-        background: rgba(56, 189, 248, 0.1);
-      }
-      .stat-value {
-        font-size: 28px;
-        font-weight: 800;
-        color: var(--text);
-        margin-bottom: 4px;
-        letter-spacing: -0.5px;
-      }
-      .stat-note {
-        font-size: 11.5px;
-        color: var(--text-3);
       }
 
-      /* =============================================
-       CARD / SECTION CONTAINER
-    ============================================= */
-      .card {
-        background: var(--card);
-        border: 1px solid var(--border);
-        border-radius: var(--r-2xl);
-        padding: 26px;
-        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+      body.dark-theme .stat-icon {
+        background: rgba(14, 165, 233, 0.16);
+        color: var(--primary);
       }
+
+      .stat-value {
+        font-size: 26px;
+        font-weight: 800;
+        color: var(--text-main);
+        margin-bottom: 4px;
+        letter-spacing: -0.4px;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .stat-note {
+        font-size: 12px;
+        color: var(--text-muted);
+      }
+
+      /* ===== CARD ===== */
+      .card {
+        background: var(--card-bg);
+        backdrop-filter: blur(22px);
+        -webkit-backdrop-filter: blur(22px);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-xl);
+        padding: 24px;
+        box-shadow: var(--shadow-sm);
+      }
+
       .card-header {
         display: flex;
         justify-content: space-between;
@@ -677,91 +819,102 @@
         margin-bottom: 20px;
         flex-wrap: wrap;
         gap: 14px;
-        border-bottom: 1px solid var(--border);
-        padding-bottom: 18px;
+        border-bottom: 1px dashed var(--divider);
+        padding-bottom: 16px;
       }
+
       .card-title-wrap h2 {
         font-size: 20px;
         font-weight: 800;
-        color: var(--text);
-        margin-bottom: 5px;
-        letter-spacing: -0.3px;
+        color: var(--text-main);
+        margin-bottom: 4px;
+        letter-spacing: -0.4px;
       }
+
       .card-subtitle {
         font-size: 13px;
-        color: var(--text-2);
+        color: var(--text-muted);
       }
 
       .section-badge {
-        background: rgba(56, 189, 248, 0.1);
-        color: var(--ocean);
-        border: 1px solid rgba(56, 189, 248, 0.2);
-        padding: 6px 13px;
-        border-radius: 99px;
-        font-size: 11.5px;
+        background: var(--water-foam);
+        color: var(--primary-strong);
+        border: 1px solid var(--water-foam-deep);
+        padding: 7px 13px;
+        border-radius: var(--radius-pill);
+        font-size: 11px;
         font-weight: 800;
+        letter-spacing: 0.3px;
       }
 
-      /* =============================================
-       TOOLBAR & INPUTS
-    ============================================= */
+      body.dark-theme .section-badge {
+        background: var(--info-bg);
+        color: var(--info-text);
+        border-color: var(--info-border);
+      }
+
+      /* ===== FORMS / TOOLBAR ===== */
       .toolbar {
         display: flex;
         gap: 12px;
         flex-wrap: wrap;
         margin-bottom: 16px;
       }
+
       .field,
       .field-wide {
         flex: 1;
         min-width: 200px;
       }
+
       .field-wide {
         min-width: 100%;
       }
 
       input[type="text"],
+      input[type="password"],
+      input[type="number"],
+      input[type="email"],
+      input[type="date"],
       select,
       textarea {
         width: 100%;
-        padding: 11px 14px;
-        border-radius: var(--r-lg);
-        border: 1px solid var(--border-2);
-        background: rgba(255, 255, 255, 0.04);
-        color: var(--text);
-        font-size: 13.5px;
+        padding: 11px 13px;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--input-border);
+        background: var(--input-bg);
+        color: var(--text-main);
+        font-size: 13px;
         font-weight: 500;
-        font-family: "Outfit", sans-serif;
+        font-family: inherit;
         outline: none;
-        transition: all 0.18s ease;
-        appearance: none;
+        transition:
+          border-color 0.2s ease,
+          box-shadow 0.2s ease,
+          background 0.2s ease;
       }
+
       textarea {
         min-height: 110px;
         resize: vertical;
+        line-height: 1.5;
       }
 
-      input[type="text"]::placeholder,
+      input::placeholder,
       textarea::placeholder {
-        color: var(--text-3);
-      }
-
-      select option {
-        background: #181e2a;
-        color: var(--text);
+        color: var(--text-soft);
+        opacity: 0.85;
       }
 
       input:focus,
       select:focus,
       textarea:focus {
-        border-color: rgba(56, 189, 248, 0.4);
-        background: rgba(56, 189, 248, 0.05);
-        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+        border-color: var(--primary);
+        background: var(--input-focus-bg);
+        box-shadow: 0 0 0 4px var(--input-focus-ring);
       }
 
-      /* =============================================
-       BUTTONS
-    ============================================= */
+      /* ===== BUTTONS ===== */
       .btn-group {
         display: flex;
         gap: 10px;
@@ -769,399 +922,467 @@
       }
 
       button {
-        padding: 11px 18px;
+        padding: 11px 16px;
         border: none;
-        border-radius: var(--r-lg);
-        background: linear-gradient(135deg, var(--ocean), var(--ocean-dk));
+        border-radius: var(--radius-md);
+        background: linear-gradient(
+          135deg,
+          var(--primary) 0%,
+          var(--primary-hover) 100%
+        );
         color: white;
         font-size: 13px;
-        font-weight: 700;
-        font-family: "Outfit", sans-serif;
+        font-weight: 800;
+        font-family: inherit;
         cursor: pointer;
-        box-shadow: 0 4px 14px rgba(14, 165, 233, 0.25);
-        transition: all 0.18s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
+        box-shadow: 0 8px 18px rgba(14, 165, 233, 0.22);
+        transition:
+          transform 0.2s ease,
+          box-shadow 0.2s ease,
+          background 0.2s ease;
       }
+
       button:hover {
+        box-shadow: 0 12px 24px rgba(14, 165, 233, 0.3);
         transform: translateY(-1px);
-        box-shadow: 0 6px 20px rgba(14, 165, 233, 0.35);
       }
+
       button:active {
         transform: translateY(0);
       }
 
-      .ghost-btn {
-        background: rgba(255, 255, 255, 0.05);
-        color: var(--text-2);
-        border: 1px solid var(--border-2);
+      button:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
         box-shadow: none;
+        transform: none;
       }
+
+      .ghost-btn {
+        background: var(--card-bg);
+        color: var(--primary-strong);
+        border: 1px solid var(--card-border);
+        box-shadow: var(--shadow-xs);
+      }
+
       .ghost-btn:hover {
-        background: rgba(255, 255, 255, 0.09);
-        color: var(--text);
-        border-color: var(--border-2);
-        box-shadow: none;
+        background: var(--water-foam);
+        border-color: var(--water-foam-deep);
+        box-shadow: var(--shadow-sm);
+      }
+
+      body.dark-theme .ghost-btn {
+        color: var(--primary);
+      }
+
+      body.dark-theme .ghost-btn:hover {
+        background: rgba(56, 189, 248, 0.14);
       }
 
       .danger-btn {
-        background: rgba(251, 113, 133, 0.1);
-        color: var(--sakura);
-        border: 1px solid rgba(251, 113, 133, 0.2);
+        background: var(--card-bg);
+        color: var(--danger-text);
+        border: 1px solid var(--danger-border);
         box-shadow: none;
       }
+
       .danger-btn:hover {
-        background: rgba(251, 113, 133, 0.18);
-        border-color: rgba(251, 113, 133, 0.35);
-        box-shadow: none;
+        background: var(--danger-bg);
+        border-color: var(--danger-border);
+        transform: translateY(-1px);
+        box-shadow: 0 8px 18px rgba(225, 29, 72, 0.18);
       }
 
       .logout-btn {
-        background: rgba(255, 255, 255, 0.07);
-        color: var(--text);
-        border: 1px solid var(--border-2);
-        box-shadow: none;
-      }
-      .logout-btn:hover {
-        background: rgba(255, 255, 255, 0.12);
-        box-shadow: none;
+        background: rgba(255, 255, 255, 0.95);
+        color: #082f49;
+        border: 1px solid transparent;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
       }
 
-      /* =============================================
-       TABLE
-    ============================================= */
-      .info-row {
-        margin-bottom: 12px;
+      .logout-btn:hover {
+        background: white;
+        color: #e11d48;
+        transform: translateY(-1px);
       }
+
+      .hero .logout-btn {
+        font-weight: 800;
+      }
+
+      /* ===== TABLE ===== */
+      .info-row {
+        margin-bottom: 14px;
+      }
+
       .info {
-        font-size: 12.5px;
-        color: var(--text-2);
+        font-size: 12px;
+        color: var(--text-muted);
         font-weight: 600;
       }
 
       .table-wrap {
         overflow-x: auto;
-        background: rgba(255, 255, 255, 0.02);
-        border: 1px solid var(--border);
-        border-radius: var(--r-xl);
-      }
-      .table-wrap::-webkit-scrollbar {
-        height: 4px;
-      }
-      .table-wrap::-webkit-scrollbar-track {
-        background: transparent;
-      }
-      .table-wrap::-webkit-scrollbar-thumb {
-        background: var(--border-2);
-        border-radius: 99px;
+        background: var(--table-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-lg);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
       }
 
       table {
         width: 100%;
         border-collapse: collapse;
-        min-width: 1000px;
+        min-width: 980px;
       }
 
       th,
       td {
-        padding: 13px 16px;
+        padding: 12px 14px;
         text-align: left;
-        border-bottom: 1px solid var(--border);
+        border-bottom: 1px solid var(--card-border-soft);
         font-size: 13px;
         vertical-align: middle;
+        color: var(--text-main);
       }
+
       th {
-        background: rgba(56, 189, 248, 0.04);
-        color: var(--ocean);
+        background: var(--table-head-bg);
+        color: var(--primary-strong);
         font-weight: 800;
         font-size: 11px;
         text-transform: uppercase;
-        letter-spacing: 0.7px;
+        letter-spacing: 0.5px;
         position: sticky;
         top: 0;
         z-index: 10;
         white-space: nowrap;
       }
+
+      body.dark-theme th {
+        color: var(--primary);
+      }
+
       tbody tr {
-        transition: background 0.15s ease;
+        transition: background 0.2s ease;
       }
+
+      tbody tr:nth-child(even) {
+        background: var(--table-row-zebra);
+      }
+
       tbody tr:hover {
-        background: rgba(56, 189, 248, 0.04);
+        background: var(--table-row-hover);
       }
+
       tbody tr:last-child td {
         border-bottom: none;
       }
 
       td button {
         padding: 7px 11px;
-        font-size: 11.5px;
+        font-size: 11px;
         margin-right: 4px;
         margin-bottom: 4px;
+        font-weight: 700;
+        box-shadow: var(--shadow-xs);
       }
 
-      /* =============================================
-       BADGES
-    ============================================= */
+      td input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--primary);
+        cursor: pointer;
+      }
+
+      /* ===== BADGE ===== */
       .badge {
         display: inline-flex;
+        align-items: center;
+        gap: 5px;
         padding: 4px 10px;
-        border-radius: 99px;
+        border-radius: var(--radius-pill);
         font-size: 11px;
         font-weight: 800;
+        text-transform: capitalize;
         border: 1px solid transparent;
+        line-height: 1.2;
         white-space: nowrap;
       }
+
+      .badge::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+        opacity: 0.85;
+      }
+
       .badge.pending {
         background: var(--warn-bg);
         color: var(--warn-text);
-        border-color: rgba(251, 191, 36, 0.2);
+        border-color: var(--warn-border);
       }
+
       .badge.paid,
       .badge.delivered,
       .badge.available {
         background: var(--success-bg);
         color: var(--success-text);
-        border-color: rgba(52, 211, 153, 0.2);
+        border-color: var(--success-border);
       }
+
       .badge.expired,
       .badge.cancelled,
       .badge.used {
         background: var(--danger-bg);
         color: var(--danger-text);
-        border-color: rgba(251, 113, 133, 0.2);
+        border-color: var(--danger-border);
       }
+
       .badge.waiting_payment {
         background: var(--info-bg);
         color: var(--info-text);
-        border-color: rgba(56, 189, 248, 0.2);
+        border-color: var(--info-border);
       }
+
       .badge.vip {
-        background: rgba(251, 191, 36, 0.1);
-        color: var(--gold);
-        border-color: rgba(251, 191, 36, 0.2);
+        background: var(--gold-bg);
+        color: var(--gold-text);
+        border-color: var(--gold-border);
       }
+
       .badge.loyal {
-        background: rgba(56, 189, 248, 0.1);
-        color: var(--ocean);
-        border-color: rgba(56, 189, 248, 0.2);
+        background: #dbeafe;
+        color: #1d4ed8;
+        border-color: #93c5fd;
       }
+
+      body.dark-theme .badge.loyal {
+        background: rgba(59, 130, 246, 0.2);
+        color: #93c5fd;
+        border-color: rgba(147, 197, 253, 0.35);
+      }
+
       .badge.verified,
       .badge.reviewer {
         background: var(--success-bg);
         color: var(--success-text);
-        border-color: rgba(52, 211, 153, 0.2);
+        border-color: var(--success-border);
       }
+
       .badge.new {
-        background: rgba(148, 163, 184, 0.08);
-        color: var(--text-2);
-        border-color: var(--border-2);
+        background: var(--neutral-bg);
+        color: var(--neutral-text);
+        border-color: var(--neutral-border);
       }
+
       .badge.manual,
       .badge.stock_empty {
         background: var(--danger-bg);
         color: var(--danger-text);
-        border-color: rgba(251, 113, 133, 0.2);
+        border-color: var(--danger-border);
       }
 
-      /* =============================================
-       EMPTY STATE
-    ============================================= */
+      /* ===== EMPTY STATE ===== */
       .empty {
         text-align: center;
-        padding: 60px 40px !important;
-        color: var(--text-3);
+        padding: 56px 24px !important;
+        color: var(--text-muted);
         font-style: italic;
+        font-weight: 500;
         font-size: 14px;
       }
+
       .empty::before {
         content: "🎐";
         display: block;
         font-size: 32px;
-        margin-bottom: 12px;
-        opacity: 0.5;
+        margin-bottom: 10px;
+        opacity: 0.85;
+        font-style: normal;
       }
 
-      /* =============================================
-       KEY DISPLAY
-    ============================================= */
+      /* ===== KEY MASK ===== */
       .key-mask {
         display: inline-flex;
         align-items: center;
-        padding: 5px 9px;
-        border-radius: var(--r-md);
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid var(--border-2);
-        color: var(--ocean);
-        font-family: "JetBrains Mono", monospace;
-        font-size: 11.5px;
-        font-weight: 600;
-        letter-spacing: 0.5px;
+        padding: 6px 10px;
+        border-radius: 10px;
+        background: var(--neutral-bg);
+        border: 1px solid var(--neutral-border);
+        color: var(--text-main);
+        font-family: "JetBrains Mono", "Courier New", monospace;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.4px;
         word-break: break-all;
       }
+
+      body.dark-theme .key-mask {
+        background: rgba(148, 163, 184, 0.12);
+        color: var(--text-main);
+      }
+
       .key-action-row {
         display: flex;
-        gap: 5px;
+        gap: 6px;
         flex-wrap: wrap;
-        margin-top: 6px;
+        margin-top: 7px;
       }
+
       .key-action-row button {
-        padding: 6px 9px;
+        padding: 6px 10px;
         font-size: 11px;
         box-shadow: none;
       }
 
-      /* =============================================
-       ADMIN ALERTS BOX
-    ============================================= */
+      /* ===== ALERTS BOX ===== */
       .admin-alerts-box {
-        margin: 0 0 20px;
+        margin: 0 0 18px;
         padding: 18px;
-        border-radius: var(--r-xl);
-        background: rgba(251, 191, 36, 0.06);
-        border: 1px solid rgba(251, 191, 36, 0.18);
+        border-radius: var(--radius-lg);
+        background: var(--card-bg);
+        border: 1px solid var(--warn-border);
         color: var(--warn-text);
+        box-shadow: var(--shadow-xs);
+        backdrop-filter: blur(18px);
       }
+
+      body:not(.dark-theme) .admin-alerts-box {
+        background: #fff7ed;
+        border-color: #fed7aa;
+        color: #9a3412;
+      }
+
+      body.dark-theme .admin-alerts-box {
+        background: rgba(154, 52, 18, 0.18);
+        border-color: rgba(254, 215, 170, 0.35);
+        color: #fed7aa;
+      }
+
       .admin-alerts-head {
         display: flex;
         justify-content: space-between;
         gap: 12px;
         align-items: center;
         margin-bottom: 12px;
+        flex-wrap: wrap;
       }
+
       .admin-alerts-head strong {
         font-size: 15px;
+        font-weight: 800;
       }
+
       .admin-alert-list {
         display: grid;
         gap: 10px;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       }
+
       .admin-alert-item {
         padding: 12px 14px;
-        border-radius: var(--r-lg);
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(251, 191, 36, 0.12);
+        border-radius: var(--radius-md);
+        background: rgba(255, 255, 255, 0.7);
+        border: 1px solid #fed7aa;
         font-size: 12.5px;
         line-height: 1.5;
-        color: var(--text-2);
+        color: #7c2d12;
       }
+
+      body.dark-theme .admin-alert-item {
+        background: rgba(15, 23, 42, 0.5);
+        border-color: rgba(254, 215, 170, 0.3);
+        color: #fed7aa;
+      }
+
       .admin-alert-item b {
-        color: var(--gold);
+        color: #7c2d12;
+        font-weight: 800;
       }
+
+      body.dark-theme .admin-alert-item b {
+        color: #fed7aa;
+      }
+
       .admin-alert-tag {
         display: inline-flex;
         padding: 3px 8px;
-        border-radius: 99px;
-        background: rgba(251, 191, 36, 0.12);
-        color: var(--gold);
+        border-radius: var(--radius-pill);
+        background: #ffedd5;
+        color: #9a3412;
         font-size: 10px;
         font-weight: 800;
-        margin-bottom: 5px;
-        letter-spacing: 0.5px;
+        margin-bottom: 6px;
+        letter-spacing: 0.3px;
       }
+
+      body.dark-theme .admin-alert-tag {
+        background: rgba(254, 215, 170, 0.18);
+        color: #fed7aa;
+      }
+
       .admin-alert-actions {
         margin-top: 12px;
         display: flex;
         gap: 8px;
         flex-wrap: wrap;
       }
+
       .admin-alert-actions button {
-        border-radius: 99px;
-        padding: 8px 14px;
-        background: rgba(251, 191, 36, 0.15);
-        color: var(--gold);
-        border: 1px solid rgba(251, 191, 36, 0.25);
-        font-weight: 700;
+        border: none;
+        border-radius: var(--radius-pill);
+        padding: 8px 12px;
+        background: #f97316;
+        color: white;
+        font-weight: 800;
         font-size: 12px;
-        box-shadow: none;
+        cursor: pointer;
+        box-shadow: 0 6px 14px rgba(249, 115, 22, 0.28);
       }
+
       .admin-alert-actions button:hover {
-        background: rgba(251, 191, 36, 0.25);
+        background: #ea580c;
       }
 
-      /* =============================================
-       TOAST NOTIFICATION (UI ONLY, NO SERVER)
-    ============================================= */
-      #toast-container {
-        position: fixed;
-        bottom: 24px;
-        right: 24px;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        z-index: 9999;
-        pointer-events: none;
+      /* ===== SWEETALERT TUNING ===== */
+      .swal2-popup {
+        font-family: "Plus Jakarta Sans", "Segoe UI", sans-serif !important;
+        border-radius: var(--radius-lg) !important;
+        background: var(--card-bg-strong) !important;
+        color: var(--text-main) !important;
+        border: 1px solid var(--card-border) !important;
       }
-      .toast {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 12px 18px;
-        background: var(--bg-3);
-        border: 1px solid var(--border-2);
-        border-radius: var(--r-lg);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-        color: var(--text);
-        font-size: 13px;
-        font-weight: 600;
-        min-width: 220px;
-        animation: toastIn 0.25s ease both;
-        pointer-events: all;
+
+      .swal2-title,
+      .swal2-html-container {
+        color: var(--text-main) !important;
       }
-      .toast.hide {
-        animation: toastOut 0.25s ease forwards;
+
+      .swal2-input {
+        background: var(--input-bg) !important;
+        color: var(--text-main) !important;
+        border-color: var(--input-border) !important;
       }
-      @keyframes toastIn {
-        from {
-          opacity: 0;
-          transform: translateX(20px);
-        }
-        to {
-          opacity: 1;
-          transform: none;
-        }
+
+      .swal2-toast {
+        background: var(--card-bg-strong) !important;
       }
-      @keyframes toastOut {
-        from {
-          opacity: 1;
-          transform: none;
-        }
-        to {
-          opacity: 0;
-          transform: translateX(20px);
+
+      /* ===== RESPONSIVE ===== */
+      @media (max-width: 980px) {
+        .nav-title {
+          min-width: auto;
         }
       }
 
-      /* =============================================
-       LOADING SKELETON (UI ONLY)
-    ============================================= */
-      .skeleton {
-        background: linear-gradient(
-          90deg,
-          rgba(255, 255, 255, 0.04) 25%,
-          rgba(255, 255, 255, 0.08) 50%,
-          rgba(255, 255, 255, 0.04) 75%
-        );
-        background-size: 400% 100%;
-        animation: shimmer 1.4s ease infinite;
-        border-radius: var(--r-md);
-      }
-      @keyframes shimmer {
-        from {
-          background-position: 100% 0;
-        }
-        to {
-          background-position: -100% 0;
-        }
-      }
-
-      /* =============================================
-       RESPONSIVE
-    ============================================= */
       @media (max-width: 768px) {
         body {
           flex-direction: column;
         }
+
         .sidebar {
           width: 100% !important;
           min-width: 100% !important;
@@ -1170,88 +1391,151 @@
           position: sticky;
           top: 0;
           border-right: none;
-          border-bottom: 1px solid var(--border);
-          padding: 10px 12px;
-          gap: 10px;
+          border-bottom: 1px solid var(--card-border);
           flex-direction: column;
-          overflow-y: visible;
+          align-items: stretch;
+          padding: 12px;
+          gap: 12px;
+          z-index: 100;
         }
+
         .sidebar-brand {
           border-bottom: none;
           padding-bottom: 0;
         }
+
+        .sidebar-section-label {
+          display: none;
+        }
+
         .sidebar-nav {
           display: flex;
           flex-direction: row;
           flex: none;
+          justify-content: flex-start;
+          gap: 8px;
           overflow-x: auto;
-          gap: 6px;
-          padding-bottom: 2px;
+          padding-bottom: 4px;
           -webkit-overflow-scrolling: touch;
         }
-        .sidebar-nav::-webkit-scrollbar {
-          height: 0;
+
+        .sidebar-toggle {
+          display: none;
         }
-        .sidebar-toggle,
+
         .sidebar-footer {
           display: none;
         }
+
         .nav-btn {
           width: auto;
           min-width: max-content;
-          padding: 8px 14px;
+          padding: 9px 13px;
           font-size: 12px;
-          border-radius: 99px;
+          border-radius: var(--radius-pill);
           white-space: nowrap;
         }
+
         .page {
-          padding: 14px 14px 40px;
+          padding: 14px;
         }
+
         .hero {
-          padding: 20px;
+          padding: 22px;
         }
+
         .hero h1 {
           font-size: 22px;
         }
+
         .card {
           padding: 18px;
         }
+
         .top-nav {
           flex-direction: column;
           align-items: flex-start;
           gap: 12px;
+          padding: 12px 14px;
         }
+
         .nav-actions {
           width: 100%;
           flex-wrap: wrap;
         }
+
         .nav-chip {
-          display: none;
+          flex: 1 1 auto;
+          justify-content: center;
         }
+
+        .top-nav .logout-btn,
+        .top-nav .ghost-btn {
+          flex: 1 1 auto;
+        }
+
+        .toolbar {
+          gap: 10px;
+        }
+
+        .btn-group {
+          width: 100%;
+          gap: 10px;
+        }
+
         .btn-group button {
-          flex: 1 1 130px;
+          flex: 1 1 140px;
+          min-height: 42px;
         }
+
         body.sidebar-collapsed .sidebar {
           width: 100% !important;
           min-width: 100% !important;
           flex: none !important;
-          padding: 10px 12px;
+          padding: 12px;
         }
-        body.sidebar-collapsed .sidebar-text,
-        body.sidebar-collapsed .nav-label {
+
+        body.sidebar-collapsed .sidebar-brand {
+          flex-direction: row;
+          align-items: center;
+        }
+
+        body.sidebar-collapsed .sidebar-text {
           display: block;
           opacity: 1;
         }
+
+        body.sidebar-collapsed .nav-btn span:not(.nav-ico) {
+          display: inline;
+        }
+      }
+
+      @media (max-width: 520px) {
+        .stat-card {
+          padding: 14px;
+        }
+
+        .stat-value {
+          font-size: 22px;
+        }
+
+        .hero h1 {
+          font-size: 19px;
+        }
+
+        .hero p {
+          font-size: 12px;
+        }
       }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </head>
 
   <body>
-    <!-- ===================== SIDEBAR ===================== -->
-    <div class="sidebar">
+    <aside class="sidebar" aria-label="Sidebar navigation">
       <div class="sidebar-brand">
         <div class="sidebar-brand-left">
-          <div class="sidebar-logo">⛩️</div>
+          <div class="sidebar-logo" aria-hidden="true">⛩️</div>
           <div class="sidebar-text">
             <div class="sidebar-kicker">AE Game Store</div>
             <div class="sidebar-title">Admin Panel</div>
@@ -1260,85 +1544,100 @@
         <button
           class="sidebar-toggle"
           onclick="toggleSidebar()"
+          aria-label="Toggle sidebar"
           title="Toggle sidebar"
         >
           ☰
         </button>
       </div>
 
-      <nav class="sidebar-nav">
+      <nav class="sidebar-nav" aria-label="Admin sections">
+        <div class="sidebar-section-label">Manajemen</div>
         <button
           class="nav-btn active"
           data-section="dashboard"
           onclick="showSection('dashboard', this)"
         >
-          <span class="nav-icon">🏠</span
-          ><span class="nav-label">Dashboard</span>
+          <span class="nav-ico" aria-hidden="true">📊</span>
+          <span>Dashboard</span>
         </button>
         <button
           class="nav-btn"
           data-section="products"
           onclick="showSection('products', this)"
         >
-          <span class="nav-icon">📦</span><span class="nav-label">Produk</span>
+          <span class="nav-ico" aria-hidden="true">📦</span>
+          <span>Produk</span>
         </button>
         <button
           class="nav-btn"
           data-section="orders"
           onclick="showSection('orders', this)"
         >
-          <span class="nav-icon">🧾</span><span class="nav-label">Order</span>
+          <span class="nav-ico" aria-hidden="true">🧾</span>
+          <span>Order</span>
         </button>
         <button
           class="nav-btn"
           data-section="users"
           onclick="showSection('users', this)"
         >
-          <span class="nav-icon">👥</span
-          ><span class="nav-label">User Buyer</span>
+          <span class="nav-ico" aria-hidden="true">👥</span>
+          <span>User Buyer</span>
         </button>
         <button
           class="nav-btn"
           data-section="keys"
           onclick="showSection('keys', this)"
         >
-          <span class="nav-icon">🔑</span
-          ><span class="nav-label">Game Key</span>
+          <span class="nav-ico" aria-hidden="true">🔑</span>
+          <span>Game Key</span>
         </button>
         <button
           class="nav-btn"
           data-section="vouchers"
           onclick="showSection('vouchers', this)"
         >
-          <span class="nav-icon">🎟️</span><span class="nav-label">Voucher</span>
+          <span class="nav-ico" aria-hidden="true">🎟️</span>
+          <span>Voucher</span>
         </button>
       </nav>
 
       <div class="sidebar-footer">
         <button class="sidebar-logout" onclick="logoutAdmin()">
-          🚪 &nbsp;Logout
+          <span aria-hidden="true">🚪</span>
+          <span>Logout</span>
         </button>
       </div>
-    </div>
+    </aside>
 
-    <!-- ===================== MAIN ===================== -->
     <main class="page">
-      <!-- ===== DASHBOARD ===== -->
       <section id="section-dashboard" class="admin-section active">
         <div class="top-nav">
           <div class="top-nav-left">
-            <div class="logo-badge">AE</div>
+            <div class="logo-badge" aria-hidden="true">AE</div>
             <div>
               <div class="nav-kicker" id="adminGreeting">AE Game Store</div>
-              <div class="nav-title" id="adminClock">Admin Dashboard</div>
+              <div class="nav-title" id="adminClock">Zen Admin Dashboard</div>
             </div>
           </div>
           <div class="nav-actions">
             <div class="admin-role-chip owner" id="adminRoleChip">👑 Owner</div>
+
             <div class="nav-chip">
-              <span class="chip-dot"></span>
-              <span>Sistem Aktif</span>
+              <span class="chip-dot" aria-hidden="true"></span>
+              <span>Sistem Aktif & Terlindungi</span>
             </div>
+            <button
+              class="top-action-btn"
+              id="theme-toggle"
+              type="button"
+              onclick="toggleAdminTheme()"
+              aria-label="Toggle theme"
+              title="Toggle theme"
+            >
+              🌙
+            </button>
             <button
               class="ghost-btn"
               style="padding: 8px 14px"
@@ -1351,34 +1650,26 @@
 
         <div class="hero">
           <div class="hero-row">
-            <div style="max-width: 560px">
+            <div style="max-width: 600px">
               <div class="hero-badge">AE GAME STORE • ADMIN</div>
-              <h1>Dashboard <span>Operasional</span></h1>
+              <h1>Dashboard Operasional</h1>
               <p>
                 Kelola produk, order, stok key, voucher, dan buyer dari satu
                 panel yang clean.
               </p>
             </div>
-            <div
-              style="
-                display: flex;
-                flex-direction: column;
-                gap: 10px;
-                align-items: flex-end;
-              "
-            >
+            <div>
               <button class="logout-btn" onclick="refreshAllData()">
-                🌊 Refresh Semua Data
+                Refresh Semua Data 🌊
               </button>
             </div>
           </div>
           <div class="hero-mini">
-            <div class="mini-pill">📦 Order</div>
-            <div class="mini-pill">🔑 Stok Key</div>
-            <div class="mini-pill">🎟️ Voucher</div>
+            <div class="mini-pill">Order</div>
+            <div class="mini-pill">Stok Key</div>
+            <div class="mini-pill">Voucher</div>
           </div>
         </div>
-
         <div
           id="adminAlertsBox"
           class="admin-alerts-box"
@@ -1389,46 +1680,49 @@
           class="admin-alerts-box"
           style="display: none"
         ></div>
-
-        <div class="stats">
+        <div class="stats delay-1">
           <div class="stat-card">
             <div class="stat-top">
               <div class="stat-label">Total Key</div>
               <div class="stat-icon">🔑</div>
             </div>
-            <div class="stat-value" id="totalKeyStat">—</div>
-            <div class="stat-note">Seluruh key di database</div>
+            <div class="stat-value" id="totalKeyStat">0</div>
+            <div class="stat-note">Seluruh key di database.</div>
           </div>
+
           <div class="stat-card">
             <div class="stat-top">
               <div class="stat-label">Key Available</div>
               <div class="stat-icon">✅</div>
             </div>
-            <div class="stat-value" id="availableKeyStat">—</div>
-            <div class="stat-note">Stok key belum dipakai</div>
+            <div class="stat-value" id="availableKeyStat">0</div>
+            <div class="stat-note">Stok key yang belum dipakai.</div>
           </div>
+
           <div class="stat-card">
             <div class="stat-top">
               <div class="stat-label">Total Order</div>
               <div class="stat-icon">🧾</div>
             </div>
-            <div class="stat-value" id="totalOrderStat">—</div>
-            <div class="stat-note">Jumlah order tercatat</div>
+            <div class="stat-value" id="totalOrderStat">0</div>
+            <div class="stat-note">Jumlah order yang tercatat.</div>
           </div>
+
           <div class="stat-card">
             <div class="stat-top">
               <div class="stat-label">Total Produk</div>
               <div class="stat-icon">📦</div>
             </div>
-            <div class="stat-value" id="totalProductStat">—</div>
-            <div class="stat-note">Produk tersedia di panel</div>
+            <div class="stat-value" id="totalProductStat">0</div>
+            <div class="stat-note">Produk tersedia di panel.</div>
           </div>
+
           <div class="stat-card">
             <div class="stat-top">
               <div class="stat-label">Produk Hampir Habis</div>
               <div class="stat-icon">⚠️</div>
             </div>
-            <div class="stat-value" id="lowStockStat">—</div>
+            <div class="stat-value" id="lowStockStat">0</div>
             <div class="stat-note">Produk dengan stok &lt; 5</div>
           </div>
           <div class="stat-card">
@@ -1436,67 +1730,72 @@
               <div class="stat-label">Revenue Hari Ini</div>
               <div class="stat-icon">💰</div>
             </div>
-            <div class="stat-value" id="revenueTodayStat">Rp —</div>
-            <div class="stat-note">Total order paid hari ini</div>
+            <div class="stat-value" id="revenueTodayStat">Rp 0</div>
+            <div class="stat-note">Total order paid hari ini.</div>
           </div>
+
           <div class="stat-card">
             <div class="stat-top">
               <div class="stat-label">Revenue Bulan Ini</div>
               <div class="stat-icon">📈</div>
             </div>
-            <div class="stat-value" id="revenueMonthStat">Rp —</div>
-            <div class="stat-note">Total order paid bulan ini</div>
+            <div class="stat-value" id="revenueMonthStat">Rp 0</div>
+            <div class="stat-note">Total order paid bulan ini.</div>
           </div>
+
           <div class="stat-card">
             <div class="stat-top">
               <div class="stat-label">Paid Hari Ini</div>
               <div class="stat-icon">✅</div>
             </div>
-            <div class="stat-value" id="paidTodayStat">—</div>
-            <div class="stat-note">Order berhasil dibayar hari ini</div>
+            <div class="stat-value" id="paidTodayStat">0</div>
+            <div class="stat-note">Order berhasil dibayar hari ini.</div>
           </div>
+
           <div class="stat-card">
             <div class="stat-top">
               <div class="stat-label">Order Pending</div>
               <div class="stat-icon">⏳</div>
             </div>
-            <div class="stat-value" id="pendingOrderStat">—</div>
-            <div class="stat-note">Order belum dibayar</div>
+            <div class="stat-value" id="pendingOrderStat">0</div>
+            <div class="stat-note">Order belum dibayar.</div>
           </div>
         </div>
       </section>
 
-      <!-- ===== PRODUCTS ===== -->
       <section id="section-products" class="admin-section">
-        <div class="card">
+        <div class="card delay-1">
           <div class="card-header">
             <div class="card-title-wrap">
               <h2>Kelola Produk</h2>
               <p class="card-subtitle">
-                Tambah, edit, aktifkan, atau hapus produk dari store.
+                Tambahkan, edit, aktifkan, atau hapus produk dari store dengan
+                cepat.
               </p>
             </div>
-            <div class="section-badge">📦 Product Manager</div>
+            <div class="section-badge">Product Manager</div>
           </div>
-
           <div class="toolbar">
             <div class="field">
               <input
                 type="text"
                 id="productSearchInput"
-                placeholder="🔍 Cari game / brand / durasi"
+                placeholder="Cari game / brand / durasi"
               />
             </div>
+
             <div class="field">
               <select id="productGameFilter" onchange="applyProductFilters()">
                 <option value="">Semua Game</option>
               </select>
             </div>
+
             <div class="field">
               <select id="productBrandFilter" onchange="applyProductFilters()">
                 <option value="">Semua Brand</option>
               </select>
             </div>
+
             <div class="field">
               <select id="productStatusFilter" onchange="applyProductFilters()">
                 <option value="">Semua Status</option>
@@ -1505,7 +1804,6 @@
               </select>
             </div>
           </div>
-
           <div class="toolbar">
             <input type="hidden" id="editingProductId" />
             <div class="field">
@@ -1541,13 +1839,13 @@
           <div class="toolbar">
             <div class="btn-group">
               <button id="saveProductBtn" onclick="saveProduct()">
-                💾 Tambah Produk
+                Tambah Produk
               </button>
               <button class="ghost-btn" onclick="resetProductForm()">
-                🔄 Reset Form
+                Reset Form
               </button>
               <button class="ghost-btn" onclick="loadProducts()">
-                ↻ Refresh
+                Refresh Produk
               </button>
             </div>
           </div>
@@ -1557,6 +1855,7 @@
               Memuat daftar produk...
             </div>
           </div>
+
           <div class="table-wrap">
             <table>
               <thead>
@@ -1567,7 +1866,7 @@
                   <th>Durasi</th>
                   <th>Harga</th>
                   <th>Status</th>
-                  <th style="width: 240px">Aksi</th>
+                  <th style="width: 220px">Aksi</th>
                 </tr>
               </thead>
               <tbody id="productTableBody"></tbody>
@@ -1576,17 +1875,16 @@
         </div>
       </section>
 
-      <!-- ===== ORDERS ===== -->
       <section id="section-orders" class="admin-section">
-        <div class="card">
+        <div class="card delay-1">
           <div class="card-header">
             <div class="card-title-wrap">
               <h2>Daftar Order</h2>
               <p class="card-subtitle">
-                Lihat transaksi masuk, filter pembayaran, copy detail order.
+                Lihat transaksi masuk, filter pembayaran, dan copy detail order.
               </p>
             </div>
-            <div class="section-badge">🧾 Order Monitor</div>
+            <div class="section-badge">Order Monitor</div>
           </div>
 
           <div class="toolbar">
@@ -1594,9 +1892,10 @@
               <input
                 type="text"
                 id="orderSearchInput"
-                placeholder="🔍 Cari order id / nama / kontak / game / produk"
+                placeholder="Cari order id / nama / kontak / game / produk"
               />
             </div>
+
             <div class="field">
               <select id="paymentFilter" onchange="applyOrderFilters()">
                 <option value="">Semua Pembayaran</option>
@@ -1605,6 +1904,7 @@
                 <option value="expired">Expired</option>
               </select>
             </div>
+
             <div class="field">
               <select id="deliveryFilter" onchange="applyOrderFilters()">
                 <option value="">Semua Pengiriman</option>
@@ -1614,16 +1914,17 @@
                 <option value="cancelled">Cancelled</option>
               </select>
             </div>
+
             <div class="btn-group">
-              <button onclick="loadOrders()">↻ Refresh</button>
+              <button onclick="loadOrders()">Refresh Order</button>
               <button class="ghost-btn" onclick="selectAllFilteredOrders()">
-                ☑ Pilih Semua
+                Pilih Semua Filter
               </button>
               <button class="danger-btn" onclick="deleteSelectedOrders()">
-                🗑 Hapus Terpilih
+                Hapus Terpilih
               </button>
               <button class="ghost-btn" onclick="clearSelectedOrders()">
-                ✕ Batal
+                Batal Pilih
               </button>
             </div>
           </div>
@@ -1631,6 +1932,7 @@
           <div class="info-row">
             <div class="info" id="orderStatusText">Memuat daftar order...</div>
           </div>
+
           <div class="table-wrap">
             <table>
               <thead>
@@ -1648,7 +1950,7 @@
                   <th>Pengiriman</th>
                   <th>Game Key</th>
                   <th>Waktu</th>
-                  <th style="width: 180px">Aksi</th>
+                  <th style="width: 160px">Aksi</th>
                 </tr>
               </thead>
               <tbody id="orderTableBody"></tbody>
@@ -1656,25 +1958,26 @@
           </div>
         </div>
       </section>
-
-      <!-- ===== USERS ===== -->
       <section id="section-users" class="admin-section">
-        <div class="card">
+        <div class="card delay-1">
           <div class="card-header">
             <div class="card-title-wrap">
               <h2>Daftar User Buyer</h2>
               <p class="card-subtitle">Lihat akun buyer yang sudah daftar.</p>
             </div>
-            <div class="section-badge">👥 User Monitor</div>
+            <div class="section-badge">User Monitor</div>
           </div>
+
           <div class="toolbar">
             <div class="btn-group">
-              <button onclick="loadUsers()">↻ Refresh User</button>
+              <button onclick="loadUsers()">Refresh User</button>
             </div>
           </div>
+
           <div class="info-row">
             <div class="info" id="userStatusText">Memuat daftar user...</div>
           </div>
+
           <div class="table-wrap">
             <table>
               <thead>
@@ -1694,9 +1997,8 @@
         </div>
       </section>
 
-      <!-- ===== GAME KEYS ===== -->
       <section id="section-keys" class="admin-section">
-        <div class="card">
+        <div class="card delay-1">
           <div class="card-header">
             <div class="card-title-wrap">
               <h2>Tambah Game Key</h2>
@@ -1704,7 +2006,7 @@
                 Tambahkan key satuan atau bulk untuk setiap produk yang aktif.
               </p>
             </div>
-            <div class="section-badge">🔑 Key Stock</div>
+            <div class="section-badge">Key Stock</div>
           </div>
 
           <div class="toolbar">
@@ -1712,9 +2014,10 @@
               <input
                 type="text"
                 id="keySearchInput"
-                placeholder="🔍 Cari key / game / brand / durasi"
+                placeholder="Cari key / game / brand / durasi"
               />
             </div>
+
             <div class="field">
               <select id="keyStatusFilter" onchange="applyKeyFilters()">
                 <option value="">Semua Status</option>
@@ -1739,7 +2042,7 @@
               />
             </div>
             <div class="btn-group">
-              <button onclick="addSingleKey()">➕ Tambah 1 Key</button>
+              <button onclick="addSingleKey()">Tambah 1 Key</button>
             </div>
           </div>
 
@@ -1754,9 +2057,9 @@
 
           <div class="toolbar">
             <div class="btn-group">
-              <button onclick="addBulkKeys()">📥 Tambah Bulk Key</button>
+              <button onclick="addBulkKeys()">Tambah Bulk Key</button>
               <button class="ghost-btn" onclick="loadKeys()">
-                ↻ Refresh Key
+                Refresh Key
               </button>
             </div>
           </div>
@@ -1764,6 +2067,7 @@
           <div class="info-row">
             <div class="info" id="keyStatusText">Memuat daftar key...</div>
           </div>
+
           <div class="table-wrap">
             <table>
               <thead>
@@ -1771,8 +2075,8 @@
                   <th style="width: 90px">ID</th>
                   <th>Produk</th>
                   <th>Key</th>
-                  <th style="width: 160px">Status</th>
-                  <th style="width: 120px">Aksi</th>
+                  <th style="width: 180px">Status</th>
+                  <th style="width: 140px">Aksi</th>
                 </tr>
               </thead>
               <tbody id="keyTableBody"></tbody>
@@ -1780,10 +2084,8 @@
           </div>
         </div>
       </section>
-
-      <!-- ===== VOUCHERS ===== -->
       <section id="section-vouchers" class="admin-section">
-        <div class="card">
+        <div class="card delay-1">
           <div class="card-header">
             <div class="card-title-wrap">
               <h2>Kelola Voucher</h2>
@@ -1792,17 +2094,17 @@
                 Delta Force.
               </p>
             </div>
-            <div class="section-badge">🎟️ Voucher Manager</div>
+            <div class="section-badge">Voucher Manager</div>
           </div>
-
           <div class="toolbar">
             <div class="field-wide">
               <input
                 type="text"
                 id="voucherSearchInput"
-                placeholder="🔍 Cari kode / game / brand / durasi voucher"
+                placeholder="Cari kode / game / brand / durasi voucher"
               />
             </div>
+
             <div class="field">
               <select id="voucherStatusFilter" onchange="applyVoucherFilters()">
                 <option value="">Semua Status</option>
@@ -1814,6 +2116,7 @@
 
           <div class="toolbar">
             <input type="hidden" id="editingVoucherId" />
+
             <div class="field">
               <input
                 type="text"
@@ -1821,6 +2124,7 @@
                 placeholder="Kode voucher, contoh: DELTA5K"
               />
             </div>
+
             <div class="field">
               <input
                 type="text"
@@ -1835,6 +2139,7 @@
                 placeholder="Brand optional, contoh: Aorus"
               />
             </div>
+
             <div class="field">
               <input
                 type="text"
@@ -1842,6 +2147,7 @@
                 placeholder="Durasi optional, contoh: 6 Jam"
               />
             </div>
+
             <div class="field">
               <input
                 type="text"
@@ -1849,6 +2155,7 @@
                 placeholder="Nominal diskon, contoh: 5000"
               />
             </div>
+
             <div class="field">
               <input
                 type="text"
@@ -1861,13 +2168,13 @@
           <div class="toolbar">
             <div class="btn-group">
               <button id="saveVoucherBtn" onclick="saveVoucher()">
-                💾 Simpan Voucher
+                Simpan Voucher
               </button>
               <button class="ghost-btn" onclick="resetVoucherForm()">
-                🔄 Reset Form
+                Reset Form
               </button>
               <button class="ghost-btn" onclick="loadVouchers()">
-                ↻ Refresh
+                Refresh Voucher
               </button>
             </div>
           </div>
@@ -1877,6 +2184,7 @@
               Memuat daftar voucher...
             </div>
           </div>
+
           <div class="table-wrap">
             <table>
               <thead>
@@ -1889,7 +2197,7 @@
                   <th>Diskon</th>
                   <th>Status</th>
                   <th>Expired</th>
-                  <th style="width: 230px">Aksi</th>
+                  <th style="width: 220px">Aksi</th>
                 </tr>
               </thead>
               <tbody id="voucherTableBody"></tbody>
@@ -1899,13 +2207,6 @@
       </section>
     </main>
 
-    <!-- ===== TOAST CONTAINER (UI only) ===== -->
-    <div id="toast-container"></div>
-
-    <!-- =====================================================================
-       JAVASCRIPT — semua logic server/DB sama persis dengan aslinya.
-       Tambahan UI-only: showToast(), animasi section, badge-update counter
-  ===================================================================== -->
     <script>
       let allOrders = [];
       let selectedOrderIds = new Set();
@@ -1913,49 +2214,26 @@
       let allVouchers = [];
       let allKeys = [];
 
-      /* ── UI ADDITION: lightweight toast (tidak menyentuh server/DB) ── */
-      function showToast(msg, type = "info") {
-        const container = document.getElementById("toast-container");
-        const icons = { info: "💬", success: "✅", error: "❌", warn: "⚠️" };
-        const el = document.createElement("div");
-        el.className = "toast";
-        el.innerHTML = `<span>${icons[type] || "💬"}</span><span>${msg}</span>`;
-        container.appendChild(el);
-        setTimeout(() => {
-          el.classList.add("hide");
-          el.addEventListener("animationend", () => el.remove(), {
-            once: true,
-          });
-        }, 3000);
-      }
-
-      /* ── UI ADDITION: nav badge counter helper (tidak menyentuh server/DB) ── */
-      function setNavBadge(section, count) {
-        const btn = document.querySelector(
-          `.nav-btn[data-section="${section}"]`,
-        );
-        if (!btn) return;
-        const existing = btn.querySelector(".nav-count");
-        if (existing) existing.remove();
-        if (count > 0) {
-          const badge = document.createElement("span");
-          badge.className = "nav-count";
-          badge.style.cssText = `
-          margin-left:auto; background:rgba(251,113,133,0.8);
-          color:#fff; font-size:10px; font-weight:800;
-          padding:1px 6px; border-radius:99px; line-height:1.6;
-        `;
-          badge.textContent = count > 99 ? "99+" : count;
-          btn.appendChild(badge);
-        }
-      }
-
-      /* ─────────────────────────────────────────────────────────────────
-       ORIGINAL LOGIC — TIDAK DIUBAH SAMA SEKALI
-    ───────────────────────────────────────────────────────────────── */
       function toggleSidebar() {
         document.body.classList.toggle("sidebar-collapsed");
       }
+
+      function applyAdminTheme() {
+        const stored = localStorage.getItem("ae_theme");
+        const isDark = stored === "dark";
+        document.body.classList.toggle("dark-theme", isDark);
+        const btn = document.getElementById("theme-toggle");
+        if (btn) btn.innerText = isDark ? "☀️" : "🌙";
+      }
+
+      function toggleAdminTheme() {
+        const isDark = document.body.classList.toggle("dark-theme");
+        localStorage.setItem("ae_theme", isDark ? "dark" : "light");
+        const btn = document.getElementById("theme-toggle");
+        if (btn) btn.innerText = isDark ? "☀️" : "🌙";
+      }
+
+      applyAdminTheme();
 
       function showSection(sectionName, buttonEl = null) {
         const sections = document.querySelectorAll(".admin-section");
@@ -2013,8 +2291,6 @@
         loadAdminStats();
         loadAdminAlerts();
         loadAdminSessions();
-        /* UI only: toast feedback */
-        showToast("Semua data di-refresh 🌊", "info");
       }
 
       function formatRupiah(num) {
@@ -2073,20 +2349,10 @@
 
         document.getElementById("totalKeyStat").innerText = total;
         document.getElementById("availableKeyStat").innerText = available;
-
-        /* UI only: badge on nav */
-        const lowStock = total - available;
-        setNavBadge("keys", available === 0 ? total : 0);
       }
 
       function updateOrderStats(orders) {
         document.getElementById("totalOrderStat").innerText = orders.length;
-
-        /* UI only: badge for pending orders on nav */
-        const pendingCount = orders.filter(
-          (o) => String(o.payment_status || "").toLowerCase() === "pending",
-        ).length;
-        setNavBadge("orders", pendingCount);
       }
 
       function getCsrfToken() {
@@ -2114,12 +2380,11 @@
         display:block;
         padding:14px;
         border-radius:12px;
-        background:#0f172a;
-        border:1px solid rgba(56,189,248,0.2);
-        color:#38bdf8;
+        background:#f0f9ff;
+        border:1px solid #bae6fd;
+        color:#0c4a6e;
         font-weight:800;
         word-break:break-all;
-        font-family:'JetBrains Mono',monospace;
       ">
         ${escapeHtml(value || "-")}
       </code>
@@ -2128,8 +2393,6 @@
           showCancelButton: true,
           cancelButtonText: "Tutup",
           confirmButtonColor: "#0ea5e9",
-          background: "#111620",
-          color: "#e2e8f0",
         }).then((result) => {
           if (result.isConfirmed) {
             copyToClipboard(value || "");
@@ -2164,7 +2427,7 @@
         navigator.clipboard
           .writeText(text)
           .then(() => {
-            showToast("Berhasil dicopy!", "success"); /* UI only */
+            Swal.fire("Berhasil dicopy!");
           })
           .catch(() => {
             Swal.fire("Gagal copy.");
@@ -2382,7 +2645,6 @@
           Swal.fire("Terjadi error server saat menambahkan bulk key");
         }
       }
-
       async function loadUsers() {
         const statusText = document.getElementById("userStatusText");
         const tableBody = document.getElementById("userTableBody");
@@ -2449,8 +2711,6 @@
           confirmButtonText: "Ya, Reset",
           cancelButtonText: "Batal",
           confirmButtonColor: "#0ea5e9",
-          background: "#111620",
-          color: "#e2e8f0",
         });
 
         if (!result.isConfirmed) return;
@@ -2480,8 +2740,6 @@
             confirmButtonText: "Copy Password",
             showCancelButton: true,
             cancelButtonText: "Tutup",
-            background: "#111620",
-            color: "#e2e8f0",
           }).then((copyResult) => {
             if (copyResult.isConfirmed) {
               navigator.clipboard.writeText(data.newPassword || "");
@@ -2502,8 +2760,6 @@
           confirmButtonText: "Ya, Hapus",
           cancelButtonText: "Batal",
           confirmButtonColor: "#fb7185",
-          background: "#111620",
-          color: "#e2e8f0",
         });
 
         if (!result.isConfirmed) return;
@@ -2529,7 +2785,6 @@
           Swal.fire("Terjadi error server saat hapus user");
         }
       }
-
       async function loadOrders() {
         const statusText = document.getElementById("orderStatusText");
         const tableBody = document.getElementById("orderTableBody");
@@ -2865,7 +3120,6 @@
 
         copyToClipboard(text);
       }
-
       async function confirmPayment(orderId) {
         const result = await Swal.fire({
           title: "Konfirmasi Pembayaran?",
@@ -2876,8 +3130,6 @@
           cancelButtonText: "Batal",
           confirmButtonColor: "#0ea5e9",
           cancelButtonColor: "#64748b",
-          background: "#111620",
-          color: "#e2e8f0",
         });
 
         if (!result.isConfirmed) return;
@@ -2901,8 +3153,6 @@
               title: "Gagal",
               text: data.message || "Gagal konfirmasi pembayaran",
               confirmButtonColor: "#0ea5e9",
-              background: "#111620",
-              color: "#e2e8f0",
             });
             return;
           }
@@ -2912,8 +3162,6 @@
             title: "Berhasil",
             text: data.message || "Pembayaran dikonfirmasi",
             confirmButtonColor: "#0ea5e9",
-            background: "#111620",
-            color: "#e2e8f0",
           });
 
           loadOrders();
@@ -2926,12 +3174,9 @@
             title: "Error",
             text: "Terjadi error saat konfirmasi pembayaran",
             confirmButtonColor: "#0ea5e9",
-            background: "#111620",
-            color: "#e2e8f0",
           });
         }
       }
-
       function getFilteredDeletableOrders() {
         const searchValue = document
           .getElementById("orderSearchInput")
@@ -3007,8 +3252,6 @@
             title: "Belum ada order dipilih",
             text: "Pilih order yang ingin dihapus dulu.",
             confirmButtonColor: "#0ea5e9",
-            background: "#111620",
-            color: "#e2e8f0",
           });
           return;
         }
@@ -3022,8 +3265,6 @@
           cancelButtonText: "Batal",
           confirmButtonColor: "#fb7185",
           cancelButtonColor: "#64748b",
-          background: "#111620",
-          color: "#e2e8f0",
         });
 
         if (!result.isConfirmed) return;
@@ -3056,8 +3297,6 @@
           title: "Selesai",
           text: `Berhasil: ${success}, gagal: ${failed}`,
           confirmButtonColor: "#0ea5e9",
-          background: "#111620",
-          color: "#e2e8f0",
         });
 
         loadOrders();
@@ -3074,8 +3313,6 @@
           cancelButtonText: "Batal",
           confirmButtonColor: "#fb7185",
           cancelButtonColor: "#64748b",
-          background: "#111620",
-          color: "#e2e8f0",
         });
 
         if (!result.isConfirmed) return;
@@ -3101,8 +3338,6 @@
               title: "Gagal",
               text: data.message || "Gagal menghapus order",
               confirmButtonColor: "#0ea5e9",
-              background: "#111620",
-              color: "#e2e8f0",
             });
             return;
           }
@@ -3112,8 +3347,6 @@
             title: "Berhasil",
             text: data.message || "Order berhasil dihapus",
             confirmButtonColor: "#0ea5e9",
-            background: "#111620",
-            color: "#e2e8f0",
           });
 
           loadOrders();
@@ -3124,8 +3357,6 @@
             title: "Error",
             text: "Terjadi error server saat menghapus order",
             confirmButtonColor: "#0ea5e9",
-            background: "#111620",
-            color: "#e2e8f0",
           });
         }
       }
@@ -3140,8 +3371,6 @@
           cancelButtonText: "Batal",
           confirmButtonColor: "#fb7185",
           cancelButtonColor: "#64748b",
-          background: "#111620",
-          color: "#e2e8f0",
         });
 
         if (!result.isConfirmed) return;
@@ -3167,8 +3396,6 @@
               title: "Gagal",
               text: data.message || "Gagal menghapus key",
               confirmButtonColor: "#0ea5e9",
-              background: "#111620",
-              color: "#e2e8f0",
             });
             return;
           }
@@ -3178,8 +3405,6 @@
             title: "Berhasil",
             text: data.message || "Key berhasil dihapus",
             confirmButtonColor: "#0ea5e9",
-            background: "#111620",
-            color: "#e2e8f0",
           });
 
           loadKeys();
@@ -3190,8 +3415,6 @@
             title: "Error",
             text: "Terjadi error server saat menghapus key",
             confirmButtonColor: "#0ea5e9",
-            background: "#111620",
-            color: "#e2e8f0",
           });
         }
       }
@@ -3305,9 +3528,6 @@
             data.paid_today || 0;
           document.getElementById("pendingOrderStat").innerText =
             data.pending_orders || 0;
-
-          /* UI only: badge pending on nav */
-          setNavBadge("orders", data.pending_orders || 0);
         } catch (err) {
           console.error("Gagal load admin stats");
         }
@@ -3373,13 +3593,12 @@
           text: "Produk yang dihapus tidak bisa dikembalikan!",
           icon: "warning",
           showCancelButton: true,
-          confirmButtonColor: "#fb7185",
+          confirmButtonColor: "#fb7185", // Warna Torii Red
           cancelButtonColor: "#475569",
           confirmButtonText: "Ya, Hapus!",
           cancelButtonText: "Batal",
-          background: "#111620",
-          color: "#e2e8f0",
         }).then(async (result) => {
+          // Semua logika fetch HARUS masuk ke dalam blok ini
           if (result.isConfirmed) {
             try {
               const res = await fetch(`/products/${id}`, {
@@ -3549,7 +3768,7 @@
         if (filteredProducts.length === 0) {
           tableBody.innerHTML = `
                               <tr>
-                                <td colspan="7" class="empty">Tidak ada produk yang sesuai filter.</td>
+                                <td colspan="9" class="empty">Tidak ada produk yang sesuai filter.</td>
                               </tr>
                             `;
           return;
@@ -3695,7 +3914,7 @@
             return `
         <tr>
           <td>${item.id}</td>
-          <td><b style="color:var(--ocean);font-family:'JetBrains Mono',monospace">${escapeHtml(item.code || "-")}</b></td>
+          <td><b>${escapeHtml(item.code || "-")}</b></td>
           <td>${escapeHtml(item.game_name || "-")}</td>
           <td>${escapeHtml(item.brand_name || "Semua")}</td>
           <td>${escapeHtml(item.duration_name || "Semua")}</td>
@@ -3758,10 +3977,6 @@
         const expiresAt = document
           .getElementById("voucherExpiresAt")
           .value.trim();
-        const editingId = document.getElementById("editingVoucherId").value;
-        const isEditMode = Boolean(editingId);
-        const url = isEditMode ? `/vouchers/${editingId}` : "/vouchers";
-        const method = isEditMode ? "PUT" : "POST";
 
         if (!code || !gameName || !discountAmount) {
           Swal.fire("Kode, nama game, dan nominal diskon wajib diisi.");
@@ -3769,8 +3984,8 @@
         }
 
         try {
-          const res = await fetch(url, {
-            method,
+          const res = await fetch("/vouchers", {
+            method: "POST",
             headers: {
               "Content-Type": "application/json",
               "x-csrf-token": getCsrfToken(),
@@ -3839,8 +4054,6 @@
           confirmButtonText: "Ya, Hapus",
           cancelButtonText: "Batal",
           confirmButtonColor: "#fb7185",
-          background: "#111620",
-          color: "#e2e8f0",
         });
 
         if (!result.isConfirmed) return;
@@ -3880,7 +4093,7 @@
         if (brandInput) brandInput.value = "";
         if (durationInput) durationInput.value = "";
         if (priceInput) priceInput.value = "";
-        if (saveBtn) saveBtn.innerText = "💾 Tambah Produk";
+        if (saveBtn) saveBtn.innerText = "Tambah Produk";
 
         Swal.fire({
           toast: true,
@@ -3890,8 +4103,6 @@
           showConfirmButton: false,
           timer: 1200,
           timerProgressBar: true,
-          background: "#111620",
-          color: "#e2e8f0",
         });
       }
 
@@ -3901,8 +4112,7 @@
         document.getElementById("productBrand").value = brand;
         document.getElementById("productDuration").value = duration;
         document.getElementById("productPrice").value = price;
-        document.getElementById("saveProductBtn").innerText =
-          "💾 Update Produk";
+        document.getElementById("saveProductBtn").innerText = "Update Produk";
 
         window.scrollTo({
           top: 0,
@@ -3945,6 +4155,7 @@
       }
 
       document.addEventListener("DOMContentLoaded", () => {
+        applyAdminTheme();
         loadAdminAlerts();
         const searchInput = document.getElementById("orderSearchInput");
         if (searchInput) {
@@ -3971,7 +4182,6 @@
         showSection("dashboard");
       });
     </script>
-
     <script>
       async function loadAdminProfile() {
         try {
@@ -4003,7 +4213,7 @@
           console.error("Gagal memuat profil admin");
         }
       }
-
+      // --- FITUR TAMBAHAN: Jam & Sapaan Real-Time ---
       function updateClock() {
         const now = new Date();
         const hours = now.getHours();
@@ -4029,8 +4239,9 @@
       }
 
       setInterval(updateClock, 60000);
-      updateClock();
+      updateClock(); // Jalankan pertama kali
       loadAdminProfile();
+      // ----------------------------------------------
     </script>
   </body>
 </html>
