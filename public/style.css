@@ -2434,20 +2434,29 @@ button#buyBtn:disabled {
   line-height: 1.5;
 }
 
-/* ===== FLOATING ELEMENTS ===== */
 .floating-admin-btn {
   position: fixed;
-  bottom: 24px;
   right: 24px;
-  z-index: 90;
+  bottom: 24px;
+  left: auto;
+  top: auto;
+  z-index: 120;
+  width: fit-content;
+  max-width: 220px;
+  min-width: 178px;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
-  padding: 12px 18px;
+  padding: 12px 16px;
   border-radius: var(--radius-pill);
   background: linear-gradient(135deg, #0ea5e9, #0284c7);
-  color: white;
+  color: #ffffff;
   box-shadow: 0 14px 30px rgba(14, 165, 233, 0.4);
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  flex: 0 0 auto;
   transition:
     transform var(--dur-fast) var(--ease-out),
     box-shadow var(--dur-fast) var(--ease-out);
@@ -2461,18 +2470,21 @@ button#buyBtn:disabled {
 .floating-admin-icon {
   width: 32px;
   height: 32px;
+  min-width: 32px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.2);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-size: 16px;
+  flex-shrink: 0;
 }
 
 .floating-admin-content {
   display: flex;
   flex-direction: column;
   line-height: 1.1;
+  min-width: 0;
 }
 
 .floating-admin-content strong {
@@ -2485,13 +2497,42 @@ button#buyBtn:disabled {
   opacity: 0.85;
 }
 
-.floating-admin-badge {
+.floating-admin-badge,
+.floating-admin-online {
   width: 10px;
   height: 10px;
+  min-width: 10px;
   border-radius: 50%;
   background: #22c55e;
   box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6);
   animation: pulseDot 1.6s infinite;
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .floating-admin-btn {
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+    max-width: 56px;
+    right: 16px;
+    bottom: 18px;
+    padding: 0;
+    border-radius: 50%;
+    gap: 0;
+  }
+
+  .floating-admin-icon {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+  }
+
+  .floating-admin-content,
+  .floating-admin-badge,
+  .floating-admin-online {
+    display: none;
+  }
 }
 
 @keyframes pulseDot {

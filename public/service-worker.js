@@ -1,4 +1,4 @@
-const CACHE_NAME = "ae-game-store-v4";
+const CACHE_NAME = "ae-game-store-v5";
 
 const STATIC_ASSETS = [
   "/",
