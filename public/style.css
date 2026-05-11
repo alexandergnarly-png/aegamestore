@@ -1705,6 +1705,7 @@ body.dark-theme .game-card-thumb {
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
+  line-clamp: 2;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
 }
@@ -2434,6 +2435,7 @@ button#buyBtn:disabled {
   line-height: 1.5;
 }
 
+/* ===== FLOATING ELEMENTS ===== */
 .floating-admin-btn {
   position: fixed;
   right: 24px;
@@ -3180,6 +3182,7 @@ body.dark-theme .recent-viewed-title {
 
 .recent-viewed-card .game-card-thumb-overlay strong {
   font-size: 11px;
+  line-clamp: 1;
   -webkit-line-clamp: 1;
 }
 
@@ -3373,24 +3376,6 @@ body.dark-theme .order-step-dot {
   font-weight: 900;
   letter-spacing: 0.4px;
   color: white;
-}
-
-/* ===== FLOATING ADMIN ONLINE DOT ===== */
-.floating-admin-btn {
-  position: relative;
-}
-
-.floating-admin-online {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--success);
-  border: 2px solid white;
-  animation: stockPulse 1.8s ease-in-out infinite;
-  pointer-events: none;
 }
 
 /* ===== EMPTY CTA BUTTON ===== */
