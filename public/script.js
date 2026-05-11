@@ -93,6 +93,38 @@ const translations = {
     chatAdminSub: "Fast response",
     footerTagline:
       "Solusi top-up game tercepat dan terpercaya di Indonesia. Otomatis 24 jam non-stop.",
+    metaGames: "Game tersedia",
+    metaStock: "Stok ready",
+    filterFavorites: "Favorit",
+    sortLabel: "Urutkan",
+    sortDefault: "Rekomendasi",
+    sortCheapest: "Termurah",
+    sortAZ: "A–Z",
+    sortStock: "Stok Terbanyak",
+    recentTitle: "Terakhir dilihat",
+    recentClear: "Bersihkan",
+    cardFromPrice: "Mulai",
+    cardBadgeHot: "HOT",
+    cardBadgeBest: "BEST SELLER",
+    cardBadgeNew: "NEW",
+    cardCategoryMobile: "Mobile",
+    cardCategoryTools: "Tools",
+    cardFavoriteAdd: "Tambah ke favorit",
+    cardFavoriteRemove: "Hapus dari favorit",
+    toastFavoriteAdded: "Ditambahkan ke favorit",
+    toastFavoriteRemoved: "Dihapus dari favorit",
+    toastVoucherCopied: "Kode voucher disalin",
+    toastFiltersReset: "Filter direset",
+    toastRecentCleared: "Riwayat dibersihkan",
+    resetFilterBtn: "Reset filter",
+    emptyFavoritesTitle: "Belum ada game favorit",
+    emptyFavoritesDesc:
+      "Klik ikon ❤️ di kartu game untuk menyimpannya di sini.",
+    orderStep1: "Pilih produk",
+    orderStep2: "Detail player",
+    orderStep3: "Bayar",
+    promoEndsIn: "Berakhir dalam",
+    catalogStockReady: "stok ready",
   },
   en: {
     selectProduct: "Select Product",
@@ -188,6 +220,37 @@ const translations = {
     chatAdminSub: "Fast response",
     footerTagline:
       "The fastest and most trusted game top-up service in Indonesia. Automatic 24/7.",
+    metaGames: "Games available",
+    metaStock: "Stock ready",
+    filterFavorites: "Favorites",
+    sortLabel: "Sort by",
+    sortDefault: "Recommended",
+    sortCheapest: "Cheapest",
+    sortAZ: "A–Z",
+    sortStock: "Most Stock",
+    recentTitle: "Recently viewed",
+    recentClear: "Clear",
+    cardFromPrice: "From",
+    cardBadgeHot: "HOT",
+    cardBadgeBest: "BEST SELLER",
+    cardBadgeNew: "NEW",
+    cardCategoryMobile: "Mobile",
+    cardCategoryTools: "Tools",
+    cardFavoriteAdd: "Add to favorites",
+    cardFavoriteRemove: "Remove from favorites",
+    toastFavoriteAdded: "Added to favorites",
+    toastFavoriteRemoved: "Removed from favorites",
+    toastVoucherCopied: "Voucher code copied",
+    toastFiltersReset: "Filters reset",
+    toastRecentCleared: "History cleared",
+    resetFilterBtn: "Reset filter",
+    emptyFavoritesTitle: "No favorite games yet",
+    emptyFavoritesDesc: "Tap the ❤️ icon on a game card to save it here.",
+    orderStep1: "Pick product",
+    orderStep2: "Player details",
+    orderStep3: "Pay",
+    promoEndsIn: "Ends in",
+    catalogStockReady: "stock ready",
   },
 };
 
@@ -230,6 +293,16 @@ function setLanguage(lang) {
       element.placeholder = translations[lang][key];
     }
   });
+
+  if (
+    typeof renderGames === "function" &&
+    Array.isArray(allProducts) &&
+    allProducts.length
+  ) {
+    try {
+      renderGames();
+    } catch (e) {}
+  }
   const btnId = document.getElementById("btn-id");
   const btnEn = document.getElementById("btn-en");
 
@@ -298,6 +371,86 @@ let selectedProductId = null;
 let appliedVoucherCode = "";
 let selectedProductBasePrice = 0;
 let selectedReviewRating = 5;
+let currentSort = localStorage.getItem("ae_sort") || "default";
+
+const FAVORITES_STORAGE_KEY = "ae_favorite_games";
+const RECENT_STORAGE_KEY = "ae_recent_games";
+const RECENT_MAX = 6;
+
+function readJsonStorage(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return fallback;
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : fallback;
+  } catch (err) {
+    return fallback;
+  }
+}
+
+function writeJsonStorage(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (err) {}
+}
+
+let favoriteGames = readJsonStorage(FAVORITES_STORAGE_KEY, []);
+let recentGames = readJsonStorage(RECENT_STORAGE_KEY, []);
+
+function isFavorite(game) {
+  return favoriteGames.includes(game);
+}
+
+function toggleFavorite(game) {
+  if (!game) return false;
+  const wasFavorite = isFavorite(game);
+  if (wasFavorite) {
+    favoriteGames = favoriteGames.filter((entry) => entry !== game);
+  } else {
+    favoriteGames = [game, ...favoriteGames.filter((entry) => entry !== game)];
+  }
+  writeJsonStorage(FAVORITES_STORAGE_KEY, favoriteGames);
+  return !wasFavorite;
+}
+
+function pushRecentGame(game) {
+  if (!game) return;
+  recentGames = [game, ...recentGames.filter((entry) => entry !== game)].slice(
+    0,
+    RECENT_MAX,
+  );
+  writeJsonStorage(RECENT_STORAGE_KEY, recentGames);
+}
+
+function clearRecentGames() {
+  recentGames = [];
+  writeJsonStorage(RECENT_STORAGE_KEY, recentGames);
+}
+
+function showToast(message, options = {}) {
+  const stack = document.getElementById("toastStack");
+  if (!stack || !message) return;
+
+  const toast = document.createElement("div");
+  toast.className = "toast" + (options.tone ? " toast-" + options.tone : "");
+  toast.setAttribute("role", "status");
+
+  const icon = options.icon || "\u2728";
+  toast.innerHTML = `
+    <span class="toast-icon" aria-hidden="true">${icon}</span>
+    <span class="toast-text">${escapeHtml(message)}</span>
+  `;
+
+  stack.appendChild(toast);
+
+  requestAnimationFrame(() => toast.classList.add("show"));
+
+  const duration = Number(options.duration || 2400);
+  setTimeout(() => {
+    toast.classList.remove("show");
+    setTimeout(() => toast.remove(), 280);
+  }, duration);
+}
 
 const gameGrid = document.getElementById("gameGrid");
 const brandSelect = document.getElementById("brand");
@@ -401,91 +554,349 @@ function isToolsGame(gameName) {
   );
 }
 
-function getVisibleGames() {
+function getGameProducts(game) {
+  return allProducts.filter((item) => item.game === game);
+}
+
+function getGameStock(game) {
+  return getGameProducts(game).reduce(
+    (total, item) => total + Number(item.available_keys || 0),
+    0,
+  );
+}
+
+function getGameMinPrice(game) {
+  const prices = getGameProducts(game)
+    .map((item) => Number(item.price || 0))
+    .filter((price) => price > 0);
+  return prices.length ? Math.min(...prices) : 0;
+}
+
+function getGameBrandCount(game) {
+  return new Set(getGameProducts(game).map((item) => item.brand)).size;
+}
+
+function getGameCreatedAt(game) {
+  const dates = getGameProducts(game)
+    .map((item) => Date.parse(item.created_at || ""))
+    .filter((value) => Number.isFinite(value));
+  return dates.length ? Math.max(...dates) : 0;
+}
+
+function getGameBadgeKey(game) {
+  if (!game) return "";
+  const stock = getGameStock(game);
+  const brandCount = getGameBrandCount(game);
+  const createdAt = getGameCreatedAt(game);
+  const now = Date.now();
+  const isNew = createdAt && now - createdAt < 1000 * 60 * 60 * 24 * 30;
+
+  if (brandCount >= 2 && stock >= 30) return "cardBadgeBest";
+  if (stock >= 50) return "cardBadgeHot";
+  if (isNew) return "cardBadgeNew";
+  return "";
+}
+
+function getGameCategoryLabel(game) {
+  return isToolsGame(game)
+    ? translations[currentLanguage].cardCategoryTools
+    : translations[currentLanguage].cardCategoryMobile;
+}
+
+function getCategoryGames(category) {
   const uniqueGames = [...new Set(allProducts.map((item) => item.game))];
-
-  if (currentCategory === "Tools") {
-    return uniqueGames.filter((game) => isToolsGame(game));
-  }
-
-  if (currentCategory === "Mobile") {
+  if (category === "Tools") return uniqueGames.filter(isToolsGame);
+  if (category === "Mobile")
     return uniqueGames.filter((game) => !isToolsGame(game));
-  }
-
+  if (category === "Favorites")
+    return uniqueGames.filter((game) => isFavorite(game));
   return uniqueGames;
 }
 
+function getVisibleGames() {
+  const baseGames = getCategoryGames(currentCategory);
+  const sorted = [...baseGames];
+
+  if (currentSort === "price-asc") {
+    sorted.sort((a, b) => {
+      const priceA = getGameMinPrice(a) || Number.POSITIVE_INFINITY;
+      const priceB = getGameMinPrice(b) || Number.POSITIVE_INFINITY;
+      return priceA - priceB;
+    });
+  } else if (currentSort === "az") {
+    sorted.sort((a, b) => String(a).localeCompare(String(b)));
+  } else if (currentSort === "stock") {
+    sorted.sort((a, b) => getGameStock(b) - getGameStock(a));
+  } else {
+    sorted.sort((a, b) => {
+      const stockA = getGameStock(a);
+      const stockB = getGameStock(b);
+      if (stockA > 0 && stockB <= 0) return -1;
+      if (stockB > 0 && stockA <= 0) return 1;
+      const favA = isFavorite(a) ? 1 : 0;
+      const favB = isFavorite(b) ? 1 : 0;
+      if (favA !== favB) return favB - favA;
+      return String(a).localeCompare(String(b));
+    });
+  }
+
+  return sorted;
+}
+
+function normalizeImageId(game) {
+  return (
+    String(game || "game")
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, "")
+      .slice(0, 8) || "game"
+  );
+}
+
+function getGameInitials(game) {
+  const cleaned = String(game || "")
+    .replace(/[^A-Za-z0-9\s]/g, " ")
+    .trim();
+  if (!cleaned) return "AE";
+  const parts = cleaned.split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+  return cleaned.slice(0, 2).toUpperCase();
+}
+
+function renderGameCardThumb(game) {
+  const imageUrl = getGameImage(game);
+  const initials = getGameInitials(game);
+  const id = normalizeImageId(game);
+  return `
+    <div class="game-card-thumb">
+      <div class="game-card-thumb-fallback" data-game-key="${escapeHtml(id)}">
+        <span>${escapeHtml(initials)}</span>
+      </div>
+      <img
+        loading="lazy"
+        decoding="async"
+        src="${escapeHtml(imageUrl)}"
+        alt="${escapeHtml(game)}"
+        onerror="this.style.display='none'; this.previousElementSibling?.classList.add('show');"
+        onload="this.previousElementSibling?.classList.remove('show');"
+      >
+      <div class="game-card-thumb-overlay">
+        <strong>${escapeHtml(game)}</strong>
+      </div>
+    </div>
+  `;
+}
+
+function updateCatalogMeta() {
+  const uniqueGames = [...new Set(allProducts.map((item) => item.game))];
+  const totalStock = allProducts.reduce(
+    (total, item) => total + Number(item.available_keys || 0),
+    0,
+  );
+
+  const gameCount = document.getElementById("catalogGameCount");
+  const stockCount = document.getElementById("catalogStockCount");
+  if (gameCount) gameCount.textContent = String(uniqueGames.length);
+  if (stockCount) stockCount.textContent = totalStock.toLocaleString("id-ID");
+
+  document.querySelectorAll(".pill-count").forEach((node) => {
+    const target = node.getAttribute("data-count-for");
+    if (!target) return;
+    const count = getCategoryGames(target).length;
+    node.textContent = count > 0 ? String(count) : "";
+    node.classList.toggle("has-count", count > 0);
+  });
+}
+
+function renderRecentViewed() {
+  const rail = document.getElementById("recentViewedRail");
+  const track = document.getElementById("recentViewedTrack");
+  if (!rail || !track) return;
+
+  const available = recentGames.filter((game) =>
+    allProducts.some((item) => item.game === game),
+  );
+
+  if (available.length === 0) {
+    rail.hidden = true;
+    track.innerHTML = "";
+    return;
+  }
+
+  rail.hidden = false;
+  track.innerHTML = available
+    .map(
+      (game) => `
+      <button
+        type="button"
+        class="recent-viewed-card"
+        data-recent-game="${escapeHtml(game)}"
+      >
+        ${renderGameCardThumb(game)}
+      </button>
+    `,
+    )
+    .join("");
+
+  track.querySelectorAll("[data-recent-game]").forEach((node) => {
+    node.addEventListener("click", () => {
+      const game = node.getAttribute("data-recent-game");
+      if (game) openOrderModal(game);
+    });
+  });
+}
+
+function renderEmptyCatalog() {
+  const t = translations[currentLanguage];
+  const isFavoritesView = currentCategory === "Favorites";
+
+  const emptyTitle = isFavoritesView
+    ? t.emptyFavoritesTitle
+    : currentLanguage === "en"
+      ? "No products in this category yet"
+      : "Belum ada produk di kategori ini";
+
+  const emptyDesc = isFavoritesView
+    ? t.emptyFavoritesDesc
+    : currentLanguage === "en"
+      ? "Try another category or contact admin for product availability."
+      : "Coba kategori lain atau hubungi admin untuk cek ketersediaan produk.";
+
+  const cta = isFavoritesView
+    ? `<button type="button" class="empty-cta-btn" onclick="resetCatalogFilters()">${escapeHtml(t.resetFilterBtn)}</button>`
+    : `<a href="https://t.me/aegamestore" target="_blank" rel="noopener noreferrer">Chat Admin</a>`;
+
+  gameGrid.innerHTML = `
+    <div class="empty-category-card">
+      <div class="empty-category-icon">${isFavoritesView ? "\u2764\ufe0f" : "\ud83c\udf0a"}</div>
+      <h3>${escapeHtml(emptyTitle)}</h3>
+      <p>${escapeHtml(emptyDesc)}</p>
+      ${cta}
+    </div>
+  `;
+}
+
 function renderGames() {
+  if (!gameGrid) return;
   gameGrid.innerHTML = "";
+  updateCatalogMeta();
+  renderRecentViewed();
 
   const visibleGames = getVisibleGames();
 
   if (visibleGames.length === 0) {
-    const emptyTitle =
-      currentLanguage === "en"
-        ? "No products in this category yet"
-        : "Belum ada produk di kategori ini";
-
-    const emptyDesc =
-      currentLanguage === "en"
-        ? "Try another category or contact admin for product availability."
-        : "Coba kategori lain atau hubungi admin untuk cek ketersediaan produk.";
-
-    const emptyBtn = currentLanguage === "en" ? "Chat Admin" : "Chat Admin";
-
-    gameGrid.innerHTML = `
-    <div class="empty-category-card">
-      <div class="empty-category-icon">🌊</div>
-      <h3>${emptyTitle}</h3>
-      <p>${emptyDesc}</p>
-      <a href="https://t.me/aegamestore" target="_blank">${emptyBtn}</a>
-    </div>
-  `;
+    renderEmptyCatalog();
     return;
   }
+
+  const t = translations[currentLanguage];
 
   visibleGames.forEach((game) => {
     const card = document.createElement("div");
     card.className = "game-card";
+    card.setAttribute("data-game", game);
 
-    const imageUrl = getGameImage(game);
-    const gameProducts = allProducts.filter((item) => item.game === game);
-    const totalStock = gameProducts.reduce(
-      (total, item) => total + Number(item.available_keys || 0),
-      0,
-    );
-    const stockLabel =
-      totalStock > 0
-        ? currentLanguage === "en"
-          ? `${totalStock} stock ready`
-          : `${totalStock} stok ready`
-        : translations[currentLanguage].outOfStockLabel;
+    const totalStock = getGameStock(game);
+    const minPrice = getGameMinPrice(game);
+    const stockReady = totalStock > 0;
+    const stockLabel = stockReady
+      ? `${totalStock.toLocaleString("id-ID")} ${t.catalogStockReady}`
+      : t.outOfStockLabel;
+
+    const badgeKey = stockReady ? getGameBadgeKey(game) : "";
+    const badgeLabel = badgeKey ? t[badgeKey] : "";
+    const categoryLabel = getGameCategoryLabel(game);
+    const fav = isFavorite(game);
 
     card.innerHTML = `
-  <img src="${imageUrl}" alt="${game}" onerror="this.src='${fallbackImage}'">
-  <span>${game}</span>
-  <div class="game-card-meta">
-    <b class="${totalStock > 0 ? "ready" : "empty"}">${stockLabel}</b>
-  </div>
-`;
+      ${renderGameCardThumb(game)}
+      <div class="game-card-top">
+        <span class="game-card-chip">${escapeHtml(categoryLabel)}</span>
+        ${
+          badgeKey
+            ? `<span class="game-card-ribbon ribbon-${badgeKey}">${escapeHtml(badgeLabel)}</span>`
+            : ""
+        }
+      </div>
+      <button
+        type="button"
+        class="game-card-fav ${fav ? "is-active" : ""}"
+        aria-pressed="${fav ? "true" : "false"}"
+        aria-label="${escapeHtml(fav ? t.cardFavoriteRemove : t.cardFavoriteAdd)}"
+      >
+        <span aria-hidden="true">${fav ? "\u2764\ufe0f" : "\ud83e\udd0d"}</span>
+      </button>
+      <div class="game-card-body">
+        <span class="game-card-title">${escapeHtml(game)}</span>
+        <div class="game-card-meta">
+          <span class="game-card-price">
+            ${
+              minPrice > 0
+                ? `<small>${escapeHtml(t.cardFromPrice)}</small><b>${formatRupiah(minPrice)}</b>`
+                : `<b>${escapeHtml(stockReady ? "—" : t.outOfStockLabel)}</b>`
+            }
+          </span>
+          <span class="game-card-stock ${stockReady ? "ready" : "empty"}">
+            <span class="game-card-stock-dot" aria-hidden="true"></span>
+            ${escapeHtml(stockLabel)}
+          </span>
+        </div>
+      </div>
+    `;
 
     if (game === selectedGame) {
       card.classList.add("active");
     }
 
-    card.onclick = async () => {
-      card.style.pointerEvents = "none";
+    if (!stockReady) {
+      card.classList.add("is-out-of-stock");
+    }
 
+    const favButton = card.querySelector(".game-card-fav");
+    if (favButton) {
+      favButton.addEventListener("click", (event) => {
+        event.stopPropagation();
+        const nowFavorite = toggleFavorite(game);
+        showToast(
+          nowFavorite
+            ? translations[currentLanguage].toastFavoriteAdded
+            : translations[currentLanguage].toastFavoriteRemoved,
+          { icon: nowFavorite ? "\u2764\ufe0f" : "\ud83d\udc94" },
+        );
+        renderGames();
+      });
+    }
+
+    card.addEventListener("click", async () => {
+      card.style.pointerEvents = "none";
       try {
         await openOrderModal(game);
       } finally {
         card.style.pointerEvents = "auto";
       }
-    };
+    });
 
     gameGrid.appendChild(card);
   });
 }
+
+function resetCatalogFilters() {
+  currentCategory = "all";
+  document.querySelectorAll(".filter-pills .pill").forEach((pill) => {
+    pill.classList.toggle(
+      "active",
+      pill.getAttribute("data-category") === "all",
+    );
+  });
+  const search = document.getElementById("gameSearch");
+  if (search) search.value = "";
+  renderGames();
+  showToast(translations[currentLanguage].toastFiltersReset, {
+    icon: "\ud83d\udd04",
+  });
+}
+window.resetCatalogFilters = resetCatalogFilters;
 
 async function openOrderModal(game) {
   const voucherInput = document.getElementById("voucherCodeInput");
@@ -531,8 +942,10 @@ async function openOrderModal(game) {
   }
 
   selectedGame = game;
+  pushRecentGame(game);
   renderGames();
   loadBrands();
+  setOrderStep(1);
 
   const modal = document.getElementById("orderModal");
   const title = document.getElementById("modalGameTitle");
@@ -544,6 +957,40 @@ async function openOrderModal(game) {
   if (modal) {
     modal.classList.add("show");
     document.body.style.overflow = "hidden";
+  }
+
+  setTimeout(() => {
+    const productEl = document.getElementById("product");
+    if (productEl && !productEl.disabled) {
+      try {
+        productEl.focus({ preventScroll: true });
+      } catch (err) {}
+    }
+  }, 220);
+}
+
+function setOrderStep(step) {
+  const steps = document.querySelectorAll("#orderSteps .order-step");
+  if (!steps.length) return;
+  steps.forEach((node, index) => {
+    const stepNumber = index + 1;
+    node.classList.toggle("is-active", stepNumber === step);
+    node.classList.toggle("is-done", stepNumber < step);
+  });
+}
+
+function updateOrderStepFromForm() {
+  const name = document.getElementById("name")?.value.trim() || "";
+  const contact = document.getElementById("contact")?.value.trim() || "";
+  const productEl = document.getElementById("product");
+  const hasProduct = Boolean(productEl?.value);
+
+  if (name && contact && hasProduct) {
+    setOrderStep(3);
+  } else if (hasProduct) {
+    setOrderStep(2);
+  } else {
+    setOrderStep(1);
   }
 }
 
@@ -990,11 +1437,17 @@ function filterCategory(cat, btnElement) {
   currentCategory = cat || "all";
 
   document
-    .querySelectorAll(".pill")
+    .querySelectorAll(".filter-pills .pill")
     .forEach((btn) => btn.classList.remove("active"));
 
   if (btnElement) {
     btnElement.classList.add("active");
+  } else {
+    document
+      .querySelectorAll(
+        `.filter-pills .pill[data-category="${currentCategory}"]`,
+      )
+      .forEach((btn) => btn.classList.add("active"));
   }
 
   renderGames();
@@ -1656,15 +2109,112 @@ document.addEventListener("DOMContentLoaded", () => {
   sectionMap.forEach((_, section) => observer.observe(section));
 });
 
+// --- CATALOG ENHANCEMENTS (sort, shortcuts, recent rail, modal step tracking) ---
+document.addEventListener("DOMContentLoaded", () => {
+  const sortSelect = document.getElementById("sortSelect");
+  if (sortSelect) {
+    sortSelect.value = currentSort;
+    sortSelect.addEventListener("change", () => {
+      currentSort = sortSelect.value || "default";
+      localStorage.setItem("ae_sort", currentSort);
+      renderGames();
+    });
+  }
+
+  const recentClearBtn = document.getElementById("recentViewedClear");
+  if (recentClearBtn) {
+    recentClearBtn.addEventListener("click", () => {
+      clearRecentGames();
+      renderGames();
+      showToast(translations[currentLanguage].toastRecentCleared, {
+        icon: "\ud83e\uddf9",
+      });
+    });
+  }
+
+  const searchInput = document.getElementById("gameSearch");
+  document.addEventListener("keydown", (event) => {
+    if (!searchInput) return;
+    const target = event.target;
+    const tag = target?.tagName?.toLowerCase();
+    const isTyping =
+      tag === "input" || tag === "textarea" || target?.isContentEditable;
+
+    if (event.key === "/" && !isTyping) {
+      event.preventDefault();
+      searchInput.focus();
+      searchInput.select();
+      return;
+    }
+
+    if (event.key === "Escape" && target === searchInput) {
+      searchInput.value = "";
+      searchGame();
+    }
+  });
+
+  const productEl = document.getElementById("product");
+  const brandEl = document.getElementById("brand");
+  const nameEl = document.getElementById("name");
+  const contactEl = document.getElementById("contact");
+  [productEl, brandEl, nameEl, contactEl].forEach((node) => {
+    if (!node) return;
+    const evt = node.tagName === "SELECT" ? "change" : "input";
+    node.addEventListener(evt, updateOrderStepFromForm);
+  });
+
+  startPromoCountdown();
+});
+
+function startPromoCountdown() {
+  const node = document.getElementById("promoCountdownTime");
+  if (!node) return;
+
+  let endTime = Number(localStorage.getItem("ae_promo_end") || 0);
+  const now = Date.now();
+  if (!endTime || endTime <= now) {
+    endTime = now + 24 * 60 * 60 * 1000;
+    localStorage.setItem("ae_promo_end", String(endTime));
+  }
+
+  const tick = () => {
+    const diff = Math.max(0, endTime - Date.now());
+    const h = Math.floor(diff / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    const pad = (n) => String(n).padStart(2, "0");
+    node.textContent = `${pad(h)}:${pad(m)}:${pad(s)}`;
+    if (diff <= 0) {
+      endTime = Date.now() + 24 * 60 * 60 * 1000;
+      localStorage.setItem("ae_promo_end", String(endTime));
+    }
+  };
+
+  tick();
+  setInterval(tick, 1000);
+}
+
 function searchGame() {
   const input =
     document.getElementById("gameSearch")?.value.toLowerCase() || "";
   const cards = document.querySelectorAll(".game-card");
+  let visibleCount = 0;
 
   cards.forEach((card) => {
-    const gameName = card.querySelector("span")?.innerText.toLowerCase() || "";
-    card.style.display = gameName.includes(input) ? "flex" : "none";
+    const gameName = (
+      card.getAttribute("data-game") ||
+      card.querySelector(".game-card-title")?.innerText ||
+      ""
+    ).toLowerCase();
+    const matches = gameName.includes(input);
+    card.style.display = matches ? "flex" : "none";
+    if (matches) visibleCount += 1;
   });
+
+  const emptyHint = document.getElementById("searchEmptyHint");
+  if (emptyHint) {
+    emptyHint.hidden = visibleCount !== 0 || !input;
+  }
 }
 
 function createSakura() {
