@@ -707,7 +707,22 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.static("public"));
+app.use(
+  express.static("public", {
+    etag: true,
+    maxAge: 0,
+    setHeaders: (res, filePath) => {
+      if (
+        filePath.endsWith(".html") ||
+        filePath.endsWith(".css") ||
+        filePath.endsWith(".js") ||
+        filePath.endsWith("service-worker.js")
+      ) {
+        res.setHeader("Cache-Control", "no-cache");
+      }
+    },
+  }),
+);
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });

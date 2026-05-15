@@ -1,9 +1,9 @@
-const CACHE_NAME = "ae-game-store-v14";
+const CACHE_NAME = "ae-game-store-auto-v1";
 
 const STATIC_ASSETS = [
   "/",
-  "/style.css?v=45",
-  "/script.js?v=43",
+  "/style.css",
+  "/script.js",
   "/manifest.json",
   "/offline.html",
 ];
@@ -26,26 +26,19 @@ self.addEventListener("activate", (event) => {
             .filter((cacheName) => cacheName !== CACHE_NAME)
             .map((cacheName) => caches.delete(cacheName)),
         ),
-      ),
+      )
+      .then(() => self.clients.claim()),
   );
-
-  self.clients.claim();
 });
 
 self.addEventListener("fetch", (event) => {
-  const requestUrl = new URL(event.request.url);
+  const request = event.request;
+  const requestUrl = new URL(request.url);
 
-  if (event.request.method !== "GET") {
-    return;
-  }
+  if (request.method !== "GET") return;
+  if (requestUrl.origin !== self.location.origin) return;
 
-  // Jangan ganggu request gambar/file dari domain luar
-  if (requestUrl.origin !== self.location.origin) {
-    return;
-  }
-
-  // Jangan cache API/data dinamis tapi tetap fallback offline buat navigasi
-  if (
+  const isDynamicRequest =
     requestUrl.pathname.startsWith("/public-products") ||
     requestUrl.pathname.startsWith("/public-vouchers") ||
     requestUrl.pathname.startsWith("/trending-products") ||
@@ -54,23 +47,30 @@ self.addEventListener("fetch", (event) => {
     requestUrl.pathname.startsWith("/recent-purchases") ||
     requestUrl.pathname.startsWith("/voucher-preview") ||
     requestUrl.pathname.startsWith("/create-order") ||
-    requestUrl.pathname.startsWith("/user/")
-  ) {
-    return;
-  }
+    requestUrl.pathname.startsWith("/user/") ||
+    requestUrl.pathname.startsWith("/orders") ||
+    requestUrl.pathname.startsWith("/order/");
 
-  if (event.request.mode === "navigate") {
+  if (isDynamicRequest) return;
+
+  if (request.mode === "navigate") {
     event.respondWith(
-      fetch(event.request).catch(() =>
-        caches
-          .match(event.request)
-          .then((cached) => cached || caches.match("/offline.html")),
-      ),
+      fetch(request).catch(() => caches.match("/offline.html")),
     );
     return;
   }
 
   event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request)),
+    fetch(request)
+      .then((response) => {
+        const responseClone = response.clone();
+
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(request, responseClone);
+        });
+
+        return response;
+      })
+      .catch(() => caches.match(request)),
   );
 });
