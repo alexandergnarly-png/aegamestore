@@ -3476,11 +3476,13 @@ window.addEventListener("load", () => {
       } catch (err) {}
       state.deferredInstallPrompt = null;
       banner.hidden = true;
+      document.body.classList.remove("install-prompt-open");
       localStorage.setItem(STORAGE_KEYS.installDismissed, String(Date.now()));
     });
 
     closeBtn.addEventListener("click", () => {
       banner.hidden = true;
+      document.body.classList.remove("install-prompt-open");
       localStorage.setItem(STORAGE_KEYS.installDismissed, String(Date.now()));
     });
 

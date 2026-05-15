@@ -1,5 +1,5 @@
 /* =========================================================
-   AE Game Store — UI/UX v35
+   AE Game Store — UI/UX v42
    Notes: This file ONLY changes presentation. All selectors
    referenced by script.js and index.html are preserved
    exactly so server / database integration keeps working.
@@ -4579,5 +4579,31 @@ body.dark-theme .order-step-dot {
 @media (max-width: 768px) {
   .genre-pills {
     display: none !important;
+  }
+}
+/* ===== FIX INSTALL PROMPT CLOSE STATE ===== */
+.install-prompt-banner[hidden] {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  body.install-prompt-open .floating-admin-btn {
+    display: none !important;
+  }
+
+  .install-prompt-banner {
+    left: 12px;
+    right: 12px;
+    bottom: 92px;
+    max-width: none;
+    z-index: 180;
+  }
+
+  .install-prompt-close {
+    width: 36px;
+    height: 36px;
+    top: -16px;
+    right: -8px;
+    z-index: 5;
   }
 }
