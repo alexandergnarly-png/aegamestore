@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Offline — AE Game Store</title>
+    <meta name="theme-color" content="#0ea5e9" />
+    <link rel="manifest" href="/manifest.json" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f0f9ff;
+        --card: rgba(255, 255, 255, 0.92);
+        --ocean: #0ea5e9;
+        --sakura: #fbcfe8;
+        --ink: #0f172a;
+        --muted: #64748b;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family:
+          "Plus Jakarta Sans",
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background: linear-gradient(135deg, #f0f9ff 0%, #fef6f9 100%);
+        color: var(--ink);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        text-align: center;
+      }
+      .offline-card {
+        background: var(--card);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(14, 165, 233, 0.12);
+        border-radius: 24px;
+        padding: 36px 28px;
+        max-width: 440px;
+        width: 100%;
+        box-shadow: 0 24px 48px -24px rgba(14, 165, 233, 0.25);
+      }
+      .offline-icon {
+        font-size: 64px;
+        margin-bottom: 16px;
+        animation: wave 2.4s ease-in-out infinite;
+        display: inline-block;
+      }
+      @keyframes wave {
+        0%,
+        100% {
+          transform: rotate(-6deg);
+        }
+        50% {
+          transform: rotate(6deg);
+        }
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 26px;
+        font-weight: 800;
+        color: var(--ocean);
+      }
+      p {
+        margin: 0 0 20px;
+        color: var(--muted);
+        line-height: 1.5;
+        font-size: 15px;
+      }
+      .offline-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      button,
+      a.btn {
+        appearance: none;
+        border: none;
+        font-family: inherit;
+        font-size: 14px;
+        font-weight: 700;
+        padding: 12px 22px;
+        border-radius: 999px;
+        cursor: pointer;
+        text-decoration: none;
+        transition:
+          transform 0.15s ease,
+          box-shadow 0.15s ease;
+      }
+      .btn-primary {
+        background: var(--ocean);
+        color: #fff;
+        box-shadow: 0 12px 24px -12px rgba(14, 165, 233, 0.6);
+      }
+      .btn-primary:hover {
+        transform: translateY(-2px);
+      }
+      .btn-secondary {
+        background: rgba(14, 165, 233, 0.1);
+        color: var(--ocean);
+      }
+      .favorites-section {
+        margin-top: 28px;
+        text-align: left;
+      }
+      .favorites-section h2 {
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        margin: 0 0 10px;
+      }
+      .favorites-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .favorite-item {
+        padding: 10px 14px;
+        background: rgba(14, 165, 233, 0.06);
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--ocean);
+      }
+      .favorites-empty {
+        color: var(--muted);
+        font-size: 13px;
+        font-style: italic;
+      }
+      @media (prefers-color-scheme: dark) {
+        body {
+          background: linear-gradient(135deg, #0c1a2c 0%, #1a1428 100%);
+          color: #e2e8f0;
+        }
+        .offline-card {
+          background: rgba(15, 23, 42, 0.85);
+          border-color: rgba(14, 165, 233, 0.2);
+        }
+        p {
+          color: #94a3b8;
+        }
+        .favorite-item {
+          background: rgba(14, 165, 233, 0.15);
+          color: #7dd3fc;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="offline-card">
+      <div class="offline-icon" aria-hidden="true">🌊</div>
+      <h1>Sinyal lagi turun</h1>
+      <p>
+        Koneksi internetmu terputus. Cek WiFi atau data seluler, lalu coba lagi.
+        Halaman ini tersedia offline berkat AE Game Store PWA.
+      </p>
+      <div class="offline-actions">
+        <button class="btn-primary" onclick="window.location.reload()">
+          🔄 Coba Lagi
+        </button>
+        <a class="btn btn-secondary" href="/">🏠 Beranda</a>
+      </div>
+
+      <div class="favorites-section" id="favoritesSection" hidden>
+        <h2>❤️ Game favoritmu</h2>
+        <div class="favorites-list" id="favoritesList"></div>
+      </div>
+    </div>
+
+    <script>
+      try {
+        var favs = JSON.parse(localStorage.getItem("ae_favorites") || "[]");
+        if (Array.isArray(favs) && favs.length > 0) {
+          var section = document.getElementById("favoritesSection");
+          var list = document.getElementById("favoritesList");
+          if (section && list) {
+            section.hidden = false;
+            list.innerHTML = favs
+              .slice(0, 6)
+              .map(function (g) {
+                var safe = String(g)
+                  .replace(/&/g, "&amp;")
+                  .replace(/</g, "&lt;")
+                  .replace(/>/g, "&gt;");
+                return '<div class="favorite-item">🎮 ' + safe + "</div>";
+              })
+              .join("");
+          }
+        }
+      } catch (e) {}
+    </script>
+  </body>
+</html>

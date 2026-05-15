@@ -1,10 +1,11 @@
-const CACHE_NAME = "ae-game-store-v9";
+const CACHE_NAME = "ae-game-store-v10";
 
 const STATIC_ASSETS = [
   "/",
-  "/style.css?v=40",
-  "/script.js?v=38",
+  "/style.css?v=41",
+  "/script.js?v=39",
   "/manifest.json",
+  "/offline.html",
 ];
 
 self.addEventListener("install", (event) => {
@@ -43,15 +44,29 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Jangan cache API/data dinamis
+  // Jangan cache API/data dinamis tapi tetap fallback offline buat navigasi
   if (
     requestUrl.pathname.startsWith("/public-products") ||
+    requestUrl.pathname.startsWith("/public-vouchers") ||
+    requestUrl.pathname.startsWith("/trending-products") ||
     requestUrl.pathname.startsWith("/api/") ||
     requestUrl.pathname.startsWith("/reviews") ||
     requestUrl.pathname.startsWith("/recent-purchases") ||
     requestUrl.pathname.startsWith("/voucher-preview") ||
-    requestUrl.pathname.startsWith("/create-order")
+    requestUrl.pathname.startsWith("/create-order") ||
+    requestUrl.pathname.startsWith("/user/")
   ) {
+    return;
+  }
+
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      fetch(event.request).catch(() =>
+        caches
+          .match(event.request)
+          .then((cached) => cached || caches.match("/offline.html")),
+      ),
+    );
     return;
   }
 

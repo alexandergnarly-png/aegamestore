@@ -125,6 +125,51 @@ const translations = {
     orderStep3: "Bayar",
     promoEndsIn: "Berakhir dalam",
     catalogStockReady: "stok ready",
+    trendingTitle: "🔥 Lagi Naik Daun",
+    trendingSub: "Top game minggu ini",
+    trendingEmpty: "Belum ada data trending",
+    quickBuyTitle: "Beli Lagi",
+    quickBuySub: "Order terakhir kamu — 1 klik checkout",
+    quickBuyAction: "Beli lagi",
+    recommendationTitle: "Mungkin Kamu Suka",
+    searchHistoryTitle: "Pencarian terakhir",
+    searchHistoryClear: "Hapus",
+    searchEmptyHint: "Mulai ketik untuk cari game",
+    genreLabel: "Genre",
+    genreAll: "Semua genre",
+    genreMOBA: "MOBA",
+    genreBR: "Battle Royale",
+    genreFPS: "FPS",
+    genreMMORPG: "MMORPG",
+    genreSandbox: "Sandbox",
+    genreCasual: "Casual",
+    genreSimulation: "Simulation",
+    genreCardGame: "Card Game",
+    genreTools: "Tools",
+    contactValidWA: "Nomor WhatsApp terdeteksi",
+    contactValidEmail: "Email terdeteksi",
+    contactInvalid: "Isi nomor WA atau email",
+    deliveryAutoLabel: "Auto",
+    deliveryAutoDesc: "Kirim otomatis ≤ 1 menit setelah bayar",
+    deliveryManualLabel: "Manual",
+    deliveryManualDesc: "Admin proses manual ≤ 30 menit",
+    autoVoucherApplied: "otomatis terpasang",
+    autoVoucherSavings: "Hemat",
+    paymentPreviewLabel: "Bayar pakai:",
+    resumeCartTitle: "Pesananmu masih ada",
+    resumeCartAction: "Lanjut Beli",
+    bottomNavHome: "Beranda",
+    bottomNavCatalog: "Katalog",
+    bottomNavHistory: "Riwayat",
+    bottomNavAccount: "Akun",
+    pullReleaseHint: "Lepas untuk refresh",
+    pullToRefreshHint: "Tarik untuk refresh",
+    pullRefreshingHint: "Memuat ulang...",
+    installAppTitle: "Install AE Game Store",
+    installAppDesc: "Akses cepat, notif promo, hemat data",
+    installAppBtn: "Install",
+    detailRatingLabel: "Rating",
+    detailViewBtn: "Lihat Detail",
   },
   en: {
     selectProduct: "Select Product",
@@ -251,6 +296,51 @@ const translations = {
     orderStep3: "Pay",
     promoEndsIn: "Ends in",
     catalogStockReady: "stock ready",
+    trendingTitle: "🔥 Trending Now",
+    trendingSub: "Top games this week",
+    trendingEmpty: "No trending data yet",
+    quickBuyTitle: "Buy Again",
+    quickBuySub: "Your recent orders — 1-click checkout",
+    quickBuyAction: "Buy again",
+    recommendationTitle: "You Might Also Like",
+    searchHistoryTitle: "Recent searches",
+    searchHistoryClear: "Clear",
+    searchEmptyHint: "Start typing to search games",
+    genreLabel: "Genre",
+    genreAll: "All genres",
+    genreMOBA: "MOBA",
+    genreBR: "Battle Royale",
+    genreFPS: "FPS",
+    genreMMORPG: "MMORPG",
+    genreSandbox: "Sandbox",
+    genreCasual: "Casual",
+    genreSimulation: "Simulation",
+    genreCardGame: "Card Game",
+    genreTools: "Tools",
+    contactValidWA: "WhatsApp number detected",
+    contactValidEmail: "Email detected",
+    contactInvalid: "Enter WA number or email",
+    deliveryAutoLabel: "Auto",
+    deliveryAutoDesc: "Delivered automatically ≤ 1 minute after payment",
+    deliveryManualLabel: "Manual",
+    deliveryManualDesc: "Admin processes manually ≤ 30 minutes",
+    autoVoucherApplied: "auto-applied",
+    autoVoucherSavings: "You save",
+    paymentPreviewLabel: "Pay with:",
+    resumeCartTitle: "Your order is saved",
+    resumeCartAction: "Resume",
+    bottomNavHome: "Home",
+    bottomNavCatalog: "Catalog",
+    bottomNavHistory: "History",
+    bottomNavAccount: "Account",
+    pullReleaseHint: "Release to refresh",
+    pullToRefreshHint: "Pull to refresh",
+    pullRefreshingHint: "Refreshing...",
+    installAppTitle: "Install AE Game Store",
+    installAppDesc: "Quick access, promo alerts, save data",
+    installAppBtn: "Install",
+    detailRatingLabel: "Rating",
+    detailViewBtn: "View Details",
   },
 };
 
@@ -2355,3 +2445,1226 @@ window.addEventListener("load", () => {
     });
   }
 });
+
+// ============================================================
+// AE Game Store v2 — Batch B / D / F feature module
+// All features are additive and isolated. Existing flows untouched.
+// ============================================================
+(function aeStoreV2Features() {
+  const STORAGE_KEYS = {
+    searchHistory: "ae_search_history",
+    pendingCart: "ae_pending_cart",
+    lastContact: "ae_last_contact",
+    lastName: "ae_last_name",
+    installDismissed: "ae_install_dismissed_at",
+    activeGenre: "ae_active_genre",
+  };
+
+  const GAME_GENRE_MAP = [
+    { match: /mobile legends|mlbb|ml/i, genre: "MOBA" },
+    {
+      match: /pubg|free fire|ff|cod ?mobile|codm|battleground|fortnite/i,
+      genre: "BR",
+    },
+    { match: /valorant|csgo|cs2|apex|overwatch|fps/i, genre: "FPS" },
+    {
+      match: /genshin|wuthering|honkai|tower of fantasy|punishing/i,
+      genre: "MMORPG",
+    },
+    { match: /minecraft|roblox|sandbox/i, genre: "Sandbox" },
+    { match: /clash|brawl|stumble|coin master|casual/i, genre: "Casual" },
+    { match: /sims|sim ?city|simulation/i, genre: "Simulation" },
+    {
+      match: /yu-?gi-?oh|hearthstone|magic the gathering|card/i,
+      genre: "CardGame",
+    },
+    { match: /gbox|g ?box|tools|tool|key|premium/i, genre: "Tools" },
+  ];
+
+  const GENRE_LIST = [
+    { key: "all", labelKey: "genreAll" },
+    { key: "MOBA", labelKey: "genreMOBA" },
+    { key: "BR", labelKey: "genreBR" },
+    { key: "FPS", labelKey: "genreFPS" },
+    { key: "MMORPG", labelKey: "genreMMORPG" },
+    { key: "Sandbox", labelKey: "genreSandbox" },
+    { key: "Casual", labelKey: "genreCasual" },
+    { key: "Simulation", labelKey: "genreSimulation" },
+    { key: "CardGame", labelKey: "genreCardGame" },
+    { key: "Tools", labelKey: "genreTools" },
+  ];
+
+  const state = {
+    publicVouchers: [],
+    trendingGames: [],
+    lastOrders: [],
+    activeGenre: localStorage.getItem(STORAGE_KEYS.activeGenre) || "all",
+    pendingCart: null,
+    deferredInstallPrompt: null,
+    pullToRefresh: { startY: 0, dy: 0, active: false, refreshing: false },
+  };
+
+  function safeT(key, fallback) {
+    try {
+      return translations[currentLanguage]?.[key] || fallback || key;
+    } catch (err) {
+      return fallback || key;
+    }
+  }
+
+  function safeEscape(value) {
+    if (typeof escapeHtml === "function") return escapeHtml(value);
+    return String(value || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function vibrate(pattern) {
+    if (window.matchMedia && window.matchMedia("(max-width: 640px)").matches) {
+      try {
+        if (navigator.vibrate) navigator.vibrate(pattern);
+      } catch (err) {}
+    }
+  }
+
+  function getGenreForGame(gameName) {
+    const name = String(gameName || "");
+    for (const rule of GAME_GENRE_MAP) {
+      if (rule.match.test(name)) return rule.genre;
+    }
+    return "";
+  }
+
+  function getActiveGenre() {
+    return state.activeGenre || "all";
+  }
+
+  function setActiveGenre(genre) {
+    state.activeGenre = genre || "all";
+    localStorage.setItem(STORAGE_KEYS.activeGenre, state.activeGenre);
+    document.querySelectorAll(".genre-pill").forEach((pill) => {
+      pill.classList.toggle(
+        "is-active",
+        pill.getAttribute("data-genre") === state.activeGenre,
+      );
+    });
+    if (typeof renderGames === "function") renderGames();
+  }
+
+  // ------------------------------------------------------------
+  // Genre filter: hook into getCategoryGames to also filter by genre
+  // ------------------------------------------------------------
+  function applyGenreFilter() {
+    if (typeof window.getCategoryGames !== "function") return;
+    const original = window.getCategoryGames;
+    window.getCategoryGames = function (category) {
+      const base = original(category);
+      const genre = getActiveGenre();
+      if (genre === "all") return base;
+      return base.filter((game) => getGenreForGame(game) === genre);
+    };
+  }
+
+  function renderGenrePills() {
+    const container = document.getElementById("genrePills");
+    if (!container) return;
+    if (!Array.isArray(allProducts) || allProducts.length === 0) {
+      container.hidden = true;
+      return;
+    }
+
+    const presentGenres = new Set(["all"]);
+    allProducts.forEach((p) => {
+      const g = getGenreForGame(p.game);
+      if (g) presentGenres.add(g);
+    });
+
+    const items = GENRE_LIST.filter((g) => presentGenres.has(g.key));
+    if (items.length <= 2) {
+      container.hidden = true;
+      return;
+    }
+
+    container.hidden = false;
+    container.innerHTML = items
+      .map((g) => {
+        const isActive = g.key === getActiveGenre();
+        const label = safeT(g.labelKey, g.key);
+        return `<button type="button" class="genre-pill ${isActive ? "is-active" : ""}" data-genre="${safeEscape(g.key)}" role="tab" aria-selected="${isActive ? "true" : "false"}">${safeEscape(label)}</button>`;
+      })
+      .join("");
+
+    container.querySelectorAll(".genre-pill").forEach((pill) => {
+      pill.addEventListener("click", () => {
+        vibrate(8);
+        setActiveGenre(pill.getAttribute("data-genre"));
+      });
+    });
+  }
+
+  // ------------------------------------------------------------
+  // D1: Trending strip
+  // ------------------------------------------------------------
+  async function loadTrending() {
+    try {
+      const res = await fetch("/trending-products");
+      if (!res.ok) return;
+      const data = await res.json();
+      if (!Array.isArray(data)) return;
+      state.trendingGames = data;
+      renderTrending();
+    } catch (err) {}
+  }
+
+  function renderTrending() {
+    const rail = document.getElementById("trendingRail");
+    const track = document.getElementById("trendingRailTrack");
+    if (!rail || !track) return;
+
+    const knownGames = new Set(
+      Array.isArray(allProducts) ? allProducts.map((p) => p.game) : [],
+    );
+    const items = state.trendingGames
+      .map((row) => row.game)
+      .filter((g) => knownGames.has(g))
+      .slice(0, 8);
+
+    if (items.length === 0) {
+      rail.hidden = true;
+      return;
+    }
+
+    rail.hidden = false;
+    track.innerHTML = items
+      .map((game, idx) => {
+        const initials =
+          typeof getGameInitials === "function" ? getGameInitials(game) : "AE";
+        const stock =
+          typeof getGameStock === "function" ? getGameStock(game) : 0;
+        const minPrice =
+          typeof getGameMinPrice === "function" ? getGameMinPrice(game) : 0;
+        const rankBadge =
+          idx < 3
+            ? `<span class="trending-rank trending-rank-${idx + 1}">#${idx + 1}</span>`
+            : "";
+        return `
+          <button type="button" class="trending-card" data-game="${safeEscape(game)}">
+            ${rankBadge}
+            <div class="trending-card-thumb">${safeEscape(initials)}</div>
+            <div class="trending-card-info">
+              <strong>${safeEscape(game)}</strong>
+              <small>${stock > 0 ? (typeof formatRupiah === "function" ? formatRupiah(minPrice) : "Rp " + minPrice) : safeT("outOfStockLabel", "Habis")}</small>
+            </div>
+          </button>
+        `;
+      })
+      .join("");
+
+    track.querySelectorAll(".trending-card").forEach((card) => {
+      card.addEventListener("click", () => {
+        const game = card.getAttribute("data-game");
+        vibrate(8);
+        if (game && typeof openOrderModal === "function") {
+          openOrderModal(game);
+        }
+      });
+    });
+  }
+
+  // ------------------------------------------------------------
+  // B1: Quick buy — recent paid orders
+  // ------------------------------------------------------------
+  async function loadLastOrders() {
+    try {
+      const res = await fetch("/user/orders");
+      if (!res.ok) return;
+      const data = await res.json();
+      if (!Array.isArray(data)) return;
+
+      const paidOrders = data.filter(
+        (o) => String(o.payment_status) === "paid",
+      );
+      const seen = new Set();
+      const unique = [];
+      for (const order of paidOrders) {
+        const key = `${order.game}|${order.product}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        unique.push(order);
+        if (unique.length >= 3) break;
+      }
+      state.lastOrders = unique;
+      renderQuickBuy();
+    } catch (err) {}
+  }
+
+  function renderQuickBuy() {
+    const banner = document.getElementById("quickBuyBanner");
+    const track = document.getElementById("quickBuyTrack");
+    if (!banner || !track) return;
+
+    const knownGames = new Set(
+      Array.isArray(allProducts) ? allProducts.map((p) => p.game) : [],
+    );
+    const orders = state.lastOrders.filter((o) => knownGames.has(o.game));
+
+    if (orders.length === 0) {
+      banner.hidden = true;
+      return;
+    }
+
+    banner.hidden = false;
+    const actionLabel = safeT("quickBuyAction", "Beli lagi");
+    track.innerHTML = orders
+      .map((order) => {
+        return `
+          <button type="button" class="quick-buy-card" data-game="${safeEscape(order.game)}">
+            <div class="quick-buy-card-info">
+              <strong>${safeEscape(order.game)}</strong>
+              <small>${safeEscape(order.product || "")}</small>
+            </div>
+            <span class="quick-buy-card-cta">${safeEscape(actionLabel)} \u2192</span>
+          </button>
+        `;
+      })
+      .join("");
+
+    track.querySelectorAll(".quick-buy-card").forEach((card) => {
+      card.addEventListener("click", () => {
+        const game = card.getAttribute("data-game");
+        vibrate(10);
+        if (game && typeof openOrderModal === "function") {
+          openOrderModal(game);
+        }
+      });
+    });
+  }
+
+  // ------------------------------------------------------------
+  // B4: Auto-apply voucher
+  // ------------------------------------------------------------
+  async function loadPublicVouchers() {
+    try {
+      const res = await fetch("/public-vouchers");
+      if (!res.ok) return;
+      const data = await res.json();
+      if (Array.isArray(data)) state.publicVouchers = data;
+    } catch (err) {}
+  }
+
+  function findBestVoucherForProduct(product) {
+    if (
+      !product ||
+      !Array.isArray(state.publicVouchers) ||
+      !state.publicVouchers.length
+    ) {
+      return null;
+    }
+    const game = String(product.game || "").toLowerCase();
+    const brand = String(product.brand || "").toLowerCase();
+    const duration = String(product.duration || "").toLowerCase();
+
+    let best = null;
+    for (const v of state.publicVouchers) {
+      const vGame = String(v.game_name || "").toLowerCase();
+      const vBrand = String(v.brand_name || "").toLowerCase();
+      const vDuration = String(v.duration_name || "").toLowerCase();
+
+      if (
+        v.scope === "duration" &&
+        (vGame !== game || vBrand !== brand || vDuration !== duration)
+      )
+        continue;
+      if (v.scope === "brand" && (vGame !== game || vBrand !== brand)) continue;
+      if (v.scope === "game" && vGame !== game) continue;
+
+      const disc = Number(v.discount_amount || 0);
+      if (disc <= 0) continue;
+      if (disc >= Number(product.price || 0)) continue;
+      if (!best || disc > Number(best.discount_amount || 0)) best = v;
+    }
+    return best;
+  }
+
+  function renderAutoVoucherBanner(product) {
+    const banner = document.getElementById("autoVoucherBanner");
+    if (!banner) return;
+    if (!product) {
+      banner.hidden = true;
+      banner.innerHTML = "";
+      return;
+    }
+    const best = findBestVoucherForProduct(product);
+    if (!best) {
+      banner.hidden = true;
+      banner.innerHTML = "";
+      return;
+    }
+    const applied = safeT("autoVoucherApplied", "otomatis terpasang");
+    const savings = safeT("autoVoucherSavings", "Hemat");
+    const rupiah =
+      typeof formatRupiah === "function"
+        ? formatRupiah(best.discount_amount)
+        : "Rp " + best.discount_amount;
+
+    banner.hidden = false;
+    banner.innerHTML = `
+      <span class="auto-voucher-emoji" aria-hidden="true">\ud83c\udf81</span>
+      <div class="auto-voucher-text">
+        <strong>${safeEscape(best.code)}</strong>
+        <small>${safeEscape(applied)} \u2014 ${safeEscape(savings)} <b>${rupiah}</b></small>
+      </div>
+      <button type="button" class="auto-voucher-apply" data-code="${safeEscape(best.code)}">
+        ${safeT("checkVoucherBtn", "Apply")}
+      </button>
+    `;
+    const applyBtn = banner.querySelector(".auto-voucher-apply");
+    if (applyBtn) {
+      applyBtn.addEventListener("click", () => {
+        vibrate(10);
+        const input = document.getElementById("voucherCodeInput");
+        if (input) {
+          input.value = best.code;
+          if (typeof checkVoucher === "function") checkVoucher();
+        }
+      });
+    }
+  }
+
+  // ------------------------------------------------------------
+  // B5: Delivery time estimate
+  // ------------------------------------------------------------
+  function renderDeliveryEstimate(product) {
+    const el = document.getElementById("deliveryEstimate");
+    if (!el) return;
+    if (!product) {
+      el.hidden = true;
+      el.innerHTML = "";
+      return;
+    }
+    const type = String(product.delivery_type || "auto").toLowerCase();
+    const isManual = type === "manual";
+    const label = isManual
+      ? safeT("deliveryManualLabel", "Manual")
+      : safeT("deliveryAutoLabel", "Auto");
+    const desc = isManual
+      ? safeT("deliveryManualDesc", "Admin proses manual \u2264 30 menit")
+      : safeT(
+          "deliveryAutoDesc",
+          "Kirim otomatis \u2264 1 menit setelah bayar",
+        );
+    const icon = isManual ? "\ud83d\udc64" : "\u26a1";
+
+    el.hidden = false;
+    el.className = `delivery-estimate ${isManual ? "is-manual" : "is-auto"}`;
+    el.innerHTML = `
+      <span class="delivery-estimate-icon" aria-hidden="true">${icon}</span>
+      <div class="delivery-estimate-text">
+        <strong>${safeEscape(label)}</strong>
+        <small>${safeEscape(desc)}</small>
+      </div>
+    `;
+  }
+
+  // ------------------------------------------------------------
+  // B2: Smart-fill contact (WA/Email detection)
+  // ------------------------------------------------------------
+  function classifyContact(value) {
+    const v = String(value || "").trim();
+    if (!v) return "";
+    if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)) return "email";
+    const digits = v.replace(/\D/g, "");
+    if (
+      /^(\+?62|0)8\d{7,12}$/.test(v) ||
+      (digits.length >= 9 && digits.length <= 15)
+    ) {
+      return "wa";
+    }
+    return "invalid";
+  }
+
+  function attachContactSmartFill() {
+    const input = document.getElementById("contact");
+    if (!input || input.dataset.smartFillBound === "1") return;
+    input.dataset.smartFillBound = "1";
+
+    const field = input.closest(".field") || input.parentElement;
+    if (!field) return;
+
+    const lastContact = localStorage.getItem(STORAGE_KEYS.lastContact);
+    if (lastContact && !input.value.trim()) input.value = lastContact;
+
+    let hintEl = field.querySelector(".contact-hint");
+    if (!hintEl) {
+      hintEl = document.createElement("small");
+      hintEl.className = "contact-hint";
+      field.appendChild(hintEl);
+    }
+
+    function update() {
+      const kind = classifyContact(input.value);
+      hintEl.classList.remove("is-valid", "is-invalid");
+      if (!input.value.trim()) {
+        hintEl.textContent = "";
+        return;
+      }
+      if (kind === "wa") {
+        hintEl.textContent =
+          "\u2705 " + safeT("contactValidWA", "Nomor WA terdeteksi");
+        hintEl.classList.add("is-valid");
+      } else if (kind === "email") {
+        hintEl.textContent =
+          "\u2705 " + safeT("contactValidEmail", "Email terdeteksi");
+        hintEl.classList.add("is-valid");
+      } else {
+        hintEl.textContent =
+          "\u26a0\ufe0f " + safeT("contactInvalid", "Isi nomor WA atau email");
+        hintEl.classList.add("is-invalid");
+      }
+    }
+
+    input.addEventListener("input", update);
+    input.addEventListener("blur", () => {
+      const val = input.value.trim();
+      const kind = classifyContact(val);
+      if (val && (kind === "wa" || kind === "email")) {
+        localStorage.setItem(STORAGE_KEYS.lastContact, val);
+      }
+    });
+
+    const nameInput = document.getElementById("name");
+    if (nameInput) {
+      const lastName = localStorage.getItem(STORAGE_KEYS.lastName);
+      if (lastName && !nameInput.value.trim()) nameInput.value = lastName;
+      nameInput.addEventListener("blur", () => {
+        const val = nameInput.value.trim();
+        if (val) localStorage.setItem(STORAGE_KEYS.lastName, val);
+      });
+    }
+
+    update();
+  }
+
+  // ------------------------------------------------------------
+  // B6 + B3 fusion: Resume cart bottom bar
+  // ------------------------------------------------------------
+  function savePendingCart() {
+    const productSel = document.getElementById("product");
+    const nameInput = document.getElementById("name");
+    const contactInput = document.getElementById("contact");
+    if (!productSel || !productSel.value) return;
+
+    const product = Array.isArray(allProducts)
+      ? allProducts.find((p) => String(p.id) === String(productSel.value))
+      : null;
+    if (!product) return;
+
+    const payload = {
+      game: product.game,
+      product_id: product.id,
+      brand: product.brand,
+      duration: product.duration,
+      price: product.price,
+      name: nameInput ? nameInput.value.trim() : "",
+      contact: contactInput ? contactInput.value.trim() : "",
+      ts: Date.now(),
+    };
+    try {
+      sessionStorage.setItem(STORAGE_KEYS.pendingCart, JSON.stringify(payload));
+      state.pendingCart = payload;
+    } catch (err) {}
+  }
+
+  function clearPendingCart() {
+    try {
+      sessionStorage.removeItem(STORAGE_KEYS.pendingCart);
+    } catch (err) {}
+    state.pendingCart = null;
+    renderResumeBar();
+  }
+
+  function loadPendingCart() {
+    try {
+      const raw = sessionStorage.getItem(STORAGE_KEYS.pendingCart);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed || !parsed.game) return null;
+      if (Date.now() - Number(parsed.ts || 0) > 1000 * 60 * 60 * 6) return null;
+      return parsed;
+    } catch (err) {
+      return null;
+    }
+  }
+
+  function renderResumeBar() {
+    const bar = document.getElementById("resumeCartBar");
+    if (!bar) return;
+    const cart = state.pendingCart;
+    if (!cart || !cart.game) {
+      bar.hidden = true;
+      return;
+    }
+    const modal = document.getElementById("orderModal");
+    if (modal && modal.classList.contains("show")) {
+      bar.hidden = true;
+      return;
+    }
+    const label = bar.querySelector("#resumeCartLabel");
+    if (label) {
+      const price =
+        typeof formatRupiah === "function"
+          ? formatRupiah(cart.price)
+          : "Rp " + cart.price;
+      label.textContent = `${cart.game} \u00b7 ${cart.brand || ""} ${cart.duration || ""} \u00b7 ${price}`;
+    }
+    bar.hidden = false;
+  }
+
+  function setupResumeBar() {
+    state.pendingCart = loadPendingCart();
+    renderResumeBar();
+    const action = document.getElementById("resumeCartAction");
+    const closeBtn = document.getElementById("resumeCartClose");
+    if (action) {
+      action.addEventListener("click", async () => {
+        vibrate(10);
+        const cart = state.pendingCart;
+        if (!cart || !cart.game) return;
+        if (typeof openOrderModal === "function") {
+          await openOrderModal(cart.game);
+        }
+        setTimeout(() => {
+          const brand = document.getElementById("brand");
+          if (brand && cart.brand) {
+            brand.value = cart.brand;
+            brand.dispatchEvent(new Event("change"));
+          }
+          setTimeout(() => {
+            const productSel = document.getElementById("product");
+            if (productSel && cart.product_id) {
+              productSel.value = String(cart.product_id);
+              productSel.dispatchEvent(new Event("change"));
+            }
+            const nameInput = document.getElementById("name");
+            const contactInput = document.getElementById("contact");
+            if (nameInput && cart.name) nameInput.value = cart.name;
+            if (contactInput && cart.contact) contactInput.value = cart.contact;
+            if (typeof updateOrderStepFromForm === "function")
+              updateOrderStepFromForm();
+          }, 80);
+        }, 300);
+      });
+    }
+    if (closeBtn) {
+      closeBtn.addEventListener("click", () => {
+        clearPendingCart();
+      });
+    }
+  }
+
+  // ------------------------------------------------------------
+  // D2 + D5: Search autocomplete + history
+  // ------------------------------------------------------------
+  function readSearchHistory() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEYS.searchHistory);
+      if (!raw) return [];
+      const arr = JSON.parse(raw);
+      return Array.isArray(arr) ? arr.slice(0, 5) : [];
+    } catch (err) {
+      return [];
+    }
+  }
+
+  function writeSearchHistory(arr) {
+    try {
+      localStorage.setItem(
+        STORAGE_KEYS.searchHistory,
+        JSON.stringify(arr.slice(0, 5)),
+      );
+    } catch (err) {}
+  }
+
+  function pushSearchHistory(query) {
+    const q = String(query || "").trim();
+    if (q.length < 2) return;
+    const current = readSearchHistory().filter(
+      (x) => x.toLowerCase() !== q.toLowerCase(),
+    );
+    current.unshift(q);
+    writeSearchHistory(current);
+  }
+
+  function fuzzyMatchScore(query, target) {
+    const q = String(query || "")
+      .trim()
+      .toLowerCase();
+    const t = String(target || "").toLowerCase();
+    if (!q) return 0;
+    if (t.startsWith(q)) return 100;
+    if (t.includes(q)) return 80;
+    const tokens = t.split(/\s+/);
+    if (tokens.some((tok) => tok.startsWith(q))) return 60;
+    let qi = 0;
+    for (let i = 0; i < t.length && qi < q.length; i++) {
+      if (t[i] === q[qi]) qi++;
+    }
+    return qi === q.length ? 40 : 0;
+  }
+
+  function renderSearchDropdown() {
+    const dropdown = document.getElementById("searchDropdown");
+    const input = document.getElementById("gameSearch");
+    if (!dropdown || !input) return;
+    const q = input.value.trim();
+    const games = Array.isArray(allProducts)
+      ? [...new Set(allProducts.map((p) => p.game))]
+      : [];
+
+    if (!q) {
+      const history = readSearchHistory();
+      if (history.length === 0) {
+        dropdown.hidden = true;
+        dropdown.innerHTML = "";
+        return;
+      }
+      dropdown.hidden = false;
+      dropdown.innerHTML = `
+        <div class="search-dropdown-head">
+          <span>${safeEscape(safeT("searchHistoryTitle", "Pencarian terakhir"))}</span>
+          <button type="button" class="search-dropdown-clear" id="searchHistoryClearBtn">${safeEscape(safeT("searchHistoryClear", "Hapus"))}</button>
+        </div>
+        ${history
+          .map(
+            (h) =>
+              `<button type="button" class="search-dropdown-item is-history" data-q="${safeEscape(h)}"><span aria-hidden="true">\ud83d\udd52</span>${safeEscape(h)}</button>`,
+          )
+          .join("")}
+      `;
+      const clearBtn = dropdown.querySelector("#searchHistoryClearBtn");
+      if (clearBtn) {
+        clearBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          writeSearchHistory([]);
+          renderSearchDropdown();
+        });
+      }
+    } else {
+      const scored = games
+        .map((g) => ({ game: g, score: fuzzyMatchScore(q, g) }))
+        .filter((x) => x.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 6);
+      if (scored.length === 0) {
+        dropdown.hidden = true;
+        dropdown.innerHTML = "";
+        return;
+      }
+      dropdown.hidden = false;
+      dropdown.innerHTML = scored
+        .map((s) => {
+          const stock =
+            typeof getGameStock === "function" ? getGameStock(s.game) : 0;
+          return `
+            <button type="button" class="search-dropdown-item" data-game="${safeEscape(s.game)}">
+              <span class="search-dropdown-name">${safeEscape(s.game)}</span>
+              <small class="search-dropdown-stock">${stock > 0 ? stock + " " + safeT("catalogStockReady", "stok") : safeT("outOfStockLabel", "Habis")}</small>
+            </button>
+          `;
+        })
+        .join("");
+    }
+
+    dropdown.querySelectorAll(".search-dropdown-item").forEach((item) => {
+      item.addEventListener("click", () => {
+        const isHistory = item.classList.contains("is-history");
+        if (isHistory) {
+          const q = item.getAttribute("data-q");
+          input.value = q || "";
+          if (typeof searchGame === "function") searchGame();
+          renderSearchDropdown();
+          input.focus();
+          return;
+        }
+        const game = item.getAttribute("data-game");
+        if (!game) return;
+        pushSearchHistory(input.value.trim());
+        input.value = "";
+        if (typeof searchGame === "function") searchGame();
+        dropdown.hidden = true;
+        vibrate(8);
+        if (typeof openOrderModal === "function") openOrderModal(game);
+      });
+    });
+  }
+
+  function setupSearchEnhancements() {
+    const input = document.getElementById("gameSearch");
+    const dropdown = document.getElementById("searchDropdown");
+    if (!input || !dropdown) return;
+
+    input.addEventListener("focus", renderSearchDropdown);
+    input.addEventListener("input", renderSearchDropdown);
+    input.addEventListener("keyup", () => {
+      const q = input.value.trim();
+      if (q.length >= 2) pushSearchHistory(q);
+    });
+    document.addEventListener("click", (e) => {
+      if (!dropdown.contains(e.target) && e.target !== input) {
+        dropdown.hidden = true;
+      }
+    });
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") dropdown.hidden = true;
+    });
+  }
+
+  // ------------------------------------------------------------
+  // D4: Recommendations
+  // ------------------------------------------------------------
+  function renderRecommendations() {
+    const section = document.getElementById("recommendationSection");
+    const track = document.getElementById("recommendationTrack");
+    if (!section || !track) return;
+    if (!Array.isArray(allProducts) || allProducts.length === 0) {
+      section.hidden = true;
+      return;
+    }
+
+    let recents = [];
+    try {
+      recents = JSON.parse(localStorage.getItem("ae_recent_games") || "[]");
+    } catch (err) {}
+    if (!Array.isArray(recents)) recents = [];
+
+    const allGames = [...new Set(allProducts.map((p) => p.game))];
+    if (!recents.length) {
+      const stockSorted = allGames
+        .map((g) => ({
+          game: g,
+          stock: typeof getGameStock === "function" ? getGameStock(g) : 0,
+        }))
+        .sort((a, b) => b.stock - a.stock)
+        .slice(0, 6);
+      paintRecommendations(stockSorted.map((x) => x.game));
+      return;
+    }
+
+    const ref = recents[0];
+    const refGenre = getGenreForGame(ref);
+    const candidates = allGames
+      .filter((g) => g !== ref && !recents.includes(g))
+      .map((g) => {
+        let score = 0;
+        if (getGenreForGame(g) === refGenre) score += 50;
+        const stock = typeof getGameStock === "function" ? getGameStock(g) : 0;
+        if (stock > 0) score += 20;
+        return { game: g, score };
+      })
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 6);
+
+    paintRecommendations(candidates.map((c) => c.game));
+  }
+
+  function paintRecommendations(games) {
+    const section = document.getElementById("recommendationSection");
+    const track = document.getElementById("recommendationTrack");
+    if (!section || !track) return;
+    if (!games || !games.length) {
+      section.hidden = true;
+      return;
+    }
+    section.hidden = false;
+    track.innerHTML = games
+      .map((game) => {
+        const initials =
+          typeof getGameInitials === "function" ? getGameInitials(game) : "AE";
+        const stock =
+          typeof getGameStock === "function" ? getGameStock(game) : 0;
+        const minPrice =
+          typeof getGameMinPrice === "function" ? getGameMinPrice(game) : 0;
+        return `
+          <button type="button" class="recommendation-card" data-game="${safeEscape(game)}">
+            <div class="recommendation-card-thumb">${safeEscape(initials)}</div>
+            <div class="recommendation-card-info">
+              <strong>${safeEscape(game)}</strong>
+              <small>${stock > 0 ? (typeof formatRupiah === "function" ? formatRupiah(minPrice) : "Rp " + minPrice) : safeT("outOfStockLabel", "Habis")}</small>
+            </div>
+          </button>
+        `;
+      })
+      .join("");
+    track.querySelectorAll(".recommendation-card").forEach((card) => {
+      card.addEventListener("click", () => {
+        const game = card.getAttribute("data-game");
+        vibrate(8);
+        if (game && typeof openOrderModal === "function") openOrderModal(game);
+      });
+    });
+  }
+
+  // ------------------------------------------------------------
+  // D6: Detail mini popover (desktop only)
+  // ------------------------------------------------------------
+  function setupDetailPopover() {
+    if (window.matchMedia && window.matchMedia("(max-width: 768px)").matches) {
+      return;
+    }
+    let popover = null;
+    let hoverTimer = null;
+    let currentCard = null;
+
+    function createPopover() {
+      const el = document.createElement("div");
+      el.className = "game-detail-popover";
+      el.setAttribute("role", "tooltip");
+      document.body.appendChild(el);
+      return el;
+    }
+
+    function showFor(card) {
+      const game = card.getAttribute("data-game");
+      if (!game) return;
+      if (!popover) popover = createPopover();
+      const stock = typeof getGameStock === "function" ? getGameStock(game) : 0;
+      const minPrice =
+        typeof getGameMinPrice === "function" ? getGameMinPrice(game) : 0;
+      const brandCount =
+        typeof getGameBrandCount === "function" ? getGameBrandCount(game) : 0;
+      const genre = getGenreForGame(game) || "\u2014";
+      popover.innerHTML = `
+        <strong>${safeEscape(game)}</strong>
+        <div class="game-detail-row"><span>Genre</span><b>${safeEscape(genre)}</b></div>
+        <div class="game-detail-row"><span>Brand</span><b>${brandCount}</b></div>
+        <div class="game-detail-row"><span>${safeT("catalogStockReady", "Stok")}</span><b>${stock}</b></div>
+        ${minPrice > 0 ? `<div class="game-detail-row"><span>${safeT("cardFromPrice", "Mulai")}</span><b>${typeof formatRupiah === "function" ? formatRupiah(minPrice) : minPrice}</b></div>` : ""}
+      `;
+      const rect = card.getBoundingClientRect();
+      const top = rect.bottom + window.scrollY + 8;
+      const left = rect.left + window.scrollX;
+      popover.style.top = top + "px";
+      popover.style.left = left + "px";
+      popover.classList.add("is-visible");
+    }
+
+    function hide() {
+      if (popover) popover.classList.remove("is-visible");
+    }
+
+    document.addEventListener("mouseover", (e) => {
+      const card = e.target.closest(".game-card");
+      if (!card) return;
+      if (card === currentCard) return;
+      currentCard = card;
+      clearTimeout(hoverTimer);
+      hoverTimer = setTimeout(() => showFor(card), 500);
+    });
+    document.addEventListener("mouseout", (e) => {
+      const card = e.target.closest(".game-card");
+      if (!card) return;
+      if (card !== currentCard) return;
+      clearTimeout(hoverTimer);
+      currentCard = null;
+      hide();
+    });
+    window.addEventListener("scroll", hide, { passive: true });
+  }
+
+  // ------------------------------------------------------------
+  // F2: Pull-to-refresh (mobile)
+  // ------------------------------------------------------------
+  function setupPullToRefresh() {
+    const indicator = document.getElementById("pullToRefresh");
+    if (!indicator) return;
+    if (!window.matchMedia || !window.matchMedia("(max-width: 640px)").matches)
+      return;
+
+    const THRESHOLD = 80;
+
+    document.addEventListener(
+      "touchstart",
+      (e) => {
+        if (window.scrollY > 5) return;
+        const modal = document.getElementById("orderModal");
+        if (modal && modal.classList.contains("show")) return;
+        state.pullToRefresh.startY = e.touches[0].clientY;
+        state.pullToRefresh.dy = 0;
+        state.pullToRefresh.active = true;
+      },
+      { passive: true },
+    );
+
+    document.addEventListener(
+      "touchmove",
+      (e) => {
+        if (!state.pullToRefresh.active || state.pullToRefresh.refreshing)
+          return;
+        const dy = e.touches[0].clientY - state.pullToRefresh.startY;
+        if (dy <= 0) {
+          indicator.hidden = true;
+          return;
+        }
+        state.pullToRefresh.dy = dy;
+        const offset = Math.min(dy * 0.6, THRESHOLD + 20);
+        indicator.hidden = false;
+        indicator.style.transform = `translate(-50%, ${offset}px)`;
+        indicator.classList.toggle("is-ready", dy >= THRESHOLD);
+      },
+      { passive: true },
+    );
+
+    document.addEventListener("touchend", async () => {
+      if (!state.pullToRefresh.active) return;
+      const triggered = state.pullToRefresh.dy >= THRESHOLD;
+      state.pullToRefresh.active = false;
+      if (!triggered) {
+        indicator.hidden = true;
+        indicator.style.transform = "translate(-50%, -100%)";
+        return;
+      }
+      state.pullToRefresh.refreshing = true;
+      indicator.classList.add("is-refreshing");
+      vibrate(15);
+      try {
+        if (typeof loadAllProducts === "function") await loadAllProducts();
+        if (typeof loadRecentPurchases === "function")
+          await loadRecentPurchases();
+        await loadTrending();
+        await loadPublicVouchers();
+      } catch (err) {}
+      setTimeout(() => {
+        indicator.classList.remove("is-refreshing", "is-ready");
+        indicator.hidden = true;
+        indicator.style.transform = "translate(-50%, -100%)";
+        state.pullToRefresh.refreshing = false;
+      }, 700);
+    });
+  }
+
+  // ------------------------------------------------------------
+  // F3: PWA install prompt
+  // ------------------------------------------------------------
+  function setupInstallPrompt() {
+    const banner = document.getElementById("installPromptBanner");
+    const action = document.getElementById("installPromptAction");
+    const closeBtn = document.getElementById("installPromptClose");
+    if (!banner || !action || !closeBtn) return;
+
+    const dismissedAt = Number(
+      localStorage.getItem(STORAGE_KEYS.installDismissed) || 0,
+    );
+    const sevenDays = 7 * 24 * 60 * 60 * 1000;
+    if (dismissedAt && Date.now() - dismissedAt < sevenDays) return;
+
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      state.deferredInstallPrompt = e;
+      banner.hidden = false;
+    });
+
+    action.addEventListener("click", async () => {
+      const prompt = state.deferredInstallPrompt;
+      if (!prompt) return;
+      vibrate(10);
+      prompt.prompt();
+      try {
+        await prompt.userChoice;
+      } catch (err) {}
+      state.deferredInstallPrompt = null;
+      banner.hidden = true;
+      localStorage.setItem(STORAGE_KEYS.installDismissed, String(Date.now()));
+    });
+
+    closeBtn.addEventListener("click", () => {
+      banner.hidden = true;
+      localStorage.setItem(STORAGE_KEYS.installDismissed, String(Date.now()));
+    });
+
+    window.addEventListener("appinstalled", () => {
+      banner.hidden = true;
+      localStorage.setItem(STORAGE_KEYS.installDismissed, String(Date.now()));
+    });
+  }
+
+  // ------------------------------------------------------------
+  // F1: Bottom nav active state + smooth hide on scroll up
+  // ------------------------------------------------------------
+  function setupBottomNav() {
+    const nav = document.getElementById("bottomNav");
+    if (!nav) return;
+    const items = nav.querySelectorAll(".bottom-nav-item");
+
+    function syncActive() {
+      const scrollY = window.scrollY;
+      const hero = document.getElementById("hero");
+      const store = document.getElementById("store-section");
+      let activeKey = "home";
+      if (store) {
+        const rect = store.getBoundingClientRect();
+        if (rect.top <= 100) activeKey = "catalog";
+      }
+      if (hero) {
+        const rect = hero.getBoundingClientRect();
+        if (rect.bottom > window.innerHeight * 0.6) activeKey = "home";
+      }
+      items.forEach((item) => {
+        item.classList.toggle(
+          "is-active",
+          item.getAttribute("data-nav") === activeKey,
+        );
+      });
+    }
+    syncActive();
+    window.addEventListener("scroll", syncActive, { passive: true });
+
+    items.forEach((item) => {
+      item.addEventListener("click", () => vibrate(6));
+    });
+  }
+
+  // ------------------------------------------------------------
+  // F6: Haptic on favorite/buy/filter
+  // ------------------------------------------------------------
+  function setupGlobalHaptics() {
+    document.addEventListener("click", (e) => {
+      if (
+        e.target.closest(".pill") ||
+        e.target.closest(".game-card-fav") ||
+        e.target.closest("#buyBtn")
+      ) {
+        vibrate(8);
+      }
+    });
+  }
+
+  // ------------------------------------------------------------
+  // Hook into existing functions
+  // ------------------------------------------------------------
+  function installHooks() {
+    if (
+      typeof window.openOrderModal === "function" &&
+      !window.openOrderModal.__aeWrapped
+    ) {
+      const orig = window.openOrderModal;
+      window.openOrderModal = async function patchedOpenOrderModal(game) {
+        const result = await orig.call(this, game);
+        try {
+          attachContactSmartFill();
+          const productSel = document.getElementById("product");
+          if (productSel) {
+            productSel.addEventListener("change", onProductChange);
+            onProductChange();
+          }
+          renderResumeBar();
+        } catch (err) {}
+        return result;
+      };
+      window.openOrderModal.__aeWrapped = true;
+    }
+
+    if (
+      typeof window.closeOrderModal === "function" &&
+      !window.closeOrderModal.__aeWrapped
+    ) {
+      const orig = window.closeOrderModal;
+      window.closeOrderModal = function patchedCloseOrderModal() {
+        try {
+          savePendingCart();
+        } catch (err) {}
+        const result = orig.call(this);
+        try {
+          state.pendingCart = loadPendingCart();
+          renderResumeBar();
+        } catch (err) {}
+        return result;
+      };
+      window.closeOrderModal.__aeWrapped = true;
+    }
+
+    if (
+      typeof window.renderGames === "function" &&
+      !window.renderGames.__aeWrapped
+    ) {
+      const orig = window.renderGames;
+      window.renderGames = function patchedRenderGames() {
+        const result = orig.apply(this, arguments);
+        try {
+          renderTrending();
+          renderQuickBuy();
+          renderGenrePills();
+          renderRecommendations();
+        } catch (err) {}
+        return result;
+      };
+      window.renderGames.__aeWrapped = true;
+    }
+
+    if (typeof window.buy === "function" && !window.buy.__aeWrapped) {
+      const orig = window.buy;
+      window.buy = async function patchedBuy() {
+        const result = await orig.apply(this, arguments);
+        try {
+          clearPendingCart();
+        } catch (err) {}
+        return result;
+      };
+      window.buy.__aeWrapped = true;
+    }
+  }
+
+  function onProductChange() {
+    const productSel = document.getElementById("product");
+    if (!productSel) return;
+    const product = Array.isArray(allProducts)
+      ? allProducts.find((p) => String(p.id) === String(productSel.value))
+      : null;
+    renderDeliveryEstimate(product);
+    renderAutoVoucherBanner(product);
+  }
+
+  // ------------------------------------------------------------
+  // Init
+  // ------------------------------------------------------------
+  function init() {
+    try {
+      applyGenreFilter();
+      installHooks();
+      setupSearchEnhancements();
+      setupResumeBar();
+      setupDetailPopover();
+      setupPullToRefresh();
+      setupInstallPrompt();
+      setupBottomNav();
+      setupGlobalHaptics();
+    } catch (err) {
+      console.error("AE v2 features init error:", err);
+    }
+
+    setTimeout(() => {
+      try {
+        loadTrending();
+        loadPublicVouchers();
+        loadLastOrders();
+      } catch (err) {}
+    }, 800);
+
+    setTimeout(() => {
+      try {
+        renderTrending();
+        renderQuickBuy();
+        renderGenrePills();
+        renderRecommendations();
+      } catch (err) {}
+    }, 1500);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();

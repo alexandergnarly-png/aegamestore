@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="style.css?v=40" />
+    <link rel="stylesheet" href="style.css?v=41" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#0ea5e9" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -316,6 +316,39 @@
           </div>
 
           <div
+            class="trending-rail"
+            id="trendingRail"
+            hidden
+            aria-label="Trending games"
+          >
+            <div class="trending-rail-head">
+              <span class="trending-rail-title" data-i18n="trendingTitle">
+                Lagi Naik Daun
+              </span>
+              <span class="trending-rail-sub" data-i18n="trendingSub">
+                Top game minggu ini
+              </span>
+            </div>
+            <div class="trending-rail-track" id="trendingRailTrack"></div>
+          </div>
+
+          <div
+            class="quick-buy-banner"
+            id="quickBuyBanner"
+            hidden
+            aria-label="Quick buy your last orders"
+          >
+            <div class="quick-buy-head">
+              <span class="quick-buy-icon" aria-hidden="true">🔁</span>
+              <strong data-i18n="quickBuyTitle">Beli Lagi</strong>
+              <small data-i18n="quickBuySub">
+                Order terakhir kamu — 1 klik checkout
+              </small>
+            </div>
+            <div class="quick-buy-track" id="quickBuyTrack"></div>
+          </div>
+
+          <div
             class="recent-viewed-rail"
             id="recentViewedRail"
             hidden
@@ -338,6 +371,13 @@
           </div>
 
           <div class="catalog-toolbar" id="catalogToolbar">
+            <div
+              class="genre-pills"
+              id="genrePills"
+              role="tablist"
+              aria-label="Genre game"
+              hidden
+            ></div>
             <div class="filter-pills" role="tablist" aria-label="Kategori game">
               <button type="button" class="pill active" data-category="all">
                 <span data-i18n="filterAll">Semua</span>
@@ -372,9 +412,18 @@
                   data-i18n-placeholder="searchGamePlaceholder"
                   placeholder="Cari nama game (contoh: PUBG)..."
                   onkeyup="searchGame()"
+                  autocomplete="off"
                   aria-label="Cari game"
+                  aria-autocomplete="list"
+                  aria-controls="searchDropdown"
                 />
                 <kbd class="search-kbd" aria-hidden="true">/</kbd>
+                <div
+                  class="search-dropdown"
+                  id="searchDropdown"
+                  role="listbox"
+                  hidden
+                ></div>
               </div>
               <div class="sort-control">
                 <label
@@ -402,6 +451,23 @@
 
           <div class="block">
             <div class="game-grid compact-game-grid" id="gameGrid"></div>
+          </div>
+
+          <div
+            class="recommendation-section"
+            id="recommendationSection"
+            hidden
+            aria-label="Recommended games"
+          >
+            <div class="recommendation-head">
+              <span
+                class="recommendation-title"
+                data-i18n="recommendationTitle"
+              >
+                Mungkin Kamu Suka
+              </span>
+            </div>
+            <div class="recommendation-track" id="recommendationTrack"></div>
           </div>
         </div>
       </section>
@@ -560,9 +626,48 @@
           </div>
         </div>
 
+        <div
+          class="delivery-estimate"
+          id="deliveryEstimate"
+          hidden
+          aria-live="polite"
+        ></div>
+
+        <div
+          class="auto-voucher-banner"
+          id="autoVoucherBanner"
+          hidden
+          aria-live="polite"
+        ></div>
+
         <button id="buyBtn" onclick="buy()" data-i18n="buyNow">
           Beli Sekarang 🌊
         </button>
+
+        <div
+          class="payment-methods-preview"
+          id="paymentMethodsPreview"
+          aria-label="Metode pembayaran"
+        >
+          <small data-i18n="paymentPreviewLabel">Bayar pakai:</small>
+          <div class="payment-methods-icons" aria-hidden="true">
+            <span title="QRIS">
+              <iconify-icon icon="mdi:qrcode-scan"></iconify-icon>
+            </span>
+            <span title="GoPay">
+              <iconify-icon icon="mdi:wallet"></iconify-icon>
+            </span>
+            <span title="OVO">
+              <iconify-icon icon="mdi:credit-card-outline"></iconify-icon>
+            </span>
+            <span title="DANA">
+              <iconify-icon icon="mdi:cash-fast"></iconify-icon>
+            </span>
+            <span title="ShopeePay">
+              <iconify-icon icon="mdi:shopping-outline"></iconify-icon>
+            </span>
+          </div>
+        </div>
         <div class="loading" id="loading" data-i18n="processingOrder">
           Memproses pesanan...
         </div>
@@ -590,6 +695,111 @@
     </a>
 
     <div id="toastStack" class="toast-stack" aria-live="polite"></div>
+
+    <div
+      class="resume-cart-bar"
+      id="resumeCartBar"
+      hidden
+      role="complementary"
+      aria-label="Pesanan tersimpan"
+    >
+      <button
+        type="button"
+        class="resume-cart-close"
+        id="resumeCartClose"
+        aria-label="Tutup"
+      >
+        ×
+      </button>
+      <div class="resume-cart-info">
+        <span class="resume-cart-icon" aria-hidden="true">🛒</span>
+        <div class="resume-cart-text">
+          <small data-i18n="resumeCartTitle">Pesananmu masih ada</small>
+          <strong id="resumeCartLabel">—</strong>
+        </div>
+      </div>
+      <button
+        type="button"
+        class="resume-cart-action"
+        id="resumeCartAction"
+        data-i18n="resumeCartAction"
+      >
+        Lanjut Beli
+      </button>
+    </div>
+
+    <div
+      class="install-prompt-banner"
+      id="installPromptBanner"
+      hidden
+      role="complementary"
+      aria-label="Install app"
+    >
+      <button
+        type="button"
+        class="install-prompt-close"
+        id="installPromptClose"
+        aria-label="Tutup"
+      >
+        ×
+      </button>
+      <div class="install-prompt-icon" aria-hidden="true">⛩️</div>
+      <div class="install-prompt-body">
+        <strong data-i18n="installAppTitle">Install AE Game Store</strong>
+        <small data-i18n="installAppDesc">
+          Akses cepat, notif promo, hemat data
+        </small>
+      </div>
+      <button
+        type="button"
+        class="install-prompt-action"
+        id="installPromptAction"
+        data-i18n="installAppBtn"
+      >
+        Install
+      </button>
+    </div>
+
+    <nav class="bottom-nav" id="bottomNav" aria-label="Bottom navigation">
+      <a href="#hero" class="bottom-nav-item is-active" data-nav="home">
+        <span class="bottom-nav-icon" aria-hidden="true">🏠</span>
+        <span class="bottom-nav-label" data-i18n="bottomNavHome">Beranda</span>
+      </a>
+      <a href="#store-section" class="bottom-nav-item" data-nav="catalog">
+        <span class="bottom-nav-icon" aria-hidden="true">🎮</span>
+        <span class="bottom-nav-label" data-i18n="bottomNavCatalog">
+          Katalog
+        </span>
+      </a>
+      <a
+        href="/account"
+        class="bottom-nav-item"
+        data-nav="history"
+        id="bottomNavHistory"
+      >
+        <span class="bottom-nav-icon" aria-hidden="true">📦</span>
+        <span class="bottom-nav-label" data-i18n="bottomNavHistory">
+          Riwayat
+        </span>
+      </a>
+      <a
+        href="/auth"
+        class="bottom-nav-item"
+        data-nav="account"
+        id="bottomNavAccount"
+      >
+        <span class="bottom-nav-icon" aria-hidden="true">👤</span>
+        <span class="bottom-nav-label" data-i18n="bottomNavAccount">
+          Akun
+        </span>
+      </a>
+    </nav>
+
+    <div class="pull-to-refresh" id="pullToRefresh" hidden aria-hidden="true">
+      <div class="pull-to-refresh-spinner">
+        <span class="pull-to-refresh-icon">🌊</span>
+      </div>
+    </div>
 
     <button
       type="button"
@@ -661,6 +871,6 @@
       </div>
     </footer>
 
-    <script src="script.js?v=38"></script>
+    <script src="script.js?v=39"></script>
   </body>
 </html>

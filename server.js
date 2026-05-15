@@ -203,6 +203,9 @@ db.query(
 db.query(`ALTER TABLE vouchers ADD COLUMN IF NOT EXISTS brand_name TEXT`);
 db.query(`ALTER TABLE vouchers ADD COLUMN IF NOT EXISTS duration_name TEXT`);
 db.query(
+  `ALTER TABLE products ADD COLUMN IF NOT EXISTS delivery_type TEXT DEFAULT 'auto'`,
+);
+db.query(
   `
   CREATE TABLE IF NOT EXISTS reviews (
     id SERIAL PRIMARY KEY,
@@ -2012,12 +2015,18 @@ app.get("/products", requireAdminAuth, async (req, res) => {
 });
 
 app.post("/products", requireAdminAuth, requireAdminCsrf, async (req, res) => {
-  const { game, brand, duration, price } = req.body;
+  const { game, brand, duration, price, delivery_type } = req.body;
 
   const cleanGame = String(game || "").trim();
   const cleanBrand = String(brand || "").trim();
   const cleanDuration = String(duration || "").trim();
   const cleanPrice = Number(price);
+  const cleanDeliveryType =
+    String(delivery_type || "auto")
+      .trim()
+      .toLowerCase() === "manual"
+      ? "manual"
+      : "auto";
 
   if (!cleanGame || !cleanBrand || !cleanDuration) {
     return res.status(400).json({
@@ -2038,12 +2047,21 @@ app.post("/products", requireAdminAuth, requireAdminCsrf, async (req, res) => {
     brand: cleanBrand,
     duration: cleanDuration,
     price: cleanPrice,
+    delivery_type: cleanDeliveryType,
   });
 
   try {
     const result = await query(
-      "INSERT INTO products (game, brand, duration, price, active, created_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
-      [cleanGame, cleanBrand, cleanDuration, cleanPrice, 1, createdAt],
+      "INSERT INTO products (game, brand, duration, price, active, created_at, delivery_type) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id",
+      [
+        cleanGame,
+        cleanBrand,
+        cleanDuration,
+        cleanPrice,
+        1,
+        createdAt,
+        cleanDeliveryType,
+      ],
     );
 
     console.log("INSERT SUCCESS:", result.rows);
@@ -2078,6 +2096,17 @@ app.put(
     const cleanBrand = String(brand || "").trim();
     const cleanDuration = String(duration || "").trim();
     const cleanPrice = Number(price);
+    const hasDeliveryType = Object.prototype.hasOwnProperty.call(
+      req.body,
+      "delivery_type",
+    );
+    const cleanDeliveryType = hasDeliveryType
+      ? String(req.body.delivery_type || "auto")
+          .trim()
+          .toLowerCase() === "manual"
+        ? "manual"
+        : "auto"
+      : null;
 
     if (!cleanGame || !cleanBrand || !cleanDuration) {
       return res.status(400).json({
@@ -2092,10 +2121,22 @@ app.put(
     }
 
     try {
-      const result = await query(
-        "UPDATE products SET game = $1, brand = $2, duration = $3, price = $4 WHERE id = $5 RETURNING id",
-        [cleanGame, cleanBrand, cleanDuration, cleanPrice, productId],
-      );
+      const result = cleanDeliveryType
+        ? await query(
+            "UPDATE products SET game = $1, brand = $2, duration = $3, price = $4, delivery_type = $5 WHERE id = $6 RETURNING id",
+            [
+              cleanGame,
+              cleanBrand,
+              cleanDuration,
+              cleanPrice,
+              cleanDeliveryType,
+              productId,
+            ],
+          )
+        : await query(
+            "UPDATE products SET game = $1, brand = $2, duration = $3, price = $4 WHERE id = $5 RETURNING id",
+            [cleanGame, cleanBrand, cleanDuration, cleanPrice, productId],
+          );
 
       if (result.rows.length === 0) {
         return res.status(404).json({
@@ -2246,6 +2287,7 @@ app.get("/public-products", async (req, res) => {
     const result = await query(`
   SELECT
     p.*,
+    COALESCE(p.delivery_type, 'auto') AS delivery_type,
     COUNT(k.id) FILTER (WHERE k.used = 0)::int AS available_keys,
     CASE
       WHEN LOWER(p.duration) LIKE '%jam%' THEN
@@ -2269,6 +2311,102 @@ app.get("/public-products", async (req, res) => {
     console.error("ERROR PUBLIC PRODUCTS:", err);
     return res.status(500).json({
       message: "Gagal mengambil produk publik",
+    });
+  }
+});
+
+// Public list of currently active vouchers (no auth) for auto-apply hint on the FE.
+// Returns only non-sensitive fields needed to compute display & match scope.
+app.get("/public-vouchers", async (req, res) => {
+  try {
+    const result = await query(
+      `
+      SELECT
+        code,
+        game_name,
+        brand_name,
+        duration_name,
+        discount_amount,
+        expires_at
+      FROM vouchers
+      WHERE active = 1
+        AND (expires_at IS NULL OR expires_at = '' OR expires_at > to_char(NOW(), 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'))
+      ORDER BY discount_amount DESC
+      LIMIT 50
+      `,
+    );
+
+    const vouchers = result.rows.map((row) => {
+      const game = row.game_name ? String(row.game_name).trim() : "";
+      const brand = row.brand_name ? String(row.brand_name).trim() : "";
+      const duration = row.duration_name
+        ? String(row.duration_name).trim()
+        : "";
+      let scope = "all";
+
+      if (duration) {
+        scope = "duration";
+      } else if (brand) {
+        scope = "brand";
+      } else if (game) {
+        scope = "game";
+      }
+
+      return {
+        code: String(row.code || "").trim(),
+        scope,
+        game_name: game || null,
+        brand_name: brand || null,
+        duration_name: duration || null,
+        discount_amount: Number(row.discount_amount || 0),
+        expires_at: row.expires_at || null,
+      };
+    });
+
+    return res.json(vouchers);
+  } catch (err) {
+    console.error("ERROR PUBLIC VOUCHERS:", err);
+    return res.status(500).json({
+      message: "Gagal mengambil voucher publik",
+    });
+  }
+});
+
+// Trending games: top 8 by paid order count over last 7 days.
+// Used for the "Lagi Naik Daun" rail on the catalog.
+app.get("/trending-products", async (req, res) => {
+  try {
+    const sevenDaysAgo = new Date(
+      Date.now() - 7 * 24 * 60 * 60 * 1000,
+    ).toISOString();
+
+    const result = await query(
+      `
+      SELECT
+        game,
+        COUNT(*)::int AS order_count
+      FROM orders
+      WHERE payment_status = 'paid'
+        AND created_at >= $1
+        AND game IS NOT NULL
+        AND game <> ''
+      GROUP BY game
+      ORDER BY order_count DESC, game ASC
+      LIMIT 8
+      `,
+      [sevenDaysAgo],
+    );
+
+    return res.json(
+      result.rows.map((row) => ({
+        game: String(row.game || "").trim(),
+        order_count: Number(row.order_count || 0),
+      })),
+    );
+  } catch (err) {
+    console.error("ERROR TRENDING PRODUCTS:", err);
+    return res.status(500).json({
+      message: "Gagal mengambil game trending",
     });
   }
 });
