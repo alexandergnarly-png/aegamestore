@@ -2983,7 +2983,6 @@ window.addEventListener("load", () => {
       sessionStorage.removeItem(STORAGE_KEYS.pendingCart);
     } catch (err) {}
     state.pendingCart = null;
-    renderResumeBar();
   }
 
   function loadPendingCart() {
@@ -3597,7 +3596,6 @@ window.addEventListener("load", () => {
             productSel.addEventListener("change", onProductChange);
             onProductChange();
           }
-          renderResumeBar();
         } catch (err) {}
         return result;
       };
@@ -3610,14 +3608,13 @@ window.addEventListener("load", () => {
     ) {
       const orig = window.closeOrderModal;
       window.closeOrderModal = function patchedCloseOrderModal() {
-        try {
-          savePendingCart();
-        } catch (err) {}
         const result = orig.call(this);
+
         try {
-          state.pendingCart = loadPendingCart();
-          renderResumeBar();
+          sessionStorage.removeItem(STORAGE_KEYS.pendingCart);
+          state.pendingCart = null;
         } catch (err) {}
+
         return result;
       };
       window.closeOrderModal.__aeWrapped = true;
@@ -3672,7 +3669,6 @@ window.addEventListener("load", () => {
       applyGenreFilter();
       installHooks();
       setupSearchEnhancements();
-      setupResumeBar();
       setupDetailPopover();
       setupPullToRefresh();
       setupInstallPrompt();

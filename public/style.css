@@ -4642,3 +4642,8 @@ body.dark-theme .order-step-dot {
     z-index: 310 !important;
   }
 }
+/* Disable resume cart popup */
+.resume-cart-bar,
+#resumeCartBar {
+  display: none !important;
+}
