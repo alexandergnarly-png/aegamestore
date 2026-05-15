@@ -4653,3 +4653,8 @@ body.dark-theme .order-step-dot {
   visibility: hidden;
   pointer-events: none;
 }
+/* Disable recommendation section */
+.recommendation-section,
+#recommendationSection {
+  display: none !important;
+}

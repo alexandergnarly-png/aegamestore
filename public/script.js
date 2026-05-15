@@ -3628,7 +3628,6 @@ document.addEventListener("DOMContentLoaded", () => {
           renderTrending();
           renderQuickBuy();
           renderGenrePills();
-          renderRecommendations();
         } catch (err) {}
         return result;
       };
@@ -3688,7 +3687,6 @@ document.addEventListener("DOMContentLoaded", () => {
         renderTrending();
         renderQuickBuy();
         renderGenrePills();
-        renderRecommendations();
       } catch (err) {}
     }, 1500);
   }

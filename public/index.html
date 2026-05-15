@@ -452,23 +452,6 @@
           <div class="block">
             <div class="game-grid compact-game-grid" id="gameGrid"></div>
           </div>
-
-          <div
-            class="recommendation-section"
-            id="recommendationSection"
-            hidden
-            aria-label="Recommended games"
-          >
-            <div class="recommendation-head">
-              <span
-                class="recommendation-title"
-                data-i18n="recommendationTitle"
-              >
-                Mungkin Kamu Suka
-              </span>
-            </div>
-            <div class="recommendation-track" id="recommendationTrack"></div>
-          </div>
         </div>
       </section>
     </main>
@@ -871,11 +854,11 @@
       </div>
     </footer>
 
-    <script src="script.js"></script>
     <script>
       setTimeout(() => {
         document.getElementById("preloader")?.classList.add("fade-out");
       }, 5000);
     </script>
+    <script src="script.js"></script>
   </body>
 </html>
