@@ -3088,6 +3088,112 @@ body.dark-theme .swal2-html-container {
   }
 }
 
+/* ===== MOBILE GAME CARD: DENSITY + PERF OPTIMIZATION =====
+   Reduces visible elements per card and disables expensive
+   animations / containment-busting effects on small screens. */
+@media (max-width: 640px) {
+  /* Density: drop category chip (filter pills in toolbar handle it) */
+  .game-card-chip {
+    display: none;
+  }
+
+  /* Smaller heart */
+  .game-card-fav {
+    width: 28px;
+    height: 28px;
+    top: 6px;
+    right: 6px;
+    font-size: 12px;
+    box-shadow: 0 2px 6px rgba(14, 165, 233, 0.18);
+  }
+
+  /* Smaller ribbon */
+  .game-card-ribbon {
+    font-size: 8px;
+    padding: 3px 7px;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+  }
+
+  .game-card-top {
+    top: 6px;
+    left: 6px;
+    right: 40px;
+  }
+
+  /* Tighter body padding/gap */
+  .game-card-body {
+    padding: 8px 9px 10px;
+    gap: 5px;
+  }
+
+  .game-card-title {
+    font-size: 11.5px;
+    line-height: 1.2;
+    letter-spacing: -0.1px;
+  }
+
+  /* Compact price + stock */
+  .game-card-price small {
+    font-size: 8px;
+    letter-spacing: 0.4px;
+  }
+
+  .game-card-price b {
+    font-size: 11.5px;
+  }
+
+  .game-card-stock {
+    font-size: 8.5px;
+    padding: 2px 6px;
+    gap: 4px;
+  }
+
+  /* Thumb overlay tighter */
+  .game-card-thumb-overlay {
+    padding: 14px 8px 6px;
+  }
+
+  .game-card-thumb-overlay strong {
+    font-size: 11.5px;
+    line-clamp: 1;
+    -webkit-line-clamp: 1;
+  }
+
+  /* PERF: kill infinite stock pulse on every card */
+  .game-card-stock-dot {
+    animation: none !important;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.18);
+  }
+
+  .game-card-stock.empty .game-card-stock-dot {
+    box-shadow: 0 0 0 2px rgba(244, 63, 94, 0.18);
+  }
+
+  /* PERF: lazy paint off-screen cards (browser skips render until near viewport) */
+  .game-card {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 220px;
+    contain: layout paint style;
+  }
+
+  /* PERF: lighter shadow on mobile */
+  .game-card,
+  .game-card.active {
+    box-shadow: 0 4px 10px rgba(14, 165, 233, 0.08);
+  }
+
+  /* PERF: kill thumb image zoom on hover (tap devices anyway) */
+  .game-card:hover .game-card-thumb img {
+    transform: none;
+  }
+
+  /* PERF: simpler header on small phones (already 768 block kills backdrop) */
+  .site-header {
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.05);
+  }
+}
+
 /* ===== RECENT VIEWED RAIL ===== */
 .recent-viewed-rail {
   margin-bottom: 18px;
