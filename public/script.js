@@ -3452,43 +3452,79 @@ window.addEventListener("load", () => {
     const banner = document.getElementById("installPromptBanner");
     const action = document.getElementById("installPromptAction");
     const closeBtn = document.getElementById("installPromptClose");
+
     if (!banner || !action || !closeBtn) return;
 
     const dismissedAt = Number(
       localStorage.getItem(STORAGE_KEYS.installDismissed) || 0,
     );
     const sevenDays = 7 * 24 * 60 * 60 * 1000;
+
     if (dismissedAt && Date.now() - dismissedAt < sevenDays) return;
 
-    window.addEventListener("beforeinstallprompt", (e) => {
-      e.preventDefault();
-      state.deferredInstallPrompt = e;
+    function showInstallBanner() {
       banner.hidden = false;
+      document.body.classList.add("install-prompt-open");
+    }
+
+    function hideInstallBanner() {
+      banner.hidden = true;
+      document.body.classList.remove("install-prompt-open");
+      localStorage.setItem(STORAGE_KEYS.installDismissed, String(Date.now()));
+    }
+
+    window.addEventListener("beforeinstallprompt", (event) => {
+      event.preventDefault();
+      state.deferredInstallPrompt = event;
+      showInstallBanner();
     });
 
-    action.addEventListener("click", async () => {
+    action.addEventListener("click", async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+
       const prompt = state.deferredInstallPrompt;
-      if (!prompt) return;
+
+      if (!prompt) {
+        Swal.fire({
+          icon: "info",
+          title: "Install manual",
+          text: "Kalau tombol install belum muncul, tekan menu browser lalu pilih Tambahkan ke layar utama.",
+          confirmButtonColor: "#0ea5e9",
+        });
+        return;
+      }
+
       vibrate(10);
-      prompt.prompt();
+
       try {
+        await prompt.prompt();
         await prompt.userChoice;
       } catch (err) {}
+
       state.deferredInstallPrompt = null;
-      banner.hidden = true;
-      document.body.classList.remove("install-prompt-open");
-      localStorage.setItem(STORAGE_KEYS.installDismissed, String(Date.now()));
+      hideInstallBanner();
     });
 
-    closeBtn.addEventListener("click", () => {
-      banner.hidden = true;
-      document.body.classList.remove("install-prompt-open");
-      localStorage.setItem(STORAGE_KEYS.installDismissed, String(Date.now()));
+    closeBtn.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      hideInstallBanner();
     });
+
+    closeBtn.addEventListener(
+      "touchend",
+      (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        hideInstallBanner();
+      },
+      { passive: false },
+    );
 
     window.addEventListener("appinstalled", () => {
-      banner.hidden = true;
-      localStorage.setItem(STORAGE_KEYS.installDismissed, String(Date.now()));
+      state.deferredInstallPrompt = null;
+      hideInstallBanner();
     });
   }
 
