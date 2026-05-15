@@ -720,6 +720,10 @@ app.get("/auth", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "user-auth.html"));
 });
 
+app.get("/account", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "account.html"));
+});
+
 app.get("/ae-auth", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "admin-login.html"));
 });

@@ -4541,3 +4541,43 @@ body.dark-theme .order-step-dot {
     animation: none;
   }
 }
+/* ===== FIX MOBILE INSTALL PROMPT STACK ===== */
+@media (max-width: 768px) {
+  .install-prompt-banner {
+    left: 12px;
+    right: 12px;
+    bottom: 92px;
+    z-index: 180;
+    max-width: none;
+  }
+
+  .install-prompt-close {
+    position: absolute;
+    top: -14px;
+    right: -8px;
+    z-index: 3;
+    width: 34px;
+    height: 34px;
+  }
+
+  .floating-admin-btn {
+    bottom: 104px;
+    right: 18px;
+    z-index: 170;
+  }
+
+  .bottom-nav {
+    z-index: 120;
+  }
+}
+@media (max-width: 768px) {
+  body:has(.install-prompt-banner:not([hidden])) .floating-admin-btn {
+    display: none !important;
+  }
+}
+/* Hide genre filter on mobile to avoid duplicate "Semua" filters */
+@media (max-width: 768px) {
+  .genre-pills {
+    display: none !important;
+  }
+}

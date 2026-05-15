@@ -1,9 +1,9 @@
-const CACHE_NAME = "ae-game-store-v10";
+const CACHE_NAME = "ae-game-store-v11";
 
 const STATIC_ASSETS = [
   "/",
-  "/style.css?v=41",
-  "/script.js?v=39",
+  "/style.css?v=42",
+  "/script.js?v=40",
   "/manifest.json",
   "/offline.html",
 ];
