@@ -661,12 +661,11 @@
       </div>
     </div>
 
-    <a
-      href="https://t.me/aegamestore"
-      target="_blank"
-      rel="noopener noreferrer"
+    <button
+      type="button"
       class="floating-admin-btn"
-      aria-label="Hubungi Admin via Telegram"
+      id="chatAdminBtn"
+      aria-label="Buka bantuan admin"
     >
       <span class="floating-admin-icon" aria-hidden="true">💬</span>
       <span class="floating-admin-content">
@@ -675,7 +674,80 @@
       </span>
       <span class="floating-admin-badge" aria-hidden="true"></span>
       <span class="floating-admin-online" aria-hidden="true"></span>
-    </a>
+    </button>
+
+    <div class="admin-chat-sheet" id="adminChatSheet" aria-hidden="true">
+      <div class="admin-chat-backdrop" id="adminChatBackdrop"></div>
+
+      <div
+        class="admin-chat-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="adminChatTitle"
+      >
+        <button
+          type="button"
+          class="admin-chat-close"
+          id="adminChatClose"
+          aria-label="Tutup bantuan admin"
+        >
+          ×
+        </button>
+
+        <div class="admin-chat-head">
+          <div class="admin-chat-avatar">💬</div>
+          <div>
+            <h3 id="adminChatTitle">Butuh Bantuan?</h3>
+            <p>Admin AE Game Store siap bantu kamu.</p>
+          </div>
+        </div>
+
+        <div class="admin-chat-status">
+          <span class="admin-chat-dot"></span>
+          <strong>Online sekarang</strong>
+          <small>Estimasi balasan 1–5 menit</small>
+        </div>
+
+        <div class="admin-chat-actions">
+          <a
+            href="https://t.me/aegamestore"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="admin-chat-action primary"
+          >
+            <span>📨</span>
+            <div>
+              <strong>Chat via Telegram</strong>
+              <small>Order, komplain, atau bantuan cepat</small>
+            </div>
+          </a>
+
+          <a href="/account" class="admin-chat-action">
+            <span>📦</span>
+            <div>
+              <strong>Cek Riwayat Pesanan</strong>
+              <small>Lihat status order kamu</small>
+            </div>
+          </a>
+
+          <button
+            type="button"
+            class="admin-chat-action"
+            id="adminChatGuideBtn"
+          >
+            <span>📖</span>
+            <div>
+              <strong>Lihat Cara Beli</strong>
+              <small>Panduan singkat sebelum order</small>
+            </div>
+          </button>
+        </div>
+
+        <p class="admin-chat-note">
+          Sertakan Order ID kalau bertanya soal transaksi.
+        </p>
+      </div>
+    </div>
 
     <div id="toastStack" class="toast-stack" aria-live="polite"></div>
 

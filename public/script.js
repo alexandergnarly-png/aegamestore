@@ -3697,3 +3697,51 @@ document.addEventListener("DOMContentLoaded", () => {
     init();
   }
 })();
+
+function setupAdminChatPopup() {
+  const btn = document.getElementById("chatAdminBtn");
+  const sheet = document.getElementById("adminChatSheet");
+  const closeBtn = document.getElementById("adminChatClose");
+  const backdrop = document.getElementById("adminChatBackdrop");
+  const guideBtn = document.getElementById("adminChatGuideBtn");
+
+  if (!btn || !sheet) return;
+
+  function openAdminChat() {
+    sheet.classList.add("show");
+    sheet.setAttribute("aria-hidden", "false");
+    document.body.classList.add("admin-chat-open");
+  }
+
+  function closeAdminChat() {
+    sheet.classList.remove("show");
+    sheet.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("admin-chat-open");
+  }
+
+  btn.addEventListener("click", (event) => {
+    event.preventDefault();
+    openAdminChat();
+  });
+
+  closeBtn?.addEventListener("click", closeAdminChat);
+  backdrop?.addEventListener("click", closeAdminChat);
+
+  guideBtn?.addEventListener("click", () => {
+    closeAdminChat();
+
+    if (typeof showGuide === "function") {
+      showGuide();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && sheet.classList.contains("show")) {
+      closeAdminChat();
+    }
+  });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  setupAdminChatPopup();
+});
