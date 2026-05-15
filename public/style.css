@@ -4647,3 +4647,9 @@ body.dark-theme .order-step-dot {
 #resumeCartBar {
   display: none !important;
 }
+/* Preloader fail-safe */
+#preloader.fade-out {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}

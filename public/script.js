@@ -2422,20 +2422,17 @@ function showTelegramPopup() {
   }, 700);
 }
 
-window.addEventListener("load", () => {
+document.addEventListener("DOMContentLoaded", () => {
   const preloader = document.getElementById("preloader");
 
   setTimeout(() => {
     if (preloader) {
       preloader.classList.add("fade-out");
     }
-
-    if (window.innerWidth > 768) {
-      showTelegramPopup();
-    }
-  }, 1000);
+  }, 700);
 
   if (window.innerWidth > 768) {
+    setTimeout(showTelegramPopup, 1200);
     setInterval(createSakura, 700);
   }
 
