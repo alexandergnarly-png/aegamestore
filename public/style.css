@@ -1303,9 +1303,9 @@ body.dark-theme .catalog-meta {
 }
 
 .catalog-toolbar {
-  position: sticky;
-  top: calc(var(--header-h) + 8px);
-  z-index: 30;
+  position: relative;
+  top: auto;
+  z-index: 1;
   display: flex;
   flex-wrap: wrap;
   gap: 14px;
@@ -4656,5 +4656,52 @@ body.dark-theme .order-step-dot {
 /* Disable recommendation section */
 .recommendation-section,
 #recommendationSection {
+  display: none !important;
+}
+/* ===== FIX CATALOG TOOLBAR LAYOUT ===== */
+.catalog-toolbar {
+  align-items: stretch;
+}
+
+.catalog-toolbar-right {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.catalog-toolbar-right .search-box {
+  max-width: none;
+  min-width: 260px;
+}
+
+.sort-control {
+  min-height: 48px;
+  align-self: stretch;
+}
+
+@media (max-width: 768px) {
+  .catalog-toolbar {
+    position: relative;
+    top: auto;
+    z-index: 1;
+  }
+
+  .catalog-toolbar-right {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .catalog-toolbar-right .search-box,
+  .sort-control {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+  }
+}
+.genre-pills,
+#genrePills {
   display: none !important;
 }
