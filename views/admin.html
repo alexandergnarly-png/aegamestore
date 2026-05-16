@@ -3790,7 +3790,7 @@
         if (filteredProducts.length === 0) {
           tableBody.innerHTML = `
                               <tr>
-                                <td colspan="9" class="empty">Tidak ada produk yang sesuai filter.</td>
+                                <td colspan="10" class="empty">Tidak ada produk yang sesuai filter.</td>
                               </tr>
                             `;
           return;
@@ -3831,6 +3831,8 @@
         document.getElementById("voucherDurationName").value = "";
         document.getElementById("voucherDiscount").value = "";
         document.getElementById("voucherExpiresAt").value = "";
+        document.getElementById("voucherVisibility").value = "public";
+        document.getElementById("voucherTargetUsername").value = "";
         document.getElementById("saveVoucherBtn").innerText = "Simpan Voucher";
       }
 
@@ -3855,7 +3857,7 @@
             statusText.innerText = "Belum ada voucher.";
             tableBody.innerHTML = `
         <tr>
-          <td colspan="9" class="empty">Belum ada voucher yang dibuat.</td>
+          <td colspan="10" class="empty">Belum ada voucher yang dibuat.</td>
         </tr>
       `;
             return;
@@ -3867,7 +3869,7 @@
           statusText.innerText = "Gagal memuat daftar voucher.";
           tableBody.innerHTML = `
       <tr>
-        <td colspan="9" class="empty">Terjadi error saat mengambil voucher.</td>
+        <td colspan="10" class="empty">Terjadi error saat mengambil voucher.</td>
       </tr>
     `;
         }
@@ -3914,7 +3916,7 @@
         if (filtered.length === 0) {
           tableBody.innerHTML = `
       <tr>
-        <td colspan="9" class="empty">Tidak ada voucher yang sesuai filter.</td>
+        <td colspan="10" class="empty">Tidak ada voucher yang sesuai filter.</td>
       </tr>
     `;
           return;
@@ -3931,7 +3933,12 @@
             );
             const safeDiscount = Number(item.discount_amount || 0);
             const safeExpiresAt = JSON.stringify(String(item.expires_at || ""));
-
+            const safeVisibility = JSON.stringify(
+              String(item.visibility || "public"),
+            );
+            const safeTargetUsername = JSON.stringify(
+              String(item.target_username || ""),
+            );
             return `
         <tr>
           <td>${item.id}</td>
@@ -3940,14 +3947,21 @@
           <td>${escapeHtml(item.brand_name || "Semua")}</td>
           <td>${escapeHtml(item.duration_name || "Semua")}</td>
           <td>${formatRupiah(item.discount_amount || 0)}</td>
-          <td>
-            ${
-              active
-                ? '<span class="badge available">Active</span>'
-                : '<span class="badge used">Inactive</span>'
-            }
-          </td>
-          <td>${escapeHtml(item.expires_at || "-")}</td>
+         <td>
+  ${
+    active
+      ? '<span class="badge available">Active</span>'
+      : '<span class="badge used">Inactive</span>'
+  }
+</td>
+<td>
+  ${
+    String(item.visibility || "public") === "private"
+      ? `<span class="badge used">Private: ${escapeHtml(item.target_username || "-")}</span>`
+      : `<span class="badge available">Public</span>`
+  }
+</td>
+<td>${escapeHtml(item.expires_at || "-")}</td>
           <td>
             <button onclick='editVoucher(${item.id}, ${safeCode}, ${safeGameName}, ${safeBrandName}, ${safeDurationName}, ${safeDiscount}, ${safeExpiresAt}, ${safeVisibility}, ${safeTargetUsername})'>Edit</button>
             <button class="ghost-btn" onclick="toggleVoucherActive(${item.id}, ${active ? 0 : 1})">
@@ -4009,14 +4023,21 @@
           .getElementById("voucherTargetUsername")
           .value.trim();
 
+        const editingVoucherId =
+          document.getElementById("editingVoucherId").value;
+        const voucherUrl = editingVoucherId
+          ? `/vouchers/${editingVoucherId}`
+          : "/vouchers";
+        const voucherMethod = editingVoucherId ? "PUT" : "POST";
+
         if (!code || !gameName || !discountAmount) {
           Swal.fire("Kode, nama game, dan nominal diskon wajib diisi.");
           return;
         }
 
         try {
-          const res = await fetch("/vouchers", {
-            method: "POST",
+          const res = await fetch(voucherUrl, {
+            method: voucherMethod,
             headers: {
               "Content-Type": "application/json",
               "x-csrf-token": getCsrfToken(),
