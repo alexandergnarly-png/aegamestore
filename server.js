@@ -941,7 +941,6 @@ app.post("/vouchers", requireAdminAuth, requireAdminCsrf, async (req, res) => {
       : "public";
 
   let targetUserId = null;
-  fv;
   if (!/^[A-Z0-9_-]{3,30}$/.test(cleanCode)) {
     return res.status(400).json({
       message:
@@ -2390,8 +2389,9 @@ app.get("/public-vouchers", async (req, res) => {
         discount_amount,
         expires_at
       FROM vouchers
-      WHERE active = 1
-        AND (expires_at IS NULL OR expires_at = '' OR expires_at > to_char(NOW(), 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'))
+WHERE active = 1
+  AND COALESCE(visibility, 'public') = 'public'
+  AND (expires_at IS NULL OR expires_at = '' OR expires_at > to_char(NOW(), 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'))
       ORDER BY discount_amount DESC
       LIMIT 50
       `,
