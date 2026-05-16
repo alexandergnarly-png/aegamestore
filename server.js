@@ -203,6 +203,15 @@ db.query(
 db.query(`ALTER TABLE vouchers ADD COLUMN IF NOT EXISTS brand_name TEXT`);
 db.query(`ALTER TABLE vouchers ADD COLUMN IF NOT EXISTS duration_name TEXT`);
 db.query(
+  `ALTER TABLE vouchers ADD COLUMN IF NOT EXISTS visibility TEXT DEFAULT 'public'`,
+);
+db.query(
+  `ALTER TABLE vouchers ADD COLUMN IF NOT EXISTS target_user_id INTEGER`,
+);
+db.query(
+  `CREATE INDEX IF NOT EXISTS idx_vouchers_target_user_id ON vouchers(target_user_id)`,
+);
+db.query(
   `ALTER TABLE products ADD COLUMN IF NOT EXISTS delivery_type TEXT DEFAULT 'auto'`,
 );
 db.query(
@@ -485,6 +494,7 @@ async function getVoucherDiscount({
   durationName,
   voucherCode,
   productPrice,
+  userId,
 }) {
   const cleanCode = normalizeVoucherCode(voucherCode);
 
@@ -520,6 +530,22 @@ async function getVoucherDiscount({
       valid: false,
       message: "Kode voucher tidak ditemukan atau tidak aktif",
     };
+  }
+
+  const voucherVisibility = String(
+    voucher.visibility || "public",
+  ).toLowerCase();
+  const voucherTargetUserId = voucher.target_user_id
+    ? Number(voucher.target_user_id)
+    : null;
+
+  if (voucherVisibility === "private") {
+    if (!userId || Number(userId) !== voucherTargetUserId) {
+      return {
+        valid: false,
+        message: "Voucher ini khusus untuk buyer tertentu",
+      };
+    }
   }
 
   const targetGame = String(voucher.game_name || "")
@@ -913,6 +939,8 @@ app.post("/vouchers", requireAdminAuth, requireAdminCsrf, async (req, res) => {
     duration_name,
     discount_amount,
     expires_at,
+    visibility,
+    target_username,
   } = req.body;
 
   const cleanCode = normalizeVoucherCode(code);
@@ -921,6 +949,35 @@ app.post("/vouchers", requireAdminAuth, requireAdminCsrf, async (req, res) => {
   const cleanDurationName = String(duration_name || "").trim();
   const discountAmount = Number(discount_amount);
   const expiresAt = expires_at ? String(expires_at).trim() : null;
+  const cleanVisibility =
+    String(visibility || "public")
+      .trim()
+      .toLowerCase() === "private"
+      ? "private"
+      : "public";
+  const cleanTargetUsername = String(target_username || "").trim();
+  let targetUserId = null;
+
+  if (cleanVisibility === "private") {
+    if (!cleanTargetUsername) {
+      return res.status(400).json({
+        message: "Username buyer wajib diisi untuk voucher khusus buyer",
+      });
+    }
+
+    const userResult = await query(
+      "SELECT id FROM users WHERE username = $1 LIMIT 1",
+      [cleanTargetUsername],
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({
+        message: "Buyer target tidak ditemukan",
+      });
+    }
+
+    targetUserId = userResult.rows[0].id;
+  }
 
   if (!/^[A-Z0-9_-]{3,30}$/.test(cleanCode)) {
     return res.status(400).json({
@@ -944,9 +1001,9 @@ app.post("/vouchers", requireAdminAuth, requireAdminCsrf, async (req, res) => {
   try {
     await query(
       `INSERT INTO vouchers
-  (code, game_name, brand_name, duration_name, discount_amount, active, expires_at, created_at)
+  (code, game_name, brand_name, duration_name, discount_amount, active, expires_at, created_at, visibility, target_user_id)
  VALUES
-  ($1, $2, $3, $4, $5, 1, $6, $7)
+  ($1, $2, $3, $4, $5, 1, $6, $7, $8, $9)
  ON CONFLICT (code)
  DO UPDATE SET
   game_name = EXCLUDED.game_name,
@@ -954,7 +1011,9 @@ app.post("/vouchers", requireAdminAuth, requireAdminCsrf, async (req, res) => {
   duration_name = EXCLUDED.duration_name,
   discount_amount = EXCLUDED.discount_amount,
   active = 1,
-  expires_at = EXCLUDED.expires_at`,
+  expires_at = EXCLUDED.expires_at,
+  visibility = EXCLUDED.visibility,
+  target_user_id = EXCLUDED.target_user_id`,
       [
         cleanCode,
         cleanGameName,
@@ -963,6 +1022,8 @@ app.post("/vouchers", requireAdminAuth, requireAdminCsrf, async (req, res) => {
         discountAmount,
         expiresAt,
         new Date().toISOString(),
+        cleanVisibility,
+        targetUserId,
       ],
     );
 
@@ -990,6 +1051,8 @@ app.put(
       duration_name,
       discount_amount,
       expires_at,
+      visibility,
+      target_username,
     } = req.body;
 
     const cleanCode = normalizeVoucherCode(code);
@@ -998,6 +1061,35 @@ app.put(
     const cleanDurationName = String(duration_name || "").trim();
     const discountAmount = Number(discount_amount);
     const expiresAt = expires_at ? String(expires_at).trim() : null;
+    const cleanVisibility =
+      String(visibility || "public")
+        .trim()
+        .toLowerCase() === "private"
+        ? "private"
+        : "public";
+    const cleanTargetUsername = String(target_username || "").trim();
+    let targetUserId = null;
+
+    if (cleanVisibility === "private") {
+      if (!cleanTargetUsername) {
+        return res.status(400).json({
+          message: "Username buyer wajib diisi untuk voucher khusus buyer",
+        });
+      }
+
+      const userResult = await query(
+        "SELECT id FROM users WHERE username = $1 LIMIT 1",
+        [cleanTargetUsername],
+      );
+
+      if (userResult.rows.length === 0) {
+        return res.status(404).json({
+          message: "Buyer target tidak ditemukan",
+        });
+      }
+
+      targetUserId = userResult.rows[0].id;
+    }
 
     if (!Number.isInteger(voucherId) || voucherId <= 0) {
       return res.status(400).json({ message: "ID voucher tidak valid" });
@@ -1040,14 +1132,16 @@ app.put(
 
       const result = await query(
         `UPDATE vouchers
-         SET code = $1,
-             game_name = $2,
-             brand_name = $3,
-             duration_name = $4,
-             discount_amount = $5,
-             expires_at = $6
-         WHERE id = $7
-         RETURNING id`,
+   SET code = $1,
+       game_name = $2,
+       brand_name = $3,
+       duration_name = $4,
+       discount_amount = $5,
+       expires_at = $6,
+       visibility = $7,
+       target_user_id = $8
+   WHERE id = $9
+   RETURNING id`,
         [
           cleanCode,
           cleanGameName,
@@ -1055,6 +1149,8 @@ app.put(
           cleanDurationName || null,
           discountAmount,
           expiresAt,
+          cleanVisibility,
+          targetUserId,
           voucherId,
         ],
       );
@@ -1080,7 +1176,10 @@ app.put(
 app.get("/vouchers", requireAdminAuth, async (req, res) => {
   try {
     const result = await query(
-      "SELECT * FROM vouchers ORDER BY created_at DESC, id DESC",
+      `SELECT vouchers.*, users.username AS target_username
+        FROM vouchers
+        LEFT JOIN users ON users.id = vouchers.target_user_id
+        ORDER BY vouchers.created_at DESC, vouchers.id DESC`,
     );
 
     return res.json(result.rows);
@@ -1199,6 +1298,7 @@ app.post("/voucher-preview", voucherPreviewLimiter, async (req, res) => {
       durationName: productRow.duration,
       voucherCode: cleanVoucherCode,
       productPrice: originalPrice,
+      userId: loggedInUser.id,
     });
 
     if (!voucherCheck.valid) {
@@ -1304,6 +1404,7 @@ app.post("/create-order", orderLimiter, async (req, res) => {
       durationName: productRow.duration,
       voucherCode: voucher_code,
       productPrice: originalPrice,
+      userId: loggedInUser.id,
     });
 
     if (!voucherCheck.valid) {

@@ -2165,6 +2165,21 @@
             </div>
           </div>
 
+          <div class="field">
+            <select id="voucherVisibility">
+              <option value="public">Public Voucher</option>
+              <option value="private">Khusus Buyer Tertentu</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <input
+              type="text"
+              id="voucherTargetUsername"
+              placeholder="Username buyer target, kosongkan jika public"
+            />
+          </div>
+
           <div class="toolbar">
             <div class="btn-group">
               <button id="saveVoucherBtn" onclick="saveVoucher()">
@@ -2196,6 +2211,7 @@
                   <th>Durasi</th>
                   <th>Diskon</th>
                   <th>Status</th>
+                  <th>Scope</th>
                   <th>Expired</th>
                   <th style="width: 220px">Aksi</th>
                 </tr>
@@ -3009,6 +3025,12 @@
 
         tableBody.innerHTML = filteredOrders
           .map((item) => {
+            const safeVisibility = JSON.stringify(
+              String(item.visibility || "public"),
+            );
+            const safeTargetUsername = JSON.stringify(
+              String(item.target_username || ""),
+            );
             const safeId = JSON.stringify(String(item.id || ""));
             const safeName = JSON.stringify(String(item.name || ""));
             const safeContact = JSON.stringify(String(item.contact || ""));
@@ -3821,7 +3843,6 @@
 
         try {
           const res = await fetch("/vouchers");
-
           if (res.status === 401) {
             window.location.href = "/ae-auth";
             return;
@@ -3928,7 +3949,7 @@
           </td>
           <td>${escapeHtml(item.expires_at || "-")}</td>
           <td>
-            <button onclick='editVoucher(${item.id}, ${safeCode}, ${safeGameName}, ${safeBrandName}, ${safeDurationName}, ${safeDiscount}, ${safeExpiresAt})'>Edit</button>
+            <button onclick='editVoucher(${item.id}, ${safeCode}, ${safeGameName}, ${safeBrandName}, ${safeDurationName}, ${safeDiscount}, ${safeExpiresAt}, ${safeVisibility}, ${safeTargetUsername})'>Edit</button>
             <button class="ghost-btn" onclick="toggleVoucherActive(${item.id}, ${active ? 0 : 1})">
               ${active ? "Nonaktifkan" : "Aktifkan"}
             </button>
@@ -3948,7 +3969,13 @@
         durationName,
         discountAmount,
         expiresAt,
+        visibility,
+        targetUsername,
       ) {
+        document.getElementById("voucherVisibility").value =
+          visibility || "public";
+        document.getElementById("voucherTargetUsername").value =
+          targetUsername || "";
         document.getElementById("editingVoucherId").value = id;
         document.getElementById("voucherCode").value = code;
         document.getElementById("voucherGameName").value = gameName;
@@ -3977,6 +4004,10 @@
         const expiresAt = document
           .getElementById("voucherExpiresAt")
           .value.trim();
+        const visibility = document.getElementById("voucherVisibility").value;
+        const targetUsername = document
+          .getElementById("voucherTargetUsername")
+          .value.trim();
 
         if (!code || !gameName || !discountAmount) {
           Swal.fire("Kode, nama game, dan nominal diskon wajib diisi.");
@@ -3997,6 +4028,8 @@
               duration_name: durationName || null,
               discount_amount: Number(discountAmount),
               expires_at: expiresAt || null,
+              visibility,
+              target_username: visibility === "private" ? targetUsername : null,
             }),
           });
 
