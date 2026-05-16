@@ -2168,7 +2168,7 @@
           <div class="field">
             <select id="voucherVisibility">
               <option value="public">Public Voucher</option>
-              <option value="private">Khusus Buyer Tertentu</option>
+              <option value="private">Private / Hidden Voucher</option>
             </select>
           </div>
 
@@ -2176,7 +2176,7 @@
             <input
               type="text"
               id="voucherTargetUsername"
-              placeholder="Username buyer target, kosongkan jika public"
+              placeholder="Kosongkan — private cukup pakai kode voucher"
             />
           </div>
 
@@ -3957,7 +3957,7 @@
 <td>
   ${
     String(item.visibility || "public") === "private"
-      ? `<span class="badge used">Private: ${escapeHtml(item.target_username || "-")}</span>`
+      ? `<span class="badge used">Private / Hidden</span>`
       : `<span class="badge available">Public</span>`
   }
 </td>
@@ -4050,7 +4050,7 @@
               discount_amount: Number(discountAmount),
               expires_at: expiresAt || null,
               visibility,
-              target_username: visibility === "private" ? targetUsername : null,
+              target_username: null,
             }),
           });
 

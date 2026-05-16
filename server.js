@@ -532,22 +532,6 @@ async function getVoucherDiscount({
     };
   }
 
-  const voucherVisibility = String(
-    voucher.visibility || "public",
-  ).toLowerCase();
-  const voucherTargetUserId = voucher.target_user_id
-    ? Number(voucher.target_user_id)
-    : null;
-
-  if (voucherVisibility === "private") {
-    if (!userId || Number(userId) !== voucherTargetUserId) {
-      return {
-        valid: false,
-        message: "Voucher ini khusus untuk buyer tertentu",
-      };
-    }
-  }
-
   const targetGame = String(voucher.game_name || "")
     .trim()
     .toLowerCase();
@@ -955,30 +939,9 @@ app.post("/vouchers", requireAdminAuth, requireAdminCsrf, async (req, res) => {
       .toLowerCase() === "private"
       ? "private"
       : "public";
-  const cleanTargetUsername = String(target_username || "").trim();
+
   let targetUserId = null;
-
-  if (cleanVisibility === "private") {
-    if (!cleanTargetUsername) {
-      return res.status(400).json({
-        message: "Username buyer wajib diisi untuk voucher khusus buyer",
-      });
-    }
-
-    const userResult = await query(
-      "SELECT id FROM users WHERE username = $1 LIMIT 1",
-      [cleanTargetUsername],
-    );
-
-    if (userResult.rows.length === 0) {
-      return res.status(404).json({
-        message: "Buyer target tidak ditemukan",
-      });
-    }
-
-    targetUserId = userResult.rows[0].id;
-  }
-
+  fv;
   if (!/^[A-Z0-9_-]{3,30}$/.test(cleanCode)) {
     return res.status(400).json({
       message:
@@ -1067,29 +1030,7 @@ app.put(
         .toLowerCase() === "private"
         ? "private"
         : "public";
-    const cleanTargetUsername = String(target_username || "").trim();
     let targetUserId = null;
-
-    if (cleanVisibility === "private") {
-      if (!cleanTargetUsername) {
-        return res.status(400).json({
-          message: "Username buyer wajib diisi untuk voucher khusus buyer",
-        });
-      }
-
-      const userResult = await query(
-        "SELECT id FROM users WHERE username = $1 LIMIT 1",
-        [cleanTargetUsername],
-      );
-
-      if (userResult.rows.length === 0) {
-        return res.status(404).json({
-          message: "Buyer target tidak ditemukan",
-        });
-      }
-
-      targetUserId = userResult.rows[0].id;
-    }
 
     if (!Number.isInteger(voucherId) || voucherId <= 0) {
       return res.status(400).json({ message: "ID voucher tidak valid" });
