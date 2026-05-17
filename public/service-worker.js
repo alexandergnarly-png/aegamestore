@@ -1,4 +1,4 @@
-const CACHE_NAME = "ae-game-store-auto-v1";
+const CACHE_NAME = "ae-game-store-auto-v2";
 
 const STATIC_ASSETS = [
   "/",
@@ -49,7 +49,11 @@ self.addEventListener("fetch", (event) => {
     requestUrl.pathname.startsWith("/create-order") ||
     requestUrl.pathname.startsWith("/user/") ||
     requestUrl.pathname.startsWith("/orders") ||
-    requestUrl.pathname.startsWith("/order/");
+    requestUrl.pathname.startsWith("/order/") ||
+    requestUrl.pathname.startsWith("/admin-orders") ||
+    requestUrl.pathname.startsWith("/admin-") ||
+    requestUrl.pathname.startsWith("/ae-control") ||
+    requestUrl.pathname.startsWith("/ae-auth");
 
   if (isDynamicRequest) return;
 

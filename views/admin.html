@@ -1527,6 +1527,792 @@
           font-size: 12px;
         }
       }
+
+      /* ============================================================
+         ADMIN UPGRADE BATCH ADM-1 — Mobile foundation + order ops
+         (Card-view table, bottom-nav, FAB, skeleton, drawer, etc.)
+         ============================================================ */
+
+      :root {
+        --safe-bottom: env(safe-area-inset-bottom, 0px);
+      }
+
+      /* === Skeleton loader === */
+      @keyframes adminShimmer {
+        0% {
+          background-position: -480px 0;
+        }
+        100% {
+          background-position: 480px 0;
+        }
+      }
+      .skeleton-row {
+        background: linear-gradient(
+          90deg,
+          var(--card-bg-soft, rgba(255, 255, 255, 0.5)) 0%,
+          var(--card-bg-strong, rgba(255, 255, 255, 0.85)) 50%,
+          var(--card-bg-soft, rgba(255, 255, 255, 0.5)) 100%
+        );
+        background-size: 480px 100%;
+        animation: adminShimmer 1.2s linear infinite;
+        border-radius: 10px;
+        height: 18px;
+        margin: 6px 0;
+      }
+      .skeleton-block {
+        background: linear-gradient(
+          90deg,
+          var(--card-bg-soft, rgba(255, 255, 255, 0.5)) 0%,
+          var(--card-bg-strong, rgba(255, 255, 255, 0.85)) 50%,
+          var(--card-bg-soft, rgba(255, 255, 255, 0.5)) 100%
+        );
+        background-size: 480px 100%;
+        animation: adminShimmer 1.2s linear infinite;
+        border-radius: 14px;
+        height: 56px;
+        margin-bottom: 10px;
+      }
+      body.dark-theme .skeleton-row,
+      body.dark-theme .skeleton-block {
+        background: linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0.04) 0%,
+          rgba(255, 255, 255, 0.12) 50%,
+          rgba(255, 255, 255, 0.04) 100%
+        );
+        background-size: 480px 100%;
+      }
+
+      /* === Offline banner === */
+      .admin-offline-banner {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 500;
+        background: linear-gradient(90deg, #f97316, #fb923c);
+        color: #fff;
+        font-weight: 700;
+        font-size: 13px;
+        padding: 8px 14px;
+        text-align: center;
+        box-shadow: 0 4px 14px rgba(249, 115, 22, 0.35);
+        transform: translateY(-100%);
+        transition: transform 0.3s ease;
+        pointer-events: none;
+      }
+      .admin-offline-banner.show {
+        transform: translateY(0);
+        pointer-events: auto;
+      }
+
+      /* === Date range filter row === */
+      .date-range-row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .date-range-row .field {
+        min-width: 150px;
+      }
+      .date-range-row input[type="date"] {
+        width: 100%;
+      }
+      .date-quick-chips {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .date-quick-chip {
+        padding: 6px 12px;
+        border-radius: 999px;
+        border: 1px solid var(--card-border);
+        background: var(--card-bg);
+        color: var(--text-main);
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        min-height: 34px;
+      }
+      .date-quick-chip:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+      }
+      .date-quick-chip.active {
+        background: var(--primary);
+        color: #fff;
+        border-color: var(--primary);
+      }
+
+      /* === Pagination bar === */
+      .pagination-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 12px 4px;
+        flex-wrap: wrap;
+        font-size: 12px;
+        color: var(--text-muted);
+      }
+      .pagination-controls {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .page-btn {
+        padding: 7px 12px;
+        min-width: 40px;
+        min-height: 38px;
+        border-radius: 8px;
+        border: 1px solid var(--card-border);
+        background: var(--card-bg);
+        color: var(--text-main);
+        font-weight: 700;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+      .page-btn:hover:not(:disabled) {
+        border-color: var(--primary);
+        color: var(--primary);
+      }
+      .page-btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+      .page-btn.active {
+        background: var(--primary);
+        color: #fff;
+        border-color: var(--primary);
+      }
+      .page-summary {
+        font-weight: 700;
+        color: var(--text-muted);
+      }
+
+      /* === Order detail drawer === */
+      .order-drawer-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.45);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        z-index: 480;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+      }
+      .order-drawer-backdrop.show {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .order-drawer {
+        position: fixed;
+        top: 0;
+        right: 0;
+        height: 100vh;
+        height: 100dvh;
+        width: 460px;
+        max-width: 92vw;
+        background: var(--card-bg-strong, #fff);
+        border-left: 1px solid var(--card-border);
+        box-shadow: -20px 0 40px rgba(15, 23, 42, 0.15);
+        z-index: 490;
+        transform: translateX(100%);
+        transition: transform 0.25s ease;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      .order-drawer.show {
+        transform: translateX(0);
+      }
+      .order-drawer-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 20px;
+        border-bottom: 1px solid var(--card-border);
+        background: var(--table-head-bg);
+        flex-shrink: 0;
+      }
+      .order-drawer-head h3 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 800;
+        color: var(--primary-strong);
+      }
+      .order-drawer-close {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        border: none;
+        background: var(--card-bg);
+        color: var(--text-main);
+        font-size: 18px;
+        cursor: pointer;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .order-drawer-close:hover {
+        background: var(--card-bg-soft, rgba(255, 255, 255, 0.6));
+        color: var(--primary);
+      }
+      .order-drawer-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 18px 20px;
+        padding-bottom: calc(20px + var(--safe-bottom));
+      }
+      .order-drawer-section {
+        margin-bottom: 18px;
+      }
+      .order-drawer-section h4 {
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-muted);
+        margin: 0 0 8px;
+      }
+      .order-drawer-field {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 8px 0;
+        border-bottom: 1px dashed var(--card-border-soft, rgba(0, 0, 0, 0.06));
+        font-size: 13px;
+      }
+      .order-drawer-field:last-child {
+        border-bottom: none;
+      }
+      .order-drawer-field .label {
+        color: var(--text-muted);
+        font-weight: 600;
+        flex-shrink: 0;
+      }
+      .order-drawer-field .value {
+        text-align: right;
+        font-weight: 700;
+        color: var(--text-main);
+        word-break: break-all;
+      }
+      .order-drawer-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        padding: 14px 20px;
+        padding-bottom: calc(14px + var(--safe-bottom));
+        border-top: 1px solid var(--card-border);
+        background: var(--card-bg);
+        flex-shrink: 0;
+      }
+      .order-drawer-actions button {
+        flex: 1 1 calc(50% - 4px);
+        min-height: 44px;
+        font-weight: 700;
+      }
+      .order-timeline {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 14px;
+      }
+      .order-timeline-step {
+        flex: 1;
+        text-align: center;
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-muted);
+      }
+      .order-timeline-step .dot {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: var(--card-border);
+        margin: 0 auto 4px;
+        border: 2px solid var(--card-bg);
+        box-shadow: 0 0 0 1px var(--card-border);
+      }
+      .order-timeline-step.done .dot {
+        background: #22c55e;
+        box-shadow: 0 0 0 1px #22c55e;
+      }
+      .order-timeline-step.done {
+        color: #22c55e;
+      }
+      .order-timeline-step.failed .dot {
+        background: #ef4444;
+        box-shadow: 0 0 0 1px #ef4444;
+      }
+      .order-timeline-step.failed {
+        color: #ef4444;
+      }
+
+      /* === FAB Quick Action === */
+      .admin-fab {
+        position: fixed;
+        right: 18px;
+        bottom: calc(82px + var(--safe-bottom));
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #0ea5e9, #06b6d4);
+        color: #fff;
+        border: none;
+        font-size: 26px;
+        font-weight: 800;
+        line-height: 1;
+        cursor: pointer;
+        box-shadow:
+          0 12px 32px rgba(14, 165, 233, 0.45),
+          0 4px 8px rgba(14, 165, 233, 0.25);
+        z-index: 150;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        transition:
+          transform 0.2s ease,
+          box-shadow 0.2s ease;
+      }
+      .admin-fab:hover {
+        transform: translateY(-2px) scale(1.04);
+        box-shadow:
+          0 16px 38px rgba(14, 165, 233, 0.55),
+          0 6px 12px rgba(14, 165, 233, 0.3);
+      }
+      .admin-fab:active {
+        transform: scale(0.95);
+      }
+
+      /* === Bottom navigation (mobile) === */
+      .admin-bottom-nav {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: calc(64px + var(--safe-bottom));
+        padding-bottom: var(--safe-bottom);
+        background: var(--card-bg-strong, rgba(255, 255, 255, 0.96));
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-top: 1px solid var(--card-border);
+        box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.08);
+        z-index: 130;
+        display: none;
+        align-items: stretch;
+        justify-content: space-around;
+      }
+      .admin-bottom-nav-btn {
+        flex: 1;
+        background: none;
+        border: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        padding: 6px 4px;
+        cursor: pointer;
+        color: var(--text-muted);
+        min-height: 60px;
+        position: relative;
+        transition: color 0.15s ease;
+      }
+      .admin-bottom-nav-btn .ico {
+        font-size: 20px;
+        line-height: 1;
+      }
+      .admin-bottom-nav-btn .label {
+        font-size: 10px;
+        font-weight: 700;
+      }
+      .admin-bottom-nav-btn.active {
+        color: var(--primary);
+      }
+      .admin-bottom-nav-btn.active::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 30%;
+        right: 30%;
+        height: 3px;
+        background: var(--primary);
+        border-radius: 0 0 4px 4px;
+      }
+
+      /* === More drawer (bottom-sheet for Game Key + Voucher) === */
+      .admin-more-sheet-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.5);
+        z-index: 200;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+      }
+      .admin-more-sheet-backdrop.show {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .admin-more-sheet {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: var(--card-bg-strong, #fff);
+        border-radius: 22px 22px 0 0;
+        box-shadow: 0 -20px 40px rgba(15, 23, 42, 0.18);
+        z-index: 210;
+        padding: 18px 18px calc(24px + var(--safe-bottom));
+        transform: translateY(100%);
+        transition: transform 0.25s ease;
+      }
+      .admin-more-sheet.show {
+        transform: translateY(0);
+      }
+      .admin-more-sheet-handle {
+        width: 44px;
+        height: 5px;
+        border-radius: 999px;
+        background: var(--card-border);
+        margin: 0 auto 14px;
+      }
+      .admin-more-sheet h4 {
+        margin: 0 0 12px;
+        font-size: 14px;
+        font-weight: 800;
+        color: var(--primary-strong);
+      }
+      .admin-more-sheet-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+      .admin-more-sheet-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        padding: 14px 10px;
+        border-radius: 14px;
+        border: 1px solid var(--card-border);
+        background: var(--card-bg);
+        color: var(--text-main);
+        font-weight: 700;
+        font-size: 12px;
+        cursor: pointer;
+        min-height: 80px;
+      }
+      .admin-more-sheet-item .ico {
+        font-size: 22px;
+      }
+      .admin-more-sheet-item:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+      }
+      .admin-more-sheet-logout {
+        margin-top: 14px;
+        width: 100%;
+        padding: 12px 16px;
+        border-radius: 12px;
+        border: 1px solid #ef4444;
+        background: transparent;
+        color: #ef4444;
+        font-weight: 700;
+        cursor: pointer;
+        min-height: 46px;
+      }
+
+      /* === Row action buttons spacing (desktop) === */
+      .row-action-group {
+        display: inline-flex;
+        flex-wrap: wrap;
+        gap: 4px;
+      }
+
+      /* === Mobile: transform tables to stacked cards === */
+      @media (max-width: 768px) {
+        body {
+          padding-bottom: 78px;
+        }
+
+        .table-wrap {
+          background: transparent;
+          border: none;
+          backdrop-filter: none;
+          -webkit-backdrop-filter: none;
+        }
+
+        table,
+        thead,
+        tbody,
+        th,
+        td,
+        tr {
+          display: block;
+          width: 100%;
+        }
+
+        table {
+          min-width: 0;
+          width: 100%;
+        }
+
+        thead {
+          display: none;
+        }
+
+        tbody tr {
+          background: var(--card-bg-strong, #fff);
+          border: 1px solid var(--card-border);
+          border-radius: 14px;
+          padding: 12px 14px;
+          margin-bottom: 10px;
+          box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+        }
+
+        tbody tr:nth-child(even) {
+          background: var(--card-bg-strong, #fff);
+        }
+
+        tbody tr:hover {
+          background: var(--card-bg-strong, #fff);
+        }
+
+        tbody td {
+          padding: 7px 0;
+          border-bottom: 1px dashed var(--card-border-soft, rgba(0, 0, 0, 0.06));
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 10px;
+          font-size: 13px;
+          text-align: right;
+        }
+
+        tbody td:last-child {
+          border-bottom: none;
+          flex-direction: column;
+          align-items: stretch;
+          padding-top: 10px;
+        }
+
+        tbody td::before {
+          content: attr(data-label);
+          font-weight: 700;
+          color: var(--text-muted);
+          text-transform: uppercase;
+          font-size: 10px;
+          letter-spacing: 0.4px;
+          margin-right: 12px;
+          flex-shrink: 0;
+          text-align: left;
+        }
+
+        tbody td.action-cell::before,
+        tbody td[data-label="Aksi"]::before {
+          display: block;
+          margin-bottom: 8px;
+        }
+
+        td button,
+        .row-action-group button {
+          min-height: 40px;
+          padding: 10px 12px;
+          font-size: 12px;
+          flex: 1 1 calc(50% - 4px);
+          margin: 0;
+          width: auto;
+        }
+
+        td input[type="checkbox"] {
+          width: 22px;
+          height: 22px;
+        }
+
+        .key-mask {
+          max-width: 200px;
+          text-align: right;
+          word-break: break-all;
+        }
+
+        .key-action-row {
+          flex-direction: row;
+          gap: 4px;
+        }
+
+        /* Bottom nav + FAB visible only on mobile */
+        .admin-bottom-nav {
+          display: flex;
+        }
+        .admin-fab {
+          display: flex;
+        }
+
+        /* Sidebar tetap di atas tapi minimal */
+        .sidebar {
+          display: none;
+        }
+        body.has-bottom-nav .sidebar {
+          display: none;
+        }
+
+        /* Sticky toolbar filter */
+        .toolbar {
+          position: sticky;
+          top: 0;
+          background: var(--bg, #fff);
+          z-index: 50;
+          padding-top: 4px;
+          padding-bottom: 4px;
+        }
+        .card .toolbar:first-of-type {
+          margin-top: -8px;
+        }
+
+        /* Stat grid: horizontal scroll rail */
+        .stats {
+          display: flex !important;
+          overflow-x: auto;
+          gap: 10px;
+          padding-bottom: 6px;
+          -webkit-overflow-scrolling: touch;
+          scroll-snap-type: x mandatory;
+        }
+        .stat-card {
+          flex: 0 0 75%;
+          scroll-snap-align: start;
+          padding: 14px;
+        }
+
+        /* Top nav simpler */
+        .top-nav {
+          padding: 10px 12px;
+        }
+        .nav-actions {
+          gap: 8px;
+        }
+        .nav-chip {
+          font-size: 11px;
+          padding: 6px 10px;
+        }
+        .admin-role-chip {
+          font-size: 11px;
+          padding: 6px 10px;
+        }
+
+        /* SweetAlert mobile sizing */
+        .swal2-popup {
+          width: 92vw !important;
+          max-width: 420px !important;
+          padding: 16px !important;
+        }
+        .swal2-title {
+          font-size: 17px !important;
+        }
+        .swal2-html-container {
+          font-size: 13px !important;
+        }
+        .swal2-actions button {
+          min-height: 44px !important;
+          padding: 10px 18px !important;
+        }
+
+        /* Date range row stacked */
+        .date-range-row {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        /* Pagination wraps neatly */
+        .pagination-bar {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .pagination-controls {
+          justify-content: center;
+        }
+      }
+
+      /* === Force minimum 44px tap target on all admin buttons (mobile) === */
+      @media (max-width: 768px) {
+        button {
+          min-height: 44px;
+        }
+        .toolbar .btn-group button {
+          flex: 1 1 calc(50% - 5px);
+        }
+      }
+
+      /* === Manual deliver / cancel modal helpers === */
+      .modal-field {
+        text-align: left;
+        margin-bottom: 12px;
+      }
+      .modal-field label {
+        display: block;
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-muted);
+        margin-bottom: 6px;
+      }
+      .modal-field input,
+      .modal-field textarea {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 10px;
+        border: 1.5px solid var(--card-border);
+        background: var(--card-bg);
+        color: var(--text-main);
+        font-size: 14px;
+        font-weight: 600;
+        font-family: inherit;
+      }
+      .modal-field input:focus,
+      .modal-field textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+      }
+      .modal-field textarea {
+        min-height: 90px;
+        resize: vertical;
+      }
+      .modal-field-hint {
+        font-size: 11px;
+        color: var(--text-muted);
+        margin-top: 4px;
+      }
+
+      /* === Dark theme adjustments === */
+      body.dark-theme .admin-bottom-nav {
+        background: rgba(15, 23, 42, 0.96);
+      }
+      body.dark-theme .order-drawer {
+        background: #1e293b;
+      }
+      body.dark-theme .admin-more-sheet {
+        background: #1e293b;
+      }
+      body.dark-theme .order-drawer-head {
+        background: #0f172a;
+      }
+      body.dark-theme .admin-fab {
+        box-shadow:
+          0 12px 32px rgba(14, 165, 233, 0.55),
+          0 4px 8px rgba(14, 165, 233, 0.3);
+      }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </head>
@@ -1917,6 +2703,9 @@
 
             <div class="btn-group">
               <button onclick="loadOrders()">Refresh Order</button>
+              <button class="ghost-btn" onclick="exportOrdersCSV()">
+                Export CSV
+              </button>
               <button class="ghost-btn" onclick="selectAllFilteredOrders()">
                 Pilih Semua Filter
               </button>
@@ -1926,6 +2715,78 @@
               <button class="ghost-btn" onclick="clearSelectedOrders()">
                 Batal Pilih
               </button>
+            </div>
+          </div>
+
+          <div class="toolbar">
+            <div class="date-range-row" style="width: 100%">
+              <div class="field">
+                <label
+                  for="orderFromDate"
+                  style="
+                    display: block;
+                    font-size: 11px;
+                    text-transform: uppercase;
+                    color: var(--text-muted);
+                    margin-bottom: 4px;
+                    font-weight: 800;
+                  "
+                  >Dari</label
+                >
+                <input type="date" id="orderFromDate" />
+              </div>
+              <div class="field">
+                <label
+                  for="orderToDate"
+                  style="
+                    display: block;
+                    font-size: 11px;
+                    text-transform: uppercase;
+                    color: var(--text-muted);
+                    margin-bottom: 4px;
+                    font-weight: 800;
+                  "
+                  >Sampai</label
+                >
+                <input type="date" id="orderToDate" />
+              </div>
+              <div
+                class="date-quick-chips"
+                style="align-self: flex-end; padding-bottom: 2px"
+              >
+                <button
+                  type="button"
+                  class="date-quick-chip"
+                  data-range="today"
+                  onclick="setOrderDateRange('today', this)"
+                >
+                  Hari ini
+                </button>
+                <button
+                  type="button"
+                  class="date-quick-chip"
+                  data-range="7d"
+                  onclick="setOrderDateRange('7d', this)"
+                >
+                  7 hari
+                </button>
+                <button
+                  type="button"
+                  class="date-quick-chip"
+                  data-range="30d"
+                  onclick="setOrderDateRange('30d', this)"
+                >
+                  30 hari
+                </button>
+                <button
+                  type="button"
+                  class="date-quick-chip"
+                  data-range="all"
+                  onclick="setOrderDateRange('all', this)"
+                >
+                  Semua
+                </button>
+              </div>
             </div>
           </div>
 
@@ -1950,11 +2811,29 @@
                   <th>Pengiriman</th>
                   <th>Game Key</th>
                   <th>Waktu</th>
-                  <th style="width: 160px">Aksi</th>
+                  <th style="width: 220px">Aksi</th>
                 </tr>
               </thead>
               <tbody id="orderTableBody"></tbody>
             </table>
+          </div>
+
+          <div class="pagination-bar" id="orderPaginationBar">
+            <div class="page-summary" id="orderPageSummary">—</div>
+            <div class="pagination-controls" id="orderPaginationControls">
+              <button class="page-btn" id="orderPagePrev" type="button">
+                ← Sebelumnya
+              </button>
+              <span
+                class="page-summary"
+                id="orderPageIndicator"
+                style="padding: 0 8px"
+                >Page 1</span
+              >
+              <button class="page-btn" id="orderPageNext" type="button">
+                Berikutnya →
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -2222,6 +3101,184 @@
         </div>
       </section>
     </main>
+
+    <!-- ===== ADMIN UPGRADE: Offline banner ===== -->
+    <div
+      class="admin-offline-banner"
+      id="adminOfflineBanner"
+      role="status"
+      aria-live="polite"
+    >
+      🌊 Koneksi terputus — beberapa fitur mungkin tidak tersedia
+    </div>
+
+    <!-- ===== ADMIN UPGRADE: Order detail drawer ===== -->
+    <div
+      class="order-drawer-backdrop"
+      id="orderDrawerBackdrop"
+      onclick="closeOrderDrawer()"
+    ></div>
+    <aside
+      class="order-drawer"
+      id="orderDrawer"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="orderDrawerTitle"
+    >
+      <div class="order-drawer-head">
+        <h3 id="orderDrawerTitle">Detail Order</h3>
+        <button
+          type="button"
+          class="order-drawer-close"
+          onclick="closeOrderDrawer()"
+          aria-label="Tutup detail"
+        >
+          ✕
+        </button>
+      </div>
+      <div class="order-drawer-body" id="orderDrawerBody">
+        <div class="skeleton-block"></div>
+        <div class="skeleton-row"></div>
+        <div class="skeleton-row"></div>
+        <div class="skeleton-row"></div>
+        <div class="skeleton-row" style="width: 60%"></div>
+      </div>
+      <div class="order-drawer-actions" id="orderDrawerActions"></div>
+    </aside>
+
+    <!-- ===== ADMIN UPGRADE: FAB Quick Action ===== -->
+    <button
+      class="admin-fab"
+      id="adminFab"
+      type="button"
+      aria-label="Quick action"
+      onclick="handleFabClick()"
+    >
+      +
+    </button>
+
+    <!-- ===== ADMIN UPGRADE: Bottom navigation (mobile) ===== -->
+    <nav
+      class="admin-bottom-nav"
+      id="adminBottomNav"
+      aria-label="Admin bottom navigation"
+    >
+      <button
+        type="button"
+        class="admin-bottom-nav-btn active"
+        data-section="dashboard"
+        onclick="bottomNavGo('dashboard', this)"
+      >
+        <span class="ico">📊</span>
+        <span class="label">Dashboard</span>
+      </button>
+      <button
+        type="button"
+        class="admin-bottom-nav-btn"
+        data-section="products"
+        onclick="bottomNavGo('products', this)"
+      >
+        <span class="ico">📦</span>
+        <span class="label">Produk</span>
+      </button>
+      <button
+        type="button"
+        class="admin-bottom-nav-btn"
+        data-section="orders"
+        onclick="bottomNavGo('orders', this)"
+      >
+        <span class="ico">🧾</span>
+        <span class="label">Order</span>
+      </button>
+      <button
+        type="button"
+        class="admin-bottom-nav-btn"
+        data-section="users"
+        onclick="bottomNavGo('users', this)"
+      >
+        <span class="ico">👥</span>
+        <span class="label">User</span>
+      </button>
+      <button
+        type="button"
+        class="admin-bottom-nav-btn"
+        data-section="more"
+        onclick="openMoreSheet()"
+      >
+        <span class="ico">⋯</span>
+        <span class="label">More</span>
+      </button>
+    </nav>
+
+    <!-- ===== ADMIN UPGRADE: More bottom-sheet ===== -->
+    <div
+      class="admin-more-sheet-backdrop"
+      id="adminMoreSheetBackdrop"
+      onclick="closeMoreSheet()"
+    ></div>
+    <div
+      class="admin-more-sheet"
+      id="adminMoreSheet"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="adminMoreSheetTitle"
+    >
+      <div class="admin-more-sheet-handle" aria-hidden="true"></div>
+      <h4 id="adminMoreSheetTitle">Menu Lainnya</h4>
+      <div class="admin-more-sheet-grid">
+        <button
+          type="button"
+          class="admin-more-sheet-item"
+          onclick="
+            bottomNavGo('keys');
+            closeMoreSheet();
+          "
+        >
+          <span class="ico">🔑</span>
+          <span>Game Key</span>
+        </button>
+        <button
+          type="button"
+          class="admin-more-sheet-item"
+          onclick="
+            bottomNavGo('vouchers');
+            closeMoreSheet();
+          "
+        >
+          <span class="ico">🎟️</span>
+          <span>Voucher</span>
+        </button>
+        <button
+          type="button"
+          class="admin-more-sheet-item"
+          onclick="
+            refreshAllData();
+            closeMoreSheet();
+          "
+        >
+          <span class="ico">🔄</span>
+          <span>Refresh Semua</span>
+        </button>
+        <button
+          type="button"
+          class="admin-more-sheet-item"
+          onclick="
+            toggleAdminTheme();
+            closeMoreSheet();
+          "
+        >
+          <span class="ico" id="moreSheetThemeIco">🌙</span>
+          <span>Toggle Tema</span>
+        </button>
+      </div>
+      <button
+        type="button"
+        class="admin-more-sheet-logout"
+        onclick="logoutAdmin()"
+      >
+        🚪 Logout Admin
+      </button>
+    </div>
 
     <script>
       let allOrders = [];
@@ -2801,44 +3858,715 @@
           Swal.fire("Terjadi error server saat hapus user");
         }
       }
+      // ===== ADMIN UPGRADE: Order state (pagination + date range) =====
+      const ORDERS_STATE = {
+        page: 0,
+        pageSize: 50,
+        total: 0,
+        revenue: 0,
+        paidCount: 0,
+        loading: false,
+      };
+
+      function buildOrderQueryParams() {
+        const search =
+          document.getElementById("orderSearchInput")?.value.trim() || "";
+        const payment = document.getElementById("paymentFilter")?.value || "";
+        const delivery = document.getElementById("deliveryFilter")?.value || "";
+        const from = document.getElementById("orderFromDate")?.value || "";
+        const to = document.getElementById("orderToDate")?.value || "";
+
+        const params = new URLSearchParams();
+        if (search) params.set("search", search);
+        if (payment) params.set("payment_status", payment);
+        if (delivery) params.set("delivery_status", delivery);
+        if (from) params.set("from", from);
+        if (to) params.set("to", to);
+        params.set("limit", String(ORDERS_STATE.pageSize));
+        params.set("offset", String(ORDERS_STATE.page * ORDERS_STATE.pageSize));
+        return params;
+      }
+
+      function renderOrderTableSkeleton(rowCount = 5) {
+        const tableBody = document.getElementById("orderTableBody");
+        if (!tableBody) return;
+        let html = "";
+        for (let i = 0; i < rowCount; i++) {
+          html += `
+            <tr>
+              <td colspan="14" style="padding: 6px 0; border: none;">
+                <div class="skeleton-block"></div>
+              </td>
+            </tr>
+          `;
+        }
+        tableBody.innerHTML = html;
+      }
+
       async function loadOrders() {
         const statusText = document.getElementById("orderStatusText");
         const tableBody = document.getElementById("orderTableBody");
+        if (!tableBody || !statusText) return;
+
+        if (ORDERS_STATE.loading) return;
+        ORDERS_STATE.loading = true;
 
         statusText.innerText = "Memuat daftar order...";
-        tableBody.innerHTML = "";
+        renderOrderTableSkeleton(5);
 
         try {
-          const res = await fetch("/orders");
+          const params = buildOrderQueryParams();
+          const res = await fetch("/admin-orders?" + params.toString());
 
           if (res.status === 401) {
             window.location.href = "/ae-auth";
             return;
           }
 
-          const data = await res.json();
+          if (!res.ok) {
+            throw new Error("HTTP " + res.status);
+          }
 
-          if (!Array.isArray(data) || data.length === 0) {
-            allOrders = [];
+          const data = await res.json();
+          const rows = Array.isArray(data?.rows) ? data.rows : [];
+
+          ORDERS_STATE.total = Number(data?.total) || 0;
+          ORDERS_STATE.revenue = Number(data?.revenue) || 0;
+          ORDERS_STATE.paidCount = Number(data?.paid_count) || 0;
+
+          allOrders = rows;
+
+          if (rows.length === 0 && ORDERS_STATE.page === 0) {
             updateOrderStats([]);
-            statusText.innerText = "Belum ada order.";
+            statusText.innerText = ORDERS_STATE.total
+              ? "Tidak ada pesanan yang sesuai dengan filter."
+              : "Belum ada order.";
             tableBody.innerHTML = `
-                                                <tr>
-                                                    <td colspan="14" class="empty">Lautan masih tenang... belum ada transaksi.</td>
-                                                </tr>
-                                            `;
+              <tr>
+                <td colspan="14" class="empty">
+                  ${ORDERS_STATE.total ? "🔍 Belum ada hasil untuk filter ini." : "🌊 Lautan masih tenang... belum ada transaksi."}
+                </td>
+              </tr>
+            `;
+            renderOrderPagination();
             return;
           }
 
-          allOrders = data;
-          applyOrderFilters();
+          renderOrderRows(rows);
+          renderOrderPagination();
+
+          updateOrderStats(rows);
+
+          const from = ORDERS_STATE.page * ORDERS_STATE.pageSize + 1;
+          const to = Math.min(
+            (ORDERS_STATE.page + 1) * ORDERS_STATE.pageSize,
+            ORDERS_STATE.total,
+          );
+          statusText.innerText = `Menampilkan ${from}-${to} dari ${ORDERS_STATE.total} order · Revenue paid: ${formatRupiah(ORDERS_STATE.revenue)}`;
         } catch (err) {
+          console.error("loadOrders error", err);
           statusText.innerText = "Gagal memuat daftar order.";
           tableBody.innerHTML = `
-                                            <tr>
-                                                <td colspan="14" class="empty">Terjadi error saat mengambil order.</td>
-                                            </tr>
-                                        `;
+            <tr>
+              <td colspan="14" class="empty">Terjadi error saat mengambil order.</td>
+            </tr>
+          `;
+        } finally {
+          ORDERS_STATE.loading = false;
+        }
+      }
+
+      function renderOrderRows(rows) {
+        const tableBody = document.getElementById("orderTableBody");
+        if (!tableBody) return;
+        tableBody.innerHTML = rows
+          .map((item) => {
+            const safeId = JSON.stringify(String(item.id || ""));
+            const safeName = JSON.stringify(String(item.name || ""));
+            const safeContact = JSON.stringify(String(item.contact || ""));
+            const safeGame = JSON.stringify(String(item.game || ""));
+            const safeProduct = JSON.stringify(String(item.product || ""));
+            const safePayment = JSON.stringify(
+              String(item.payment_status || ""),
+            );
+            const safeDelivery = JSON.stringify(
+              String(item.delivery_status || ""),
+            );
+            const safeGameKey = JSON.stringify(
+              String(item.gameKey || item.gamekey || ""),
+            );
+            const safeVoucherCode = JSON.stringify(
+              String(item.voucher_code || "-"),
+            );
+            const safeDiscount = Number(item.discount_amount || 0);
+            const ps = String(item.payment_status || "").toLowerCase();
+            const ds = String(item.delivery_status || "").toLowerCase();
+            const isProtected = ps === "paid" || ds === "delivered";
+            const isCancelled = ps === "cancelled" || ds === "cancelled";
+            const checked = selectedOrderIds.has(String(item.id || ""))
+              ? "checked"
+              : "";
+
+            const detailBtn = `<button class="ghost-btn" onclick='openOrderDrawer(${safeId})'>Detail</button>`;
+            const copyBtn = `<button class="ghost-btn" onclick='copyOrderDetail(${safeId}, ${safeName}, ${safeContact}, ${safeGame}, ${safeProduct}, ${Number(item.price || 0)}, ${safePayment}, ${safeDelivery}, ${safeGameKey}, ${safeVoucherCode}, ${safeDiscount})'>Copy</button>`;
+            const confirmBtn =
+              ps !== "paid" && !isCancelled
+                ? `<button class="ghost-btn" onclick='confirmPayment(${safeId})'>Konfirmasi Bayar</button>`
+                : "";
+            const manualBtn =
+              ps === "paid" && ds !== "delivered" && !isCancelled
+                ? `<button class="ghost-btn" onclick='openManualDeliverModal(${safeId})'>Kirim Manual</button>`
+                : "";
+            const cancelBtn =
+              !isProtected && !isCancelled
+                ? `<button class="ghost-btn" onclick='openCancelOrderModal(${safeId})'>Batalkan</button>`
+                : "";
+            const deleteBtn = `<button class="danger-btn" onclick='deleteOrder(${safeId})' ${isProtected ? "disabled" : ""}>Hapus</button>`;
+
+            return `
+              <tr>
+                <td data-label="Pilih">
+                  <input type="checkbox"
+                    ${checked}
+                    ${isProtected ? "disabled" : ""}
+                    onchange="toggleOrderSelection('${escapeHtml(item.id || "")}', this.checked)">
+                </td>
+                <td data-label="Order ID">${escapeHtml(item.id || "-")}</td>
+                <td data-label="Nama">${escapeHtml(item.name || "-")}</td>
+                <td data-label="Kontak">${escapeHtml(item.contact || "-")}</td>
+                <td data-label="Game">${escapeHtml(item.game || "-")}</td>
+                <td data-label="Produk">${escapeHtml(item.product || "-")}</td>
+                <td data-label="Total Bayar">${formatRupiah(item.price)}</td>
+                <td data-label="Voucher">${escapeHtml(item.voucher_code || "-")}</td>
+                <td data-label="Diskon">${formatRupiah(item.discount_amount || 0)}</td>
+                <td data-label="Pembayaran">${orderBadge(item.payment_status)}</td>
+                <td data-label="Pengiriman">${deliveryBadge(item.delivery_status)}</td>
+                <td data-label="Game Key">
+                  ${
+                    item.gameKey || item.gamekey
+                      ? renderMaskedKey(item.gameKey || item.gamekey)
+                      : "-"
+                  }
+                </td>
+                <td data-label="Waktu">${formatTanggal(item.created_at)}</td>
+                <td data-label="Aksi" class="action-cell">
+                  <div class="row-action-group">
+                    ${detailBtn}
+                    ${copyBtn}
+                    ${confirmBtn}
+                    ${manualBtn}
+                    ${cancelBtn}
+                    ${deleteBtn}
+                  </div>
+                </td>
+              </tr>
+            `;
+          })
+          .join("");
+      }
+
+      function renderOrderPagination() {
+        const summary = document.getElementById("orderPageSummary");
+        const indicator = document.getElementById("orderPageIndicator");
+        const prevBtn = document.getElementById("orderPagePrev");
+        const nextBtn = document.getElementById("orderPageNext");
+        if (!summary || !indicator || !prevBtn || !nextBtn) return;
+
+        const totalPages = Math.max(
+          1,
+          Math.ceil(ORDERS_STATE.total / ORDERS_STATE.pageSize),
+        );
+        const currentPage = ORDERS_STATE.page + 1;
+
+        summary.innerText = `Total ${ORDERS_STATE.total} order · ${ORDERS_STATE.paidCount} paid`;
+        indicator.innerText = `Hal ${currentPage} / ${totalPages}`;
+
+        prevBtn.disabled = ORDERS_STATE.page === 0 || ORDERS_STATE.loading;
+        nextBtn.disabled = currentPage >= totalPages || ORDERS_STATE.loading;
+
+        prevBtn.onclick = () => {
+          if (ORDERS_STATE.page > 0) {
+            ORDERS_STATE.page -= 1;
+            loadOrders();
+            scrollOrderSectionTop();
+          }
+        };
+        nextBtn.onclick = () => {
+          if (currentPage < totalPages) {
+            ORDERS_STATE.page += 1;
+            loadOrders();
+            scrollOrderSectionTop();
+          }
+        };
+      }
+
+      function scrollOrderSectionTop() {
+        const sec = document.getElementById("section-orders");
+        if (sec) sec.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      function setOrderDateRange(rangeKey, btn) {
+        const fromInput = document.getElementById("orderFromDate");
+        const toInput = document.getElementById("orderToDate");
+        if (!fromInput || !toInput) return;
+
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, "0");
+        const dd = String(today.getDate()).padStart(2, "0");
+        const todayStr = `${yyyy}-${mm}-${dd}`;
+
+        if (rangeKey === "today") {
+          fromInput.value = todayStr;
+          toInput.value = todayStr;
+        } else if (rangeKey === "7d") {
+          const from = new Date(today);
+          from.setDate(from.getDate() - 6);
+          fromInput.value = from.toISOString().slice(0, 10);
+          toInput.value = todayStr;
+        } else if (rangeKey === "30d") {
+          const from = new Date(today);
+          from.setDate(from.getDate() - 29);
+          fromInput.value = from.toISOString().slice(0, 10);
+          toInput.value = todayStr;
+        } else {
+          fromInput.value = "";
+          toInput.value = "";
+        }
+
+        document
+          .querySelectorAll(".date-quick-chip")
+          .forEach((el) => el.classList.remove("active"));
+        if (btn) btn.classList.add("active");
+
+        ORDERS_STATE.page = 0;
+        loadOrders();
+      }
+
+      async function exportOrdersCSV() {
+        try {
+          const params = buildOrderQueryParams();
+          params.delete("limit");
+          params.delete("offset");
+          const url = "/admin-orders/export?" + params.toString();
+
+          const res = await fetch(url);
+          if (res.status === 401) {
+            window.location.href = "/ae-auth";
+            return;
+          }
+          if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            Swal.fire({
+              icon: "error",
+              title: "Gagal export",
+              text: errData.message || "Gagal mengambil data export.",
+              confirmButtonColor: "#0ea5e9",
+            });
+            return;
+          }
+          const blob = await res.blob();
+          const a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          const stamp = new Date().toISOString().slice(0, 10);
+          a.download = `orders-${stamp}.csv`;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+
+          Swal.fire({
+            icon: "success",
+            title: "Berhasil",
+            text: "File CSV sudah diunduh.",
+            timer: 1800,
+            showConfirmButton: false,
+          });
+          hapticTap();
+        } catch (err) {
+          console.error(err);
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "Gagal export CSV: " + err.message,
+            confirmButtonColor: "#0ea5e9",
+          });
+        }
+      }
+
+      // ===== ADMIN UPGRADE: Order detail drawer =====
+      async function openOrderDrawer(orderId) {
+        const drawer = document.getElementById("orderDrawer");
+        const backdrop = document.getElementById("orderDrawerBackdrop");
+        const body = document.getElementById("orderDrawerBody");
+        const actions = document.getElementById("orderDrawerActions");
+        if (!drawer || !backdrop || !body || !actions) return;
+
+        body.innerHTML = `
+          <div class="skeleton-block"></div>
+          <div class="skeleton-row"></div>
+          <div class="skeleton-row"></div>
+          <div class="skeleton-row" style="width: 60%"></div>
+        `;
+        actions.innerHTML = "";
+
+        drawer.classList.add("show");
+        backdrop.classList.add("show");
+        document.body.style.overflow = "hidden";
+        hapticTap();
+
+        try {
+          const res = await fetch(
+            "/admin-orders/" + encodeURIComponent(orderId),
+          );
+          if (!res.ok) {
+            body.innerHTML = `<div style="text-align:center;padding:30px;color:var(--text-muted);">Gagal mengambil detail order.</div>`;
+            return;
+          }
+          const order = await res.json();
+          renderOrderDrawerContent(order);
+        } catch (err) {
+          body.innerHTML = `<div style="text-align:center;padding:30px;color:var(--text-muted);">Error: ${escapeHtml(err.message || "")}</div>`;
+        }
+      }
+
+      function closeOrderDrawer() {
+        const drawer = document.getElementById("orderDrawer");
+        const backdrop = document.getElementById("orderDrawerBackdrop");
+        if (drawer) drawer.classList.remove("show");
+        if (backdrop) backdrop.classList.remove("show");
+        document.body.style.overflow = "";
+      }
+
+      function renderOrderDrawerContent(order) {
+        const body = document.getElementById("orderDrawerBody");
+        const actions = document.getElementById("orderDrawerActions");
+        if (!body || !actions) return;
+
+        const ps = String(order.payment_status || "").toLowerCase();
+        const ds = String(order.delivery_status || "").toLowerCase();
+        const isCancelled = ps === "cancelled" || ds === "cancelled";
+        const stepCreated = "done";
+        const stepPaid = ps === "paid" ? "done" : isCancelled ? "failed" : "";
+        const stepDelivered =
+          ds === "delivered" ? "done" : isCancelled ? "failed" : "";
+
+        const gameKey = order.gameKey || order.gamekey || "";
+        const orderId = String(order.id || "");
+
+        body.innerHTML = `
+          <div class="order-drawer-section">
+            <h4>Status</h4>
+            <div class="order-timeline">
+              <div class="order-timeline-step ${stepCreated}">
+                <div class="dot"></div>Dibuat
+              </div>
+              <div class="order-timeline-step ${stepPaid}">
+                <div class="dot"></div>${isCancelled ? "Cancelled" : "Paid"}
+              </div>
+              <div class="order-timeline-step ${stepDelivered}">
+                <div class="dot"></div>${isCancelled ? "Cancelled" : "Delivered"}
+              </div>
+            </div>
+            <div class="order-drawer-field">
+              <span class="label">Pembayaran</span>
+              <span class="value">${orderBadge(order.payment_status)}</span>
+            </div>
+            <div class="order-drawer-field">
+              <span class="label">Pengiriman</span>
+              <span class="value">${deliveryBadge(order.delivery_status)}</span>
+            </div>
+          </div>
+
+          <div class="order-drawer-section">
+            <h4>Buyer</h4>
+            <div class="order-drawer-field">
+              <span class="label">Nama</span>
+              <span class="value">${escapeHtml(order.name || "-")}</span>
+            </div>
+            <div class="order-drawer-field">
+              <span class="label">Kontak</span>
+              <span class="value">${escapeHtml(order.contact || "-")}</span>
+            </div>
+            <div class="order-drawer-field">
+              <span class="label">User ID</span>
+              <span class="value">${order.user_id ? "#" + order.user_id : "Guest"}</span>
+            </div>
+          </div>
+
+          <div class="order-drawer-section">
+            <h4>Item</h4>
+            <div class="order-drawer-field">
+              <span class="label">Order ID</span>
+              <span class="value">${escapeHtml(order.id || "-")}</span>
+            </div>
+            <div class="order-drawer-field">
+              <span class="label">Game</span>
+              <span class="value">${escapeHtml(order.game || "-")}</span>
+            </div>
+            <div class="order-drawer-field">
+              <span class="label">Produk</span>
+              <span class="value">${escapeHtml(order.product || "-")}</span>
+            </div>
+            <div class="order-drawer-field">
+              <span class="label">Harga Asli</span>
+              <span class="value">${formatRupiah(order.original_price || order.price || 0)}</span>
+            </div>
+            <div class="order-drawer-field">
+              <span class="label">Diskon</span>
+              <span class="value">${formatRupiah(order.discount_amount || 0)}</span>
+            </div>
+            <div class="order-drawer-field">
+              <span class="label">Voucher</span>
+              <span class="value">${escapeHtml(order.voucher_code || "-")}</span>
+            </div>
+            <div class="order-drawer-field">
+              <span class="label">Fee</span>
+              <span class="value">${formatRupiah(order.payment_fee || 0)}</span>
+            </div>
+            <div class="order-drawer-field">
+              <span class="label">Total Bayar</span>
+              <span class="value" style="color: var(--primary-strong); font-size: 15px;">${formatRupiah(order.price || 0)}</span>
+            </div>
+          </div>
+
+          <div class="order-drawer-section">
+            <h4>Game Key</h4>
+            <div class="order-drawer-field" style="flex-direction: column; align-items: stretch;">
+              ${
+                gameKey
+                  ? renderMaskedKey(gameKey)
+                  : '<span class="value" style="text-align:left;color:var(--text-muted);font-weight:600;">Belum dikirim</span>'
+              }
+            </div>
+          </div>
+
+          <div class="order-drawer-section">
+            <h4>Riwayat</h4>
+            <div class="order-drawer-field">
+              <span class="label">Dibuat</span>
+              <span class="value">${formatTanggal(order.created_at)}</span>
+            </div>
+            ${
+              order.delivered_at
+                ? `<div class="order-drawer-field">
+                    <span class="label">Terkirim</span>
+                    <span class="value">${formatTanggal(order.delivered_at)}</span>
+                  </div>`
+                : ""
+            }
+            ${
+              order.cancelled_at
+                ? `<div class="order-drawer-field">
+                    <span class="label">Dibatalkan</span>
+                    <span class="value">${formatTanggal(order.cancelled_at)}</span>
+                  </div>
+                  <div class="order-drawer-field">
+                    <span class="label">Alasan</span>
+                    <span class="value" style="color:#ef4444;">${escapeHtml(order.cancel_reason || "-")}</span>
+                  </div>`
+                : ""
+            }
+            ${
+              order.admin_note
+                ? `<div class="order-drawer-field">
+                    <span class="label">Catatan Admin</span>
+                    <span class="value">${escapeHtml(order.admin_note)}</span>
+                  </div>`
+                : ""
+            }
+          </div>
+        `;
+
+        const buttons = [];
+        const safeId = JSON.stringify(orderId);
+
+        const copyText = `Order ID : ${order.id || "-"}\nNama     : ${order.name || "-"}\nKontak   : ${order.contact || "-"}\nGame     : ${order.game || "-"}\nProduk   : ${order.product || "-"}\nHarga    : ${formatRupiah(order.price || 0)}\nVoucher  : ${order.voucher_code || "-"}\nDiskon   : ${formatRupiah(order.discount_amount || 0)}\nStatus   : ${order.payment_status || "-"} / ${order.delivery_status || "-"}\nGame Key : ${gameKey || "-"}`;
+        const safeCopyText = JSON.stringify(copyText);
+
+        buttons.push(
+          `<button class="ghost-btn" onclick='copyToClipboard(${safeCopyText})'>Copy Detail</button>`,
+        );
+        if (ps !== "paid" && !isCancelled) {
+          buttons.push(
+            `<button class="ghost-btn" onclick='confirmPayment(${safeId})'>Konfirmasi Bayar</button>`,
+          );
+        }
+        if (ps === "paid" && ds !== "delivered" && !isCancelled) {
+          buttons.push(
+            `<button class="ghost-btn" onclick='openManualDeliverModal(${safeId})'>Kirim Manual</button>`,
+          );
+        }
+        if (!isCancelled && ds !== "delivered") {
+          buttons.push(
+            `<button class="ghost-btn" onclick='openCancelOrderModal(${safeId})' style="color:#ef4444;border-color:#fecaca;">Batalkan</button>`,
+          );
+        }
+
+        actions.innerHTML = buttons.join("");
+      }
+
+      // ===== ADMIN UPGRADE: Manual deliver (input key + send to buyer) =====
+      async function openManualDeliverModal(orderId) {
+        const result = await Swal.fire({
+          title: "Kirim Manual Game Key",
+          html: `
+            <div class="modal-field">
+              <label for="manualKeyInput">Game Key</label>
+              <input id="manualKeyInput" placeholder="Tempel game key di sini" />
+              <div class="modal-field-hint">Pastikan key sudah benar — buyer akan langsung melihat ini.</div>
+            </div>
+            <div class="modal-field">
+              <label for="manualNoteInput">Catatan Internal (opsional)</label>
+              <textarea id="manualNoteInput" placeholder="Misal: dikirim manual karena stok auto habis"></textarea>
+            </div>
+          `,
+          showCancelButton: true,
+          confirmButtonText: "Kirim Key",
+          cancelButtonText: "Batal",
+          confirmButtonColor: "#0ea5e9",
+          cancelButtonColor: "#64748b",
+          focusConfirm: false,
+          preConfirm: () => {
+            const gameKey = document
+              .getElementById("manualKeyInput")
+              .value.trim();
+            const note = document
+              .getElementById("manualNoteInput")
+              .value.trim();
+            if (!gameKey) {
+              Swal.showValidationMessage("Game key wajib diisi");
+              return false;
+            }
+            if (gameKey.length > 500) {
+              Swal.showValidationMessage("Game key terlalu panjang");
+              return false;
+            }
+            return { gameKey, note };
+          },
+        });
+
+        if (!result.isConfirmed || !result.value) return;
+
+        try {
+          const res = await fetch(
+            "/admin-orders/" + encodeURIComponent(orderId) + "/manual-deliver",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "x-csrf-token": getCsrfToken(),
+              },
+              body: JSON.stringify({
+                game_key: result.value.gameKey,
+                note: result.value.note,
+              }),
+            },
+          );
+          const data = await res.json();
+          if (!res.ok) {
+            Swal.fire({
+              icon: "error",
+              title: "Gagal",
+              text: data.message || "Gagal mengirim key manual",
+              confirmButtonColor: "#0ea5e9",
+            });
+            return;
+          }
+
+          Swal.fire({
+            icon: "success",
+            title: "Berhasil",
+            text: data.message || "Game key sudah dikirim manual",
+            timer: 1800,
+            showConfirmButton: false,
+          });
+          hapticTap(40);
+          closeOrderDrawer();
+          loadOrders();
+          loadKeys();
+          loadStockSummary();
+          loadAdminStats();
+        } catch (err) {
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "Gagal kirim manual: " + err.message,
+            confirmButtonColor: "#0ea5e9",
+          });
+        }
+      }
+
+      // ===== ADMIN UPGRADE: Cancel order modal =====
+      async function openCancelOrderModal(orderId) {
+        const result = await Swal.fire({
+          title: "Batalkan Order?",
+          html: `
+            <div class="modal-field">
+              <label for="cancelReasonInput">Alasan Pembatalan</label>
+              <textarea id="cancelReasonInput" placeholder="Mis: buyer batal, fraud, kontak tidak valid, pending expired"></textarea>
+              <div class="modal-field-hint">Order ditandai cancelled, stok tidak ikut dipotong/dikembalikan.</div>
+            </div>
+          `,
+          showCancelButton: true,
+          confirmButtonText: "Ya, Batalkan",
+          cancelButtonText: "Tidak",
+          confirmButtonColor: "#ef4444",
+          cancelButtonColor: "#64748b",
+          focusConfirm: false,
+          preConfirm: () => {
+            const reason = document
+              .getElementById("cancelReasonInput")
+              .value.trim();
+            if (!reason) {
+              Swal.showValidationMessage("Alasan wajib diisi");
+              return false;
+            }
+            return reason;
+          },
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+          const res = await fetch(
+            "/admin-orders/" + encodeURIComponent(orderId) + "/cancel",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "x-csrf-token": getCsrfToken(),
+              },
+              body: JSON.stringify({ reason: result.value }),
+            },
+          );
+          const data = await res.json();
+          if (!res.ok) {
+            Swal.fire({
+              icon: "error",
+              title: "Gagal",
+              text: data.message || "Gagal membatalkan order",
+              confirmButtonColor: "#0ea5e9",
+            });
+            return;
+          }
+          Swal.fire({
+            icon: "success",
+            title: "Berhasil",
+            text: data.message || "Order dibatalkan",
+            timer: 1500,
+            showConfirmButton: false,
+          });
+          hapticTap(40);
+          closeOrderDrawer();
+          loadOrders();
+        } catch (err) {
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "Gagal: " + err.message,
+            confirmButtonColor: "#0ea5e9",
+          });
         }
       }
 
@@ -2971,144 +4699,14 @@
         }
       }
 
+      // ===== ADMIN UPGRADE: Filters → reset page + reload from server =====
+      let orderFilterDebounce = null;
       function applyOrderFilters() {
-        const statusText = document.getElementById("orderStatusText");
-        const tableBody = document.getElementById("orderTableBody");
-
-        const searchValue = document
-          .getElementById("orderSearchInput")
-          .value.trim()
-          .toLowerCase();
-        const paymentValue = document.getElementById("paymentFilter").value;
-        const deliveryValue = document.getElementById("deliveryFilter").value;
-
-        const filteredOrders = allOrders.filter((item) => {
-          const matchesSearch =
-            !searchValue ||
-            String(item.id || "")
-              .toLowerCase()
-              .includes(searchValue) ||
-            String(item.name || "")
-              .toLowerCase()
-              .includes(searchValue) ||
-            String(item.contact || "")
-              .toLowerCase()
-              .includes(searchValue) ||
-            String(item.game || "")
-              .toLowerCase()
-              .includes(searchValue) ||
-            String(item.product || "")
-              .toLowerCase()
-              .includes(searchValue);
-
-          const matchesPayment =
-            !paymentValue || String(item.payment_status || "") === paymentValue;
-
-          const matchesDelivery =
-            !deliveryValue ||
-            String(item.delivery_status || "") === deliveryValue;
-
-          return matchesSearch && matchesPayment && matchesDelivery;
-        });
-
-        updateOrderStats(filteredOrders);
-        statusText.innerText = `Menampilkan ${filteredOrders.length} dari ${allOrders.length} order`;
-
-        if (filteredOrders.length === 0) {
-          tableBody.innerHTML = `
-                                            <tr>
-                                                <td colspan="14" class="empty">Tidak ada pesanan yang sesuai dengan filter.</td>
-                                            </tr>
-                                        `;
-          return;
-        }
-
-        tableBody.innerHTML = filteredOrders
-          .map((item) => {
-            const safeVisibility = JSON.stringify(
-              String(item.visibility || "public"),
-            );
-            const safeTargetUsername = JSON.stringify(
-              String(item.target_username || ""),
-            );
-            const safeId = JSON.stringify(String(item.id || ""));
-            const safeName = JSON.stringify(String(item.name || ""));
-            const safeContact = JSON.stringify(String(item.contact || ""));
-            const safeGame = JSON.stringify(String(item.game || ""));
-            const safeProduct = JSON.stringify(String(item.product || ""));
-            const safePayment = JSON.stringify(
-              String(item.payment_status || ""),
-            );
-            const safeDelivery = JSON.stringify(
-              String(item.delivery_status || ""),
-            );
-            const safeGameKey = JSON.stringify(
-              String(item.gameKey || item.gamekey || ""),
-            );
-            const safeVoucherCode = JSON.stringify(
-              String(item.voucher_code || "-"),
-            );
-            const safeDiscount = Number(item.discount_amount || 0);
-            const isProtected =
-              String(item.payment_status || "").toLowerCase() === "paid" ||
-              String(item.delivery_status || "").toLowerCase() === "delivered";
-            const checked = selectedOrderIds.has(String(item.id || ""))
-              ? "checked"
-              : "";
-
-            return `
-                                            <tr>
-                            <td>
-                                <input type="checkbox"
-                                    ${checked}
-                                    ${isProtected ? "disabled" : ""}
-                                    onchange="toggleOrderSelection('${escapeHtml(item.id || "")}', this.checked)">
-                            </td>
-                            <td>${escapeHtml(item.id || "-")}</td>
-                                                <td>${escapeHtml(item.name || "-")}</td>
-                                                <td>${escapeHtml(item.contact || "-")}</td>
-                                                <td>${escapeHtml(item.game || "-")}</td>
-                                                <td>${escapeHtml(item.product || "-")}</td>
-                                                <td>${formatRupiah(item.price)}</td>
-                                                <td>${escapeHtml(item.voucher_code || "-")}</td>
-                                                <td>${formatRupiah(item.discount_amount || 0)}</td>
-                                                <td>${orderBadge(item.payment_status)}</td>
-                                                <td>${deliveryBadge(item.delivery_status)}</td>
-                                                <td>
-                                                  ${
-                                                    item.gameKey || item.gamekey
-                                                      ? renderMaskedKey(
-                                                          item.gameKey ||
-                                                            item.gamekey,
-                                                        )
-                                                      : "-"
-                                                  }
-                                                </td>
-                                                <td>${formatTanggal(item.created_at)}</td>
-                                                <td>
-                                                    <button class="ghost-btn" onclick='copyOrderDetail(${safeId}, ${safeName}, ${safeContact}, ${safeGame}, ${safeProduct}, ${Number(item.price || 0)}, ${safePayment}, ${safeDelivery}, ${safeGameKey}, ${safeVoucherCode}, ${safeDiscount})'>
-                                                        Copy Detail
-                                                    </button>
-                                                    ${
-                                                      String(
-                                                        item.payment_status ||
-                                                          "",
-                                                      ).toLowerCase() !== "paid"
-                                                        ? `
-                            <button class="ghost-btn" onclick='confirmPayment(${safeId})'>
-                                Konfirmasi Bayar
-                            </button>
-                        `
-                                                        : ""
-                                                    }
-                                                    <button class="danger-btn" onclick='deleteOrder(${safeId})' ${isProtected ? "disabled" : ""}>
-                                                        Hapus
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        `;
-          })
-          .join("");
+        ORDERS_STATE.page = 0;
+        clearTimeout(orderFilterDebounce);
+        orderFilterDebounce = setTimeout(() => {
+          loadOrders();
+        }, 220);
       }
 
       function copyOrderDetail(
@@ -4296,6 +5894,191 @@
       updateClock(); // Jalankan pertama kali
       loadAdminProfile();
       // ----------------------------------------------
+
+      // ============================================================
+      // ADMIN UPGRADE: Mobile helpers (bottom-nav, FAB, sheet, etc.)
+      // ============================================================
+
+      function hapticTap(ms = 12) {
+        try {
+          if (
+            "vibrate" in navigator &&
+            !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ) {
+            navigator.vibrate(ms);
+          }
+        } catch (_) {}
+      }
+
+      function bottomNavGo(sectionName, btnEl) {
+        const navBtn =
+          btnEl ||
+          document.querySelector(
+            `.admin-bottom-nav-btn[data-section="${sectionName}"]`,
+          );
+        document
+          .querySelectorAll(".admin-bottom-nav-btn")
+          .forEach((b) => b.classList.remove("active"));
+        if (navBtn) navBtn.classList.add("active");
+
+        if (sectionName === "more") return;
+        showSection(sectionName);
+        hapticTap();
+      }
+
+      function openMoreSheet() {
+        const sheet = document.getElementById("adminMoreSheet");
+        const backdrop = document.getElementById("adminMoreSheetBackdrop");
+        if (!sheet || !backdrop) return;
+        document
+          .querySelectorAll(".admin-bottom-nav-btn")
+          .forEach((b) => b.classList.remove("active"));
+        const moreBtn = document.querySelector(
+          '.admin-bottom-nav-btn[data-section="more"]',
+        );
+        if (moreBtn) moreBtn.classList.add("active");
+
+        const moreThemeIco = document.getElementById("moreSheetThemeIco");
+        if (moreThemeIco) {
+          moreThemeIco.innerText = document.body.classList.contains(
+            "dark-theme",
+          )
+            ? "☀️"
+            : "🌙";
+        }
+
+        sheet.classList.add("show");
+        backdrop.classList.add("show");
+        hapticTap();
+      }
+
+      function closeMoreSheet() {
+        const sheet = document.getElementById("adminMoreSheet");
+        const backdrop = document.getElementById("adminMoreSheetBackdrop");
+        if (sheet) sheet.classList.remove("show");
+        if (backdrop) backdrop.classList.remove("show");
+      }
+
+      // FAB action: contextual to current active section
+      function handleFabClick() {
+        const active = document.querySelector(".admin-section.active");
+        const id = active?.id || "";
+
+        if (id === "section-products" || id === "") {
+          const form = document.getElementById("productForm");
+          if (form) form.scrollIntoView({ behavior: "smooth", block: "start" });
+          const nameInput =
+            document.getElementById("productNameInput") ||
+            document.getElementById("productGameInput");
+          setTimeout(() => nameInput?.focus(), 350);
+        } else if (id === "section-orders") {
+          loadOrders();
+        } else if (id === "section-keys") {
+          const form = document.getElementById("keyForm");
+          if (form) form.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else if (id === "section-vouchers") {
+          const form = document.getElementById("voucherForm");
+          if (form) form.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else if (id === "section-users") {
+          loadUsers();
+        } else {
+          refreshAllData();
+        }
+        hapticTap();
+      }
+
+      // Auto data-label for all tables → enables mobile card layout
+      function attachAutoDataLabel() {
+        document.querySelectorAll("table").forEach((table) => {
+          const tbody = table.querySelector("tbody");
+          if (!tbody || tbody._labelObserver) return;
+          const apply = () => {
+            const headers = Array.from(table.querySelectorAll("thead th")).map(
+              (th) => th.innerText.trim() || "",
+            );
+            if (!headers.length) return;
+            tbody.querySelectorAll("tr").forEach((tr) => {
+              const tds = Array.from(tr.children).filter(
+                (n) => n.tagName === "TD",
+              );
+              if (tds.length === 1 && tds[0].hasAttribute("colspan")) {
+                tds[0].setAttribute("data-label", "");
+                return;
+              }
+              tds.forEach((td, idx) => {
+                if (!td.hasAttribute("data-label") && headers[idx]) {
+                  td.setAttribute("data-label", headers[idx]);
+                }
+                if (idx === tds.length - 1) {
+                  td.classList.add("action-cell");
+                }
+              });
+            });
+          };
+          const obs = new MutationObserver(apply);
+          obs.observe(tbody, { childList: true });
+          tbody._labelObserver = obs;
+          apply();
+        });
+      }
+
+      attachAutoDataLabel();
+      // Re-run periodically as a safety net for tables rendered after init
+      setInterval(attachAutoDataLabel, 2000);
+
+      // Offline / online banner
+      function setupOfflineBanner() {
+        const banner = document.getElementById("adminOfflineBanner");
+        if (!banner) return;
+        const update = () => {
+          if (navigator.onLine === false) {
+            banner.classList.add("show");
+          } else {
+            banner.classList.remove("show");
+          }
+        };
+        window.addEventListener("online", update);
+        window.addEventListener("offline", update);
+        update();
+      }
+
+      // ESC closes drawer / sheet
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          closeOrderDrawer();
+          closeMoreSheet();
+        }
+      });
+
+      setupOfflineBanner();
+
+      // Sync bottom nav active state when sidebar's showSection runs
+      const _origShowSection = showSection;
+      window.showSection = function (sectionName, buttonEl) {
+        const result = _origShowSection(sectionName, buttonEl);
+        document
+          .querySelectorAll(".admin-bottom-nav-btn")
+          .forEach((b) => b.classList.remove("active"));
+        const map = {
+          dashboard: "dashboard",
+          products: "products",
+          orders: "orders",
+          users: "users",
+        };
+        const matched = map[sectionName];
+        if (matched) {
+          const navBtn = document.querySelector(
+            `.admin-bottom-nav-btn[data-section="${matched}"]`,
+          );
+          if (navBtn) navBtn.classList.add("active");
+        } else if (sectionName === "keys" || sectionName === "vouchers") {
+          const moreBtn = document.querySelector(
+            '.admin-bottom-nav-btn[data-section="more"]',
+          );
+          if (moreBtn) moreBtn.classList.add("active");
+        }
+        return result;
+      };
     </script>
   </body>
 </html>

@@ -177,6 +177,19 @@ db.query(
   `ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_fee INTEGER DEFAULT 0`,
 );
 db.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS voucher_code TEXT`);
+db.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS cancel_reason TEXT`);
+db.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS cancelled_at TEXT`);
+db.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivered_at TEXT`);
+db.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS admin_note TEXT`);
+db.query(
+  `CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at)`,
+);
+db.query(
+  `CREATE INDEX IF NOT EXISTS idx_orders_payment_status ON orders(payment_status)`,
+);
+db.query(
+  `CREATE INDEX IF NOT EXISTS idx_orders_delivery_status ON orders(delivery_status)`,
+);
 
 db.query(
   `
@@ -1837,6 +1850,340 @@ app.get("/orders", requireAdminAuth, async (req, res) => {
     });
   }
 });
+
+// ===== ADMIN ORDERS: pagination + filter + date range =====
+function buildOrderFilterClause(q, startIdx = 1) {
+  const conditions = [];
+  const params = [];
+  let i = startIdx;
+
+  const payment = String(q.payment_status || "")
+    .trim()
+    .toLowerCase();
+  const delivery = String(q.delivery_status || "")
+    .trim()
+    .toLowerCase();
+  const search = String(q.search || "")
+    .trim()
+    .toLowerCase();
+  const from = String(q.from || "").trim();
+  const to = String(q.to || "").trim();
+
+  if (payment) {
+    conditions.push(`LOWER(payment_status) = $${i++}`);
+    params.push(payment);
+  }
+  if (delivery) {
+    conditions.push(`LOWER(delivery_status) = $${i++}`);
+    params.push(delivery);
+  }
+  if (from) {
+    conditions.push(`created_at >= $${i++}`);
+    params.push(from + " 00:00:00");
+  }
+  if (to) {
+    conditions.push(`created_at <= $${i++}`);
+    params.push(to + " 23:59:59");
+  }
+  if (search) {
+    conditions.push(
+      `(LOWER(id) LIKE $${i} OR LOWER(name) LIKE $${i} OR LOWER(contact) LIKE $${i} OR LOWER(game) LIKE $${i} OR LOWER(product) LIKE $${i})`,
+    );
+    params.push(`%${search}%`);
+    i++;
+  }
+
+  return {
+    where: conditions.length ? "WHERE " + conditions.join(" AND ") : "",
+    params,
+    nextIdx: i,
+  };
+}
+
+app.get("/admin-orders", requireAdminAuth, async (req, res) => {
+  const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 50, 1), 200);
+  const offset = Math.max(parseInt(req.query.offset, 10) || 0, 0);
+
+  const { where, params, nextIdx } = buildOrderFilterClause(req.query, 1);
+
+  try {
+    const countResult = await query(
+      `SELECT COUNT(*)::int AS total, COALESCE(SUM(price) FILTER (WHERE payment_status = 'paid'), 0)::int AS revenue, COUNT(*) FILTER (WHERE payment_status = 'paid')::int AS paid_count FROM orders ${where}`,
+      params,
+    );
+
+    const summary = countResult.rows[0] || {
+      total: 0,
+      revenue: 0,
+      paid_count: 0,
+    };
+
+    const rowsResult = await query(
+      `SELECT * FROM orders ${where} ORDER BY created_at DESC, id DESC LIMIT $${nextIdx} OFFSET $${nextIdx + 1}`,
+      [...params, limit, offset],
+    );
+
+    return res.json({
+      rows: rowsResult.rows,
+      total: summary.total,
+      revenue: summary.revenue,
+      paid_count: summary.paid_count,
+      limit,
+      offset,
+    });
+  } catch (err) {
+    console.error("ERROR ADMIN ORDERS:", err);
+    return res.status(500).json({
+      message: "Gagal mengambil daftar order",
+    });
+  }
+});
+
+// ===== ADMIN ORDERS EXPORT: CSV (semua filter aktif) =====
+app.get("/admin-orders/export", requireAdminAuth, async (req, res) => {
+  const { where, params } = buildOrderFilterClause(req.query, 1);
+
+  try {
+    const result = await query(
+      `SELECT id, name, contact, game, product, price, original_price, discount_amount, payment_fee, voucher_code, payment_status, delivery_status, gameKey, created_at, delivered_at, cancelled_at, cancel_reason FROM orders ${where} ORDER BY created_at DESC, id DESC LIMIT 5000`,
+      params,
+    );
+
+    const headers = [
+      "Order ID",
+      "Nama",
+      "Kontak",
+      "Game",
+      "Produk",
+      "Harga",
+      "Harga Asli",
+      "Diskon",
+      "Fee",
+      "Voucher",
+      "Status Bayar",
+      "Status Kirim",
+      "Game Key",
+      "Dibuat",
+      "Terkirim",
+      "Dibatalkan",
+      "Alasan Batal",
+    ];
+
+    const escapeCsv = (val) => {
+      if (val === null || val === undefined) return "";
+      const s = String(val);
+      if (s.includes(",") || s.includes('"') || s.includes("\n")) {
+        return `"${s.replace(/"/g, '""')}"`;
+      }
+      return s;
+    };
+
+    const lines = [headers.join(",")];
+    for (const row of result.rows) {
+      lines.push(
+        [
+          row.id,
+          row.name,
+          row.contact,
+          row.game,
+          row.product,
+          row.price,
+          row.original_price,
+          row.discount_amount,
+          row.payment_fee,
+          row.voucher_code,
+          row.payment_status,
+          row.delivery_status,
+          row.gamekey || row.gameKey || "",
+          row.created_at,
+          row.delivered_at,
+          row.cancelled_at,
+          row.cancel_reason,
+        ]
+          .map(escapeCsv)
+          .join(","),
+      );
+    }
+
+    const csv = "\uFEFF" + lines.join("\n");
+    const stamp = new Date().toISOString().slice(0, 10);
+
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="orders-${stamp}.csv"`,
+    );
+    return res.send(csv);
+  } catch (err) {
+    console.error("ERROR EXPORT ORDERS:", err);
+    return res.status(500).json({
+      message: "Gagal export order: " + err.message,
+    });
+  }
+});
+
+// ===== ADMIN ORDERS: detail by id (full info, owner only) =====
+app.get("/admin-orders/:id", requireAdminAuth, async (req, res) => {
+  const orderId = String(req.params.id || "").trim();
+  if (!orderId) {
+    return res.status(400).json({ message: "ID order tidak valid" });
+  }
+
+  try {
+    const result = await query("SELECT * FROM orders WHERE id = $1 LIMIT 1", [
+      orderId,
+    ]);
+    const order = result.rows[0];
+    if (!order) {
+      return res.status(404).json({ message: "Order tidak ditemukan" });
+    }
+    return res.json(order);
+  } catch (err) {
+    console.error("ERROR GET ORDER DETAIL:", err);
+    return res.status(500).json({
+      message: "Gagal mengambil detail order",
+    });
+  }
+});
+
+// ===== ADMIN ORDERS: manual fulfillment (admin input key + mark delivered) =====
+app.post(
+  "/admin-orders/:id/manual-deliver",
+  requireAdminAuth,
+  requireAdminCsrf,
+  async (req, res) => {
+    const orderId = String(req.params.id || "").trim();
+    const gameKey = String(req.body?.game_key || "").trim();
+    const note = String(req.body?.note || "").trim();
+
+    if (!orderId) {
+      return res.status(400).json({ message: "ID order tidak valid" });
+    }
+    if (!gameKey) {
+      return res.status(400).json({ message: "Game key wajib diisi" });
+    }
+    if (gameKey.length > 500) {
+      return res.status(400).json({ message: "Game key terlalu panjang" });
+    }
+
+    try {
+      const orderResult = await query(
+        "SELECT id, payment_status, delivery_status FROM orders WHERE id = $1 LIMIT 1",
+        [orderId],
+      );
+      const order = orderResult.rows[0];
+
+      if (!order) {
+        return res.status(404).json({ message: "Order tidak ditemukan" });
+      }
+
+      const ps = String(order.payment_status || "").toLowerCase();
+      const ds = String(order.delivery_status || "").toLowerCase();
+
+      if (ps !== "paid") {
+        return res.status(400).json({
+          message:
+            "Manual fulfillment hanya untuk order yang sudah berstatus paid",
+        });
+      }
+
+      if (ds === "delivered") {
+        return res.status(400).json({ message: "Order ini sudah delivered" });
+      }
+
+      if (ds === "cancelled") {
+        return res.status(400).json({ message: "Order ini sudah dibatalkan" });
+      }
+
+      await query(
+        `UPDATE orders
+         SET gameKey = $1,
+             delivery_status = $2,
+             delivered_at = $3,
+             admin_note = COALESCE(NULLIF($4, ''), admin_note)
+         WHERE id = $5`,
+        [gameKey, "delivered", new Date().toISOString(), note, orderId],
+      );
+
+      return res.json({
+        message: "Game key berhasil dikirim manual ke buyer",
+      });
+    } catch (err) {
+      console.error("ERROR MANUAL DELIVER:", err);
+      return res.status(500).json({
+        message: "Gagal manual deliver: " + err.message,
+      });
+    }
+  },
+);
+
+// ===== ADMIN ORDERS: cancel order + reason (no refund flow) =====
+app.post(
+  "/admin-orders/:id/cancel",
+  requireAdminAuth,
+  requireAdminCsrf,
+  async (req, res) => {
+    const orderId = String(req.params.id || "").trim();
+    const reason = String(req.body?.reason || "").trim();
+
+    if (!orderId) {
+      return res.status(400).json({ message: "ID order tidak valid" });
+    }
+    if (!reason) {
+      return res.status(400).json({ message: "Alasan wajib diisi" });
+    }
+    if (reason.length > 500) {
+      return res.status(400).json({ message: "Alasan terlalu panjang" });
+    }
+
+    try {
+      const orderResult = await query(
+        "SELECT id, payment_status, delivery_status FROM orders WHERE id = $1 LIMIT 1",
+        [orderId],
+      );
+      const order = orderResult.rows[0];
+
+      if (!order) {
+        return res.status(404).json({ message: "Order tidak ditemukan" });
+      }
+
+      const ps = String(order.payment_status || "").toLowerCase();
+      const ds = String(order.delivery_status || "").toLowerCase();
+
+      if (ds === "delivered") {
+        return res.status(400).json({
+          message:
+            "Order yang sudah delivered tidak boleh dibatalkan. Gunakan note internal.",
+        });
+      }
+
+      if (ps === "cancelled" || ds === "cancelled") {
+        return res
+          .status(400)
+          .json({ message: "Order ini sudah dibatalkan sebelumnya" });
+      }
+
+      await query(
+        `UPDATE orders
+         SET payment_status = $1,
+             delivery_status = $2,
+             cancel_reason = $3,
+             cancelled_at = $4
+         WHERE id = $5`,
+        ["cancelled", "cancelled", reason, new Date().toISOString(), orderId],
+      );
+
+      return res.json({
+        message: "Order berhasil dibatalkan",
+      });
+    } catch (err) {
+      console.error("ERROR CANCEL ORDER:", err);
+      return res.status(500).json({
+        message: "Gagal membatalkan order: " + err.message,
+      });
+    }
+  },
+);
 
 app.get("/stock-summary", requireAdminAuth, async (req, res) => {
   try {
