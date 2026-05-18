@@ -762,6 +762,8 @@ app.use((req, res, next) => {
     req.path.startsWith("/vouchers") ||
     req.path.startsWith("/products") ||
     req.path.startsWith("/security-audit") ||
+    req.path.startsWith("/payment-data") ||
+    req.path.startsWith("/create-qris-order") ||
     req.path.startsWith("/api/user") ||
     req.path.startsWith("/api/admin")
   ) {

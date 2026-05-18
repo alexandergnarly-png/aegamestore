@@ -165,9 +165,9 @@
           const data = await res.json();
 
           if (!res.ok) {
+            renderPaymentData();
             document.getElementById("paymentStatus").innerText =
               data.message || "Gagal mengambil data pembayaran.";
-            renderPaymentData();
             return;
           }
 
