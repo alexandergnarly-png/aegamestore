@@ -2166,17 +2166,18 @@
           display: none;
         }
 
-        /* Sticky toolbar filter */
+        /* Mobile toolbar: keep simple, avoid sticky stacking bugs */
         .toolbar {
-          position: sticky;
-          top: 0;
-          background: var(--bg, #fff);
-          z-index: 50;
-          padding-top: 4px;
-          padding-bottom: 4px;
+          position: relative;
+          top: auto;
+          background: transparent;
+          z-index: 1;
+          padding-top: 0;
+          padding-bottom: 0;
         }
+
         .card .toolbar:first-of-type {
-          margin-top: -8px;
+          margin-top: 0;
         }
 
         /* Stat grid: horizontal scroll rail */
@@ -3145,17 +3146,6 @@
       </div>
       <div class="order-drawer-actions" id="orderDrawerActions"></div>
     </aside>
-
-    <!-- ===== ADMIN UPGRADE: FAB Quick Action ===== -->
-    <button
-      class="admin-fab"
-      id="adminFab"
-      type="button"
-      aria-label="Quick action"
-      onclick="handleFabClick()"
-    >
-      +
-    </button>
 
     <!-- ===== ADMIN UPGRADE: Bottom navigation (mobile) ===== -->
     <nav
@@ -5916,12 +5906,22 @@
           document.querySelector(
             `.admin-bottom-nav-btn[data-section="${sectionName}"]`,
           );
+
         document
           .querySelectorAll(".admin-bottom-nav-btn")
           .forEach((b) => b.classList.remove("active"));
-        if (navBtn) navBtn.classList.add("active");
+
+        if (navBtn) {
+          navBtn.classList.add("active");
+        } else if (sectionName === "keys" || sectionName === "vouchers") {
+          const moreBtn = document.querySelector(
+            '.admin-bottom-nav-btn[data-section="more"]',
+          );
+          if (moreBtn) moreBtn.classList.add("active");
+        }
 
         if (sectionName === "more") return;
+
         showSection(sectionName);
         hapticTap();
       }
@@ -5958,35 +5958,6 @@
         if (sheet) sheet.classList.remove("show");
         if (backdrop) backdrop.classList.remove("show");
       }
-
-      // FAB action: contextual to current active section
-      function handleFabClick() {
-        const active = document.querySelector(".admin-section.active");
-        const id = active?.id || "";
-
-        if (id === "section-products" || id === "") {
-          const form = document.getElementById("productForm");
-          if (form) form.scrollIntoView({ behavior: "smooth", block: "start" });
-          const nameInput =
-            document.getElementById("productNameInput") ||
-            document.getElementById("productGameInput");
-          setTimeout(() => nameInput?.focus(), 350);
-        } else if (id === "section-orders") {
-          loadOrders();
-        } else if (id === "section-keys") {
-          const form = document.getElementById("keyForm");
-          if (form) form.scrollIntoView({ behavior: "smooth", block: "start" });
-        } else if (id === "section-vouchers") {
-          const form = document.getElementById("voucherForm");
-          if (form) form.scrollIntoView({ behavior: "smooth", block: "start" });
-        } else if (id === "section-users") {
-          loadUsers();
-        } else {
-          refreshAllData();
-        }
-        hapticTap();
-      }
-
       // Auto data-label for all tables → enables mobile card layout
       function attachAutoDataLabel() {
         document.querySelectorAll("table").forEach((table) => {
