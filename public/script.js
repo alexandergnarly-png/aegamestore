@@ -1262,7 +1262,7 @@ async function buy() {
   setLoading(true);
 
   try {
-    const res = await fetch("/create-qris-order", {
+    const res = await fetch("/create-order", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -1291,26 +1291,78 @@ async function buy() {
       return;
     }
 
-    if (data.qrisUrl && data.orderId) {
+    if (
+      data.snapToken &&
+      window.AEPaymentModal &&
+      typeof window.AEPaymentModal.open === "function"
+    ) {
+      const finalPriceText =
+        document.getElementById("finalPriceText")?.innerText || "";
+      const totalPrice = Number(
+        String(finalPriceText).replace(/[^0-9]/g, "") ||
+          selectedProductBasePrice ||
+          0,
+      );
+      const gameNameForModal =
+        document.getElementById("previewGame")?.innerText ||
+        selectedProduct?.game ||
+        "";
+      const productNameForModal =
+        document.getElementById("previewProduct")?.innerText ||
+        `${selectedProduct?.brand || ""} - ${selectedProduct?.duration || ""}`.trim();
+
       closeOrderModal();
       setLoading(false);
 
-      showPaymentPopup({
-        orderId: data.orderId,
-        qrisUrl: data.qrisUrl,
-        grossAmount: data.grossAmount,
-        resultUrl: data.resultUrl,
-      });
+      try {
+        await window.AEPaymentModal.open({
+          orderId: data.orderId,
+          snapToken: data.snapToken,
+          clientKey: data.midtransClientKey,
+          isProduction: !!data.midtransIsProduction,
+          paymentUrl: data.paymentUrl,
+          resultUrl: data.resultUrl,
+          gameName: gameNameForModal,
+          productName: productNameForModal,
+          totalPrice: totalPrice,
+        });
+      } catch (snapErr) {
+        console.error("[AEPay] Modal open error:", snapErr);
+        // Show explicit error with manual fallback (NO auto-redirect)
+        Swal.fire({
+          icon: "error",
+          title: "Popup gagal terbuka",
+          html:
+            "Detail error: <code>" +
+            String(snapErr?.message || snapErr || "Unknown") +
+            "</code><br><br>Buka pembayaran di tab Midtrans?",
+          showCancelButton: true,
+          confirmButtonColor: "#0ea5e9",
+          cancelButtonColor: "#94a3b8",
+          confirmButtonText: "Buka di Midtrans",
+          cancelButtonText: "Batal",
+        }).then((res) => {
+          if (res.isConfirmed && data.paymentUrl) {
+            window.location.href = data.paymentUrl;
+          }
+        });
+      }
       return;
     }
 
+    if (!data.snapToken) {
+      console.warn(
+        "[AEPay] /create-order did not return snapToken; using legacy redirect. Update server.js to expose snapToken.",
+      );
+    }
+    if (data.snapToken && !window.AEPaymentModal) {
+      console.warn(
+        "[AEPay] snapToken received but window.AEPaymentModal missing. Likely stale script.js cache. Hard reload or unregister SW.",
+      );
+    }
+
     if (data.paymentUrl) {
-      Swal.fire({
-        icon: "error",
-        title: "Flow masih Snap",
-        text: "Server masih mengirim paymentUrl Snap. Pastikan checkout memakai /create-qris-order.",
-        confirmButtonColor: "#fb7185",
-      });
+      window.location.href = data.paymentUrl;
       return;
     }
 
@@ -1353,88 +1405,6 @@ async function buy() {
 
   setLoading(false);
 }
-
-let activePaymentOrderId = "";
-let activePaymentResultUrl = "";
-let paymentStatusTimer = null;
-
-function openPaymentPopup() {
-  const popup = document.getElementById("paymentPopup");
-  if (!popup) return;
-  popup.classList.add("show");
-  popup.setAttribute("aria-hidden", "false");
-  document.body.style.overflow = "hidden";
-}
-
-function closePaymentPopup() {
-  const popup = document.getElementById("paymentPopup");
-  if (!popup) return;
-  popup.classList.remove("show");
-  popup.setAttribute("aria-hidden", "true");
-  document.body.style.overflow = "";
-
-  if (paymentStatusTimer) {
-    clearInterval(paymentStatusTimer);
-    paymentStatusTimer = null;
-  }
-}
-
-function showPaymentPopup({ orderId, qrisUrl, grossAmount, resultUrl }) {
-  activePaymentOrderId = orderId || "";
-  activePaymentResultUrl =
-    resultUrl || `/result?order_id=${encodeURIComponent(activePaymentOrderId)}`;
-
-  const qrImg = document.getElementById("paymentPopupQr");
-  const amountEl = document.getElementById("paymentPopupAmount");
-  const statusEl = document.getElementById("paymentPopupStatus");
-  const resultLink = document.getElementById("paymentPopupResultLink");
-
-  if (qrImg) qrImg.src = qrisUrl || "";
-  if (amountEl) amountEl.innerText = formatRupiah(grossAmount || 0);
-  if (statusEl) statusEl.innerText = "Menunggu pembayaran...";
-  if (resultLink) resultLink.href = activePaymentResultUrl;
-
-  openPaymentPopup();
-
-  if (paymentStatusTimer) clearInterval(paymentStatusTimer);
-  paymentStatusTimer = setInterval(checkPaymentPopupStatus, 5000);
-}
-
-async function checkPaymentPopupStatus() {
-  if (!activePaymentOrderId) return;
-
-  const statusEl = document.getElementById("paymentPopupStatus");
-  if (statusEl) statusEl.innerText = "Mengecek pembayaran...";
-
-  try {
-    const res = await fetch(
-      `/order/${encodeURIComponent(activePaymentOrderId)}`,
-    );
-    const data = await res.json();
-
-    if (!res.ok) {
-      if (statusEl) {
-        statusEl.innerText = data.message || "Belum bisa cek pembayaran.";
-      }
-      return;
-    }
-
-    if (data.payment_status === "paid") {
-      if (statusEl) statusEl.innerText = "Pembayaran berhasil. Mengalihkan...";
-      window.location.href = activePaymentResultUrl;
-      return;
-    }
-
-    if (statusEl) {
-      statusEl.innerText = "Belum dibayar. Silakan scan QRIS dulu.";
-    }
-  } catch (err) {
-    if (statusEl) statusEl.innerText = "Gagal cek status pembayaran.";
-  }
-}
-
-window.closePaymentPopup = closePaymentPopup;
-window.checkPaymentPopupStatus = checkPaymentPopupStatus;
 // --- FITUR USER LOGIN STATUS ---
 async function checkLoginStatus() {
   try {
@@ -3872,6 +3842,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // AE Payment Modal — custom wrapper for Midtrans Snap.js embed
 // ============================================================
 (function setupAEPaymentModal() {
+  console.info("[AEPay] AEPaymentModal module loading…");
   const SNAP_SANDBOX_URL = "https://app.sandbox.midtrans.com/snap/snap.js";
   const SNAP_PROD_URL = "https://app.midtrans.com/snap/snap.js";
   const POLL_INTERVAL_MS = 4000;
@@ -3916,6 +3887,7 @@ document.addEventListener("DOMContentLoaded", () => {
       paymentStateDescError: "Coba ulangi atau gunakan metode lain.",
       paymentActionDetail: "Lihat Detail Order",
       paymentActionRetry: "Coba Lagi",
+      paymentActionOpenMidtrans: "Buka di Midtrans",
       paymentActionClose: "Tutup",
       paymentConfirmCloseTitle: "Batal Bayar?",
       paymentConfirmCloseText:
@@ -3950,6 +3922,7 @@ document.addEventListener("DOMContentLoaded", () => {
       paymentStateDescError: "Please try again or use a different method.",
       paymentActionDetail: "View Order Details",
       paymentActionRetry: "Try Again",
+      paymentActionOpenMidtrans: "Open in Midtrans",
       paymentActionClose: "Close",
       paymentConfirmCloseTitle: "Cancel Payment?",
       paymentConfirmCloseText:
@@ -4260,13 +4233,17 @@ document.addEventListener("DOMContentLoaded", () => {
       title: t("paymentStateTitleError"),
       desc: t("paymentStateDescError"),
       primary: {
-        label: t("paymentActionRetry"),
+        label: t("paymentActionOpenMidtrans"),
         state: "error",
         onClick: () => {
-          // Reload snap embed
-          hideStateOverlay();
-          setStatus("pending");
-          tryEmbedSnap();
+          if (state.paymentUrl) {
+            window.location.href = state.paymentUrl;
+          } else {
+            // No fallback URL — try reload embed instead
+            hideStateOverlay();
+            setStatus("pending");
+            tryEmbedSnap();
+          }
         },
       },
       secondary: {
@@ -4289,32 +4266,55 @@ document.addEventListener("DOMContentLoaded", () => {
         tries += 1;
       }
       if (!window.snap || typeof window.snap.pay !== "function") {
-        throw new Error("Snap unavailable");
+        throw new Error("Snap unavailable on window object");
       }
-      const embedFn =
-        typeof window.snap.embed === "function"
-          ? window.snap.embed.bind(window.snap)
-          : window.snap.pay.bind(window.snap);
-      embedFn(state.currentSnapToken, {
-        embedId: "snap-container",
+
+      const callbacks = {
         onSuccess: () => {
-          // Webhook is source of truth, but trigger poll immediately
+          console.info("[AEPay] snap onSuccess");
           pollOrderStatus(false);
         },
         onPending: () => {
+          console.info("[AEPay] snap onPending");
           pollOrderStatus(false);
         },
-        onError: () => {
+        onError: (err) => {
+          console.error("[AEPay] snap onError:", err);
           handleSnapError();
         },
         onClose: () => {
-          // User closed the embed UI without finishing. Keep our modal open.
-          // The poll/countdown continues; user can re-pay or close.
+          console.info(
+            "[AEPay] snap onClose — user dismissed snap UI; our modal stays open",
+          );
         },
-      });
+      };
+
+      // Prefer snap.embed() (newer API, true inline iframe).
+      // Fallback to snap.pay(token, {embedId}) (older API that supports embedId).
+      // Last resort: snap.pay(token, {}) — opens Midtrans popup overlay (NOT a redirect).
+      const hasEmbed = typeof window.snap.embed === "function";
+      console.info(
+        "[AEPay] snap methods detected — embed:",
+        hasEmbed,
+        "pay:",
+        typeof window.snap.pay,
+      );
+
+      if (hasEmbed) {
+        window.snap.embed(state.currentSnapToken, {
+          embedId: "snap-container",
+          ...callbacks,
+        });
+      } else {
+        // Try pay() with embedId (some snap.js versions support this)
+        window.snap.pay(state.currentSnapToken, {
+          embedId: "snap-container",
+          ...callbacks,
+        });
+      }
       if (els.snapLoading) els.snapLoading.hidden = true;
     } catch (err) {
-      console.error("Snap embed failed:", err);
+      console.error("[AEPay] Snap embed failed:", err);
       if (els.snapLoading) els.snapLoading.hidden = true;
       handleSnapError();
     }
@@ -4454,4 +4454,5 @@ document.addEventListener("DOMContentLoaded", () => {
     close,
     refresh: () => pollOrderStatus(false),
   };
+  console.info("[AEPay] AEPaymentModal ready ✓");
 })();

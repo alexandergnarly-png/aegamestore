@@ -1,4 +1,4 @@
-const CACHE_NAME = "ae-game-store-auto-v2";
+const CACHE_NAME = "ae-game-store-auto-v3";
 
 const STATIC_ASSETS = [
   "/",
@@ -49,16 +49,20 @@ self.addEventListener("fetch", (event) => {
     requestUrl.pathname.startsWith("/create-order") ||
     requestUrl.pathname.startsWith("/user/") ||
     requestUrl.pathname.startsWith("/orders") ||
-    requestUrl.pathname.startsWith("/order/") ||
-    requestUrl.pathname.startsWith("/admin-orders") ||
-    requestUrl.pathname.startsWith("/admin-") ||
-    requestUrl.pathname.startsWith("/ae-control") ||
-    requestUrl.pathname.startsWith("/ae-auth") ||
-    requestUrl.pathname.startsWith("/payment") ||
-    requestUrl.pathname.startsWith("/payment-data") ||
-    requestUrl.pathname.startsWith("/create-qris-order");
+    requestUrl.pathname.startsWith("/order/");
 
   if (isDynamicRequest) return;
+
+  // Always bypass SW cache for script.js / style.css with version query
+  // so cache-busted assets reach the user instantly.
+  if (
+    (requestUrl.pathname === "/script.js" ||
+      requestUrl.pathname === "/style.css") &&
+    requestUrl.search
+  ) {
+    event.respondWith(fetch(request));
+    return;
+  }
 
   if (request.mode === "navigate") {
     event.respondWith(
