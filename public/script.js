@@ -4456,3 +4456,125 @@ document.addEventListener("DOMContentLoaded", () => {
   };
   console.info("[AEPay] AEPaymentModal ready ✓");
 })();
+
+(function setupResumeOrderHandler() {
+  function cleanResumeParamFromUrl() {
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("resume_order");
+      const qs = url.searchParams.toString();
+      const cleaned =
+        url.origin + url.pathname + (qs ? "?" + qs : "") + url.hash;
+      window.history.replaceState({}, document.title, cleaned);
+    } catch (_) {
+      /* ignore */
+    }
+  }
+
+  async function tryResume() {
+    const params = new URLSearchParams(window.location.search);
+    const orderId = (params.get("resume_order") || "").trim();
+    if (!orderId) return;
+
+    cleanResumeParamFromUrl();
+    console.info("[AEPay] Resume order requested:", orderId);
+
+    if (!window.AEPaymentModal) {
+      console.warn(
+        "[AEPay] Resume requested but AEPaymentModal missing. Aborting.",
+      );
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        "/order/" + encodeURIComponent(orderId) + "/resume",
+        {
+          method: "GET",
+          credentials: "same-origin",
+          headers: { Accept: "application/json" },
+        },
+      );
+
+      if (res.status === 401) {
+        if (typeof Swal !== "undefined") {
+          Swal.fire({
+            icon: "warning",
+            title: "Belum login",
+            text: "Login dulu untuk lanjut bayar order.",
+            confirmButtonColor: "#0ea5e9",
+            confirmButtonText: "Login",
+          }).then(() => {
+            window.location.href = "/auth";
+          });
+        } else {
+          window.location.href = "/auth";
+        }
+        return;
+      }
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        const code = String(data?.code || "");
+        const msg = String(data?.message || "Gagal memuat order");
+
+        if (code === "ALREADY_PAID" && data?.resultUrl) {
+          window.location.href = data.resultUrl;
+          return;
+        }
+
+        if (typeof Swal !== "undefined") {
+          Swal.fire({
+            icon: code === "EXPIRED" ? "info" : "error",
+            title: "Tidak bisa lanjut bayar",
+            text: msg,
+            confirmButtonColor: "#0ea5e9",
+          });
+        }
+        return;
+      }
+
+      if (!data?.snapToken) {
+        if (typeof Swal !== "undefined") {
+          Swal.fire({
+            icon: "error",
+            title: "Token pembayaran tidak tersedia",
+            text: "Server tidak menyertakan snapToken pada response. Coba refresh atau buat order baru.",
+            confirmButtonColor: "#0ea5e9",
+          });
+        }
+        return;
+      }
+
+      await window.AEPaymentModal.open({
+        orderId: data.orderId,
+        snapToken: data.snapToken,
+        clientKey: data.midtransClientKey,
+        isProduction: !!data.midtransIsProduction,
+        paymentUrl: data.paymentUrl,
+        resultUrl: data.resultUrl,
+        gameName: data.game || "",
+        productName: data.product || "",
+        totalPrice: Number(data.price || 0),
+      });
+    } catch (err) {
+      console.error("[AEPay] Resume order error:", err);
+      if (typeof Swal !== "undefined") {
+        Swal.fire({
+          icon: "error",
+          title: "Gagal lanjut bayar",
+          text: "Terjadi kesalahan saat memuat order. Coba lagi atau buka dari halaman akun.",
+          confirmButtonColor: "#0ea5e9",
+        });
+      }
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", tryResume);
+  } else {
+    // Defer to next tick to ensure AEPaymentModal is ready
+    setTimeout(tryResume, 0);
+  }
+})();

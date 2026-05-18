@@ -962,6 +962,10 @@
 
       .order-actions {
         margin-top: 12px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
       }
 
       .order-link-btn {
@@ -984,6 +988,44 @@
 
       .order-link-btn:hover {
         background: rgba(56, 189, 248, 0.24);
+      }
+
+      .resume-pay-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 10px 16px;
+        font-size: 12px;
+        font-weight: 800;
+        color: #ffffff;
+        background: linear-gradient(120deg, #0ea5e9 0%, #f472b6 100%);
+        border: none;
+        border-radius: var(--radius-pill);
+        cursor: pointer;
+        box-shadow: 0 6px 18px rgba(14, 165, 233, 0.35);
+        transition:
+          transform var(--dur-fast) var(--ease-out),
+          box-shadow var(--dur-fast) var(--ease-out),
+          filter var(--dur-fast) var(--ease-out);
+      }
+
+      .resume-pay-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 24px rgba(244, 114, 182, 0.4);
+      }
+
+      .resume-pay-btn:active {
+        transform: translateY(0);
+      }
+
+      .resume-pay-btn:disabled {
+        opacity: 0.7;
+        cursor: progress;
+        filter: saturate(0.6);
+      }
+
+      .resume-pay-btn iconify-icon {
+        font-size: 16px;
       }
 
       .discount-value {
@@ -1488,6 +1530,9 @@
           key: "Key",
           copyKey: "Copy Key",
           viewOrderDetail: "Lihat Detail Order",
+          resumePayment: "Lanjut Bayar",
+          resumePaymentLoading: "Memuat order…",
+          resumePaymentFailedTitle: "Gagal lanjut bayar",
           noDataTitle: "Tidak ada data",
           notAvailable: "belum tersedia.",
           copied: "berhasil dicopy",
@@ -1559,6 +1604,9 @@
           key: "Key",
           copyKey: "Copy Key",
           viewOrderDetail: "View Order Detail",
+          resumePayment: "Resume Payment",
+          resumePaymentLoading: "Loading order…",
+          resumePaymentFailedTitle: "Failed to resume payment",
           noDataTitle: "No data",
           notAvailable: "is not available yet.",
           copied: "copied successfully",
@@ -1987,6 +2035,22 @@
                       ${
                         orderId
                           ? `<div class="order-actions">
+                              ${
+                                String(
+                                  item.payment_status || "",
+                                ).toLowerCase() === "pending"
+                                  ? `<button
+                                      type="button"
+                                      class="resume-pay-btn"
+                                      onclick='resumeOrderPayment(${JSON.stringify(
+                                        orderId,
+                                      )}, this)'
+                                    >
+                                      <iconify-icon icon="mdi:credit-card-fast-outline" aria-hidden="true"></iconify-icon>
+                                      ${tAccount("resumePayment")}
+                                    </button>`
+                                  : ""
+                              }
                               <a
                                 class="order-link-btn"
                                 href="/result.html?order_id=${encodeURIComponent(
@@ -2005,6 +2069,18 @@
                 .join("")}
             </div>
           `;
+      }
+
+      function resumeOrderPayment(orderId, btn) {
+        if (!orderId) return;
+        if (btn) {
+          btn.disabled = true;
+          btn.innerHTML =
+            '<iconify-icon icon="mdi:loading" aria-hidden="true"></iconify-icon>' +
+            tAccount("resumePaymentLoading");
+        }
+        const target = "/?resume_order=" + encodeURIComponent(orderId);
+        window.location.href = target;
       }
 
       function saveDefaultOrderData() {

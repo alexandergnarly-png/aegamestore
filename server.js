@@ -181,6 +181,11 @@ db.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS cancel_reason TEXT`);
 db.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS cancelled_at TEXT`);
 db.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivered_at TEXT`);
 db.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS admin_note TEXT`);
+db.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS snap_token TEXT`);
+db.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS snap_redirect_url TEXT`);
+db.query(
+  `ALTER TABLE orders ADD COLUMN IF NOT EXISTS snap_token_created_at TEXT`,
+);
 db.query(
   `CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at)`,
 );
@@ -1465,6 +1470,22 @@ app.post("/create-order", orderLimiter, async (req, res) => {
       },
     });
 
+    try {
+      await query(
+        `UPDATE orders
+         SET snap_token = $1, snap_redirect_url = $2, snap_token_created_at = $3
+         WHERE id = $4`,
+        [
+          transaction.token,
+          transaction.redirect_url,
+          new Date().toISOString(),
+          orderId,
+        ],
+      );
+    } catch (persistErr) {
+      console.error("WARN: gagal simpan snap token order:", persistErr.message);
+    }
+
     return res.json({
       message: "Transaksi Midtrans berhasil dibuat",
       orderId: orderId,
@@ -1644,6 +1665,132 @@ app.get("/order/:id", orderCheckLimiter, async (req, res) => {
     return res.status(500).json({
       message: "Gagal mengambil data order",
     });
+  }
+});
+
+app.get("/order/:id/resume", orderCheckLimiter, async (req, res) => {
+  const loggedInUser = getLoggedInUserFromRequest(req);
+  if (!loggedInUser) {
+    return res
+      .status(401)
+      .json({ message: "Kamu harus login dulu", redirectUrl: "/auth" });
+  }
+
+  const orderId = String(req.params.id || "").trim();
+  if (!orderId) {
+    return res.status(400).json({ message: "ID order tidak valid" });
+  }
+
+  try {
+    const result = await query(
+      "SELECT * FROM orders WHERE id = $1 AND user_id = $2 LIMIT 1",
+      [orderId, loggedInUser.id],
+    );
+    const order = result.rows[0];
+
+    if (!order) {
+      return res
+        .status(404)
+        .json({ message: "Order tidak ditemukan atau bukan milikmu" });
+    }
+
+    const paymentStatus = String(order.payment_status || "").toLowerCase();
+    const deliveryStatus = String(order.delivery_status || "").toLowerCase();
+
+    if (paymentStatus === "paid" && deliveryStatus !== "cancelled") {
+      return res.status(409).json({
+        message: "Order sudah dibayar",
+        code: "ALREADY_PAID",
+        resultUrl: `/result?order_id=${orderId}`,
+      });
+    }
+    if (paymentStatus === "cancelled" || paymentStatus === "expired") {
+      return res.status(410).json({
+        message:
+          paymentStatus === "expired"
+            ? "Order sudah kedaluwarsa, silakan buat order baru"
+            : "Order sudah dibatalkan, silakan buat order baru",
+        code: paymentStatus === "expired" ? "EXPIRED" : "CANCELLED",
+      });
+    }
+
+    const baseUrl = process.env.APP_BASE_URL || `http://localhost:${port}`;
+    const TWENTY_THREE_HOURS_MS = 23 * 60 * 60 * 1000;
+    const tokenCreatedAtIso = order.snap_token_created_at || order.created_at;
+    const tokenAgeMs = tokenCreatedAtIso
+      ? Date.now() - new Date(tokenCreatedAtIso).getTime()
+      : Infinity;
+
+    let snapToken = order.snap_token;
+    let snapRedirectUrl = order.snap_redirect_url;
+
+    if (!snapToken || tokenAgeMs > TWENTY_THREE_HOURS_MS) {
+      try {
+        const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(order.contact);
+        const transaction = await snap.createTransaction({
+          transaction_details: {
+            order_id: orderId,
+            gross_amount: Number(order.price),
+          },
+          customer_details: {
+            first_name: order.name,
+            email: isValidEmail ? order.contact : "customer@example.com",
+            phone: isValidEmail
+              ? ""
+              : String(order.contact || "").replace(/[^0-9+]/g, ""),
+          },
+          item_details: [
+            {
+              id: String(order.product_id || ""),
+              price: Number(order.price),
+              quantity: 1,
+              name: `${order.game} - ${order.product}`,
+            },
+          ],
+          callbacks: {
+            finish: `${baseUrl}/result?order_id=${orderId}`,
+            error: `${baseUrl}/result?order_id=${orderId}`,
+            pending: `${baseUrl}/result?order_id=${orderId}`,
+          },
+        });
+
+        snapToken = transaction.token;
+        snapRedirectUrl = transaction.redirect_url;
+
+        await query(
+          `UPDATE orders
+           SET snap_token = $1, snap_redirect_url = $2, snap_token_created_at = $3
+           WHERE id = $4`,
+          [snapToken, snapRedirectUrl, new Date().toISOString(), orderId],
+        );
+      } catch (recreateErr) {
+        console.error(
+          "ERROR RESUME ORDER (recreate snap):",
+          recreateErr.response?.data || recreateErr.message || recreateErr,
+        );
+        return res.status(502).json({
+          message:
+            "Gagal mengambil ulang token pembayaran. Coba lagi atau buat order baru.",
+        });
+      }
+    }
+
+    return res.json({
+      message: "Resume order siap",
+      orderId,
+      snapToken,
+      paymentUrl: snapRedirectUrl,
+      resultUrl: `${baseUrl}/result?order_id=${orderId}`,
+      midtransClientKey: process.env.MIDTRANS_CLIENT_KEY || "",
+      midtransIsProduction: isMidtransProduction,
+      game: order.game,
+      product: order.product,
+      price: order.price,
+      created_at: order.created_at,
+    });
+  } catch (err) {
+    console.error("ERROR RESUME ORDER:", err);
+    return res.status(500).json({ message: "Gagal memuat order" });
   }
 });
 
