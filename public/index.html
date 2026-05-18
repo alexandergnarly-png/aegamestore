@@ -849,7 +849,6 @@
           </div>
 
           <div class="payment-modal-snap-wrap">
-            <div id="snap-container" class="payment-modal-snap"></div>
             <div class="payment-modal-snap-loading" id="paymentSnapLoading">
               <div class="payment-modal-spinner" aria-hidden="true"></div>
               <small data-i18n="paymentLoadingSnap"
@@ -1099,6 +1098,49 @@
         document.getElementById("preloader")?.classList.add("fade-out");
       }, 5000);
     </script>
+    <div class="payment-popup" id="paymentPopup" aria-hidden="true">
+      <div class="payment-popup-backdrop"></div>
+
+      <div
+        class="payment-popup-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="paymentPopupTitle"
+      >
+        <button
+          type="button"
+          class="payment-popup-close"
+          onclick="closePaymentPopup()"
+          aria-label="Tutup pembayaran"
+        >
+          ×
+        </button>
+
+        <div class="payment-popup-kicker">AE Game Store</div>
+        <h2 id="paymentPopupTitle">Pembayaran QRIS</h2>
+        <p>Scan QRIS dari Midtrans untuk menyelesaikan pembayaran.</p>
+
+        <div class="payment-popup-amount">
+          <span>Total Bayar</span>
+          <strong id="paymentPopupAmount">Rp 0</strong>
+        </div>
+
+        <div class="payment-popup-qr">
+          <img id="paymentPopupQr" alt="QRIS Midtrans" />
+        </div>
+
+        <div class="payment-popup-status" id="paymentPopupStatus">
+          Menunggu pembayaran...
+        </div>
+
+        <div class="payment-popup-actions">
+          <button type="button" onclick="checkPaymentPopupStatus()">
+            Cek Pembayaran
+          </button>
+          <a id="paymentPopupResultLink" href="/">Lihat Detail Order</a>
+        </div>
+      </div>
+    </div>
     <script src="script.js?v=44"></script>
   </body>
 </html>

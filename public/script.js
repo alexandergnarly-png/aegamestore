@@ -1262,7 +1262,7 @@ async function buy() {
   setLoading(true);
 
   try {
-    const res = await fetch("/create-order", {
+    const res = await fetch("/create-qris-order", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -1291,52 +1291,26 @@ async function buy() {
       return;
     }
 
-    if (
-      data.snapToken &&
-      window.AEPaymentModal &&
-      typeof window.AEPaymentModal.open === "function"
-    ) {
-      const finalPriceText =
-        document.getElementById("finalPriceText")?.innerText || "";
-      const totalPrice = Number(
-        String(finalPriceText).replace(/[^0-9]/g, "") ||
-          selectedProductBasePrice ||
-          0,
-      );
-      const gameNameForModal =
-        document.getElementById("previewGame")?.innerText ||
-        selectedProduct?.game ||
-        "";
-      const productNameForModal =
-        document.getElementById("previewProduct")?.innerText ||
-        `${selectedProduct?.brand || ""} - ${selectedProduct?.duration || ""}`.trim();
-
+    if (data.qrisUrl && data.orderId) {
       closeOrderModal();
       setLoading(false);
 
-      try {
-        await window.AEPaymentModal.open({
-          orderId: data.orderId,
-          snapToken: data.snapToken,
-          clientKey: data.midtransClientKey,
-          isProduction: !!data.midtransIsProduction,
-          paymentUrl: data.paymentUrl,
-          resultUrl: data.resultUrl,
-          gameName: gameNameForModal,
-          productName: productNameForModal,
-          totalPrice: totalPrice,
-        });
-      } catch (snapErr) {
-        console.error("Snap embed error, fallback to redirect:", snapErr);
-        if (data.paymentUrl) {
-          window.location.href = data.paymentUrl;
-        }
-      }
+      showPaymentPopup({
+        orderId: data.orderId,
+        qrisUrl: data.qrisUrl,
+        grossAmount: data.grossAmount,
+        resultUrl: data.resultUrl,
+      });
       return;
     }
 
     if (data.paymentUrl) {
-      window.location.href = data.paymentUrl;
+      Swal.fire({
+        icon: "error",
+        title: "Flow masih Snap",
+        text: "Server masih mengirim paymentUrl Snap. Pastikan checkout memakai /create-qris-order.",
+        confirmButtonColor: "#fb7185",
+      });
       return;
     }
 
@@ -1379,6 +1353,88 @@ async function buy() {
 
   setLoading(false);
 }
+
+let activePaymentOrderId = "";
+let activePaymentResultUrl = "";
+let paymentStatusTimer = null;
+
+function openPaymentPopup() {
+  const popup = document.getElementById("paymentPopup");
+  if (!popup) return;
+  popup.classList.add("show");
+  popup.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+}
+
+function closePaymentPopup() {
+  const popup = document.getElementById("paymentPopup");
+  if (!popup) return;
+  popup.classList.remove("show");
+  popup.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+
+  if (paymentStatusTimer) {
+    clearInterval(paymentStatusTimer);
+    paymentStatusTimer = null;
+  }
+}
+
+function showPaymentPopup({ orderId, qrisUrl, grossAmount, resultUrl }) {
+  activePaymentOrderId = orderId || "";
+  activePaymentResultUrl =
+    resultUrl || `/result?order_id=${encodeURIComponent(activePaymentOrderId)}`;
+
+  const qrImg = document.getElementById("paymentPopupQr");
+  const amountEl = document.getElementById("paymentPopupAmount");
+  const statusEl = document.getElementById("paymentPopupStatus");
+  const resultLink = document.getElementById("paymentPopupResultLink");
+
+  if (qrImg) qrImg.src = qrisUrl || "";
+  if (amountEl) amountEl.innerText = formatRupiah(grossAmount || 0);
+  if (statusEl) statusEl.innerText = "Menunggu pembayaran...";
+  if (resultLink) resultLink.href = activePaymentResultUrl;
+
+  openPaymentPopup();
+
+  if (paymentStatusTimer) clearInterval(paymentStatusTimer);
+  paymentStatusTimer = setInterval(checkPaymentPopupStatus, 5000);
+}
+
+async function checkPaymentPopupStatus() {
+  if (!activePaymentOrderId) return;
+
+  const statusEl = document.getElementById("paymentPopupStatus");
+  if (statusEl) statusEl.innerText = "Mengecek pembayaran...";
+
+  try {
+    const res = await fetch(
+      `/order/${encodeURIComponent(activePaymentOrderId)}`,
+    );
+    const data = await res.json();
+
+    if (!res.ok) {
+      if (statusEl) {
+        statusEl.innerText = data.message || "Belum bisa cek pembayaran.";
+      }
+      return;
+    }
+
+    if (data.payment_status === "paid") {
+      if (statusEl) statusEl.innerText = "Pembayaran berhasil. Mengalihkan...";
+      window.location.href = activePaymentResultUrl;
+      return;
+    }
+
+    if (statusEl) {
+      statusEl.innerText = "Belum dibayar. Silakan scan QRIS dulu.";
+    }
+  } catch (err) {
+    if (statusEl) statusEl.innerText = "Gagal cek status pembayaran.";
+  }
+}
+
+window.closePaymentPopup = closePaymentPopup;
+window.checkPaymentPopupStatus = checkPaymentPopupStatus;
 // --- FITUR USER LOGIN STATUS ---
 async function checkLoginStatus() {
   try {
