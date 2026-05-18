@@ -8,7 +8,6 @@ const bcrypt = require("bcryptjs");
 const helmet = require("helmet");
 require("dotenv").config();
 const rateLimit = require("express-rate-limit");
-const QRCode = require("qrcode");
 const jwt = require("jsonwebtoken");
 
 const app = express();
@@ -27,85 +26,6 @@ const snap = new midtransClient.Snap({
   serverKey: process.env.MIDTRANS_SERVER_KEY,
   clientKey: process.env.MIDTRANS_CLIENT_KEY,
 });
-
-const midtransApiBaseUrl = isMidtransProduction
-  ? "https://api.midtrans.com"
-  : "https://api.sandbox.midtrans.com";
-
-function getMidtransAuthHeader() {
-  const serverKey = String(process.env.MIDTRANS_SERVER_KEY || "").trim();
-  const encoded = Buffer.from(`${serverKey}:`).toString("base64");
-  return `Basic ${encoded}`;
-}
-
-async function createMidtransQrisCharge(payload) {
-  const response = await fetch(`${midtransApiBaseUrl}/v2/charge`, {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-      Authorization: getMidtransAuthHeader(),
-      "X-Override-Notification": `${
-        process.env.APP_BASE_URL || `http://localhost:${port}`
-      }/midtrans-notification`,
-    },
-    body: JSON.stringify(payload),
-  });
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    console.error("MIDTRANS QRIS ERROR:", {
-      status: response.status,
-      data,
-    });
-
-    throw new Error(
-      data.status_message ||
-        data.message ||
-        data.validation_messages?.join(", ") ||
-        "Gagal membuat QRIS",
-    );
-  }
-
-  return data;
-}
-
-async function getQrisImageUrl(midtransCharge) {
-  const actions = Array.isArray(midtransCharge.actions)
-    ? midtransCharge.actions
-    : [];
-
-  const qrAction =
-    actions.find((item) => item.name === "generate-qr-code") ||
-    actions.find((item) =>
-      String(item.name || "")
-        .toLowerCase()
-        .includes("qr"),
-    );
-
-  if (qrAction?.url) {
-    return qrAction.url;
-  }
-
-  const qrString = String(
-    midtransCharge.qr_string ||
-      midtransCharge.qris?.qr_string ||
-      midtransCharge.qrString ||
-      "",
-  ).trim();
-
-  if (qrString) {
-    return QRCode.toDataURL(qrString, {
-      margin: 1,
-      width: 320,
-      errorCorrectionLevel: "M",
-    });
-  }
-
-  console.error("MIDTRANS QRIS RESPONSE WITHOUT QR:", midtransCharge);
-  return "";
-}
 
 db.query("SELECT NOW()", (err, res) => {
   if (err) {
@@ -257,9 +177,6 @@ db.query(
   `ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_fee INTEGER DEFAULT 0`,
 );
 db.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS voucher_code TEXT`);
-db.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS qris_url TEXT`);
-db.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS qris_raw TEXT`);
-db.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_type TEXT`);
 db.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS cancel_reason TEXT`);
 db.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS cancelled_at TEXT`);
 db.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivered_at TEXT`);
@@ -799,8 +716,6 @@ app.use((req, res, next) => {
     req.path.startsWith("/vouchers") ||
     req.path.startsWith("/products") ||
     req.path.startsWith("/security-audit") ||
-    req.path.startsWith("/payment-data") ||
-    req.path.startsWith("/create-qris-order") ||
     req.path.startsWith("/api/user") ||
     req.path.startsWith("/api/admin")
   ) {
@@ -837,9 +752,6 @@ app.get("/", (req, res) => {
 
 app.get("/result", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "result.html"));
-});
-app.get("/payment", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "payment.html"));
 });
 
 app.get("/auth", (req, res) => {
@@ -1371,198 +1283,6 @@ app.post("/voucher-preview", voucherPreviewLimiter, async (req, res) => {
     return res.status(500).json({ message: "Gagal cek voucher" });
   }
 });
-
-app.post("/create-qris-order", orderLimiter, async (req, res) => {
-  const loggedInUser = getLoggedInUserFromRequest(req);
-
-  if (!loggedInUser) {
-    return res.status(401).json({
-      message: "Kamu harus login dulu sebelum order",
-      redirectUrl: "/auth",
-    });
-  }
-
-  const { product_id, name, contact, voucher_code } = req.body;
-
-  const cleanName = String(name || "").trim();
-  const cleanContact = String(contact || "").trim();
-  const cleanProductId = Number(product_id);
-
-  if (!Number.isInteger(cleanProductId) || cleanProductId <= 0) {
-    return res.status(400).json({ message: "Produk tidak valid" });
-  }
-
-  if (!cleanName || cleanName.length < 2 || cleanName.length > 60) {
-    return res.status(400).json({ message: "Nama harus 2 sampai 60 karakter" });
-  }
-
-  const safeNameRegex = /^[a-zA-Z0-9 .,_'’-]+$/;
-  if (!safeNameRegex.test(cleanName)) {
-    return res.status(400).json({
-      message: "Nama mengandung karakter yang tidak diizinkan",
-    });
-  }
-
-  if (!cleanContact || cleanContact.length < 5 || cleanContact.length > 100) {
-    return res.status(400).json({
-      message: "Kontak harus 5 sampai 100 karakter",
-    });
-  }
-
-  const safeContactRegex = /^[a-zA-Z0-9@+._\- ]+$/;
-  if (!safeContactRegex.test(cleanContact)) {
-    return res.status(400).json({
-      message: "Kontak mengandung karakter yang tidak diizinkan",
-    });
-  }
-
-  try {
-    const productResult = await query(
-      "SELECT * FROM products WHERE id = $1 AND active = 1 LIMIT 1",
-      [cleanProductId],
-    );
-
-    const productRow = productResult.rows[0];
-
-    if (!productRow) {
-      return res.status(404).json({
-        message: "Produk tidak ditemukan atau tidak aktif",
-      });
-    }
-
-    const keyCheck = await query(
-      "SELECT id FROM keys WHERE product_id = $1 AND used = 0 LIMIT 1",
-      [cleanProductId],
-    );
-
-    if (keyCheck.rows.length === 0) {
-      return res.status(400).json({ message: "Stok key habis" });
-    }
-
-    const orderId = "ORDER-" + crypto.randomUUID();
-    const accessToken = crypto.randomBytes(24).toString("hex");
-    const createdAt = new Date().toISOString();
-    const productName = `${productRow.brand} - ${productRow.duration}`;
-    const game = productRow.game;
-    const originalPrice = Number(productRow.price);
-
-    const voucherCheck = await getVoucherDiscount({
-      gameName: game,
-      brandName: productRow.brand,
-      durationName: productRow.duration,
-      voucherCode: voucher_code,
-      productPrice: originalPrice,
-      userId: loggedInUser.id,
-    });
-
-    if (!voucherCheck.valid) {
-      return res.status(400).json({
-        message: voucherCheck.message,
-      });
-    }
-
-    const discountAmount = voucherCheck.discountAmount;
-    const netPrice = Math.max(originalPrice - discountAmount, 1000);
-    const price = calculateQrisGrossPrice(netPrice);
-    const paymentFee = price - netPrice;
-    const appliedVoucherCode = voucherCheck.code || null;
-    const baseUrl = process.env.APP_BASE_URL || `http://localhost:${port}`;
-    const userId = loggedInUser.id;
-
-    res.cookie(`order_token_${orderId}`, accessToken, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 1000 * 60 * 60 * 2,
-      path: "/",
-    });
-
-    await query(
-      `INSERT INTO orders
-      (id, product_id, user_id, access_token, name, contact, game, product, price, original_price, discount_amount, payment_fee, voucher_code, payment_status, delivery_status, created_at)
-      VALUES
-      ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
-      [
-        orderId,
-        cleanProductId,
-        userId,
-        accessToken,
-        cleanName,
-        cleanContact,
-        game,
-        productName,
-        price,
-        originalPrice,
-        discountAmount,
-        paymentFee,
-        appliedVoucherCode,
-        "pending",
-        "waiting_payment",
-        createdAt,
-      ],
-    );
-
-    const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanContact);
-
-    const midtransCharge = await createMidtransQrisCharge({
-      payment_type: "qris",
-      transaction_details: {
-        order_id: orderId,
-        gross_amount: price,
-      },
-      qris: {
-        acquirer: "gopay",
-      },
-      qris: {
-        acquirer: "gopay",
-      },
-      customer_details: {
-        first_name: cleanName,
-        email: isValidEmail ? cleanContact : "customer@example.com",
-        phone: isValidEmail ? "" : cleanContact.replace(/[^0-9+]/g, ""),
-      },
-      item_details: [
-        {
-          id: String(cleanProductId),
-          price,
-          quantity: 1,
-          name: `${game} - ${productName}`,
-        },
-      ],
-    });
-
-    const qrisUrl = await getQrisImageUrl(midtransCharge);
-
-    if (!qrisUrl) {
-      throw new Error("QRIS URL tidak ditemukan dari Midtrans");
-    }
-
-    await query(
-      `UPDATE orders
-   SET qris_url = $1,
-       qris_raw = $2,
-       payment_type = $3
-   WHERE id = $4`,
-      [qrisUrl, midtransCharge.qr_string || "", "qris", orderId],
-    );
-
-    return res.json({
-      message: "QRIS berhasil dibuat",
-      orderId,
-      paymentType: "qris",
-      qrisUrl,
-      qrString: midtransCharge.qr_string || "",
-      transactionStatus: midtransCharge.transaction_status || "pending",
-      grossAmount: price,
-      resultUrl: `${baseUrl}/result?order_id=${orderId}`,
-    });
-  } catch (err) {
-    console.error("ERROR CREATE QRIS ORDER:", err.message || err);
-    return res.status(500).json({
-      message: err.message || "Gagal membuat QRIS Midtrans",
-    });
-  }
-});
 // buat order + pembayaran Midtrans
 app.post("/create-order", orderLimiter, async (req, res) => {
   const loggedInUser = getLoggedInUserFromRequest(req);
@@ -1722,8 +1442,12 @@ app.post("/create-order", orderLimiter, async (req, res) => {
 
     return res.json({
       message: "Transaksi Midtrans berhasil dibuat",
+      orderId: orderId,
+      snapToken: transaction.token,
       paymentUrl: transaction.redirect_url,
       resultUrl: `${baseUrl}/result?order_id=${orderId}`,
+      midtransClientKey: process.env.MIDTRANS_CLIENT_KEY || "",
+      midtransIsProduction: isMidtransProduction,
     });
   } catch (err) {
     console.error(
@@ -1852,61 +1576,6 @@ app.post("/midtrans-notification", webhookLimiter, async (req, res) => {
   } catch (err) {
     console.error("ERROR MIDTRANS NOTIFICATION:", err.message);
     return res.status(500).send("ERROR");
-  }
-});
-
-app.get("/payment-data/:id", orderCheckLimiter, async (req, res) => {
-  const orderId = String(req.params.id || "").trim();
-  const token = String(req.cookies[`order_token_${orderId}`] || "").trim();
-
-  if (!orderId || !token) {
-    return res.status(403).json({
-      message: "Akses pembayaran tidak valid",
-    });
-  }
-
-  try {
-    const result = await query(
-      `SELECT
-         id,
-         price,
-         payment_status,
-         delivery_status,
-         qris_url,
-         qris_raw,
-         payment_type,
-         created_at
-       FROM orders
-       WHERE id = $1
-         AND access_token = $2
-       LIMIT 1`,
-      [orderId, token],
-    );
-
-    const order = result.rows[0];
-
-    if (!order) {
-      return res.status(403).json({
-        message: "Akses pembayaran ditolak",
-      });
-    }
-
-    return res.json({
-      orderId: order.id,
-      grossAmount: Number(order.price || 0),
-      paymentStatus: order.payment_status,
-      deliveryStatus: order.delivery_status,
-      paymentType: order.payment_type || "qris",
-      qrisUrl: order.qris_url || "",
-      qrString: order.qris_raw || "",
-      createdAt: order.created_at,
-      resultUrl: `/result?order_id=${encodeURIComponent(order.id)}`,
-    });
-  } catch (err) {
-    console.error("ERROR GET PAYMENT DATA:", err);
-    return res.status(500).json({
-      message: "Gagal mengambil data pembayaran",
-    });
   }
 });
 

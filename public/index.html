@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="style.css?v=46" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#0ea5e9" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -768,6 +768,158 @@
     <div id="toastStack" class="toast-stack" aria-live="polite"></div>
 
     <div
+      class="payment-modal"
+      id="paymentModal"
+      hidden
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="paymentModalTitle"
+    >
+      <div class="payment-modal-backdrop" id="paymentModalBackdrop"></div>
+
+      <div class="payment-modal-card" role="document">
+        <header class="payment-modal-header">
+          <div class="payment-modal-brand">
+            <span class="payment-modal-torii" aria-hidden="true">⛩️</span>
+            <div class="payment-modal-brand-text">
+              <strong id="paymentModalTitle" data-i18n="paymentModalTitle">
+                Selesaikan Pembayaran
+              </strong>
+              <small>
+                <span data-i18n="paymentModalOrderLabel">Order</span>
+                <span class="payment-modal-order-id" id="paymentOrderId"
+                  >—</span
+                >
+              </small>
+            </div>
+          </div>
+          <button
+            type="button"
+            class="payment-modal-close"
+            id="paymentModalClose"
+            aria-label="Tutup pembayaran"
+          >
+            ✕
+          </button>
+        </header>
+
+        <section class="payment-modal-summary">
+          <div class="payment-modal-amount">
+            <small data-i18n="paymentModalTotal">Total Bayar</small>
+            <strong>Rp <span id="paymentTotal">0</span></strong>
+          </div>
+          <div class="payment-modal-meta">
+            <div class="payment-modal-meta-row">
+              <small data-i18n="paymentModalGame">Game</small>
+              <span id="paymentGameName">—</span>
+            </div>
+            <div class="payment-modal-meta-row">
+              <small data-i18n="paymentModalProduct">Produk</small>
+              <span id="paymentProductName">—</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="payment-modal-countdown" id="paymentCountdownWrap">
+          <div class="payment-modal-countdown-info">
+            <span class="payment-modal-countdown-icon" aria-hidden="true"
+              >⏱️</span
+            >
+            <span data-i18n="paymentModalCountdownLabel">QR Aktif</span>
+            <strong id="paymentCountdownTime">15:00</strong>
+          </div>
+          <div class="payment-modal-progress">
+            <div
+              class="payment-modal-progress-bar"
+              id="paymentProgressBar"
+            ></div>
+          </div>
+        </section>
+
+        <section class="payment-modal-body">
+          <div
+            class="payment-modal-status-pill"
+            id="paymentStatusPill"
+            data-state="pending"
+          >
+            <span class="payment-modal-status-dot" aria-hidden="true"></span>
+            <span id="paymentStatusText" data-i18n="paymentStatusPending">
+              Menunggu pembayaran…
+            </span>
+          </div>
+
+          <div class="payment-modal-snap-wrap">
+            <div id="snap-container" class="payment-modal-snap"></div>
+            <div class="payment-modal-snap-loading" id="paymentSnapLoading">
+              <div class="payment-modal-spinner" aria-hidden="true"></div>
+              <small data-i18n="paymentLoadingSnap"
+                >Memuat metode pembayaran…</small
+              >
+            </div>
+          </div>
+
+          <div class="payment-modal-state" id="paymentStateOverlay" hidden>
+            <div
+              class="payment-modal-state-icon"
+              id="paymentStateIcon"
+              aria-hidden="true"
+            >
+              ✓
+            </div>
+            <strong id="paymentStateTitle">Pembayaran Berhasil</strong>
+            <small id="paymentStateDesc">
+              Game key sedang dikirim, sebentar lagi…
+            </small>
+            <div class="payment-modal-state-actions">
+              <button
+                type="button"
+                class="payment-modal-btn payment-modal-btn-primary"
+                id="paymentStateActionPrimary"
+              >
+                Lihat Detail Order
+              </button>
+              <button
+                type="button"
+                class="payment-modal-btn payment-modal-btn-ghost"
+                id="paymentStateActionSecondary"
+                hidden
+              >
+                Coba Lagi
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <footer class="payment-modal-footer">
+          <div class="payment-modal-footer-hint">
+            <span aria-hidden="true">🛡️</span>
+            <span data-i18n="paymentSecureHint">
+              Pembayaran aman via Midtrans (QRIS, GoPay, OVO, DANA, VA, dll)
+            </span>
+          </div>
+          <div class="payment-modal-footer-actions">
+            <button
+              type="button"
+              class="payment-modal-btn payment-modal-btn-ghost"
+              id="paymentRefreshStatus"
+              data-i18n="paymentRefreshStatus"
+            >
+              🔄 Cek Status
+            </button>
+            <button
+              type="button"
+              class="payment-modal-btn payment-modal-btn-link"
+              id="paymentExitBtn"
+              data-i18n="paymentExitLater"
+            >
+              Bayar Nanti
+            </button>
+          </div>
+        </footer>
+      </div>
+    </div>
+
+    <div
       class="resume-cart-bar"
       id="resumeCartBar"
       hidden
@@ -947,6 +1099,6 @@
         document.getElementById("preloader")?.classList.add("fade-out");
       }, 5000);
     </script>
-    <script src="script.js"></script>
+    <script src="script.js?v=44"></script>
   </body>
 </html>

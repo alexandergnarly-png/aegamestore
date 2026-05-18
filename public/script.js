@@ -1262,7 +1262,7 @@ async function buy() {
   setLoading(true);
 
   try {
-    const res = await fetch("/create-qris-order", {
+    const res = await fetch("/create-order", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -1291,12 +1291,47 @@ async function buy() {
       return;
     }
 
-    if (data.qrisUrl && data.orderId) {
-      sessionStorage.setItem("ae_qris_url", data.qrisUrl);
-      sessionStorage.setItem("ae_qris_amount", String(data.grossAmount || 0));
-      sessionStorage.setItem("ae_qris_result_url", data.resultUrl || "");
+    if (
+      data.snapToken &&
+      window.AEPaymentModal &&
+      typeof window.AEPaymentModal.open === "function"
+    ) {
+      const finalPriceText =
+        document.getElementById("finalPriceText")?.innerText || "";
+      const totalPrice = Number(
+        String(finalPriceText).replace(/[^0-9]/g, "") ||
+          selectedProductBasePrice ||
+          0,
+      );
+      const gameNameForModal =
+        document.getElementById("previewGame")?.innerText ||
+        selectedProduct?.game ||
+        "";
+      const productNameForModal =
+        document.getElementById("previewProduct")?.innerText ||
+        `${selectedProduct?.brand || ""} - ${selectedProduct?.duration || ""}`.trim();
 
-      window.location.href = `/payment?order_id=${encodeURIComponent(data.orderId)}`;
+      closeOrderModal();
+      setLoading(false);
+
+      try {
+        await window.AEPaymentModal.open({
+          orderId: data.orderId,
+          snapToken: data.snapToken,
+          clientKey: data.midtransClientKey,
+          isProduction: !!data.midtransIsProduction,
+          paymentUrl: data.paymentUrl,
+          resultUrl: data.resultUrl,
+          gameName: gameNameForModal,
+          productName: productNameForModal,
+          totalPrice: totalPrice,
+        });
+      } catch (snapErr) {
+        console.error("Snap embed error, fallback to redirect:", snapErr);
+        if (data.paymentUrl) {
+          window.location.href = data.paymentUrl;
+        }
+      }
       return;
     }
 
@@ -3776,3 +3811,591 @@ function setupAdminChatPopup() {
 document.addEventListener("DOMContentLoaded", () => {
   setupAdminChatPopup();
 });
+
+// ============================================================
+// AE Payment Modal — custom wrapper for Midtrans Snap.js embed
+// ============================================================
+(function setupAEPaymentModal() {
+  const SNAP_SANDBOX_URL = "https://app.sandbox.midtrans.com/snap/snap.js";
+  const SNAP_PROD_URL = "https://app.midtrans.com/snap/snap.js";
+  const POLL_INTERVAL_MS = 4000;
+  const COUNTDOWN_SECONDS = 15 * 60;
+
+  const state = {
+    isOpen: false,
+    orderId: null,
+    resultUrl: null,
+    paymentUrl: null,
+    pollTimer: null,
+    countdownTimer: null,
+    countdownLeft: COUNTDOWN_SECONDS,
+    snapLoaded: false,
+    snapClientKey: null,
+    finalStatusHandled: false,
+  };
+
+  const i18n = {
+    id: {
+      paymentModalTitle: "Selesaikan Pembayaran",
+      paymentModalOrderLabel: "Order",
+      paymentModalTotal: "Total Bayar",
+      paymentModalGame: "Game",
+      paymentModalProduct: "Produk",
+      paymentModalCountdownLabel: "QR Aktif",
+      paymentStatusPending: "Menunggu pembayaran…",
+      paymentStatusPaid: "Pembayaran diterima!",
+      paymentStatusExpired: "Waktu habis",
+      paymentStatusCancelled: "Pembayaran dibatalkan",
+      paymentStatusError: "Terjadi kesalahan",
+      paymentLoadingSnap: "Memuat metode pembayaran…",
+      paymentSecureHint:
+        "Pembayaran aman via Midtrans (QRIS, GoPay, OVO, DANA, VA, dll)",
+      paymentRefreshStatus: "🔄 Cek Status",
+      paymentExitLater: "Bayar Nanti",
+      paymentStateTitlePaid: "Pembayaran Berhasil 🎉",
+      paymentStateDescPaid: "Game key sedang dikirim, sebentar lagi…",
+      paymentStateTitleExpired: "Waktu Habis",
+      paymentStateDescExpired: "QR kadaluwarsa. Silakan buat order baru.",
+      paymentStateTitleError: "Pembayaran Gagal",
+      paymentStateDescError: "Coba ulangi atau gunakan metode lain.",
+      paymentActionDetail: "Lihat Detail Order",
+      paymentActionRetry: "Coba Lagi",
+      paymentActionClose: "Tutup",
+      paymentConfirmCloseTitle: "Batal Bayar?",
+      paymentConfirmCloseText:
+        "Order tetap pending. Kamu bisa lanjut bayar di halaman akun.",
+      paymentConfirmCloseYes: "Ya, Tutup",
+      paymentConfirmCloseNo: "Lanjut Bayar",
+      paymentCheckingStatus: "Mengecek status…",
+      paymentRefreshDone: "Status terupdate",
+    },
+    en: {
+      paymentModalTitle: "Complete Payment",
+      paymentModalOrderLabel: "Order",
+      paymentModalTotal: "Total",
+      paymentModalGame: "Game",
+      paymentModalProduct: "Product",
+      paymentModalCountdownLabel: "QR Active",
+      paymentStatusPending: "Waiting for payment…",
+      paymentStatusPaid: "Payment received!",
+      paymentStatusExpired: "Time expired",
+      paymentStatusCancelled: "Payment cancelled",
+      paymentStatusError: "Something went wrong",
+      paymentLoadingSnap: "Loading payment methods…",
+      paymentSecureHint:
+        "Secured by Midtrans (QRIS, GoPay, OVO, DANA, VA, etc)",
+      paymentRefreshStatus: "🔄 Check Status",
+      paymentExitLater: "Pay Later",
+      paymentStateTitlePaid: "Payment Successful 🎉",
+      paymentStateDescPaid: "Your game key is being delivered…",
+      paymentStateTitleExpired: "Time Expired",
+      paymentStateDescExpired: "QR code expired. Please create a new order.",
+      paymentStateTitleError: "Payment Failed",
+      paymentStateDescError: "Please try again or use a different method.",
+      paymentActionDetail: "View Order Details",
+      paymentActionRetry: "Try Again",
+      paymentActionClose: "Close",
+      paymentConfirmCloseTitle: "Cancel Payment?",
+      paymentConfirmCloseText:
+        "Order stays pending. You can continue paying from your account page.",
+      paymentConfirmCloseYes: "Yes, Close",
+      paymentConfirmCloseNo: "Continue Paying",
+      paymentCheckingStatus: "Checking status…",
+      paymentRefreshDone: "Status updated",
+    },
+  };
+
+  function t(key) {
+    const lang =
+      (typeof currentLanguage !== "undefined" && currentLanguage) || "id";
+    const dict = i18n[lang] || i18n.id;
+    return dict[key] || i18n.id[key] || key;
+  }
+
+  function getElements() {
+    return {
+      modal: document.getElementById("paymentModal"),
+      backdrop: document.getElementById("paymentModalBackdrop"),
+      closeBtn: document.getElementById("paymentModalClose"),
+      orderId: document.getElementById("paymentOrderId"),
+      total: document.getElementById("paymentTotal"),
+      gameName: document.getElementById("paymentGameName"),
+      productName: document.getElementById("paymentProductName"),
+      countdown: document.getElementById("paymentCountdownTime"),
+      progressBar: document.getElementById("paymentProgressBar"),
+      statusPill: document.getElementById("paymentStatusPill"),
+      statusText: document.getElementById("paymentStatusText"),
+      snapContainer: document.getElementById("snap-container"),
+      snapLoading: document.getElementById("paymentSnapLoading"),
+      stateOverlay: document.getElementById("paymentStateOverlay"),
+      stateIcon: document.getElementById("paymentStateIcon"),
+      stateTitle: document.getElementById("paymentStateTitle"),
+      stateDesc: document.getElementById("paymentStateDesc"),
+      statePrimary: document.getElementById("paymentStateActionPrimary"),
+      stateSecondary: document.getElementById("paymentStateActionSecondary"),
+      refreshBtn: document.getElementById("paymentRefreshStatus"),
+      exitBtn: document.getElementById("paymentExitBtn"),
+    };
+  }
+
+  function loadSnapJs(clientKey, isProduction) {
+    return new Promise((resolve, reject) => {
+      if (
+        window.snap &&
+        typeof window.snap.pay === "function" &&
+        state.snapClientKey === clientKey
+      ) {
+        resolve();
+        return;
+      }
+      const existing = document.getElementById("midtrans-snap-script");
+      if (existing) existing.remove();
+
+      const script = document.createElement("script");
+      script.id = "midtrans-snap-script";
+      script.src = isProduction ? SNAP_PROD_URL : SNAP_SANDBOX_URL;
+      script.setAttribute("data-client-key", clientKey);
+      script.async = true;
+      script.onload = () => {
+        state.snapLoaded = true;
+        state.snapClientKey = clientKey;
+        resolve();
+      };
+      script.onerror = (err) => {
+        reject(new Error("Snap.js failed to load"));
+      };
+      document.head.appendChild(script);
+    });
+  }
+
+  function formatRupiahLocal(n) {
+    const num = Number(n || 0);
+    return num.toLocaleString("id-ID");
+  }
+
+  function setBodyScrollLock(lock) {
+    document.body.style.overflow = lock ? "hidden" : "";
+  }
+
+  function applyI18n() {
+    const els = getElements();
+    if (els.statusText && els.statusPill.dataset.state === "pending") {
+      els.statusText.textContent = t("paymentStatusPending");
+    }
+    if (els.refreshBtn) els.refreshBtn.textContent = t("paymentRefreshStatus");
+    if (els.exitBtn) els.exitBtn.textContent = t("paymentExitLater");
+    if (els.snapLoading) {
+      const small = els.snapLoading.querySelector("small");
+      if (small) small.textContent = t("paymentLoadingSnap");
+    }
+  }
+
+  function setStatus(status) {
+    const els = getElements();
+    if (!els.statusPill || !els.statusText) return;
+    const map = {
+      pending: t("paymentStatusPending"),
+      paid: t("paymentStatusPaid"),
+      expired: t("paymentStatusExpired"),
+      cancelled: t("paymentStatusCancelled"),
+      error: t("paymentStatusError"),
+    };
+    els.statusPill.dataset.state = status;
+    els.statusText.textContent = map[status] || map.pending;
+  }
+
+  function showStateOverlay({ icon, title, desc, primary, secondary }) {
+    const els = getElements();
+    if (!els.stateOverlay) return;
+    els.stateOverlay.hidden = false;
+    els.stateOverlay.dataset.state = primary?.state || "info";
+    if (els.stateIcon) els.stateIcon.textContent = icon || "✓";
+    if (els.stateTitle) els.stateTitle.textContent = title || "";
+    if (els.stateDesc) els.stateDesc.textContent = desc || "";
+    if (primary) {
+      els.statePrimary.hidden = false;
+      els.statePrimary.textContent = primary.label;
+      els.statePrimary.onclick = primary.onClick;
+    } else {
+      els.statePrimary.hidden = true;
+    }
+    if (secondary) {
+      els.stateSecondary.hidden = false;
+      els.stateSecondary.textContent = secondary.label;
+      els.stateSecondary.onclick = secondary.onClick;
+    } else {
+      els.stateSecondary.hidden = true;
+    }
+    // Hide snap iframe behind overlay
+    if (els.snapContainer) els.snapContainer.style.display = "none";
+    if (els.snapLoading) els.snapLoading.hidden = true;
+  }
+
+  function hideStateOverlay() {
+    const els = getElements();
+    if (els.stateOverlay) els.stateOverlay.hidden = true;
+    if (els.snapContainer) els.snapContainer.style.display = "";
+  }
+
+  function startCountdown() {
+    stopCountdown();
+    state.countdownLeft = COUNTDOWN_SECONDS;
+    updateCountdownUI();
+    state.countdownTimer = setInterval(() => {
+      state.countdownLeft -= 1;
+      if (state.countdownLeft <= 0) {
+        stopCountdown();
+        handleExpired();
+        return;
+      }
+      updateCountdownUI();
+    }, 1000);
+  }
+
+  function stopCountdown() {
+    if (state.countdownTimer) {
+      clearInterval(state.countdownTimer);
+      state.countdownTimer = null;
+    }
+  }
+
+  function updateCountdownUI() {
+    const els = getElements();
+    const m = Math.floor(state.countdownLeft / 60);
+    const s = state.countdownLeft % 60;
+    const text = `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    if (els.countdown) els.countdown.textContent = text;
+    if (els.progressBar) {
+      const pct = Math.max(
+        0,
+        Math.min(100, (state.countdownLeft / COUNTDOWN_SECONDS) * 100),
+      );
+      els.progressBar.style.width = `${pct}%`;
+      if (pct < 25) {
+        els.progressBar.dataset.danger = "true";
+      } else {
+        els.progressBar.dataset.danger = "false";
+      }
+    }
+  }
+
+  function startPolling() {
+    stopPolling();
+    state.pollTimer = setInterval(() => {
+      pollOrderStatus();
+    }, POLL_INTERVAL_MS);
+  }
+
+  function stopPolling() {
+    if (state.pollTimer) {
+      clearInterval(state.pollTimer);
+      state.pollTimer = null;
+    }
+  }
+
+  async function pollOrderStatus(silent = true) {
+    if (!state.orderId) return null;
+    try {
+      const res = await fetch(`/order/${encodeURIComponent(state.orderId)}`, {
+        credentials: "same-origin",
+        cache: "no-store",
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      handleStatusUpdate(data, silent);
+      return data;
+    } catch (err) {
+      if (!silent) {
+        console.error("Poll order status failed:", err);
+      }
+      return null;
+    }
+  }
+
+  function handleStatusUpdate(order, silent) {
+    if (!order || state.finalStatusHandled) return;
+    const paymentStatus = String(order.payment_status || "").toLowerCase();
+    const deliveryStatus = String(order.delivery_status || "").toLowerCase();
+
+    if (paymentStatus === "paid") {
+      state.finalStatusHandled = true;
+      handlePaid(order);
+      return;
+    }
+    if (paymentStatus === "expired" || paymentStatus === "expire") {
+      state.finalStatusHandled = true;
+      handleExpired();
+      return;
+    }
+    if (paymentStatus === "cancelled" || paymentStatus === "cancel") {
+      state.finalStatusHandled = true;
+      handleCancelled();
+      return;
+    }
+    if (!silent) {
+      setStatus("pending");
+    }
+  }
+
+  function handlePaid(order) {
+    stopPolling();
+    stopCountdown();
+    setStatus("paid");
+    showStateOverlay({
+      icon: "🎉",
+      title: t("paymentStateTitlePaid"),
+      desc: t("paymentStateDescPaid"),
+      primary: {
+        label: t("paymentActionDetail"),
+        state: "paid",
+        onClick: () => {
+          window.location.href =
+            state.resultUrl ||
+            `/result?order_id=${encodeURIComponent(state.orderId)}`;
+        },
+      },
+    });
+    // auto redirect after 2.5s
+    setTimeout(() => {
+      if (state.isOpen) {
+        window.location.href =
+          state.resultUrl ||
+          `/result?order_id=${encodeURIComponent(state.orderId)}`;
+      }
+    }, 2500);
+  }
+
+  function handleExpired() {
+    stopPolling();
+    stopCountdown();
+    setStatus("expired");
+    showStateOverlay({
+      icon: "⏰",
+      title: t("paymentStateTitleExpired"),
+      desc: t("paymentStateDescExpired"),
+      primary: {
+        label: t("paymentActionClose"),
+        state: "expired",
+        onClick: () => close(true),
+      },
+    });
+  }
+
+  function handleCancelled() {
+    stopPolling();
+    stopCountdown();
+    setStatus("cancelled");
+    showStateOverlay({
+      icon: "✕",
+      title: t("paymentStatusCancelled"),
+      desc: t("paymentStateDescError"),
+      primary: {
+        label: t("paymentActionClose"),
+        state: "cancelled",
+        onClick: () => close(true),
+      },
+    });
+  }
+
+  function handleSnapError() {
+    setStatus("error");
+    showStateOverlay({
+      icon: "⚠️",
+      title: t("paymentStateTitleError"),
+      desc: t("paymentStateDescError"),
+      primary: {
+        label: t("paymentActionRetry"),
+        state: "error",
+        onClick: () => {
+          // Reload snap embed
+          hideStateOverlay();
+          setStatus("pending");
+          tryEmbedSnap();
+        },
+      },
+      secondary: {
+        label: t("paymentActionClose"),
+        onClick: () => close(true),
+      },
+    });
+  }
+
+  async function tryEmbedSnap() {
+    const els = getElements();
+    if (!els.snapContainer) return;
+    els.snapContainer.innerHTML = "";
+    if (els.snapLoading) els.snapLoading.hidden = false;
+    try {
+      // wait briefly for snap.js to be available
+      let tries = 0;
+      while (!window.snap && tries < 50) {
+        await new Promise((r) => setTimeout(r, 100));
+        tries += 1;
+      }
+      if (!window.snap || typeof window.snap.pay !== "function") {
+        throw new Error("Snap unavailable");
+      }
+      const embedFn =
+        typeof window.snap.embed === "function"
+          ? window.snap.embed.bind(window.snap)
+          : window.snap.pay.bind(window.snap);
+      embedFn(state.currentSnapToken, {
+        embedId: "snap-container",
+        onSuccess: () => {
+          // Webhook is source of truth, but trigger poll immediately
+          pollOrderStatus(false);
+        },
+        onPending: () => {
+          pollOrderStatus(false);
+        },
+        onError: () => {
+          handleSnapError();
+        },
+        onClose: () => {
+          // User closed the embed UI without finishing. Keep our modal open.
+          // The poll/countdown continues; user can re-pay or close.
+        },
+      });
+      if (els.snapLoading) els.snapLoading.hidden = true;
+    } catch (err) {
+      console.error("Snap embed failed:", err);
+      if (els.snapLoading) els.snapLoading.hidden = true;
+      handleSnapError();
+    }
+  }
+
+  function bindCloseHandlers() {
+    const els = getElements();
+    if (els.closeBtn && !els.closeBtn.__aeBound) {
+      els.closeBtn.addEventListener("click", () => confirmAndClose());
+      els.closeBtn.__aeBound = true;
+    }
+    if (els.exitBtn && !els.exitBtn.__aeBound) {
+      els.exitBtn.addEventListener("click", () => confirmAndClose());
+      els.exitBtn.__aeBound = true;
+    }
+    if (els.backdrop && !els.backdrop.__aeBound) {
+      els.backdrop.addEventListener("click", () => confirmAndClose());
+      els.backdrop.__aeBound = true;
+    }
+    if (els.refreshBtn && !els.refreshBtn.__aeBound) {
+      els.refreshBtn.addEventListener("click", async () => {
+        els.refreshBtn.disabled = true;
+        const original = els.refreshBtn.textContent;
+        els.refreshBtn.textContent = t("paymentCheckingStatus");
+        await pollOrderStatus(false);
+        els.refreshBtn.textContent = t("paymentRefreshDone");
+        setTimeout(() => {
+          els.refreshBtn.textContent = original;
+          els.refreshBtn.disabled = false;
+        }, 1500);
+      });
+      els.refreshBtn.__aeBound = true;
+    }
+    if (!window.__aePaymentEsc) {
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && state.isOpen) {
+          confirmAndClose();
+        }
+      });
+      window.__aePaymentEsc = true;
+    }
+  }
+
+  function confirmAndClose() {
+    // If already final state, close directly
+    if (state.finalStatusHandled) {
+      close(true);
+      return;
+    }
+    if (typeof Swal !== "undefined") {
+      Swal.fire({
+        icon: "question",
+        title: t("paymentConfirmCloseTitle"),
+        text: t("paymentConfirmCloseText"),
+        showCancelButton: true,
+        confirmButtonColor: "#fb7185",
+        cancelButtonColor: "#0ea5e9",
+        confirmButtonText: t("paymentConfirmCloseYes"),
+        cancelButtonText: t("paymentConfirmCloseNo"),
+        backdrop: "rgba(12, 74, 110, 0.4)",
+      }).then((res) => {
+        if (res.isConfirmed) close(true);
+      });
+    } else {
+      close(true);
+    }
+  }
+
+  function close(force = false) {
+    if (!state.isOpen && !force) return;
+    state.isOpen = false;
+    stopPolling();
+    stopCountdown();
+    const els = getElements();
+    if (els.modal) {
+      els.modal.classList.remove("show");
+      els.modal.hidden = true;
+    }
+    if (els.snapContainer) els.snapContainer.innerHTML = "";
+    setBodyScrollLock(false);
+    hideStateOverlay();
+  }
+
+  async function open(opts) {
+    if (state.isOpen) return;
+    if (!opts || !opts.snapToken || !opts.clientKey) {
+      throw new Error("Missing snap token / client key");
+    }
+
+    state.isOpen = true;
+    state.orderId = opts.orderId;
+    state.resultUrl = opts.resultUrl || null;
+    state.paymentUrl = opts.paymentUrl || null;
+    state.currentSnapToken = opts.snapToken;
+    state.finalStatusHandled = false;
+    state.countdownLeft = COUNTDOWN_SECONDS;
+
+    const els = getElements();
+    if (!els.modal) throw new Error("paymentModal element missing");
+
+    // Populate fields
+    if (els.orderId) els.orderId.textContent = opts.orderId || "—";
+    if (els.total) els.total.textContent = formatRupiahLocal(opts.totalPrice);
+    if (els.gameName) els.gameName.textContent = opts.gameName || "—";
+    if (els.productName) els.productName.textContent = opts.productName || "—";
+
+    applyI18n();
+    setStatus("pending");
+    hideStateOverlay();
+    if (els.snapLoading) els.snapLoading.hidden = false;
+    if (els.snapContainer) els.snapContainer.innerHTML = "";
+
+    // Show modal
+    els.modal.hidden = false;
+    requestAnimationFrame(() => {
+      els.modal.classList.add("show");
+    });
+    setBodyScrollLock(true);
+
+    bindCloseHandlers();
+    startCountdown();
+    startPolling();
+
+    // Load snap.js + embed
+    try {
+      await loadSnapJs(opts.clientKey, opts.isProduction);
+      await tryEmbedSnap();
+    } catch (err) {
+      console.error("Failed to load/embed snap:", err);
+      handleSnapError();
+      throw err;
+    }
+  }
+
+  window.AEPaymentModal = {
+    open,
+    close,
+    refresh: () => pollOrderStatus(false),
+  };
+})();
