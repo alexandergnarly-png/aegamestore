@@ -54,8 +54,16 @@ async function createMidtransQrisCharge(payload) {
   const data = await response.json();
 
   if (!response.ok) {
+    console.error("MIDTRANS QRIS ERROR:", {
+      status: response.status,
+      data,
+    });
+
     throw new Error(
-      data.status_message || data.message || "Gagal membuat QRIS",
+      data.status_message ||
+        data.message ||
+        data.validation_messages?.join(", ") ||
+        "Gagal membuat QRIS",
     );
   }
 
@@ -1473,6 +1481,9 @@ app.post("/create-qris-order", orderLimiter, async (req, res) => {
         order_id: orderId,
         gross_amount: price,
       },
+      qris: {
+        acquirer: "gopay",
+      },
       customer_details: {
         first_name: cleanName,
         email: isValidEmail ? cleanContact : "customer@example.com",
@@ -1516,7 +1527,7 @@ app.post("/create-qris-order", orderLimiter, async (req, res) => {
   } catch (err) {
     console.error("ERROR CREATE QRIS ORDER:", err.message || err);
     return res.status(500).json({
-      message: "Gagal membuat QRIS Midtrans",
+      message: err.message || "Gagal membuat QRIS Midtrans",
     });
   }
 });
