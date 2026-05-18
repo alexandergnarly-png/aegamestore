@@ -8,6 +8,7 @@ const bcrypt = require("bcryptjs");
 const helmet = require("helmet");
 require("dotenv").config();
 const rateLimit = require("express-rate-limit");
+const QRCode = require("qrcode");
 const jwt = require("jsonwebtoken");
 
 const app = express();
@@ -70,12 +71,40 @@ async function createMidtransQrisCharge(payload) {
   return data;
 }
 
-function getQrisImageUrl(midtransCharge) {
-  const action = Array.isArray(midtransCharge.actions)
-    ? midtransCharge.actions.find((item) => item.name === "generate-qr-code")
-    : null;
+async function getQrisImageUrl(midtransCharge) {
+  const actions = Array.isArray(midtransCharge.actions)
+    ? midtransCharge.actions
+    : [];
 
-  return action?.url || "";
+  const qrAction =
+    actions.find((item) => item.name === "generate-qr-code") ||
+    actions.find((item) =>
+      String(item.name || "")
+        .toLowerCase()
+        .includes("qr"),
+    );
+
+  if (qrAction?.url) {
+    return qrAction.url;
+  }
+
+  const qrString = String(
+    midtransCharge.qr_string ||
+      midtransCharge.qris?.qr_string ||
+      midtransCharge.qrString ||
+      "",
+  ).trim();
+
+  if (qrString) {
+    return QRCode.toDataURL(qrString, {
+      margin: 1,
+      width: 320,
+      errorCorrectionLevel: "M",
+    });
+  }
+
+  console.error("MIDTRANS QRIS RESPONSE WITHOUT QR:", midtransCharge);
+  return "";
 }
 
 db.query("SELECT NOW()", (err, res) => {
@@ -1484,6 +1513,9 @@ app.post("/create-qris-order", orderLimiter, async (req, res) => {
       qris: {
         acquirer: "gopay",
       },
+      qris: {
+        acquirer: "gopay",
+      },
       customer_details: {
         first_name: cleanName,
         email: isValidEmail ? cleanContact : "customer@example.com",
@@ -1499,7 +1531,7 @@ app.post("/create-qris-order", orderLimiter, async (req, res) => {
       ],
     });
 
-    const qrisUrl = getQrisImageUrl(midtransCharge);
+    const qrisUrl = await getQrisImageUrl(midtransCharge);
 
     if (!qrisUrl) {
       throw new Error("QRIS URL tidak ditemukan dari Midtrans");
