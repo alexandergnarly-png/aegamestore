@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pembayaran QRIS - AE Game Store</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      body {
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 18px;
+      }
+
+      .payment-card {
+        width: min(440px, 100%);
+        padding: 22px;
+        border-radius: 26px;
+        background: var(--card-bg-strong, #fff);
+        border: 1px solid var(--border-color, #bae6fd);
+        box-shadow: var(--shadow-lg, 0 20px 50px rgba(14, 165, 233, 0.18));
+        text-align: center;
+      }
+
+      .payment-kicker {
+        font-size: 11px;
+        font-weight: 900;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        color: var(--ocean, #0ea5e9);
+      }
+
+      .payment-card h1 {
+        margin: 8px 0 6px;
+        font-size: 24px;
+      }
+
+      .payment-amount {
+        margin: 16px 0;
+        padding: 14px;
+        border-radius: 18px;
+        background: rgba(14, 165, 233, 0.1);
+      }
+
+      .payment-amount span {
+        display: block;
+        font-size: 12px;
+        color: var(--text-muted, #64748b);
+      }
+
+      .payment-amount strong {
+        display: block;
+        margin-top: 4px;
+        font-size: 28px;
+      }
+
+      .payment-qr {
+        width: min(300px, 100%);
+        margin: 12px auto;
+        padding: 12px;
+        border-radius: 20px;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+      }
+
+      .payment-qr img {
+        width: 100%;
+        display: block;
+      }
+
+      .payment-status {
+        margin: 14px 0;
+        font-size: 13px;
+        color: var(--text-muted, #64748b);
+      }
+
+      .payment-actions {
+        display: grid;
+        gap: 10px;
+        margin-top: 16px;
+      }
+
+      .payment-actions button,
+      .payment-actions a {
+        min-height: 46px;
+        border-radius: 14px;
+        display: grid;
+        place-items: center;
+        font-weight: 900;
+        text-decoration: none;
+      }
+
+      .payment-actions a {
+        background: rgba(14, 165, 233, 0.1);
+        color: var(--ocean-deep, #0369a1);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="payment-card">
+      <div class="payment-kicker">AE Game Store</div>
+      <h1>Pembayaran QRIS</h1>
+      <p id="paymentDesc">Scan QRIS di bawah untuk menyelesaikan pembayaran.</p>
+
+      <div class="payment-amount">
+        <span>Total Bayar</span>
+        <strong id="paymentAmount">Rp 0</strong>
+      </div>
+
+      <div class="payment-qr">
+        <img id="paymentQrImage" alt="QRIS Midtrans" />
+      </div>
+
+      <div class="payment-status" id="paymentStatus">
+        Menunggu pembayaran...
+      </div>
+
+      <div class="payment-actions">
+        <button type="button" onclick="checkPaymentStatus()">
+          Cek Pembayaran
+        </button>
+        <a id="resultLink" href="/">Lihat Detail Order</a>
+      </div>
+    </main>
+
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const orderId = params.get("order_id");
+      let qrisUrl = sessionStorage.getItem("ae_qris_url") || "";
+      let grossAmount = Number(sessionStorage.getItem("ae_qris_amount") || 0);
+      let resultUrl =
+        sessionStorage.getItem("ae_qris_result_url") ||
+        `/result?order_id=${encodeURIComponent(orderId || "")}`;
+
+      function formatRupiah(value) {
+        return "Rp " + Number(value || 0).toLocaleString("id-ID");
+      }
+
+      function renderPaymentData() {
+        document.getElementById("paymentAmount").innerText =
+          formatRupiah(grossAmount);
+        document.getElementById("resultLink").href = resultUrl;
+
+        if (qrisUrl) {
+          document.getElementById("paymentQrImage").src = qrisUrl;
+          document.getElementById("paymentStatus").innerText =
+            "Menunggu pembayaran...";
+        } else {
+          document.getElementById("paymentStatus").innerText =
+            "QRIS tidak ditemukan. Silakan ulangi checkout.";
+        }
+      }
+
+      async function loadPaymentData() {
+        if (!orderId) {
+          renderPaymentData();
+          return;
+        }
+
+        try {
+          const res = await fetch(
+            `/payment-data/${encodeURIComponent(orderId)}`,
+          );
+          const data = await res.json();
+
+          if (!res.ok) {
+            document.getElementById("paymentStatus").innerText =
+              data.message || "Gagal mengambil data pembayaran.";
+            renderPaymentData();
+            return;
+          }
+
+          qrisUrl = data.qrisUrl || qrisUrl;
+          grossAmount = Number(data.grossAmount || grossAmount || 0);
+          resultUrl =
+            data.resultUrl || `/result?order_id=${encodeURIComponent(orderId)}`;
+
+          if (qrisUrl) sessionStorage.setItem("ae_qris_url", qrisUrl);
+          sessionStorage.setItem("ae_qris_amount", String(grossAmount || 0));
+          sessionStorage.setItem("ae_qris_result_url", resultUrl);
+
+          renderPaymentData();
+
+          if (data.paymentStatus === "paid") {
+            document.getElementById("paymentStatus").innerText =
+              "Pembayaran berhasil. Mengalihkan...";
+            window.location.href = resultUrl;
+          }
+        } catch (err) {
+          renderPaymentData();
+        }
+      }
+
+      loadPaymentData();
+
+      async function checkPaymentStatus() {
+        if (!orderId) return;
+
+        const statusEl = document.getElementById("paymentStatus");
+        statusEl.innerText = "Mengecek pembayaran...";
+
+        try {
+          const res = await fetch(`/order/${encodeURIComponent(orderId)}`);
+          const data = await res.json();
+
+          if (!res.ok) {
+            statusEl.innerText = data.message || "Belum bisa cek pembayaran.";
+            return;
+          }
+
+          if (data.payment_status === "paid") {
+            statusEl.innerText = "Pembayaran berhasil. Mengalihkan...";
+            window.location.href = resultUrl;
+            return;
+          }
+
+          statusEl.innerText = "Belum dibayar. Silakan scan QRIS dulu.";
+        } catch (err) {
+          statusEl.innerText = "Gagal cek status pembayaran.";
+        }
+      }
+
+      setInterval(checkPaymentStatus, 5000);
+    </script>
+  </body>
+</html>

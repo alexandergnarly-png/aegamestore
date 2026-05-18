@@ -53,7 +53,10 @@ self.addEventListener("fetch", (event) => {
     requestUrl.pathname.startsWith("/admin-orders") ||
     requestUrl.pathname.startsWith("/admin-") ||
     requestUrl.pathname.startsWith("/ae-control") ||
-    requestUrl.pathname.startsWith("/ae-auth");
+    requestUrl.pathname.startsWith("/ae-auth") ||
+    requestUrl.pathname.startsWith("/payment") ||
+    requestUrl.pathname.startsWith("/payment-data") ||
+    requestUrl.pathname.startsWith("/create-qris-order");
 
   if (isDynamicRequest) return;
 

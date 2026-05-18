@@ -1262,7 +1262,7 @@ async function buy() {
   setLoading(true);
 
   try {
-    const res = await fetch("/create-order", {
+    const res = await fetch("/create-qris-order", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -1288,6 +1288,15 @@ async function buy() {
       }).then(() => {
         window.location.href = data.redirectUrl || "/auth";
       });
+      return;
+    }
+
+    if (data.qrisUrl && data.orderId) {
+      sessionStorage.setItem("ae_qris_url", data.qrisUrl);
+      sessionStorage.setItem("ae_qris_amount", String(data.grossAmount || 0));
+      sessionStorage.setItem("ae_qris_result_url", data.resultUrl || "");
+
+      window.location.href = `/payment?order_id=${encodeURIComponent(data.orderId)}`;
       return;
     }
 
