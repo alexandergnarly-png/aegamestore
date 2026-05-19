@@ -3845,7 +3845,12 @@ document.addEventListener("DOMContentLoaded", () => {
   console.info("[AEPay] AEPaymentModal module loading…");
   const SNAP_SANDBOX_URL = "https://app.sandbox.midtrans.com/snap/snap.js";
   const SNAP_PROD_URL = "https://app.midtrans.com/snap/snap.js";
-  const POLL_INTERVAL_MS = 4000;
+  // Slower polling on mobile (6s) to reduce CPU/battery; desktop stays 4s.
+  const IS_MOBILE_VIEWPORT =
+    typeof window !== "undefined" &&
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(max-width: 768px)").matches;
+  const POLL_INTERVAL_MS = IS_MOBILE_VIEWPORT ? 6000 : 4000;
   const COUNTDOWN_SECONDS = 15 * 60;
 
   const state = {
@@ -4110,6 +4115,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function startPolling() {
     stopPolling();
+    if (typeof document !== "undefined" && document.hidden) {
+      // Skip polling while tab hidden — save battery/CPU
+      return;
+    }
     state.pollTimer = setInterval(() => {
       pollOrderStatus();
     }, POLL_INTERVAL_MS);
@@ -4120,6 +4129,21 @@ document.addEventListener("DOMContentLoaded", () => {
       clearInterval(state.pollTimer);
       state.pollTimer = null;
     }
+  }
+
+  function handleVisibilityChange() {
+    if (!state.isOpen) return;
+    if (document.hidden) {
+      stopPolling();
+    } else {
+      // Re-sync immediately on return + restart interval
+      pollOrderStatus();
+      startPolling();
+    }
+  }
+
+  if (typeof document !== "undefined") {
+    document.addEventListener("visibilitychange", handleVisibilityChange);
   }
 
   async function pollOrderStatus(silent = true) {

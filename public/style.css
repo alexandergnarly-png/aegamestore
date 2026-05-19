@@ -5109,7 +5109,8 @@ body.dark-theme .payment-modal-card {
 }
 
 .payment-modal-order-id {
-  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family:
+    "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   font-weight: 600;
   margin-left: 4px;
   color: var(--accent, #0284c7);
@@ -5235,7 +5236,8 @@ body.dark-theme .payment-modal-countdown {
 
 .payment-modal-countdown-info strong {
   margin-left: auto;
-  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family:
+    "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 16px;
   font-weight: 700;
   color: var(--text-primary, #0c4a6e);
@@ -5675,6 +5677,113 @@ body.dark-theme .payment-modal-btn-ghost {
 
   .payment-modal-brand-text strong {
     font-size: 15px;
+  }
+}
+
+/* --- Mobile performance overrides ---
+   backdrop-filter blur + multi-layer gradients + per-frame animations
+   bikin payment modal lag di mid-range Android. Di mobile,
+   simplify visual untuk gain frame budget. */
+@media (max-width: 768px) {
+  .payment-modal-backdrop {
+    background: rgba(8, 47, 73, 0.78);
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  body.dark-theme .payment-modal-backdrop {
+    background: rgba(0, 0, 0, 0.82);
+  }
+
+  .payment-modal-card {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: var(--card-bg-strong, #ffffff);
+    will-change: transform;
+    transform: translateY(100%);
+    transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 -10px 30px -10px rgba(8, 47, 73, 0.35);
+  }
+
+  body.dark-theme .payment-modal-card {
+    background: #0f172a;
+  }
+
+  .payment-modal-card::before {
+    animation: none !important;
+    background: linear-gradient(90deg, #0ea5e9, #fb7185);
+  }
+
+  .payment-modal-status-dot {
+    animation: none !important;
+    opacity: 0.95;
+  }
+
+  .payment-modal-progress-bar {
+    transition: width 1s linear !important;
+  }
+
+  .payment-modal-progress-bar[data-danger="true"] {
+    animation: none !important;
+  }
+
+  .payment-modal-amount {
+    background: rgba(14, 165, 233, 0.08);
+    border-color: rgba(14, 165, 233, 0.16);
+  }
+
+  .payment-modal-snap-wrap {
+    min-height: 320px;
+    contain: layout paint;
+  }
+
+  .payment-modal-snap {
+    min-height: 320px;
+    contain: layout paint;
+  }
+
+  .payment-modal-snap iframe {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .payment-modal-snap-loading {
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  body.dark-theme .payment-modal-snap-loading {
+    background: rgba(15, 23, 42, 0.92);
+  }
+
+  .payment-modal-state {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(255, 255, 255, 0.97);
+  }
+
+  body.dark-theme .payment-modal-state {
+    background: rgba(15, 23, 42, 0.97);
+  }
+
+  .payment-modal-close {
+    transition: background 0.18s ease, color 0.18s ease;
+  }
+
+  .payment-modal-close:hover,
+  .payment-modal-close:focus-visible {
+    transform: none;
+  }
+
+  /* Use dvh where supported for accurate viewport */
+  .payment-modal {
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  .payment-modal-card {
+    max-height: 92vh;
+    max-height: 92dvh;
   }
 }
 
