@@ -3,7 +3,7 @@
 // always return a valid Response object so the browser doesn't fall back
 // to the offline page on transient sub-resource fails.
 
-const CACHE_NAME = "ae-game-store-auto-v4";
+const CACHE_NAME = "ae-game-store-auto-v5";
 
 const STATIC_ASSETS = [
   "/",
