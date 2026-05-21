@@ -1077,6 +1077,85 @@
         color: #f8fafc !important;
       }
 
+      /* === Orders filter chips === */
+      .orders-filter {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+      }
+
+      .filter-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 14px;
+        border-radius: var(--radius-pill);
+        font-size: 12px;
+        font-weight: 800;
+        color: var(--text-muted);
+        background: rgba(56, 189, 248, 0.1);
+        border: 1px solid var(--border-soft);
+        transition:
+          color var(--dur-fast) var(--ease-out),
+          background var(--dur-fast) var(--ease-out);
+        cursor: pointer;
+      }
+
+      .filter-chip:hover {
+        color: var(--ocean-deep);
+        background: rgba(56, 189, 248, 0.18);
+      }
+
+      body.dark-theme .filter-chip:hover {
+        color: var(--ocean-light);
+      }
+
+      .filter-chip.active {
+        color: white;
+        background: linear-gradient(
+          135deg,
+          var(--ocean-deep),
+          var(--ocean-light)
+        );
+        border-color: transparent;
+        box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);
+      }
+
+      .filter-chip .dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .filter-chip[data-filter="pending"] .dot {
+        background: var(--warning);
+      }
+      .filter-chip[data-filter="paid"] .dot {
+        background: var(--success);
+      }
+      .filter-chip[data-filter="failed"] .dot {
+        background: var(--danger);
+      }
+
+      .filter-chip .count {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 18px;
+        height: 18px;
+        padding: 0 5px;
+        font-size: 10px;
+        font-weight: 800;
+        border-radius: var(--radius-pill);
+        background: rgba(56, 189, 248, 0.18);
+        color: inherit;
+      }
+
+      .filter-chip.active .count {
+        background: rgba(255, 255, 255, 0.28);
+      }
+
       /* Responsive */
       @media (max-width: 880px) {
         .page {
@@ -1086,6 +1165,107 @@
 
         .surface {
           padding: 22px;
+        }
+      }
+
+      /* === Mobile perf + visual cleanup (≤768px) === */
+      @media (max-width: 768px) {
+        /* B1: Disable backdrop-filter — major GPU saver */
+        .site-header,
+        .surface,
+        .tab-card,
+        .order-card {
+          backdrop-filter: none !important;
+          -webkit-backdrop-filter: none !important;
+        }
+
+        .site-header {
+          background: rgba(255, 255, 255, 0.96);
+        }
+        body.dark-theme .site-header {
+          background: rgba(8, 14, 32, 0.96);
+        }
+
+        .surface {
+          background: var(--card-bg-strong);
+        }
+
+        /* B2: Static skeleton (no shimmer animation) */
+        .skeleton-card {
+          animation: none !important;
+          background: rgba(56, 189, 248, 0.12);
+        }
+
+        /* B5: Disable fade-up panel animation */
+        .panel.active {
+          animation: none !important;
+        }
+
+        /* Hide decorative blobs to save GPU */
+        .blob {
+          display: none;
+        }
+
+        /* Disable card hover lift on touch — no hover anyway */
+        .order-card {
+          transition: none;
+        }
+        .order-card:hover {
+          transform: none;
+          box-shadow: var(--shadow-xs);
+        }
+
+        /* A3: Profile card compact — avatar + name horizontal */
+        .profile-card {
+          text-align: left;
+          padding: 18px;
+        }
+        .profile-card::before {
+          height: 4px;
+        }
+        .profile-card-head {
+          text-align: left;
+          display: grid;
+          grid-template-columns: 64px 1fr;
+          gap: 14px;
+          align-items: center;
+        }
+        .profile-card .avatar {
+          margin: 0;
+          width: 64px;
+          height: 64px;
+          font-size: 28px;
+          border-radius: 20px;
+        }
+        .profile-card h1 {
+          font-size: 18px;
+          margin: 0 0 2px;
+        }
+        .profile-card .subtitle {
+          font-size: 12px;
+        }
+        /* Hide buyer stats mini line on mobile to reduce clutter */
+        .buyer-stats-mini {
+          display: none;
+        }
+        .buyer-badge {
+          margin-top: 10px;
+        }
+        .status-grid {
+          margin-top: 14px;
+          gap: 8px;
+        }
+        .status-box {
+          padding: 10px 12px;
+        }
+        .profile-actions {
+          flex-direction: row;
+          margin-top: 14px;
+          gap: 8px;
+        }
+        .profile-actions .btn {
+          padding: 11px 14px;
+          font-size: 13px;
         }
       }
 
@@ -1120,6 +1300,44 @@
 
         .order-row b {
           text-align: left;
+        }
+
+        /* A4: Icon-only style tabs — icon top, label bottom small */
+        .tab-card {
+          padding: 4px;
+          gap: 4px;
+        }
+        .tab-btn {
+          flex-direction: column;
+          gap: 2px;
+          min-width: 0;
+          padding: 8px 6px;
+          font-size: 10px;
+          letter-spacing: 0.2px;
+          line-height: 1.2;
+        }
+        .tab-btn iconify-icon {
+          font-size: 18px;
+        }
+
+        /* A5: Hide redundant section description on mobile */
+        .section-desc {
+          display: none;
+        }
+
+        /* Compact filter chips */
+        .orders-filter {
+          gap: 6px;
+          margin-bottom: 12px;
+        }
+        .filter-chip {
+          padding: 6px 10px;
+          font-size: 11px;
+        }
+        .filter-chip .count {
+          min-width: 16px;
+          height: 16px;
+          font-size: 9px;
         }
       }
     </style>
@@ -1195,11 +1413,19 @@
     <main class="page">
       <!-- Profile column -->
       <aside class="surface profile-card" aria-label="Profil pengguna">
-        <div class="avatar" aria-hidden="true">👤</div>
-        <h1 data-account-i18n="accountTitle">Akun Saya</h1>
-        <p class="subtitle" id="userText" data-account-i18n="checkingAccount">
-          Mengecek akun...
-        </p>
+        <div class="profile-card-head">
+          <div class="avatar" aria-hidden="true">👤</div>
+          <div class="profile-card-text">
+            <h1 data-account-i18n="accountTitle">Akun Saya</h1>
+            <p
+              class="subtitle"
+              id="userText"
+              data-account-i18n="checkingAccount"
+            >
+              Mengecek akun...
+            </p>
+          </div>
+        </div>
 
         <div id="buyerBadgeBox" aria-live="polite"></div>
         <div
@@ -1298,11 +1524,62 @@
           </p>
 
           <div
-            id="orderHistory"
-            class="orders-content"
-            data-account-i18n="loadingOrderHistory"
+            class="orders-filter"
+            role="group"
+            aria-label="Filter order status"
+            id="ordersFilter"
           >
-            Memuat riwayat order...
+            <button
+              type="button"
+              class="filter-chip active"
+              data-filter="all"
+              aria-pressed="true"
+              onclick="setOrderFilter('all')"
+            >
+              <span data-account-i18n="filterAll">Semua</span>
+              <span class="count" id="filterCount-all">0</span>
+            </button>
+            <button
+              type="button"
+              class="filter-chip"
+              data-filter="pending"
+              aria-pressed="false"
+              onclick="setOrderFilter('pending')"
+            >
+              <span class="dot" aria-hidden="true"></span>
+              <span data-account-i18n="filterPending">Pending</span>
+              <span class="count" id="filterCount-pending">0</span>
+            </button>
+            <button
+              type="button"
+              class="filter-chip"
+              data-filter="paid"
+              aria-pressed="false"
+              onclick="setOrderFilter('paid')"
+            >
+              <span class="dot" aria-hidden="true"></span>
+              <span data-account-i18n="filterPaid">Lunas</span>
+              <span class="count" id="filterCount-paid">0</span>
+            </button>
+            <button
+              type="button"
+              class="filter-chip"
+              data-filter="failed"
+              aria-pressed="false"
+              onclick="setOrderFilter('failed')"
+            >
+              <span class="dot" aria-hidden="true"></span>
+              <span data-account-i18n="filterFailed">Gagal</span>
+              <span class="count" id="filterCount-failed">0</span>
+            </button>
+          </div>
+
+          <div id="orderHistory" class="orders-content">
+            <div class="skeleton-list">
+              <div class="skeleton-card"></div>
+              <div class="skeleton-card"></div>
+              <div class="skeleton-card"></div>
+            </div>
           </div>
         </div>
 
@@ -1553,6 +1830,10 @@
           featureSoonText:
             "Nanti data ini bisa disimpan ke akun dan dipakai otomatis saat checkout.",
           badgeSoon: "SEGERA",
+          filterAll: "Semua",
+          filterPending: "Pending",
+          filterPaid: "Lunas",
+          filterFailed: "Gagal",
         },
         en: {
           accountTitle: "My Account",
@@ -1627,6 +1908,10 @@
           featureSoonText:
             "Later, this data can be saved to your account and used automatically during checkout.",
           badgeSoon: "SOON",
+          filterAll: "All",
+          filterPending: "Pending",
+          filterPaid: "Paid",
+          filterFailed: "Failed",
         },
       };
 
@@ -1903,6 +2188,33 @@
       }
 
       let orderHistoryCache = null;
+      let orderFilter = "all";
+
+      function classifyOrderStatus(payment_status) {
+        const s = String(payment_status || "").toLowerCase();
+        if (s === "paid") return "paid";
+        if (s === "pending" || s === "waiting_payment") return "pending";
+        if (s === "expired" || s === "cancelled" || s === "failed")
+          return "failed";
+        return "other";
+      }
+
+      function setOrderFilter(filter) {
+        orderFilter = filter || "all";
+        document
+          .querySelectorAll("#ordersFilter .filter-chip")
+          .forEach((btn) => {
+            const isActive = btn.getAttribute("data-filter") === orderFilter;
+            btn.classList.toggle("active", isActive);
+            btn.setAttribute("aria-pressed", isActive ? "true" : "false");
+          });
+        if (Array.isArray(orderHistoryCache)) {
+          renderOrderHistory(
+            document.getElementById("orderHistory"),
+            orderHistoryCache,
+          );
+        }
+      }
 
       async function loadOrderHistory() {
         const box = document.getElementById("orderHistory");
@@ -1941,7 +2253,30 @@
 
       function renderOrderHistory(box, data) {
         if (!box) box = document.getElementById("orderHistory");
-        if (!Array.isArray(data) || data.length === 0) {
+
+        // Update filter chip counts (always reflect the FULL dataset)
+        const counts = { all: 0, pending: 0, paid: 0, failed: 0 };
+        if (Array.isArray(data)) {
+          data.forEach((item) => {
+            counts.all += 1;
+            const group = classifyOrderStatus(item.payment_status);
+            if (counts[group] !== undefined) counts[group] += 1;
+          });
+        }
+        Object.keys(counts).forEach((k) => {
+          const el = document.getElementById(`filterCount-${k}`);
+          if (el) el.textContent = counts[k];
+        });
+
+        // Apply filter
+        let list = Array.isArray(data) ? data : [];
+        if (orderFilter !== "all") {
+          list = list.filter(
+            (item) => classifyOrderStatus(item.payment_status) === orderFilter,
+          );
+        }
+
+        if (list.length === 0) {
           box.innerHTML = `
             <div class="orders-empty">
               <iconify-icon icon="mdi:cart-outline" aria-hidden="true"></iconify-icon>
@@ -1953,12 +2288,14 @@
 
         box.innerHTML = `
             <div class="order-list">
-              ${data
+              ${list
                 .map((item) => {
                   const gameKey = item.gamekey || item.gameKey || "";
                   const voucherCode = item.voucher_code || "";
                   const discountAmount = Number(item.discount_amount || 0);
                   const orderId = item.id || item.order_id || "";
+                  const deliveryStatus = item.delivery_status || "";
+                  const productName = item.product || "";
 
                   return `
                     <article class="order-card">
@@ -1971,40 +2308,52 @@
                         </span>
                       </div>
 
-                      <div class="order-row">
-                        <span>${tAccount("product")}</span>
-                        <b>${escapeHtml(item.product || "-")}</b>
-                      </div>
+                      ${
+                        productName
+                          ? `<div class="order-row">
+                              <span>${tAccount("product")}</span>
+                              <b>${escapeHtml(productName)}</b>
+                            </div>`
+                          : ""
+                      }
 
                       <div class="order-row">
                         <span>${tAccount("totalPayment")}</span>
                         <b>${formatRupiah(item.price)}</b>
                       </div>
 
-                      <div class="order-row">
-                        <span>${tAccount("voucher")}</span>
-                        <b>${escapeHtml(voucherCode || "-")}</b>
-                      </div>
+                      ${
+                        voucherCode
+                          ? `<div class="order-row">
+                              <span>${tAccount("voucher")}</span>
+                              <b>${escapeHtml(voucherCode)}</b>
+                            </div>`
+                          : ""
+                      }
 
-                      <div class="order-row">
-                        <span>${tAccount("discount")}</span>
-                        <b class="discount-value">
-                          ${
-                            discountAmount > 0
-                              ? "- " + formatRupiah(discountAmount)
-                              : "-"
-                          }
-                        </b>
-                      </div>
+                      ${
+                        discountAmount > 0
+                          ? `<div class="order-row">
+                              <span>${tAccount("discount")}</span>
+                              <b class="discount-value">- ${formatRupiah(
+                                discountAmount,
+                              )}</b>
+                            </div>`
+                          : ""
+                      }
 
-                      <div class="order-row">
-                        <span>${tAccount("delivery")}</span>
-                        <span class="status-pill ${escapeHtml(
-                          item.delivery_status || "",
-                        )}">
-                          ${escapeHtml(item.delivery_status || "-")}
-                        </span>
-                      </div>
+                      ${
+                        deliveryStatus
+                          ? `<div class="order-row">
+                              <span>${tAccount("delivery")}</span>
+                              <span class="status-pill ${escapeHtml(
+                                deliveryStatus,
+                              )}">
+                                ${escapeHtml(deliveryStatus)}
+                              </span>
+                            </div>`
+                          : ""
+                      }
 
                       <div class="order-row">
                         <span>${tAccount("time")}</span>
