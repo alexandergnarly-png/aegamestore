@@ -1036,8 +1036,9 @@ async function openOrderModal(game) {
       return;
     }
 
-    if (nameInput && !nameInput.value.trim()) {
+    if (nameInput) {
       nameInput.value = data.username || "";
+      nameInput.readOnly = true;
     }
 
     if (contactInput && data.contact && !contactInput.value.trim()) {
