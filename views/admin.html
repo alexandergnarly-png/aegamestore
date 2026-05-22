@@ -2314,6 +2314,135 @@
           0 12px 32px rgba(14, 165, 233, 0.55),
           0 4px 8px rgba(14, 165, 233, 0.3);
       }
+      /* ===== ADMIN MOBILE PERFORMANCE FIX ===== */
+      @media (max-width: 768px) {
+        .sidebar,
+        .top-nav,
+        .card,
+        .stat-card,
+        .table-wrap,
+        .admin-bottom-nav,
+        .order-drawer,
+        .admin-more-sheet,
+        .admin-alerts-box {
+          backdrop-filter: none !important;
+          -webkit-backdrop-filter: none !important;
+        }
+
+        .hero::before,
+        .hero::after {
+          display: none !important;
+        }
+
+        .hero,
+        .card,
+        .stat-card,
+        .top-nav,
+        .admin-bottom-nav,
+        .order-drawer,
+        .admin-more-sheet,
+        .admin-alerts-box,
+        .nav-btn.active,
+        button {
+          box-shadow: none !important;
+        }
+
+        .stat-card:hover,
+        .nav-btn:hover,
+        button:hover,
+        .ghost-btn:hover,
+        .danger-btn:hover,
+        .top-action-btn:hover,
+        .admin-fab:hover {
+          transform: none !important;
+        }
+
+        .skeleton-row,
+        .skeleton-block {
+          animation: none !important;
+        }
+
+        .admin-fab {
+          box-shadow: none !important;
+        }
+
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.001ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.12s !important;
+        }
+      }
+      /* ===== ADMIN SMALL PHONE LAYOUT FIX ===== */
+      @media (max-width: 520px) {
+        .page {
+          padding: 12px 10px 90px !important;
+        }
+
+        .top-nav {
+          position: relative !important;
+          top: auto !important;
+          margin-bottom: 14px !important;
+        }
+
+        .hero {
+          padding: 18px !important;
+          margin-bottom: 16px !important;
+          border-radius: 18px !important;
+        }
+
+        .hero h1 {
+          font-size: 18px !important;
+        }
+
+        .hero p {
+          font-size: 12px !important;
+        }
+
+        .card {
+          padding: 14px !important;
+          border-radius: 18px !important;
+        }
+
+        .card-header {
+          margin-bottom: 14px !important;
+          padding-bottom: 12px !important;
+        }
+
+        .card-title-wrap h2 {
+          font-size: 17px !important;
+        }
+
+        .toolbar {
+          gap: 8px !important;
+        }
+
+        .field,
+        .field-wide {
+          min-width: 100% !important;
+        }
+
+        tbody tr {
+          padding: 10px 12px !important;
+        }
+
+        tbody td {
+          font-size: 12px !important;
+        }
+
+        tbody td::before {
+          font-size: 9px !important;
+        }
+
+        .admin-bottom-nav-btn .label {
+          font-size: 9px !important;
+        }
+
+        .admin-bottom-nav-btn .ico {
+          font-size: 18px !important;
+        }
+      }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </head>
