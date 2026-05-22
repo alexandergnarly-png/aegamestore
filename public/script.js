@@ -1093,11 +1093,10 @@ function setOrderStep(step) {
 
 function updateOrderStepFromForm() {
   const name = document.getElementById("name")?.value.trim() || "";
-  const contact = document.getElementById("contact")?.value.trim() || "";
   const productEl = document.getElementById("product");
   const hasProduct = Boolean(productEl?.value);
 
-  if (name && contact && hasProduct) {
+  if (name && hasProduct) {
     setOrderStep(3);
   } else if (hasProduct) {
     setOrderStep(2);
@@ -2340,8 +2339,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const productEl = document.getElementById("product");
   const brandEl = document.getElementById("brand");
   const nameEl = document.getElementById("name");
-  const contactEl = document.getElementById("contact");
-  [productEl, brandEl, nameEl, contactEl].forEach((node) => {
+  [productEl, brandEl, nameEl].forEach((node) => {
     if (!node) return;
     const evt = node.tagName === "SELECT" ? "change" : "input";
     node.addEventListener(evt, updateOrderStepFromForm);
