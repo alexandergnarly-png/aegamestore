@@ -1323,10 +1323,10 @@ app.post("/create-order", orderLimiter, async (req, res) => {
       redirectUrl: "/auth",
     });
   }
-  const { product_id, name, contact, voucher_code } = req.body;
+  const { product_id, name, voucher_code } = req.body;
 
   const cleanName = String(name || "").trim();
-  const cleanContact = String(contact || "").trim();
+  const cleanContact = "Telegram Admin";
   const cleanProductId = Number(product_id);
 
   if (!Number.isInteger(cleanProductId) || cleanProductId <= 0) {
@@ -1342,19 +1342,6 @@ app.post("/create-order", orderLimiter, async (req, res) => {
     return res
       .status(400)
       .json({ message: "Nama mengandung karakter yang tidak diizinkan" });
-  }
-
-  if (!cleanContact || cleanContact.length < 5 || cleanContact.length > 100) {
-    return res
-      .status(400)
-      .json({ message: "Kontak harus 5 sampai 100 karakter" });
-  }
-
-  const safeContactRegex = /^[a-zA-Z0-9@+._\- ]+$/;
-  if (!safeContactRegex.test(cleanContact)) {
-    return res
-      .status(400)
-      .json({ message: "Kontak mengandung karakter yang tidak diizinkan" });
   }
 
   try {

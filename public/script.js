@@ -1219,17 +1219,17 @@ productSelect.addEventListener("change", updatePreview);
 
 async function buy() {
   const name = document.getElementById("name").value.trim();
-  const contact = document.getElementById("contact").value.trim();
+  const contact = "Telegram Admin";
 
   const selectedProduct = allProducts.find(
     (item) => String(item.id) === String(productSelect.value),
   );
 
-  if (!name || !contact) {
+  if (!name) {
     Swal.fire({
       icon: "warning",
       title: "Oops...",
-      text: "Isi nama player dan kontak kamu dulu ya!",
+      text: "Nama player belum terisi.",
       confirmButtonColor: "#0ea5e9",
     });
     return;
