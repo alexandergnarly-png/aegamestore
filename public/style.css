@@ -5797,3 +5797,176 @@ body.dark-theme .payment-modal-btn-ghost {
     transition: opacity 0.2s ease !important;
   }
 }
+/* ===== MOBILE LIGHT UX FIX ===== */
+@media (max-width: 768px) {
+  .watercolor-blob,
+  .blob-1,
+  .blob-2 {
+    display: none !important;
+  }
+
+  .site-header,
+  .shop-card,
+  .promo-container,
+  .testi-card,
+  .review-action-card,
+  .order-modal-content,
+  .payment-modal-card {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .brand-logo,
+  .auth-btn,
+  .hero-cta,
+  .shop-card,
+  .promo-container,
+  .testi-card,
+  .review-action-card,
+  .game-card,
+  .order-modal-content,
+  .payment-modal-card {
+    box-shadow: none !important;
+  }
+
+  .hero {
+    padding-top: 6px !important;
+  }
+
+  .hero-copy {
+    gap: 12px !important;
+  }
+
+  .hero h1 {
+    font-size: 28px !important;
+    line-height: 1.15 !important;
+  }
+
+  .hero p {
+    font-size: 13px !important;
+    line-height: 1.5 !important;
+  }
+
+  .hero-trust {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+
+  .hero-trust li:nth-child(3) {
+    display: none !important;
+  }
+
+  .promo-container {
+    margin-top: -18px !important;
+  }
+
+  .promo-slide {
+    min-height: 118px !important;
+    padding: 14px !important;
+  }
+
+  .promo-content h3 {
+    font-size: 16px !important;
+  }
+
+  .promo-content p {
+    font-size: 12px !important;
+  }
+
+  .promo-controls {
+    display: none !important;
+  }
+
+  .review-section-head p,
+  .review-action-card p {
+    font-size: 12px !important;
+  }
+
+  .game-card:hover,
+  .hero-cta:hover,
+  .auth-btn:hover,
+  button:hover {
+    transform: none !important;
+  }
+
+  #preloader {
+    display: none !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.12s !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .page {
+    gap: 34px !important;
+    padding: 22px 14px 92px !important;
+  }
+
+  .header-inner {
+    padding: 10px 14px !important;
+    min-height: 62px !important;
+  }
+
+  .brand-logo {
+    width: 38px !important;
+    height: 38px !important;
+  }
+
+  .brand-copy strong {
+    font-size: 14px !important;
+  }
+
+  .brand-copy span {
+    display: none !important;
+  }
+
+  .lang-switch {
+    display: none !important;
+  }
+
+  .theme-toggle-btn {
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  .auth-btn {
+    padding: 8px 11px !important;
+    font-size: 12px !important;
+  }
+
+  .hero-badge {
+    font-size: 10px !important;
+    padding: 6px 12px !important;
+  }
+
+  .hero-cta-row {
+    width: 100% !important;
+    gap: 8px !important;
+  }
+
+  .hero-cta {
+    flex: 1 1 auto !important;
+    padding: 11px 12px !important;
+    font-size: 12px !important;
+  }
+
+  .section-head {
+    gap: 10px !important;
+  }
+
+  .section-head h2 {
+    font-size: 20px !important;
+  }
+
+  .order-modal-content {
+    max-height: 88dvh !important;
+    overflow-y: auto !important;
+  }
+}
