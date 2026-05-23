@@ -1528,11 +1528,21 @@
           el.querySelectorAll(".skeleton-line").forEach((s) => s.remove());
         });
       }
+      const brandCompatibleGames = {
+        aorus: ["Delta Force", "PUBG Mobile", "Valorant"],
+
+        // Contoh nanti kalau ada brand lain:
+        // rexus: ["Game A", "Game B"],
+        // logitech: ["Game C", "Game D"],
+      };
+
       function getCompatibleGames(data) {
         const product = String(data?.product || "").toLowerCase();
 
-        if (product.includes("aorus")) {
-          return ["Delta Force", "PUBG Mobile", "Valorant"];
+        for (const [brand, games] of Object.entries(brandCompatibleGames)) {
+          if (product.includes(brand)) {
+            return games;
+          }
         }
 
         return [];
