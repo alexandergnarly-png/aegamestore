@@ -662,6 +662,62 @@
         font-weight: 700;
       }
 
+      /* Compatible games box */
+      .compatible-box {
+        display: none;
+        margin: 0 0 20px;
+        padding: 14px 16px;
+        border-radius: var(--radius-md);
+        background: var(--info-bg);
+        border: 1px solid rgba(56, 189, 248, 0.28);
+        color: var(--info-strong);
+        text-align: left;
+      }
+
+      .compatible-box.show {
+        display: block;
+      }
+
+      .compatible-title {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11px;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+      }
+
+      .compatible-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin-bottom: 8px;
+      }
+
+      .compatible-chip {
+        display: inline-flex;
+        align-items: center;
+        padding: 5px 10px;
+        border-radius: var(--radius-pill);
+        background: rgba(255, 255, 255, 0.65);
+        border: 1px solid rgba(56, 189, 248, 0.24);
+        color: var(--text-strong);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      body.dark-theme .compatible-chip {
+        background: rgba(15, 23, 42, 0.55);
+      }
+
+      .compatible-note {
+        font-size: 12px;
+        line-height: 1.5;
+        color: var(--text-muted);
+      }
+
       /* Key box */
       .key-box {
         position: relative;
@@ -1094,10 +1150,6 @@
               <span class="skeleton-line long"></span>
               <span class="skeleton-line short"></span>
             </div>
-            <div class="summary-item" id="contactText">
-              <span class="skeleton-line long"></span>
-              <span class="skeleton-line short"></span>
-            </div>
             <div class="summary-item" id="gameText">
               <span class="skeleton-line long"></span>
               <span class="skeleton-line short"></span>
@@ -1111,7 +1163,20 @@
               <span class="skeleton-line short"></span>
             </div>
           </div>
-
+          <div class="compatible-box" id="compatibleBox">
+            <div class="compatible-title">
+              <iconify-icon
+                icon="mdi:gamepad-variant-outline"
+                aria-hidden="true"
+              ></iconify-icon>
+              <span data-result-i18n="compatibleTitle">Kompatibel Dengan</span>
+            </div>
+            <div class="compatible-list" id="compatibleList"></div>
+            <div class="compatible-note" data-result-i18n="compatibleNote">
+              Key ini dapat digunakan untuk beberapa game yang didukung brand
+              tersebut.
+            </div>
+          </div>
           <div class="key-box">
             <span class="key-title">
               <iconify-icon
@@ -1241,6 +1306,9 @@
           copySuccessText: "Game key berhasil dicopy!",
           copyFailTitle: "Oops...",
           copyFailText: "Gagal copy key.",
+          compatibleTitle: "Kompatibel Dengan",
+          compatibleNote:
+            "Key ini dapat digunakan untuk beberapa game yang didukung brand tersebut.",
         },
         en: {
           pageTitle: "Order Result - AE Game Store",
@@ -1297,6 +1365,9 @@
           copySuccessText: "Game key copied successfully!",
           copyFailTitle: "Oops...",
           copyFailText: "Failed to copy key.",
+          compatibleTitle: "Compatible With",
+          compatibleNote:
+            "This key can be used for several games supported by this brand.",
         },
       };
 
@@ -1457,7 +1528,39 @@
           el.querySelectorAll(".skeleton-line").forEach((s) => s.remove());
         });
       }
+      function getCompatibleGames(data) {
+        const product = String(data?.product || "").toLowerCase();
 
+        if (product.includes("aorus")) {
+          return ["Delta Force", "PUBG Mobile", "Valorant"];
+        }
+
+        return [];
+      }
+
+      function renderCompatibleGames(data) {
+        const box = document.getElementById("compatibleBox");
+        const list = document.getElementById("compatibleList");
+
+        if (!box || !list) return;
+
+        const games = getCompatibleGames(data);
+
+        if (!games.length) {
+          box.classList.remove("show");
+          list.innerHTML = "";
+          return;
+        }
+
+        list.innerHTML = games
+          .map(
+            (game) =>
+              `<span class="compatible-chip">${escapeHtml(game)}</span>`,
+          )
+          .join("");
+
+        box.classList.add("show");
+      }
       function fillSummary(data) {
         clearSkeleton();
         const summaryEl = document.getElementById("summary");
@@ -1466,12 +1569,6 @@
           <span class="summary-label">${tResult("labelName")}</span>
           <span class="summary-value">${escapeHtml(
             data.name || tResult("dash"),
-          )}</span>
-        `;
-        document.getElementById("contactText").innerHTML = `
-          <span class="summary-label">${tResult("labelContact")}</span>
-          <span class="summary-value">${escapeHtml(
-            data.contact || tResult("dash"),
           )}</span>
         `;
         document.getElementById("gameText").innerHTML = `
@@ -1509,6 +1606,7 @@
           badge(data.payment_status) + badge(data.delivery_status);
 
         fillSummary(data);
+        renderCompatibleGames(data);
 
         // Detach static i18n binding once we render dynamic content
         statusText.removeAttribute("data-result-i18n");
