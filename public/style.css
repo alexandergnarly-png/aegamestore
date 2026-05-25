@@ -6004,3 +6004,78 @@ body.dark-theme .payment-modal-btn-ghost {
     display: none !important;
   }
 }
+/* ===== MOBILE PROMO MINIMAL FIX ===== */
+@media (max-width: 768px) {
+  .promo-container {
+    margin-top: -18px !important;
+    gap: 6px !important;
+  }
+
+  .promo-slider {
+    height: 104px !important;
+    border-radius: 18px !important;
+    box-shadow: none !important;
+  }
+
+  .promo-slide {
+    min-height: 104px !important;
+    padding: 12px 14px !important;
+  }
+
+  .promo-content {
+    gap: 3px !important;
+    max-width: 100% !important;
+  }
+
+  .promo-content span {
+    font-size: 10px !important;
+    padding: 3px 8px !important;
+    letter-spacing: 0.7px !important;
+  }
+
+  .promo-content h3 {
+    font-size: 15px !important;
+    line-height: 1.2 !important;
+    margin-bottom: 2px !important;
+  }
+
+  .promo-content p {
+    font-size: 11px !important;
+    line-height: 1.35 !important;
+    max-width: 92% !important;
+  }
+
+  .promo-countdown {
+    margin-top: 4px !important;
+    padding: 4px 8px !important;
+    font-size: 10px !important;
+  }
+
+  .promo-controls {
+    display: none !important;
+  }
+
+  .promo-arrow,
+  .promo-dot {
+    display: none !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .promo-slider {
+    height: 96px !important;
+  }
+
+  .promo-slide {
+    min-height: 96px !important;
+    padding: 10px 12px !important;
+  }
+
+  .promo-content h3 {
+    font-size: 14px !important;
+  }
+
+  .promo-content p {
+    font-size: 10.5px !important;
+  }
+}
