@@ -812,6 +812,49 @@
         background: rgba(244, 63, 94, 0.18);
       }
 
+      /* How to use box */
+      .howto-box {
+        display: none;
+        margin-top: 14px;
+        padding: 14px 16px;
+        border-radius: var(--radius-md);
+        background: var(--card-bg);
+        border: 1px solid var(--border-soft);
+        text-align: left;
+      }
+
+      .howto-box.show {
+        display: block;
+      }
+
+      .howto-title {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11px;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--ocean-deep);
+        margin-bottom: 8px;
+      }
+
+      body.dark-theme .howto-title {
+        color: var(--ocean-light);
+      }
+
+      .howto-list {
+        margin: 0;
+        padding-left: 18px;
+        color: var(--text-muted);
+        font-size: 12px;
+        line-height: 1.7;
+      }
+
+      .howto-list strong {
+        color: var(--text-strong);
+      }
+
       /* Buttons */
       .btn {
         display: inline-flex;
@@ -891,6 +934,21 @@
         color: var(--text-muted);
         line-height: 1.6;
         text-align: center;
+      }
+
+      .result-help {
+        margin-top: 16px;
+        padding: 14px;
+        border-radius: var(--radius-md);
+        background: var(--info-bg);
+        border: 1px solid rgba(56, 189, 248, 0.25);
+        text-align: center;
+      }
+
+      .result-help p {
+        margin-bottom: 10px;
+        color: var(--text-muted);
+        font-size: 12px;
       }
 
       .result-actions {
@@ -1015,7 +1073,49 @@
       body.dark-theme .swal2-html-container {
         color: #f8fafc !important;
       }
+      /* Mobile performance */
+      @media (max-width: 768px) {
+        .blob,
+        .sakura {
+          display: none !important;
+        }
 
+        .site-header,
+        .card,
+        .summary,
+        .key-box,
+        .compatible-box,
+        .howto-box {
+          backdrop-filter: none !important;
+          -webkit-backdrop-filter: none !important;
+        }
+
+        .card,
+        .brand-logo,
+        .logo-badge,
+        .copy-btn,
+        .home-btn,
+        .secondary-btn {
+          box-shadow: none !important;
+        }
+
+        .skeleton,
+        .skeleton-line {
+          animation: none !important;
+        }
+
+        .btn:hover {
+          transform: none !important;
+        }
+
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.001ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.12s !important;
+        }
+      }
       /* Responsive */
       @media (max-width: 520px) {
         .header-inner {
@@ -1200,6 +1300,27 @@
             </button>
           </div>
 
+          <div class="howto-box" id="howtoBox">
+            <div class="howto-title">
+              <iconify-icon
+                icon="mdi:book-open-page-variant-outline"
+                aria-hidden="true"
+              ></iconify-icon>
+              <span data-result-i18n="howtoTitle">Cara Pakai Key</span>
+            </div>
+            <ol class="howto-list">
+              <li data-result-i18n="howtoStep1">
+                Copy kode key yang sudah muncul.
+              </li>
+              <li data-result-i18n="howtoStep2">
+                Buka game atau panel brand terkait.
+              </li>
+              <li data-result-i18n="howtoStep3">
+                Redeem / login sesuai instruksi brand.
+              </li>
+            </ol>
+          </div>
+
           <p
             class="helper-text"
             id="statusText"
@@ -1207,6 +1328,19 @@
           >
             Memuat data order...
           </p>
+
+          <div class="result-help" id="resultHelp" style="display: none">
+            <p data-result-i18n="needHelp">Butuh bantuan? Hubungi admin.</p>
+            <a
+              href="https://t.me/narlyax"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn secondary-btn"
+              data-result-i18n="chatAdmin"
+            >
+              Chat Admin
+            </a>
+          </div>
 
           <div class="result-actions">
             <button
@@ -1309,6 +1443,12 @@
           compatibleTitle: "Kompatibel Dengan",
           compatibleNote:
             "Key ini dapat digunakan untuk beberapa game yang didukung brand tersebut.",
+          howtoTitle: "Cara Pakai Key",
+          howtoStep1: "Copy kode key yang sudah muncul.",
+          howtoStep2: "Buka game atau panel brand terkait.",
+          howtoStep3: "Redeem / login sesuai instruksi brand.",
+          chatAdmin: "Chat Admin",
+          needHelp: "Butuh bantuan? Hubungi admin.",
         },
         en: {
           pageTitle: "Order Result - AE Game Store",
@@ -1368,6 +1508,12 @@
           compatibleTitle: "Compatible With",
           compatibleNote:
             "This key can be used for several games supported by this brand.",
+          howtoTitle: "How to Use Key",
+          howtoStep1: "Copy the key code that appears.",
+          howtoStep2: "Open the related game or brand panel.",
+          howtoStep3: "Redeem / login according to the brand instructions.",
+          chatAdmin: "Chat Admin",
+          needHelp: "Need help? Contact admin.",
         },
       };
 
@@ -1608,6 +1754,10 @@
         const keyBox = document.getElementById("keyBox");
         const copyBtn = document.getElementById("copyBtn");
         const keyWrapper = document.querySelector(".key-box");
+        const howtoBox = document.getElementById("howtoBox");
+        if (howtoBox) howtoBox.classList.remove("show");
+        const resultHelp = document.getElementById("resultHelp");
+        if (resultHelp) resultHelp.style.display = "none";
 
         const paymentStatus = String(data.payment_status || "").toLowerCase();
         const deliveryStatus = String(data.delivery_status || "").toLowerCase();
@@ -1627,6 +1777,7 @@
           copyBtn.style.display = "flex";
           keyBox.innerText = data.gameKey;
           if (keyWrapper) keyWrapper.className = "key-box delivered";
+          if (howtoBox) howtoBox.classList.add("show");
           statusText.innerHTML = `
             <div class="status-message-card success">
               <iconify-icon icon="mdi:check-circle" aria-hidden="true"></iconify-icon>

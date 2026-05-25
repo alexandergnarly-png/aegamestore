@@ -5970,3 +5970,37 @@ body.dark-theme .payment-modal-btn-ghost {
     overflow-y: auto !important;
   }
 }
+/* ===== MOBILE PROMO MINIMAL FIX ===== */
+@media (max-width: 768px) {
+  .promo-container {
+    margin-top: -18px !important;
+  }
+
+  .promo-slide {
+    min-height: 104px !important;
+    padding: 12px 14px !important;
+  }
+
+  .promo-content span {
+    font-size: 10px !important;
+  }
+
+  .promo-content h3 {
+    font-size: 15px !important;
+    margin-bottom: 4px !important;
+  }
+
+  .promo-content p {
+    font-size: 11px !important;
+    line-height: 1.4 !important;
+  }
+
+  .promo-countdown {
+    margin-top: 6px !important;
+    font-size: 11px !important;
+  }
+
+  .promo-controls {
+    display: none !important;
+  }
+}
