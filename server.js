@@ -736,6 +736,16 @@ app.use(
 app.use(globalLimiter);
 app.use(express.json({ limit: "50kb" }));
 app.use(cookieParser());
+
+app.use((req, res, next) => {
+  res.setHeader(
+    "Permissions-Policy",
+    "camera=(), microphone=(), geolocation=(), payment=()",
+  );
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  next();
+});
+
 app.use((req, res, next) => {
   if (
     req.path.startsWith("/orders") ||
