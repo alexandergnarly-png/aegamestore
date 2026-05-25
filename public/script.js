@@ -441,21 +441,17 @@ const gameImages = {
     "https://cdn.cloudflare.steamstatic.com/steam/apps/578080/header.jpg",
   pubgm: "https://cdn.cloudflare.steamstatic.com/steam/apps/578080/header.jpg",
 
-  mobilelegends:
-    "https://play-lh.googleusercontent.com/7oS5oPpR2z6kV1U1vVZrXW6Y7n4Zs3l7J9v0V0p0m8V0Q0h3R0Z0J0U0R0I0M0Y=s512",
-  mobilelegend:
-    "https://play-lh.googleusercontent.com/7oS5oPpR2z6kV1U1vVZrXW6Y7n4Zs3l7J9v0V0p0m8V0Q0h3R0Z0J0U0R0I0M0Y=s512",
-  mlbb: "https://play-lh.googleusercontent.com/7oS5oPpR2z6kV1U1vVZrXW6Y7n4Zs3l7J9v0V0p0m8V0Q0h3R0Z0J0U0R0I0M0Y=s512",
+  mobilelegends: "/images/games/mlbb.png",
+  mobilelegend: "/images/games/mlbb.png",
+  mlbb: "/images/games/mlbb.png",
 
   freefire:
     "https://play-lh.googleusercontent.com/6llpraFcTI0rEUuRpWEG9NWWblvm106y5JXcDzu60ACuaUYDD3i70a-p9_QM65NsGDE=s512",
   ff: "https://play-lh.googleusercontent.com/6llpraFcTI0rEUuRpWEG9NWWblvm106y5JXcDzu60ACuaUYDD3i70a-p9_QM65NsGDE=s512",
 
-  codm: "https://commons.wikimedia.org/wiki/Special:Redirect/file/Call%20of%20Duty%20Mobile%20Logo.png",
-  callofdutymobile:
-    "https://commons.wikimedia.org/wiki/Special:Redirect/file/Call%20of%20Duty%20Mobile%20Logo.png",
-  callofduty:
-    "https://commons.wikimedia.org/wiki/Special:Redirect/file/Call%20of%20Duty%20Mobile%20Logo.png",
+  codm: "/images/games/codm.png",
+  callofdutymobile: "/images/games/codm.png",
+  callofduty: "/images/games/codm.png",
 
   bloodstrike: "https://www.blood-strike.com/favicon.ico",
 
