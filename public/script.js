@@ -181,6 +181,8 @@ const translations = {
     adminChatGuideTitle: "Lihat Cara Beli",
     adminChatGuideDesc: "Panduan singkat sebelum order",
     adminChatNote: "Sertakan Order ID kalau bertanya soal transaksi.",
+    voucherToggleTitle: "Punya voucher?",
+    voucherToggleDesc: "Masukkan kode jika ada",
   },
   en: {
     selectProduct: "Select Product",
@@ -273,6 +275,8 @@ const translations = {
       "Reviews can only be submitted by buyers who have completed an order.",
     chatAdminTitle: "Chat Admin",
     chatAdminSub: "Fast response",
+    voucherToggleTitle: "Have a voucher?",
+    voucherToggleDesc: "Enter code if you have one",
     footerTagline:
       "The fastest and most trusted game top-up service in Indonesia. Automatic 24/7.",
     metaGames: "Games available",
@@ -1008,6 +1012,8 @@ window.resetCatalogFilters = resetCatalogFilters;
 async function openOrderModal(game) {
   const voucherInput = document.getElementById("voucherCodeInput");
   if (voucherInput) voucherInput.value = "";
+  const voucherPanel = document.getElementById("voucherPanel");
+  if (voucherPanel) voucherPanel.open = false;
 
   const nameInput = document.getElementById("name");
   const contactInput = document.getElementById("contact");
@@ -1111,6 +1117,8 @@ function closeOrderModal() {
 
   const voucherInput = document.getElementById("voucherCodeInput");
   if (voucherInput) voucherInput.value = "";
+  const voucherPanel = document.getElementById("voucherPanel");
+  if (voucherPanel) voucherPanel.open = false;
 
   resetVoucherPreview();
 }
@@ -2915,6 +2923,9 @@ document.addEventListener("DOMContentLoaded", () => {
         vibrate(10);
         const input = document.getElementById("voucherCodeInput");
         if (input) {
+          const voucherPanel = document.getElementById("voucherPanel");
+          if (voucherPanel) voucherPanel.open = true;
+
           input.value = best.code;
           if (typeof checkVoucher === "function") checkVoucher();
         }

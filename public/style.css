@@ -6304,3 +6304,150 @@ body.dark-theme .payment-modal-btn-ghost {
     font-size: 8.5px !important;
   }
 }
+/* ===== ORDER VOUCHER COLLAPSIBLE ===== */
+.voucher-panel {
+  margin: 4px 0 14px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  background: rgba(56, 189, 248, 0.06);
+  overflow: hidden;
+}
+
+.voucher-panel[open] {
+  background: rgba(56, 189, 248, 0.08);
+}
+
+.voucher-toggle {
+  list-style: none;
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 10px;
+  align-items: center;
+  padding: 13px 15px;
+  user-select: none;
+}
+
+.voucher-toggle::-webkit-details-marker {
+  display: none;
+}
+
+.voucher-toggle-main {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-strong);
+  font-size: 13px;
+}
+
+.voucher-toggle-main b {
+  font-weight: 900;
+}
+
+.voucher-toggle small {
+  grid-column: 1;
+  color: var(--text-muted);
+  font-size: 11.5px;
+}
+
+.voucher-toggle-arrow {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgba(14, 165, 233, 0.12);
+  color: var(--ocean-deep);
+  font-weight: 900;
+  transition: transform 0.18s ease;
+}
+
+.voucher-panel[open] .voucher-toggle-arrow {
+  transform: rotate(180deg);
+}
+
+.voucher-panel-body {
+  padding: 0 15px 14px;
+}
+
+.voucher-panel-body label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--ocean-deep);
+}
+
+body.dark-theme .voucher-toggle-arrow {
+  color: var(--ocean-light);
+  background: rgba(56, 189, 248, 0.16);
+}
+
+@media (max-width: 520px) {
+  .voucher-toggle {
+    padding: 11px 12px;
+  }
+
+  .voucher-panel-body {
+    padding: 0 12px 12px;
+  }
+
+  .voucher-row {
+    grid-template-columns: 1fr auto;
+    gap: 7px;
+  }
+
+  .voucher-check-btn {
+    padding: 0 13px !important;
+    font-size: 12px !important;
+  }
+
+  .voucher-check-btn span {
+    display: none;
+  }
+}
+/* ===== MOBILE ORDER MODAL STICKY BUY ===== */
+@media (max-width: 640px) {
+  .order-modal {
+    padding: 10px !important;
+    align-items: flex-end !important;
+  }
+
+  .order-modal-card {
+    max-height: 92dvh !important;
+    padding: 20px 16px 14px !important;
+    border-radius: 24px 24px 18px 18px !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .order-steps {
+    padding: 9px !important;
+    gap: 6px !important;
+  }
+
+  .order-step-label {
+    font-size: 11px !important;
+  }
+
+  .order-step-dot {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 12px !important;
+  }
+
+  button#buyBtn {
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 5 !important;
+    margin-top: 12px !important;
+    box-shadow: 0 -8px 20px rgba(14, 165, 233, 0.18) !important;
+  }
+
+  button#buyBtn::after {
+    display: none !important;
+  }
+}

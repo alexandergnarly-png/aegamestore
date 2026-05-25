@@ -535,34 +535,47 @@
           </div>
         </div>
 
-        <div class="form-group">
-          <label for="voucherCodeInput" data-i18n="voucherCodeLabel">
-            Kode Voucher
-          </label>
-          <div class="voucher-row">
-            <input
-              type="text"
-              id="voucherCodeInput"
-              placeholder="Contoh: DELTA5K"
-              data-i18n-placeholder="voucherPlaceholder"
-              autocomplete="off"
-            />
-            <button
-              type="button"
-              id="checkVoucherBtn"
-              class="voucher-check-btn"
-              onclick="checkVoucher()"
-            >
+        <details class="voucher-panel" id="voucherPanel">
+          <summary class="voucher-toggle">
+            <span class="voucher-toggle-main">
               <span aria-hidden="true">🎟️</span>
-              <b data-i18n="checkVoucherBtn">Cek</b>
-            </button>
+              <b data-i18n="voucherToggleTitle">Punya voucher?</b>
+            </span>
+            <small data-i18n="voucherToggleDesc">Masukkan kode jika ada</small>
+            <span class="voucher-toggle-arrow" aria-hidden="true">⌄</span>
+          </summary>
+
+          <div class="voucher-panel-body">
+            <label for="voucherCodeInput" data-i18n="voucherCodeLabel">
+              Kode Voucher
+            </label>
+
+            <div class="voucher-row">
+              <input
+                type="text"
+                id="voucherCodeInput"
+                placeholder="Contoh: DELTA5K"
+                data-i18n-placeholder="voucherPlaceholder"
+                autocomplete="off"
+              />
+              <button
+                type="button"
+                id="checkVoucherBtn"
+                class="voucher-check-btn"
+                onclick="checkVoucher()"
+              >
+                <span aria-hidden="true">🎟️</span>
+                <b data-i18n="checkVoucherBtn">Cek</b>
+              </button>
+            </div>
+
+            <small
+              id="voucherMessage"
+              class="voucher-message"
+              aria-live="polite"
+            ></small>
           </div>
-          <small
-            id="voucherMessage"
-            class="voucher-message"
-            aria-live="polite"
-          ></small>
-        </div>
+        </details>
 
         <div class="price-breakdown" id="priceBreakdown" style="display: none">
           <div>
