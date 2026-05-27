@@ -746,6 +746,19 @@ async function getVoucherDiscount({
     };
   }
 
+  const voucherVisibility = String(
+    voucher.visibility || "public",
+  ).toLowerCase();
+  const targetUserId = Number(voucher.target_user_id || 0);
+  const currentUserId = Number(userId || 0);
+
+  if (voucherVisibility === "private" && targetUserId !== currentUserId) {
+    return {
+      valid: false,
+      message: "Voucher ini khusus untuk user tertentu",
+    };
+  }
+
   const targetGame = String(voucher.game_name || "")
     .trim()
     .toLowerCase();
@@ -1202,6 +1215,31 @@ app.post("/vouchers", requireAdminAuth, requireAdminCsrf, async (req, res) => {
 
   let targetUserId = null;
 
+  if (cleanVisibility === "private") {
+    const cleanTargetUsername = String(target_username || "").trim();
+
+    if (!cleanTargetUsername) {
+      return res.status(400).json({
+        message: "Username target wajib diisi untuk voucher private",
+      });
+    }
+
+    const userResult = await query(
+      "SELECT id FROM users WHERE username = $1 LIMIT 1",
+      [cleanTargetUsername],
+    );
+
+    const targetUser = userResult.rows[0];
+
+    if (!targetUser) {
+      return res.status(404).json({
+        message: "User target voucher tidak ditemukan",
+      });
+    }
+
+    targetUserId = targetUser.id;
+  }
+
   if (Number.isInteger(cleanProductId) && cleanProductId > 0) {
     const productResult = await query(
       "SELECT * FROM products WHERE id = $1 LIMIT 1",
@@ -1319,6 +1357,31 @@ app.put(
 
     if (!Number.isInteger(voucherId) || voucherId <= 0) {
       return res.status(400).json({ message: "ID voucher tidak valid" });
+    }
+
+    if (cleanVisibility === "private") {
+      const cleanTargetUsername = String(target_username || "").trim();
+
+      if (!cleanTargetUsername) {
+        return res.status(400).json({
+          message: "Username target wajib diisi untuk voucher private",
+        });
+      }
+
+      const userResult = await query(
+        "SELECT id FROM users WHERE username = $1 LIMIT 1",
+        [cleanTargetUsername],
+      );
+
+      const targetUser = userResult.rows[0];
+
+      if (!targetUser) {
+        return res.status(404).json({
+          message: "User target voucher tidak ditemukan",
+        });
+      }
+
+      targetUserId = targetUser.id;
     }
 
     if (Number.isInteger(cleanProductId) && cleanProductId > 0) {
