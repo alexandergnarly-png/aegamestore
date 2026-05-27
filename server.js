@@ -696,23 +696,7 @@ async function getBestCheckoutDiscount({
   voucherCode,
 }) {
   const originalPrice = Number(productRow.price || 0);
-
-  const voucherCheck = await getVoucherDiscount({
-    productId,
-    gameName: productRow.game,
-    brandName: productRow.brand,
-    durationName: productRow.duration,
-    voucherCode,
-    productPrice: originalPrice,
-    userId,
-  });
-
-  if (!voucherCheck.valid) {
-    return {
-      valid: false,
-      message: voucherCheck.message,
-    };
-  }
+  const cleanVoucherCode = normalizeVoucherCode(voucherCode);
 
   const vipCheck = await getVipDiscountForProduct({
     userId,
@@ -720,10 +704,36 @@ async function getBestCheckoutDiscount({
     productPrice: originalPrice,
   });
 
+  let voucherCheck = {
+    valid: true,
+    code: "",
+    discountAmount: 0,
+    message: "",
+  };
+
+  if (cleanVoucherCode) {
+    voucherCheck = await getVoucherDiscount({
+      productId,
+      gameName: productRow.game,
+      brandName: productRow.brand,
+      durationName: productRow.duration,
+      voucherCode: cleanVoucherCode,
+      productPrice: originalPrice,
+      userId,
+    });
+
+    if (!voucherCheck.valid && !vipCheck.valid) {
+      return {
+        valid: false,
+        message: voucherCheck.message,
+      };
+    }
+  }
+
   const voucherDiscount = Number(voucherCheck.discountAmount || 0);
   const vipDiscount = Number(vipCheck.discountAmount || 0);
 
-  if (vipDiscount > voucherDiscount) {
+  if (vipCheck.valid && vipDiscount > voucherDiscount) {
     return {
       valid: true,
       code: vipCheck.code,
@@ -737,7 +747,7 @@ async function getBestCheckoutDiscount({
     valid: true,
     code: voucherCheck.code || "",
     discountAmount: voucherDiscount,
-    message: voucherCheck.message,
+    message: voucherCheck.message || "Harga berhasil dihitung",
     discountType: voucherDiscount > 0 ? "voucher" : "",
   };
 }
