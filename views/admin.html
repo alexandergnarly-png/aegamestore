@@ -3978,13 +3978,13 @@
           .map(
             (item) => `
         <tr>
-          <td>${item.id}</td>
-          <td>${escapeHtml(item.username || "-")}</td>
-          <td>${buyerBadge(item.badge)}</td>
-          <td>${Number(item.paid_order_count || 0)} order</td>
-          <td>${formatRupiah(item.total_spend || 0)}</td>
-          <td>${formatTanggal(item.created_at)}</td>
-          <td>
+  <td data-label="ID">${item.id}</td>
+  <td data-label="Username">${escapeHtml(item.username || "-")}</td>
+  <td data-label="Badge">${buyerBadge(item.badge)}</td>
+  <td data-label="Order Paid">${Number(item.paid_order_count || 0)} order</td>
+  <td data-label="Total Belanja">${formatRupiah(item.total_spend || 0)}</td>
+  <td data-label="Daftar">${formatTanggal(item.created_at)}</td>
+  <td data-label="Aksi" class="action-cell">
             <button class="ghost-btn" onclick="resetUserPassword(${item.id})">
               Reset Password
             </button>
