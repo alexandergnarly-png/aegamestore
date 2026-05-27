@@ -1,20 +1,6 @@
 import { formatRupiah } from "@/lib/format";
 import { getGameInitials, getGameThumbnail } from "@/lib/game-assets";
-
-export type Product = {
-  id: number;
-  game: string;
-  brand: string;
-  duration: string;
-  price: number;
-  active: number;
-  delivery_type?: string;
-
-  // beberapa kemungkinan nama field stock dari backend
-  stock?: number;
-  stock_count?: number;
-  available_stock?: number;
-};
+import { type Product } from "@/lib/types";
 
 function getDeliveryLabel(type?: string) {
   const deliveryType = String(type || "auto").toLowerCase();

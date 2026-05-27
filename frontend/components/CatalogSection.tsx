@@ -1,8 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ProductCard, type Product } from "@/components/ProductCard";
+import { ProductCard } from "@/components/ProductCard";
 import { normalizeText } from "@/lib/format";
+import { type Product } from "@/lib/types";
 
 type SortMode = "recommended" | "price-low" | "price-high" | "name";
 

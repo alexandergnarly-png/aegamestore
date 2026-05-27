@@ -4,8 +4,8 @@ import { Footer } from "@/components/Footer";
 import { Hero } from "@/components/Hero";
 import { Navbar } from "@/components/Navbar";
 import { TrustStrip } from "@/components/TrustStrip";
-import { type Product } from "@/components/ProductCard";
 import { apiFetch } from "@/lib/api";
+import { type Product } from "@/lib/types";
 
 async function getProducts() {
   try {
