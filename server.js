@@ -3937,6 +3937,22 @@ app.get("/api/user/me", async (req, res) => {
   try {
     const decoded = jwt.verify(token, jwtSecret);
 
+    const userResult = await query(
+      `
+      SELECT id, username, badge_override, badge_override_expires_at
+      FROM users
+      WHERE id = $1
+      LIMIT 1
+      `,
+      [decoded.id],
+    );
+
+    const user = userResult.rows[0];
+
+    if (!user) {
+      return res.json({ loggedIn: false });
+    }
+
     const statsResult = await query(
       `
       SELECT
@@ -3945,7 +3961,7 @@ app.get("/api/user/me", async (req, res) => {
       FROM orders
       WHERE user_id = $1
       `,
-      [decoded.id],
+      [user.id],
     );
 
     const reviewResult = await query(
@@ -3956,31 +3972,32 @@ app.get("/api/user/me", async (req, res) => {
         AND active = 1
       LIMIT 1
       `,
-      [decoded.id],
+      [user.id],
     );
 
     const paidOrderCount = Number(statsResult.rows[0]?.paid_order_count || 0);
     const totalSpend = Number(statsResult.rows[0]?.total_spend || 0);
     const hasReview = reviewResult.rows.length > 0;
+
     const overrideBadge =
-      item.badge_override &&
-      (!item.badge_override_expires_at ||
-        new Date(item.badge_override_expires_at) > new Date())
-        ? getBadgeByCode(item.badge_override)
+      user.badge_override &&
+      (!user.badge_override_expires_at ||
+        new Date(user.badge_override_expires_at) > new Date())
+        ? getBadgeByCode(user.badge_override)
         : null;
 
     const badge =
       overrideBadge ||
       getBuyerBadge({
-        paidOrderCount: item.paid_order_count,
-        totalSpend: item.total_spend,
-        hasReview: item.has_review,
+        paidOrderCount,
+        totalSpend,
+        hasReview,
       });
 
     return res.json({
       loggedIn: true,
-      id: decoded.id,
-      username: decoded.username,
+      id: user.id,
+      username: user.username,
       badge,
       stats: {
         paid_order_count: paidOrderCount,
@@ -3989,6 +4006,7 @@ app.get("/api/user/me", async (req, res) => {
       },
     });
   } catch (err) {
+    console.error("ERROR GET USER ME:", err);
     return res.json({ loggedIn: false });
   }
 });
