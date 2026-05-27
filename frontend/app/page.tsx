@@ -1,6 +1,8 @@
 import { CatalogSection } from "@/components/CatalogSection";
+import { Footer } from "@/components/Footer";
 import { Hero } from "@/components/Hero";
 import { Navbar } from "@/components/Navbar";
+import { TrustStrip } from "@/components/TrustStrip";
 import { type Product } from "@/components/ProductCard";
 import { apiFetch } from "@/lib/api";
 
@@ -27,7 +29,11 @@ export default async function HomePage() {
 
       <Hero totalProducts={products.length} totalGames={games.length} />
 
+      <TrustStrip />
+
       <CatalogSection products={products} />
+
+      <Footer />
     </main>
   );
 }
