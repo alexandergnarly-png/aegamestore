@@ -1,10 +1,13 @@
 import { CatalogSection } from "@/components/CatalogSection";
 import { CTASection } from "@/components/CTASection";
 import { Footer } from "@/components/Footer";
+import { GameHighlights } from "@/components/GameHighlights";
 import { Hero } from "@/components/Hero";
+import { HowItWorks } from "@/components/HowItWorks";
 import { Navbar } from "@/components/Navbar";
 import { TrustStrip } from "@/components/TrustStrip";
 import { apiFetch } from "@/lib/api";
+import { getUniqueGames } from "@/lib/products";
 import { type Product } from "@/lib/types";
 
 async function getProducts() {
@@ -14,10 +17,6 @@ async function getProducts() {
     console.error("GET PRODUCTS ERROR:", err);
     return [];
   }
-}
-
-function getUniqueGames(products: Product[]) {
-  return Array.from(new Set(products.map((item) => item.game))).filter(Boolean);
 }
 
 export default async function HomePage() {
@@ -30,7 +29,11 @@ export default async function HomePage() {
 
       <Hero totalProducts={products.length} totalGames={games.length} />
 
+      <GameHighlights products={products} />
+
       <TrustStrip />
+
+      <HowItWorks />
 
       <CatalogSection products={products} />
 
