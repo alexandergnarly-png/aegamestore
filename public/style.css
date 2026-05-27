@@ -7387,3 +7387,100 @@ body.dark-theme .voucher-panel {
     padding: 0 10px !important;
   }
 }
+
+
+/* =========================================================
+   ORDER POPUP V52 — Voucher mobile visibility fix
+   Voucher is now placed before player detail and forced visible on mobile.
+   ========================================================= */
+#voucherPanel.voucher-panel {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  order: 3;
+  flex: 0 0 auto;
+}
+
+#voucherPanel .voucher-toggle {
+  display: grid !important;
+}
+
+#voucherPanel[open] .voucher-panel-body,
+#voucherPanel .voucher-panel-body {
+  display: block !important;
+  visibility: visible !important;
+}
+
+#voucherCodeInput,
+#checkVoucherBtn,
+#voucherMessage {
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+@media (max-width: 640px) {
+  #voucherPanel.voucher-panel {
+    margin: 8px 0 10px !important;
+    border: 1px solid rgba(14, 165, 233, 0.18) !important;
+    background: rgba(224, 242, 254, 0.66) !important;
+    scroll-margin-top: 12px;
+  }
+
+  body.dark-theme #voucherPanel.voucher-panel {
+    background: rgba(14, 165, 233, 0.13) !important;
+  }
+
+  #voucherPanel .voucher-toggle {
+    min-height: 42px !important;
+    padding: 9px 11px !important;
+  }
+
+  #voucherPanel .voucher-toggle-main {
+    font-size: 12px !important;
+  }
+
+  #voucherPanel .voucher-toggle small {
+    font-size: 10px !important;
+  }
+
+  #voucherPanel .voucher-panel-body {
+    padding: 0 11px 11px !important;
+  }
+
+  #voucherPanel .voucher-row {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 58px !important;
+    align-items: stretch !important;
+    gap: 7px !important;
+  }
+
+  #voucherCodeInput {
+    min-width: 0 !important;
+    width: 100% !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    padding: 9px 11px !important;
+    font-size: 12.5px !important;
+    border-radius: 13px !important;
+  }
+
+  #checkVoucherBtn.voucher-check-btn {
+    width: 58px !important;
+    min-width: 58px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    padding: 0 !important;
+    justify-content: center !important;
+    border-radius: 13px !important;
+  }
+
+  #checkVoucherBtn.voucher-check-btn b {
+    font-size: 12px !important;
+  }
+
+  #voucherMessage.voucher-message {
+    margin-top: 6px !important;
+    min-height: 13px !important;
+    font-size: 10.5px !important;
+  }
+}
