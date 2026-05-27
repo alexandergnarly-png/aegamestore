@@ -116,7 +116,12 @@ export function ProductCard({ product }: { product: Product }) {
           </span>
         ) : (
           <a
-            href={buildCheckoutUrl(product.game)}
+            href={buildCheckoutUrl({
+              game: product.game,
+              brand: product.brand,
+              duration: product.duration,
+              productId: product.id,
+            })}
             className="rounded-full bg-rose-500 px-4 py-2 text-sm font-black text-white shadow-sm hover:bg-rose-600"
           >
             Buy

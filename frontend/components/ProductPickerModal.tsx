@@ -257,7 +257,12 @@ export function ProductPickerModal({
                               </span>
                             ) : (
                               <a
-                                href={buildCheckoutUrl(product.game)}
+                                href={buildCheckoutUrl({
+                                  game: product.game,
+                                  brand: product.brand,
+                                  duration: product.duration,
+                                  productId: product.id,
+                                })}
                                 className="rounded-full bg-rose-500 px-4 py-2 text-xs font-black text-white shadow-sm shadow-rose-500/20 transition hover:bg-rose-600 md:text-sm"
                               >
                                 Buy
