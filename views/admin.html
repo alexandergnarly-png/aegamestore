@@ -2674,14 +2674,6 @@
 
           <div class="stat-card">
             <div class="stat-top">
-              <div class="stat-label">Produk Hampir Habis</div>
-              <div class="stat-icon">⚠️</div>
-            </div>
-            <div class="stat-value" id="lowStockStat">0</div>
-            <div class="stat-note">Produk dengan stok &lt; 5</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-top">
               <div class="stat-label">Revenue Hari Ini</div>
               <div class="stat-icon">💰</div>
             </div>
@@ -5112,11 +5104,7 @@
             ? data.manual_orders
             : [];
 
-          const lowStockProducts = Array.isArray(data.low_stock_products)
-            ? data.low_stock_products
-            : [];
-
-          if (manualOrders.length === 0 && lowStockProducts.length === 0) {
+          if (manualOrders.length === 0) {
             box.style.display = "none";
             box.innerHTML = "";
             return;
@@ -5136,33 +5124,18 @@
             )
             .join("");
 
-          const lowStockHtml = lowStockProducts
-            .map(
-              (item) => `
-                                  <div class="admin-alert-item">
-                                    <span class="admin-alert-tag">STOK RENDAH</span><br>
-                                    <b>${item.game || "-"}</b><br>
-                                    ${item.brand || "-"} • ${item.duration || "-"}<br>
-                                    Sisa key: <b>${item.available_keys || 0}</b>
-                                  </div>
-                                `,
-            )
-            .join("");
-
           box.innerHTML = `
                               <div class="admin-alerts-head">
                                 <strong>⚠️ Perlu Perhatian</strong>
-                                <span>${manualOrders.length} order manual • ${lowStockProducts.length} stok rendah</span>
+                                <span>${manualOrders.length} order manual</span>
                               </div>
 
                               <div class="admin-alert-list">
                                 ${manualHtml}
-                                ${lowStockHtml}
                               </div>
 
                               <div class="admin-alert-actions">
                                 <button type="button" onclick="loadOrders()">Refresh Order</button>
-                                <button type="button" onclick="loadProducts()">Refresh Produk</button>
                               </div>
                             `;
 
@@ -5626,29 +5599,8 @@
       }
 
       async function loadStockSummary() {
-        try {
-          const res = await fetch("/stock-summary");
-
-          if (res.status === 401) {
-            window.location.href = "/ae-auth";
-            return;
-          }
-
-          const data = await res.json();
-
-          let lowStock = 0;
-
-          data.forEach((item) => {
-            const stock = Number(item.available_keys || 0);
-            if (stock < 5) {
-              lowStock++;
-            }
-          });
-
-          document.getElementById("lowStockStat").innerText = lowStock;
-        } catch (err) {
-          console.error("Gagal load stock summary");
-        }
+        // Alert stok rendah sudah dihapus karena stok dipantau manual 24/7.
+        return;
       }
 
       async function loadAdminStats() {

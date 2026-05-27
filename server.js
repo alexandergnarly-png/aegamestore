@@ -4300,27 +4300,9 @@ app.get("/admin-alerts", requireAdminAuth, async (req, res) => {
       LIMIT 10
     `);
 
-    const lowStockProducts = await query(`
-      SELECT
-        p.id,
-        p.game,
-        p.brand,
-        p.duration,
-        COUNT(k.id) FILTER (WHERE k.used = 0)::int AS available_keys
-      FROM products p
-      LEFT JOIN keys k ON k.product_id = p.id
-      WHERE p.active = 1
-      GROUP BY p.id
-      HAVING COUNT(k.id) FILTER (WHERE k.used = 0) <= 3
-      ORDER BY available_keys ASC, p.game ASC, p.brand ASC
-      LIMIT 10
-    `);
-
     return res.json({
       manual_orders: manualOrders.rows,
-      low_stock_products: lowStockProducts.rows,
       manual_order_count: manualOrders.rows.length,
-      low_stock_count: lowStockProducts.rows.length,
     });
   } catch (err) {
     console.error("ERROR ADMIN ALERTS:", err);
