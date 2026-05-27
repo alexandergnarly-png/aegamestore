@@ -1,4 +1,5 @@
 import { CatalogSection } from "@/components/CatalogSection";
+import { CTASection } from "@/components/CTASection";
 import { Footer } from "@/components/Footer";
 import { Hero } from "@/components/Hero";
 import { Navbar } from "@/components/Navbar";
@@ -32,6 +33,8 @@ export default async function HomePage() {
       <TrustStrip />
 
       <CatalogSection products={products} />
+
+      <CTASection />
 
       <Footer />
     </main>

@@ -23,8 +23,17 @@ const trustItems = [
 
 export function TrustStrip() {
   return (
-    <section className="px-4 pb-10">
+    <section id="benefits" className="px-4 pb-10">
       <div className="mx-auto max-w-6xl">
+        <div className="mb-4">
+          <p className="text-xs font-black uppercase tracking-[0.22em] text-sky-500">
+            Benefits
+          </p>
+          <h2 className="mt-1 text-2xl font-black text-sky-950">
+            Why buy at AE Game Store?
+          </h2>
+        </div>
+
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {trustItems.map((item) => (
             <article
