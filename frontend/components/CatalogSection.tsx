@@ -1,7 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { EmptyState } from "@/components/EmptyState";
 import { ProductCard } from "@/components/ProductCard";
+import { SectionHeader } from "@/components/SectionHeader";
 import { normalizeText } from "@/lib/format";
 import { type Product } from "@/lib/types";
 
@@ -67,20 +69,16 @@ export function CatalogSection({ products }: { products: Product[] }) {
   return (
     <section id="catalog" className="px-4 pb-12">
       <div className="mx-auto max-w-6xl">
-        <div className="mb-4 flex flex-col justify-between gap-3 md:flex-row md:items-end">
-          <div>
-            <p className="text-xs font-black uppercase tracking-[0.22em] text-sky-500">
-              Catalog
+        <SectionHeader
+          eyebrow="Catalog"
+          title="Available Products"
+          description="Search by game, brand, duration, or delivery type."
+          action={
+            <p className="text-sm font-semibold text-slate-500">
+              {filteredProducts.length} dari {products.length} produk tampil.
             </p>
-            <h2 className="mt-1 text-2xl font-black text-sky-950">
-              Available Products
-            </h2>
-          </div>
-
-          <p className="text-sm font-semibold text-slate-500">
-            {filteredProducts.length} dari {products.length} produk tampil.
-          </p>
-        </div>
+          }
+        />
 
         <div className="mb-5 rounded-3xl bg-white p-3 shadow-sm ring-1 ring-sky-100">
           <div className="grid gap-3 md:grid-cols-[1fr_auto_auto_auto]">
@@ -170,9 +168,20 @@ export function CatalogSection({ products }: { products: Product[] }) {
             ))}
           </div>
         ) : (
-          <div className="rounded-3xl bg-white p-5 text-sm font-semibold text-slate-500 shadow-sm ring-1 ring-sky-100">
-            Produk tidak ditemukan. Coba ganti keyword atau klik Reset.
-          </div>
+          <EmptyState
+            icon="🎮"
+            title="Produk tidak ditemukan"
+            description="Coba ganti keyword, pilih game lain, atau klik tombol reset."
+            action={
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="rounded-full bg-sky-500 px-5 py-3 text-sm font-black text-white hover:bg-sky-600"
+              >
+                Reset Filter
+              </button>
+            }
+          />
         )}
       </div>
     </section>

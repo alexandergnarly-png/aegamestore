@@ -1,3 +1,5 @@
+import { SectionHeader } from "@/components/SectionHeader";
+
 const steps = [
   {
     number: "01",
@@ -20,14 +22,11 @@ export function HowItWorks() {
   return (
     <section className="px-4 pb-10">
       <div className="mx-auto max-w-6xl">
-        <div className="mb-4">
-          <p className="text-xs font-black uppercase tracking-[0.22em] text-sky-500">
-            How It Works
-          </p>
-          <h2 className="mt-1 text-2xl font-black text-sky-950">
-            Simple checkout flow
-          </h2>
-        </div>
+        <SectionHeader
+          eyebrow="How It Works"
+          title="Simple checkout flow"
+          description="The new frontend keeps the buying flow familiar while checkout remains handled by the existing stable backend."
+        />
 
         <div className="grid gap-3 md:grid-cols-3">
           {steps.map((step) => (

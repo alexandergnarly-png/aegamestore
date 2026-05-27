@@ -1,10 +1,13 @@
 import { CatalogSection } from "@/components/CatalogSection";
 import { CTASection } from "@/components/CTASection";
+import { FloatingActions } from "@/components/FloatingActions";
 import { Footer } from "@/components/Footer";
 import { GameHighlights } from "@/components/GameHighlights";
 import { Hero } from "@/components/Hero";
 import { HowItWorks } from "@/components/HowItWorks";
 import { Navbar } from "@/components/Navbar";
+import { StatsBar } from "@/components/StatsBar";
+import { StoreNotice } from "@/components/StoreNotice";
 import { TrustStrip } from "@/components/TrustStrip";
 import { apiFetch } from "@/lib/api";
 import { getUniqueGames } from "@/lib/products";
@@ -29,6 +32,10 @@ export default async function HomePage() {
 
       <Hero totalProducts={products.length} totalGames={games.length} />
 
+      <StoreNotice />
+
+      <StatsBar products={products} />
+
       <GameHighlights products={products} />
 
       <TrustStrip />
@@ -40,6 +47,8 @@ export default async function HomePage() {
       <CTASection />
 
       <Footer />
+
+      <FloatingActions />
     </main>
   );
 }

@@ -1,3 +1,4 @@
+import { SectionHeader } from "@/components/SectionHeader";
 import { formatRupiah } from "@/lib/format";
 import { getGameInitials, getGameThumbnail } from "@/lib/game-assets";
 import { getGameStats } from "@/lib/products";
@@ -11,23 +12,19 @@ export function GameHighlights({ products }: { products: Product[] }) {
   return (
     <section className="px-4 pb-10">
       <div className="mx-auto max-w-6xl">
-        <div className="mb-4 flex flex-col justify-between gap-3 md:flex-row md:items-end">
-          <div>
-            <p className="text-xs font-black uppercase tracking-[0.22em] text-sky-500">
-              Game Highlights
-            </p>
-            <h2 className="mt-1 text-2xl font-black text-sky-950">
-              Popular games in catalog
-            </h2>
-          </div>
-
-          <a
-            href="#catalog"
-            className="text-sm font-black text-sky-600 hover:text-sky-700"
-          >
-            View all products →
-          </a>
-        </div>
+        <SectionHeader
+          eyebrow="Game Highlights"
+          title="Popular games in catalog"
+          description="Browse the most visible game groups from your live product catalog."
+          action={
+            <a
+              href="#catalog"
+              className="text-sm font-black text-sky-600 hover:text-sky-700"
+            >
+              View all products →
+            </a>
+          }
+        />
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {gameStats.map((item) => {
