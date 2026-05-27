@@ -635,6 +635,7 @@ async function loadAllProducts() {
 
     renderGames();
     loadBrands();
+    await openOrderFromCheckoutQuery();
   } catch (err) {
     gameGrid.innerHTML = `
   <div class="empty-category-card">
@@ -773,6 +774,140 @@ function getGameInitials(game) {
     return (parts[0][0] + parts[1][0]).toUpperCase();
   }
   return cleaned.slice(0, 2).toUpperCase();
+}
+
+function normalizeCheckoutValue(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ");
+}
+
+function getCheckoutQueryParams() {
+  const params = new URLSearchParams(window.location.search);
+
+  const productId = Number(
+    params.get("productId") || params.get("product_id") || 0,
+  );
+
+  return {
+    game: String(params.get("game") || "").trim(),
+    brand: String(params.get("brand") || "").trim(),
+    duration: String(params.get("duration") || "").trim(),
+    productId: Number.isInteger(productId) && productId > 0 ? productId : null,
+  };
+}
+
+function findProductFromCheckoutQuery(query) {
+  if (!Array.isArray(allProducts) || allProducts.length === 0) {
+    return null;
+  }
+
+  if (query.productId) {
+    const byId = allProducts.find(
+      (item) => Number(item.id) === Number(query.productId),
+    );
+
+    if (byId) return byId;
+  }
+
+  const targetGame = normalizeCheckoutValue(query.game);
+  const targetBrand = normalizeCheckoutValue(query.brand);
+  const targetDuration = normalizeCheckoutValue(query.duration);
+
+  return (
+    allProducts.find((item) => {
+      const sameGame =
+        !targetGame || normalizeCheckoutValue(item.game) === targetGame;
+      const sameBrand =
+        !targetBrand || normalizeCheckoutValue(item.brand) === targetBrand;
+      const sameDuration =
+        !targetDuration ||
+        normalizeCheckoutValue(item.duration) === targetDuration;
+
+      return sameGame && sameBrand && sameDuration;
+    }) || null
+  );
+}
+
+function cleanCheckoutQueryFromUrl() {
+  const url = new URL(window.location.href);
+
+  url.searchParams.delete("game");
+  url.searchParams.delete("brand");
+  url.searchParams.delete("duration");
+  url.searchParams.delete("productId");
+  url.searchParams.delete("product_id");
+
+  const cleanUrl =
+    url.pathname +
+    (url.searchParams.toString() ? `?${url.searchParams}` : "") +
+    url.hash;
+
+  window.history.replaceState({}, document.title, cleanUrl);
+}
+
+async function openOrderFromCheckoutQuery() {
+  const query = getCheckoutQueryParams();
+
+  if (!query.game && !query.productId) {
+    return;
+  }
+
+  if (!Array.isArray(allProducts) || allProducts.length === 0) {
+    return;
+  }
+
+  const targetProduct = findProductFromCheckoutQuery(query);
+  const targetGame = targetProduct?.game || query.game;
+
+  if (!targetGame) {
+    return;
+  }
+
+  await openOrderModal(targetGame);
+
+  setTimeout(() => {
+    if (targetProduct) {
+      if (brandSelect && targetProduct.brand) {
+        brandSelect.value = targetProduct.brand;
+        brandSelect.dispatchEvent(new Event("change"));
+      }
+
+      if (productSelect && targetProduct.id) {
+        productSelect.value = targetProduct.id;
+        updatePreview();
+      }
+
+      cleanCheckoutQueryFromUrl();
+      return;
+    }
+
+    if (query.brand && brandSelect) {
+      brandSelect.value = query.brand;
+      brandSelect.dispatchEvent(new Event("change"));
+    }
+
+    if (query.duration && productSelect) {
+      const matchedProduct = allProducts.find(
+        (item) =>
+          normalizeCheckoutValue(item.game) ===
+            normalizeCheckoutValue(targetGame) &&
+          (!query.brand ||
+            normalizeCheckoutValue(item.brand) ===
+              normalizeCheckoutValue(query.brand)) &&
+          normalizeCheckoutValue(item.duration) ===
+            normalizeCheckoutValue(query.duration),
+      );
+
+      if (matchedProduct) {
+        productSelect.value = matchedProduct.id;
+        updatePreview();
+      }
+    }
+
+    cleanCheckoutQueryFromUrl();
+  }, 250);
 }
 
 function renderGameCardThumb(game) {
