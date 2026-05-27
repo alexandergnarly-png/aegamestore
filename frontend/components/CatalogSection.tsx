@@ -2,12 +2,21 @@
 
 import { useMemo, useState } from "react";
 import { EmptyState } from "@/components/EmptyState";
-import { ProductCard } from "@/components/ProductCard";
+import { ProductGroupCard } from "@/components/ProductGroupCard";
+import { ProductPickerModal } from "@/components/ProductPickerModal";
 import { SectionHeader } from "@/components/SectionHeader";
 import { normalizeText } from "@/lib/format";
 import { type Product } from "@/lib/types";
 
 type SortMode = "recommended" | "price-low" | "price-high" | "name";
+
+type ProductGroup = {
+  key: string;
+  game: string;
+  brand: string;
+  products: Product[];
+  lowestPrice: number;
+};
 
 function getUniqueGames(products: Product[]) {
   return Array.from(new Set(products.map((item) => item.game)))
@@ -15,42 +24,72 @@ function getUniqueGames(products: Product[]) {
     .sort((a, b) => a.localeCompare(b));
 }
 
+function getGroupedProducts(products: Product[]): ProductGroup[] {
+  const map = new Map<string, ProductGroup>();
+
+  products.forEach((product) => {
+    const key = `${product.game}__${product.brand}`;
+
+    const existing = map.get(key);
+
+    if (existing) {
+      existing.products.push(product);
+      existing.lowestPrice = Math.min(existing.lowestPrice, product.price);
+      return;
+    }
+
+    map.set(key, {
+      key,
+      game: product.game,
+      brand: product.brand,
+      products: [product],
+      lowestPrice: product.price,
+    });
+  });
+
+  return Array.from(map.values()).map((group) => ({
+    ...group,
+    products: [...group.products].sort(
+      (a, b) => Number(a.price || 0) - Number(b.price || 0),
+    ),
+  }));
+}
+
 export function CatalogSection({ products }: { products: Product[] }) {
   const [search, setSearch] = useState("");
   const [gameFilter, setGameFilter] = useState("all");
   const [sortMode, setSortMode] = useState<SortMode>("recommended");
+  const [selectedGroup, setSelectedGroup] = useState<ProductGroup | null>(null);
 
   const games = useMemo(() => getUniqueGames(products), [products]);
+  const groups = useMemo(() => getGroupedProducts(products), [products]);
 
-  const filteredProducts = useMemo(() => {
+  const filteredGroups = useMemo(() => {
     const keyword = normalizeText(search);
 
-    const result = products.filter((item) => {
-      const game = normalizeText(item.game);
-      const brand = normalizeText(item.brand);
-      const duration = normalizeText(item.duration);
-      const delivery = normalizeText(item.delivery_type);
+    const result = groups.filter((group) => {
+      const groupText = normalizeText(
+        `${group.game} ${group.brand} ${group.products
+          .map((item) => item.duration)
+          .join(" ")}`,
+      );
 
-      const searchableText = `${game} ${brand} ${duration} ${delivery}`;
-
-      const matchSearch = !keyword || searchableText.includes(keyword);
-      const matchGame = gameFilter === "all" || item.game === gameFilter;
+      const matchSearch = !keyword || groupText.includes(keyword);
+      const matchGame = gameFilter === "all" || group.game === gameFilter;
 
       return matchSearch && matchGame;
     });
 
     return [...result].sort((a, b) => {
-      if (sortMode === "price-low") return a.price - b.price;
-      if (sortMode === "price-high") return b.price - a.price;
+      if (sortMode === "price-low") return a.lowestPrice - b.lowestPrice;
+      if (sortMode === "price-high") return b.lowestPrice - a.lowestPrice;
       if (sortMode === "name") {
-        return `${a.game} ${a.brand} ${a.duration}`.localeCompare(
-          `${b.game} ${b.brand} ${b.duration}`,
-        );
+        return `${a.game} ${a.brand}`.localeCompare(`${b.game} ${b.brand}`);
       }
 
       return 0;
     });
-  }, [products, search, gameFilter, sortMode]);
+  }, [groups, search, gameFilter, sortMode]);
 
   function handleSearchChange(value: string) {
     setSearch(value);
@@ -72,10 +111,10 @@ export function CatalogSection({ products }: { products: Product[] }) {
         <SectionHeader
           eyebrow="Catalog"
           title="Available Products"
-          description="Search by game, brand, duration, or delivery type."
+          description="Products are grouped by game and brand. Click View Options to choose duration."
           action={
             <p className="text-sm font-semibold text-slate-500">
-              {filteredProducts.length} dari {products.length} produk tampil.
+              {filteredGroups.length} dari {groups.length} game cards tampil.
             </p>
           }
         />
@@ -161,10 +200,16 @@ export function CatalogSection({ products }: { products: Product[] }) {
           )}
         </div>
 
-        {filteredProducts.length > 0 ? (
+        {filteredGroups.length > 0 ? (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredProducts.map((item) => (
-              <ProductCard key={item.id} product={item} />
+            {filteredGroups.map((group) => (
+              <ProductGroupCard
+                key={group.key}
+                game={group.game}
+                brand={group.brand}
+                products={group.products}
+                onOpen={() => setSelectedGroup(group)}
+              />
             ))}
           </div>
         ) : (
@@ -184,6 +229,14 @@ export function CatalogSection({ products }: { products: Product[] }) {
           />
         )}
       </div>
+
+      <ProductPickerModal
+        open={Boolean(selectedGroup)}
+        title={selectedGroup?.game || ""}
+        brand={selectedGroup?.brand || ""}
+        products={selectedGroup?.products || []}
+        onClose={() => setSelectedGroup(null)}
+      />
     </section>
   );
 }
