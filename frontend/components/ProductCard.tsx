@@ -9,7 +9,11 @@ export type Product = {
   price: number;
   active: number;
   delivery_type?: string;
+
+  // beberapa kemungkinan nama field stock dari backend
   stock?: number;
+  stock_count?: number;
+  available_stock?: number;
 };
 
 function getDeliveryLabel(type?: string) {
@@ -22,9 +26,21 @@ function getDeliveryLabel(type?: string) {
   return "Auto";
 }
 
+function getProductStock(product: Product) {
+  const rawStock =
+    product.stock ?? product.stock_count ?? product.available_stock ?? null;
+
+  if (rawStock === null || rawStock === undefined) {
+    return null;
+  }
+
+  return Number(rawStock || 0);
+}
+
 export function ProductCard({ product }: { product: Product }) {
-  const stock = Number(product.stock || 0);
-  const isOutOfStock = stock <= 0;
+  const stock = getProductStock(product);
+  const stockUnknown = stock === null;
+  const isOutOfStock = !stockUnknown && stock <= 0;
   const deliveryLabel = getDeliveryLabel(product.delivery_type);
   const thumbnail = getGameThumbnail(product.game);
   const initials = getGameInitials(product.game);
@@ -87,7 +103,11 @@ export function ProductCard({ product }: { product: Product }) {
               : "bg-emerald-100 text-emerald-700"
           }`}
         >
-          {isOutOfStock ? "Stock empty" : `${stock} stock ready`}
+          {stockUnknown
+            ? "Available"
+            : isOutOfStock
+              ? "Stock empty"
+              : `${stock} stock ready`}
         </span>
 
         <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-600">
