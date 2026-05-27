@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="style.css?v=54" />
+    <link rel="stylesheet" href="style.css?v=55" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#0ea5e9" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -825,6 +825,23 @@
           </button>
         </header>
 
+        <section class="payment-modal-steps" aria-label="Status pembayaran">
+          <div class="payment-step is-done" id="paymentStepOrder">
+            <span class="payment-step-dot">1</span>
+            <small data-i18n="paymentStepOrder">Order dibuat</small>
+          </div>
+          <span class="payment-step-line" aria-hidden="true"></span>
+          <div class="payment-step is-active" id="paymentStepPay">
+            <span class="payment-step-dot">2</span>
+            <small data-i18n="paymentStepPay">Bayar</small>
+          </div>
+          <span class="payment-step-line" aria-hidden="true"></span>
+          <div class="payment-step" id="paymentStepDone">
+            <span class="payment-step-dot">3</span>
+            <small data-i18n="paymentStepDone">Selesai</small>
+          </div>
+        </section>
+
         <section class="payment-modal-summary">
           <div class="payment-modal-amount">
             <small data-i18n="paymentModalTotal">Total Bayar</small>
@@ -839,6 +856,24 @@
               <small data-i18n="paymentModalProduct">Produk</small>
               <span id="paymentProductName">—</span>
             </div>
+          </div>
+        </section>
+
+        <section
+          class="payment-modal-quick-guide"
+          aria-label="Panduan pembayaran"
+        >
+          <div>
+            <span aria-hidden="true">📱</span>
+            <small data-i18n="paymentGuideScan"
+              >Pilih QRIS/e-wallet lalu selesaikan pembayaran.</small
+            >
+          </div>
+          <div>
+            <span aria-hidden="true">⚡</span>
+            <small data-i18n="paymentGuideAuto"
+              >Status dicek otomatis, tidak perlu refresh.</small
+            >
           </div>
         </section>
 
@@ -1121,6 +1156,6 @@
         document.getElementById("preloader")?.classList.add("fade-out");
       }, 5000);
     </script>
-    <script src="script.js?v=54"></script>
+    <script src="script.js?v=55"></script>
   </body>
 </html>

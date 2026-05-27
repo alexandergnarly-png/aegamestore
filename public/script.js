@@ -4207,6 +4207,11 @@ document.addEventListener("DOMContentLoaded", () => {
       paymentModalTotal: "Total Bayar",
       paymentModalGame: "Game",
       paymentModalProduct: "Produk",
+      paymentStepOrder: "Order dibuat",
+      paymentStepPay: "Bayar",
+      paymentStepDone: "Selesai",
+      paymentGuideScan: "Pilih QRIS/e-wallet lalu selesaikan pembayaran.",
+      paymentGuideAuto: "Status dicek otomatis, tidak perlu refresh.",
       paymentModalCountdownLabel: "QR Aktif",
       paymentStatusPending: "Menunggu pembayaran…",
       paymentStatusPaid: "Pembayaran diterima!",
@@ -4242,6 +4247,11 @@ document.addEventListener("DOMContentLoaded", () => {
       paymentModalTotal: "Total",
       paymentModalGame: "Game",
       paymentModalProduct: "Product",
+      paymentStepOrder: "Order created",
+      paymentStepPay: "Pay",
+      paymentStepDone: "Done",
+      paymentGuideScan: "Choose QRIS/e-wallet and complete payment.",
+      paymentGuideAuto: "Status checks automatically, no refresh needed.",
       paymentModalCountdownLabel: "QR Active",
       paymentStatusPending: "Waiting for payment…",
       paymentStatusPaid: "Payment received!",
@@ -4289,6 +4299,9 @@ document.addEventListener("DOMContentLoaded", () => {
       total: document.getElementById("paymentTotal"),
       gameName: document.getElementById("paymentGameName"),
       productName: document.getElementById("paymentProductName"),
+      stepOrder: document.getElementById("paymentStepOrder"),
+      stepPay: document.getElementById("paymentStepPay"),
+      stepDone: document.getElementById("paymentStepDone"),
       countdown: document.getElementById("paymentCountdownTime"),
       progressBar: document.getElementById("paymentProgressBar"),
       statusPill: document.getElementById("paymentStatusPill"),
@@ -4352,6 +4365,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if (els.refreshBtn) els.refreshBtn.textContent = t("paymentRefreshStatus");
     if (els.exitBtn) els.exitBtn.textContent = t("paymentExitLater");
+    document
+      .querySelectorAll("#paymentModal [data-i18n]")
+      .forEach((element) => {
+        const key = element.getAttribute("data-i18n");
+        const value = t(key);
+        if (value && value !== key) element.textContent = value;
+      });
     if (els.snapLoading) {
       const small = els.snapLoading.querySelector("small");
       if (small) small.textContent = t("paymentLoadingSnap");
@@ -4370,6 +4390,23 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     els.statusPill.dataset.state = status;
     els.statusText.textContent = map[status] || map.pending;
+    if (els.modal) els.modal.dataset.paymentState = status;
+    const isFinalSuccess = status === "paid";
+    const isFinalFailed = ["expired", "cancelled", "error"].includes(status);
+    if (els.stepOrder) {
+      els.stepOrder.classList.add("is-done");
+      els.stepOrder.classList.remove("is-active", "is-failed");
+    }
+    if (els.stepPay) {
+      els.stepPay.classList.toggle("is-active", status === "pending");
+      els.stepPay.classList.toggle("is-done", isFinalSuccess);
+      els.stepPay.classList.toggle("is-failed", isFinalFailed);
+    }
+    if (els.stepDone) {
+      els.stepDone.classList.toggle("is-active", isFinalSuccess);
+      els.stepDone.classList.toggle("is-done", isFinalSuccess);
+      els.stepDone.classList.toggle("is-failed", isFinalFailed);
+    }
   }
 
   function showStateOverlay({ icon, title, desc, primary, secondary }) {
