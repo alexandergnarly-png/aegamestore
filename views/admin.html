@@ -2443,6 +2443,37 @@
           font-size: 18px !important;
         }
       }
+      /* ===== USER SEARCH TOOLBAR ===== */
+      .user-toolbar {
+        align-items: center;
+      }
+
+      .user-search-field {
+        flex: 1 1 280px;
+        min-width: 240px;
+      }
+
+      @media (max-width: 640px) {
+        .user-toolbar {
+          flex-direction: column;
+          align-items: stretch;
+          gap: 10px;
+        }
+
+        .user-search-field {
+          min-width: 100%;
+        }
+
+        .user-toolbar .btn-group {
+          width: 100%;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .user-toolbar .btn-group button {
+          width: 100%;
+        }
+      }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </head>
@@ -2977,9 +3008,26 @@
             <div class="section-badge">User Monitor</div>
           </div>
 
-          <div class="toolbar">
+          <div class="toolbar user-toolbar">
+            <div class="field user-search-field">
+              <input
+                type="text"
+                id="userSearchInput"
+                placeholder="Cari username buyer..."
+                autocomplete="off"
+                oninput="renderUserTable()"
+              />
+            </div>
+
             <div class="btn-group">
-              <button onclick="loadUsers()">Refresh User</button>
+              <button type="button" onclick="loadUsers()">Refresh User</button>
+              <button
+                type="button"
+                class="ghost-btn"
+                onclick="clearUserSearch()"
+              >
+                Reset
+              </button>
             </div>
           </div>
 
@@ -3837,6 +3885,7 @@
           Swal.fire("Terjadi error server saat menambahkan bulk key");
         }
       }
+      let ADMIN_USERS_CACHE = [];
       async function loadUsers() {
         const statusText = document.getElementById("userStatusText");
         const tableBody = document.getElementById("userTableBody");
@@ -3855,45 +3904,105 @@
           const data = await res.json();
 
           if (!Array.isArray(data) || data.length === 0) {
+            ADMIN_USERS_CACHE = [];
             statusText.innerText = "Belum ada user buyer.";
             tableBody.innerHTML = `
-                                        <tr>
-                                            <td colspan="7" class="empty">Belum ada user yang daftar.</td>
-                                        </tr>
-                                    `;
+        <tr>
+          <td colspan="7" class="empty">Belum ada user yang daftar.</td>
+        </tr>
+      `;
             return;
           }
 
-          statusText.innerText = `Total user: ${data.length}`;
-
-          tableBody.innerHTML = data
-            .map(
-              (item) => `
-                            <tr>
-                                <td>${item.id}</td>
-                                <td>${escapeHtml(item.username || "-")}</td>
-                                <td>${buyerBadge(item.badge)}</td>
-                                <td>${Number(item.paid_order_count || 0)} order</td>
-                                <td>${formatRupiah(item.total_spend || 0)}</td>
-                                <td>${formatTanggal(item.created_at)}</td>
-                                <td>
-                                    <button class="ghost-btn" onclick="resetUserPassword(${item.id})">Reset Password</button>
-                                    <button class="danger-btn" onclick="deleteUser(${item.id})">Hapus</button>
-                                </td>
-                            </tr>
-                        `,
-            )
-            .join("");
+          ADMIN_USERS_CACHE = data;
+          renderUserTable();
         } catch (err) {
           statusText.innerText = "Gagal memuat daftar user.";
           tableBody.innerHTML = `
-                                    <tr>
-                                        <td colspan="7" class="empty">Terjadi error saat mengambil user.</td>
-                                    </tr>
-                                `;
+      <tr>
+        <td colspan="7" class="empty">Terjadi error saat mengambil user.</td>
+      </tr>
+    `;
         }
       }
+      function getFilteredUsers() {
+        const keyword = String(
+          document.getElementById("userSearchInput")?.value || "",
+        )
+          .trim()
+          .toLowerCase();
 
+        if (!keyword) return ADMIN_USERS_CACHE;
+
+        return ADMIN_USERS_CACHE.filter((item) => {
+          const username = String(item.username || "").toLowerCase();
+          const badge = String(item.badge?.label || "").toLowerCase();
+          const id = String(item.id || "").toLowerCase();
+
+          return (
+            username.includes(keyword) ||
+            badge.includes(keyword) ||
+            id.includes(keyword)
+          );
+        });
+      }
+
+      function renderUserTable() {
+        const statusText = document.getElementById("userStatusText");
+        const tableBody = document.getElementById("userTableBody");
+        if (!statusText || !tableBody) return;
+
+        const users = getFilteredUsers();
+        const keyword = String(
+          document.getElementById("userSearchInput")?.value || "",
+        ).trim();
+
+        if (!users.length) {
+          statusText.innerText = keyword
+            ? `Tidak ada user cocok untuk "${keyword}".`
+            : "Belum ada user buyer.";
+
+          tableBody.innerHTML = `
+      <tr>
+        <td colspan="7" class="empty">User tidak ditemukan.</td>
+      </tr>
+    `;
+          return;
+        }
+
+        statusText.innerText = keyword
+          ? `Menampilkan ${users.length} dari ${ADMIN_USERS_CACHE.length} user.`
+          : `Total user: ${ADMIN_USERS_CACHE.length}`;
+
+        tableBody.innerHTML = users
+          .map(
+            (item) => `
+        <tr>
+          <td>${item.id}</td>
+          <td>${escapeHtml(item.username || "-")}</td>
+          <td>${buyerBadge(item.badge)}</td>
+          <td>${Number(item.paid_order_count || 0)} order</td>
+          <td>${formatRupiah(item.total_spend || 0)}</td>
+          <td>${formatTanggal(item.created_at)}</td>
+          <td>
+            <button class="ghost-btn" onclick="resetUserPassword(${item.id})">
+              Reset Password
+            </button>
+            <button class="danger-btn" onclick="deleteUser(${item.id})">
+              Hapus
+            </button>
+          </td>
+        </tr>
+      `,
+          )
+          .join("");
+      }
+
+      function clearUserSearch() {
+        const input = document.getElementById("userSearchInput");
+        if (input) input.value = "";
+        renderUserTable();
+      }
       async function resetUserPassword(userId) {
         const result = await Swal.fire({
           title: "Reset Password User?",
