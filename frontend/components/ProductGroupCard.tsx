@@ -6,7 +6,6 @@ import { type Product } from "@/lib/types";
 
 type ProductGroupCardProps = {
   game: string;
-  brand: string;
   products: Product[];
   onOpen: () => void;
 };
@@ -17,15 +16,28 @@ function getLowestPrice(products: Product[]) {
   return Math.min(...products.map((item) => Number(item.price || 0)));
 }
 
+function getUniqueBrands(products: Product[]) {
+  return Array.from(new Set(products.map((item) => item.brand)))
+    .filter(Boolean)
+    .sort((a, b) => a.localeCompare(b));
+}
+
+function getUniqueDurations(products: Product[]) {
+  return Array.from(new Set(products.map((item) => item.duration)))
+    .filter(Boolean)
+    .slice(0, 4);
+}
+
 export function ProductGroupCard({
   game,
-  brand,
   products,
   onOpen,
 }: ProductGroupCardProps) {
   const thumbnail = getGameThumbnail(game);
   const initials = getGameInitials(game);
   const lowestPrice = getLowestPrice(products);
+  const brands = getUniqueBrands(products);
+  const durations = getUniqueDurations(products);
 
   return (
     <article className="group rounded-3xl bg-white p-4 shadow-sm ring-1 ring-sky-100 transition hover:-translate-y-0.5 hover:shadow-md">
@@ -47,11 +59,13 @@ export function ProductGroupCard({
 
           <div className="min-w-0">
             <p className="text-xs font-black uppercase tracking-wide text-sky-500">
-              {brand}
+              {brands.length} brands
             </p>
+
             <h3 className="mt-1 truncate text-xl font-black text-sky-950">
               {game}
             </h3>
+
             <p className="mt-1 text-xs font-bold text-slate-500">
               {products.length} options available
             </p>
@@ -59,25 +73,36 @@ export function ProductGroupCard({
         </div>
 
         <span className="rounded-full bg-sky-100 px-3 py-1 text-xs font-black text-sky-700">
-          Options
+          Game
         </span>
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
-        {products.slice(0, 3).map((item) => (
+        {brands.slice(0, 3).map((brand) => (
           <span
-            key={item.id}
-            className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-600"
+            key={brand}
+            className="rounded-full bg-sky-50 px-3 py-1 text-xs font-black text-sky-700"
           >
-            {item.duration}
+            {brand}
           </span>
         ))}
 
-        {products.length > 3 ? (
-          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-600">
-            +{products.length - 3} more
+        {brands.length > 3 ? (
+          <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-black text-sky-700">
+            +{brands.length - 3} brands
           </span>
         ) : null}
+      </div>
+
+      <div className="mt-2 flex flex-wrap gap-2">
+        {durations.map((duration) => (
+          <span
+            key={duration}
+            className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-600"
+          >
+            {duration}
+          </span>
+        ))}
       </div>
 
       <div className="mt-5 flex items-center justify-between gap-3">

@@ -13,7 +13,6 @@ type SortMode = "recommended" | "price-low" | "price-high" | "name";
 type ProductGroup = {
   key: string;
   game: string;
-  brand: string;
   products: Product[];
   lowestPrice: number;
 };
@@ -28,7 +27,7 @@ function getGroupedProducts(products: Product[]): ProductGroup[] {
   const map = new Map<string, ProductGroup>();
 
   products.forEach((product) => {
-    const key = `${product.game}__${product.brand}`;
+    const key = product.game;
 
     const existing = map.get(key);
 
@@ -41,7 +40,6 @@ function getGroupedProducts(products: Product[]): ProductGroup[] {
     map.set(key, {
       key,
       game: product.game,
-      brand: product.brand,
       products: [product],
       lowestPrice: product.price,
     });
@@ -68,11 +66,10 @@ export function CatalogSection({ products }: { products: Product[] }) {
     const keyword = normalizeText(search);
 
     const result = groups.filter((group) => {
-      const groupText = normalizeText(
-        `${group.game} ${group.brand} ${group.products
-          .map((item) => item.duration)
-          .join(" ")}`,
-      );
+      const brands = group.products.map((item) => item.brand).join(" ");
+      const durations = group.products.map((item) => item.duration).join(" ");
+
+      const groupText = normalizeText(`${group.game} ${brands} ${durations}`);
 
       const matchSearch = !keyword || groupText.includes(keyword);
       const matchGame = gameFilter === "all" || group.game === gameFilter;
@@ -84,7 +81,7 @@ export function CatalogSection({ products }: { products: Product[] }) {
       if (sortMode === "price-low") return a.lowestPrice - b.lowestPrice;
       if (sortMode === "price-high") return b.lowestPrice - a.lowestPrice;
       if (sortMode === "name") {
-        return `${a.game} ${a.brand}`.localeCompare(`${b.game} ${b.brand}`);
+        return a.game.localeCompare(b.game);
       }
 
       return 0;
@@ -110,11 +107,11 @@ export function CatalogSection({ products }: { products: Product[] }) {
       <div className="mx-auto max-w-6xl">
         <SectionHeader
           eyebrow="Catalog"
-          title="Available Products"
-          description="Products are grouped by game and brand. Click View Options to choose duration."
+          title="Available Games"
+          description="One card per game. Click View Options to choose brand and duration."
           action={
             <p className="text-sm font-semibold text-slate-500">
-              {filteredGroups.length} dari {groups.length} game cards tampil.
+              {filteredGroups.length} dari {groups.length} game tampil.
             </p>
           }
         />
@@ -206,7 +203,6 @@ export function CatalogSection({ products }: { products: Product[] }) {
               <ProductGroupCard
                 key={group.key}
                 game={group.game}
-                brand={group.brand}
                 products={group.products}
                 onOpen={() => setSelectedGroup(group)}
               />
@@ -233,7 +229,6 @@ export function CatalogSection({ products }: { products: Product[] }) {
       <ProductPickerModal
         open={Boolean(selectedGroup)}
         title={selectedGroup?.game || ""}
-        brand={selectedGroup?.brand || ""}
         products={selectedGroup?.products || []}
         onClose={() => setSelectedGroup(null)}
       />
