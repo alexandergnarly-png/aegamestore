@@ -2,15 +2,9 @@
 
 import { useMemo, useState } from "react";
 import { ProductCard, type Product } from "@/components/ProductCard";
+import { normalizeText } from "@/lib/format";
 
 type SortMode = "recommended" | "price-low" | "price-high" | "name";
-
-function normalizeText(value: string | number | undefined | null) {
-  return String(value || "")
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, " ");
-}
 
 function getUniqueGames(products: Product[]) {
   return Array.from(new Set(products.map((item) => item.game)))
@@ -58,8 +52,6 @@ export function CatalogSection({ products }: { products: Product[] }) {
   function handleSearchChange(value: string) {
     setSearch(value);
 
-    // Biar kalau sebelumnya filter game masih Delta/CODM,
-    // pas search "pubg" hasilnya tetap bisa muncul.
     if (value.trim()) {
       setGameFilter("all");
     }
@@ -129,6 +121,38 @@ export function CatalogSection({ products }: { products: Product[] }) {
             >
               Reset
             </button>
+          </div>
+
+          <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+            <button
+              type="button"
+              onClick={() => setGameFilter("all")}
+              className={`shrink-0 rounded-full px-4 py-2 text-xs font-black transition ${
+                gameFilter === "all"
+                  ? "bg-sky-500 text-white"
+                  : "bg-sky-50 text-sky-700 hover:bg-sky-100"
+              }`}
+            >
+              All
+            </button>
+
+            {games.map((game) => (
+              <button
+                key={game}
+                type="button"
+                onClick={() => {
+                  setGameFilter(game);
+                  setSearch("");
+                }}
+                className={`shrink-0 rounded-full px-4 py-2 text-xs font-black transition ${
+                  gameFilter === game
+                    ? "bg-sky-500 text-white"
+                    : "bg-sky-50 text-sky-700 hover:bg-sky-100"
+                }`}
+              >
+                {game}
+              </button>
+            ))}
           </div>
 
           {search.trim() && (
