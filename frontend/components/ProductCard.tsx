@@ -26,11 +26,51 @@ function getDeliveryLabel(type?: string) {
 
   return "Auto";
 }
+function normalizeGameName(game: string) {
+  return String(game || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+}
+
+function getGameThumbnail(game: string) {
+  const normalized = normalizeGameName(game);
+
+  const thumbnails: Record<string, string> = {
+    deltaforce:
+      "https://cdn.cloudflare.steamstatic.com/steam/apps/2507950/header.jpg",
+    pubgm:
+      "https://cdn.cloudflare.steamstatic.com/steam/apps/578080/header.jpg",
+    pubgmobile:
+      "https://cdn.cloudflare.steamstatic.com/steam/apps/578080/header.jpg",
+    bloodstrike: "https://www.blood-strike.com/favicon.ico",
+    freefire:
+      "https://play-lh.googleusercontent.com/6llpraFcTI0rEUuRpWEG9NWWblvm106y5JXcDzu60ACuaUYDD3i70a-p9_QM65NsGDE=s512",
+    mlbb: "https://play-lh.googleusercontent.com/7nVY1HnQwxS65U6k7PRkDmW4N-1Jwdx0j5JqR68ZtIyM36Z7S6cQLal8hcdR4Pl0Tw=s512",
+    mobilelegends:
+      "https://play-lh.googleusercontent.com/7nVY1HnQwxS65U6k7PRkDmW4N-1Jwdx0j5JqR68ZtIyM36Z7S6cQLal8hcdR4Pl0Tw=s512",
+    codm: "https://play-lh.googleusercontent.com/3rU1PpO9wq0wVQIEV2ODNVJjJdxZB7Y6zjB8Fh91m5nMZT3sZml0j63QXK-DfM7v3g=s512",
+    callofdutymobile:
+      "https://play-lh.googleusercontent.com/3rU1PpO9wq0wVQIEV2ODNVJjJdxZB7Y6zjB8Fh91m5nMZT3sZml0j63QXK-DfM7v3g=s512",
+  };
+
+  return thumbnails[normalized] || "";
+}
+
+function getGameInitials(game: string) {
+  return String(game || "AE")
+    .split(" ")
+    .map((word) => word[0])
+    .join("")
+    .slice(0, 3)
+    .toUpperCase();
+}
 
 export function ProductCard({ product }: { product: Product }) {
   const stock = Number(product.stock || 0);
   const isOutOfStock = stock <= 0;
   const deliveryLabel = getDeliveryLabel(product.delivery_type);
+  const thumbnail = getGameThumbnail(product.game);
+  const initials = getGameInitials(product.game);
 
   return (
     <article
@@ -41,18 +81,34 @@ export function ProductCard({ product }: { product: Product }) {
       }`}
     >
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className="text-xs font-black uppercase tracking-wide text-sky-500">
-            {product.brand}
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-gradient-to-br from-sky-100 to-rose-100 ring-1 ring-sky-100">
+            {thumbnail ? (
+              <img
+                src={thumbnail}
+                alt={product.game}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center text-sm font-black text-sky-700">
+                {initials}
+              </div>
+            )}
           </div>
 
-          <h3 className="mt-1 truncate text-lg font-black text-sky-950">
-            {product.game}
-          </h3>
+          <div className="min-w-0">
+            <div className="text-xs font-black uppercase tracking-wide text-sky-500">
+              {product.brand}
+            </div>
+
+            <h3 className="mt-1 truncate text-lg font-black text-sky-950">
+              {product.game}
+            </h3>
+          </div>
         </div>
 
         <span
-          className={`rounded-full px-3 py-1 text-xs font-black ${
+          className={`shrink-0 rounded-full px-3 py-1 text-xs font-black ${
             deliveryLabel === "Manual"
               ? "bg-amber-100 text-amber-700"
               : "bg-sky-100 text-sky-700"
