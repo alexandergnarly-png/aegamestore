@@ -6847,3 +6847,279 @@ body.dark-theme .order-steps {
     transition: none !important;
   }
 }
+
+/* =========================================================
+   ORDER POPUP MODERN SELECTOR v50
+   Native select remains as a hidden fallback controlled by JS.
+   ========================================================= */
+.native-order-select {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.order-choice-field {
+  position: relative;
+}
+
+.order-brand-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.order-brand-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 10px 13px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-soft);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--text-main);
+  box-shadow: var(--shadow-xs);
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+body.dark-theme .order-brand-pill {
+  background: rgba(20, 30, 56, 0.72);
+}
+
+.order-brand-pill:hover {
+  transform: translateY(-1px);
+  border-color: rgba(14, 165, 233, 0.55);
+}
+
+.order-brand-pill.is-selected {
+  background: linear-gradient(135deg, var(--ocean-deep), var(--ocean-light));
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 10px 22px rgba(14, 165, 233, 0.24);
+}
+
+.order-brand-name {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: -0.1px;
+}
+
+.order-brand-stock {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 7px;
+  border-radius: var(--radius-pill);
+  background: rgba(14, 165, 233, 0.12);
+  color: var(--ocean-deep);
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.order-brand-pill.is-selected .order-brand-stock {
+  background: rgba(255, 255, 255, 0.22);
+  color: white;
+}
+
+.order-product-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.order-product-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 7px;
+  min-height: 112px;
+  padding: 14px;
+  text-align: left;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-soft);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.66));
+  color: var(--text-main);
+  box-shadow: var(--shadow-xs);
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+body.dark-theme .order-product-card {
+  background: linear-gradient(180deg, rgba(20, 30, 56, 0.88), rgba(20, 30, 56, 0.66));
+}
+
+.order-product-card:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(14, 165, 233, 0.6);
+  box-shadow: var(--shadow-sm);
+}
+
+.order-product-card:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.order-product-card.is-selected {
+  border-color: var(--ocean);
+  background:
+    linear-gradient(180deg, rgba(224, 242, 254, 0.96), rgba(255, 255, 255, 0.78));
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.16);
+}
+
+body.dark-theme .order-product-card.is-selected {
+  background:
+    linear-gradient(180deg, rgba(14, 165, 233, 0.18), rgba(20, 30, 56, 0.78));
+}
+
+.order-product-card.is-disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  filter: grayscale(0.25);
+}
+
+.order-product-topline {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.order-product-duration {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-strong);
+  letter-spacing: -0.2px;
+  line-height: 1.25;
+}
+
+.order-product-badge {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: var(--radius-pill);
+  background: rgba(16, 185, 129, 0.14);
+  color: #047857;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+body.dark-theme .order-product-badge {
+  color: #6ee7b7;
+}
+
+.order-product-badge.danger {
+  background: rgba(244, 63, 94, 0.14);
+  color: #be123c;
+  border-color: rgba(244, 63, 94, 0.24);
+}
+
+body.dark-theme .order-product-badge.danger {
+  color: #fda4af;
+}
+
+.order-product-price {
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--ocean-deep);
+  letter-spacing: -0.45px;
+}
+
+body.dark-theme .order-product-price {
+  color: var(--ocean-light);
+}
+
+.order-product-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.order-choice-empty {
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px dashed var(--border-color);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .order-brand-pills {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+  }
+
+  .order-brand-pill {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+    min-height: 40px;
+    padding: 9px 12px;
+  }
+
+  .order-product-cards {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .order-product-card {
+    min-height: 92px;
+    padding: 12px 13px;
+    border-radius: 16px;
+  }
+
+  .order-product-duration {
+    font-size: 13px;
+  }
+
+  .order-product-price {
+    font-size: 17px;
+  }
+
+  .order-product-badge {
+    font-size: 9px;
+    padding: 3px 7px;
+  }
+}
+
+@media (max-width: 540px) {
+  .order-brand-pill:hover,
+  .order-product-card:hover:not(:disabled) {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .order-brand-pill,
+  .order-product-card,
+  .order-product-card.is-selected,
+  .order-brand-pill.is-selected {
+    box-shadow: none !important;
+  }
+}

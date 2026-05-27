@@ -1279,7 +1279,138 @@ function loadBrands() {
     brandSelect.appendChild(option);
   });
 
+  renderBrandPills(brands);
   loadDurations();
+}
+
+function getBrandStockCount(brand) {
+  return allProducts
+    .filter((item) => item.game === selectedGame && item.brand === brand)
+    .reduce((total, item) => total + Number(item.available_keys || 0), 0);
+}
+
+function renderBrandPills(brands = []) {
+  const brandPills = document.getElementById("brandPills");
+  if (!brandPills) return;
+
+  if (!brands.length) {
+    brandPills.innerHTML = `
+      <div class="order-choice-empty">Brand belum tersedia</div>
+    `;
+    return;
+  }
+
+  brandPills.innerHTML = brands
+    .map((brand) => {
+      const stock = getBrandStockCount(brand);
+      const isActive = String(brandSelect.value) === String(brand);
+      return `
+        <button
+          type="button"
+          class="order-brand-pill${isActive ? " is-selected" : ""}"
+          data-brand="${escapeHtml(brand)}"
+          role="radio"
+          aria-checked="${isActive ? "true" : "false"}"
+        >
+          <span class="order-brand-name">${escapeHtml(brand)}</span>
+          <span class="order-brand-stock">${stock} ready</span>
+        </button>
+      `;
+    })
+    .join("");
+
+  brandPills.querySelectorAll(".order-brand-pill").forEach((button) => {
+    button.addEventListener("click", () => {
+      const brand = button.getAttribute("data-brand") || "";
+      if (!brand || brandSelect.value === brand) return;
+      brandSelect.value = brand;
+      brandSelect.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+  });
+}
+
+function renderProductCards(products = []) {
+  const productCards = document.getElementById("productCards");
+  if (!productCards) return;
+
+  if (!products.length) {
+    productCards.innerHTML = `
+      <div class="order-choice-empty">Produk belum tersedia untuk brand ini</div>
+    `;
+    return;
+  }
+
+  productCards.innerHTML = products
+    .map((item) => {
+      const availableKeys = Number(item.available_keys || 0);
+      const isOutOfStock = availableKeys <= 0;
+      const isActive = String(productSelect.value) === String(item.id);
+      const deliveryType = String(item.delivery_type || "auto").toLowerCase();
+      const deliveryLabel =
+        deliveryType === "manual"
+          ? translations[currentLanguage].deliveryManualLabel || "Manual"
+          : translations[currentLanguage].deliveryAutoLabel || "Auto";
+      const stockLabel = isOutOfStock
+        ? translations[currentLanguage].outOfStockLabel
+        : `${availableKeys} ready`;
+
+      return `
+        <button
+          type="button"
+          class="order-product-card${isActive ? " is-selected" : ""}${isOutOfStock ? " is-disabled" : ""}"
+          data-product-id="${escapeHtml(String(item.id))}"
+          role="radio"
+          aria-checked="${isActive ? "true" : "false"}"
+          ${isOutOfStock ? "disabled" : ""}
+        >
+          <span class="order-product-topline">
+            <span class="order-product-duration">${escapeHtml(item.duration)}</span>
+            <span class="order-product-badge ${isOutOfStock ? "danger" : ""}">${escapeHtml(stockLabel)}</span>
+          </span>
+          <span class="order-product-price">${formatRupiah(item.price)}</span>
+          <span class="order-product-meta">
+            <span>${escapeHtml(item.brand)}</span>
+            <span>•</span>
+            <span>${escapeHtml(deliveryLabel)}</span>
+          </span>
+        </button>
+      `;
+    })
+    .join("");
+
+  productCards.querySelectorAll(".order-product-card").forEach((button) => {
+    button.addEventListener("click", () => {
+      if (button.disabled) return;
+      const productId = button.getAttribute("data-product-id") || "";
+      if (!productId || String(productSelect.value) === String(productId))
+        return;
+      productSelect.value = productId;
+      productSelect.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+  });
+}
+
+function syncOrderChoiceWidgets() {
+  const brandPills = document.getElementById("brandPills");
+  if (brandPills) {
+    brandPills.querySelectorAll(".order-brand-pill").forEach((button) => {
+      const active =
+        String(button.getAttribute("data-brand")) === String(brandSelect.value);
+      button.classList.toggle("is-selected", active);
+      button.setAttribute("aria-checked", active ? "true" : "false");
+    });
+  }
+
+  const productCards = document.getElementById("productCards");
+  if (productCards) {
+    productCards.querySelectorAll(".order-product-card").forEach((button) => {
+      const active =
+        String(button.getAttribute("data-product-id")) ===
+        String(productSelect.value);
+      button.classList.toggle("is-selected", active);
+      button.setAttribute("aria-checked", active ? "true" : "false");
+    });
+  }
 }
 
 function loadDurations() {
@@ -1314,6 +1445,14 @@ function loadDurations() {
     productSelect.value = filteredProducts[0].id;
   }
 
+  renderBrandPills([
+    ...new Set(
+      allProducts
+        .filter((item) => item.game === selectedGame)
+        .map((item) => item.brand),
+    ),
+  ]);
+  renderProductCards(filteredProducts);
   updatePreview();
 }
 
@@ -1331,6 +1470,7 @@ function updatePreview() {
     document.getElementById("previewProduct").innerText =
       translations[currentLanguage].previewWait;
     document.getElementById("previewPrice").innerText = "Rp 0";
+    syncOrderChoiceWidgets();
     resetVoucherPreview();
     return;
   }
@@ -1351,6 +1491,7 @@ function updatePreview() {
     ? translations[currentLanguage].outOfStockLabel
     : translations[currentLanguage].buyNow;
 
+  syncOrderChoiceWidgets();
   resetVoucherPreview();
   refreshCheckoutDiscountPreview();
 }

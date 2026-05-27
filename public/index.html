@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="style.css?v=49" />
+    <link rel="stylesheet" href="style.css?v=50" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#0ea5e9" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -508,16 +508,32 @@
         </ol>
 
         <div class="form-grid">
-          <div class="field">
+          <div class="field order-choice-field">
             <label for="brand" data-i18n="brandLabel">Brand</label>
-            <select id="brand" aria-label="Brand"></select>
+            <select id="brand" class="native-order-select" aria-label="Brand"></select>
+            <div
+              class="order-brand-pills"
+              id="brandPills"
+              role="radiogroup"
+              aria-label="Pilih brand"
+            ></div>
           </div>
 
-          <div class="field">
+          <div class="field order-choice-field field-wide">
             <label for="product" data-i18n="durationLabel">
               Nominal / Durasi
             </label>
-            <select id="product" aria-label="Nominal atau durasi"></select>
+            <select
+              id="product"
+              class="native-order-select"
+              aria-label="Nominal atau durasi"
+            ></select>
+            <div
+              class="order-product-cards"
+              id="productCards"
+              role="radiogroup"
+              aria-label="Pilih nominal atau durasi"
+            ></div>
           </div>
         </div>
 
@@ -1101,6 +1117,6 @@
         document.getElementById("preloader")?.classList.add("fade-out");
       }, 5000);
     </script>
-    <script src="script.js?v=49"></script>
+    <script src="script.js?v=50"></script>
   </body>
 </html>
