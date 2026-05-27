@@ -160,7 +160,10 @@ db.query(
     }
   },
 );
-
+db.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS badge_override TEXT`);
+db.query(
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS badge_override_expires_at TEXT`,
+);
 db.query(`CREATE INDEX IF NOT EXISTS idx_orders_id ON orders(id)`);
 db.query(
   `CREATE INDEX IF NOT EXISTS idx_keys_product_used ON keys(product_id, used)`,
@@ -497,6 +500,79 @@ function getBuyerBadge({
     description: "Buyer baru AE Game Store",
   };
 }
+function getBadgeByCode(code) {
+  const cleanCode = String(code || "")
+    .trim()
+    .toLowerCase();
+
+  const badges = {
+    new: {
+      code: "new",
+      label: "New Buyer",
+      emoji: "🎐",
+      description: "Buyer baru AE Game Store",
+    },
+    verified: {
+      code: "verified",
+      label: "Verified Buyer",
+      emoji: "✅",
+      description: "Sudah pernah berhasil order",
+    },
+    loyal: {
+      code: "loyal",
+      label: "Loyal Buyer",
+      emoji: "🌊",
+      description: "Buyer yang sering transaksi",
+    },
+    vip: {
+      code: "vip",
+      label: "VIP Buyer",
+      emoji: "👑",
+      description: "Buyer premium AE Game Store",
+    },
+    reviewer: {
+      code: "reviewer",
+      label: "Reviewer",
+      emoji: "⭐",
+      description: "Buyer yang sudah memberi review",
+    },
+  };
+
+  return badges[cleanCode] || null;
+}
+
+async function getUserBadgeOverride(userId) {
+  const cleanUserId = Number(userId);
+
+  if (!Number.isInteger(cleanUserId) || cleanUserId <= 0) {
+    return null;
+  }
+
+  const result = await query(
+    `
+    SELECT badge_override, badge_override_expires_at
+    FROM users
+    WHERE id = $1
+    LIMIT 1
+    `,
+    [cleanUserId],
+  );
+
+  const user = result.rows[0];
+
+  if (!user || !user.badge_override) {
+    return null;
+  }
+
+  if (
+    user.badge_override_expires_at &&
+    new Date(user.badge_override_expires_at) < new Date()
+  ) {
+    return null;
+  }
+
+  return getBadgeByCode(user.badge_override);
+}
 async function getBuyerStats(userId) {
   const cleanUserId = Number(userId);
 
@@ -533,6 +609,12 @@ async function getBuyerStats(userId) {
 }
 
 async function isVipBuyer(userId) {
+  const overrideBadge = await getUserBadgeOverride(userId);
+
+  if (overrideBadge?.code === "vip") {
+    return true;
+  }
+
   const stats = await getBuyerStats(userId);
 
   return (
@@ -2351,36 +2433,58 @@ app.get("/users", requireAdminAuth, async (req, res) => {
   try {
     const result = await query(
       `
-  SELECT
-    u.id,
-    u.username,
-    u.created_at,
-    COUNT(o.id) FILTER (WHERE o.payment_status = 'paid')::int AS paid_order_count,
-    COALESCE(SUM(o.price) FILTER (WHERE o.payment_status = 'paid'), 0)::int AS total_spend,
-    CASE WHEN MAX(r.id) IS NULL THEN false ELSE true END AS has_review
-  FROM users u
-  LEFT JOIN orders o ON o.user_id = u.id
-  LEFT JOIN reviews r ON r.user_id = u.id AND r.active = 1
-  GROUP BY u.id
-  ORDER BY u.created_at DESC
-  `,
+      SELECT
+        u.id,
+        u.username,
+        u.created_at,
+        u.badge_override,
+        u.badge_override_expires_at,
+        COUNT(o.id) FILTER (WHERE o.payment_status = 'paid')::int AS paid_order_count,
+        COALESCE(SUM(o.price) FILTER (WHERE o.payment_status = 'paid'), 0)::int AS total_spend,
+        CASE WHEN MAX(r.id) IS NULL THEN false ELSE true END AS has_review
+      FROM users u
+      LEFT JOIN orders o ON o.user_id = u.id
+      LEFT JOIN reviews r ON r.user_id = u.id AND r.active = 1
+      GROUP BY u.id
+      ORDER BY u.created_at DESC
+      `,
     );
 
-    const users = result.rows.map((item) => ({
-      ...item,
-      paid_order_count: Number(item.paid_order_count || 0),
-      total_spend: Number(item.total_spend || 0),
-      has_review: Boolean(item.has_review),
-      badge: getBuyerBadge({
-        paidOrderCount: item.paid_order_count,
-        totalSpend: item.total_spend,
-        hasReview: item.has_review,
-      }),
-    }));
+    const now = new Date();
+
+    const users = result.rows.map((item) => {
+      const paidOrderCount = Number(item.paid_order_count || 0);
+      const totalSpend = Number(item.total_spend || 0);
+      const hasReview = Boolean(item.has_review);
+
+      const overrideBadge =
+        item.badge_override &&
+        (!item.badge_override_expires_at ||
+          new Date(item.badge_override_expires_at) > now)
+          ? getBadgeByCode(item.badge_override)
+          : null;
+
+      const badge =
+        overrideBadge ||
+        getBuyerBadge({
+          paidOrderCount,
+          totalSpend,
+          hasReview,
+        });
+
+      return {
+        ...item,
+        paid_order_count: paidOrderCount,
+        total_spend: totalSpend,
+        has_review: hasReview,
+        badge,
+        badge_override: item.badge_override || null,
+        badge_override_expires_at: item.badge_override_expires_at || null,
+        badge_is_override: Boolean(overrideBadge),
+      };
+    });
 
     return res.json(users);
-
-    return res.json(result.rows);
   } catch (err) {
     console.error("ERROR GET USERS:", err);
     return res.status(500).json({
@@ -2388,6 +2492,127 @@ app.get("/users", requireAdminAuth, async (req, res) => {
     });
   }
 });
+
+app.post(
+  "/users/:id/badge-override",
+  requireAdminAuth,
+  requireAdminCsrf,
+  async (req, res) => {
+    const userId = Number(req.params.id);
+    const badgeCode = String(req.body.badge_code || "")
+      .trim()
+      .toLowerCase();
+    const expiresMode = String(req.body.expires_mode || "1d")
+      .trim()
+      .toLowerCase();
+
+    if (!Number.isInteger(userId) || userId <= 0) {
+      return res.status(400).json({
+        message: "ID user tidak valid",
+      });
+    }
+
+    const badge = getBadgeByCode(badgeCode);
+
+    if (!badge) {
+      return res.status(400).json({
+        message: "Badge override tidak valid",
+      });
+    }
+
+    let expiresAt = null;
+    const now = new Date();
+
+    if (expiresMode === "1d") {
+      expiresAt = new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString();
+    } else if (expiresMode === "7d") {
+      expiresAt = new Date(
+        now.getTime() + 7 * 24 * 60 * 60 * 1000,
+      ).toISOString();
+    } else if (expiresMode === "manual") {
+      expiresAt = null;
+    } else {
+      return res.status(400).json({
+        message: "Mode expired tidak valid",
+      });
+    }
+
+    try {
+      const result = await query(
+        `
+        UPDATE users
+        SET badge_override = $1,
+            badge_override_expires_at = $2
+        WHERE id = $3
+        RETURNING id, username
+        `,
+        [badge.code, expiresAt, userId],
+      );
+
+      const user = result.rows[0];
+
+      if (!user) {
+        return res.status(404).json({
+          message: "User tidak ditemukan",
+        });
+      }
+
+      return res.json({
+        message: `Badge ${badge.label} berhasil diterapkan ke ${user.username}`,
+      });
+    } catch (err) {
+      console.error("ERROR SET BADGE OVERRIDE:", err);
+      return res.status(500).json({
+        message: "Gagal menerapkan badge override",
+      });
+    }
+  },
+);
+
+app.delete(
+  "/users/:id/badge-override",
+  requireAdminAuth,
+  requireAdminCsrf,
+  async (req, res) => {
+    const userId = Number(req.params.id);
+
+    if (!Number.isInteger(userId) || userId <= 0) {
+      return res.status(400).json({
+        message: "ID user tidak valid",
+      });
+    }
+
+    try {
+      const result = await query(
+        `
+        UPDATE users
+        SET badge_override = NULL,
+            badge_override_expires_at = NULL
+        WHERE id = $1
+        RETURNING id, username
+        `,
+        [userId],
+      );
+
+      const user = result.rows[0];
+
+      if (!user) {
+        return res.status(404).json({
+          message: "User tidak ditemukan",
+        });
+      }
+
+      return res.json({
+        message: `Badge override ${user.username} berhasil direset`,
+      });
+    } catch (err) {
+      console.error("ERROR RESET BADGE OVERRIDE:", err);
+      return res.status(500).json({
+        message: "Gagal reset badge override",
+      });
+    }
+  },
+);
 
 app.post(
   "/users/:id/reset-password",
@@ -3737,7 +3962,20 @@ app.get("/api/user/me", async (req, res) => {
     const paidOrderCount = Number(statsResult.rows[0]?.paid_order_count || 0);
     const totalSpend = Number(statsResult.rows[0]?.total_spend || 0);
     const hasReview = reviewResult.rows.length > 0;
-    const badge = getBuyerBadge({ paidOrderCount, totalSpend, hasReview });
+    const overrideBadge =
+      item.badge_override &&
+      (!item.badge_override_expires_at ||
+        new Date(item.badge_override_expires_at) > new Date())
+        ? getBadgeByCode(item.badge_override)
+        : null;
+
+    const badge =
+      overrideBadge ||
+      getBuyerBadge({
+        paidOrderCount: item.paid_order_count,
+        totalSpend: item.total_spend,
+        hasReview: item.has_review,
+      });
 
     return res.json({
       loggedIn: true,

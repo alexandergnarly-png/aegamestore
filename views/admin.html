@@ -3039,6 +3039,63 @@
             </div>
           </div>
 
+          <div class="toolbar user-toolbar">
+            <div class="field user-search-field">
+              <input
+                type="text"
+                id="badgeOverrideSearchInput"
+                placeholder="Cari username untuk test badge..."
+                autocomplete="off"
+                oninput="renderBadgeOverrideMatches()"
+              />
+            </div>
+
+            <div class="field">
+              <select id="badgeOverrideSelect">
+                <option value="vip">👑 VIP Buyer</option>
+                <option value="loyal">🌊 Loyal Buyer</option>
+                <option value="verified">✅ Verified Buyer</option>
+                <option value="reviewer">⭐ Reviewer</option>
+                <option value="new">🎐 New Buyer</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <select id="badgeOverrideExpires">
+                <option value="1d">Expired 1 hari</option>
+                <option value="7d">Expired 7 hari</option>
+                <option value="manual">Manual reset</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="info-row">
+            <p class="info">
+              Owner testing: pakai ini untuk kasih badge sementara ke akun test.
+              Reset setelah selesai test.
+            </p>
+          </div>
+
+          <div class="table-wrap" style="margin-bottom: 16px">
+            <table>
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Badge Sekarang</th>
+                  <th>Override</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="badgeOverrideTableBody">
+                <tr>
+                  <td colspan="4" class="empty">
+                    Cari username buyer untuk testing badge.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
           <div class="info-row">
             <div class="info" id="userStatusText">Memuat daftar user...</div>
           </div>
@@ -4080,7 +4137,14 @@
         <tr>
   <td data-label="ID">${item.id}</td>
   <td data-label="Username">${escapeHtml(item.username || "-")}</td>
-  <td data-label="Badge">${buyerBadge(item.badge)}</td>
+  <td data-label="Badge">
+  ${buyerBadge(item.badge)}
+  ${
+    item.badge_is_override
+      ? `<span class="badge vip" style="margin-left:6px;">Override</span>`
+      : ""
+  }
+</td>
   <td data-label="Order Paid">${Number(item.paid_order_count || 0)} order</td>
   <td data-label="Total Belanja">${formatRupiah(item.total_spend || 0)}</td>
   <td data-label="Daftar">${formatTanggal(item.created_at)}</td>
@@ -4096,6 +4160,138 @@
       `,
           )
           .join("");
+      }
+
+      function getBadgeOverrideMatches() {
+        const keyword = String(
+          document.getElementById("badgeOverrideSearchInput")?.value || "",
+        )
+          .trim()
+          .toLowerCase();
+
+        if (!keyword) return [];
+
+        return ADMIN_USERS_CACHE.filter((item) =>
+          String(item.username || "")
+            .toLowerCase()
+            .includes(keyword),
+        ).slice(0, 8);
+      }
+
+      function renderBadgeOverrideMatches() {
+        const tableBody = document.getElementById("badgeOverrideTableBody");
+        if (!tableBody) return;
+
+        const users = getBadgeOverrideMatches();
+
+        if (!users.length) {
+          tableBody.innerHTML = `
+      <tr>
+        <td colspan="4" class="empty">User tidak ditemukan.</td>
+      </tr>
+    `;
+          return;
+        }
+
+        tableBody.innerHTML = users
+          .map((item) => {
+            const overrideText = item.badge_is_override
+              ? `${escapeHtml(item.badge_override || "-")} ${
+                  item.badge_override_expires_at
+                    ? `sampai ${formatTanggal(item.badge_override_expires_at)}`
+                    : "(manual reset)"
+                }`
+              : "Tidak ada";
+
+            return `
+        <tr>
+          <td data-label="User">
+            #${item.id} · ${escapeHtml(item.username || "-")}
+          </td>
+          <td data-label="Badge Sekarang">${buyerBadge(item.badge)}</td>
+          <td data-label="Override">${overrideText}</td>
+          <td data-label="Aksi" class="action-cell">
+            <button class="ghost-btn" onclick="applyBadgeOverride(${item.id})">
+              Apply
+            </button>
+            <button class="danger-btn" onclick="resetBadgeOverride(${item.id})">
+              Reset
+            </button>
+          </td>
+        </tr>
+      `;
+          })
+          .join("");
+      }
+
+      async function applyBadgeOverride(userId) {
+        const badgeCode =
+          document.getElementById("badgeOverrideSelect")?.value || "vip";
+        const expiresMode =
+          document.getElementById("badgeOverrideExpires")?.value || "1d";
+
+        try {
+          const res = await fetch(`/users/${userId}/badge-override`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-csrf-token": getCsrfToken(),
+            },
+            body: JSON.stringify({
+              badge_code: badgeCode,
+              expires_mode: expiresMode,
+            }),
+          });
+
+          const data = await res.json();
+
+          if (!res.ok) {
+            Swal.fire(data.message || "Gagal menerapkan badge override");
+            return;
+          }
+
+          Swal.fire(data.message || "Badge override berhasil diterapkan");
+          await loadUsers();
+          renderBadgeOverrideMatches();
+        } catch (err) {
+          Swal.fire("Terjadi error server saat menerapkan badge override");
+        }
+      }
+
+      async function resetBadgeOverride(userId) {
+        const result = await Swal.fire({
+          title: "Reset Badge Override?",
+          text: "Badge user akan kembali mengikuti transaksi asli.",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "Ya, Reset",
+          cancelButtonText: "Batal",
+          confirmButtonColor: "#fb7185",
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+          const res = await fetch(`/users/${userId}/badge-override`, {
+            method: "DELETE",
+            headers: {
+              "x-csrf-token": getCsrfToken(),
+            },
+          });
+
+          const data = await res.json();
+
+          if (!res.ok) {
+            Swal.fire(data.message || "Gagal reset badge override");
+            return;
+          }
+
+          Swal.fire(data.message || "Badge override berhasil direset");
+          await loadUsers();
+          renderBadgeOverrideMatches();
+        } catch (err) {
+          Swal.fire("Terjadi error server saat reset badge override");
+        }
       }
 
       function clearUserSearch() {
