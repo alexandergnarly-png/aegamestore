@@ -1172,13 +1172,16 @@ async function openOrderModal(game) {
       return;
     }
 
+    const defaultOrder = data.defaultOrder || {};
+
     if (nameInput) {
-      nameInput.value = data.username || "";
-      nameInput.readOnly = true;
+      nameInput.value = defaultOrder.name || data.username || "";
+      nameInput.readOnly = false;
     }
 
-    if (contactInput && data.contact && !contactInput.value.trim()) {
-      contactInput.value = data.contact;
+    if (contactInput && !contactInput.value.trim()) {
+      contactInput.value =
+        defaultOrder.contact || data.contact || data.email || "";
     }
   } catch (err) {
     Swal.fire({
@@ -1357,7 +1360,7 @@ productSelect.addEventListener("change", updatePreview);
 
 async function buy() {
   const name = document.getElementById("name").value.trim();
-  const contact = "Telegram Admin";
+  const contact = document.getElementById("contact")?.value.trim() || "";
 
   const selectedProduct = allProducts.find(
     (item) => String(item.id) === String(productSelect.value),
@@ -1372,6 +1375,17 @@ async function buy() {
     });
     return;
   }
+
+  if (!contact) {
+    Swal.fire({
+      icon: "warning",
+      title: "Oops...",
+      text: "Kontak order belum terisi.",
+      confirmButtonColor: "#0ea5e9",
+    });
+    return;
+  }
+
   if (!selectedProduct) {
     Swal.fire({
       icon: "info",

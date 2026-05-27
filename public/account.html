@@ -742,6 +742,16 @@
         margin-top: 8px;
       }
 
+      .note.ok {
+        color: var(--success);
+        font-weight: 800;
+      }
+
+      .note.warn {
+        color: var(--warning);
+        font-weight: 800;
+      }
+
       .badge-soon {
         display: inline-flex;
         align-items: center;
@@ -1590,11 +1600,8 @@
           role="tabpanel"
           aria-labelledby="tab-default"
         >
-          <div class="section-title">
-            <span data-account-i18n="defaultOrderTitle"
-              >Data Order Default</span
-            >
-            <span class="badge-soon" data-account-i18n="badgeSoon">SEGERA</span>
+          <div class="section-title" data-account-i18n="defaultOrderTitle">
+            Data Order Default
           </div>
           <p class="section-desc" data-account-i18n="defaultOrderNote">
             Data ini bisa dipakai untuk mengisi otomatis nama dan kontak saat
@@ -1645,7 +1652,7 @@
             onclick="saveDefaultOrderData()"
             data-account-i18n="saveDefaultOrder"
           >
-            Simpan Data Order (Segera)
+            Simpan Data Order
           </button>
         </div>
 
@@ -1735,21 +1742,47 @@
 
           <div style="height: 22px"></div>
 
-          <div class="section-title">
-            <span data-account-i18n="verifyEmailTitle">Verifikasi Email</span>
-            <span class="badge-soon" data-account-i18n="badgeSoon">SEGERA</span>
+          <div class="section-title" data-account-i18n="verifyEmailTitle">
+            Verifikasi Email
           </div>
           <p class="section-desc" data-account-i18n="verifyEmailNote">
-            Fitur ini butuh tambahan email di database dan layanan kirim email
-            seperti Resend, Brevo, atau SMTP.
+            Kirim link verifikasi ke email kamu. Email yang sudah verified bisa
+            dipakai untuk data order dan notifikasi akun.
           </p>
+
+          <div class="field">
+            <label for="verifyEmail" data-account-i18n="verifyEmailLabel">
+              Email
+            </label>
+            <div class="input-wrap">
+              <iconify-icon
+                icon="mdi:email-check-outline"
+                aria-hidden="true"
+              ></iconify-icon>
+              <input
+                type="email"
+                id="verifyEmail"
+                placeholder="email@example.com"
+                data-account-placeholder="verifyEmailPlaceholder"
+                autocomplete="email"
+              />
+            </div>
+            <p
+              class="note"
+              id="emailVerifyStatus"
+              data-account-i18n="emailNotVerified"
+            >
+              Email belum terverifikasi.
+            </p>
+          </div>
+
           <button
             type="button"
             class="btn btn-secondary"
-            onclick="emailComingSoon()"
+            onclick="requestEmailVerification()"
             data-account-i18n="verifyEmailButton"
           >
-            Verify Email
+            Kirim Link Verifikasi
           </button>
         </div>
       </section>
@@ -1772,7 +1805,7 @@
           defaultContactLabel: "Kontak Default",
           defaultNamePlaceholder: "Nama default untuk order",
           defaultContactPlaceholder: "Email / Nomor WA aktif",
-          saveDefaultOrder: "Simpan Data Order (Segera)",
+          saveDefaultOrder: "Simpan Data Order",
           defaultOrderNote:
             "Data ini bisa dipakai untuk mengisi otomatis nama dan kontak saat checkout.",
           changePasswordTitle: "Ganti Password",
@@ -1784,9 +1817,23 @@
           changePasswordNote:
             "Kalau password kamu hasil reset admin, isi password random itu sebagai password lama.",
           verifyEmailTitle: "Verifikasi Email",
-          verifyEmailButton: "Verify Email",
+          verifyEmailButton: "Kirim Link Verifikasi",
           verifyEmailNote:
-            "Fitur ini butuh tambahan email di database dan layanan kirim email seperti Resend, Brevo, atau SMTP.",
+            "Kirim link verifikasi ke email kamu. Email verified bisa dipakai untuk data order dan notifikasi akun.",
+          verifyEmailLabel: "Email",
+          verifyEmailPlaceholder: "email@example.com",
+          emailVerified: "Email sudah terverifikasi ✅",
+          emailPending:
+            "Link verifikasi sudah pernah dikirim. Cek inbox email kamu.",
+          emailNotVerified: "Email belum terverifikasi.",
+          defaultOrderSaved: "Data order default berhasil disimpan",
+          defaultOrderFailed: "Gagal menyimpan data order default",
+          verifyEmailSentTitle: "Link Verifikasi Dikirim",
+          verifyEmailSentText:
+            "Cek inbox email kamu lalu klik link verifikasi.",
+          verifyEmailDevLinkText:
+            "Mode testing: link verifikasi tersedia karena RESEND_API_KEY belum diset.",
+          verifyEmailFailed: "Gagal mengirim link verifikasi",
           orderHistoryTitle: "Riwayat Order",
           orderHistoryDesc:
             "Semua transaksi yang terhubung ke akunmu, lengkap dengan key game dan detail pembayaran.",
@@ -1850,7 +1897,7 @@
           defaultContactLabel: "Default Contact",
           defaultNamePlaceholder: "Default name for orders",
           defaultContactPlaceholder: "Active email / WhatsApp number",
-          saveDefaultOrder: "Save Order Data (Soon)",
+          saveDefaultOrder: "Save Order Data",
           defaultOrderNote:
             "This data can be used to auto-fill your name and contact during checkout.",
           changePasswordTitle: "Change Password",
@@ -1862,9 +1909,23 @@
           changePasswordNote:
             "If your password was reset by admin, use the random password as your old password.",
           verifyEmailTitle: "Email Verification",
-          verifyEmailButton: "Verify Email",
+          verifyEmailButton: "Send Verification Link",
           verifyEmailNote:
-            "This feature needs an email column, verification token, and email service such as Resend, Brevo, or SMTP.",
+            "Send a verification link to your email. A verified email can be used for order data and account notifications.",
+          verifyEmailLabel: "Email",
+          verifyEmailPlaceholder: "email@example.com",
+          emailVerified: "Email is verified ✅",
+          emailPending:
+            "A verification link has been sent. Please check your inbox.",
+          emailNotVerified: "Email is not verified yet.",
+          defaultOrderSaved: "Default order data saved",
+          defaultOrderFailed: "Failed to save default order data",
+          verifyEmailSentTitle: "Verification Link Sent",
+          verifyEmailSentText:
+            "Check your inbox and click the verification link.",
+          verifyEmailDevLinkText:
+            "Testing mode: verification link is available because RESEND_API_KEY is not set.",
+          verifyEmailFailed: "Failed to send verification link",
           orderHistoryTitle: "Order History",
           orderHistoryDesc:
             "All transactions linked to your account, complete with game keys and payment details.",
@@ -2038,9 +2099,24 @@
           userText.dataset.username = data.username;
           userText.removeAttribute("data-account-i18n");
 
-          if (data.contact) {
-            const contactStatus = document.getElementById("contactStatus");
-            contactStatus.innerText = data.contact;
+          const defaultOrder = data.defaultOrder || {};
+          const defaultNameInput = document.getElementById("defaultName");
+          const defaultContactInput = document.getElementById("defaultContact");
+          const verifyEmailInput = document.getElementById("verifyEmail");
+
+          if (defaultNameInput)
+            defaultNameInput.value = defaultOrder.name || data.username || "";
+          if (defaultContactInput)
+            defaultContactInput.value =
+              defaultOrder.contact || data.email || "";
+          if (verifyEmailInput)
+            verifyEmailInput.value = data.email || defaultOrder.contact || "";
+
+          updateAccountEmailStatus(data);
+
+          const contactStatus = document.getElementById("contactStatus");
+          if (contactStatus && (defaultOrder.contact || data.email)) {
+            contactStatus.innerText = defaultOrder.contact || data.email;
             contactStatus.removeAttribute("data-account-i18n");
           }
 
@@ -2114,13 +2190,82 @@
         }
       }
 
-      function emailComingSoon() {
-        Swal.fire({
-          title: tAccount("verifyEmailComingSoonTitle"),
-          text: tAccount("verifyEmailComingSoonText"),
-          icon: "info",
-          confirmButtonColor: "#0ea5e9",
-        });
+      function updateAccountEmailStatus(data = {}) {
+        const status = document.getElementById("emailVerifyStatus");
+        if (!status) return;
+
+        status.removeAttribute("data-account-i18n");
+        status.classList.remove("ok", "warn");
+
+        if (data.emailVerified) {
+          status.innerText = tAccount("emailVerified");
+          status.classList.add("ok");
+          return;
+        }
+
+        if (data.emailVerificationPending) {
+          status.innerText = tAccount("emailPending");
+          status.classList.add("warn");
+          return;
+        }
+
+        status.innerText = tAccount("emailNotVerified");
+      }
+
+      async function requestEmailVerification() {
+        const email = document.getElementById("verifyEmail").value.trim();
+
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          Swal.fire({
+            icon: "warning",
+            title: tAccount("failedTitle"),
+            text: tAccount("defaultContactPlaceholder"),
+            confirmButtonColor: "#0ea5e9",
+          });
+          return;
+        }
+
+        try {
+          const res = await fetch("/api/user/verify-email/send", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-user-csrf-token": getCookie("user_csrf"),
+            },
+            body: JSON.stringify({ email }),
+          });
+
+          const data = await res.json();
+
+          if (!res.ok) {
+            Swal.fire(
+              tAccount("failedTitle"),
+              data.message || tAccount("verifyEmailFailed"),
+              "error",
+            );
+            return;
+          }
+
+          const html = data.verificationUrl
+            ? `${escapeHtml(tAccount("verifyEmailDevLinkText"))}<br><br><a href="${escapeHtml(data.verificationUrl)}" target="_blank" rel="noopener">${escapeHtml(data.verificationUrl)}</a>`
+            : escapeHtml(data.message || tAccount("verifyEmailSentText"));
+
+          Swal.fire({
+            icon: data.alreadyVerified ? "success" : "info",
+            title: data.alreadyVerified
+              ? tAccount("emailVerified")
+              : tAccount("verifyEmailSentTitle"),
+            html,
+            confirmButtonColor: "#0ea5e9",
+          });
+
+          updateAccountEmailStatus({
+            emailVerified: Boolean(data.alreadyVerified),
+            emailVerificationPending: !data.alreadyVerified,
+          });
+        } catch (err) {
+          Swal.fire(tAccount("errorTitle"), tAccount("serverError"), "error");
+        }
       }
 
       async function logoutUser() {
@@ -2432,13 +2577,74 @@
         window.location.href = target;
       }
 
-      function saveDefaultOrderData() {
-        Swal.fire({
-          title: tAccount("featureSoonTitle"),
-          text: tAccount("featureSoonText"),
-          icon: "info",
-          confirmButtonColor: "#0ea5e9",
-        });
+      async function saveDefaultOrderData() {
+        const defaultName = document.getElementById("defaultName").value.trim();
+        const defaultContact = document
+          .getElementById("defaultContact")
+          .value.trim();
+
+        if (!defaultName || defaultName.length < 2) {
+          Swal.fire({
+            icon: "warning",
+            title: tAccount("failedTitle"),
+            text: tAccount("defaultNamePlaceholder"),
+            confirmButtonColor: "#0ea5e9",
+          });
+          return;
+        }
+
+        if (!defaultContact || defaultContact.length < 5) {
+          Swal.fire({
+            icon: "warning",
+            title: tAccount("failedTitle"),
+            text: tAccount("defaultContactPlaceholder"),
+            confirmButtonColor: "#0ea5e9",
+          });
+          return;
+        }
+
+        try {
+          const res = await fetch("/api/user/default-order", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-user-csrf-token": getCookie("user_csrf"),
+            },
+            body: JSON.stringify({ defaultName, defaultContact }),
+          });
+
+          const data = await res.json();
+
+          if (!res.ok) {
+            Swal.fire(
+              tAccount("failedTitle"),
+              data.message || tAccount("defaultOrderFailed"),
+              "error",
+            );
+            return;
+          }
+
+          const contactStatus = document.getElementById("contactStatus");
+          if (contactStatus) {
+            contactStatus.innerText = defaultContact;
+            contactStatus.removeAttribute("data-account-i18n");
+          }
+
+          if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(defaultContact)) {
+            const verifyEmail = document.getElementById("verifyEmail");
+            if (verifyEmail) verifyEmail.value = defaultContact.toLowerCase();
+            updateAccountEmailStatus({ emailVerified: false });
+          }
+
+          Swal.fire({
+            icon: "success",
+            title: tAccount("successTitle"),
+            text: data.message || tAccount("defaultOrderSaved"),
+            confirmButtonColor: "#0ea5e9",
+          });
+        } catch (err) {
+          Swal.fire(tAccount("errorTitle"), tAccount("serverError"), "error");
+        }
       }
     </script>
   </body>

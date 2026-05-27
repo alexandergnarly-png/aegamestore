@@ -164,6 +164,20 @@ db.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS badge_override TEXT`);
 db.query(
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS badge_override_expires_at TEXT`,
 );
+db.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS default_name TEXT`);
+db.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS default_contact TEXT`);
+db.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS email TEXT`);
+db.query(
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified INTEGER DEFAULT 0`,
+);
+db.query(
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verification_token_hash TEXT`,
+);
+db.query(
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verification_expires_at TEXT`,
+);
+db.query(`CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)`);
+
 db.query(`CREATE INDEX IF NOT EXISTS idx_orders_id ON orders(id)`);
 db.query(
   `CREATE INDEX IF NOT EXISTS idx_keys_product_used ON keys(product_id, used)`,
@@ -366,6 +380,22 @@ const voucherPreviewLimiter = rateLimit({
   },
 });
 
+const userProfileLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 20,
+  message: {
+    message: "Terlalu banyak update data akun, coba lagi nanti",
+  },
+});
+
+const emailVerificationLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: {
+    message: "Terlalu banyak request verifikasi email, coba lagi nanti",
+  },
+});
+
 async function isAdminLoggedIn(req) {
   const sessionToken = String(req.cookies.admin_auth || "").trim();
 
@@ -421,6 +451,97 @@ function normalizeVoucherCode(code) {
   return String(code || "")
     .trim()
     .toUpperCase();
+}
+
+function normalizeEmail(email) {
+  return String(email || "")
+    .trim()
+    .toLowerCase();
+}
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || "").trim());
+}
+
+function isValidOrderContact(contact) {
+  const cleanContact = String(contact || "").trim();
+
+  if (cleanContact.length < 5 || cleanContact.length > 80) {
+    return false;
+  }
+
+  if (isValidEmail(cleanContact)) {
+    return true;
+  }
+
+  if (/^\+?[0-9][0-9\s().-]{6,24}$/.test(cleanContact)) {
+    return true;
+  }
+
+  if (/^@?[a-zA-Z0-9_]{5,32}$/.test(cleanContact)) {
+    return true;
+  }
+
+  return false;
+}
+
+function hashToken(token) {
+  return crypto.createHash("sha256").update(String(token)).digest("hex");
+}
+
+function getAppBaseUrl(req) {
+  const configured = String(process.env.APP_BASE_URL || "").trim();
+  if (configured) return configured.replace(/\/$/, "");
+
+  const proto = req.headers["x-forwarded-proto"] || req.protocol || "http";
+  const host = req.headers["x-forwarded-host"] || req.headers.host;
+  return `${proto}://${host}`.replace(/\/$/, "");
+}
+
+async function sendVerificationEmail({ to, username, verificationUrl }) {
+  const resendApiKey = String(process.env.RESEND_API_KEY || "").trim();
+  const fromEmail = String(
+    process.env.RESEND_FROM_EMAIL || "AE Game Store <onboarding@resend.dev>",
+  ).trim();
+
+  if (!resendApiKey) {
+    console.warn(
+      "RESEND_API_KEY belum diset. Link verifikasi:",
+      verificationUrl,
+    );
+    return { sent: false, provider: "dev-log" };
+  }
+
+  const subject = "Verify your AE Game Store email";
+  const html = `
+    <div style="font-family:Arial,sans-serif;line-height:1.6;color:#0f172a">
+      <h2>Verify your AE Game Store email</h2>
+      <p>Halo ${String(username || "Buyer")}, klik tombol di bawah untuk verifikasi email kamu.</p>
+      <p><a href="${verificationUrl}" style="display:inline-block;background:#0ea5e9;color:white;padding:12px 18px;border-radius:12px;text-decoration:none;font-weight:700">Verify Email</a></p>
+      <p>Link ini berlaku 30 menit. Kalau kamu tidak meminta verifikasi, abaikan email ini.</p>
+    </div>
+  `;
+
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${resendApiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: fromEmail,
+      to,
+      subject,
+      html,
+    }),
+  });
+
+  if (!response.ok) {
+    const body = await response.text().catch(() => "");
+    throw new Error(`Resend gagal kirim email: ${response.status} ${body}`);
+  }
+
+  return { sent: true, provider: "resend" };
 }
 
 function verifyMidtransSignature(notification) {
@@ -1894,14 +2015,39 @@ app.post("/create-order", orderLimiter, async (req, res) => {
       redirectUrl: "/auth",
     });
   }
-  const { product_id, name, voucher_code } = req.body;
+  const { product_id, name, contact, voucher_code } = req.body;
 
-  const cleanName = String(name || "").trim();
-  const cleanContact = "Telegram Admin";
   const cleanProductId = Number(product_id);
+  let cleanName = String(name || "").trim();
+  let cleanContact = String(contact || "").trim();
 
   if (!Number.isInteger(cleanProductId) || cleanProductId <= 0) {
     return res.status(400).json({ message: "Produk tidak valid" });
+  }
+
+  try {
+    const defaultResult = await query(
+      `SELECT username, default_name, default_contact, email
+       FROM users
+       WHERE id = $1
+       LIMIT 1`,
+      [loggedInUser.id],
+    );
+    const defaultUser = defaultResult.rows[0] || {};
+
+    if (!cleanName) {
+      cleanName = String(
+        defaultUser.default_name || defaultUser.username || "",
+      ).trim();
+    }
+
+    if (!cleanContact) {
+      cleanContact = String(
+        defaultUser.default_contact || defaultUser.email || "Telegram Admin",
+      ).trim();
+    }
+  } catch (err) {
+    console.error("WARN LOAD DEFAULT ORDER DATA:", err.message);
   }
 
   if (!cleanName || cleanName.length < 2 || cleanName.length > 60) {
@@ -1913,6 +2059,13 @@ app.post("/create-order", orderLimiter, async (req, res) => {
     return res
       .status(400)
       .json({ message: "Nama mengandung karakter yang tidak diizinkan" });
+  }
+
+  if (!isValidOrderContact(cleanContact)) {
+    return res.status(400).json({
+      message:
+        "Kontak harus berupa email, nomor WhatsApp, atau username Telegram yang valid",
+    });
   }
 
   try {
@@ -3938,6 +4091,247 @@ app.post("/user-logout", requireUserCsrf, (req, res) => {
 });
 // ----------------------------------
 
+app.post(
+  "/api/user/default-order",
+  userProfileLimiter,
+  requireUserCsrf,
+  async (req, res) => {
+    const loggedInUser = getLoggedInUserFromRequest(req);
+
+    if (!loggedInUser) {
+      return res.status(401).json({ message: "Kamu harus login dulu" });
+    }
+
+    const defaultName = String(req.body.defaultName || "").trim();
+    const defaultContact = String(req.body.defaultContact || "").trim();
+
+    if (!defaultName || defaultName.length < 2 || defaultName.length > 60) {
+      return res.status(400).json({
+        message: "Nama default harus 2 sampai 60 karakter",
+      });
+    }
+
+    const safeNameRegex = /^[a-zA-Z0-9 .,_'’-]+$/;
+    if (!safeNameRegex.test(defaultName)) {
+      return res.status(400).json({
+        message: "Nama default mengandung karakter yang tidak diizinkan",
+      });
+    }
+
+    if (!isValidOrderContact(defaultContact)) {
+      return res.status(400).json({
+        message:
+          "Kontak default harus berupa email, nomor WhatsApp, atau username Telegram yang valid",
+      });
+    }
+
+    const emailFromContact = isValidEmail(defaultContact)
+      ? normalizeEmail(defaultContact)
+      : null;
+
+    try {
+      await query(
+        `UPDATE users
+         SET default_name = $1,
+             default_contact = $2,
+             email = COALESCE($3, email),
+             email_verified = CASE
+               WHEN $3 IS NOT NULL AND COALESCE(email, '') <> $3 THEN 0
+               ELSE email_verified
+             END
+         WHERE id = $4`,
+        [defaultName, defaultContact, emailFromContact, loggedInUser.id],
+      );
+
+      return res.json({
+        message: "Data order default berhasil disimpan",
+        defaultOrder: {
+          name: defaultName,
+          contact: defaultContact,
+        },
+        email: emailFromContact || "",
+        emailVerified: false,
+      });
+    } catch (err) {
+      console.error("ERROR SAVE DEFAULT ORDER DATA:", err);
+      return res.status(500).json({
+        message: "Gagal menyimpan data order default",
+      });
+    }
+  },
+);
+
+app.post(
+  "/api/user/verify-email/send",
+  emailVerificationLimiter,
+  requireUserCsrf,
+  async (req, res) => {
+    const loggedInUser = getLoggedInUserFromRequest(req);
+
+    if (!loggedInUser) {
+      return res.status(401).json({ message: "Kamu harus login dulu" });
+    }
+
+    const requestedEmail = normalizeEmail(req.body.email);
+
+    try {
+      const userResult = await query(
+        `SELECT id, username, email, default_contact, email_verified
+         FROM users
+         WHERE id = $1
+         LIMIT 1`,
+        [loggedInUser.id],
+      );
+
+      const user = userResult.rows[0];
+
+      if (!user) {
+        return res.status(404).json({ message: "User tidak ditemukan" });
+      }
+
+      const fallbackEmail = isValidEmail(user.email)
+        ? normalizeEmail(user.email)
+        : isValidEmail(user.default_contact)
+          ? normalizeEmail(user.default_contact)
+          : "";
+
+      const targetEmail = requestedEmail || fallbackEmail;
+
+      if (!isValidEmail(targetEmail)) {
+        return res.status(400).json({
+          message: "Isi email yang valid dulu di Data Default",
+        });
+      }
+
+      if (
+        normalizeEmail(user.email) === targetEmail &&
+        Number(user.email_verified || 0) === 1
+      ) {
+        return res.json({
+          message: "Email sudah terverifikasi",
+          email: targetEmail,
+          alreadyVerified: true,
+        });
+      }
+
+      const token = crypto.randomBytes(32).toString("hex");
+      const tokenHash = hashToken(token);
+      const expiresAt = new Date(Date.now() + 1000 * 60 * 30).toISOString();
+      const verificationUrl = `${getAppBaseUrl(req)}/verify-email?token=${token}`;
+
+      await query(
+        `UPDATE users
+         SET email = $1,
+             email_verified = 0,
+             email_verification_token_hash = $2,
+             email_verification_expires_at = $3
+         WHERE id = $4`,
+        [targetEmail, tokenHash, expiresAt, loggedInUser.id],
+      );
+
+      const sendResult = await sendVerificationEmail({
+        to: targetEmail,
+        username: user.username,
+        verificationUrl,
+      });
+
+      const responsePayload = {
+        message: sendResult.sent
+          ? "Link verifikasi sudah dikirim ke email kamu"
+          : "Link verifikasi dibuat. RESEND_API_KEY belum diset, jadi link tampil untuk mode testing.",
+        email: targetEmail,
+        sent: sendResult.sent,
+        provider: sendResult.provider,
+      };
+
+      if (!sendResult.sent && process.env.NODE_ENV !== "production") {
+        responsePayload.verificationUrl = verificationUrl;
+      }
+
+      return res.json(responsePayload);
+    } catch (err) {
+      console.error("ERROR SEND EMAIL VERIFICATION:", err);
+      return res.status(500).json({
+        message: "Gagal mengirim email verifikasi",
+      });
+    }
+  },
+);
+
+app.get("/verify-email", async (req, res) => {
+  const token = String(req.query.token || "").trim();
+
+  if (!/^[a-f0-9]{64}$/i.test(token)) {
+    return res.status(400).send("Link verifikasi tidak valid");
+  }
+
+  const tokenHash = hashToken(token);
+
+  try {
+    const result = await query(
+      `SELECT id, email_verification_expires_at
+       FROM users
+       WHERE email_verification_token_hash = $1
+       LIMIT 1`,
+      [tokenHash],
+    );
+
+    const user = result.rows[0];
+
+    if (!user) {
+      return res
+        .status(400)
+        .send("Link verifikasi tidak valid atau sudah dipakai");
+    }
+
+    if (
+      !user.email_verification_expires_at ||
+      new Date(user.email_verification_expires_at) < new Date()
+    ) {
+      return res
+        .status(400)
+        .send(
+          "Link verifikasi sudah expired. Silakan request ulang dari halaman akun.",
+        );
+    }
+
+    await query(
+      `UPDATE users
+       SET email_verified = 1,
+           email_verification_token_hash = NULL,
+           email_verification_expires_at = NULL
+       WHERE id = $1`,
+      [user.id],
+    );
+
+    return res.send(`<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Email Verified - AE Game Store</title>
+  <style>
+    body{font-family:Arial,sans-serif;background:#f0f9ff;color:#0c4a6e;display:grid;place-items:center;min-height:100vh;margin:0;padding:24px}
+    .card{max-width:460px;background:white;border:1px solid #bae6fd;border-radius:24px;padding:28px;text-align:center;box-shadow:0 14px 32px rgba(14,165,233,.14)}
+    a{display:inline-block;margin-top:14px;background:#0ea5e9;color:white;padding:12px 18px;border-radius:999px;text-decoration:none;font-weight:800}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>✅ Email berhasil diverifikasi</h1>
+    <p>Email akun AE Game Store kamu sekarang sudah aktif dan terverifikasi.</p>
+    <a href="/account">Kembali ke Account</a>
+  </div>
+</body>
+</html>`);
+  } catch (err) {
+    console.error("ERROR VERIFY EMAIL:", err);
+    return res.status(500).send("Gagal verifikasi email");
+  }
+});
+
+// ----------------------------------
+
 // --- FITUR BARU: Cek User yang sedang Login ---
 app.get("/api/user/me", async (req, res) => {
   const token = req.cookies.user_auth;
@@ -3949,7 +4343,8 @@ app.get("/api/user/me", async (req, res) => {
 
     const userResult = await query(
       `
-      SELECT id, username, badge_override, badge_override_expires_at
+      SELECT id, username, default_name, default_contact, email, email_verified,
+             email_verification_expires_at, badge_override, badge_override_expires_at
       FROM users
       WHERE id = $1
       LIMIT 1
@@ -4008,6 +4403,17 @@ app.get("/api/user/me", async (req, res) => {
       loggedIn: true,
       id: user.id,
       username: user.username,
+      contact: user.default_contact || user.email || "",
+      defaultOrder: {
+        name: user.default_name || "",
+        contact: user.default_contact || "",
+      },
+      email: user.email || "",
+      emailVerified: Number(user.email_verified || 0) === 1,
+      emailVerificationPending: Boolean(
+        user.email_verification_expires_at &&
+        new Date(user.email_verification_expires_at) > new Date(),
+      ),
       badge,
       stats: {
         paid_order_count: paidOrderCount,
