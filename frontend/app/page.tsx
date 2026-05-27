@@ -1,18 +1,13 @@
-import { BrandOverview } from "@/components/BrandOverview";
 import { CatalogSection } from "@/components/CatalogSection";
-import { CTASection } from "@/components/CTASection";
 import { FAQSection } from "@/components/FAQSection";
-import { FeaturedDeals } from "@/components/FeaturedDeals";
 import { FloatingActions } from "@/components/FloatingActions";
 import { Footer } from "@/components/Footer";
-import { GameHighlights } from "@/components/GameHighlights";
 import { Hero } from "@/components/Hero";
 import { HowItWorks } from "@/components/HowItWorks";
 import { Navbar } from "@/components/Navbar";
 import { StatsBar } from "@/components/StatsBar";
 import { StoreNotice } from "@/components/StoreNotice";
 import { SupportCards } from "@/components/SupportCards";
-import { TrustStrip } from "@/components/TrustStrip";
 import { apiFetch } from "@/lib/api";
 import { getUniqueGames } from "@/lib/products";
 import { type Product } from "@/lib/types";
@@ -40,21 +35,11 @@ export default async function HomePage() {
 
       <StatsBar products={products} />
 
-      <GameHighlights products={products} />
-
-      <BrandOverview products={products} />
-
-      <FeaturedDeals products={products} />
-
-      <TrustStrip />
+      <CatalogSection products={products} />
 
       <HowItWorks />
 
-      <CatalogSection products={products} />
-
       <SupportCards />
-
-      <CTASection />
 
       <FAQSection />
 

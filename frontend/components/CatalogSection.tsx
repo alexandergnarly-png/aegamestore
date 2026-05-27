@@ -107,11 +107,11 @@ export function CatalogSection({ products }: { products: Product[] }) {
       <div className="mx-auto max-w-6xl">
         <SectionHeader
           eyebrow="Catalog"
-          title="Available Games"
-          description="One card per game. Click View Options to choose brand and duration."
+          title="Choose your game"
+          description="One game card only. Open options to choose brand, duration, and price."
           action={
             <p className="text-sm font-semibold text-slate-500">
-              {filteredGroups.length} dari {groups.length} game tampil.
+              {filteredGroups.length} / {groups.length} games
             </p>
           }
         />
@@ -121,7 +121,7 @@ export function CatalogSection({ products }: { products: Product[] }) {
             <input
               value={search}
               onChange={(event) => handleSearchChange(event.target.value)}
-              placeholder="Search game, brand, duration..."
+              placeholder="Search game, brand, or duration..."
               className="h-12 rounded-2xl border border-sky-100 bg-sky-50 px-4 text-sm font-semibold text-sky-950 outline-none transition focus:border-sky-300 focus:bg-white"
             />
 
@@ -144,9 +144,9 @@ export function CatalogSection({ products }: { products: Product[] }) {
               className="h-12 rounded-2xl border border-sky-100 bg-sky-50 px-4 text-sm font-bold text-sky-950 outline-none transition focus:border-sky-300 focus:bg-white"
             >
               <option value="recommended">Recommended</option>
-              <option value="price-low">Lowest price</option>
+              <option value="price-low">Cheapest first</option>
               <option value="price-high">Highest price</option>
-              <option value="name">Name A-Z</option>
+              <option value="name">Game A-Z</option>
             </select>
 
             <button
@@ -211,15 +211,15 @@ export function CatalogSection({ products }: { products: Product[] }) {
         ) : (
           <EmptyState
             icon="🎮"
-            title="Produk tidak ditemukan"
-            description="Coba ganti keyword, pilih game lain, atau klik tombol reset."
+            title="No game found"
+            description="Try another keyword, choose all games, or reset the filter."
             action={
               <button
                 type="button"
                 onClick={clearFilters}
                 className="rounded-full bg-sky-500 px-5 py-3 text-sm font-black text-white hover:bg-sky-600"
               >
-                Reset Filter
+                Reset Search
               </button>
             }
           />

@@ -20,7 +20,7 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section className="px-4 pb-10">
+    <section id="how-it-works" className="px-4 pb-10">
       <div className="mx-auto max-w-6xl">
         <SectionHeader
           eyebrow="How It Works"
