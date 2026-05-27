@@ -2015,11 +2015,11 @@ app.post("/create-order", orderLimiter, async (req, res) => {
       redirectUrl: "/auth",
     });
   }
-  const { product_id, name, contact, voucher_code } = req.body;
+  const { product_id, name, voucher_code } = req.body;
 
   const cleanProductId = Number(product_id);
   let cleanName = String(name || "").trim();
-  let cleanContact = String(contact || "").trim();
+  let cleanContact = "";
 
   if (!Number.isInteger(cleanProductId) || cleanProductId <= 0) {
     return res.status(400).json({ message: "Produk tidak valid" });
@@ -2041,11 +2041,9 @@ app.post("/create-order", orderLimiter, async (req, res) => {
       ).trim();
     }
 
-    if (!cleanContact) {
-      cleanContact = String(
-        defaultUser.default_contact || defaultUser.email || "Telegram Admin",
-      ).trim();
-    }
+    cleanContact = String(
+      defaultUser.email || defaultUser.default_contact || "",
+    ).trim();
   } catch (err) {
     console.error("WARN LOAD DEFAULT ORDER DATA:", err.message);
   }
@@ -2059,13 +2057,6 @@ app.post("/create-order", orderLimiter, async (req, res) => {
     return res
       .status(400)
       .json({ message: "Nama mengandung karakter yang tidak diizinkan" });
-  }
-
-  if (!isValidOrderContact(cleanContact)) {
-    return res.status(400).json({
-      message:
-        "Kontak harus berupa email, nomor WhatsApp, atau username Telegram yang valid",
-    });
   }
 
   try {
@@ -4118,16 +4109,17 @@ app.post(
       });
     }
 
-    if (!isValidOrderContact(defaultContact)) {
+    if (defaultContact && !isValidOrderContact(defaultContact)) {
       return res.status(400).json({
         message:
           "Kontak default harus berupa email, nomor WhatsApp, atau username Telegram yang valid",
       });
     }
 
-    const emailFromContact = isValidEmail(defaultContact)
-      ? normalizeEmail(defaultContact)
-      : null;
+    const emailFromContact =
+      defaultContact && isValidEmail(defaultContact)
+        ? normalizeEmail(defaultContact)
+        : null;
 
     try {
       await query(

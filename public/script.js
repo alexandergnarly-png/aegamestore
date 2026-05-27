@@ -1151,7 +1151,6 @@ async function openOrderModal(game) {
   if (voucherPanel) voucherPanel.open = true;
 
   const nameInput = document.getElementById("name");
-  const contactInput = document.getElementById("contact");
 
   resetVoucherPreview();
 
@@ -1177,11 +1176,6 @@ async function openOrderModal(game) {
     if (nameInput) {
       nameInput.value = defaultOrder.name || data.username || "";
       nameInput.readOnly = false;
-    }
-
-    if (contactInput && !contactInput.value.trim()) {
-      contactInput.value =
-        defaultOrder.contact || data.contact || data.email || "";
     }
   } catch (err) {
     Swal.fire({
@@ -1501,7 +1495,6 @@ productSelect.addEventListener("change", updatePreview);
 
 async function buy() {
   const name = document.getElementById("name").value.trim();
-  const contact = document.getElementById("contact")?.value.trim() || "";
 
   const selectedProduct = allProducts.find(
     (item) => String(item.id) === String(productSelect.value),
@@ -1512,16 +1505,6 @@ async function buy() {
       icon: "warning",
       title: "Oops...",
       text: "Nama player belum terisi.",
-      confirmButtonColor: "#0ea5e9",
-    });
-    return;
-  }
-
-  if (!contact) {
-    Swal.fire({
-      icon: "warning",
-      title: "Oops...",
-      text: "Kontak order belum terisi.",
       confirmButtonColor: "#0ea5e9",
     });
     return;
@@ -1564,7 +1547,6 @@ async function buy() {
       body: JSON.stringify({
         product_id: selectedProduct.id,
         name,
-        contact,
         voucher_code:
           appliedVoucherCode ||
           document.getElementById("voucherCodeInput")?.value ||
@@ -3399,7 +3381,6 @@ document.addEventListener("DOMContentLoaded", () => {
   function savePendingCart() {
     const productSel = document.getElementById("product");
     const nameInput = document.getElementById("name");
-    const contactInput = document.getElementById("contact");
     if (!productSel || !productSel.value) return;
 
     const product = Array.isArray(allProducts)
@@ -3414,7 +3395,6 @@ document.addEventListener("DOMContentLoaded", () => {
       duration: product.duration,
       price: product.price,
       name: nameInput ? nameInput.value.trim() : "",
-      contact: contactInput ? contactInput.value.trim() : "",
       ts: Date.now(),
     };
     try {
@@ -3493,9 +3473,7 @@ document.addEventListener("DOMContentLoaded", () => {
               productSel.dispatchEvent(new Event("change"));
             }
             const nameInput = document.getElementById("name");
-            const contactInput = document.getElementById("contact");
             if (nameInput && cart.name) nameInput.value = cart.name;
-            if (contactInput && cart.contact) contactInput.value = cart.contact;
             if (typeof updateOrderStepFromForm === "function")
               updateOrderStepFromForm();
           }, 80);
