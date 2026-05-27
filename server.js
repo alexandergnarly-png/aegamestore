@@ -226,6 +226,29 @@ db.query(
 db.query(
   `ALTER TABLE vouchers ADD COLUMN IF NOT EXISTS target_user_id INTEGER`,
 );
+db.query(`ALTER TABLE vouchers ADD COLUMN IF NOT EXISTS product_id INTEGER`);
+db.query(
+  `CREATE INDEX IF NOT EXISTS idx_vouchers_product_id ON vouchers(product_id)`,
+);
+db.query(
+  `
+  CREATE TABLE IF NOT EXISTS vip_discounts (
+    id SERIAL PRIMARY KEY,
+    product_id INTEGER NOT NULL UNIQUE,
+    discount_amount INTEGER NOT NULL DEFAULT 0,
+    active INTEGER DEFAULT 1,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  )
+`,
+  (err) => {
+    if (err) {
+      console.error("CREATE TABLE vip_discounts ERROR:", err);
+    } else {
+      console.log("Table vip_discounts ready");
+    }
+  },
+);
 db.query(
   `CREATE INDEX IF NOT EXISTS idx_vouchers_target_user_id ON vouchers(target_user_id)`,
 );
@@ -474,6 +497,168 @@ function getBuyerBadge({
     description: "Buyer baru AE Game Store",
   };
 }
+async function getBuyerStats(userId) {
+  const cleanUserId = Number(userId);
+
+  if (!Number.isInteger(cleanUserId) || cleanUserId <= 0) {
+    return {
+      paidOrderCount: 0,
+      totalSpend: 0,
+      hasReview: false,
+    };
+  }
+
+  const result = await query(
+    `
+    SELECT
+      COUNT(o.id) FILTER (WHERE o.payment_status = 'paid')::int AS paid_order_count,
+      COALESCE(SUM(o.price) FILTER (WHERE o.payment_status = 'paid'), 0)::int AS total_spend,
+      CASE WHEN MAX(r.id) IS NULL THEN false ELSE true END AS has_review
+    FROM users u
+    LEFT JOIN orders o ON o.user_id = u.id
+    LEFT JOIN reviews r ON r.user_id = u.id AND r.active = 1
+    WHERE u.id = $1
+    GROUP BY u.id
+    `,
+    [cleanUserId],
+  );
+
+  const row = result.rows[0];
+
+  return {
+    paidOrderCount: Number(row?.paid_order_count || 0),
+    totalSpend: Number(row?.total_spend || 0),
+    hasReview: Boolean(row?.has_review),
+  };
+}
+
+async function isVipBuyer(userId) {
+  const stats = await getBuyerStats(userId);
+
+  return (
+    Number(stats.paidOrderCount || 0) >= 10 ||
+    Number(stats.totalSpend || 0) >= 500000
+  );
+}
+
+async function getVipDiscountForProduct({ userId, productId, productPrice }) {
+  const cleanProductId = Number(productId);
+  const price = Number(productPrice || 0);
+
+  if (!Number.isInteger(cleanProductId) || cleanProductId <= 0 || price <= 0) {
+    return {
+      valid: false,
+      code: "",
+      discountAmount: 0,
+      message: "",
+    };
+  }
+
+  const vip = await isVipBuyer(userId);
+
+  if (!vip) {
+    return {
+      valid: false,
+      code: "",
+      discountAmount: 0,
+      message: "",
+    };
+  }
+
+  const result = await query(
+    `
+    SELECT *
+    FROM vip_discounts
+    WHERE product_id = $1
+      AND active = 1
+    LIMIT 1
+    `,
+    [cleanProductId],
+  );
+
+  const rule = result.rows[0];
+
+  if (!rule) {
+    return {
+      valid: false,
+      code: "",
+      discountAmount: 0,
+      message: "",
+    };
+  }
+
+  const rawDiscount = Number(rule.discount_amount || 0);
+  const maxDiscount = Math.max(price - 1000, 0);
+  const discountAmount = Math.min(rawDiscount, maxDiscount);
+
+  if (discountAmount <= 0) {
+    return {
+      valid: false,
+      code: "",
+      discountAmount: 0,
+      message: "",
+    };
+  }
+
+  return {
+    valid: true,
+    code: "VIP_DISCOUNT",
+    discountAmount,
+    message: "Diskon VIP berhasil digunakan",
+  };
+}
+async function getBestCheckoutDiscount({
+  userId,
+  productId,
+  productRow,
+  voucherCode,
+}) {
+  const originalPrice = Number(productRow.price || 0);
+
+  const voucherCheck = await getVoucherDiscount({
+    productId,
+    gameName: productRow.game,
+    brandName: productRow.brand,
+    durationName: productRow.duration,
+    voucherCode,
+    productPrice: originalPrice,
+    userId,
+  });
+
+  if (!voucherCheck.valid) {
+    return {
+      valid: false,
+      message: voucherCheck.message,
+    };
+  }
+
+  const vipCheck = await getVipDiscountForProduct({
+    userId,
+    productId,
+    productPrice: originalPrice,
+  });
+
+  const voucherDiscount = Number(voucherCheck.discountAmount || 0);
+  const vipDiscount = Number(vipCheck.discountAmount || 0);
+
+  if (vipDiscount > voucherDiscount) {
+    return {
+      valid: true,
+      code: vipCheck.code,
+      discountAmount: vipDiscount,
+      message: vipCheck.message,
+      discountType: "vip",
+    };
+  }
+
+  return {
+    valid: true,
+    code: voucherCheck.code || "",
+    discountAmount: voucherDiscount,
+    message: voucherCheck.message,
+    discountType: voucherDiscount > 0 ? "voucher" : "",
+  };
+}
 
 function getAdminBadge() {
   const role = String(process.env.ADMIN_BADGE || "owner")
@@ -507,6 +692,7 @@ function getAdminBadge() {
 }
 
 async function getVoucherDiscount({
+  productId,
   gameName,
   brandName,
   durationName,
@@ -547,6 +733,16 @@ async function getVoucherDiscount({
     return {
       valid: false,
       message: "Kode voucher tidak ditemukan atau tidak aktif",
+    };
+  }
+
+  const currentProductId = Number(productId || 0);
+  const targetProductId = Number(voucher.product_id || 0);
+
+  if (targetProductId && targetProductId !== currentProductId) {
+    return {
+      valid: false,
+      message: "Voucher ini tidak berlaku untuk produk ini",
     };
   }
 
@@ -754,6 +950,7 @@ app.use((req, res, next) => {
     req.path.startsWith("/users") ||
     req.path.startsWith("/keys") ||
     req.path.startsWith("/vouchers") ||
+    req.path.startsWith("/vip-discounts") ||
     req.path.startsWith("/products") ||
     req.path.startsWith("/security-audit") ||
     req.path.startsWith("/api/user") ||
@@ -977,6 +1174,7 @@ app.get("/api/admin/me", requireAdminAuth, async (req, res) => {
 app.post("/vouchers", requireAdminAuth, requireAdminCsrf, async (req, res) => {
   const {
     code,
+    product_id,
     game_name,
     brand_name,
     duration_name,
@@ -987,9 +1185,12 @@ app.post("/vouchers", requireAdminAuth, requireAdminCsrf, async (req, res) => {
   } = req.body;
 
   const cleanCode = normalizeVoucherCode(code);
-  const cleanGameName = String(game_name || "").trim();
-  const cleanBrandName = String(brand_name || "").trim();
-  const cleanDurationName = String(duration_name || "").trim();
+  const cleanProductId = Number(product_id || 0);
+
+  let cleanGameName = String(game_name || "").trim();
+  let cleanBrandName = String(brand_name || "").trim();
+  let cleanDurationName = String(duration_name || "").trim();
+
   const discountAmount = Number(discount_amount);
   const expiresAt = expires_at ? String(expires_at).trim() : null;
   const cleanVisibility =
@@ -1000,6 +1201,25 @@ app.post("/vouchers", requireAdminAuth, requireAdminCsrf, async (req, res) => {
       : "public";
 
   let targetUserId = null;
+
+  if (Number.isInteger(cleanProductId) && cleanProductId > 0) {
+    const productResult = await query(
+      "SELECT * FROM products WHERE id = $1 LIMIT 1",
+      [cleanProductId],
+    );
+
+    const product = productResult.rows[0];
+
+    if (!product) {
+      return res.status(400).json({
+        message: "Produk voucher tidak ditemukan",
+      });
+    }
+
+    cleanGameName = product.game;
+    cleanBrandName = product.brand;
+    cleanDurationName = product.duration;
+  }
   if (!/^[A-Z0-9_-]{3,30}$/.test(cleanCode)) {
     return res.status(400).json({
       message:
@@ -1022,9 +1242,9 @@ app.post("/vouchers", requireAdminAuth, requireAdminCsrf, async (req, res) => {
   try {
     await query(
       `INSERT INTO vouchers
-  (code, game_name, brand_name, duration_name, discount_amount, active, expires_at, created_at, visibility, target_user_id)
+  (code, product_id, game_name, brand_name, duration_name, discount_amount, active, expires_at, created_at, visibility, target_user_id)
  VALUES
-  ($1, $2, $3, $4, $5, 1, $6, $7, $8, $9)
+  ($1, $2, $3, $4, $5, $6, 1, $7, $8, $9, $10)
  ON CONFLICT (code)
  DO UPDATE SET
   game_name = EXCLUDED.game_name,
@@ -1034,9 +1254,11 @@ app.post("/vouchers", requireAdminAuth, requireAdminCsrf, async (req, res) => {
   active = 1,
   expires_at = EXCLUDED.expires_at,
   visibility = EXCLUDED.visibility,
-  target_user_id = EXCLUDED.target_user_id`,
+  target_user_id = EXCLUDED.target_user_id,
+  product_id = EXCLUDED.product_id`,
       [
         cleanCode,
+        cleanProductId > 0 ? cleanProductId : null,
         cleanGameName,
         cleanBrandName || null,
         cleanDurationName || null,
@@ -1067,6 +1289,7 @@ app.put(
     const voucherId = Number(req.params.id);
     const {
       code,
+      product_id,
       game_name,
       brand_name,
       duration_name,
@@ -1077,9 +1300,12 @@ app.put(
     } = req.body;
 
     const cleanCode = normalizeVoucherCode(code);
-    const cleanGameName = String(game_name || "").trim();
-    const cleanBrandName = String(brand_name || "").trim();
-    const cleanDurationName = String(duration_name || "").trim();
+    const cleanProductId = Number(product_id || 0);
+
+    let cleanGameName = String(game_name || "").trim();
+    let cleanBrandName = String(brand_name || "").trim();
+    let cleanDurationName = String(duration_name || "").trim();
+
     const discountAmount = Number(discount_amount);
     const expiresAt = expires_at ? String(expires_at).trim() : null;
     const cleanVisibility =
@@ -1088,10 +1314,30 @@ app.put(
         .toLowerCase() === "private"
         ? "private"
         : "public";
+
     let targetUserId = null;
 
     if (!Number.isInteger(voucherId) || voucherId <= 0) {
       return res.status(400).json({ message: "ID voucher tidak valid" });
+    }
+
+    if (Number.isInteger(cleanProductId) && cleanProductId > 0) {
+      const productResult = await query(
+        "SELECT * FROM products WHERE id = $1 LIMIT 1",
+        [cleanProductId],
+      );
+
+      const product = productResult.rows[0];
+
+      if (!product) {
+        return res.status(400).json({
+          message: "Produk voucher tidak ditemukan",
+        });
+      }
+
+      cleanGameName = product.game;
+      cleanBrandName = product.brand;
+      cleanDurationName = product.duration;
     }
 
     if (!/^[A-Z0-9_-]{3,30}$/.test(cleanCode)) {
@@ -1131,18 +1377,20 @@ app.put(
 
       const result = await query(
         `UPDATE vouchers
-   SET code = $1,
-       game_name = $2,
-       brand_name = $3,
-       duration_name = $4,
-       discount_amount = $5,
-       expires_at = $6,
-       visibility = $7,
-       target_user_id = $8
-   WHERE id = $9
-   RETURNING id`,
+         SET code = $1,
+             product_id = $2,
+             game_name = $3,
+             brand_name = $4,
+             duration_name = $5,
+             discount_amount = $6,
+             expires_at = $7,
+             visibility = $8,
+             target_user_id = $9
+         WHERE id = $10
+         RETURNING id`,
         [
           cleanCode,
+          cleanProductId > 0 ? cleanProductId : null,
           cleanGameName,
           cleanBrandName || null,
           cleanDurationName || null,
@@ -1259,6 +1507,165 @@ app.delete(
   },
 );
 
+app.get("/vip-discounts", requireAdminAuth, async (req, res) => {
+  try {
+    const result = await query(
+      `
+      SELECT
+        vd.*,
+        p.game,
+        p.brand,
+        p.duration,
+        p.price
+      FROM vip_discounts vd
+      LEFT JOIN products p ON p.id = vd.product_id
+      ORDER BY vd.created_at DESC, vd.id DESC
+      `,
+    );
+
+    return res.json(result.rows);
+  } catch (err) {
+    console.error("ERROR GET VIP DISCOUNTS:", err);
+    return res.status(500).json({
+      message: "Gagal mengambil daftar diskon VIP",
+    });
+  }
+});
+
+app.post(
+  "/vip-discounts",
+  requireAdminAuth,
+  requireAdminCsrf,
+  async (req, res) => {
+    const productId = Number(req.body.product_id);
+    const discountAmount = Number(req.body.discount_amount);
+
+    if (!Number.isInteger(productId) || productId <= 0) {
+      return res.status(400).json({ message: "Produk tidak valid" });
+    }
+
+    if (!Number.isInteger(discountAmount) || discountAmount <= 0) {
+      return res.status(400).json({ message: "Diskon VIP tidak valid" });
+    }
+
+    try {
+      const productResult = await query(
+        "SELECT id, price FROM products WHERE id = $1 LIMIT 1",
+        [productId],
+      );
+
+      const product = productResult.rows[0];
+
+      if (!product) {
+        return res.status(404).json({ message: "Produk tidak ditemukan" });
+      }
+
+      if (discountAmount >= Number(product.price)) {
+        return res.status(400).json({
+          message:
+            "Diskon VIP tidak boleh lebih besar atau sama dengan harga produk",
+        });
+      }
+
+      await query(
+        `
+      INSERT INTO vip_discounts
+        (product_id, discount_amount, active, created_at, updated_at)
+      VALUES
+        ($1, $2, 1, $3, $3)
+      ON CONFLICT (product_id)
+      DO UPDATE SET
+        discount_amount = EXCLUDED.discount_amount,
+        active = 1,
+        updated_at = EXCLUDED.updated_at
+      `,
+        [productId, discountAmount, new Date().toISOString()],
+      );
+
+      return res.json({
+        message: "Diskon VIP berhasil disimpan",
+      });
+    } catch (err) {
+      console.error("ERROR SAVE VIP DISCOUNT:", err);
+      return res.status(500).json({
+        message: "Gagal menyimpan diskon VIP",
+      });
+    }
+  },
+);
+
+app.patch(
+  "/vip-discounts/:id/toggle-active",
+  requireAdminAuth,
+  requireAdminCsrf,
+  async (req, res) => {
+    const id = Number(req.params.id);
+    const active = Number(req.body.active);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({ message: "ID diskon VIP tidak valid" });
+    }
+
+    if (![0, 1].includes(active)) {
+      return res.status(400).json({ message: "Status tidak valid" });
+    }
+
+    try {
+      const result = await query(
+        "UPDATE vip_discounts SET active = $1, updated_at = $2 WHERE id = $3 RETURNING id",
+        [active, new Date().toISOString(), id],
+      );
+
+      if (!result.rows.length) {
+        return res.status(404).json({ message: "Diskon VIP tidak ditemukan" });
+      }
+
+      return res.json({
+        message:
+          active === 1 ? "Diskon VIP diaktifkan" : "Diskon VIP dinonaktifkan",
+      });
+    } catch (err) {
+      console.error("ERROR TOGGLE VIP DISCOUNT:", err);
+      return res.status(500).json({
+        message: "Gagal mengubah status diskon VIP",
+      });
+    }
+  },
+);
+
+app.delete(
+  "/vip-discounts/:id",
+  requireAdminAuth,
+  requireAdminCsrf,
+  async (req, res) => {
+    const id = Number(req.params.id);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({ message: "ID diskon VIP tidak valid" });
+    }
+
+    try {
+      const result = await query(
+        "DELETE FROM vip_discounts WHERE id = $1 RETURNING id",
+        [id],
+      );
+
+      if (!result.rows.length) {
+        return res.status(404).json({ message: "Diskon VIP tidak ditemukan" });
+      }
+
+      return res.json({
+        message: "Diskon VIP berhasil dihapus",
+      });
+    } catch (err) {
+      console.error("ERROR DELETE VIP DISCOUNT:", err);
+      return res.status(500).json({
+        message: "Gagal menghapus diskon VIP",
+      });
+    }
+  },
+);
+
 app.post("/voucher-preview", voucherPreviewLimiter, async (req, res) => {
   const loggedInUser = getLoggedInUserFromRequest(req);
 
@@ -1291,27 +1698,26 @@ app.post("/voucher-preview", voucherPreviewLimiter, async (req, res) => {
 
     const originalPrice = Number(productRow.price);
 
-    const voucherCheck = await getVoucherDiscount({
-      gameName: productRow.game,
-      brandName: productRow.brand,
-      durationName: productRow.duration,
-      voucherCode: cleanVoucherCode,
-      productPrice: originalPrice,
+    const discountCheck = await getBestCheckoutDiscount({
       userId: loggedInUser.id,
+      productId: cleanProductId,
+      productRow,
+      voucherCode: cleanVoucherCode,
     });
 
-    if (!voucherCheck.valid) {
-      return res.status(400).json({ message: voucherCheck.message });
+    if (!discountCheck.valid) {
+      return res.status(400).json({ message: discountCheck.message });
     }
 
-    const discountAmount = voucherCheck.discountAmount;
+    const discountAmount = discountCheck.discountAmount;
     const netPrice = Math.max(originalPrice - discountAmount, 1000);
     const finalPrice = calculateQrisGrossPrice(netPrice);
     const paymentFee = finalPrice - netPrice;
 
     return res.json({
-      message: voucherCheck.message || "Preview harga berhasil",
-      voucher_code: voucherCheck.code,
+      message: discountCheck.message || "Preview harga berhasil",
+      voucher_code: discountCheck.code,
+      discount_type: discountCheck.discountType,
       original_price: originalPrice,
       discount_amount: discountAmount,
       net_price: netPrice,
@@ -1384,26 +1790,24 @@ app.post("/create-order", orderLimiter, async (req, res) => {
     const game = productRow.game;
     const originalPrice = Number(productRow.price);
 
-    const voucherCheck = await getVoucherDiscount({
-      gameName: game,
-      brandName: productRow.brand,
-      durationName: productRow.duration,
-      voucherCode: voucher_code,
-      productPrice: originalPrice,
+    const discountCheck = await getBestCheckoutDiscount({
       userId: loggedInUser.id,
+      productId: cleanProductId,
+      productRow,
+      voucherCode: voucher_code,
     });
 
-    if (!voucherCheck.valid) {
+    if (!discountCheck.valid) {
       return res.status(400).json({
-        message: voucherCheck.message,
+        message: discountCheck.message,
       });
     }
 
-    const discountAmount = voucherCheck.discountAmount;
+    const discountAmount = discountCheck.discountAmount;
     const netPrice = Math.max(originalPrice - discountAmount, 1000);
     const price = calculateQrisGrossPrice(netPrice);
     const paymentFee = price - netPrice;
-    const appliedVoucherCode = voucherCheck.code || null;
+    const appliedVoucherCode = discountCheck.code || null;
 
     const baseUrl = process.env.APP_BASE_URL || `http://localhost:${port}`;
     const userId = loggedInUser.id;

@@ -2548,6 +2548,14 @@
           <span class="nav-ico" aria-hidden="true">🎟️</span>
           <span>Voucher</span>
         </button>
+        <button
+          class="nav-btn"
+          data-section="vip-discounts"
+          onclick="showSection('vip-discounts', this)"
+        >
+          <span class="nav-ico" aria-hidden="true">👑</span>
+          <span>VIP Discount</span>
+        </button>
       </nav>
 
       <div class="sidebar-footer">
@@ -3183,6 +3191,16 @@
             </div>
 
             <div class="field">
+              <label>Pilih Produk</label>
+              <select
+                id="voucherProductSelect"
+                onchange="syncVoucherProductFields()"
+              >
+                <option value="">Pilih produk...</option>
+              </select>
+            </div>
+
+            <div class="field">
               <input
                 type="text"
                 id="voucherGameName"
@@ -3274,6 +3292,72 @@
                 </tr>
               </thead>
               <tbody id="voucherTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+      <section class="admin-section" id="section-vip-discounts">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title-wrap">
+              <h2>VIP Discount Rules</h2>
+              <p class="card-subtitle">
+                Atur diskon otomatis untuk buyer dengan badge VIP.
+              </p>
+            </div>
+            <span class="section-badge">VIP Benefit</span>
+          </div>
+
+          <div class="toolbar">
+            <div class="field">
+              <select id="vipDiscountProductSelect">
+                <option value="">Pilih produk...</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <input
+                type="number"
+                id="vipDiscountAmount"
+                placeholder="Diskon VIP, contoh: 5000"
+                min="1"
+              />
+            </div>
+
+            <div class="btn-group">
+              <button type="button" onclick="saveVipDiscount()">
+                Simpan Diskon VIP
+              </button>
+              <button
+                type="button"
+                class="ghost-btn"
+                onclick="loadVipDiscounts()"
+              >
+                Refresh
+              </button>
+            </div>
+          </div>
+
+          <div class="info-row">
+            <p class="info" id="vipDiscountStatusText">Memuat diskon VIP...</p>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Produk</th>
+                  <th>Harga</th>
+                  <th>Diskon VIP</th>
+                  <th>Status</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="vipDiscountTableBody">
+                <tr>
+                  <td colspan="5" class="empty">Belum ada diskon VIP.</td>
+                </tr>
+              </tbody>
             </table>
           </div>
         </div>
@@ -3419,6 +3503,17 @@
           type="button"
           class="admin-more-sheet-item"
           onclick="
+            bottomNavGo('vip-discounts');
+            closeMoreSheet();
+          "
+        >
+          <span class="ico">👑</span>
+          <span>VIP Discount</span>
+        </button>
+        <button
+          type="button"
+          class="admin-more-sheet-item"
+          onclick="
             refreshAllData();
             closeMoreSheet();
           "
@@ -3514,6 +3609,11 @@
 
         if (sectionName === "vouchers") {
           loadVouchers();
+        }
+
+        if (sectionName === "vip-discounts") {
+          loadVipDiscountProductOptions();
+          loadVipDiscounts();
         }
 
         if (sectionName === "dashboard") {
@@ -5652,6 +5752,12 @@
       function resetVoucherForm() {
         document.getElementById("editingVoucherId").value = "";
         document.getElementById("voucherCode").value = "";
+
+        const voucherProductSelect = document.getElementById(
+          "voucherProductSelect",
+        );
+        if (voucherProductSelect) voucherProductSelect.value = "";
+
         document.getElementById("voucherGameName").value = "";
         document.getElementById("voucherBrandName").value = "";
         document.getElementById("voucherDurationName").value = "";
@@ -5752,6 +5858,7 @@
           .map((item) => {
             const active = Number(item.active) === 1;
             const safeCode = JSON.stringify(String(item.code || ""));
+            const safeProductId = Number(item.product_id || 0);
             const safeGameName = JSON.stringify(String(item.game_name || ""));
             const safeBrandName = JSON.stringify(String(item.brand_name || ""));
             const safeDurationName = JSON.stringify(
@@ -5789,7 +5896,7 @@
 </td>
 <td>${escapeHtml(item.expires_at || "-")}</td>
           <td>
-            <button onclick='editVoucher(${item.id}, ${safeCode}, ${safeGameName}, ${safeBrandName}, ${safeDurationName}, ${safeDiscount}, ${safeExpiresAt}, ${safeVisibility}, ${safeTargetUsername})'>Edit</button>
+            <button onclick='editVoucher(${item.id}, ${safeCode}, ${safeProductId}, ${safeGameName}, ${safeBrandName}, ${safeDurationName}, ${safeDiscount}, ${safeExpiresAt}, ${safeVisibility}, ${safeTargetUsername})'>Edit</button>
             <button class="ghost-btn" onclick="toggleVoucherActive(${item.id}, ${active ? 0 : 1})">
               ${active ? "Nonaktifkan" : "Aktifkan"}
             </button>
@@ -5804,6 +5911,7 @@
       function editVoucher(
         id,
         code,
+        productId,
         gameName,
         brandName,
         durationName,
@@ -5818,6 +5926,12 @@
           targetUsername || "";
         document.getElementById("editingVoucherId").value = id;
         document.getElementById("voucherCode").value = code;
+
+        const voucherProductSelect = document.getElementById(
+          "voucherProductSelect",
+        );
+        if (voucherProductSelect) voucherProductSelect.value = productId || "";
+
         document.getElementById("voucherGameName").value = gameName;
         document.getElementById("voucherBrandName").value = brandName || "";
         document.getElementById("voucherDurationName").value =
@@ -5849,6 +5963,9 @@
           .getElementById("voucherTargetUsername")
           .value.trim();
 
+        const productId =
+          document.getElementById("voucherProductSelect")?.value || "";
+
         const editingVoucherId =
           document.getElementById("editingVoucherId").value;
         const voucherUrl = editingVoucherId
@@ -5870,6 +5987,7 @@
             },
             body: JSON.stringify({
               code,
+              product_id: productId ? Number(productId) : null,
               game_name: gameName,
               brand_name: brandName || null,
               duration_name: durationName || null,
@@ -6034,9 +6152,467 @@
         }
       }
 
+      async function loadVipDiscountProductOptions() {
+        const select = document.getElementById("vipDiscountProductSelect");
+        if (!select) return;
+
+        try {
+          const res = await fetch("/products");
+
+          if (res.status === 401) {
+            window.location.href = "/ae-auth";
+            return;
+          }
+
+          const data = await res.json();
+
+          select.innerHTML = `<option value="">Pilih produk...</option>`;
+
+          if (!Array.isArray(data) || data.length === 0) {
+            select.innerHTML = `<option value="">Belum ada produk</option>`;
+            return;
+          }
+
+          data.forEach((item) => {
+            const option = document.createElement("option");
+            option.value = item.id;
+            option.textContent = `${item.game} — ${item.brand} — ${item.duration} — ${formatRupiah(item.price || 0)}`;
+            select.appendChild(option);
+          });
+        } catch (err) {
+          select.innerHTML = `<option value="">Gagal memuat produk</option>`;
+        }
+      }
+
+      async function loadVipDiscounts() {
+        const statusText = document.getElementById("vipDiscountStatusText");
+        const tableBody = document.getElementById("vipDiscountTableBody");
+
+        if (!statusText || !tableBody) return;
+
+        statusText.innerText = "Memuat diskon VIP...";
+        tableBody.innerHTML = "";
+
+        try {
+          const res = await fetch("/vip-discounts");
+
+          if (res.status === 401) {
+            window.location.href = "/ae-auth";
+            return;
+          }
+
+          const data = await res.json();
+
+          if (!Array.isArray(data) || !data.length) {
+            statusText.innerText = "Belum ada diskon VIP.";
+            tableBody.innerHTML = `
+        <tr>
+          <td colspan="5" class="empty">Belum ada diskon VIP.</td>
+        </tr>
+      `;
+            return;
+          }
+
+          statusText.innerText = `Total diskon VIP: ${data.length}`;
+
+          tableBody.innerHTML = data
+            .map((item) => {
+              const active = Number(item.active) === 1;
+
+              return `
+          <tr>
+            <td data-label="Produk">
+              ${escapeHtml(item.game || "-")} — ${escapeHtml(item.brand || "-")} — ${escapeHtml(item.duration || "-")}
+            </td>
+            <td data-label="Harga">${formatRupiah(item.price || 0)}</td>
+            <td data-label="Diskon VIP">${formatRupiah(item.discount_amount || 0)}</td>
+            <td data-label="Status">
+              <span class="badge ${active ? "paid" : "expired"}">
+                ${active ? "Aktif" : "Nonaktif"}
+              </span>
+            </td>
+            <td data-label="Aksi" class="action-cell">
+              <button class="ghost-btn" onclick="toggleVipDiscount(${item.id}, ${active ? 0 : 1})">
+                ${active ? "Nonaktifkan" : "Aktifkan"}
+              </button>
+              <button class="danger-btn" onclick="deleteVipDiscount(${item.id})">
+                Hapus
+              </button>
+            </td>
+          </tr>
+        `;
+            })
+            .join("");
+        } catch (err) {
+          statusText.innerText = "Gagal memuat diskon VIP.";
+          tableBody.innerHTML = `
+      <tr>
+        <td colspan="5" class="empty">Terjadi error saat mengambil diskon VIP.</td>
+      </tr>
+    `;
+        }
+      }
+
+      async function saveVipDiscount() {
+        const productId = Number(
+          document.getElementById("vipDiscountProductSelect")?.value || 0,
+        );
+        const discountAmount = Number(
+          document.getElementById("vipDiscountAmount")?.value || 0,
+        );
+
+        if (!productId || !discountAmount) {
+          Swal.fire("Produk dan nominal diskon VIP wajib diisi.");
+          return;
+        }
+
+        try {
+          const res = await fetch("/vip-discounts", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-csrf-token": getCsrfToken(),
+            },
+            body: JSON.stringify({
+              product_id: productId,
+              discount_amount: discountAmount,
+            }),
+          });
+
+          const data = await res.json();
+
+          if (!res.ok) {
+            Swal.fire(data.message || "Gagal menyimpan diskon VIP");
+            return;
+          }
+
+          Swal.fire(data.message || "Diskon VIP berhasil disimpan");
+          document.getElementById("vipDiscountAmount").value = "";
+          loadVipDiscounts();
+        } catch (err) {
+          Swal.fire("Terjadi error server saat menyimpan diskon VIP");
+        }
+      }
+
+      async function toggleVipDiscount(id, active) {
+        try {
+          const res = await fetch(`/vip-discounts/${id}/toggle-active`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              "x-csrf-token": getCsrfToken(),
+            },
+            body: JSON.stringify({ active }),
+          });
+
+          const data = await res.json();
+
+          if (!res.ok) {
+            Swal.fire(data.message || "Gagal mengubah status diskon VIP");
+            return;
+          }
+
+          Swal.fire(data.message || "Status diskon VIP berhasil diubah");
+          loadVipDiscounts();
+        } catch (err) {
+          Swal.fire("Terjadi error server saat mengubah status diskon VIP");
+        }
+      }
+
+      async function deleteVipDiscount(id) {
+        const result = await Swal.fire({
+          title: "Hapus Diskon VIP?",
+          text: "Diskon VIP yang dihapus tidak akan otomatis berlaku lagi.",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "Ya, Hapus",
+          cancelButtonText: "Batal",
+          confirmButtonColor: "#fb7185",
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+          const res = await fetch(`/vip-discounts/${id}`, {
+            method: "DELETE",
+            headers: {
+              "x-csrf-token": getCsrfToken(),
+            },
+          });
+
+          const data = await res.json();
+
+          if (!res.ok) {
+            Swal.fire(data.message || "Gagal menghapus diskon VIP");
+            return;
+          }
+
+          Swal.fire(data.message || "Diskon VIP berhasil dihapus");
+          loadVipDiscounts();
+        } catch (err) {
+          Swal.fire("Terjadi error server saat menghapus diskon VIP");
+        }
+      }
+
+      async function loadVoucherProductOptions() {
+        const select = document.getElementById("voucherProductSelect");
+        if (!select) return;
+
+        try {
+          const res = await fetch("/products");
+
+          if (res.status === 401) {
+            window.location.href = "/ae-auth";
+            return;
+          }
+
+          const data = await res.json();
+
+          select.innerHTML = `<option value="">Pilih produk...</option>`;
+
+          if (!Array.isArray(data) || data.length === 0) {
+            select.innerHTML = `<option value="">Belum ada produk</option>`;
+            return;
+          }
+
+          data.forEach((item) => {
+            const option = document.createElement("option");
+            option.value = item.id;
+            option.textContent = `${item.game} — ${item.brand} — ${item.duration} — ${formatRupiah(item.price || 0)}`;
+            option.dataset.game = item.game || "";
+            option.dataset.brand = item.brand || "";
+            option.dataset.duration = item.duration || "";
+            select.appendChild(option);
+          });
+        } catch (err) {
+          select.innerHTML = `<option value="">Gagal memuat produk</option>`;
+        }
+      }
+
+      function syncVoucherProductFields() {
+        const select = document.getElementById("voucherProductSelect");
+        const selected = select?.selectedOptions?.[0];
+
+        if (!selected) return;
+
+        const gameInput = document.getElementById("voucherGameName");
+        const brandInput = document.getElementById("voucherBrandName");
+        const durationInput = document.getElementById("voucherDurationName");
+
+        if (gameInput) gameInput.value = selected.dataset.game || "";
+        if (brandInput) brandInput.value = selected.dataset.brand || "";
+        if (durationInput)
+          durationInput.value = selected.dataset.duration || "";
+      }
+
+      async function loadVipDiscountProductOptions() {
+        const select = document.getElementById("vipDiscountProductSelect");
+        if (!select) return;
+
+        try {
+          const res = await fetch("/products");
+
+          if (res.status === 401) {
+            window.location.href = "/ae-auth";
+            return;
+          }
+
+          const data = await res.json();
+
+          select.innerHTML = `<option value="">Pilih produk...</option>`;
+
+          if (!Array.isArray(data) || data.length === 0) {
+            select.innerHTML = `<option value="">Belum ada produk</option>`;
+            return;
+          }
+
+          data.forEach((item) => {
+            const option = document.createElement("option");
+            option.value = item.id;
+            option.textContent = `${item.game} — ${item.brand} — ${item.duration} — ${formatRupiah(item.price || 0)}`;
+            select.appendChild(option);
+          });
+        } catch (err) {
+          select.innerHTML = `<option value="">Gagal memuat produk</option>`;
+        }
+      }
+
+      async function loadVipDiscounts() {
+        const statusText = document.getElementById("vipDiscountStatusText");
+        const tableBody = document.getElementById("vipDiscountTableBody");
+
+        if (!statusText || !tableBody) return;
+
+        statusText.innerText = "Memuat diskon VIP...";
+        tableBody.innerHTML = "";
+
+        try {
+          const res = await fetch("/vip-discounts");
+
+          if (res.status === 401) {
+            window.location.href = "/ae-auth";
+            return;
+          }
+
+          const data = await res.json();
+
+          if (!Array.isArray(data) || !data.length) {
+            statusText.innerText = "Belum ada diskon VIP.";
+            tableBody.innerHTML = `
+        <tr>
+          <td colspan="5" class="empty">Belum ada diskon VIP.</td>
+        </tr>
+      `;
+            return;
+          }
+
+          statusText.innerText = `Total diskon VIP: ${data.length}`;
+
+          tableBody.innerHTML = data
+            .map((item) => {
+              const active = Number(item.active) === 1;
+
+              return `
+          <tr>
+            <td data-label="Produk">
+              ${escapeHtml(item.game || "-")} — ${escapeHtml(item.brand || "-")} — ${escapeHtml(item.duration || "-")}
+            </td>
+            <td data-label="Harga">${formatRupiah(item.price || 0)}</td>
+            <td data-label="Diskon VIP">${formatRupiah(item.discount_amount || 0)}</td>
+            <td data-label="Status">
+              <span class="badge ${active ? "paid" : "expired"}">
+                ${active ? "Aktif" : "Nonaktif"}
+              </span>
+            </td>
+            <td data-label="Aksi" class="action-cell">
+              <button class="ghost-btn" onclick="toggleVipDiscount(${item.id}, ${active ? 0 : 1})">
+                ${active ? "Nonaktifkan" : "Aktifkan"}
+              </button>
+              <button class="danger-btn" onclick="deleteVipDiscount(${item.id})">
+                Hapus
+              </button>
+            </td>
+          </tr>
+        `;
+            })
+            .join("");
+        } catch (err) {
+          statusText.innerText = "Gagal memuat diskon VIP.";
+          tableBody.innerHTML = `
+      <tr>
+        <td colspan="5" class="empty">Terjadi error saat mengambil diskon VIP.</td>
+      </tr>
+    `;
+        }
+      }
+
+      async function saveVipDiscount() {
+        const productId = Number(
+          document.getElementById("vipDiscountProductSelect")?.value || 0,
+        );
+        const discountAmount = Number(
+          document.getElementById("vipDiscountAmount")?.value || 0,
+        );
+
+        if (!productId || !discountAmount) {
+          Swal.fire("Produk dan nominal diskon VIP wajib diisi.");
+          return;
+        }
+
+        try {
+          const res = await fetch("/vip-discounts", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-csrf-token": getCsrfToken(),
+            },
+            body: JSON.stringify({
+              product_id: productId,
+              discount_amount: discountAmount,
+            }),
+          });
+
+          const data = await res.json();
+
+          if (!res.ok) {
+            Swal.fire(data.message || "Gagal menyimpan diskon VIP");
+            return;
+          }
+
+          Swal.fire(data.message || "Diskon VIP berhasil disimpan");
+          document.getElementById("vipDiscountAmount").value = "";
+          loadVipDiscounts();
+        } catch (err) {
+          Swal.fire("Terjadi error server saat menyimpan diskon VIP");
+        }
+      }
+
+      async function toggleVipDiscount(id, active) {
+        try {
+          const res = await fetch(`/vip-discounts/${id}/toggle-active`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              "x-csrf-token": getCsrfToken(),
+            },
+            body: JSON.stringify({ active }),
+          });
+
+          const data = await res.json();
+
+          if (!res.ok) {
+            Swal.fire(data.message || "Gagal mengubah status diskon VIP");
+            return;
+          }
+
+          Swal.fire(data.message || "Status diskon VIP berhasil diubah");
+          loadVipDiscounts();
+        } catch (err) {
+          Swal.fire("Terjadi error server saat mengubah status diskon VIP");
+        }
+      }
+
+      async function deleteVipDiscount(id) {
+        const result = await Swal.fire({
+          title: "Hapus Diskon VIP?",
+          text: "Diskon VIP yang dihapus tidak akan otomatis berlaku lagi.",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "Ya, Hapus",
+          cancelButtonText: "Batal",
+          confirmButtonColor: "#fb7185",
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+          const res = await fetch(`/vip-discounts/${id}`, {
+            method: "DELETE",
+            headers: {
+              "x-csrf-token": getCsrfToken(),
+            },
+          });
+
+          const data = await res.json();
+
+          if (!res.ok) {
+            Swal.fire(data.message || "Gagal menghapus diskon VIP");
+            return;
+          }
+
+          Swal.fire(data.message || "Diskon VIP berhasil dihapus");
+          loadVipDiscounts();
+        } catch (err) {
+          Swal.fire("Terjadi error server saat menghapus diskon VIP");
+        }
+      }
+
       document.addEventListener("DOMContentLoaded", () => {
         applyAdminTheme();
         loadAdminAlerts();
+        loadVoucherProductOptions();
+        loadVipDiscountProductOptions();
+        loadVipDiscounts();
         const searchInput = document.getElementById("orderSearchInput");
         if (searchInput) {
           searchInput.addEventListener("input", applyOrderFilters);
@@ -6151,7 +6727,11 @@
 
         if (navBtn) {
           navBtn.classList.add("active");
-        } else if (sectionName === "keys" || sectionName === "vouchers") {
+        } else if (
+          sectionName === "keys" ||
+          sectionName === "vouchers" ||
+          sectionName === "vip-discounts"
+        ) {
           const moreBtn = document.querySelector(
             '.admin-bottom-nav-btn[data-section="more"]',
           );
@@ -6280,7 +6860,11 @@
             `.admin-bottom-nav-btn[data-section="${matched}"]`,
           );
           if (navBtn) navBtn.classList.add("active");
-        } else if (sectionName === "keys" || sectionName === "vouchers") {
+        } else if (
+          sectionName === "keys" ||
+          sectionName === "vouchers" ||
+          sectionName === "vip-discounts"
+        ) {
           const moreBtn = document.querySelector(
             '.admin-bottom-nav-btn[data-section="more"]',
           );
