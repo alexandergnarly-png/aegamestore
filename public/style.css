@@ -6451,3 +6451,399 @@ body.dark-theme .voucher-toggle-arrow {
     display: none !important;
   }
 }
+
+/* ============================================================
+   AE UI/UX Upgrade v49 — compact mobile, sticky catalog search,
+   smoother order sheet, bottom nav indicator, light animations
+   ============================================================ */
+
+:root {
+  --tap-scale: 0.985;
+}
+
+/* lightweight touch feedback */
+button:active,
+a:active,
+.game-card:active,
+.admin-chat-action:active,
+.bottom-nav-item:active {
+  transform: scale(var(--tap-scale));
+}
+
+/* soft reveal utility used by JS enhancement */
+.ae-soft-enter {
+  animation: aeSoftEnter 0.24s var(--ease-out) both;
+}
+
+@keyframes aeSoftEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* catalog toolbar feels sticky on desktop/tablet, disabled into compact clone on phones */
+.catalog-toolbar {
+  position: sticky;
+  top: calc(var(--header-h) + 10px);
+  z-index: 30;
+  background: var(--card-bg-strong);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+}
+
+/* mini search clone shown only after user reaches catalog on mobile */
+.ae-sticky-search {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  top: 68px;
+  z-index: 120;
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(14, 165, 233, 0.16);
+  box-shadow: 0 10px 28px rgba(8, 47, 73, 0.12);
+  transform: translateY(-14px);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 0.2s var(--ease-out),
+    opacity 0.2s var(--ease-out);
+}
+
+body.dark-theme .ae-sticky-search {
+  background: rgba(8, 14, 32, 0.94);
+  border-color: rgba(56, 189, 248, 0.18);
+}
+
+.ae-sticky-search.show {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.ae-sticky-search-icon {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: rgba(14, 165, 233, 0.1);
+}
+
+.ae-sticky-search input {
+  min-width: 0;
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--text-main);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  outline: none;
+}
+
+.ae-sticky-search-clear {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: rgba(251, 113, 133, 0.12);
+  color: var(--torii-red-strong);
+  font-weight: 900;
+}
+
+/* order sheet: split scrolling content from sticky action area naturally */
+.order-modal-card {
+  scroll-behavior: smooth;
+}
+
+.order-steps {
+  position: sticky;
+  top: -1px;
+  z-index: 8;
+  margin: 0 0 18px;
+  padding: 10px 8px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(14, 165, 233, 0.12);
+}
+
+body.dark-theme .order-steps {
+  background: rgba(15, 23, 42, 0.86);
+}
+
+.order-step.is-done .order-step-dot {
+  background: var(--success);
+  color: white;
+}
+
+.order-step.is-done .order-step-dot::after {
+  content: "✓";
+  font-size: 11px;
+}
+
+.order-step.is-done .order-step-dot {
+  font-size: 0;
+}
+
+#previewPrice.ae-price-pulse,
+#finalPriceText.ae-price-pulse {
+  animation: aePricePulse 0.34s var(--ease-out);
+}
+
+@keyframes aePricePulse {
+  0% {
+    transform: scale(1);
+    background: transparent;
+  }
+  45% {
+    transform: scale(1.04);
+    background: rgba(16, 185, 129, 0.14);
+  }
+  100% {
+    transform: scale(1);
+    background: transparent;
+  }
+}
+
+/* chat as true mobile bottom sheet */
+.admin-chat-card {
+  will-change: transform, opacity;
+}
+
+/* promo slide swipe state */
+.promo-slider {
+  touch-action: pan-y;
+}
+
+.promo-slide {
+  will-change: opacity, transform;
+}
+
+/* bottom nav moving indicator */
+.bottom-nav {
+  --ae-nav-index: 0;
+}
+
+.bottom-nav::before {
+  content: "";
+  position: absolute;
+  left: calc((100% / 4) * var(--ae-nav-index) + 10px);
+  bottom: calc(5px + env(safe-area-inset-bottom));
+  width: calc(100% / 4 - 20px);
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--ocean), var(--sakura-strong));
+  transition: left 0.22s var(--ease-out);
+}
+
+.bottom-nav-item.is-active .bottom-nav-icon {
+  transform: translateY(-1px);
+}
+
+@media (min-width: 641px) {
+  .game-card {
+    will-change: transform;
+  }
+}
+
+@media (max-width: 640px) {
+  .ae-sticky-search {
+    display: flex;
+  }
+
+  .catalog-toolbar {
+    position: relative;
+    top: auto;
+    z-index: 1;
+    box-shadow: none;
+  }
+
+  /* compact horizontal mobile game cards */
+  .game-grid,
+  .compact-game-grid {
+    grid-template-columns: 1fr !important;
+    gap: 9px !important;
+  }
+
+  .game-card {
+    min-height: 94px;
+    display: grid;
+    grid-template-columns: 92px minmax(0, 1fr);
+    align-items: stretch;
+    border-radius: 18px;
+    overflow: hidden;
+    content-visibility: auto;
+    contain-intrinsic-size: 0 104px;
+  }
+
+  .game-card:active {
+    transform: scale(0.992) !important;
+  }
+
+  .game-card-thumb {
+    width: 92px;
+    height: 100%;
+    min-height: 94px;
+    aspect-ratio: auto;
+  }
+
+  .game-card-thumb-overlay {
+    padding: 26px 7px 7px;
+  }
+
+  .game-card-thumb-overlay strong {
+    display: none;
+  }
+
+  .game-card-top {
+    left: 102px;
+    top: 10px;
+    right: 48px;
+  }
+
+  .game-card-chip {
+    display: inline-flex;
+    font-size: 8.5px;
+    padding: 3px 7px;
+  }
+
+  .game-card-ribbon {
+    display: none;
+  }
+
+  .game-card-fav {
+    top: 10px;
+    right: 10px;
+    width: 30px;
+    height: 30px;
+  }
+
+  .game-card-body {
+    justify-content: flex-end;
+    min-width: 0;
+    padding: 36px 10px 10px;
+  }
+
+  .game-card-title {
+    font-size: 13px;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+  }
+
+  .game-card-meta {
+    align-items: flex-end;
+  }
+
+  .game-card-price b {
+    font-size: 12.5px;
+  }
+
+  .game-card-stock {
+    max-width: 48%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .order-modal-card {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: calc(14px + env(safe-area-inset-bottom));
+  }
+
+  .order-steps {
+    top: 0;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  #buyBtn {
+    position: sticky;
+    bottom: 0;
+    z-index: 12;
+    width: 100%;
+    min-height: 52px;
+    margin-top: 12px;
+    border-radius: 16px;
+    box-shadow: 0 -8px 24px rgba(14, 165, 233, 0.16);
+  }
+
+  .payment-methods-preview,
+  .trust-text {
+    text-align: center;
+  }
+
+  .admin-chat-backdrop {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(8, 47, 73, 0.34);
+  }
+
+  .admin-chat-card {
+    left: 10px;
+    right: 10px;
+    bottom: calc(76px + env(safe-area-inset-bottom));
+    width: auto;
+    max-height: min(70vh, 520px);
+    overflow-y: auto;
+    border-radius: 26px;
+    transform: translateY(28px);
+  }
+
+  .admin-chat-sheet.show .admin-chat-card {
+    transform: translateY(0);
+  }
+
+  .admin-chat-close {
+    top: 10px;
+    right: 10px;
+    box-shadow: none;
+  }
+
+  .testi-scroll-container,
+  .trending-rail-track,
+  .recent-viewed-track {
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .testi-card,
+  .trending-card,
+  .recent-viewed-card {
+    scroll-snap-align: start;
+  }
+
+  .blob-1,
+  .blob-2,
+  .watercolor-blob {
+    animation: none !important;
+    filter: blur(48px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ae-soft-enter,
+  #previewPrice.ae-price-pulse,
+  #finalPriceText.ae-price-pulse {
+    animation: none !important;
+  }
+
+  .bottom-nav::before,
+  .ae-sticky-search,
+  .admin-chat-card {
+    transition: none !important;
+  }
+}

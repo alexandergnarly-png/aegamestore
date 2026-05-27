@@ -4803,3 +4803,200 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(tryResume, 0);
   }
 })();
+
+// ============================================================
+// AE UI/UX Upgrade v49 — lightweight mobile helpers
+// ============================================================
+(function setupAEUiUxUpgradeV49() {
+  const mqMobile = window.matchMedia
+    ? window.matchMedia("(max-width: 640px)")
+    : null;
+
+  function isMobile() {
+    return mqMobile ? mqMobile.matches : window.innerWidth <= 640;
+  }
+
+  function pulsePriceNode(node) {
+    if (!node) return;
+    node.classList.remove("ae-price-pulse");
+    void node.offsetWidth;
+    node.classList.add("ae-price-pulse");
+    window.setTimeout(() => node.classList.remove("ae-price-pulse"), 420);
+  }
+
+  function setupPricePulse() {
+    ["previewPrice", "finalPriceText"].forEach((id) => {
+      const node = document.getElementById(id);
+      if (!node || node.__aePricePulseReady) return;
+      node.__aePricePulseReady = true;
+      let last = node.textContent;
+      const obs = new MutationObserver(() => {
+        const next = node.textContent;
+        if (next && next !== last) {
+          last = next;
+          pulsePriceNode(node);
+        }
+      });
+      obs.observe(node, {
+        childList: true,
+        characterData: true,
+        subtree: true,
+      });
+    });
+  }
+
+  function setupStickyCatalogSearch() {
+    const source = document.getElementById("gameSearch");
+    const store = document.getElementById("store-section");
+    if (!source || !store || document.getElementById("aeStickySearch")) return;
+
+    const wrap = document.createElement("div");
+    wrap.className = "ae-sticky-search";
+    wrap.id = "aeStickySearch";
+    wrap.setAttribute("aria-hidden", "true");
+    wrap.innerHTML = `
+      <span class="ae-sticky-search-icon" aria-hidden="true">🔍</span>
+      <input type="text" id="aeStickySearchInput" placeholder="Cari game cepat..." autocomplete="off" aria-label="Cari game cepat" />
+      <button type="button" class="ae-sticky-search-clear" aria-label="Bersihkan pencarian">×</button>
+    `;
+    document.body.appendChild(wrap);
+
+    const input = wrap.querySelector("input");
+    const clear = wrap.querySelector("button");
+
+    const syncFromSource = () => {
+      if (input && input.value !== source.value) input.value = source.value;
+    };
+
+    source.addEventListener("input", syncFromSource);
+    input.addEventListener("input", () => {
+      source.value = input.value;
+      if (typeof window.searchGame === "function") window.searchGame();
+      else source.dispatchEvent(new Event("keyup", { bubbles: true }));
+    });
+    clear.addEventListener("click", () => {
+      input.value = "";
+      source.value = "";
+      if (typeof window.searchGame === "function") window.searchGame();
+      source.focus({ preventScroll: true });
+    });
+
+    const updateVisibility = () => {
+      if (!isMobile()) {
+        wrap.classList.remove("show");
+        wrap.setAttribute("aria-hidden", "true");
+        return;
+      }
+      const rect = store.getBoundingClientRect();
+      const shouldShow = rect.top < 52 && rect.bottom > 220;
+      wrap.classList.toggle("show", shouldShow);
+      wrap.setAttribute("aria-hidden", shouldShow ? "false" : "true");
+      if (shouldShow) syncFromSource();
+    };
+
+    window.addEventListener("scroll", updateVisibility, { passive: true });
+    window.addEventListener("resize", updateVisibility, { passive: true });
+    updateVisibility();
+  }
+
+  function setupPromoSwipe() {
+    const slider = document.getElementById("promoSlider");
+    if (!slider || slider.__aeSwipeReady) return;
+    slider.__aeSwipeReady = true;
+    let startX = 0;
+    let startY = 0;
+    let tracking = false;
+
+    slider.addEventListener(
+      "touchstart",
+      (event) => {
+        const touch = event.touches && event.touches[0];
+        if (!touch) return;
+        startX = touch.clientX;
+        startY = touch.clientY;
+        tracking = true;
+      },
+      { passive: true },
+    );
+
+    slider.addEventListener(
+      "touchend",
+      (event) => {
+        if (!tracking) return;
+        tracking = false;
+        const touch = event.changedTouches && event.changedTouches[0];
+        if (!touch) return;
+        const dx = touch.clientX - startX;
+        const dy = touch.clientY - startY;
+        if (Math.abs(dx) < 42 || Math.abs(dx) < Math.abs(dy) * 1.3) return;
+        if (dx < 0 && typeof window.nextSlide === "function")
+          window.nextSlide();
+        if (dx > 0 && typeof window.prevSlide === "function")
+          window.prevSlide();
+      },
+      { passive: true },
+    );
+  }
+
+  function setupBottomNavIndicator() {
+    const nav = document.getElementById("bottomNav");
+    if (!nav) return;
+    const setIndex = () => {
+      const items = Array.from(nav.querySelectorAll(".bottom-nav-item"));
+      const active =
+        nav.querySelector(".bottom-nav-item.is-active") || items[0];
+      const index = Math.max(0, items.indexOf(active));
+      nav.style.setProperty("--ae-nav-index", String(index));
+    };
+    nav.addEventListener("click", () => window.setTimeout(setIndex, 80));
+    const obs = new MutationObserver(setIndex);
+    nav.querySelectorAll(".bottom-nav-item").forEach((item) => {
+      obs.observe(item, { attributes: true, attributeFilter: ["class"] });
+    });
+    setIndex();
+  }
+
+  function setupOrderModalPolish() {
+    const modal = document.getElementById("orderModal");
+    if (!modal || modal.__aePolishReady) return;
+    modal.__aePolishReady = true;
+    const obs = new MutationObserver(() => {
+      if (modal.classList.contains("show")) {
+        const card = modal.querySelector(".order-modal-card");
+        if (card) {
+          card.classList.remove("ae-soft-enter");
+          void card.offsetWidth;
+          card.classList.add("ae-soft-enter");
+        }
+      }
+    });
+    obs.observe(modal, { attributes: true, attributeFilter: ["class"] });
+  }
+
+  function setupLightCardStagger() {
+    const grid = document.getElementById("gameGrid");
+    if (!grid || grid.__aeStaggerReady) return;
+    grid.__aeStaggerReady = true;
+    const obs = new MutationObserver(() => {
+      if (isMobile()) return;
+      Array.from(grid.querySelectorAll(".game-card"))
+        .slice(0, 12)
+        .forEach((card, index) => {
+          if (card.__aeEntered) return;
+          card.__aeEntered = true;
+          card.style.animationDelay = `${Math.min(index * 18, 180)}ms`;
+          card.classList.add("ae-soft-enter");
+        });
+    });
+    obs.observe(grid, { childList: true });
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    setupPricePulse();
+    setupStickyCatalogSearch();
+    setupPromoSwipe();
+    setupBottomNavIndicator();
+    setupOrderModalPolish();
+    setupLightCardStagger();
+  });
+})();
