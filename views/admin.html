@@ -2314,6 +2314,198 @@
           0 12px 32px rgba(14, 165, 233, 0.55),
           0 4px 8px rgba(14, 165, 233, 0.3);
       }
+
+      /* ===== ADMIN MOBILE OPS UPGRADE ===== */
+      .admin-order-mobile-ops {
+        display: none;
+        margin-bottom: 14px;
+        padding: 14px;
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--card-border);
+        background: var(--card-bg-strong);
+      }
+
+      .admin-order-ops-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+
+      .admin-order-ops-head strong {
+        display: block;
+        color: var(--text-strong);
+        font-size: 15px;
+        font-weight: 800;
+      }
+
+      .admin-order-ops-head span {
+        display: block;
+        color: var(--text-muted);
+        font-size: 12px;
+        margin-top: 2px;
+      }
+
+      .admin-ops-refresh {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        border-radius: 12px;
+        box-shadow: none;
+      }
+
+      .admin-order-ops-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+
+      .admin-ops-card {
+        min-height: 66px;
+        padding: 10px 8px;
+        border-radius: 14px;
+        background: rgba(56, 189, 248, 0.1);
+        color: var(--text-main);
+        border: 1px solid var(--card-border-soft);
+        box-shadow: none;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 2px;
+      }
+
+      .ops-num {
+        color: var(--primary-strong);
+        font-size: 22px;
+        font-weight: 800;
+        line-height: 1;
+      }
+
+      .ops-label {
+        color: var(--text-muted);
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.35px;
+      }
+
+      .admin-order-quick-chips {
+        display: flex;
+        gap: 7px;
+        overflow-x: auto;
+        padding-bottom: 2px;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .admin-order-chip {
+        flex: 0 0 auto;
+        padding: 9px 13px;
+        min-height: 38px;
+        border-radius: var(--radius-pill);
+        background: var(--card-bg);
+        color: var(--text-muted);
+        border: 1px solid var(--card-border);
+        box-shadow: none;
+        font-size: 12px;
+      }
+
+      .admin-order-chip.active {
+        color: white;
+        background: linear-gradient(
+          135deg,
+          var(--primary),
+          var(--primary-hover)
+        );
+        border-color: transparent;
+      }
+
+      .admin-order-sticky-search {
+        display: none;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+
+      .admin-order-sticky-search input {
+        flex: 1;
+      }
+
+      .admin-order-sticky-search button {
+        min-width: 72px;
+        box-shadow: none;
+      }
+
+      @media (max-width: 768px) {
+        .admin-order-mobile-ops {
+          display: block;
+        }
+
+        .admin-order-sticky-search {
+          position: sticky;
+          top: 8px;
+          z-index: 40;
+          display: flex;
+          padding: 8px;
+          border: 1px solid var(--card-border);
+          border-radius: 16px;
+          background: var(--card-bg-strong);
+        }
+
+        #section-orders .toolbar:first-of-type .field-wide {
+          display: none;
+        }
+
+        #section-orders .btn-group button {
+          flex: 1 1 calc(50% - 5px);
+          font-size: 12px;
+        }
+
+        #section-orders tbody tr {
+          border-radius: 16px;
+          padding: 12px;
+        }
+
+        #section-orders tbody td[data-label="Order ID"] {
+          font-weight: 800;
+          color: var(--primary-strong);
+        }
+
+        #section-orders tbody td[data-label="Aksi"] .row-action-group {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          width: 100%;
+          gap: 8px;
+        }
+
+        #section-orders tbody td[data-label="Aksi"] .row-action-group button {
+          width: 100%;
+          min-height: 42px;
+        }
+
+        #section-orders .pagination-controls {
+          display: grid;
+          grid-template-columns: 1fr auto 1fr;
+          width: 100%;
+        }
+      }
+
+      @media (max-width: 420px) {
+        .admin-order-ops-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+
+        .ops-num {
+          font-size: 20px;
+        }
+
+        .ops-label {
+          font-size: 10px;
+        }
+      }
+
       /* ===== ADMIN MOBILE PERFORMANCE FIX ===== */
       @media (max-width: 768px) {
         .sidebar,
@@ -2832,6 +3024,103 @@
               </p>
             </div>
             <div class="section-badge">Order Monitor</div>
+          </div>
+
+          <div class="admin-order-mobile-ops" id="adminOrderMobileOps">
+            <div class="admin-order-ops-head">
+              <div>
+                <strong>Order Control</strong>
+                <span>Mode cepat untuk pantauan mobile</span>
+              </div>
+              <button
+                type="button"
+                class="admin-ops-refresh"
+                onclick="loadOrders()"
+              >
+                ↻
+              </button>
+            </div>
+            <div class="admin-order-ops-grid">
+              <button
+                type="button"
+                class="admin-ops-card"
+                onclick="setQuickOrderFilter('manual')"
+              >
+                <span class="ops-num" id="opsManualCount">0</span>
+                <span class="ops-label">Manual</span>
+              </button>
+              <button
+                type="button"
+                class="admin-ops-card"
+                onclick="setQuickOrderFilter('pending')"
+              >
+                <span class="ops-num" id="opsPendingCount">0</span>
+                <span class="ops-label">Pending</span>
+              </button>
+              <button
+                type="button"
+                class="admin-ops-card"
+                onclick="setQuickOrderFilter('paid')"
+              >
+                <span class="ops-num" id="opsPaidCount">0</span>
+                <span class="ops-label">Paid</span>
+              </button>
+            </div>
+            <div
+              class="admin-order-quick-chips"
+              aria-label="Filter cepat order"
+            >
+              <button
+                type="button"
+                class="admin-order-chip active"
+                data-quick-order="all"
+                onclick="setQuickOrderFilter('all', this)"
+              >
+                Semua
+              </button>
+              <button
+                type="button"
+                class="admin-order-chip"
+                data-quick-order="manual"
+                onclick="setQuickOrderFilter('manual', this)"
+              >
+                Manual
+              </button>
+              <button
+                type="button"
+                class="admin-order-chip"
+                data-quick-order="pending"
+                onclick="setQuickOrderFilter('pending', this)"
+              >
+                Pending
+              </button>
+              <button
+                type="button"
+                class="admin-order-chip"
+                data-quick-order="paid"
+                onclick="setQuickOrderFilter('paid', this)"
+              >
+                Paid
+              </button>
+              <button
+                type="button"
+                class="admin-order-chip"
+                data-quick-order="delivered"
+                onclick="setQuickOrderFilter('delivered', this)"
+              >
+                Delivered
+              </button>
+            </div>
+          </div>
+
+          <div class="admin-order-sticky-search" id="adminOrderStickySearch">
+            <input
+              type="text"
+              id="orderMobileSearchInput"
+              placeholder="Cari ID / user / kontak..."
+              oninput="syncMobileOrderSearch(this.value)"
+            />
+            <button type="button" onclick="loadOrders()">Cari</button>
           </div>
 
           <div class="toolbar">
@@ -4451,6 +4740,8 @@
           ORDERS_STATE.paidCount = Number(data?.paid_count) || 0;
 
           allOrders = rows;
+          updateOrderMobileOps(rows);
+          syncOrderSearchInputsFromDesktop();
 
           if (rows.length === 0 && ORDERS_STATE.page === 0) {
             updateOrderStats([]);
@@ -4482,6 +4773,7 @@
         } catch (err) {
           console.error("loadOrders error", err);
           statusText.innerText = "Gagal memuat daftar order.";
+          updateOrderMobileOps([]);
           tableBody.innerHTML = `
             <tr>
               <td colspan="14" class="empty">Terjadi error saat mengambil order.</td>
@@ -5204,6 +5496,79 @@
         orderFilterDebounce = setTimeout(() => {
           loadOrders();
         }, 220);
+      }
+
+      function syncMobileOrderSearch(value) {
+        const desktopSearch = document.getElementById("orderSearchInput");
+        if (desktopSearch && desktopSearch.value !== value) {
+          desktopSearch.value = value;
+        }
+        applyOrderFilters();
+      }
+
+      function syncOrderSearchInputsFromDesktop() {
+        const desktopSearch = document.getElementById("orderSearchInput");
+        const mobileSearch = document.getElementById("orderMobileSearchInput");
+        if (
+          desktopSearch &&
+          mobileSearch &&
+          mobileSearch.value !== desktopSearch.value
+        ) {
+          mobileSearch.value = desktopSearch.value;
+        }
+      }
+
+      function setQuickOrderFilter(type, btn) {
+        const payment = document.getElementById("paymentFilter");
+        const delivery = document.getElementById("deliveryFilter");
+        if (!payment || !delivery) return;
+
+        payment.value = "";
+        delivery.value = "";
+
+        if (type === "manual") {
+          payment.value = "paid";
+          delivery.value = "manual";
+        } else if (type === "pending") {
+          payment.value = "pending";
+        } else if (type === "paid") {
+          payment.value = "paid";
+        } else if (type === "delivered") {
+          delivery.value = "delivered";
+        }
+
+        document
+          .querySelectorAll(".admin-order-chip")
+          .forEach((el) => el.classList.remove("active"));
+        const activeBtn =
+          btn || document.querySelector(`[data-quick-order="${type}"]`);
+        if (activeBtn) activeBtn.classList.add("active");
+
+        applyOrderFilters();
+      }
+
+      function updateOrderMobileOps(rows = []) {
+        const manualEl = document.getElementById("opsManualCount");
+        const pendingEl = document.getElementById("opsPendingCount");
+        const paidEl = document.getElementById("opsPaidCount");
+        if (!manualEl || !pendingEl || !paidEl) return;
+
+        const counts = rows.reduce(
+          (acc, item) => {
+            const ps = String(item.payment_status || "").toLowerCase();
+            const ds = String(item.delivery_status || "").toLowerCase();
+            if (ps === "pending" || ps === "waiting_payment") acc.pending += 1;
+            if (ps === "paid") acc.paid += 1;
+            if (ps === "paid" && ds !== "delivered" && ds !== "cancelled")
+              acc.manual += 1;
+            return acc;
+          },
+          { manual: 0, pending: 0, paid: 0 },
+        );
+
+        manualEl.innerText = counts.manual;
+        pendingEl.innerText = counts.pending;
+        paidEl.innerText = counts.paid;
       }
 
       function copyOrderDetail(
@@ -6763,7 +7128,10 @@
         loadVipDiscounts();
         const searchInput = document.getElementById("orderSearchInput");
         if (searchInput) {
-          searchInput.addEventListener("input", applyOrderFilters);
+          searchInput.addEventListener("input", () => {
+            syncOrderSearchInputsFromDesktop();
+            applyOrderFilters();
+          });
         }
         const voucherSearchInput =
           document.getElementById("voucherSearchInput");
