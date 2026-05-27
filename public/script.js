@@ -1214,6 +1214,7 @@ function updatePreview() {
     : translations[currentLanguage].buyNow;
 
   resetVoucherPreview();
+  refreshCheckoutDiscountPreview();
 }
 
 brandSelect.addEventListener("change", loadDurations);
@@ -1690,6 +1691,61 @@ function showDefaultPriceBreakdown(productPrice) {
     paymentFee,
     finalPrice,
   });
+}
+
+async function refreshCheckoutDiscountPreview() {
+  if (!selectedProductId) return;
+
+  const voucherInput = document.getElementById("voucherCodeInput");
+  const voucherMessage = document.getElementById("voucherMessage");
+  const voucherCode = String(voucherInput?.value || "").trim();
+
+  try {
+    const res = await fetch("/voucher-preview", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        product_id: selectedProductId,
+        voucher_code: voucherCode,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      if (voucherCode && voucherMessage) {
+        appliedVoucherCode = "";
+        voucherMessage.innerText =
+          data.message || translations[currentLanguage].invalidVoucherMsg;
+        voucherMessage.className = "voucher-message error";
+      }
+      return;
+    }
+
+    appliedVoucherCode = data.voucher_code || "";
+
+    showPriceBreakdown({
+      originalPrice: data.original_price,
+      discountAmount: data.discount_amount,
+      paymentFee: data.payment_fee,
+      finalPrice: data.final_price,
+    });
+
+    if (voucherMessage) {
+      if (Number(data.discount_amount || 0) > 0) {
+        voucherMessage.innerText =
+          data.discount_type === "vip"
+            ? "Diskon VIP berhasil digunakan"
+            : data.message || translations[currentLanguage].voucherSuccessMsg;
+        voucherMessage.className = "voucher-message success";
+      } else {
+        voucherMessage.innerText = "";
+        voucherMessage.className = "voucher-message";
+      }
+    }
+  } catch (err) {}
 }
 
 function resetVoucherPreview() {
