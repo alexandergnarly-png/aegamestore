@@ -1245,6 +1245,78 @@
           transition-duration: 0.12s !important;
         }
       }
+
+      /* ===== CLEAN AUTH UX PATCH v2 ===== */
+      .auth-tip {
+        margin-top: 14px;
+        padding: 10px 12px;
+        border-radius: var(--radius-md);
+        background: var(--primary-soft);
+        color: var(--text-soft);
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1.45;
+        text-align: center;
+      }
+
+      .auth-card {
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+      }
+
+      .auth-emoji {
+        animation: none;
+      }
+
+      button.btn-primary::after {
+        display: none;
+      }
+
+      @media (max-width: 720px) {
+        .main {
+          display: block;
+          padding: 22px 16px 20px;
+        }
+
+        .hero {
+          display: none;
+        }
+
+        .auth-side {
+          width: 100%;
+          max-width: 500px;
+          margin: 0 auto;
+        }
+
+        .auth-card {
+          padding: 26px 20px;
+          border-radius: 22px;
+        }
+
+        .auth-head {
+          margin-bottom: 18px;
+        }
+
+        .auth-emoji {
+          width: 54px;
+          height: 54px;
+          font-size: 28px;
+          margin-bottom: 10px;
+        }
+
+        .auth-title {
+          font-size: 22px;
+        }
+
+        .auth-subtitle {
+          font-size: 13px;
+        }
+
+        .footer-note {
+          padding: 18px 18px 26px;
+        }
+      }
+
     </style>
   </head>
 
@@ -1252,10 +1324,6 @@
     <a href="#auth-card" class="skip-link" data-auth-i18n="skipToForm"
       >Lewati ke form</a
     >
-
-    <div class="bg-blob blob-1"></div>
-    <div class="bg-blob blob-2"></div>
-    <div class="bg-blob blob-3"></div>
 
     <div class="page">
       <header class="top-bar">
@@ -1542,6 +1610,10 @@
                   >Daftar sekarang</span
                 >
               </div>
+
+              <div class="auth-tip" data-auth-i18n="authTip">
+                Gunakan username yang sama seperti saat order agar riwayat kamu tersimpan.
+              </div>
             </div>
 
             <!-- FORM DAFTAR -->
@@ -1672,6 +1744,10 @@
                   >Masuk</span
                 >
               </div>
+
+              <div class="auth-tip" data-auth-i18n="authTip">
+                Gunakan username yang sama seperti saat order agar riwayat kamu tersimpan.
+              </div>
             </div>
 
             <div style="text-align: center">
@@ -1694,21 +1770,6 @@
       </footer>
     </div>
 
-    <div class="social-proof" id="socialProof" role="status" aria-live="polite">
-      <div class="social-proof-emoji" aria-hidden="true">🎉</div>
-      <div>
-        <div>
-          <span class="social-proof-name" id="socialProofName">Andra</span>
-          <span data-auth-i18n="socialProofJoined">
-            baru saja daftar &amp; top-up.
-          </span>
-        </div>
-        <div class="social-proof-desc" data-auth-i18n="socialProofTime">
-          2 menit lalu
-        </div>
-      </div>
-    </div>
-
     <script>
       // Sinkronisasi dengan Dark Mode di halaman utama
       document.addEventListener("DOMContentLoaded", () => {
@@ -1729,7 +1790,8 @@
         }
         applyAuthLanguage();
         bindLiveValidation();
-        startSocialProof();
+        // Clean auth: social proof toast disabled for faster, calmer login page.
+        // startSocialProof();
       });
 
       function toggleAuthTheme() {
@@ -1935,6 +1997,8 @@
       }
 
       function spawnSparkles() {
+        // Clean auth: sparkle burst disabled to keep login/register lightweight.
+        return;
         if (window.innerWidth <= 540) return;
         if (window.matchMedia("(prefers-reduced-motion: reduce)").matches)
           return;
@@ -2186,6 +2250,8 @@
           socialProofTime: "2 menit lalu",
           footerNote:
             "Dengan masuk atau mendaftar, kamu menyetujui Syarat & Kebijakan kami.",
+          authTip:
+            "Gunakan username yang sama seperti saat order agar riwayat kamu tersimpan.",
           changePasswordTitle: "Ganti Password",
           oldPasswordPlaceholder: "Password lama / random",
           newPasswordPlaceholder: "Password baru",
