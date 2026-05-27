@@ -17,9 +17,7 @@ function getProductStock(product: Product) {
   const rawStock =
     product.stock ?? product.stock_count ?? product.available_stock ?? null;
 
-  if (rawStock === null || rawStock === undefined) {
-    return null;
-  }
+  if (rawStock === null || rawStock === undefined) return null;
 
   return Number(rawStock || 0);
 }
@@ -31,9 +29,7 @@ function getBrands(products: Product[]) {
 }
 
 function groupProductsByBrand(products: Product[]) {
-  const brands = getBrands(products);
-
-  return brands.map((brand) => ({
+  return getBrands(products).map((brand) => ({
     brand,
     products: products
       .filter((item) => item.brand === brand)
@@ -66,124 +62,143 @@ export function ProductPickerModal({
       : brandGroups.filter((group) => group.brand === activeBrand);
 
   useEffect(() => {
-    if (open) {
-      setActiveBrand("all");
-      document.body.style.overflow = "hidden";
+    if (!open) return;
+
+    setActiveBrand("all");
+    document.body.style.overflow = "hidden";
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") onClose();
     }
+
+    window.addEventListener("keydown", handleKeyDown);
 
     return () => {
       document.body.style.overflow = "";
+      window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [open]);
+  }, [open, onClose]);
 
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-sky-950/45 px-3 py-3 backdrop-blur-md md:items-center">
-      <div className="w-full max-w-3xl overflow-hidden rounded-[2rem] bg-white shadow-2xl ring-1 ring-sky-100">
-        <div className="relative overflow-hidden">
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-sky-950/45 px-2 pb-2 pt-8 backdrop-blur-md md:items-center md:p-4"
+      onClick={onClose}
+    >
+      <div
+        className="flex max-h-[86dvh] w-full max-w-2xl flex-col overflow-hidden rounded-[1.7rem] bg-white shadow-2xl ring-1 ring-sky-100 md:max-h-[82vh] md:rounded-[2rem]"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="relative shrink-0 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-sky-500 via-cyan-300 to-rose-400" />
 
           {thumbnail ? (
             <img
               src={thumbnail}
               alt={title}
-              className="absolute inset-0 h-full w-full object-cover opacity-35"
+              className="absolute inset-0 h-full w-full object-cover opacity-25"
             />
           ) : null}
 
-          <div className="absolute inset-0 bg-gradient-to-t from-sky-950/80 via-sky-950/35 to-sky-950/10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-sky-950/80 via-sky-950/35 to-sky-950/5" />
 
-          <div className="relative flex items-start justify-between gap-4 p-5 text-white">
-            <div className="flex min-w-0 items-center gap-3">
-              <div className="h-16 w-16 shrink-0 overflow-hidden rounded-3xl bg-white/20 ring-1 ring-white/30 backdrop-blur">
-                {thumbnail ? (
-                  <img
-                    src={thumbnail}
-                    alt={title}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center text-sm font-black text-white">
-                    {initials}
-                  </div>
-                )}
-              </div>
-
-              <div className="min-w-0">
-                <p className="text-xs font-black uppercase tracking-[0.2em] text-white/80">
-                  Choose brand & duration
-                </p>
-
-                <h2 className="mt-1 truncate text-3xl font-black">{title}</h2>
-
-                <p className="mt-1 text-xs font-semibold text-white/80">
-                  {products.length} options · {brandGroups.length} brands ·
-                  start from {formatRupiah(lowestPrice)}
-                </p>
-              </div>
+          <div className="relative p-4 text-white md:p-5">
+            <div className="mb-3 flex items-center justify-center md:hidden">
+              <div className="h-1.5 w-12 rounded-full bg-white/40" />
             </div>
 
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/20 text-xl font-black text-white backdrop-blur hover:bg-white/30"
-              aria-label="Close"
-            >
-              ×
-            </button>
-          </div>
-        </div>
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="h-13 w-13 flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white/20 ring-1 ring-white/30 backdrop-blur md:h-16 md:w-16 md:rounded-3xl">
+                  {thumbnail ? (
+                    <img
+                      src={thumbnail}
+                      alt={title}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-sm font-black text-white">
+                      {initials}
+                    </span>
+                  )}
+                </div>
 
-        <div className="border-b border-sky-100 bg-white px-4 py-3">
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            <button
-              type="button"
-              onClick={() => setActiveBrand("all")}
-              className={`shrink-0 rounded-full px-4 py-2 text-xs font-black transition ${
-                activeBrand === "all"
-                  ? "bg-sky-500 text-white"
-                  : "bg-sky-50 text-sky-700 hover:bg-sky-100"
-              }`}
-            >
-              All Brands
-            </button>
+                <div className="min-w-0">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/80 md:text-xs">
+                    Choose option
+                  </p>
 
-            {brandGroups.map((group) => (
+                  <h2 className="mt-0.5 truncate text-2xl font-black md:text-3xl">
+                    {title}
+                  </h2>
+
+                  <p className="mt-1 text-[11px] font-semibold text-white/80 md:text-xs">
+                    {products.length} options · {brandGroups.length} brands ·{" "}
+                    {formatRupiah(lowestPrice)}
+                  </p>
+                </div>
+              </div>
+
               <button
-                key={group.brand}
                 type="button"
-                onClick={() => setActiveBrand(group.brand)}
-                className={`shrink-0 rounded-full px-4 py-2 text-xs font-black transition ${
-                  activeBrand === group.brand
-                    ? "bg-sky-500 text-white"
-                    : "bg-sky-50 text-sky-700 hover:bg-sky-100"
+                onClick={onClose}
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/20 text-xl font-black text-white backdrop-blur transition hover:bg-white/30"
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+              <button
+                type="button"
+                onClick={() => setActiveBrand("all")}
+                className={`shrink-0 rounded-full px-3.5 py-2 text-[11px] font-black transition md:text-xs ${
+                  activeBrand === "all"
+                    ? "bg-white text-sky-700"
+                    : "bg-white/15 text-white ring-1 ring-white/25 hover:bg-white/25"
                 }`}
               >
-                {group.brand}
+                All Brands
               </button>
-            ))}
+
+              {brandGroups.map((group) => (
+                <button
+                  key={group.brand}
+                  type="button"
+                  onClick={() => setActiveBrand(group.brand)}
+                  className={`shrink-0 rounded-full px-3.5 py-2 text-[11px] font-black transition md:text-xs ${
+                    activeBrand === group.brand
+                      ? "bg-white text-sky-700"
+                      : "bg-white/15 text-white ring-1 ring-white/25 hover:bg-white/25"
+                  }`}
+                >
+                  {group.brand}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
-        <div className="max-h-[58vh] overflow-y-auto bg-sky-50/70 p-4">
-          <div className="grid gap-4">
+        <div className="min-h-0 flex-1 overflow-y-auto bg-sky-50/70 p-3 md:p-4">
+          <div className="grid gap-3">
             {visibleGroups.map((group) => (
               <section
                 key={group.brand}
-                className="rounded-[1.5rem] bg-white p-4 shadow-sm ring-1 ring-sky-100"
+                className="rounded-[1.35rem] bg-white p-3 shadow-sm ring-1 ring-sky-100 md:p-4"
               >
-                <div className="mb-3 flex items-center justify-between gap-3">
+                <div className="mb-2 flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-xs font-black uppercase tracking-wide text-sky-500">
+                    <p className="text-[10px] font-black uppercase tracking-wide text-sky-500 md:text-xs">
                       Brand
                     </p>
-                    <h3 className="text-xl font-black text-sky-950">
+                    <h3 className="text-base font-black text-sky-950 md:text-lg">
                       {group.brand}
                     </h3>
                   </div>
 
-                  <span className="rounded-full bg-sky-100 px-3 py-1 text-xs font-black text-sky-700">
+                  <span className="rounded-full bg-sky-100 px-3 py-1 text-[11px] font-black text-sky-700 md:text-xs">
                     {group.products.length} options
                   </span>
                 </div>
@@ -200,30 +215,30 @@ export function ProductPickerModal({
                     return (
                       <div
                         key={product.id}
-                        className="rounded-2xl border border-sky-100 bg-white p-3 transition hover:border-sky-200 hover:bg-sky-50/60"
+                        className="rounded-2xl border border-sky-100 bg-white p-3 transition hover:border-sky-200 hover:bg-sky-50/70"
                       >
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                          <div>
-                            <div className="flex flex-wrap items-center gap-2">
-                              <p className="text-base font-black text-sky-950">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <p className="truncate text-sm font-black text-sky-950 md:text-base">
                                 {product.duration}
                               </p>
 
                               {isLowest ? (
-                                <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-black text-emerald-700">
+                                <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700">
                                   Best price
                                 </span>
                               ) : null}
                             </div>
 
-                            <p className="mt-1 text-xl font-black text-sky-700">
+                            <p className="mt-1 text-base font-black text-sky-700 md:text-lg">
                               {formatRupiah(product.price)}
                             </p>
                           </div>
 
-                          <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+                          <div className="flex shrink-0 items-center gap-2">
                             <span
-                              className={`rounded-full px-3 py-1 text-xs font-black ${
+                              className={`hidden rounded-full px-2.5 py-1 text-[10px] font-black sm:inline-flex ${
                                 isOutOfStock
                                   ? "bg-rose-100 text-rose-700"
                                   : "bg-emerald-100 text-emerald-700"
@@ -232,23 +247,43 @@ export function ProductPickerModal({
                               {stockUnknown
                                 ? "Available"
                                 : isOutOfStock
-                                  ? "Stock empty"
+                                  ? "Empty"
                                   : `${stock} stock`}
                             </span>
 
                             {isOutOfStock ? (
-                              <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-black text-slate-400">
+                              <span className="rounded-full bg-slate-100 px-3 py-2 text-xs font-black text-slate-400">
                                 Sold Out
                               </span>
                             ) : (
                               <a
                                 href={buildCheckoutUrl(product.game)}
-                                className="rounded-full bg-rose-500 px-4 py-2 text-sm font-black text-white shadow-sm hover:bg-rose-600"
+                                className="rounded-full bg-rose-500 px-4 py-2 text-xs font-black text-white shadow-sm shadow-rose-500/20 transition hover:bg-rose-600 md:text-sm"
                               >
                                 Buy
                               </a>
                             )}
                           </div>
+                        </div>
+
+                        <div className="mt-2 flex items-center justify-between gap-2 sm:hidden">
+                          <span
+                            className={`rounded-full px-2.5 py-1 text-[10px] font-black ${
+                              isOutOfStock
+                                ? "bg-rose-100 text-rose-700"
+                                : "bg-emerald-100 text-emerald-700"
+                            }`}
+                          >
+                            {stockUnknown
+                              ? "Available"
+                              : isOutOfStock
+                                ? "Stock empty"
+                                : `${stock} stock`}
+                          </span>
+
+                          <p className="text-[10px] font-semibold text-slate-400">
+                            Stable checkout
+                          </p>
                         </div>
                       </div>
                     );
@@ -259,18 +294,17 @@ export function ProductPickerModal({
           </div>
         </div>
 
-        <div className="border-t border-sky-100 bg-white p-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-xs font-semibold leading-5 text-slate-500">
-              Setelah klik Buy, kamu akan diarahkan ke checkout website lama
-              yang sudah stabil.
+        <div className="shrink-0 border-t border-sky-100 bg-white p-3 md:p-4">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-[11px] font-semibold leading-5 text-slate-500 md:text-xs">
+              Checkout tetap diarahkan ke website lama yang sudah stabil.
             </p>
 
             <a
               href={buildSupportUrl()}
-              className="shrink-0 rounded-full bg-sky-100 px-4 py-2 text-center text-xs font-black text-sky-700 hover:bg-sky-200"
+              className="shrink-0 rounded-full bg-sky-100 px-3.5 py-2 text-xs font-black text-sky-700 transition hover:bg-sky-200"
             >
-              Ask Support
+              Support
             </a>
           </div>
         </div>
