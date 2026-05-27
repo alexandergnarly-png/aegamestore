@@ -5,8 +5,17 @@ import { ProductCard, type Product } from "@/components/ProductCard";
 
 type SortMode = "recommended" | "price-low" | "price-high" | "name";
 
+function normalizeText(value: string | number | undefined | null) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ");
+}
+
 function getUniqueGames(products: Product[]) {
-  return Array.from(new Set(products.map((item) => item.game))).filter(Boolean);
+  return Array.from(new Set(products.map((item) => item.game)))
+    .filter(Boolean)
+    .sort((a, b) => a.localeCompare(b));
 }
 
 export function CatalogSection({ products }: { products: Product[] }) {
@@ -17,15 +26,17 @@ export function CatalogSection({ products }: { products: Product[] }) {
   const games = useMemo(() => getUniqueGames(products), [products]);
 
   const filteredProducts = useMemo(() => {
-    const keyword = search.trim().toLowerCase();
+    const keyword = normalizeText(search);
 
     const result = products.filter((item) => {
-      const matchSearch =
-        !keyword ||
-        item.game.toLowerCase().includes(keyword) ||
-        item.brand.toLowerCase().includes(keyword) ||
-        item.duration.toLowerCase().includes(keyword);
+      const game = normalizeText(item.game);
+      const brand = normalizeText(item.brand);
+      const duration = normalizeText(item.duration);
+      const delivery = normalizeText(item.delivery_type);
 
+      const searchableText = `${game} ${brand} ${duration} ${delivery}`;
+
+      const matchSearch = !keyword || searchableText.includes(keyword);
       const matchGame = gameFilter === "all" || item.game === gameFilter;
 
       return matchSearch && matchGame;
@@ -35,12 +46,30 @@ export function CatalogSection({ products }: { products: Product[] }) {
       if (sortMode === "price-low") return a.price - b.price;
       if (sortMode === "price-high") return b.price - a.price;
       if (sortMode === "name") {
-        return `${a.game} ${a.brand}`.localeCompare(`${b.game} ${b.brand}`);
+        return `${a.game} ${a.brand} ${a.duration}`.localeCompare(
+          `${b.game} ${b.brand} ${b.duration}`,
+        );
       }
 
       return 0;
     });
   }, [products, search, gameFilter, sortMode]);
+
+  function handleSearchChange(value: string) {
+    setSearch(value);
+
+    // Biar kalau sebelumnya filter game masih Delta/CODM,
+    // pas search "pubg" hasilnya tetap bisa muncul.
+    if (value.trim()) {
+      setGameFilter("all");
+    }
+  }
+
+  function clearFilters() {
+    setSearch("");
+    setGameFilter("all");
+    setSortMode("recommended");
+  }
 
   return (
     <section id="catalog" className="px-4 pb-12">
@@ -61,10 +90,10 @@ export function CatalogSection({ products }: { products: Product[] }) {
         </div>
 
         <div className="mb-5 rounded-3xl bg-white p-3 shadow-sm ring-1 ring-sky-100">
-          <div className="grid gap-3 md:grid-cols-[1fr_auto_auto]">
+          <div className="grid gap-3 md:grid-cols-[1fr_auto_auto_auto]">
             <input
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              onChange={(event) => handleSearchChange(event.target.value)}
               placeholder="Search game, brand, duration..."
               className="h-12 rounded-2xl border border-sky-100 bg-sky-50 px-4 text-sm font-semibold text-sky-950 outline-none transition focus:border-sky-300 focus:bg-white"
             />
@@ -92,7 +121,21 @@ export function CatalogSection({ products }: { products: Product[] }) {
               <option value="price-high">Highest price</option>
               <option value="name">Name A-Z</option>
             </select>
+
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="h-12 rounded-2xl bg-slate-100 px-4 text-sm font-black text-slate-600 transition hover:bg-slate-200"
+            >
+              Reset
+            </button>
           </div>
+
+          {search.trim() && (
+            <p className="mt-3 px-1 text-xs font-bold text-slate-500">
+              Search: <span className="text-sky-700">{search}</span>
+            </p>
+          )}
         </div>
 
         {filteredProducts.length > 0 ? (
@@ -103,7 +146,7 @@ export function CatalogSection({ products }: { products: Product[] }) {
           </div>
         ) : (
           <div className="rounded-3xl bg-white p-5 text-sm font-semibold text-slate-500 shadow-sm ring-1 ring-sky-100">
-            Produk tidak ditemukan. Coba ganti keyword atau filter game.
+            Produk tidak ditemukan. Coba ganti keyword atau klik Reset.
           </div>
         )}
       </div>
