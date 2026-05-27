@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="style.css?v=50" />
+    <link rel="stylesheet" href="style.css?v=51" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#0ea5e9" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -510,7 +510,11 @@
         <div class="form-grid">
           <div class="field order-choice-field">
             <label for="brand" data-i18n="brandLabel">Brand</label>
-            <select id="brand" class="native-order-select" aria-label="Brand"></select>
+            <select
+              id="brand"
+              class="native-order-select"
+              aria-label="Brand"
+            ></select>
             <div
               class="order-brand-pills"
               id="brandPills"
@@ -551,7 +555,7 @@
           </div>
         </div>
 
-        <details class="voucher-panel" id="voucherPanel">
+        <details class="voucher-panel" id="voucherPanel" open>
           <summary class="voucher-toggle">
             <span class="voucher-toggle-main">
               <span aria-hidden="true">🎟️</span>
@@ -1117,6 +1121,6 @@
         document.getElementById("preloader")?.classList.add("fade-out");
       }, 5000);
     </script>
-    <script src="script.js?v=50"></script>
+    <script src="script.js?v=51"></script>
   </body>
 </html>

@@ -1148,7 +1148,7 @@ async function openOrderModal(game) {
   const voucherInput = document.getElementById("voucherCodeInput");
   if (voucherInput) voucherInput.value = "";
   const voucherPanel = document.getElementById("voucherPanel");
-  if (voucherPanel) voucherPanel.open = false;
+  if (voucherPanel) voucherPanel.open = true;
 
   const nameInput = document.getElementById("name");
   const contactInput = document.getElementById("contact");
