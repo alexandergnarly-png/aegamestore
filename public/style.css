@@ -6848,44 +6848,62 @@ body.dark-theme .order-steps {
   }
 }
 
-/* =========================================================
-   ORDER POPUP MODERN SELECTOR v50
-   Native select remains as a hidden fallback controlled by JS.
-   ========================================================= */
+/* ============================================================
+   AE UI/UX v56 — QRIS full view + mobile order popup overflow fix
+   ============================================================ */
 .native-order-select {
   position: absolute !important;
   width: 1px !important;
   height: 1px !important;
-  padding: 0 !important;
-  margin: -1px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
   overflow: hidden !important;
-  clip: rect(0, 0, 0, 0) !important;
-  white-space: nowrap !important;
-  border: 0 !important;
 }
 
 .order-choice-field {
   position: relative;
+  min-width: 0;
 }
 
 .order-brand-pills {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
+  gap: 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 2px 2px 8px;
+  margin-top: 4px;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+}
+
+.order-brand-pills::-webkit-scrollbar,
+.order-product-cards::-webkit-scrollbar {
+  height: 4px;
+}
+
+.order-brand-pills::-webkit-scrollbar-thumb,
+.order-product-cards::-webkit-scrollbar-thumb {
+  background: rgba(14, 165, 233, 0.22);
+  border-radius: var(--radius-pill);
 }
 
 .order-brand-pill {
+  flex: 0 0 auto;
+  min-width: 112px;
+  max-width: 180px;
+  min-height: 46px;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  min-height: 42px;
-  padding: 10px 13px;
+  padding: 10px 14px;
   border-radius: var(--radius-pill);
-  border: 1px solid var(--border-soft);
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(56, 189, 248, 0.24);
   color: var(--text-main);
   box-shadow: var(--shadow-xs);
+  scroll-snap-align: start;
   transition:
     transform var(--dur-fast) var(--ease-out),
     border-color var(--dur-fast) var(--ease-out),
@@ -6894,913 +6912,285 @@ body.dark-theme .order-steps {
 }
 
 body.dark-theme .order-brand-pill {
-  background: rgba(20, 30, 56, 0.72);
+  background: rgba(20, 30, 56, 0.82);
 }
 
-.order-brand-pill:hover {
-  transform: translateY(-1px);
-  border-color: rgba(14, 165, 233, 0.55);
-}
-
-.order-brand-pill.is-selected {
-  background: linear-gradient(135deg, var(--ocean-deep), var(--ocean-light));
-  color: white;
-  border-color: transparent;
-  box-shadow: 0 10px 22px rgba(14, 165, 233, 0.24);
-}
-
-.order-brand-name {
+.order-brand-pill span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 13px;
-  font-weight: 800;
-  letter-spacing: -0.1px;
+  font-weight: 900;
 }
 
-.order-brand-stock {
-  display: inline-flex;
-  align-items: center;
+.order-brand-pill small {
+  flex: 0 0 auto;
   padding: 3px 7px;
   border-radius: var(--radius-pill);
-  background: rgba(14, 165, 233, 0.12);
+  background: rgba(56, 189, 248, 0.13);
   color: var(--ocean-deep);
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 900;
   white-space: nowrap;
 }
 
-.order-brand-pill.is-selected .order-brand-stock {
-  background: rgba(255, 255, 255, 0.22);
+body.dark-theme .order-brand-pill small {
+  color: var(--ocean-light);
+  background: rgba(56, 189, 248, 0.18);
+}
+
+.order-brand-pill.active {
   color: white;
+  border-color: var(--ocean-light);
+  background: linear-gradient(135deg, var(--ocean-deep), var(--ocean-light));
+}
+
+.order-brand-pill.active small {
+  color: white;
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.order-brand-pill:active,
+.order-product-card:active {
+  transform: scale(0.985);
 }
 
 .order-product-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  grid-template-columns: 1fr;
   gap: 10px;
-  margin-top: 8px;
+  margin-top: 4px;
+  min-width: 0;
 }
 
 .order-product-card {
+  width: 100%;
+  min-height: 104px;
   display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 7px;
-  min-height: 112px;
-  padding: 14px;
-  text-align: left;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-soft);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.66));
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 15px 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(56, 189, 248, 0.26);
+  background: rgba(255, 255, 255, 0.78);
   color: var(--text-main);
+  text-align: left;
   box-shadow: var(--shadow-xs);
   transition:
     transform var(--dur-fast) var(--ease-out),
     border-color var(--dur-fast) var(--ease-out),
-    background var(--dur-fast) var(--ease-out),
-    box-shadow var(--dur-fast) var(--ease-out);
+    background var(--dur-fast) var(--ease-out);
 }
 
 body.dark-theme .order-product-card {
-  background: linear-gradient(180deg, rgba(20, 30, 56, 0.88), rgba(20, 30, 56, 0.66));
+  background: rgba(20, 30, 56, 0.78);
 }
 
-.order-product-card:hover:not(:disabled) {
-  transform: translateY(-1px);
-  border-color: rgba(14, 165, 233, 0.6);
-  box-shadow: var(--shadow-sm);
-}
-
-.order-product-card:active:not(:disabled) {
-  transform: scale(0.98);
-}
-
-.order-product-card.is-selected {
+.order-product-card.active {
   border-color: var(--ocean);
-  background:
-    linear-gradient(180deg, rgba(224, 242, 254, 0.96), rgba(255, 255, 255, 0.78));
-  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.16);
+  background: linear-gradient(180deg, rgba(224, 242, 254, 0.92), rgba(255, 255, 255, 0.82));
+  box-shadow: 0 0 0 1px rgba(14, 165, 233, 0.12);
 }
 
-body.dark-theme .order-product-card.is-selected {
-  background:
-    linear-gradient(180deg, rgba(14, 165, 233, 0.18), rgba(20, 30, 56, 0.78));
+body.dark-theme .order-product-card.active {
+  background: rgba(56, 189, 248, 0.16);
 }
 
-.order-product-card.is-disabled {
-  opacity: 0.55;
+.order-product-card.is-empty {
+  opacity: 0.56;
   cursor: not-allowed;
-  filter: grayscale(0.25);
+  filter: grayscale(0.2);
 }
 
-.order-product-topline {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 8px;
+.order-product-main {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
 }
 
-.order-product-duration {
-  font-size: 14px;
-  font-weight: 800;
+.order-product-main strong {
+  font-size: 16px;
+  font-weight: 900;
   color: var(--text-strong);
-  letter-spacing: -0.2px;
-  line-height: 1.25;
+  line-height: 1.2;
 }
 
-.order-product-badge {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 8px;
-  border-radius: var(--radius-pill);
-  background: rgba(16, 185, 129, 0.14);
-  color: #047857;
-  border: 1px solid rgba(16, 185, 129, 0.2);
-  font-size: 10px;
+.order-product-main b {
+  font-size: 24px;
   font-weight: 900;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-body.dark-theme .order-product-badge {
-  color: #6ee7b7;
-}
-
-.order-product-badge.danger {
-  background: rgba(244, 63, 94, 0.14);
-  color: #be123c;
-  border-color: rgba(244, 63, 94, 0.24);
-}
-
-body.dark-theme .order-product-badge.danger {
-  color: #fda4af;
-}
-
-.order-product-price {
-  font-size: 18px;
-  font-weight: 900;
+  letter-spacing: -0.6px;
   color: var(--ocean-deep);
-  letter-spacing: -0.45px;
+  line-height: 1.15;
 }
 
-body.dark-theme .order-product-price {
+body.dark-theme .order-product-main b {
   color: var(--ocean-light);
 }
 
-.order-product-meta {
+.order-product-main small {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-muted);
+}
+
+.order-product-stock {
+  flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  color: var(--text-muted);
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: var(--radius-pill);
+  background: rgba(16, 185, 129, 0.16);
+  color: #047857;
+  border: 1px solid rgba(16, 185, 129, 0.28);
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 900;
+  white-space: nowrap;
 }
 
-.order-choice-empty {
-  width: 100%;
-  padding: 14px;
-  border-radius: var(--radius-md);
-  background: rgba(56, 189, 248, 0.08);
-  border: 1px dashed var(--border-color);
-  color: var(--text-muted);
-  font-size: 13px;
-  font-weight: 700;
-  text-align: center;
+.order-product-card.is-empty .order-product-stock {
+  background: rgba(244, 63, 94, 0.12);
+  color: #be123c;
+  border-color: rgba(244, 63, 94, 0.22);
 }
 
+/* Fix game popup clipped on some mobile browsers, especially when the URL bar
+   changes viewport width/height while a bottom sheet is open. */
 @media (max-width: 640px) {
+  .order-modal {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    overflow: hidden !important;
+    padding: 8px !important;
+  }
+
+  .order-modal-card {
+    width: calc(100vw - 16px) !important;
+    max-width: calc(100vw - 16px) !important;
+    margin-inline: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior: contain;
+  }
+
+  .modal-head h2,
+  .modal-head p {
+    max-width: calc(100vw - 88px) !important;
+    overflow-wrap: anywhere;
+  }
+
+  .form-grid,
+  .price-breakdown,
+  .modal-summary,
+  .payment-methods-preview,
+  .trust-text {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
   .order-brand-pills {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    padding-bottom: 4px;
-    -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x mandatory;
+    gap: 8px;
+    margin-inline: -2px;
+    padding-inline: 2px;
   }
 
   .order-brand-pill {
-    flex: 0 0 auto;
-    scroll-snap-align: start;
-    min-height: 40px;
-    padding: 9px 12px;
+    min-width: 96px;
+    max-width: 150px;
+    min-height: 42px;
+    padding: 8px 10px;
+    gap: 6px;
+    box-shadow: none !important;
+  }
+
+  .order-brand-pill span {
+    font-size: 12px;
+  }
+
+  .order-brand-pill small {
+    font-size: 9px;
+    padding: 2px 6px;
   }
 
   .order-product-cards {
-    grid-template-columns: 1fr;
     gap: 8px;
   }
 
   .order-product-card {
-    min-height: 92px;
-    padding: 12px 13px;
-    border-radius: 16px;
-  }
-
-  .order-product-duration {
-    font-size: 13px;
-  }
-
-  .order-product-price {
-    font-size: 17px;
-  }
-
-  .order-product-badge {
-    font-size: 9px;
-    padding: 3px 7px;
-  }
-}
-
-@media (max-width: 540px) {
-  .order-brand-pill:hover,
-  .order-product-card:hover:not(:disabled) {
-    transform: none;
-    box-shadow: none;
-  }
-
-  .order-brand-pill,
-  .order-product-card,
-  .order-product-card.is-selected,
-  .order-brand-pill.is-selected {
+    min-height: 88px;
+    padding: 12px 12px;
+    border-radius: 17px;
     box-shadow: none !important;
   }
-}
 
-
-/* =========================================================
-   ORDER POPUP V51 — Voucher visible + proportional mobile size
-   Keeps modern brand/product selector, restores voucher input visibility.
-   ========================================================= */
-.voucher-panel {
-  display: block !important;
-  margin: 10px 0 12px !important;
-  border-radius: 18px !important;
-  background: linear-gradient(180deg, rgba(224, 242, 254, 0.72), rgba(255, 255, 255, 0.52)) !important;
-}
-
-body.dark-theme .voucher-panel {
-  background: linear-gradient(180deg, rgba(14, 165, 233, 0.14), rgba(20, 30, 56, 0.56)) !important;
-}
-
-.voucher-panel[open] .voucher-panel-body {
-  display: block !important;
-}
-
-.voucher-toggle {
-  min-height: 50px;
-}
-
-.voucher-row input#voucherCodeInput {
-  min-height: 44px;
-  border-radius: 14px;
-}
-
-.voucher-check-btn {
-  min-height: 44px;
-  border-radius: 14px !important;
-}
-
-@media (max-width: 640px) {
-  .order-modal {
-    padding: 0 !important;
-    align-items: flex-end !important;
+  .order-product-main strong {
+    font-size: 14px;
   }
 
-  .order-modal-card {
-    width: 100% !important;
-    max-width: 100% !important;
-    max-height: 94dvh !important;
-    border-radius: 22px 22px 0 0 !important;
-    padding: 16px 14px calc(12px + env(safe-area-inset-bottom)) !important;
+  .order-product-main b {
+    font-size: 20px;
   }
 
-  .modal-close-btn {
-    top: 10px !important;
-    right: 10px !important;
-    width: 34px !important;
-    height: 34px !important;
+  .order-product-main small {
+    font-size: 12px;
   }
 
-  .modal-head {
-    margin-bottom: 12px !important;
-    padding-right: 36px;
-  }
-
-  .summary-badge {
-    font-size: 9.5px !important;
-    padding: 4px 9px !important;
-    margin-bottom: 6px !important;
-  }
-
-  .modal-head h2 {
-    font-size: 19px !important;
-    line-height: 1.18 !important;
-    margin-bottom: 3px !important;
-  }
-
-  .modal-head p {
-    font-size: 12px !important;
-    line-height: 1.45 !important;
-  }
-
-  .order-steps {
-    margin-bottom: 12px !important;
-    padding: 8px !important;
-    border-radius: 16px !important;
-  }
-
-  .order-step-dot {
-    width: 24px !important;
-    height: 24px !important;
-    font-size: 11px !important;
-  }
-
-  .order-step-label {
-    font-size: 10px !important;
-  }
-
-  .form-grid {
-    gap: 10px !important;
-    margin-bottom: 10px !important;
-  }
-
-  .form-group label,
-  .field label,
-  .voucher-panel-body label {
-    font-size: 11.5px !important;
-    margin-bottom: 6px !important;
-  }
-
-  input[type="text"]:not(#gameSearch),
-  select {
-    min-height: 42px !important;
-    padding: 11px 12px !important;
-    border-radius: 14px !important;
-    font-size: 13px !important;
-  }
-
-  .order-brand-pills {
-    gap: 6px !important;
-    margin-top: 6px !important;
-  }
-
-  .order-brand-pill {
-    min-height: 36px !important;
-    padding: 8px 10px !important;
-    gap: 6px !important;
-  }
-
-  .order-brand-name {
-    font-size: 12px !important;
-  }
-
-  .order-brand-stock {
-    font-size: 9px !important;
-    padding: 2px 6px !important;
-  }
-
-  .order-product-cards {
-    gap: 7px !important;
-    margin-top: 6px !important;
-  }
-
-  .order-product-card {
-    min-height: 82px !important;
-    padding: 10px 11px !important;
-    gap: 5px !important;
-    border-radius: 15px !important;
-  }
-
-  .order-product-duration {
-    font-size: 12.5px !important;
-    line-height: 1.2 !important;
-  }
-
-  .order-product-price {
-    font-size: 15.5px !important;
-  }
-
-  .order-product-badge {
-    font-size: 8.5px !important;
-    padding: 3px 6px !important;
-  }
-
-  .order-product-meta {
-    font-size: 10px !important;
-    gap: 5px !important;
-  }
-
-  .voucher-panel {
-    margin: 8px 0 10px !important;
-    border-radius: 15px !important;
-  }
-
-  .voucher-toggle {
-    min-height: 44px !important;
-    padding: 10px 12px !important;
-    gap: 2px 8px !important;
-  }
-
-  .voucher-toggle-main {
-    font-size: 12.5px !important;
-  }
-
-  .voucher-toggle small {
-    font-size: 10.5px !important;
-  }
-
-  .voucher-toggle-arrow {
-    width: 24px !important;
-    height: 24px !important;
-  }
-
-  .voucher-panel-body {
-    padding: 0 12px 12px !important;
-  }
-
-  .voucher-row {
-    grid-template-columns: 1fr auto !important;
-    gap: 7px !important;
-  }
-
-  .voucher-check-btn {
-    min-height: 42px !important;
-    padding: 0 12px !important;
-    font-size: 12px !important;
-  }
-
-  .voucher-check-btn span {
-    display: none !important;
-  }
-
-  .voucher-message {
-    min-height: 14px !important;
-    margin-top: 6px !important;
-    font-size: 11px !important;
-  }
-
-  .price-breakdown {
-    padding: 10px 12px !important;
-    margin: 6px 0 10px !important;
-    border-radius: 15px !important;
-  }
-
-  .price-breakdown > div {
-    padding: 4px 0 !important;
-    font-size: 12px !important;
-  }
-
-  .modal-summary {
-    gap: 8px !important;
-    margin-bottom: 10px !important;
-  }
-
-  .summary-item {
-    padding: 10px 11px !important;
-    border-radius: 14px !important;
-  }
-
-  #buyBtn {
-    min-height: 50px !important;
-    border-radius: 15px !important;
-    margin-top: 10px !important;
+  .order-product-stock {
+    font-size: 10px;
+    padding: 5px 8px;
   }
 }
 
-@media (max-width: 390px) {
-  .order-modal-card {
-    padding-left: 12px !important;
-    padding-right: 12px !important;
-  }
-
-  .order-brand-stock {
-    display: none !important;
-  }
-
-  .order-product-card {
-    min-height: 78px !important;
-  }
-
-  .voucher-row {
-    grid-template-columns: 1fr auto !important;
-  }
-
-  .voucher-check-btn {
-    padding: 0 10px !important;
-  }
-}
-
-
-/* =========================================================
-   ORDER POPUP V52 — Voucher mobile visibility fix
-   Voucher is now placed before player detail and forced visible on mobile.
-   ========================================================= */
-#voucherPanel.voucher-panel {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  order: 3;
-  flex: 0 0 auto;
-}
-
-#voucherPanel .voucher-toggle {
-  display: grid !important;
-}
-
-#voucherPanel[open] .voucher-panel-body,
-#voucherPanel .voucher-panel-body {
-  display: block !important;
-  visibility: visible !important;
-}
-
-#voucherCodeInput,
-#checkVoucherBtn,
-#voucherMessage {
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-@media (max-width: 640px) {
-  #voucherPanel.voucher-panel {
-    margin: 8px 0 10px !important;
-    border: 1px solid rgba(14, 165, 233, 0.18) !important;
-    background: rgba(224, 242, 254, 0.66) !important;
-    scroll-margin-top: 12px;
-  }
-
-  body.dark-theme #voucherPanel.voucher-panel {
-    background: rgba(14, 165, 233, 0.13) !important;
-  }
-
-  #voucherPanel .voucher-toggle {
-    min-height: 42px !important;
-    padding: 9px 11px !important;
-  }
-
-  #voucherPanel .voucher-toggle-main {
-    font-size: 12px !important;
-  }
-
-  #voucherPanel .voucher-toggle small {
-    font-size: 10px !important;
-  }
-
-  #voucherPanel .voucher-panel-body {
-    padding: 0 11px 11px !important;
-  }
-
-  #voucherPanel .voucher-row {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) 58px !important;
-    align-items: stretch !important;
-    gap: 7px !important;
-  }
-
-  #voucherCodeInput {
-    min-width: 0 !important;
-    width: 100% !important;
-    height: 40px !important;
-    min-height: 40px !important;
-    padding: 9px 11px !important;
-    font-size: 12.5px !important;
-    border-radius: 13px !important;
-  }
-
-  #checkVoucherBtn.voucher-check-btn {
-    width: 58px !important;
-    min-width: 58px !important;
-    height: 40px !important;
-    min-height: 40px !important;
-    padding: 0 !important;
-    justify-content: center !important;
-    border-radius: 13px !important;
-  }
-
-  #checkVoucherBtn.voucher-check-btn b {
-    font-size: 12px !important;
-  }
-
-  #voucherMessage.voucher-message {
-    margin-top: 6px !important;
-    min-height: 13px !important;
-    font-size: 10.5px !important;
-  }
-}
-
-/* ============================================================
-   AE Payment Modal Upgrade v55 — mobile-first checkout status
-   ============================================================ */
-.payment-modal-card {
-  max-width: 560px;
-  border-radius: 30px;
-}
-
-.payment-modal-steps {
-  display: grid;
-  grid-template-columns: 1fr 42px 1fr 42px 1fr;
-  align-items: center;
-  gap: 8px;
-  padding: 14px 22px 2px;
-}
-
-.payment-step {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-  color: var(--text-muted, #64748b);
-}
-
-.payment-step-dot {
-  width: 34px;
-  height: 34px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: rgba(14, 165, 233, 0.08);
-  border: 1px solid rgba(14, 165, 233, 0.24);
-  color: var(--ocean-deep, #0284c7);
-  font-weight: 900;
-  font-size: 13px;
-}
-
-.payment-step small {
-  font-size: 10px;
-  font-weight: 900;
-  letter-spacing: 0.04em;
-  text-align: center;
-  white-space: nowrap;
-}
-
-.payment-step-line {
-  height: 2px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, rgba(14, 165, 233, 0.18), rgba(244, 114, 182, 0.18));
-}
-
-.payment-step.is-done .payment-step-dot,
-.payment-step.is-active .payment-step-dot {
-  color: #fff;
-  background: linear-gradient(135deg, var(--ocean, #0ea5e9), var(--ocean-light, #38bdf8));
-  border-color: transparent;
-}
-
-.payment-step.is-done small,
-.payment-step.is-active small {
-  color: var(--ocean-deep, #0284c7);
-}
-
-.payment-step.is-done .payment-step-dot::after {
-  content: "✓";
-  font-size: 14px;
-}
-
-.payment-step.is-done .payment-step-dot {
-  font-size: 0;
-}
-
-.payment-step.is-failed .payment-step-dot {
-  background: rgba(244, 63, 94, 0.12);
-  border-color: rgba(244, 63, 94, 0.26);
-  color: var(--danger, #f43f5e);
-}
-
-.payment-step.is-failed small {
-  color: var(--danger, #f43f5e);
-}
-
-.payment-modal-quick-guide {
-  margin: 0 22px 14px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-.payment-modal-quick-guide > div {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
-  border: 1px solid rgba(14, 165, 233, 0.14);
-  border-radius: 16px;
-  background: rgba(14, 165, 233, 0.055);
-  color: var(--text-muted, #64748b);
-  min-width: 0;
-}
-
-.payment-modal-quick-guide span {
-  width: 30px;
-  height: 30px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 30px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(14, 165, 233, 0.13);
-}
-
-.payment-modal-quick-guide small {
-  font-size: 11px;
-  line-height: 1.35;
-  font-weight: 700;
-}
-
-.payment-modal-status-pill {
-  width: 100%;
-  justify-content: center;
-  min-height: 38px;
-}
-
+/* Midtrans Snap QRIS fix: avoid cutting the QR inside the embedded frame.
+   Let the bottom sheet scroll, and give the iframe enough height for QRIS. */
 .payment-modal-snap-wrap {
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.32);
+  overflow: visible !important;
 }
 
-.payment-modal-footer {
-  position: sticky;
-  bottom: 0;
-  z-index: 3;
-  background: linear-gradient(180deg, rgba(255,255,255,0.86), rgba(255,255,255,0.96));
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-}
-
-body.dark-theme .payment-modal-footer {
-  background: linear-gradient(180deg, rgba(15, 23, 42, 0.86), rgba(15, 23, 42, 0.97));
-}
-
-body.dark-theme .payment-step.is-done small,
-body.dark-theme .payment-step.is-active small {
-  color: var(--ocean-light, #38bdf8);
-}
-
-body.dark-theme .payment-modal-quick-guide > div {
-  background: rgba(14, 165, 233, 0.09);
-  border-color: rgba(56, 189, 248, 0.13);
-}
-
-body.dark-theme .payment-modal-quick-guide span {
-  background: rgba(15, 23, 42, 0.6);
-  border-color: rgba(56, 189, 248, 0.14);
+.payment-modal-snap iframe {
+  min-height: 520px !important;
+  height: 520px !important;
 }
 
 @media (max-width: 640px) {
-  .payment-modal {
-    align-items: flex-end;
-    padding: 0;
-  }
-
   .payment-modal-card {
-    width: 100%;
-    max-width: none;
-    max-height: 94dvh;
-    border-radius: 24px 24px 0 0;
-    transform: translateY(100%) scale(1);
-    border-left: none;
-    border-right: none;
-    border-bottom: none;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-  }
-
-  .payment-modal.show .payment-modal-card {
-    transform: translateY(0) scale(1);
-  }
-
-  .payment-modal-backdrop {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-  }
-
-  .payment-modal-header {
-    padding: 16px 16px 10px;
-  }
-
-  .payment-modal-torii {
-    width: 38px;
-    height: 38px;
-    border-radius: 13px;
-    box-shadow: none;
-  }
-
-  .payment-modal-brand-text strong {
-    font-size: 15px;
-  }
-
-  .payment-modal-close {
-    width: 36px;
-    height: 36px;
-  }
-
-  .payment-modal-steps {
-    grid-template-columns: 1fr 28px 1fr 28px 1fr;
-    padding: 12px 14px 0;
-    gap: 4px;
-  }
-
-  .payment-step-dot {
-    width: 30px;
-    height: 30px;
-    font-size: 12px;
-  }
-
-  .payment-step small {
-    font-size: 9px;
-  }
-
-  .payment-modal-summary {
-    padding: 12px 16px;
-    gap: 10px;
-  }
-
-  .payment-modal-amount {
-    padding: 12px 14px;
-    border-radius: 16px;
-  }
-
-  .payment-modal-amount strong {
-    font-size: 22px;
-  }
-
-  .payment-modal-meta-row {
-    font-size: 12px;
-  }
-
-  .payment-modal-quick-guide {
-    margin: 0 16px 10px;
-    grid-template-columns: 1fr;
-    gap: 6px;
-  }
-
-  .payment-modal-quick-guide > div {
-    padding: 8px 10px;
-    border-radius: 14px;
-  }
-
-  .payment-modal-quick-guide span {
-    width: 28px;
-    height: 28px;
-    flex-basis: 28px;
-  }
-
-  .payment-modal-countdown {
-    padding: 10px 16px;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    max-height: 96dvh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
   }
 
   .payment-modal-body {
-    padding: 12px 16px 0;
-  }
-
-  .payment-modal-status-pill {
-    margin-bottom: 10px;
-    font-size: 11px;
-    min-height: 34px;
+    overflow: visible !important;
   }
 
   .payment-modal-snap-wrap,
   .payment-modal-snap {
-    min-height: 315px;
+    min-height: 500px !important;
+    height: auto !important;
+    overflow: visible !important;
+    contain: none !important;
   }
 
   .payment-modal-snap iframe {
-    min-height: 315px !important;
+    min-height: 500px !important;
+    height: 500px !important;
+    width: 100% !important;
+    border-radius: 16px !important;
   }
 
   .payment-modal-footer {
-    padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-  }
-
-  .payment-modal-footer-hint {
-    font-size: 11px;
-    line-height: 1.35;
-  }
-
-  .payment-modal-footer-actions {
-    grid-template-columns: 1fr 1fr;
-    width: 100%;
-  }
-
-  .payment-modal-btn {
-    min-height: 44px;
-    font-size: 12px;
-    box-shadow: none !important;
+    position: relative !important;
   }
 }
 
 @media (max-width: 380px) {
-  .payment-modal-card {
-    max-height: 96dvh;
-  }
-
-  .payment-modal-quick-guide {
-    display: none;
-  }
-
   .payment-modal-snap-wrap,
   .payment-modal-snap,
   .payment-modal-snap iframe {
-    min-height: 292px !important;
+    min-height: 470px !important;
+    height: 470px !important;
   }
 }

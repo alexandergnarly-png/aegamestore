@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="style.css?v=55" />
+    <link rel="stylesheet" href="style.css?v=56" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#0ea5e9" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -508,40 +508,34 @@
         </ol>
 
         <div class="form-grid">
-          <div class="field order-choice-field">
+          <div class="field">
             <label for="brand" data-i18n="brandLabel">Brand</label>
-            <select
-              id="brand"
-              class="native-order-select"
-              aria-label="Brand"
-            ></select>
-            <div
-              class="order-brand-pills"
-              id="brandPills"
-              role="radiogroup"
-              aria-label="Pilih brand"
-            ></div>
+            <select id="brand" aria-label="Brand"></select>
           </div>
 
-          <div class="field order-choice-field field-wide">
+          <div class="field">
             <label for="product" data-i18n="durationLabel">
               Nominal / Durasi
             </label>
-            <select
-              id="product"
-              class="native-order-select"
-              aria-label="Nominal atau durasi"
-            ></select>
-            <div
-              class="order-product-cards"
-              id="productCards"
-              role="radiogroup"
-              aria-label="Pilih nominal atau durasi"
-            ></div>
+            <select id="product" aria-label="Nominal atau durasi"></select>
           </div>
         </div>
 
-        <details class="voucher-panel" id="voucherPanel" open>
+        <div class="form-grid">
+          <div class="field">
+            <label for="name" data-i18n="playerNameLabel">Nama Player</label>
+            <input
+              type="text"
+              id="name"
+              placeholder="Masukkan nama kamu"
+              data-i18n-placeholder="playerNamePlaceholder"
+              autocomplete="name"
+              readonly
+            />
+          </div>
+        </div>
+
+        <details class="voucher-panel" id="voucherPanel">
           <summary class="voucher-toggle">
             <span class="voucher-toggle-main">
               <span aria-hidden="true">🎟️</span>
@@ -582,20 +576,6 @@
             ></small>
           </div>
         </details>
-
-        <div class="form-grid">
-          <div class="field">
-            <label for="name" data-i18n="playerNameLabel">Nama Player</label>
-            <input
-              type="text"
-              id="name"
-              placeholder="Masukkan nama kamu"
-              data-i18n-placeholder="playerNamePlaceholder"
-              autocomplete="name"
-              readonly
-            />
-          </div>
-        </div>
 
         <div class="price-breakdown" id="priceBreakdown" style="display: none">
           <div>
@@ -825,23 +805,6 @@
           </button>
         </header>
 
-        <section class="payment-modal-steps" aria-label="Status pembayaran">
-          <div class="payment-step is-done" id="paymentStepOrder">
-            <span class="payment-step-dot">1</span>
-            <small data-i18n="paymentStepOrder">Order dibuat</small>
-          </div>
-          <span class="payment-step-line" aria-hidden="true"></span>
-          <div class="payment-step is-active" id="paymentStepPay">
-            <span class="payment-step-dot">2</span>
-            <small data-i18n="paymentStepPay">Bayar</small>
-          </div>
-          <span class="payment-step-line" aria-hidden="true"></span>
-          <div class="payment-step" id="paymentStepDone">
-            <span class="payment-step-dot">3</span>
-            <small data-i18n="paymentStepDone">Selesai</small>
-          </div>
-        </section>
-
         <section class="payment-modal-summary">
           <div class="payment-modal-amount">
             <small data-i18n="paymentModalTotal">Total Bayar</small>
@@ -856,24 +819,6 @@
               <small data-i18n="paymentModalProduct">Produk</small>
               <span id="paymentProductName">—</span>
             </div>
-          </div>
-        </section>
-
-        <section
-          class="payment-modal-quick-guide"
-          aria-label="Panduan pembayaran"
-        >
-          <div>
-            <span aria-hidden="true">📱</span>
-            <small data-i18n="paymentGuideScan"
-              >Pilih QRIS/e-wallet lalu selesaikan pembayaran.</small
-            >
-          </div>
-          <div>
-            <span aria-hidden="true">⚡</span>
-            <small data-i18n="paymentGuideAuto"
-              >Status dicek otomatis, tidak perlu refresh.</small
-            >
           </div>
         </section>
 
@@ -1156,6 +1101,6 @@
         document.getElementById("preloader")?.classList.add("fade-out");
       }, 5000);
     </script>
-    <script src="script.js?v=55"></script>
+    <script src="script.js?v=56"></script>
   </body>
 </html>

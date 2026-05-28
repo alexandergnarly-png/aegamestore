@@ -1148,9 +1148,10 @@ async function openOrderModal(game) {
   const voucherInput = document.getElementById("voucherCodeInput");
   if (voucherInput) voucherInput.value = "";
   const voucherPanel = document.getElementById("voucherPanel");
-  if (voucherPanel) voucherPanel.open = true;
+  if (voucherPanel) voucherPanel.open = false;
 
   const nameInput = document.getElementById("name");
+  const contactInput = document.getElementById("contact");
 
   resetVoucherPreview();
 
@@ -1171,11 +1172,13 @@ async function openOrderModal(game) {
       return;
     }
 
-    const defaultOrder = data.defaultOrder || {};
-
     if (nameInput) {
-      nameInput.value = defaultOrder.name || data.username || "";
-      nameInput.readOnly = false;
+      nameInput.value = data.username || "";
+      nameInput.readOnly = true;
+    }
+
+    if (contactInput && data.contact && !contactInput.value.trim()) {
+      contactInput.value = data.contact;
     }
   } catch (err) {
     Swal.fire({
@@ -1255,6 +1258,112 @@ function closeOrderModal() {
   resetVoucherPreview();
 }
 
+function renderOrderBrandPills(brands) {
+  const wrap = document.getElementById("brandPills");
+  if (!wrap) return;
+
+  wrap.innerHTML = "";
+
+  brands.forEach((brand) => {
+    const products = allProducts.filter(
+      (item) => item.game === selectedGame && item.brand === brand,
+    );
+    const readyCount = products.reduce(
+      (sum, item) => sum + Number(item.available_keys || 0),
+      0,
+    );
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "order-brand-pill";
+    btn.setAttribute("role", "radio");
+    btn.setAttribute(
+      "aria-checked",
+      brandSelect.value === brand ? "true" : "false",
+    );
+    btn.dataset.brand = brand;
+    btn.innerHTML = `
+      <span>${escapeHtml(brand)}</span>
+      <small>${readyCount} ready</small>
+    `;
+
+    if (brandSelect.value === brand) btn.classList.add("active");
+
+    btn.addEventListener("click", () => {
+      if (brandSelect.value === brand) return;
+      brandSelect.value = brand;
+      loadDurations();
+    });
+
+    wrap.appendChild(btn);
+  });
+}
+
+function syncOrderBrandPillsActive() {
+  document.querySelectorAll(".order-brand-pill").forEach((btn) => {
+    const active = btn.dataset.brand === brandSelect.value;
+    btn.classList.toggle("active", active);
+    btn.setAttribute("aria-checked", active ? "true" : "false");
+  });
+}
+
+function renderOrderProductCards(products) {
+  const wrap = document.getElementById("productCards");
+  if (!wrap) return;
+
+  wrap.innerHTML = "";
+
+  products.forEach((item) => {
+    const availableKeys = Number(item.available_keys || 0);
+    const isOutOfStock = availableKeys <= 0;
+    const deliveryType = String(item.delivery_type || "auto").toLowerCase();
+    const deliveryLabel = deliveryType === "manual" ? "Manual" : "Auto";
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "order-product-card";
+    btn.setAttribute("role", "radio");
+    btn.setAttribute(
+      "aria-checked",
+      String(item.id) === String(productSelect.value) ? "true" : "false",
+    );
+    btn.dataset.productId = String(item.id);
+    btn.disabled = isOutOfStock;
+
+    if (String(item.id) === String(productSelect.value))
+      btn.classList.add("active");
+    if (isOutOfStock) btn.classList.add("is-empty");
+
+    const stockText = isOutOfStock ? "OUT OF STOCK" : `${availableKeys} READY`;
+
+    btn.innerHTML = `
+      <div class="order-product-main">
+        <strong>${escapeHtml(item.duration)}</strong>
+        <b>${formatRupiah(item.price)}</b>
+        <small>${escapeHtml(item.brand)} • ${deliveryLabel}</small>
+      </div>
+      <span class="order-product-stock">${stockText}</span>
+    `;
+
+    btn.addEventListener("click", () => {
+      if (isOutOfStock) return;
+      productSelect.value = item.id;
+      productSelect.dispatchEvent(new Event("change", { bubbles: true }));
+      syncOrderProductCardsActive();
+    });
+
+    wrap.appendChild(btn);
+  });
+}
+
+function syncOrderProductCardsActive() {
+  document.querySelectorAll(".order-product-card").forEach((btn) => {
+    const active = btn.dataset.productId === String(productSelect.value);
+    btn.classList.toggle("active", active);
+    btn.setAttribute("aria-checked", active ? "true" : "false");
+  });
+}
+
 function loadBrands() {
   const brands = [
     ...new Set(
@@ -1273,138 +1382,9 @@ function loadBrands() {
     brandSelect.appendChild(option);
   });
 
-  renderBrandPills(brands);
+  renderOrderBrandPills(brands);
+  syncOrderBrandPillsActive();
   loadDurations();
-}
-
-function getBrandStockCount(brand) {
-  return allProducts
-    .filter((item) => item.game === selectedGame && item.brand === brand)
-    .reduce((total, item) => total + Number(item.available_keys || 0), 0);
-}
-
-function renderBrandPills(brands = []) {
-  const brandPills = document.getElementById("brandPills");
-  if (!brandPills) return;
-
-  if (!brands.length) {
-    brandPills.innerHTML = `
-      <div class="order-choice-empty">Brand belum tersedia</div>
-    `;
-    return;
-  }
-
-  brandPills.innerHTML = brands
-    .map((brand) => {
-      const stock = getBrandStockCount(brand);
-      const isActive = String(brandSelect.value) === String(brand);
-      return `
-        <button
-          type="button"
-          class="order-brand-pill${isActive ? " is-selected" : ""}"
-          data-brand="${escapeHtml(brand)}"
-          role="radio"
-          aria-checked="${isActive ? "true" : "false"}"
-        >
-          <span class="order-brand-name">${escapeHtml(brand)}</span>
-          <span class="order-brand-stock">${stock} ready</span>
-        </button>
-      `;
-    })
-    .join("");
-
-  brandPills.querySelectorAll(".order-brand-pill").forEach((button) => {
-    button.addEventListener("click", () => {
-      const brand = button.getAttribute("data-brand") || "";
-      if (!brand || brandSelect.value === brand) return;
-      brandSelect.value = brand;
-      brandSelect.dispatchEvent(new Event("change", { bubbles: true }));
-    });
-  });
-}
-
-function renderProductCards(products = []) {
-  const productCards = document.getElementById("productCards");
-  if (!productCards) return;
-
-  if (!products.length) {
-    productCards.innerHTML = `
-      <div class="order-choice-empty">Produk belum tersedia untuk brand ini</div>
-    `;
-    return;
-  }
-
-  productCards.innerHTML = products
-    .map((item) => {
-      const availableKeys = Number(item.available_keys || 0);
-      const isOutOfStock = availableKeys <= 0;
-      const isActive = String(productSelect.value) === String(item.id);
-      const deliveryType = String(item.delivery_type || "auto").toLowerCase();
-      const deliveryLabel =
-        deliveryType === "manual"
-          ? translations[currentLanguage].deliveryManualLabel || "Manual"
-          : translations[currentLanguage].deliveryAutoLabel || "Auto";
-      const stockLabel = isOutOfStock
-        ? translations[currentLanguage].outOfStockLabel
-        : `${availableKeys} ready`;
-
-      return `
-        <button
-          type="button"
-          class="order-product-card${isActive ? " is-selected" : ""}${isOutOfStock ? " is-disabled" : ""}"
-          data-product-id="${escapeHtml(String(item.id))}"
-          role="radio"
-          aria-checked="${isActive ? "true" : "false"}"
-          ${isOutOfStock ? "disabled" : ""}
-        >
-          <span class="order-product-topline">
-            <span class="order-product-duration">${escapeHtml(item.duration)}</span>
-            <span class="order-product-badge ${isOutOfStock ? "danger" : ""}">${escapeHtml(stockLabel)}</span>
-          </span>
-          <span class="order-product-price">${formatRupiah(item.price)}</span>
-          <span class="order-product-meta">
-            <span>${escapeHtml(item.brand)}</span>
-            <span>•</span>
-            <span>${escapeHtml(deliveryLabel)}</span>
-          </span>
-        </button>
-      `;
-    })
-    .join("");
-
-  productCards.querySelectorAll(".order-product-card").forEach((button) => {
-    button.addEventListener("click", () => {
-      if (button.disabled) return;
-      const productId = button.getAttribute("data-product-id") || "";
-      if (!productId || String(productSelect.value) === String(productId))
-        return;
-      productSelect.value = productId;
-      productSelect.dispatchEvent(new Event("change", { bubbles: true }));
-    });
-  });
-}
-
-function syncOrderChoiceWidgets() {
-  const brandPills = document.getElementById("brandPills");
-  if (brandPills) {
-    brandPills.querySelectorAll(".order-brand-pill").forEach((button) => {
-      const active =
-        String(button.getAttribute("data-brand")) === String(brandSelect.value);
-      button.classList.toggle("is-selected", active);
-      button.setAttribute("aria-checked", active ? "true" : "false");
-    });
-  }
-
-  const productCards = document.getElementById("productCards");
-  if (productCards) {
-    productCards.querySelectorAll(".order-product-card").forEach((button) => {
-      const active =
-        String(button.getAttribute("data-product-id")) ===
-        String(productSelect.value);
-      button.classList.toggle("is-selected", active);
-      button.setAttribute("aria-checked", active ? "true" : "false");
-    });
-  }
 }
 
 function loadDurations() {
@@ -1439,14 +1419,9 @@ function loadDurations() {
     productSelect.value = filteredProducts[0].id;
   }
 
-  renderBrandPills([
-    ...new Set(
-      allProducts
-        .filter((item) => item.game === selectedGame)
-        .map((item) => item.brand),
-    ),
-  ]);
-  renderProductCards(filteredProducts);
+  syncOrderBrandPillsActive();
+  renderOrderProductCards(filteredProducts);
+  syncOrderProductCardsActive();
   updatePreview();
 }
 
@@ -1464,12 +1439,12 @@ function updatePreview() {
     document.getElementById("previewProduct").innerText =
       translations[currentLanguage].previewWait;
     document.getElementById("previewPrice").innerText = "Rp 0";
-    syncOrderChoiceWidgets();
     resetVoucherPreview();
     return;
   }
 
   selectedProductId = selectedProduct.id;
+  syncOrderProductCardsActive();
   selectedProductBasePrice = Number(selectedProduct.price || 0);
 
   const availableKeys = Number(selectedProduct.available_keys || 0);
@@ -1485,7 +1460,6 @@ function updatePreview() {
     ? translations[currentLanguage].outOfStockLabel
     : translations[currentLanguage].buyNow;
 
-  syncOrderChoiceWidgets();
   resetVoucherPreview();
   refreshCheckoutDiscountPreview();
 }
@@ -1495,6 +1469,7 @@ productSelect.addEventListener("change", updatePreview);
 
 async function buy() {
   const name = document.getElementById("name").value.trim();
+  const contact = "Telegram Admin";
 
   const selectedProduct = allProducts.find(
     (item) => String(item.id) === String(productSelect.value),
@@ -1509,7 +1484,6 @@ async function buy() {
     });
     return;
   }
-
   if (!selectedProduct) {
     Swal.fire({
       icon: "info",
@@ -1547,6 +1521,7 @@ async function buy() {
       body: JSON.stringify({
         product_id: selectedProduct.id,
         name,
+        contact,
         voucher_code:
           appliedVoucherCode ||
           document.getElementById("voucherCodeInput")?.value ||
@@ -3381,6 +3356,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function savePendingCart() {
     const productSel = document.getElementById("product");
     const nameInput = document.getElementById("name");
+    const contactInput = document.getElementById("contact");
     if (!productSel || !productSel.value) return;
 
     const product = Array.isArray(allProducts)
@@ -3395,6 +3371,7 @@ document.addEventListener("DOMContentLoaded", () => {
       duration: product.duration,
       price: product.price,
       name: nameInput ? nameInput.value.trim() : "",
+      contact: contactInput ? contactInput.value.trim() : "",
       ts: Date.now(),
     };
     try {
@@ -3473,7 +3450,9 @@ document.addEventListener("DOMContentLoaded", () => {
               productSel.dispatchEvent(new Event("change"));
             }
             const nameInput = document.getElementById("name");
+            const contactInput = document.getElementById("contact");
             if (nameInput && cart.name) nameInput.value = cart.name;
+            if (contactInput && cart.contact) contactInput.value = cart.contact;
             if (typeof updateOrderStepFromForm === "function")
               updateOrderStepFromForm();
           }, 80);
@@ -4207,11 +4186,6 @@ document.addEventListener("DOMContentLoaded", () => {
       paymentModalTotal: "Total Bayar",
       paymentModalGame: "Game",
       paymentModalProduct: "Produk",
-      paymentStepOrder: "Order dibuat",
-      paymentStepPay: "Bayar",
-      paymentStepDone: "Selesai",
-      paymentGuideScan: "Pilih QRIS/e-wallet lalu selesaikan pembayaran.",
-      paymentGuideAuto: "Status dicek otomatis, tidak perlu refresh.",
       paymentModalCountdownLabel: "QR Aktif",
       paymentStatusPending: "Menunggu pembayaran…",
       paymentStatusPaid: "Pembayaran diterima!",
@@ -4247,11 +4221,6 @@ document.addEventListener("DOMContentLoaded", () => {
       paymentModalTotal: "Total",
       paymentModalGame: "Game",
       paymentModalProduct: "Product",
-      paymentStepOrder: "Order created",
-      paymentStepPay: "Pay",
-      paymentStepDone: "Done",
-      paymentGuideScan: "Choose QRIS/e-wallet and complete payment.",
-      paymentGuideAuto: "Status checks automatically, no refresh needed.",
       paymentModalCountdownLabel: "QR Active",
       paymentStatusPending: "Waiting for payment…",
       paymentStatusPaid: "Payment received!",
@@ -4299,9 +4268,6 @@ document.addEventListener("DOMContentLoaded", () => {
       total: document.getElementById("paymentTotal"),
       gameName: document.getElementById("paymentGameName"),
       productName: document.getElementById("paymentProductName"),
-      stepOrder: document.getElementById("paymentStepOrder"),
-      stepPay: document.getElementById("paymentStepPay"),
-      stepDone: document.getElementById("paymentStepDone"),
       countdown: document.getElementById("paymentCountdownTime"),
       progressBar: document.getElementById("paymentProgressBar"),
       statusPill: document.getElementById("paymentStatusPill"),
@@ -4365,13 +4331,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if (els.refreshBtn) els.refreshBtn.textContent = t("paymentRefreshStatus");
     if (els.exitBtn) els.exitBtn.textContent = t("paymentExitLater");
-    document
-      .querySelectorAll("#paymentModal [data-i18n]")
-      .forEach((element) => {
-        const key = element.getAttribute("data-i18n");
-        const value = t(key);
-        if (value && value !== key) element.textContent = value;
-      });
     if (els.snapLoading) {
       const small = els.snapLoading.querySelector("small");
       if (small) small.textContent = t("paymentLoadingSnap");
@@ -4390,23 +4349,6 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     els.statusPill.dataset.state = status;
     els.statusText.textContent = map[status] || map.pending;
-    if (els.modal) els.modal.dataset.paymentState = status;
-    const isFinalSuccess = status === "paid";
-    const isFinalFailed = ["expired", "cancelled", "error"].includes(status);
-    if (els.stepOrder) {
-      els.stepOrder.classList.add("is-done");
-      els.stepOrder.classList.remove("is-active", "is-failed");
-    }
-    if (els.stepPay) {
-      els.stepPay.classList.toggle("is-active", status === "pending");
-      els.stepPay.classList.toggle("is-done", isFinalSuccess);
-      els.stepPay.classList.toggle("is-failed", isFinalFailed);
-    }
-    if (els.stepDone) {
-      els.stepDone.classList.toggle("is-active", isFinalSuccess);
-      els.stepDone.classList.toggle("is-done", isFinalSuccess);
-      els.stepDone.classList.toggle("is-failed", isFinalFailed);
-    }
   }
 
   function showStateOverlay({ icon, title, desc, primary, secondary }) {
