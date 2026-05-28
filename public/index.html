@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="style.css?v=56" />
+    <link rel="stylesheet" href="style.css?v=57" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#0ea5e9" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -507,17 +507,37 @@
           </li>
         </ol>
 
-        <div class="form-grid">
-          <div class="field">
+        <div class="form-grid order-choice-grid">
+          <div class="field order-choice-field">
             <label for="brand" data-i18n="brandLabel">Brand</label>
-            <select id="brand" aria-label="Brand"></select>
+            <select
+              id="brand"
+              class="native-order-select"
+              aria-label="Brand"
+            ></select>
+            <div
+              class="order-brand-pills"
+              id="brandPills"
+              role="radiogroup"
+              aria-label="Pilih brand"
+            ></div>
           </div>
 
-          <div class="field">
+          <div class="field order-choice-field">
             <label for="product" data-i18n="durationLabel">
               Nominal / Durasi
             </label>
-            <select id="product" aria-label="Nominal atau durasi"></select>
+            <select
+              id="product"
+              class="native-order-select"
+              aria-label="Nominal atau durasi"
+            ></select>
+            <div
+              class="order-product-cards"
+              id="productCards"
+              role="radiogroup"
+              aria-label="Pilih nominal atau durasi"
+            ></div>
           </div>
         </div>
 
@@ -1102,5 +1122,178 @@
       }, 5000);
     </script>
     <script src="script.js?v=56"></script>
+    <script>
+      (() => {
+        const brandSelect = document.getElementById("brand");
+        const productSelect = document.getElementById("product");
+        const brandPills = document.getElementById("brandPills");
+        const productCards = document.getElementById("productCards");
+
+        if (!brandSelect || !productSelect || !brandPills || !productCards) {
+          return;
+        }
+
+        const rupiah = (value) => {
+          const number = Number(String(value || "").replace(/[^0-9]/g, ""));
+          if (!number) return String(value || "").trim();
+          return new Intl.NumberFormat("id-ID", {
+            style: "currency",
+            currency: "IDR",
+            maximumFractionDigits: 0,
+          }).format(number);
+        };
+
+        const cleanText = (text) =>
+          String(text || "")
+            .replace(/\s+/g, " ")
+            .trim();
+
+        const optionList = (select) =>
+          Array.from(select.options).filter(
+            (option) => option.value && !option.disabled,
+          );
+
+        const setSelectValue = (select, value) => {
+          if (select.value === value) return;
+          select.value = value;
+          select.dispatchEvent(new Event("change", { bubbles: true }));
+        };
+
+        const getBrandInitial = (label) => {
+          const normalized = cleanText(label);
+          return normalized ? normalized.slice(0, 1).toUpperCase() : "⛩️";
+        };
+
+        const renderBrands = () => {
+          const options = optionList(brandSelect);
+
+          brandPills.innerHTML = options
+            .map((option) => {
+              const label = cleanText(option.textContent);
+              const active =
+                option.value === brandSelect.value ? " active" : "";
+
+              return `
+                <button
+                  type="button"
+                  class="order-brand-pill${active}"
+                  data-value="${option.value.replace(/"/g, "&quot;")}"
+                  role="radio"
+                  aria-checked="${option.value === brandSelect.value}"
+                >
+                  <small>${getBrandInitial(label)}</small>
+                  <span>${label}</span>
+                </button>
+              `;
+            })
+            .join("");
+        };
+
+        const splitProductLabel = (label) => {
+          const normalized = cleanText(label);
+          const priceMatch = normalized.match(
+            /(?:Rp\s*)?[0-9][0-9.]*([,][0-9]+)?/,
+          );
+
+          if (!priceMatch) {
+            return { title: normalized, price: "", note: "Ready" };
+          }
+
+          const price = rupiah(priceMatch[0]);
+          const title = cleanText(
+            normalized.replace(priceMatch[0], "").replace(/[-–—|]+$/g, ""),
+          );
+
+          return {
+            title: title || normalized,
+            price,
+            note: normalized.toLowerCase().includes("out")
+              ? "Stok habis"
+              : "Ready stock",
+          };
+        };
+
+        const renderProducts = () => {
+          const options = optionList(productSelect);
+
+          if (!options.length) {
+            productCards.innerHTML = `
+              <button type="button" class="order-product-card is-empty" disabled>
+                <span class="order-product-main">
+                  <strong>Pilih brand dulu</strong>
+                  <small>Produk akan muncul otomatis</small>
+                </span>
+                <span class="order-product-stock">Waiting</span>
+              </button>
+            `;
+            return;
+          }
+
+          productCards.innerHTML = options
+            .map((option) => {
+              const label = cleanText(option.textContent);
+              const { title, price, note } = splitProductLabel(label);
+              const isEmpty = /habis|out of stock|sold/i.test(label);
+              const active =
+                option.value === productSelect.value ? " active" : "";
+
+              return `
+                <button
+                  type="button"
+                  class="order-product-card${active}${isEmpty ? " is-empty" : ""}"
+                  data-value="${option.value.replace(/"/g, "&quot;")}"
+                  role="radio"
+                  aria-checked="${option.value === productSelect.value}"
+                  ${isEmpty ? "disabled" : ""}
+                >
+                  <span class="order-product-main">
+                    <strong>${title}</strong>
+                    ${price ? `<b>${price}</b>` : ""}
+                    <small>${label}</small>
+                  </span>
+                  <span class="order-product-stock">${note}</span>
+                </button>
+              `;
+            })
+            .join("");
+        };
+
+        brandPills.addEventListener("click", (event) => {
+          const button = event.target.closest(".order-brand-pill");
+          if (!button) return;
+          setSelectValue(brandSelect, button.dataset.value);
+          renderBrands();
+          setTimeout(renderProducts, 0);
+        });
+
+        productCards.addEventListener("click", (event) => {
+          const button = event.target.closest(".order-product-card");
+          if (!button || button.disabled) return;
+          setSelectValue(productSelect, button.dataset.value);
+          renderProducts();
+        });
+
+        brandSelect.addEventListener("change", () => {
+          renderBrands();
+          setTimeout(renderProducts, 0);
+        });
+
+        productSelect.addEventListener("change", renderProducts);
+
+        const observerConfig = {
+          childList: true,
+          subtree: true,
+          attributes: true,
+        };
+        new MutationObserver(renderBrands).observe(brandSelect, observerConfig);
+        new MutationObserver(renderProducts).observe(
+          productSelect,
+          observerConfig,
+        );
+
+        renderBrands();
+        renderProducts();
+      })();
+    </script>
   </body>
 </html>

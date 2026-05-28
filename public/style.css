@@ -7194,3 +7194,80 @@ body.dark-theme .order-product-main b {
     height: 470px !important;
   }
 }
+
+
+/* ============================================================
+   AE UI/UX v57 — Modern order picker polish
+   Brand uses horizontal pills, product uses selectable cards.
+   Native selects stay hidden so old script.js logic still works.
+   ============================================================ */
+.order-choice-grid {
+  align-items: start;
+}
+
+.order-choice-field > label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.order-brand-pills:empty::before,
+.order-product-cards:empty::before {
+  content: "Memuat pilihan...";
+  display: block;
+  width: 100%;
+  padding: 13px 14px;
+  border-radius: 18px;
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px dashed rgba(56, 189, 248, 0.28);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.order-product-cards {
+  max-height: 246px;
+  overflow-y: auto;
+  padding-right: 3px;
+}
+
+.order-product-card {
+  cursor: pointer;
+}
+
+.order-product-card:hover:not(.is-empty),
+.order-brand-pill:hover {
+  transform: translateY(-1px);
+  border-color: var(--ocean-light);
+}
+
+.order-product-card.active::after,
+.order-brand-pill.active::after {
+  content: "✓";
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ocean-deep);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.order-product-card.active::after {
+  margin-left: auto;
+}
+
+@media (max-width: 640px) {
+  .order-choice-grid {
+    gap: 14px;
+  }
+
+  .order-product-cards {
+    max-height: 220px;
+    margin-right: -3px;
+  }
+}
