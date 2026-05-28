@@ -1316,6 +1316,169 @@
           padding: 18px 18px 26px;
         }
       }
+
+      /* ===== AUTH UX UPGRADE v3 — compact, mobile-friendly ===== */
+      .auth-mini-benefits {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        margin: 16px 0 4px;
+      }
+
+      .auth-mini-benefit {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        min-height: 42px;
+        padding: 9px 8px;
+        border-radius: var(--radius-md);
+        background: linear-gradient(
+          135deg,
+          var(--primary-soft),
+          var(--secondary-soft)
+        );
+        border: 1px solid var(--card-border);
+        color: var(--text-soft);
+        font-size: 11px;
+        font-weight: 800;
+        text-align: center;
+        line-height: 1.25;
+      }
+
+      .auth-mini-benefit span:first-child {
+        font-size: 15px;
+        flex: 0 0 auto;
+      }
+
+      .terms-row {
+        align-items: center;
+      }
+
+      .terms-link {
+        border: none;
+        background: transparent;
+        color: var(--primary-strong);
+        font: inherit;
+        font-size: 12px;
+        font-weight: 800;
+        cursor: pointer;
+        padding: 6px 0;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+
+      .terms-link:hover {
+        color: var(--primary-deep);
+      }
+
+      button.btn-primary:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+        transform: none !important;
+        box-shadow: none !important;
+      }
+
+      /* Lighter desktop visual effects */
+      .blob-3 {
+        display: none;
+      }
+
+      .bg-blob {
+        filter: blur(72px);
+        opacity: 0.42;
+      }
+
+      .auth-card {
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+      }
+
+      @media (max-width: 720px) {
+        .top-bar-inner {
+          gap: 10px;
+        }
+
+        .brand-mark {
+          width: 38px;
+          height: 38px;
+          border-radius: 13px;
+          font-size: 20px;
+        }
+
+        .auth-tabs {
+          margin-bottom: 18px;
+        }
+
+        .auth-title {
+          font-size: 20px;
+        }
+
+        .auth-subtitle {
+          font-size: 12.5px;
+        }
+
+        .input-group {
+          margin-bottom: 13px;
+        }
+
+        .input-label {
+          margin-bottom: 6px;
+          font-size: 11px;
+        }
+
+        .input-group input {
+          padding-top: 13px;
+          padding-bottom: 13px;
+          font-size: 14px;
+        }
+
+        .form-row {
+          margin: 10px 0 14px;
+        }
+
+        .divider {
+          margin: 14px 0;
+        }
+
+        .auth-tip {
+          margin-top: 12px;
+          padding: 9px 10px;
+          font-size: 11.5px;
+        }
+
+        .auth-mini-benefits {
+          grid-template-columns: 1fr;
+          gap: 7px;
+          margin-top: 14px;
+        }
+
+        .auth-mini-benefit {
+          min-height: 38px;
+          justify-content: flex-start;
+          padding: 9px 12px;
+          font-size: 12px;
+        }
+
+        .back-link {
+          margin-top: 16px;
+        }
+      }
+
+      @media (max-width: 380px) {
+        .lang-btn {
+          padding: 6px 9px;
+        }
+
+        .icon-btn {
+          width: 36px;
+          height: 36px;
+        }
+
+        .auth-card {
+          padding: 22px 16px;
+        }
+      }
     </style>
   </head>
 
@@ -1577,14 +1740,14 @@
                   />
                   <span data-auth-i18n="rememberMe">Ingat saya</span>
                 </label>
-                <a
-                  href="https://t.me/aegamestore"
-                  target="_blank"
-                  rel="noopener"
+                <button
+                  type="button"
                   class="forgot-link"
+                  onclick="showForgotPasswordHelp()"
                   data-auth-i18n="forgotPassword"
-                  >Lupa password?</a
                 >
+                  Lupa password?
+                </button>
               </div>
 
               <button
@@ -1715,17 +1878,30 @@
                 </div>
               </div>
 
-              <div class="form-row">
+              <div class="form-row terms-row">
                 <label class="checkbox-row">
-                  <input type="checkbox" id="acceptTerms" />
+                  <input
+                    type="checkbox"
+                    id="acceptTerms"
+                    onchange="updateRegisterButtonState()"
+                  />
                   <span data-auth-i18n="acceptTerms">Saya setuju ke S&K</span>
                 </label>
+                <button
+                  type="button"
+                  class="terms-link"
+                  onclick="showTermsPolicy()"
+                  data-auth-i18n="termsDetails"
+                >
+                  Detail
+                </button>
               </div>
 
               <button
                 class="btn-primary"
                 id="btnRegister"
                 onclick="register()"
+                disabled
                 data-auth-i18n="registerButton"
               >
                 Daftar Sekarang
@@ -1748,6 +1924,21 @@
               <div class="auth-tip" data-auth-i18n="authTip">
                 Gunakan username yang sama seperti saat order agar riwayat kamu
                 tersimpan.
+              </div>
+            </div>
+
+            <div class="auth-mini-benefits" aria-label="Login benefits">
+              <div class="auth-mini-benefit">
+                <span aria-hidden="true">⚡</span>
+                <b data-auth-i18n="benefitInstant">Instant Delivery</b>
+              </div>
+              <div class="auth-mini-benefit">
+                <span aria-hidden="true">🎟️</span>
+                <b data-auth-i18n="benefitVoucher">Voucher Member</b>
+              </div>
+              <div class="auth-mini-benefit">
+                <span aria-hidden="true">🔒</span>
+                <b data-auth-i18n="benefitSecure">Secure Payment</b>
               </div>
             </div>
 
@@ -1888,11 +2079,18 @@
           loginUser.addEventListener("input", validateLoginUsername);
         }
         if (regUser) {
-          regUser.addEventListener("input", validateRegUsername);
+          regUser.addEventListener("input", () => {
+            validateRegUsername();
+            updateRegisterButtonState();
+          });
         }
         if (regPass) {
-          regPass.addEventListener("input", updatePasswordStrength);
+          regPass.addEventListener("input", () => {
+            updatePasswordStrength();
+            updateRegisterButtonState();
+          });
         }
+        updateRegisterButtonState();
 
         // Caps Lock detection
         [loginPass, regPass].forEach((el) => {
@@ -2033,6 +2231,76 @@
         btn.disabled = false;
       }
 
+      function getAuthRedirectTarget() {
+        const params = new URLSearchParams(window.location.search);
+        const next = String(params.get("next") || "").trim();
+
+        if (
+          next &&
+          next.startsWith("/") &&
+          !next.startsWith("//") &&
+          !next.includes("\\")
+        ) {
+          return next;
+        }
+
+        return "/";
+      }
+
+      function getRegisterValidity() {
+        const username =
+          document.getElementById("regUsername")?.value.trim() || "";
+        const password =
+          document.getElementById("regPassword")?.value.trim() || "";
+        const terms = document.getElementById("acceptTerms");
+
+        return {
+          usernameOk: username.length >= 3 && !/\s/.test(username),
+          passwordOk: password.length >= 6,
+          termsOk: terms ? terms.checked : true,
+        };
+      }
+
+      function updateRegisterButtonState() {
+        const btn = document.getElementById("btnRegister");
+        if (!btn) return;
+        const valid = getRegisterValidity();
+        btn.disabled = !(valid.usernameOk && valid.passwordOk && valid.termsOk);
+      }
+
+      function showForgotPasswordHelp() {
+        const lang = getSavedAuthLanguage();
+        const dict = authTranslations[lang] || authTranslations.id;
+
+        Swal.fire({
+          icon: "info",
+          title: dict.forgotHelpTitle,
+          text: dict.forgotHelpText,
+          showCancelButton: true,
+          confirmButtonText: dict.contactAdmin,
+          cancelButtonText: dict.cancelBtn,
+          confirmButtonColor: "#0ea5e9",
+          cancelButtonColor: "#94a3b8",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.open("https://t.me/aegamestore", "_blank", "noopener");
+          }
+        });
+      }
+
+      function showTermsPolicy() {
+        const lang = getSavedAuthLanguage();
+        const dict = authTranslations[lang] || authTranslations.id;
+
+        Swal.fire({
+          icon: "info",
+          title: dict.termsPolicyTitle,
+          html: dict.termsPolicyText,
+          confirmButtonText: dict.understandBtn,
+          confirmButtonColor: "#0ea5e9",
+        });
+      }
+
       // Fungsi Login User (Endpoint & Body TETAP)
       async function login() {
         const username = document.getElementById("loginUsername").value.trim();
@@ -2088,7 +2356,7 @@
             timer: 1500,
           });
           setTimeout(() => {
-            window.location.href = "/";
+            window.location.href = getAuthRedirectTarget();
           }, 1500);
         } catch {
           Swal.fire({
@@ -2160,6 +2428,7 @@
             document.getElementById("loginUsername").value = username;
             document.getElementById("regPassword").value = "";
             updatePasswordStrength();
+            updateRegisterButtonState();
             setAuthTab("login");
             validateLoginUsername();
           });
@@ -2253,6 +2522,17 @@
             "Dengan masuk atau mendaftar, kamu menyetujui Syarat & Kebijakan kami.",
           authTip:
             "Gunakan username yang sama seperti saat order agar riwayat kamu tersimpan.",
+          benefitInstant: "Instant Delivery",
+          benefitVoucher: "Voucher Member",
+          benefitSecure: "Secure Payment",
+          termsDetails: "Detail",
+          termsPolicyTitle: "Syarat & Kebijakan",
+          termsPolicyText:
+            "<div style='text-align:left;line-height:1.6'>Dengan membuat akun, kamu setuju untuk menggunakan data akun secara benar, tidak menyalahgunakan voucher, dan mengikuti aturan transaksi AE Game Store. Order yang sudah diproses mengikuti ketentuan produk dan status pembayaran.</div>",
+          understandBtn: "Mengerti",
+          forgotHelpTitle: "Lupa password?",
+          forgotHelpText:
+            "Untuk keamanan akun, reset password dilakukan lewat admin AE Game Store. Klik tombol di bawah untuk chat Telegram.",
           changePasswordTitle: "Ganti Password",
           oldPasswordPlaceholder: "Password lama / random",
           newPasswordPlaceholder: "Password baru",
@@ -2339,6 +2619,19 @@
           socialProofTime: "2 mins ago",
           footerNote:
             "By signing in or registering, you agree to our Terms & Policy.",
+          authTip:
+            "Use the same username you use when ordering so your history is saved.",
+          benefitInstant: "Instant Delivery",
+          benefitVoucher: "Member Vouchers",
+          benefitSecure: "Secure Payment",
+          termsDetails: "Details",
+          termsPolicyTitle: "Terms & Policy",
+          termsPolicyText:
+            "<div style='text-align:left;line-height:1.6'>By creating an account, you agree to use your account properly, avoid voucher abuse, and follow AE Game Store transaction rules. Processed orders follow the product and payment status terms.</div>",
+          understandBtn: "Got it",
+          forgotHelpTitle: "Forgot password?",
+          forgotHelpText:
+            "For account security, password reset is handled by AE Game Store admin. Tap the button below to chat on Telegram.",
           changePasswordTitle: "Change Password",
           oldPasswordPlaceholder: "Old / random password",
           newPasswordPlaceholder: "New password",
@@ -2401,6 +2694,7 @@
         validateLoginUsername();
         validateRegUsername();
         updatePasswordStrength();
+        updateRegisterButtonState();
       }
 
       // Sakura petals
@@ -2420,9 +2714,10 @@
           sakura.remove();
         }, 7000);
       }
-      if (window.innerWidth > 768) {
-        setInterval(createSakura, 800);
-      }
+      // Sakura petals disabled for a cleaner and lighter desktop login page.
+      // if (window.innerWidth > 768) {
+      //   setInterval(createSakura, 1200);
+      // }
 
       // Social proof rotator
       const proofNames = [
