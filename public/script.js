@@ -4113,17 +4113,32 @@ function setupAdminChatPopup() {
   const guideBtn = document.getElementById("adminChatGuideBtn");
 
   if (!btn || !sheet) return;
+  sheet.setAttribute("inert", "");
 
   function openAdminChat() {
     sheet.classList.add("show");
+    sheet.removeAttribute("inert");
     sheet.setAttribute("aria-hidden", "false");
     document.body.classList.add("admin-chat-open");
+
+    setTimeout(() => {
+      closeBtn?.focus();
+    }, 50);
   }
 
   function closeAdminChat() {
+    if (sheet.contains(document.activeElement)) {
+      document.activeElement.blur();
+    }
+
     sheet.classList.remove("show");
     sheet.setAttribute("aria-hidden", "true");
+    sheet.setAttribute("inert", "");
     document.body.classList.remove("admin-chat-open");
+
+    setTimeout(() => {
+      btn?.focus();
+    }, 50);
   }
 
   btn.addEventListener("click", (event) => {
