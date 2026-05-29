@@ -3292,6 +3292,81 @@ body.dark-theme .recent-viewed-title {
   -webkit-line-clamp: 1;
 }
 
+/* === Fix recently viewed card on mobile === */
+.recent-viewed-card {
+  width: 132px;
+  height: 122px;
+  flex: 0 0 132px;
+  display: block;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 18px;
+}
+
+.recent-viewed-card .game-card-thumb {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  border-radius: inherit;
+  overflow: hidden;
+  display: block;
+  background: linear-gradient(135deg, #e0f2fe 0%, #fce7f3 100%);
+}
+
+.recent-viewed-card .game-card-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.recent-viewed-card .game-card-thumb-fallback {
+  position: absolute;
+  inset: 0;
+}
+
+.recent-viewed-card .game-card-thumb-overlay {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 24px 8px 8px;
+}
+
+.recent-viewed-card .game-card-thumb-overlay strong {
+  font-size: 11px;
+  line-height: 1.2;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+}
+
+@media (max-width: 520px) {
+  .recent-viewed-rail {
+    padding: 12px;
+    margin-bottom: 14px;
+  }
+
+  .recent-viewed-track {
+    gap: 8px;
+    padding-bottom: 4px;
+  }
+
+  .recent-viewed-card {
+    flex: 0 0 96px;
+    width: 96px;
+    height: 108px;
+    border-radius: 16px;
+  }
+
+  .recent-viewed-card .game-card-thumb-overlay {
+    padding: 22px 7px 7px;
+  }
+
+  .recent-viewed-card .game-card-thumb-overlay strong {
+    font-size: 10px;
+  }
+}
+
 /* ===== TOAST NOTIFICATIONS ===== */
 .toast-stack {
   position: fixed;
