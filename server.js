@@ -959,18 +959,12 @@ async function getVoucherDiscount({
     };
   }
 
+  // Private voucher = hidden voucher.
+  // It is not shown in /public-vouchers, but anyone who knows the code can use it.
+  // Keep target_user_id ignored for backward compatibility with old saved data.
   const voucherVisibility = String(
     voucher.visibility || "public",
   ).toLowerCase();
-  const targetUserId = Number(voucher.target_user_id || 0);
-  const currentUserId = Number(userId || 0);
-
-  if (voucherVisibility === "private" && targetUserId !== currentUserId) {
-    return {
-      valid: false,
-      message: "Voucher ini khusus untuk user tertentu",
-    };
-  }
 
   const targetGame = String(voucher.game_name || "")
     .trim()
@@ -1426,32 +1420,9 @@ app.post("/vouchers", requireAdminAuth, requireAdminCsrf, async (req, res) => {
       ? "private"
       : "public";
 
-  let targetUserId = null;
-
-  if (cleanVisibility === "private") {
-    const cleanTargetUsername = String(target_username || "").trim();
-
-    if (!cleanTargetUsername) {
-      return res.status(400).json({
-        message: "Username target wajib diisi untuk voucher private",
-      });
-    }
-
-    const userResult = await query(
-      "SELECT id FROM users WHERE username = $1 LIMIT 1",
-      [cleanTargetUsername],
-    );
-
-    const targetUser = userResult.rows[0];
-
-    if (!targetUser) {
-      return res.status(404).json({
-        message: "User target voucher tidak ditemukan",
-      });
-    }
-
-    targetUserId = targetUser.id;
-  }
+  // Private voucher = hidden voucher, not user-specific.
+  // Anyone can redeem it if they know the code, but it will not appear in /public-vouchers.
+  const targetUserId = null;
 
   if (Number.isInteger(cleanProductId) && cleanProductId > 0) {
     const productResult = await query(
