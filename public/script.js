@@ -2836,11 +2836,37 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (window.__aeSwRefreshing) return;
+      window.__aeSwRefreshing = true;
+      window.location.reload();
+    });
+
     navigator.serviceWorker
-      .register("/service-worker.js?v=5", {
+      .register("/service-worker.js?v=6", {
         updateViaCache: "none",
       })
-      .then((registration) => registration.update())
+      .then((registration) => {
+        registration.update();
+
+        if (registration.waiting) {
+          registration.waiting.postMessage({ type: "SKIP_WAITING" });
+        }
+
+        registration.addEventListener("updatefound", () => {
+          const newWorker = registration.installing;
+          if (!newWorker) return;
+
+          newWorker.addEventListener("statechange", () => {
+            if (
+              newWorker.state === "installed" &&
+              navigator.serviceWorker.controller
+            ) {
+              newWorker.postMessage({ type: "SKIP_WAITING" });
+            }
+          });
+        });
+      })
       .catch((error) => {
         console.error("Service worker registration failed:", error);
       });
