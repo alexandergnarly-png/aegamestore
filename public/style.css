@@ -7444,4 +7444,150 @@ body.dark-theme .order-product-main b {
     height: 32px !important;
   }
 }
+/* === Desktop polish for order popup === */
+@media (min-width: 769px) {
+  .order-modal {
+    padding: 32px;
+    align-items: center;
+  }
 
+  .order-modal-card {
+    max-width: 820px;
+    width: min(820px, calc(100vw - 64px));
+    max-height: min(760px, calc(100vh - 64px));
+    padding: 34px 38px;
+    border-radius: 30px;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .order-modal-card::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .order-modal-card::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .order-modal-card::-webkit-scrollbar-thumb {
+    background: rgba(14, 165, 233, 0.28);
+    border-radius: 999px;
+  }
+
+  .modal-head {
+    padding-right: 56px;
+  }
+
+  .modal-head h2 {
+    font-size: 28px;
+  }
+
+  #orderSteps {
+    margin-bottom: 26px;
+  }
+
+  .form-grid {
+    grid-template-columns: 280px minmax(0, 1fr);
+    align-items: start;
+    gap: 26px 28px;
+  }
+
+  .field {
+    min-width: 0;
+  }
+
+  .order-brand-pills {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    max-height: 260px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 4px;
+  }
+
+  .order-brand-pill {
+    width: 100%;
+    justify-content: space-between;
+    min-height: 54px;
+    padding: 12px 16px;
+    border-radius: 18px;
+  }
+
+  .order-product-cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    max-height: 320px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 6px;
+    scroll-snap-type: none;
+  }
+
+  .order-product-card {
+    width: 100%;
+    min-width: 0;
+    min-height: 118px;
+    padding: 16px;
+    border-radius: 20px;
+    scroll-snap-align: unset;
+  }
+
+  .order-product-main {
+    min-width: 0;
+  }
+
+  .order-product-main strong {
+    font-size: 15px;
+    line-height: 1.25;
+    word-break: break-word;
+  }
+
+  .order-product-main b {
+    font-size: 22px;
+    line-height: 1.1;
+  }
+
+  .order-product-main small {
+    font-size: 12px;
+  }
+
+  .order-product-stock {
+    top: 14px;
+    right: 14px;
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+
+  .modal-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .price-breakdown {
+    margin-top: 10px;
+  }
+
+  button#buyBtn {
+    max-width: 420px;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+  }
+}
+
+/* Desktop: if product list only has one column worth of space */
+@media (min-width: 769px) and (max-width: 980px) {
+  .order-modal-card {
+    max-width: 740px;
+  }
+
+  .form-grid {
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 22px;
+  }
+
+  .order-product-cards {
+    grid-template-columns: 1fr;
+  }
+}
