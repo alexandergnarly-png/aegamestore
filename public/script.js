@@ -5019,6 +5019,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const input = wrap.querySelector("input");
     const clear = wrap.querySelector("button");
 
+    let quickSearchDismissed = false;
+
     const syncFromSource = () => {
       if (input && input.value !== source.value) input.value = source.value;
     };
@@ -5032,6 +5034,8 @@ document.addEventListener("DOMContentLoaded", () => {
     clear.addEventListener("click", (event) => {
       event.preventDefault();
       event.stopPropagation();
+
+      quickSearchDismissed = true;
 
       input.value = "";
       source.value = "";
@@ -5050,15 +5054,23 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     const updateVisibility = () => {
+      if (quickSearchDismissed) {
+        wrap.classList.remove("show");
+        wrap.setAttribute("aria-hidden", "true");
+        return;
+      }
+
       if (!isMobile()) {
         wrap.classList.remove("show");
         wrap.setAttribute("aria-hidden", "true");
         return;
       }
+
       const rect = store.getBoundingClientRect();
       const shouldShow = rect.top < 52 && rect.bottom > 220;
       wrap.classList.toggle("show", shouldShow);
       wrap.setAttribute("aria-hidden", shouldShow ? "false" : "true");
+
       if (shouldShow) syncFromSource();
     };
 
