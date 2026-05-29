@@ -5029,11 +5029,24 @@ document.addEventListener("DOMContentLoaded", () => {
       if (typeof window.searchGame === "function") window.searchGame();
       else source.dispatchEvent(new Event("keyup", { bubbles: true }));
     });
-    clear.addEventListener("click", () => {
+    clear.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+
       input.value = "";
       source.value = "";
-      if (typeof window.searchGame === "function") window.searchGame();
-      source.focus({ preventScroll: true });
+
+      if (typeof window.searchGame === "function") {
+        window.searchGame();
+      } else {
+        source.dispatchEvent(new Event("keyup", { bubbles: true }));
+      }
+
+      input.blur();
+      source.blur();
+
+      wrap.classList.remove("show");
+      wrap.setAttribute("aria-hidden", "true");
     });
 
     const updateVisibility = () => {
