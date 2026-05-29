@@ -7271,3 +7271,102 @@ body.dark-theme .order-product-main b {
     margin-right: -3px;
   }
 }
+
+/* ===== FIX MOBILE LANGUAGE BUTTON + VOUCHER VISIBILITY =====
+   Keep ID/EN visible on phones and make voucher easier to find
+   inside the mobile order sheet. */
+@media (max-width: 640px) {
+  .header-actions {
+    gap: 6px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .lang-switch {
+    display: inline-flex !important;
+    padding: 3px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .lang-btn {
+    padding: 6px 9px !important;
+    font-size: 11px !important;
+    letter-spacing: 0.2px !important;
+  }
+
+  .theme-toggle-btn {
+    width: 34px !important;
+    height: 34px !important;
+    flex-shrink: 0 !important;
+  }
+
+  #userMenu .auth-btn {
+    width: 34px !important;
+    height: 34px !important;
+    padding: 0 !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    overflow: hidden !important;
+  }
+
+  #userMenu .auth-btn span {
+    display: none !important;
+  }
+
+  .nav-toggle {
+    width: 34px !important;
+    height: 34px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .order-modal-card {
+    overflow-y: auto !important;
+  }
+
+  .voucher-panel {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    margin: 10px 0 12px !important;
+    flex: 0 0 auto !important;
+    border-color: rgba(14, 165, 233, 0.28) !important;
+    background: rgba(56, 189, 248, 0.09) !important;
+  }
+
+  .voucher-toggle {
+    min-height: 48px !important;
+  }
+
+  .voucher-row {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+  }
+
+  #voucherCodeInput {
+    min-width: 0 !important;
+    font-size: 13px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .brand-logo {
+    width: 34px !important;
+    height: 34px !important;
+    font-size: 18px !important;
+  }
+
+  .header-inner {
+    gap: 6px !important;
+    padding-inline: 10px !important;
+  }
+
+  .lang-btn {
+    padding: 5px 8px !important;
+  }
+
+  #userMenu .auth-btn,
+  .theme-toggle-btn,
+  .nav-toggle {
+    width: 32px !important;
+    height: 32px !important;
+  }
+}
+
