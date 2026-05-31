@@ -1149,7 +1149,6 @@ app.use(
   }),
 );
 
-app.use(globalLimiter);
 app.use(express.json({ limit: "50kb" }));
 app.use(cookieParser());
 
@@ -1173,6 +1172,10 @@ app.use((req, res, next) => {
     req.path.startsWith("/vip-discounts") ||
     req.path.startsWith("/products") ||
     req.path.startsWith("/security-audit") ||
+    req.path.startsWith("/public-products") ||
+    req.path.startsWith("/public-vouchers") ||
+    req.path.startsWith("/trending-products") ||
+    req.path.startsWith("/recent-purchases") ||
     req.path.startsWith("/api/user") ||
     req.path.startsWith("/api/admin")
   ) {
@@ -1203,6 +1206,26 @@ app.use(
     },
   }),
 );
+
+app.get("/health", async (req, res) => {
+  try {
+    await query("SELECT 1");
+    return res.json({
+      ok: true,
+      db: true,
+      time: new Date().toISOString(),
+    });
+  } catch (err) {
+    return res.status(500).json({
+      ok: false,
+      db: false,
+      message: "Database check failed",
+    });
+  }
+});
+
+// Apply global limiter after static assets so CSS/JS/images do not consume API quota.
+app.use(globalLimiter);
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
@@ -1537,35 +1560,13 @@ app.put(
         ? "private"
         : "public";
 
-    let targetUserId = null;
+    // Private voucher = hidden voucher, not user-specific.
+    // Anyone can redeem it if they know the code, but it will not appear in /public-vouchers.
+    // Keep target_user_id nulled for backward compatibility with old saved data.
+    const targetUserId = null;
 
     if (!Number.isInteger(voucherId) || voucherId <= 0) {
       return res.status(400).json({ message: "ID voucher tidak valid" });
-    }
-
-    if (cleanVisibility === "private") {
-      const cleanTargetUsername = String(target_username || "").trim();
-
-      if (!cleanTargetUsername) {
-        return res.status(400).json({
-          message: "Username target wajib diisi untuk voucher private",
-        });
-      }
-
-      const userResult = await query(
-        "SELECT id FROM users WHERE username = $1 LIMIT 1",
-        [cleanTargetUsername],
-      );
-
-      const targetUser = userResult.rows[0];
-
-      if (!targetUser) {
-        return res.status(404).json({
-          message: "User target voucher tidak ditemukan",
-        });
-      }
-
-      targetUserId = targetUser.id;
     }
 
     if (Number.isInteger(cleanProductId) && cleanProductId > 0) {
@@ -2044,13 +2045,19 @@ app.post("/create-order", orderLimiter, async (req, res) => {
         .json({ message: "Produk tidak ditemukan atau tidak aktif" });
     }
 
-    const keyCheck = await query(
-      "SELECT id FROM keys WHERE product_id = $1 AND used = 0 LIMIT 1",
-      [cleanProductId],
-    );
+    const deliveryType = String(
+      productRow.delivery_type || "auto",
+    ).toLowerCase();
 
-    if (keyCheck.rows.length === 0) {
-      return res.status(400).json({ message: "Stok key habis" });
+    if (deliveryType !== "manual") {
+      const keyCheck = await query(
+        "SELECT id FROM keys WHERE product_id = $1 AND used = 0 LIMIT 1",
+        [cleanProductId],
+      );
+
+      if (keyCheck.rows.length === 0) {
+        return res.status(400).json({ message: "Stok key habis" });
+      }
     }
 
     const orderId = "ORDER-" + crypto.randomUUID();
@@ -2079,7 +2086,7 @@ app.post("/create-order", orderLimiter, async (req, res) => {
     const paymentFee = price - netPrice;
     const appliedVoucherCode = discountCheck.code || null;
 
-    const baseUrl = process.env.APP_BASE_URL || `http://localhost:${port}`;
+    const baseUrl = getAppBaseUrl(req);
     const userId = loggedInUser.id;
 
     res.cookie(`order_token_${orderId}`, accessToken, {
@@ -2211,7 +2218,11 @@ app.post("/midtrans-notification", webhookLimiter, async (req, res) => {
         await client.query("BEGIN");
 
         const orderResult = await client.query(
-          "SELECT * FROM orders WHERE id = $1 LIMIT 1",
+          `SELECT o.*, COALESCE(p.delivery_type, 'auto') AS delivery_type
+           FROM orders o
+           LEFT JOIN products p ON p.id = o.product_id
+           WHERE o.id = $1
+           LIMIT 1`,
           [orderId],
         );
 
@@ -2223,6 +2234,22 @@ app.post("/midtrans-notification", webhookLimiter, async (req, res) => {
         }
 
         if (String(order.payment_status).toLowerCase() === "paid") {
+          await client.query("COMMIT");
+          return res.status(200).send("OK");
+        }
+
+        const deliveryType = String(
+          order.delivery_type || "auto",
+        ).toLowerCase();
+
+        if (deliveryType === "manual") {
+          await client.query(
+            `UPDATE orders
+             SET payment_status = $1, delivery_status = $2, gameKey = $3
+             WHERE id = $4`,
+            ["paid", "manual", "MENUNGGU ADMIN", orderId],
+          );
+
           await client.query("COMMIT");
           return res.status(200).send("OK");
         }
@@ -2385,7 +2412,7 @@ app.get("/order/:id/resume", orderCheckLimiter, async (req, res) => {
       });
     }
 
-    const baseUrl = process.env.APP_BASE_URL || `http://localhost:${port}`;
+    const baseUrl = getAppBaseUrl(req);
     const TWENTY_THREE_HOURS_MS = 23 * 60 * 60 * 1000;
     const tokenCreatedAtIso = order.snap_token_created_at || order.created_at;
     const tokenAgeMs = tokenCreatedAtIso
@@ -2482,7 +2509,11 @@ app.post(
       await client.query("BEGIN");
 
       const orderResult = await client.query(
-        "SELECT * FROM orders WHERE id = $1 LIMIT 1",
+        `SELECT o.*, COALESCE(p.delivery_type, 'auto') AS delivery_type
+         FROM orders o
+         LEFT JOIN products p ON p.id = o.product_id
+         WHERE o.id = $1
+         LIMIT 1`,
         [orderId],
       );
 
@@ -2496,6 +2527,22 @@ app.post(
       if (String(order.payment_status).toLowerCase() === "paid") {
         await client.query("COMMIT");
         return res.json({ message: "Order sudah dibayar sebelumnya" });
+      }
+
+      const deliveryType = String(order.delivery_type || "auto").toLowerCase();
+
+      if (deliveryType === "manual") {
+        await client.query(
+          `UPDATE orders
+           SET payment_status = $1, delivery_status = $2, gameKey = $3
+           WHERE id = $4`,
+          ["paid", "manual", "MENUNGGU ADMIN", orderId],
+        );
+
+        await client.query("COMMIT");
+        return res.json({
+          message: "Pembayaran dikonfirmasi, order masuk proses manual admin",
+        });
       }
 
       const keyResult = await client.query(
@@ -2523,10 +2570,17 @@ app.post(
         });
       }
 
-      await client.query(
-        "UPDATE keys SET used = 1 WHERE id = $1 AND used = 0",
+      const lockResult = await client.query(
+        "UPDATE keys SET used = 1 WHERE id = $1 AND used = 0 RETURNING id",
         [keyRow.id],
       );
+
+      if (lockResult.rows.length === 0) {
+        await client.query("ROLLBACK");
+        return res.status(409).json({
+          message: "Key sudah dipakai oleh proses lain, coba lagi",
+        });
+      }
 
       await client.query(
         `UPDATE orders
@@ -3691,7 +3745,10 @@ app.get("/public-products", async (req, res) => {
   SELECT
     p.*,
     COALESCE(p.delivery_type, 'auto') AS delivery_type,
-    COUNT(k.id) FILTER (WHERE k.used = 0)::int AS available_keys,
+    CASE
+      WHEN LOWER(COALESCE(p.delivery_type, 'auto')) = 'manual' THEN 9999
+      ELSE COUNT(k.id) FILTER (WHERE k.used = 0)::int
+    END AS available_keys,
     CASE
       WHEN LOWER(p.duration) LIKE '%jam%' THEN
         COALESCE(NULLIF(regexp_replace(p.duration, '[^0-9]', '', 'g'), '')::int, 0)
