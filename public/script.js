@@ -1233,17 +1233,14 @@ async function openOrderModal(game) {
 
   if (modal) {
     modal.classList.add("show");
+    document.body.classList.add("order-modal-open");
     document.body.style.overflow = "hidden";
   }
 
   setTimeout(() => {
-    const productEl = document.getElementById("product");
-    if (productEl && !productEl.disabled) {
-      try {
-        productEl.focus({ preventScroll: true });
-      } catch (err) {}
-    }
-  }, 220);
+    const card = modal?.querySelector(".order-modal-card");
+    if (card) card.scrollTop = 0;
+  }, 80);
 }
 
 function setOrderStep(step) {
@@ -1275,6 +1272,7 @@ function closeOrderModal() {
 
   if (modal) {
     modal.classList.remove("show");
+    document.body.classList.remove("order-modal-open");
     document.body.style.overflow = "";
   }
 

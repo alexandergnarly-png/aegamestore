@@ -7139,13 +7139,12 @@ body.dark-theme .order-product-main b {
     width: 100vw !important;
     max-width: 100vw !important;
     overflow: hidden !important;
-    /* padding: 0 — kept as bottom-sheet, override handled by upgrade CSS */
-    padding: 0 !important;
+    padding: 8px !important;
   }
 
   .order-modal-card {
-    width: 100% !important;
-    max-width: 100% !important;
+    width: calc(100vw - 16px) !important;
+    max-width: calc(100vw - 16px) !important;
     margin-inline: auto !important;
     overflow-x: hidden !important;
     overscroll-behavior: contain;
@@ -8176,9 +8175,9 @@ body.dark-theme .recent-viewed-card .game-card-thumb {
 
 .modal-head > div {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .summary-badge {
@@ -8198,19 +8197,15 @@ body.dark-theme .summary-badge {
   border-color: rgba(56, 189, 248, 0.25);
 }
 
-/* Hide h2 title inside modal-head when banner is NOT hidden (title shown in banner) */
-/* JS sets banner hidden attr when no game selected; remove hidden when game opens */
-.modal-head h2 {
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: -0.4px;
-  color: var(--text-strong);
-  margin-bottom: 4px;
+/* Hide the text title in modal head when banner is shown 
+   (title is shown in banner overlay instead) */
+.modal-game-banner ~ .order-modal-card .modal-head h2 {
+  display: none;
 }
 
-/* When banner is visible, suppress the duplicate h2 text title */
-#modalGameBanner:not([hidden]) ~ .modal-head h2 {
-  display: none;
+.modal-head h2 {
+  font-size: 0;
+  margin: 0;
 }
 
 .modal-head p {
@@ -8218,7 +8213,12 @@ body.dark-theme .summary-badge {
   font-size: 12px;
 }
 
-/* Pad specific modal content (not catch-all, to avoid double-padding) */
+/* Pad all form content inside modal */
+.order-modal-card > *:not(.modal-game-banner):not(.modal-close-btn) {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
 .order-modal-card .modal-head {
   padding-left: 20px;
   padding-right: 20px;
@@ -8684,5 +8684,317 @@ body.dark-theme .order-step.is-active .order-step-label {
 
   .order-choice-grid {
     grid-template-columns: 280px minmax(0, 1fr);
+  }
+}
+/* === FIX: Restore clean mobile-friendly order popup === */
+.order-modal {
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 18px !important;
+  z-index: 9999 !important;
+}
+
+.order-modal-backdrop {
+  background: rgba(8, 47, 73, 0.58) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+.order-modal-card {
+  width: min(560px, calc(100vw - 28px)) !important;
+  max-width: 560px !important;
+  max-height: calc(100dvh - 36px) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding: 26px !important;
+  border-radius: 28px !important;
+  background: var(--card-bg-strong) !important;
+  box-shadow: 0 24px 70px rgba(8, 47, 73, 0.28) !important;
+}
+
+/* Hide the new banner because it makes mobile popup too tall */
+.modal-game-banner {
+  display: none !important;
+}
+
+.modal-close-btn {
+  top: 14px !important;
+  right: 14px !important;
+  width: 38px !important;
+  height: 38px !important;
+  background: rgba(56, 189, 248, 0.14) !important;
+  color: var(--text-muted) !important;
+  border: 1px solid var(--border-soft) !important;
+  z-index: 20 !important;
+}
+
+.modal-close-btn:hover {
+  background: var(--torii-red) !important;
+  color: white !important;
+}
+
+/* Give header room from close button */
+.modal-head {
+  padding-right: 44px !important;
+  margin-bottom: 20px !important;
+}
+
+.modal-head h2 {
+  display: block !important;
+  font-size: 24px !important;
+  line-height: 1.2 !important;
+}
+
+.modal-head p {
+  font-size: 14px !important;
+  line-height: 1.55 !important;
+}
+
+/* Make step bar readable again */
+.order-steps {
+  margin: 16px 0 22px !important;
+}
+
+/* Restore form layout */
+.form-grid {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 16px !important;
+  margin-bottom: 16px !important;
+}
+
+.order-brand-pills,
+.order-product-cards {
+  max-width: 100% !important;
+}
+
+/* Prevent bottom nav from appearing above modal */
+body.order-modal-open .bottom-nav,
+body.order-modal-open .floating-admin-btn,
+body.order-modal-open .back-to-top,
+body.order-modal-open .sticky-catalog-search {
+  display: none !important;
+}
+
+@media (max-width: 640px) {
+  .order-modal {
+    padding: 12px !important;
+    align-items: center !important;
+  }
+
+  .order-modal-card {
+    width: calc(100vw - 24px) !important;
+    max-height: calc(100dvh - 24px) !important;
+    padding: 22px 20px !important;
+    border-radius: 26px !important;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  .order-brand-pills {
+    display: flex !important;
+    overflow-x: auto !important;
+    gap: 10px !important;
+    padding-bottom: 6px !important;
+  }
+
+  .order-product-cards {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .order-product-card {
+    min-height: 112px !important;
+  }
+
+  .modal-summary {
+    grid-template-columns: 1fr !important;
+  }
+
+  .voucher-row {
+    grid-template-columns: 1fr auto !important;
+  }
+
+  button#buyBtn {
+    margin-bottom: 0 !important;
+  }
+}
+
+/* === FINAL STABLE FIX: order popup after UI upgrade === */
+.order-modal {
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 14px !important;
+  z-index: 9999 !important;
+}
+
+.order-modal-backdrop {
+  background: rgba(8, 47, 73, 0.58) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+.order-modal-card {
+  position: relative !important;
+  width: min(560px, calc(100vw - 28px)) !important;
+  max-width: 560px !important;
+  max-height: calc(100dvh - 28px) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding: 24px !important;
+  border-radius: 28px !important;
+  background: var(--card-bg-strong) !important;
+  box-shadow: 0 24px 70px rgba(8, 47, 73, 0.28) !important;
+  transform: translateY(16px) scale(0.98) !important;
+  opacity: 0 !important;
+}
+
+.order-modal.show .order-modal-card {
+  transform: translateY(0) scale(1) !important;
+  opacity: 1 !important;
+}
+
+/* remove bottom-sheet handle from upgrade patch */
+.order-modal-card::before {
+  display: none !important;
+}
+
+/* disable the banner version; it made the mobile popup too tall */
+.modal-game-banner {
+  display: none !important;
+}
+
+/* undo extra direct-child padding/margins from the upgrade patch */
+.order-modal-card > *:not(.modal-close-btn):not(.modal-game-banner) {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.modal-close-btn {
+  position: absolute !important;
+  top: 14px !important;
+  right: 14px !important;
+  width: 38px !important;
+  height: 38px !important;
+  background: rgba(56, 189, 248, 0.14) !important;
+  color: var(--text-muted) !important;
+  border: 1px solid var(--border-soft) !important;
+  border-radius: 50% !important;
+  z-index: 30 !important;
+  -webkit-backdrop-filter: blur(4px) !important;
+  backdrop-filter: blur(4px) !important;
+}
+
+.modal-close-btn:hover {
+  background: var(--torii-red) !important;
+  color: white !important;
+}
+
+.modal-head {
+  padding-right: 46px !important;
+  margin: 0 0 18px !important;
+}
+
+.summary-badge {
+  display: inline-flex !important;
+  margin-bottom: 8px !important;
+}
+
+.modal-head h2 {
+  display: block !important;
+  font-size: 24px !important;
+  line-height: 1.2 !important;
+  margin: 0 0 4px !important;
+}
+
+.modal-head p {
+  display: block !important;
+  font-size: 14px !important;
+  line-height: 1.55 !important;
+  margin: 0 !important;
+}
+
+.order-steps {
+  margin: 16px 0 22px !important;
+}
+
+.form-grid {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 16px !important;
+  margin-bottom: 16px !important;
+}
+
+.order-brand-pills,
+.order-product-cards {
+  max-width: 100% !important;
+}
+
+/* hide floating UI while order modal is open */
+body.order-modal-open .bottom-nav,
+body.order-modal-open .floating-admin-btn,
+body.order-modal-open .back-to-top,
+body.order-modal-open .sticky-catalog-search {
+  display: none !important;
+}
+
+@media (max-width: 640px) {
+  .order-modal {
+    padding: 12px !important;
+  }
+
+  .order-modal-card {
+    width: calc(100vw - 24px) !important;
+    max-height: calc(100dvh - 24px) !important;
+    padding: 22px 20px !important;
+    border-radius: 26px !important;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  .order-brand-pills {
+    display: flex !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    gap: 10px !important;
+    padding: 2px 2px 8px !important;
+  }
+
+  .order-product-cards {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding-right: 0 !important;
+  }
+
+  .order-product-card {
+    width: 100% !important;
+    min-height: 112px !important;
+  }
+
+  .modal-summary {
+    grid-template-columns: 1fr !important;
+  }
+
+  .voucher-row {
+    grid-template-columns: 1fr auto !important;
+  }
+
+  button#buyBtn {
+    width: 100% !important;
+    margin: 14px 0 0 !important;
   }
 }
