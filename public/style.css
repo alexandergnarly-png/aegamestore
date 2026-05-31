@@ -8999,3 +8999,62 @@ body.order-modal-open .sticky-catalog-search {
     margin: 14px 0 0 !important;
   }
 }
+/* === Fix SweetAlert guide button blocked by mobile bottom nav === */
+body.swal2-shown .bottom-nav,
+body.swal2-height-auto .bottom-nav,
+body.swal2-shown .floating-admin-btn,
+body.swal2-shown .back-to-top,
+body.swal2-shown .sticky-catalog-search,
+body.swal2-shown .admin-chat-fab,
+body.swal2-shown .admin-chat-sheet {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+.swal2-container {
+  z-index: 20000 !important;
+}
+
+.swal2-popup {
+  position: relative !important;
+  z-index: 20001 !important;
+}
+
+.swal2-actions {
+  position: relative !important;
+  z-index: 20002 !important;
+  pointer-events: auto !important;
+}
+
+.swal2-confirm,
+.swal2-cancel,
+.swal2-deny {
+  pointer-events: auto !important;
+  position: relative !important;
+  z-index: 20003 !important;
+}
+
+@media (max-width: 640px) {
+  .swal2-container {
+    padding: 14px !important;
+  }
+
+  .swal2-popup {
+    width: calc(100vw - 28px) !important;
+    max-height: calc(100dvh - 28px) !important;
+    overflow-y: auto !important;
+    border-radius: 26px !important;
+    padding-bottom: 24px !important;
+  }
+
+  .swal2-actions {
+    margin-top: 18px !important;
+    padding-bottom: 4px !important;
+  }
+
+  .swal2-confirm {
+    min-height: 48px !important;
+    border-radius: 999px !important;
+    font-weight: 800 !important;
+  }
+}
