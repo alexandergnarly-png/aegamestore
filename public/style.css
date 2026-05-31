@@ -7653,3 +7653,21 @@ body.dark-theme .order-product-main b {
     padding-bottom: 92px !important;
   }
 }
+/* === Brand logo clickable to top === */
+.brand-home-link {
+  cursor: pointer;
+  border-radius: 18px;
+  transition:
+    transform 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.brand-home-link:hover {
+  transform: translateY(-1px);
+  background: rgba(56, 189, 248, 0.08);
+}
+
+.brand-home-link:active {
+  transform: scale(0.98);
+}
