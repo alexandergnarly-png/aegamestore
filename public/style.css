@@ -7139,12 +7139,13 @@ body.dark-theme .order-product-main b {
     width: 100vw !important;
     max-width: 100vw !important;
     overflow: hidden !important;
-    padding: 8px !important;
+    /* padding: 0 — kept as bottom-sheet, override handled by upgrade CSS */
+    padding: 0 !important;
   }
 
   .order-modal-card {
-    width: calc(100vw - 16px) !important;
-    max-width: calc(100vw - 16px) !important;
+    width: 100% !important;
+    max-width: 100% !important;
     margin-inline: auto !important;
     overflow-x: hidden !important;
     overscroll-behavior: contain;
@@ -8175,9 +8176,9 @@ body.dark-theme .recent-viewed-card .game-card-thumb {
 
 .modal-head > div {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
 }
 
 .summary-badge {
@@ -8197,15 +8198,19 @@ body.dark-theme .summary-badge {
   border-color: rgba(56, 189, 248, 0.25);
 }
 
-/* Hide the text title in modal head when banner is shown 
-   (title is shown in banner overlay instead) */
-.modal-game-banner ~ .order-modal-card .modal-head h2 {
-  display: none;
+/* Hide h2 title inside modal-head when banner is NOT hidden (title shown in banner) */
+/* JS sets banner hidden attr when no game selected; remove hidden when game opens */
+.modal-head h2 {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  color: var(--text-strong);
+  margin-bottom: 4px;
 }
 
-.modal-head h2 {
-  font-size: 0;
-  margin: 0;
+/* When banner is visible, suppress the duplicate h2 text title */
+#modalGameBanner:not([hidden]) ~ .modal-head h2 {
+  display: none;
 }
 
 .modal-head p {
@@ -8213,12 +8218,7 @@ body.dark-theme .summary-badge {
   font-size: 12px;
 }
 
-/* Pad all form content inside modal */
-.order-modal-card > *:not(.modal-game-banner):not(.modal-close-btn) {
-  padding-left: 20px;
-  padding-right: 20px;
-}
-
+/* Pad specific modal content (not catch-all, to avoid double-padding) */
 .order-modal-card .modal-head {
   padding-left: 20px;
   padding-right: 20px;
