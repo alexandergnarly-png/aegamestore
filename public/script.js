@@ -596,14 +596,8 @@ function setLoading(isLoading) {
 }
 
 async function loadAllProducts() {
-  gameGrid.innerHTML = `
-  <div class="game-skeleton"></div>
-  <div class="game-skeleton"></div>
-  <div class="game-skeleton"></div>
-  <div class="game-skeleton"></div>
-  <div class="game-skeleton"></div>
-  <div class="game-skeleton"></div>
-`;
+  const skeletonCard = `<div class="game-skeleton"><div class="game-skeleton-body"><div class="game-skeleton-line title"></div><div class="game-skeleton-line price"></div><div class="game-skeleton-line badge"></div></div></div>`;
+  gameGrid.innerHTML = skeletonCard.repeat(6);
 
   try {
     const res = await fetch("/public-products");
