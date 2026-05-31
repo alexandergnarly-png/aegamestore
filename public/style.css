@@ -8133,6 +8133,7 @@ body.dark-theme .recent-viewed-card .game-card-thumb {
   text-transform: uppercase;
   padding: 3px 10px;
   border-radius: 99px;
+  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
 }
 
@@ -8152,6 +8153,7 @@ body.dark-theme .recent-viewed-card .game-card-thumb {
   background: rgba(0, 0, 0, 0.35);
   border-radius: 50%;
   z-index: 50;
+    -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   transition:
