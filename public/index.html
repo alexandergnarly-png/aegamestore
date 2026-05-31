@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="style.css?v=59" />
+    <link rel="stylesheet" href="style.css?v=61" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#0ea5e9" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -691,6 +691,23 @@
         >
           ×
         </button>
+
+        <div class="modal-game-banner" id="modalGameBanner" hidden>
+          <img
+            id="modalGameBannerImg"
+            src=""
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
+          <div class="modal-game-banner-overlay" aria-hidden="true"></div>
+          <span class="modal-game-banner-chip" data-i18n="orderGameBadge">
+            Order Game
+          </span>
+          <strong class="modal-game-banner-title" id="modalGameBannerTitle">
+            Pilih Game
+          </strong>
+        </div>
 
         <div class="modal-head">
           <div>
@@ -1424,6 +1441,6 @@
       }, 5000);
     </script>
 
-    <script src="script.js?v=60"></script>
+    <script src="script.js?v=61"></script>
   </body>
 </html>

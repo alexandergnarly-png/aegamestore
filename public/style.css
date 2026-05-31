@@ -7763,3 +7763,924 @@ body.dark-theme .order-product-main b {
     border-radius: 18px;
   }
 }
+
+/* =========================================================
+   AE GAME STORE — IMPLEMENTED UI UPGRADE FROM PREVIEW
+   Source inspiration: preview-upgrade.html + upgrade-ui.css
+   Focus: Recently Viewed cards + Order Modal popup
+   ========================================================= */
+
+/* =========================================================
+   AE Game Store — UI/UX UPGRADE PATCH
+   Paste ini di akhir style.css (atau load sebagai stylesheet terpisah)
+   Meningkatkan: Recently Viewed Rail + Order Modal Popup
+   ========================================================= */
+
+/* =============================================
+   RECENTLY VIEWED — REDESIGN
+   Dari: strip thumbnail polos
+   Ke: kartu dengan glow, hover lift, pill badge
+   ============================================= */
+
+.recent-viewed-rail {
+  margin-bottom: 20px;
+  padding: 16px 16px 14px;
+  background: linear-gradient(
+    135deg,
+    rgba(14, 165, 233, 0.06) 0%,
+    rgba(244, 114, 182, 0.06) 100%
+  );
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  position: relative;
+  overflow: hidden;
+}
+
+.recent-viewed-rail::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--ocean), var(--sakura-strong));
+  border-radius: 2px 2px 0 0;
+}
+
+body.dark-theme .recent-viewed-rail {
+  background: linear-gradient(
+    135deg,
+    rgba(14, 165, 233, 0.1) 0%,
+    rgba(244, 114, 182, 0.08) 100%
+  );
+}
+
+.recent-viewed-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  gap: 8px;
+}
+
+.recent-viewed-title {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--ocean-deep);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.recent-viewed-title::before {
+  content: "🕐";
+  font-size: 13px;
+}
+
+body.dark-theme .recent-viewed-title {
+  color: var(--ocean-light);
+}
+
+.recent-viewed-clear {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--border-soft);
+  cursor: pointer;
+  transition:
+    color 0.18s ease,
+    background 0.18s ease,
+    transform 0.18s ease;
+}
+
+body.dark-theme .recent-viewed-clear {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.recent-viewed-clear:hover {
+  color: var(--torii-red-strong);
+  background: rgba(225, 29, 72, 0.1);
+  transform: scale(0.96);
+}
+
+/* The scrollable track */
+.recent-viewed-track {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.recent-viewed-track::-webkit-scrollbar {
+  display: none;
+}
+
+/* Individual recently-viewed card — complete redesign */
+.recent-viewed-card {
+  flex: 0 0 110px;
+  width: 110px;
+  height: auto !important;
+  scroll-snap-align: start;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--card-bg-strong);
+  cursor: pointer;
+  position: relative;
+  box-shadow: var(--shadow-xs);
+  border: 1.5px solid transparent;
+  transition:
+    transform 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.recent-viewed-card:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow:
+    var(--shadow-md),
+    0 0 0 2px rgba(14, 165, 233, 0.35);
+  border-color: var(--ocean-light);
+}
+
+.recent-viewed-card:active {
+  transform: translateY(-2px) scale(0.99);
+}
+
+/* Card thumbnail area - taller, better aspect ratio */
+.recent-viewed-card .game-card-thumb {
+  width: 100%;
+  aspect-ratio: 3 / 4 !important;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #e0f2fe, #fce7f3);
+}
+
+body.dark-theme .recent-viewed-card .game-card-thumb {
+  background: linear-gradient(
+    135deg,
+    rgba(56, 189, 248, 0.2),
+    rgba(244, 114, 182, 0.25)
+  );
+}
+
+.recent-viewed-card .game-card-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.recent-viewed-card:hover .game-card-thumb img {
+  transform: scale(1.08);
+}
+
+/* Gradient overlay at bottom of thumb */
+.recent-viewed-card .game-card-thumb-overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 28px 8px 8px;
+  background: linear-gradient(
+    0deg,
+    rgba(5, 20, 45, 0.9) 0%,
+    rgba(5, 20, 45, 0.5) 50%,
+    transparent 100%
+  );
+  z-index: 3;
+  pointer-events: none;
+}
+
+.recent-viewed-card .game-card-thumb-overlay strong {
+  font-size: 10px;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.3;
+}
+
+/* "Play" indicator on hover */
+.recent-viewed-card::after {
+  content: "▶";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.6);
+  font-size: 18px;
+  color: white;
+  background: rgba(14, 165, 233, 0.85);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+  z-index: 10;
+  line-height: 36px;
+  text-align: center;
+  padding-left: 3px;
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+}
+
+.recent-viewed-card:hover::after {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* =============================================
+   ORDER MODAL — REDESIGN
+   Dari: plain card popup
+   Ke: immersive dengan hero banner game
+   ============================================= */
+
+.order-modal {
+  align-items: flex-end;
+  padding: 0;
+  padding-top: 60px;
+}
+
+@media (min-width: 640px) {
+  .order-modal {
+    align-items: center;
+    padding: 24px;
+  }
+}
+
+.order-modal-backdrop {
+  background: rgba(4, 16, 36, 0.7);
+  backdrop-filter: blur(12px);
+}
+
+.order-modal-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 520px;
+  max-height: 92vh;
+  overflow-y: auto;
+  background: var(--card-bg-strong);
+  backdrop-filter: blur(32px);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  padding: 0;
+  box-shadow: 0 -8px 60px rgba(0, 0, 0, 0.35);
+  transform: translateY(100%);
+  opacity: 1;
+  transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+  border-top: 1px solid var(--border-color);
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-soft) transparent;
+}
+
+@media (min-width: 640px) {
+  .order-modal-card {
+    border-radius: var(--radius-xl);
+    transform: translateY(20px) scale(0.97);
+    box-shadow: var(--shadow-lg), 0 0 0 1px var(--border-soft);
+  }
+}
+
+.order-modal.show .order-modal-card {
+  transform: translateY(0) scale(1);
+}
+
+/* Drag handle (pill) at top of bottom sheet on mobile */
+.order-modal-card::before {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 4px;
+  background: var(--border-color);
+  border-radius: 99px;
+  margin: 12px auto 0;
+}
+
+@media (min-width: 640px) {
+  .order-modal-card::before {
+    display: none;
+  }
+}
+
+/* Game banner hero area at top of modal */
+.modal-game-banner {
+  width: 100%;
+  height: 130px;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--ocean-deep), var(--sakura-strong));
+  margin-bottom: 0;
+}
+
+.modal-game-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 20%;
+  opacity: 0.85;
+}
+
+.modal-game-banner-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.1) 0%,
+    rgba(0, 0, 0, 0.65) 100%
+  );
+}
+
+.modal-game-banner-title {
+  position: absolute;
+  bottom: 12px;
+  left: 20px;
+  right: 60px;
+  color: white;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: -0.4px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  line-height: 1.2;
+}
+
+.modal-game-banner-chip {
+  position: absolute;
+  top: 12px;
+  left: 20px;
+  background: rgba(14, 165, 233, 0.9);
+  color: white;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 99px;
+  backdrop-filter: blur(4px);
+}
+
+/* Close button repositioned for new layout */
+.modal-close-btn {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: white;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 50%;
+  z-index: 50;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition:
+    background 0.18s ease,
+    transform 0.18s ease;
+}
+
+.modal-close-btn:hover {
+  background: var(--torii-red-strong);
+  transform: rotate(90deg) scale(1.1);
+  color: white;
+}
+
+/* Modal content inner padding */
+.modal-head {
+  padding: 16px 20px 0;
+  margin-bottom: 14px;
+}
+
+.modal-head > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.summary-badge {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  color: var(--ocean-deep);
+  background: var(--water-foam);
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(14, 165, 233, 0.3);
+}
+
+body.dark-theme .summary-badge {
+  color: var(--ocean-light);
+  background: rgba(56, 189, 248, 0.15);
+  border-color: rgba(56, 189, 248, 0.25);
+}
+
+/* Hide the text title in modal head when banner is shown 
+   (title is shown in banner overlay instead) */
+.modal-game-banner ~ .order-modal-card .modal-head h2 {
+  display: none;
+}
+
+.modal-head h2 {
+  font-size: 0;
+  margin: 0;
+}
+
+.modal-head p {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+/* Pad all form content inside modal */
+.order-modal-card > *:not(.modal-game-banner):not(.modal-close-btn) {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.order-modal-card .modal-head {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+/* Order steps — modern pill style */
+.order-steps {
+  display: flex;
+  gap: 0;
+  margin: 0 20px 18px;
+  padding: 0;
+  list-style: none;
+  position: relative;
+}
+
+.order-steps::before {
+  content: "";
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  right: 14px;
+  height: 2px;
+  background: var(--border-soft);
+  z-index: 0;
+}
+
+.order-step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  z-index: 1;
+}
+
+.order-step-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(56, 189, 248, 0.15);
+  border: 2px solid var(--border-soft);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.22s ease,
+    border-color 0.22s ease,
+    color 0.22s ease;
+}
+
+.order-step.is-active .order-step-dot {
+  background: var(--ocean);
+  border-color: var(--ocean);
+  color: white;
+  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.2);
+}
+
+.order-step.is-done .order-step-dot {
+  background: var(--success);
+  border-color: var(--success);
+  color: white;
+}
+
+.order-step-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.2px;
+  text-align: center;
+}
+
+.order-step.is-active .order-step-label {
+  color: var(--ocean-deep);
+  font-weight: 800;
+}
+
+body.dark-theme .order-step.is-active .order-step-label {
+  color: var(--ocean-light);
+}
+
+/* Product cards — pill grid layout upgrade */
+.order-product-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* Buy button — premium gradient treatment */
+#buyBtn {
+  display: block;
+  width: calc(100% - 40px);
+  margin: 16px 20px;
+  padding: 15px 20px;
+  background: linear-gradient(135deg, var(--ocean-deep) 0%, var(--ocean) 50%, var(--sakura-strong) 100%);
+  background-size: 200% 100%;
+  background-position: 0% 50%;
+  color: white;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 0.3px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  border: none;
+  box-shadow:
+    0 4px 20px rgba(14, 165, 233, 0.35),
+    0 1px 0 rgba(255, 255, 255, 0.15) inset;
+  transition:
+    background-position 0.4s ease,
+    transform 0.18s ease,
+    box-shadow 0.22s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+#buyBtn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.15) 50%,
+    transparent 100%
+  );
+  transform: translateX(-100%);
+  transition: transform 0.5s ease;
+}
+
+#buyBtn:hover {
+  background-position: 100% 50%;
+  transform: translateY(-2px);
+  box-shadow:
+    0 8px 28px rgba(14, 165, 233, 0.4),
+    0 1px 0 rgba(255, 255, 255, 0.15) inset;
+}
+
+#buyBtn:hover::before {
+  transform: translateX(100%);
+}
+
+#buyBtn:active {
+  transform: translateY(0px) scale(0.99);
+}
+
+/* Modal summary — 3-column stat row */
+.modal-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin: 0 0 14px;
+  padding: 12px 16px;
+  background: linear-gradient(
+    135deg,
+    rgba(56, 189, 248, 0.06),
+    rgba(244, 114, 182, 0.06)
+  );
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+}
+
+.modal-summary > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 0;
+  position: relative;
+}
+
+.modal-summary > div:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 10%;
+  height: 80%;
+  width: 1px;
+  background: var(--border-soft);
+}
+
+.modal-summary small {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.modal-summary strong {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-strong);
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Trust text bottom */
+.trust-text {
+  font-size: 11px;
+  text-align: center;
+  color: var(--text-muted);
+  padding: 0 20px 20px;
+  line-height: 1.5;
+}
+
+/* Price breakdown — clean card */
+.price-breakdown {
+  margin: 4px 0 14px;
+  padding: 12px 14px;
+  background: rgba(56, 189, 248, 0.06);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+}
+
+.price-breakdown .price-total {
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(56, 189, 248, 0.35);
+}
+
+.price-breakdown .price-total b {
+  font-size: 16px;
+  background: linear-gradient(120deg, var(--ocean-deep), var(--sakura-strong));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 900;
+}
+
+/* Payment methods preview */
+.payment-methods-preview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px 0;
+  flex-wrap: wrap;
+}
+
+.payment-methods-preview small {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.payment-methods-icons {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.payment-methods-icons span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-xs);
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid var(--border-soft);
+  font-size: 14px;
+  transition: transform 0.18s ease;
+}
+
+.payment-methods-icons span:hover {
+  transform: translateY(-2px);
+}
+
+/* Scroll indicator fade at end of recently-viewed track */
+.recent-viewed-rail {
+  position: relative;
+}
+
+/* Form grids inside modal - adjust padding */
+.order-modal-card .form-grid,
+.order-modal-card .form-group {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* Remove double padding from padded wrappers */
+.order-modal-card .voucher-panel {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* Smooth scrollbar on modal */
+.order-modal-card::-webkit-scrollbar {
+  width: 4px;
+}
+.order-modal-card::-webkit-scrollbar-thumb {
+  background: var(--border-soft);
+  border-radius: 99px;
+}
+
+/* Entry animations for recently viewed cards */
+@keyframes rv-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(16px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.recent-viewed-card {
+  animation: rv-slide-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.recent-viewed-card:nth-child(1) { animation-delay: 0.04s; }
+.recent-viewed-card:nth-child(2) { animation-delay: 0.1s; }
+.recent-viewed-card:nth-child(3) { animation-delay: 0.16s; }
+.recent-viewed-card:nth-child(4) { animation-delay: 0.22s; }
+.recent-viewed-card:nth-child(5) { animation-delay: 0.28s; }
+
+
+/* === Integration fixes for current AE Game Store markup === */
+.modal-game-banner[hidden] {
+  display: none !important;
+}
+
+.order-modal-card.has-banner .modal-head h2,
+#modalGameBanner + .modal-head h2 {
+  display: none;
+}
+
+#modalGameBanner + .modal-head {
+  margin-top: 0;
+}
+
+#modalGameBanner + .modal-head .summary-badge {
+  display: none;
+}
+
+#modalGameBanner + .modal-head p {
+  margin-top: 0;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.order-modal-card > .form-grid,
+.order-modal-card > .voucher-panel,
+.order-modal-card > .price-breakdown,
+.order-modal-card > .modal-summary,
+.order-modal-card > .delivery-estimate,
+.order-modal-card > .auto-voucher-banner {
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+.order-modal-card > .form-grid {
+  width: auto;
+}
+
+.order-choice-grid {
+  margin-top: 6px;
+}
+
+.order-product-card {
+  min-width: 0;
+}
+
+.order-product-card .order-product-main {
+  min-width: 0;
+}
+
+.order-product-card .order-product-main strong {
+  word-break: break-word;
+}
+
+.recent-viewed-card .game-card-thumb-fallback {
+  position: absolute;
+  inset: 0;
+}
+
+.recent-viewed-card .game-card-thumb-fallback.show {
+  display: flex;
+}
+
+.recent-viewed-card .game-card-thumb-fallback:not(.show) {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .order-modal-card {
+    width: 100%;
+    max-width: 100%;
+    max-height: 88vh;
+    border-radius: 28px 28px 0 0;
+  }
+
+  .modal-game-banner {
+    height: 126px;
+  }
+
+  .order-modal-card > .form-grid,
+  .order-modal-card > .voucher-panel,
+  .order-modal-card > .price-breakdown,
+  .order-modal-card > .modal-summary,
+  .order-modal-card > .delivery-estimate,
+  .order-modal-card > .auto-voucher-banner {
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+
+  .order-product-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-summary > div:not(:last-child)::after {
+    display: none;
+  }
+
+  #buyBtn {
+    width: calc(100% - 32px);
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+}
+
+@media (min-width: 641px) {
+  .order-modal-card {
+    max-width: 760px;
+  }
+
+  .modal-game-banner {
+    height: 150px;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  }
+
+  .order-choice-grid {
+    grid-template-columns: 250px minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .order-brand-pills {
+    max-height: 250px;
+    overflow-y: auto;
+  }
+
+  .order-product-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 6px;
+  }
+}
+
+@media (min-width: 980px) {
+  .order-modal-card {
+    max-width: 840px;
+  }
+
+  .order-choice-grid {
+    grid-template-columns: 280px minmax(0, 1fr);
+  }
+}

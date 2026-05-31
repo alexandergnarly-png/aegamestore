@@ -1138,6 +1138,37 @@ function resetCatalogFilters() {
 }
 window.resetCatalogFilters = resetCatalogFilters;
 
+function updateOrderModalBanner(game) {
+  const banner = document.getElementById("modalGameBanner");
+  const bannerImg = document.getElementById("modalGameBannerImg");
+  const bannerTitle = document.getElementById("modalGameBannerTitle");
+
+  if (!banner || !game) return;
+
+  const gameName = String(game || "").trim();
+  const imageUrl =
+    typeof getGameImage === "function" ? getGameImage(gameName) : "";
+
+  banner.hidden = false;
+  banner.classList.toggle("has-image", Boolean(imageUrl));
+
+  if (bannerTitle) {
+    bannerTitle.textContent = gameName || "Pilih Game";
+  }
+
+  if (bannerImg) {
+    bannerImg.alt = gameName ? `${gameName} cover` : "Game cover";
+
+    if (imageUrl) {
+      bannerImg.src = imageUrl;
+      bannerImg.style.display = "";
+    } else {
+      bannerImg.removeAttribute("src");
+      bannerImg.style.display = "none";
+    }
+  }
+}
+
 async function openOrderModal(game) {
   const voucherInput = document.getElementById("voucherCodeInput");
   if (voucherInput) voucherInput.value = "";
@@ -1187,6 +1218,7 @@ async function openOrderModal(game) {
   }
 
   selectedGame = game;
+  updateOrderModalBanner(game);
   pushRecentGame(game);
   renderGames();
   loadBrands();
