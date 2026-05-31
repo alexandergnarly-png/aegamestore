@@ -6971,7 +6971,25 @@
             return;
           }
 
+          const seenProducts = new Set();
+
           data.forEach((item) => {
+            const dedupeKey = [
+              String(item.game || "")
+                .trim()
+                .toLowerCase(),
+              String(item.brand || "")
+                .trim()
+                .toLowerCase(),
+              String(item.duration || "")
+                .trim()
+                .toLowerCase(),
+              String(item.price || "0").trim(),
+            ].join("|");
+
+            if (seenProducts.has(dedupeKey)) return;
+            seenProducts.add(dedupeKey);
+
             const option = document.createElement("option");
             option.value = item.id;
             option.textContent = `${item.game} — ${item.brand} — ${item.duration} — ${formatRupiah(item.price || 0)}`;
