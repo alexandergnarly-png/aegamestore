@@ -17,7 +17,7 @@ const translations = {
     howToBuy: "Cara Beli",
     searchGamePlaceholder: "Cari nama game (contoh: PUBG)...",
     processingOrder: "Memproses pesanan...",
-    heroTitle: "Top-up digital cepat dengan gaya brutal yang tegas",
+   heroTitle: "Top Up Game Key Bareng AE Game Store",
     heroDesc:
       "Cari game favoritmu, pilih produk, lalu checkout cepat. Tampilan lebih tegas, ringan, dan fokus ke pembelian.",
     totalPayment: "Total Pembayaran",
@@ -202,7 +202,7 @@ const translations = {
     howToBuy: "How to Buy 📖",
     searchGamePlaceholder: "Search game name (e.g. PUBG)...",
     processingOrder: "Processing order...",
-    heroTitle: "Fast digital top-ups with bold brutal UI",
+    heroTitle: "Top Up Game Keys with AE Game Store",
     heroDesc:
       "Find your game, choose a product, and check out fast with a bold lightweight interface.",
     totalPayment: "Total Payment",
