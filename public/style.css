@@ -6492,12 +6492,11 @@ body.dark-theme .voucher-toggle-arrow {
   }
 
   button#buyBtn {
-    position: sticky !important;
-    bottom: 0 !important;
-    z-index: 5 !important;
+    position: relative !important;
+    bottom: auto !important;
+    z-index: 1 !important;
     margin-top: 12px !important;
-    box-shadow: 0 -8px 20px rgba(14, 165, 233, 0.18) !important;
-  }
+}
 
   button#buyBtn::after {
     display: none !important;
@@ -6824,15 +6823,14 @@ body.dark-theme .order-steps {
   }
 
   #buyBtn {
-    position: sticky;
-    bottom: 0;
-    z-index: 12;
-    width: 100%;
-    min-height: 52px;
-    margin-top: 12px;
-    border-radius: 16px;
-    box-shadow: 0 -8px 24px rgba(14, 165, 233, 0.16);
-  }
+  position: relative;
+  bottom: auto;
+  z-index: 1;
+  width: 100%;
+  min-height: 52px;
+  margin-top: 12px;
+  border-radius: 16px;
+}
 
   .payment-methods-preview,
   .trust-text {
@@ -10347,8 +10345,8 @@ button#buyBtn{
   .filter-pills{display:flex!important;overflow-x:auto!important;flex-wrap:nowrap!important;padding:2px 0 8px!important;scrollbar-width:none!important}.filter-pills::-webkit-scrollbar{display:none!important}.pill{flex:0 0 auto!important;padding:9px 11px!important;font-size:12px!important}
   .search-box input{min-height:48px!important;padding-left:42px!important}
   .game-grid,.compact-game-grid{grid-template-columns:1fr!important;gap:12px!important}.game-card{display:grid!important;grid-template-columns:92px 1fr!important;min-height:110px!important;border-radius:16px!important}
-  .game-card-thumb{height:100%!important;aspect-ratio:auto!important;border-bottom:0!important;border-right:var(--nb-border-thin)!important}.game-card-thumb-overlay,.game-card-ribbon{display:none!important}.game-card-body{padding:10px!important;justify-content:center!important}
-  .game-card-title{font-size:14px!important;line-clamp:2!important;-webkit-line-clamp:2!important}.game-card-price{padding:6px!important}.game-card-stock{font-size:10px!important;padding:4px 6px!important}
+  .game-card-thumb{height:100%!important;aspect-ratio:auto!important;border-bottom:0!important;border-right:var(--nb-border-thin)!important}.game-card-thumb-overlay,.game-card-ribbon{display:none!important}.game-card-body{padding:34px 10px 10px!important;justify-content:center!important}
+  .game-card-title{font-size:14px!important;line-clamp:2!important;-webkit-line-clamp:2!important;line-height:1.15!important}.game-card-price{padding:6px!important}.game-card-stock{font-size:10px!important;padding:4px 6px!important}
   .order-modal,.payment-modal,.policy-modal,.admin-chat-modal{padding:8px!important;align-items:flex-end!important}.order-modal-card,.payment-modal-card,.policy-modal-card,.admin-chat-panel{width:100%!important;max-width:none!important;max-height:calc(100dvh - 18px)!important;border-radius:18px 18px 10px 10px!important;padding:14px!important;overflow-y:auto!important;box-shadow:0 -4px 0 var(--nb-ink)!important}
   .modal-head{margin:-14px -14px 14px!important;padding:18px 52px 16px 14px!important}.payment-modal-card{padding:0!important}.payment-modal-head,.payment-modal-body,.payment-modal-footer{padding:14px!important}.payment-modal-title{font-size:34px!important}.payment-modal-footer{display:grid!important;gap:10px!important}
   .form-grid,.voucher-row{grid-template-columns:1fr!important}
