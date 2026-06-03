@@ -11365,482 +11365,174 @@ body.payment-modal-open .sticky-catalog-search {
     z-index: 740 !important;
   }
 }
-/* === FIX MOBILE GAME CARD + NEO PROMO BANNER === */
-@media (max-width: 640px) {
-  .game-grid {
-    display: grid !important;
-    gap: 18px !important;
-  }
+/* =========================================================
+   MOBILE HEADER FIX — Neo Brutalism
+   Kompak, semua tombol kecil, tidak overflow
+   ========================================================= */
 
-  .game-card {
-    position: relative !important;
-    display: grid !important;
-    grid-template-columns: 92px 1fr !important;
-    grid-template-rows: auto auto auto !important;
-    column-gap: 14px !important;
-    row-gap: 8px !important;
-    min-height: 150px !important;
-    padding: 14px 44px 14px 14px !important;
-    overflow: visible !important;
-    background: #fffdf4 !important;
-    border: 5px solid #111 !important;
-    border-radius: 20px !important;
-    box-shadow: 8px 8px 0 #111 !important;
-  }
-
-  .game-card-thumb {
-    grid-column: 1 !important;
-    grid-row: 1 / span 3 !important;
-    width: 92px !important;
-    height: 118px !important;
-    border: 4px solid #111 !important;
-    border-radius: 12px !important;
-    overflow: hidden !important;
-    align-self: start !important;
-  }
-
-  .game-card-thumb img {
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important;
-    object-position: center !important;
-  }
-
-  .game-card-content {
-    grid-column: 2 !important;
-    grid-row: 1 / span 3 !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    min-width: 0 !important;
-    width: 100% !important;
-    padding: 0 !important;
-    gap: 7px !important;
-  }
-
-  .game-card-category {
-    order: 1 !important;
-    position: static !important;
-    display: inline-flex !important;
-    width: fit-content !important;
-    max-width: 100% !important;
-    padding: 4px 9px !important;
-    font-size: 10px !important;
-    line-height: 1 !important;
-    letter-spacing: 0.8px !important;
-    background: #fff !important;
-    color: #111 !important;
-    border: 3px solid #111 !important;
-    border-radius: 5px !important;
-    box-shadow: 3px 3px 0 #111 !important;
-    z-index: 2 !important;
-  }
-
-  .game-card-title {
-    order: 2 !important;
-    display: block !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    color: #111 !important;
-    font-family: "Bebas Neue", "Space Grotesk", sans-serif !important;
-    font-size: 24px !important;
-    line-height: 0.92 !important;
-    letter-spacing: 0.8px !important;
-    white-space: normal !important;
-    overflow: visible !important;
-    text-overflow: unset !important;
-    word-break: break-word !important;
-    margin: 0 !important;
-    z-index: 2 !important;
-  }
-
-  .game-card-meta,
-  .game-card-footer {
-    order: 3 !important;
-    display: flex !important;
-    flex-wrap: wrap !important;
-    align-items: center !important;
-    gap: 8px !important;
-    width: 100% !important;
-  }
-
-  .game-card-price {
-    display: inline-flex !important;
-    flex-direction: column !important;
-    width: fit-content !important;
-    max-width: 120px !important;
-    padding: 6px 9px !important;
-    background: #ffe033 !important;
-    color: #111 !important;
-    border: 4px solid #111 !important;
-    border-radius: 0 !important;
-    box-shadow: 4px 4px 0 #111 !important;
-    font-family: "Space Grotesk", sans-serif !important;
-    font-size: 15px !important;
-    font-weight: 900 !important;
-    line-height: 1 !important;
-  }
-
-  .game-card-price small {
-    display: block !important;
-    color: #111 !important;
-    font-size: 8px !important;
-    font-weight: 900 !important;
-    letter-spacing: 1px !important;
-    text-transform: uppercase !important;
-  }
-
-  .game-card-stock {
-    display: inline-flex !important;
-    width: fit-content !important;
-    max-width: 132px !important;
-    padding: 7px 9px !important;
-    background: #b8ffd9 !important;
-    color: #046c4e !important;
-    border: 4px solid #111 !important;
-    border-radius: 4px !important;
-    box-shadow: 4px 4px 0 #111 !important;
-    font-size: 10px !important;
-    font-weight: 900 !important;
-    line-height: 1 !important;
-    white-space: nowrap !important;
-  }
-
-  .favorite-btn {
-    position: absolute !important;
-    top: 14px !important;
-    right: 12px !important;
-    width: 34px !important;
-    height: 34px !important;
-    border: 3px solid #111 !important;
-    border-radius: 999px !important;
-    background: #fff !important;
-    box-shadow: 3px 3px 0 #111 !important;
-    z-index: 5 !important;
-  }
+/* ── Shrink header height globally ── */
+:root {
+  --header-h: 52px !important;
 }
 
-/* === NEO PROMO BANNER REWORK === */
-.promo-container {
-  gap: 14px !important;
+.header-inner {
+  min-height: 52px !important;
+  padding: 8px 14px !important;
+  gap: 8px !important;
 }
 
-.promo-slider {
-  height: auto !important;
-  min-height: 180px !important;
-  border: 5px solid #111 !important;
-  border-radius: 0 !important;
-  overflow: hidden !important;
-  background: #111 !important;
-  box-shadow: 10px 10px 0 #111 !important;
+/* ── Brand logo lebih kecil ── */
+.brand-logo {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 6px !important;
+  flex-shrink: 0 !important;
 }
 
-.promo-slide {
-  position: absolute !important;
-  inset: 0 !important;
-  padding: 26px 28px !important;
-  background: #ffe033 !important;
-  color: #111 !important;
-  border-radius: 0 !important;
+.brand-logo svg {
+  width: 18px !important;
+  height: 18px !important;
 }
 
-.promo-slide-pink {
-  background: #ff2f7d !important;
-  color: #111 !important;
+/* ── Brand name sedikit lebih kecil ── */
+.brand-name,
+.brand-copy strong {
+  font-size: 18px !important;
+  letter-spacing: 1.5px !important;
 }
 
-.promo-slide::after {
-  background-image:
-    radial-gradient(#111 1px, transparent 1px),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.28), transparent) !important;
-  background-size:
-    18px 18px,
-    100% 100% !important;
-  opacity: 0.35 !important;
+/* ── Header actions: rapat & kecil ── */
+.header-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  margin-left: auto !important;
+  flex-shrink: 0 !important;
 }
 
-.promo-content {
-  position: relative !important;
-  z-index: 2 !important;
-  max-width: 86% !important;
-  gap: 10px !important;
+/* ── Lang switch: kompak ── */
+.lang-switch {
+  padding: 3px !important;
+  gap: 0 !important;
 }
 
-.promo-content span {
-  width: fit-content !important;
-  background: #111 !important;
-  color: #ffe033 !important;
-  border: 3px solid #111 !important;
-  border-radius: 0 !important;
-  padding: 6px 12px !important;
-  font-family: "DM Mono", monospace !important;
+.lang-btn {
+  padding: 4px 8px !important;
   font-size: 11px !important;
-  font-weight: 900 !important;
-  letter-spacing: 1.8px !important;
-  box-shadow: 4px 4px 0 #fff !important;
-}
-
-.promo-content h3 {
-  color: #111 !important;
-  font-family: "Bebas Neue", "Space Grotesk", sans-serif !important;
-  font-size: clamp(34px, 8vw, 54px) !important;
-  line-height: 0.9 !important;
-  letter-spacing: 1px !important;
-  text-transform: uppercase !important;
-  max-width: 620px !important;
-}
-
-.promo-content p {
-  color: #111 !important;
-  font-size: 15px !important;
-  font-weight: 800 !important;
-  max-width: 520px !important;
-}
-
-.promo-countdown {
+  min-width: 0 !important;
+  line-height: 1 !important;
+  height: 26px !important;
   display: inline-flex !important;
   align-items: center !important;
-  gap: 8px !important;
-  width: fit-content !important;
-  margin-top: 4px !important;
-  padding: 8px 12px !important;
-  background: #fffdf4 !important;
-  color: #111 !important;
-  border: 4px solid #111 !important;
-  border-radius: 0 !important;
-  box-shadow: 5px 5px 0 #111 !important;
-  font-family: "DM Mono", monospace !important;
-  font-weight: 900 !important;
 }
 
-.promo-arrow {
-  border: 4px solid #111 !important;
-  border-radius: 0 !important;
-  background: #fffdf4 !important;
-  color: #111 !important;
-  box-shadow: 4px 4px 0 #111 !important;
+/* ── Theme toggle: ikon saja, kotak kecil ── */
+.theme-toggle-btn,
+.theme-btn {
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px !important;
+  padding: 0 !important;
+  font-size: 14px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
-.promo-dot {
-  border: 2px solid #111 !important;
-  background: #fffdf4 !important;
-}
-
-.promo-dot.active {
-  background: #ffe033 !important;
-}
-
+/* ── Auth / user menu: ikon saja di mobile ── */
 @media (max-width: 640px) {
-  .promo-slider {
-    min-height: 190px !important;
-    box-shadow: 7px 7px 0 #111 !important;
-  }
-
-  .promo-slide {
-    padding: 22px 18px !important;
-  }
-
-  .promo-content {
-    max-width: 100% !important;
-  }
-
-  .promo-content h3 {
-    font-size: 38px !important;
-    line-height: 0.9 !important;
-  }
-
-  .promo-content p {
-    font-size: 13px !important;
-    line-height: 1.35 !important;
-  }
-
-  .promo-countdown {
-    font-size: 11px !important;
-    padding: 7px 9px !important;
-  }
-}
-/* === FINAL PATCH: Match real JS card selectors on mobile === */
-@media (max-width: 640px) {
-  .game-card {
-    display: grid !important;
-    grid-template-columns: 94px minmax(0, 1fr) !important;
-    gap: 14px !important;
-    min-height: 154px !important;
-    padding: 14px 50px 14px 14px !important;
-    overflow: hidden !important;
-  }
-
-  .game-card-thumb {
-    grid-column: 1 !important;
-    grid-row: 1 !important;
-    width: 94px !important;
-    height: 120px !important;
-    align-self: start !important;
-  }
-
-  .game-card-top {
-    position: static !important;
-    grid-column: 2 !important;
-    grid-row: 1 !important;
-    display: flex !important;
-    align-items: flex-start !important;
-    justify-content: flex-start !important;
-    gap: 6px !important;
-    pointer-events: auto !important;
-    z-index: 3 !important;
-    min-width: 0 !important;
-  }
-
-  .game-card-chip {
-    display: inline-flex !important;
-    width: fit-content !important;
-    max-width: 100% !important;
-    padding: 4px 9px !important;
-    background: #fff !important;
-    color: #111 !important;
-    border: 3px solid #111 !important;
-    border-radius: 5px !important;
-    box-shadow: 3px 3px 0 #111 !important;
-    font-size: 10px !important;
-    line-height: 1 !important;
-    letter-spacing: 0.8px !important;
-  }
-
-  .game-card-ribbon {
+  /* Sembunyikan teks auth, tampilkan ikon saja */
+  .auth-btn span:not(.auth-icon):not([aria-hidden]) {
     display: none !important;
   }
 
-  .game-card-body {
-    grid-column: 2 !important;
-    grid-row: 1 !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    justify-content: flex-start !important;
-    gap: 8px !important;
+  .auth-btn {
+    padding: 6px 10px !important;
+    font-size: 12px !important;
     min-width: 0 !important;
-    width: 100% !important;
-    padding: 32px 0 0 !important;
-    z-index: 2 !important;
+    width: 32px !important;
+    height: 32px !important;
+    justify-content: center !important;
+    box-shadow: 2px 2px 0 var(--nb-black) !important;
   }
 
-  .game-card-title {
-    display: block !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    color: #111 !important;
-    font-family: "Bebas Neue", "Space Grotesk", sans-serif !important;
-    font-size: 25px !important;
-    line-height: 0.92 !important;
-    letter-spacing: 0.8px !important;
-    white-space: normal !important;
-    overflow: visible !important;
-    text-overflow: unset !important;
-    line-clamp: unset !important;
-    -webkit-line-clamp: unset !important;
-    -webkit-box-orient: initial !important;
-    word-break: break-word !important;
-    margin: 0 !important;
+  body.dark-theme .auth-btn {
+    box-shadow: 2px 2px 0 var(--nb-white) !important;
   }
 
-  .game-card-meta {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    justify-content: flex-start !important;
+  /* User greeting — sembunyikan nama user di mobile */
+  .user-greeting strong,
+  .user-greeting span:not(.emoji) {
+    display: none !important;
+  }
+
+  .user-greeting {
+    padding: 4px 6px !important;
+  }
+
+  /* Cart / logout icon button */
+  .cart-btn,
+  .logout-btn {
+    width: 32px !important;
+    height: 32px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
     align-items: center !important;
-    gap: 8px !important;
-    width: 100% !important;
-    min-width: 0 !important;
+    justify-content: center !important;
   }
 
-  .game-card-price {
-    max-width: 118px !important;
-    flex: 0 0 auto !important;
+  /* Menu hamburger */
+  .menu-btn,
+  .nav-toggle {
+    width: 32px !important;
+    height: 32px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 16px !important;
   }
 
-  .game-card-stock {
-    max-width: 128px !important;
-    flex: 0 0 auto !important;
+  /* Header inner: no wrap, semua dalam satu baris */
+  .header-inner {
+    flex-wrap: nowrap !important;
     overflow: hidden !important;
-    text-overflow: ellipsis !important;
+    padding: 8px 12px !important;
   }
 
-  .game-card-fav {
-    position: absolute !important;
-    top: 14px !important;
-    right: 12px !important;
-    width: 34px !important;
-    height: 34px !important;
-    border: 3px solid #111 !important;
-    border-radius: 999px !important;
-    background: #fff !important;
-    box-shadow: 3px 3px 0 #111 !important;
-    z-index: 8 !important;
+  /* Brand: jangan terlalu banyak ruang */
+  .brand {
+    flex-shrink: 0 !important;
+    gap: 8px !important;
   }
 
-  .ae-sticky-search {
-    left: 10px !important;
-    right: 10px !important;
-    top: 78px !important;
-    width: auto !important;
-    padding: 8px !important;
-    border-radius: 18px !important;
-    border: 3px solid #111 !important;
-    box-shadow: 5px 5px 0 #111 !important;
-    z-index: 850 !important;
+  /* Sembunyikan brand copy (nama + tagline) di layar sangat sempit */
+  @media (max-width: 380px) {
+    .brand-copy {
+      display: none !important;
+    }
   }
 
-  .ae-sticky-search input {
-    height: 48px !important;
-    font-size: 14px !important;
-    border: 3px solid #111 !important;
-    border-radius: 12px !important;
+  /* Fix header bottom nav gap */
+  .bottom-nav {
+    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
   }
 
-  .ae-sticky-search-clear {
-    width: 46px !important;
-    height: 46px !important;
-    border: 3px solid #111 !important;
-    box-shadow: none !important;
+  /* Pastikan hero tidak kepotong header */
+  .hero {
+    padding-top: 16px !important;
   }
 }
 
-/* === FINAL PATCH: make promo fully neo, remove old soft deco feeling === */
-.promo-deco {
-  display: none !important;
+/* ── Semua ukuran layar: header lebih kompak ── */
+.site-header {
+  min-height: 52px !important;
 }
 
-.promo-slider {
-  border: 5px solid #111 !important;
-  border-radius: 0 !important;
-  background: #ffe033 !important;
-  box-shadow: 10px 10px 0 #111 !important;
-}
-
-.promo-slide {
-  background: #ffe033 !important;
-}
-
-.promo-slide-pink {
-  background: #ff2f7d !important;
-}
-
-.promo-content {
-  max-width: 100% !important;
-}
-
-@media (max-width: 640px) {
-  .promo-slider {
-    min-height: 210px !important;
-    margin-right: 8px !important;
-  }
-
-  .promo-slide {
-    padding: 20px 16px !important;
-  }
-
-  .promo-content h3 {
-    font-size: 40px !important;
-    line-height: 0.88 !important;
-  }
+/* ── Iconify icon size di header ── */
+.header-actions iconify-icon,
+.header-actions .icon {
+  font-size: 16px !important;
+  width: 16px !important;
+  height: 16px !important;
 }
