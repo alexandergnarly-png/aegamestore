@@ -13212,3 +13212,37 @@ body.dark-theme .game-card h3 {
     box-shadow: 0 8px 20px rgba(2, 132, 199, 0.3) !important;
   }
 }
+/* =========================================================
+   FINAL FIX — Mobile: hilangkan semua garis hitam tombol chat admin
+   ========================================================= */
+@media (max-width: 768px) {
+  /* Reset total tombol chat admin */
+  .floating-admin-btn,
+  .admin-chat-fab {
+    border: none !important;
+    box-shadow: 0 8px 20px rgba(2, 132, 199, 0.3) !important;
+    background: linear-gradient(135deg, #0ea5e9, #0284c7) !important;
+    outline: none !important;
+  }
+
+  /* Hancurkan semua pseudo‑element yang mungkin menambah garis */
+  .floating-admin-btn::before,
+  .floating-admin-btn::after,
+  .admin-chat-fab::before,
+  .admin-chat-fab::after {
+    display: none !important;
+    content: none !important;
+  }
+
+  /* Pastikan background teks tidak kebawa hitam */
+  .floating-admin-icon {
+    background: transparent !important;
+    color: white !important;
+  }
+
+  /* Hapus border hitam di card chat admin jika ada */
+  .admin-chat-card {
+    border: 1px solid rgba(14, 165, 233, 0.2) !important;
+    box-shadow: 0 -4px 12px rgba(0,0,0,0.1) !important;
+  }
+}
