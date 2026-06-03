@@ -15,12 +15,11 @@
       rel="stylesheet"
     />
     <script>
-      window.AE_ASSET_VERSION = Date.now();
-      document.write(
-        '<link rel="stylesheet" href="/style.css?v=' +
-          window.AE_ASSET_VERSION +
-          '">',
-      );
+      window.AE_ASSET_VERSION = String(Date.now());
+      const aeStyle = document.createElement("link");
+      aeStyle.rel = "stylesheet";
+      aeStyle.href = "/style.css?v=" + window.AE_ASSET_VERSION;
+      document.head.appendChild(aeStyle);
     </script>
     <noscript>
       <link rel="stylesheet" href="/style.css" />

@@ -11659,3 +11659,188 @@ body.payment-modal-open .sticky-catalog-search {
     padding: 7px 9px !important;
   }
 }
+/* === FINAL PATCH: Match real JS card selectors on mobile === */
+@media (max-width: 640px) {
+  .game-card {
+    display: grid !important;
+    grid-template-columns: 94px minmax(0, 1fr) !important;
+    gap: 14px !important;
+    min-height: 154px !important;
+    padding: 14px 50px 14px 14px !important;
+    overflow: hidden !important;
+  }
+
+  .game-card-thumb {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    width: 94px !important;
+    height: 120px !important;
+    align-self: start !important;
+  }
+
+  .game-card-top {
+    position: static !important;
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    gap: 6px !important;
+    pointer-events: auto !important;
+    z-index: 3 !important;
+    min-width: 0 !important;
+  }
+
+  .game-card-chip {
+    display: inline-flex !important;
+    width: fit-content !important;
+    max-width: 100% !important;
+    padding: 4px 9px !important;
+    background: #fff !important;
+    color: #111 !important;
+    border: 3px solid #111 !important;
+    border-radius: 5px !important;
+    box-shadow: 3px 3px 0 #111 !important;
+    font-size: 10px !important;
+    line-height: 1 !important;
+    letter-spacing: 0.8px !important;
+  }
+
+  .game-card-ribbon {
+    display: none !important;
+  }
+
+  .game-card-body {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    padding: 32px 0 0 !important;
+    z-index: 2 !important;
+  }
+
+  .game-card-title {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    color: #111 !important;
+    font-family: "Bebas Neue", "Space Grotesk", sans-serif !important;
+    font-size: 25px !important;
+    line-height: 0.92 !important;
+    letter-spacing: 0.8px !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    line-clamp: unset !important;
+    -webkit-line-clamp: unset !important;
+    -webkit-box-orient: initial !important;
+    word-break: break-word !important;
+    margin: 0 !important;
+  }
+
+  .game-card-meta {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .game-card-price {
+    max-width: 118px !important;
+    flex: 0 0 auto !important;
+  }
+
+  .game-card-stock {
+    max-width: 128px !important;
+    flex: 0 0 auto !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .game-card-fav {
+    position: absolute !important;
+    top: 14px !important;
+    right: 12px !important;
+    width: 34px !important;
+    height: 34px !important;
+    border: 3px solid #111 !important;
+    border-radius: 999px !important;
+    background: #fff !important;
+    box-shadow: 3px 3px 0 #111 !important;
+    z-index: 8 !important;
+  }
+
+  .ae-sticky-search {
+    left: 10px !important;
+    right: 10px !important;
+    top: 78px !important;
+    width: auto !important;
+    padding: 8px !important;
+    border-radius: 18px !important;
+    border: 3px solid #111 !important;
+    box-shadow: 5px 5px 0 #111 !important;
+    z-index: 850 !important;
+  }
+
+  .ae-sticky-search input {
+    height: 48px !important;
+    font-size: 14px !important;
+    border: 3px solid #111 !important;
+    border-radius: 12px !important;
+  }
+
+  .ae-sticky-search-clear {
+    width: 46px !important;
+    height: 46px !important;
+    border: 3px solid #111 !important;
+    box-shadow: none !important;
+  }
+}
+
+/* === FINAL PATCH: make promo fully neo, remove old soft deco feeling === */
+.promo-deco {
+  display: none !important;
+}
+
+.promo-slider {
+  border: 5px solid #111 !important;
+  border-radius: 0 !important;
+  background: #ffe033 !important;
+  box-shadow: 10px 10px 0 #111 !important;
+}
+
+.promo-slide {
+  background: #ffe033 !important;
+}
+
+.promo-slide-pink {
+  background: #ff2f7d !important;
+}
+
+.promo-content {
+  max-width: 100% !important;
+}
+
+@media (max-width: 640px) {
+  .promo-slider {
+    min-height: 210px !important;
+    margin-right: 8px !important;
+  }
+
+  .promo-slide {
+    padding: 20px 16px !important;
+  }
+
+  .promo-content h3 {
+    font-size: 40px !important;
+    line-height: 0.88 !important;
+  }
+}
