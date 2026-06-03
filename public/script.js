@@ -13,24 +13,24 @@ const translations = {
     selectGame: "1. Pilih Game",
     buyNow: "Beli Sekarang",
     processing: "Memproses...",
-    loadingWebsite: "Memuat Website...",
-    howToBuy: "Cara Beli",
+    loadingWebsite: "Loading AE Store...",
+    howToBuy: "Cara Beli 📖",
     searchGamePlaceholder: "Cari nama game (contoh: PUBG)...",
     processingOrder: "Memproses pesanan...",
-    heroTitle: "Top-up digital cepat dengan gaya brutal yang tegas",
+    heroTitle: "TOP-UP GAME CEPAT, TEGAS, DAN ANTI RIBET",
     heroDesc:
-      "Cari game favoritmu, pilih produk, lalu checkout cepat. Tampilan lebih tegas, ringan, dan fokus ke pembelian.",
+      "Pilih game, pilih produk, bayar, lalu tunggu pesanan diproses cepat.",
     totalPayment: "Total Pembayaran",
     previewEmpty: "Produk belum dipilih",
     previewWait: "Silakan pilih platform dan produk",
-    guideTitle: "Panduan Top-Up ",
+    guideTitle: "Panduan Top-Up",
     guideStep1: "Pilih Game: Cari dan klik game yang kamu inginkan.",
     guideStep2:
       "Tentukan Produk: Pilih tipe device (iOS/Android) dan produknya.",
     guideStep3: "Isi Data: Nama player otomatis dari akun login.",
     guideStep4: "Checkout: Klik 'Beli Sekarang' dan selesaikan pembayaran.",
     guideStep5: "Selesai! Game akan langsung dikirim setelah sukses.",
-    guideOk: "Mengerti",
+    guideOk: "Mengerti! 🌊",
     loginBtn: "Masuk / Daftar",
     navHome: "Beranda",
     navStore: "Katalog Game",
@@ -82,14 +82,14 @@ const translations = {
     brandTagline: "Premium Digital Keys",
     navReviews: "Review Buyer",
     heroBadge: "\uD83C\uDF0A SEAMLESS TOP-UP EXPERIENCE",
-    heroCtaPrimary: "Browse Game Catalog",
+    heroCtaPrimary: "Buka Katalog Game",
     heroCtaGuide: "\uD83D\uDCD6 Cara Beli",
-    trustInstantTitle: "Kirim Cepat",
-    trustInstantDesc: "Auto/manual sesuai stok produk",
+    trustInstantTitle: "Pengiriman Instan",
+    trustInstantDesc: "Key terkirim otomatis setelah bayar",
     trustSecureTitle: "Pembayaran Aman",
     trustSecureDesc: "QRIS GoPay Merchant resmi",
-    trustSupportTitle: "Admin Siaga",
-    trustSupportDesc: "Bantu order & kendala transaksi",
+    trustSupportTitle: "Support 24/7",
+    trustSupportDesc: "Admin standby setiap saat",
     filterTools: "Tools / GBox",
     testiTitle: "Kepercayaan Gamers",
     testiDesc:
@@ -196,25 +196,25 @@ const translations = {
     selectProduct: "Select Product",
     fillDetails: "Fill in the details below to start your order.",
     selectGame: "1. Select Game",
-    buyNow: "Buy Now ",
+    buyNow: "Buy Now",
     processing: "Processing...",
-    loadingWebsite: "Loading Website...",
+    loadingWebsite: "Loading AE Store...",
     howToBuy: "How to Buy 📖",
     searchGamePlaceholder: "Search game name (e.g. PUBG)...",
     processingOrder: "Processing order...",
-    heroTitle: "Fast digital top-ups with bold brutal UI",
+    heroTitle: "FAST, BOLD, NO-NONSENSE GAME TOP-UPS",
     heroDesc:
-      "Find your game, choose a product, and check out fast with a bold lightweight interface.",
+      "Pick a game, choose a product, pay, and let the order process fast.",
     totalPayment: "Total Payment",
     previewEmpty: "No product selected",
     previewWait: "Please select platform and product",
-    guideTitle: "Top-Up Guide ",
+    guideTitle: "Top-Up Guide",
     guideStep1: "Select Game: Find and choose your desired game.",
     guideStep2: "Choose Product: Select device type (iOS/Android) and product.",
     guideStep3: "Fill Data: Player name is filled from your logged-in account.",
     guideStep4: "Checkout: Click 'Buy Now' and complete the payment.",
     guideStep5: "Done! Your game will be delivered instantly after success.",
-    guideOk: "Got it! ",
+    guideOk: "Mengerti",
     loginBtn: "Login / Register",
     navHome: "Home",
     navStore: "Game Catalog",
@@ -266,7 +266,7 @@ const translations = {
     brandTagline: "Premium Digital Keys",
     navReviews: "Buyer Reviews",
     heroBadge: "\uD83C\uDF0A SEAMLESS TOP-UP EXPERIENCE",
-    heroCtaPrimary: "Browse Game Catalog",
+    heroCtaPrimary: "Open Game Catalog",
     heroCtaGuide: "\uD83D\uDCD6 How to Buy",
     trustInstantTitle: "Instant Delivery",
     trustInstantDesc: "Key delivered automatically after payment",
@@ -614,7 +614,7 @@ async function loadAllProducts() {
       allProducts = [];
       gameGrid.innerHTML = `
     <div class="empty-category-card">
-      <div class="empty-category-icon"></div>
+      <div class="empty-category-icon">🌊</div>
       <h3>Produk belum tersedia</h3>
       <p>Belum ada produk aktif saat ini. Silakan hubungi admin untuk info stok.</p>
       <a href="https://t.me/aegamestore" target="_blank">Chat Admin</a>
@@ -2803,7 +2803,7 @@ function showTelegramPopup() {
           <div style="background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%); width: 90px; height: 90px; border-radius: 24px; display: flex; align-items: center; justify-content: center; margin: 0 auto 22px; box-shadow: 0 10px 20px rgba(14, 165, 233, 0.15);">
             <iconify-icon icon="logos:telegram" width="54"></iconify-icon>
           </div>
-          <h2 style="color: #0c4a6e; font-size: 22px; font-weight: 800; margin-bottom: 12px; letter-spacing: -0.5px;">Eksklusif Community </h2>
+          <h2 style="color: #0c4a6e; font-size: 22px; font-weight: 800; margin-bottom: 12px; letter-spacing: -0.5px;">Eksklusif Community ⛩️</h2>
           <p style="color: #475569; font-size: 14px; line-height: 1.6; margin-bottom: 5px;">
             Dapatkan <b>voucher diskon harian</b> dan update stok tercepat hanya di Telegram.
           </p>
