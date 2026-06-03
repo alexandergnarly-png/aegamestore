@@ -9256,7 +9256,7 @@ body.dark-theme .cart-btn {
 /* ── HERO SECTION ── */
 .hero {
   background: var(--nb-white) !important;
-  border-bottom: var(--nb-border) !important;
+  border-bottom: none !important;
   position: relative !important;
   overflow: hidden !important;
 }
@@ -12063,14 +12063,14 @@ body.dark-theme .back-to-top {
   color: var(--nb-yellow) !important;
   border: var(--nb-border) !important;
   border-radius: 4px !important;
-  box-shadow: var(--nb-shadow-lg) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25) !important;
   backdrop-filter: none !important;
   transition: transform 0.1s, box-shadow 0.1s !important;
 }
 
 .floating-admin-btn:hover {
   transform: translate(-2px, -2px) !important;
-  box-shadow: var(--nb-shadow-xl) !important;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.3) !important;
 }
 
 .floating-admin-icon {
