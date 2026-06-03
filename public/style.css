@@ -10304,15 +10304,32 @@ button#buyBtn{
   text-transform:uppercase!important;
   letter-spacing:.08em!important;
 }
-.payment-modal-card{max-width:760px!important;overflow:hidden!important;}
+.payment-modal-card{
+  max-width:760px!important;
+  overflow:hidden!important;
+}
 .payment-modal-head{background:var(--nb-yellow)!important;color:var(--nb-ink)!important;border-bottom:var(--nb-border)!important;padding:22px 64px 20px 22px!important;}
 .payment-modal-title{font-size:clamp(34px,5vw,56px)!important;line-height:.9!important;}
 .payment-modal-body{background:var(--nb-paper)!important;padding:20px!important;}
 .payment-modal-amount,.payment-amount{background:var(--nb-pink)!important;color:#fff!important;border:var(--nb-border)!important;box-shadow:var(--nb-shadow)!important;border-radius:16px!important;}
 .payment-modal-amount strong,.payment-amount strong,#paymentAmount,#paymentModalAmount{color:#fff!important;-webkit-text-fill-color:currentColor!important;}
 .payment-modal-countdown{background:#111!important;color:var(--nb-yellow)!important;}
-.payment-modal-snap-wrap{background:#fff!important;padding:12px!important;}
-.payment-modal-snap-wrap iframe,#snap-container iframe{border:var(--nb-border-thin)!important;border-radius:12px!important;}
+.payment-modal-snap-wrap{
+  background:#fff!important;
+  padding:8px!important;
+  max-width:100%!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+}
+.payment-modal-snap-wrap iframe,
+#snap-container iframe{
+  display:block!important;
+  width:100%!important;
+  max-width:100%!important;
+  border:var(--nb-border-thin)!important;
+  border-radius:12px!important;
+}
 .payment-modal-footer{background:var(--nb-yellow)!important;border-top:var(--nb-border)!important;padding:16px 20px!important;}
 .swal2-popup{color:var(--nb-ink)!important;padding:24px!important;}
 .swal2-title{font-size:42px!important;}
@@ -10348,7 +10365,7 @@ button#buyBtn{
   .game-card-thumb{height:100%!important;aspect-ratio:auto!important;border-bottom:0!important;border-right:var(--nb-border-thin)!important}.game-card-thumb-overlay,.game-card-ribbon{display:none!important}.game-card-body{padding:34px 10px 10px!important;justify-content:center!important}
   .game-card-title{font-size:14px!important;line-clamp:2!important;-webkit-line-clamp:2!important;line-height:1.15!important}.game-card-price{padding:6px!important}.game-card-stock{font-size:10px!important;padding:4px 6px!important}
   .order-modal,.payment-modal,.policy-modal,.admin-chat-modal{padding:8px!important;align-items:flex-end!important}.order-modal-card,.payment-modal-card,.policy-modal-card,.admin-chat-panel{width:100%!important;max-width:none!important;max-height:calc(100dvh - 18px)!important;border-radius:18px 18px 10px 10px!important;padding:14px!important;overflow-y:auto!important;box-shadow:0 -4px 0 var(--nb-ink)!important}
-  .modal-head{margin:-14px -14px 14px!important;padding:18px 52px 16px 14px!important}.payment-modal-card{padding:0!important}.payment-modal-head,.payment-modal-body,.payment-modal-footer{padding:14px!important}.payment-modal-title{font-size:34px!important}.payment-modal-footer{display:grid!important;gap:10px!important}
+  .modal-head{margin:-14px -14px 14px!important;padding:18px 52px 16px 14px!important}.payment-modal-card{padding:0!important;overflow-y:auto!important;overflow-x:hidden!important}.payment-modal-head,.payment-modal-footer{padding:14px!important}.payment-modal-body{padding:8px!important}.payment-modal-title{font-size:34px!important}.payment-modal-footer{display:grid!important;gap:10px!important}
   .form-grid,.voucher-row{grid-template-columns:1fr!important}
 .modal-summary{
   grid-template-columns:1fr!important;
@@ -10374,6 +10391,23 @@ button#buyBtn{
   .testi-track{grid-auto-columns:minmax(250px,84vw)!important}.install-prompt-banner,.resume-cart-bar{left:10px!important;right:10px!important;bottom:74px!important;width:auto!important}
 }
 @media(max-width:390px){.brand-copy strong{max-width:92px!important}.hero h1{font-size:42px!important}.game-card{grid-template-columns:84px 1fr!important}}
+@media(max-width:768px){
+  .payment-modal-snap-wrap{
+    padding:0!important;
+    border-radius:12px!important;
+  }
+
+  .payment-modal-snap{
+    width:100%!important;
+    min-height:420px!important;
+  }
+
+  .payment-modal-snap iframe,
+  #snap-container iframe{
+    width:100%!important;
+    min-width:0!important;
+  }
+}
 /* === FIX MOBILE: show ID / EN language switcher === */
 @media (max-width: 768px) {
   .header-actions {
