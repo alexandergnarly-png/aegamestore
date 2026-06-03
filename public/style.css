@@ -13206,3 +13206,9 @@ body.dark-theme .game-card h3 {
     transform: none !important;
   }
 }
+@media (max-width: 768px) {
+  .floating-admin-btn {
+    border: none !important;
+    box-shadow: 0 8px 20px rgba(2, 132, 199, 0.3) !important;
+  }
+}
