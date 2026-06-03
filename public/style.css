@@ -10922,4 +10922,77 @@ body.payment-modal-open .sticky-catalog-search {
     box-shadow: 6px 6px 0 var(--nb-black) !important;
   }
 }
+/* === Neo Brutalism Preloader Polish === */
+#preloader {
+  background: #ffe033 !important;
+  background-image:
+    radial-gradient(#111 1px, transparent 1px),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.25), transparent) !important;
+  background-size:
+    22px 22px,
+    100% 100% !important;
+}
 
+.loader-content {
+  background: #fff !important;
+  border: 4px solid #111 !important;
+  border-radius: 26px !important;
+  padding: 34px 42px !important;
+  box-shadow: 12px 12px 0 #111 !important;
+  min-width: 320px !important;
+}
+
+.loader-logo {
+  width: 86px !important;
+  height: 86px !important;
+  border-radius: 22px !important;
+  border: 4px solid #111 !important;
+  background: #ff2f7d !important;
+  box-shadow: 7px 7px 0 #111 !important;
+}
+
+.loader-text {
+  color: #111 !important;
+  font-family: "Bebas Neue", "Space Grotesk", sans-serif !important;
+  font-size: 28px !important;
+  font-weight: 900 !important;
+  letter-spacing: 5px !important;
+  text-transform: uppercase !important;
+}
+
+.loader-bar {
+  width: 280px !important;
+  height: 14px !important;
+  background: #fff !important;
+  border: 4px solid #111 !important;
+  border-radius: 0 !important;
+  overflow: hidden !important;
+}
+
+.loader-progress {
+  height: 100% !important;
+  background: repeating-linear-gradient(
+    45deg,
+    #00c2ff 0 12px,
+    #ff2f7d 12px 24px
+  ) !important;
+  border-radius: 0 !important;
+}
+
+@media (max-width: 520px) {
+  .loader-content {
+    min-width: auto !important;
+    width: calc(100vw - 48px) !important;
+    padding: 28px 24px !important;
+    box-shadow: 8px 8px 0 #111 !important;
+  }
+
+  .loader-text {
+    font-size: 23px !important;
+    letter-spacing: 3px !important;
+  }
+
+  .loader-bar {
+    width: 100% !important;
+  }
+}
