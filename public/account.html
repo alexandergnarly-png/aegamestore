@@ -1390,7 +1390,243 @@
           font-size: 9px;
         }
       }
+
+      /* =========================================================
+         AE NEO BRUTALISM PATCH — ACCOUNT PAGE
+         Keep after original styles so it becomes the main skin.
+         ========================================================= */
+      :root {
+        --neo-ink: #0b0b0f;
+        --neo-paper: #fffdf2;
+        --neo-yellow: #fff04a;
+        --neo-cyan: #38d5ff;
+        --neo-pink: #ff5fb7;
+        --neo-green: #35ff8b;
+        --neo-red: #ff4d4d;
+        --neo-blue: #5a7dff;
+        --neo-shadow: 7px 7px 0 var(--neo-ink);
+        --neo-shadow-sm: 4px 4px 0 var(--neo-ink);
+        --neo-radius: 18px;
+      }
+
+      body {
+        font-family:
+          "Space Grotesk", "Plus Jakarta Sans", sans-serif !important;
+        background:
+          radial-gradient(
+            circle at 12% 10%,
+            rgba(255, 95, 183, 0.26),
+            transparent 28%
+          ),
+          radial-gradient(
+            circle at 88% 18%,
+            rgba(56, 213, 255, 0.32),
+            transparent 30%
+          ),
+          linear-gradient(135deg, #fffdf2 0%, #f7fbff 52%, #fff1fb 100%) !important;
+        color: var(--neo-ink) !important;
+      }
+
+      body.dark-theme {
+        background:
+          radial-gradient(
+            circle at 12% 10%,
+            rgba(255, 95, 183, 0.22),
+            transparent 28%
+          ),
+          radial-gradient(
+            circle at 88% 18%,
+            rgba(56, 213, 255, 0.22),
+            transparent 30%
+          ),
+          linear-gradient(135deg, #111827 0%, #0b1220 100%) !important;
+        color: #f8fafc !important;
+      }
+
+      .site-header {
+        background: rgba(255, 253, 242, 0.94) !important;
+        border-bottom: 4px solid var(--neo-ink) !important;
+        box-shadow: 0 6px 0 var(--neo-ink) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+      }
+
+      body.dark-theme .site-header {
+        background: rgba(15, 23, 42, 0.96) !important;
+      }
+
+      .brand-logo,
+      .avatar,
+      .icon-btn {
+        border: 3px solid var(--neo-ink) !important;
+        box-shadow: var(--neo-shadow-sm) !important;
+        border-radius: 16px !important;
+      }
+
+      .brand-copy strong,
+      .profile-card h1,
+      .section-title {
+        font-family: "Bebas Neue", "Space Grotesk", sans-serif !important;
+        letter-spacing: 0.04em !important;
+        color: var(--neo-ink) !important;
+      }
+
+      body.dark-theme .brand-copy strong,
+      body.dark-theme .profile-card h1,
+      body.dark-theme .section-title {
+        color: #f8fafc !important;
+      }
+
+      .header-back,
+      .surface,
+      .tab-card,
+      .status-box,
+      .order-row,
+      .empty-state,
+      .skeleton-card {
+        background: var(--neo-paper) !important;
+        border: 3px solid var(--neo-ink) !important;
+        border-radius: var(--neo-radius) !important;
+        box-shadow: var(--neo-shadow) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+      }
+
+      body.dark-theme .header-back,
+      body.dark-theme .surface,
+      body.dark-theme .tab-card,
+      body.dark-theme .status-box,
+      body.dark-theme .order-row,
+      body.dark-theme .empty-state {
+        background: #111827 !important;
+        border-color: #f8fafc !important;
+        box-shadow: 7px 7px 0 #f8fafc !important;
+      }
+
+      .profile-card::before {
+        height: 12px !important;
+        background: repeating-linear-gradient(
+          90deg,
+          var(--neo-yellow) 0 34px,
+          var(--neo-cyan) 34px 68px,
+          var(--neo-pink) 68px 102px
+        ) !important;
+        border-bottom: 3px solid var(--neo-ink) !important;
+      }
+
+      .tab-card {
+        border-radius: 20px !important;
+        padding: 8px !important;
+      }
+
+      .tab-btn,
+      .filter-chip,
+      .buyer-badge {
+        border: 2px solid var(--neo-ink) !important;
+        border-radius: 999px !important;
+        background: #fff !important;
+        color: var(--neo-ink) !important;
+        box-shadow: 3px 3px 0 var(--neo-ink) !important;
+        transition:
+          transform 0.16s ease,
+          box-shadow 0.16s ease !important;
+      }
+
+      .tab-btn.active,
+      .filter-chip.active,
+      .buyer-badge.vip {
+        background: var(--neo-yellow) !important;
+        color: var(--neo-ink) !important;
+      }
+
+      .tab-btn:hover,
+      .filter-chip:hover,
+      .btn:hover,
+      .header-back:hover {
+        transform: translate(-2px, -2px) !important;
+        box-shadow: 7px 7px 0 var(--neo-ink) !important;
+      }
+
+      .btn,
+      button.btn,
+      .btn-primary,
+      .btn-secondary,
+      .btn-danger {
+        border: 3px solid var(--neo-ink) !important;
+        border-radius: 16px !important;
+        box-shadow: var(--neo-shadow-sm) !important;
+        color: var(--neo-ink) !important;
+        background: var(--neo-cyan) !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.04em !important;
+      }
+
+      .btn-primary {
+        background: var(--neo-yellow) !important;
+      }
+      .btn-secondary {
+        background: #ffffff !important;
+      }
+      .btn-danger {
+        background: var(--neo-red) !important;
+        color: #ffffff !important;
+      }
+
+      input,
+      select,
+      textarea {
+        border: 3px solid var(--neo-ink) !important;
+        border-radius: 14px !important;
+        background: #ffffff !important;
+        color: var(--neo-ink) !important;
+        box-shadow: 3px 3px 0 var(--neo-ink) !important;
+        font-family: "Space Grotesk", sans-serif !important;
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        box-shadow:
+          5px 5px 0 var(--neo-ink),
+          0 0 0 4px rgba(255, 240, 74, 0.55) !important;
+        border-color: var(--neo-ink) !important;
+      }
+
+      .status-pill,
+      .dot,
+      .count {
+        border: 2px solid var(--neo-ink) !important;
+        box-shadow: 2px 2px 0 var(--neo-ink) !important;
+      }
+
+      @media (max-width: 760px) {
+        .page {
+          grid-template-columns: 1fr !important;
+          padding: 24px 14px 80px !important;
+        }
+
+        .surface {
+          padding: 22px 18px !important;
+          box-shadow: 5px 5px 0 var(--neo-ink) !important;
+        }
+
+        .header-inner {
+          padding: 12px 14px !important;
+        }
+
+        .brand-copy span {
+          display: none !important;
+        }
+
+        .tab-btn {
+          min-width: 44% !important;
+        }
+      }
     </style>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body
     onload="

@@ -1140,7 +1140,218 @@
           grid-template-columns: 1fr;
         }
       }
+
+      /* =========================================================
+         AE NEO BRUTALISM PATCH — RESULT PAGE
+         ========================================================= */
+      :root {
+        --neo-ink: #0b0b0f;
+        --neo-paper: #fffdf2;
+        --neo-yellow: #fff04a;
+        --neo-cyan: #38d5ff;
+        --neo-pink: #ff5fb7;
+        --neo-green: #35ff8b;
+        --neo-red: #ff4d4d;
+        --neo-shadow: 8px 8px 0 var(--neo-ink);
+        --neo-shadow-sm: 4px 4px 0 var(--neo-ink);
+      }
+
+      body {
+        font-family:
+          "Space Grotesk", "Plus Jakarta Sans", sans-serif !important;
+        background:
+          radial-gradient(
+            circle at 15% 10%,
+            rgba(255, 95, 183, 0.28),
+            transparent 28%
+          ),
+          radial-gradient(
+            circle at 85% 20%,
+            rgba(56, 213, 255, 0.34),
+            transparent 30%
+          ),
+          linear-gradient(135deg, #fffdf2 0%, #f8fbff 100%) !important;
+        color: var(--neo-ink) !important;
+      }
+
+      body.dark-theme {
+        background:
+          radial-gradient(
+            circle at 15% 10%,
+            rgba(255, 95, 183, 0.22),
+            transparent 28%
+          ),
+          radial-gradient(
+            circle at 85% 20%,
+            rgba(56, 213, 255, 0.22),
+            transparent 30%
+          ),
+          #111827 !important;
+        color: #f8fafc !important;
+      }
+
+      .site-header {
+        background: rgba(255, 253, 242, 0.94) !important;
+        border-bottom: 4px solid var(--neo-ink) !important;
+        box-shadow: 0 6px 0 var(--neo-ink) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+      }
+
+      body.dark-theme .site-header {
+        background: rgba(17, 24, 39, 0.96) !important;
+      }
+
+      .card,
+      .status-message-card,
+      .summary,
+      .key-box,
+      .howto-box,
+      .compatible-box,
+      .result-help {
+        background: var(--neo-paper) !important;
+        border: 3px solid var(--neo-ink) !important;
+        border-radius: 22px !important;
+        box-shadow: var(--neo-shadow) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+      }
+
+      body.dark-theme .card,
+      body.dark-theme .status-message-card,
+      body.dark-theme .summary,
+      body.dark-theme .key-box,
+      body.dark-theme .howto-box,
+      body.dark-theme .compatible-box,
+      body.dark-theme .result-help {
+        background: #111827 !important;
+        border-color: #f8fafc !important;
+        box-shadow: 8px 8px 0 #f8fafc !important;
+      }
+
+      .card::before {
+        height: 13px !important;
+        background: repeating-linear-gradient(
+          90deg,
+          var(--neo-yellow) 0 36px,
+          var(--neo-cyan) 36px 72px,
+          var(--neo-pink) 72px 108px
+        ) !important;
+        border-bottom: 3px solid var(--neo-ink) !important;
+      }
+
+      h1,
+      .brand-copy strong {
+        font-family: "Bebas Neue", "Space Grotesk", sans-serif !important;
+        letter-spacing: 0.04em !important;
+        color: var(--neo-ink) !important;
+      }
+
+      body.dark-theme h1,
+      body.dark-theme .brand-copy strong {
+        color: #f8fafc !important;
+      }
+
+      .brand-logo,
+      .logo-badge,
+      .icon-btn {
+        border: 3px solid var(--neo-ink) !important;
+        border-radius: 16px !important;
+        box-shadow: var(--neo-shadow-sm) !important;
+        background: var(--neo-yellow) !important;
+        color: var(--neo-ink) !important;
+      }
+
+      .badge,
+      .step-dot,
+      .summary-item {
+        border: 2px solid var(--neo-ink) !important;
+        box-shadow: 3px 3px 0 var(--neo-ink) !important;
+        background: #ffffff !important;
+        color: var(--neo-ink) !important;
+      }
+
+      .badge.paid,
+      .badge.delivered,
+      .progress-step.done .step-dot {
+        background: var(--neo-green) !important;
+        color: var(--neo-ink) !important;
+      }
+
+      .badge.pending,
+      .badge.waiting_payment,
+      .badge.manual,
+      .progress-step.active .step-dot {
+        background: var(--neo-yellow) !important;
+        color: var(--neo-ink) !important;
+      }
+
+      .badge.expired,
+      .badge.cancelled,
+      .progress-step.failed .step-dot {
+        background: var(--neo-red) !important;
+        color: #ffffff !important;
+      }
+
+      .progress-steps::before,
+      .progress-fill {
+        height: 6px !important;
+        border: 2px solid var(--neo-ink) !important;
+        background: var(--neo-cyan) !important;
+      }
+
+      .btn,
+      .secondary-btn,
+      .copy-btn {
+        border: 3px solid var(--neo-ink) !important;
+        border-radius: 16px !important;
+        box-shadow: var(--neo-shadow-sm) !important;
+        background: var(--neo-yellow) !important;
+        color: var(--neo-ink) !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+      }
+
+      .btn:hover,
+      .secondary-btn:hover,
+      .copy-btn:hover {
+        transform: translate(-2px, -2px) !important;
+        box-shadow: 7px 7px 0 var(--neo-ink) !important;
+      }
+
+      .summary-value,
+      .key-value,
+      code {
+        font-family: "DM Mono", "JetBrains Mono", monospace !important;
+      }
+
+      @media (max-width: 640px) {
+        main.page {
+          padding: 26px 14px 64px !important;
+        }
+
+        .card {
+          padding: 28px 18px 22px !important;
+          box-shadow: 5px 5px 0 var(--neo-ink) !important;
+        }
+
+        .summary {
+          box-shadow: 5px 5px 0 var(--neo-ink) !important;
+        }
+
+        .header-inner {
+          padding: 12px 14px !important;
+        }
+
+        .brand-copy span {
+          display: none !important;
+        }
+      }
     </style>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
   </head>
 
   <body>

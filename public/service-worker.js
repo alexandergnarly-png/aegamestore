@@ -3,7 +3,7 @@
 // always return a valid Response object so the browser doesn't fall back
 // to the offline page on transient sub-resource fails.
 
-const CACHE_VERSION = "2026-05-29-1";
+const CACHE_VERSION = "2026-06-03-neo-2";
 const CACHE_NAME = `ae-game-store-auto-${CACHE_VERSION}`;
 
 const STATIC_ASSETS = [
@@ -12,6 +12,8 @@ const STATIC_ASSETS = [
   "/script.js",
   "/manifest.json",
   "/offline.html",
+  "/account.html",
+  "/result.html",
 ];
 
 // Paths the SW should NOT intercept at all (admin, auth, favicon, etc).

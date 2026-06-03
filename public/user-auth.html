@@ -1479,7 +1479,224 @@
           padding: 22px 16px;
         }
       }
+
+      /* =========================================================
+         AE NEO BRUTALISM PATCH — AUTH PAGE
+         ========================================================= */
+      :root {
+        --neo-ink: #0b0b0f;
+        --neo-paper: #fffdf2;
+        --neo-yellow: #fff04a;
+        --neo-cyan: #38d5ff;
+        --neo-pink: #ff5fb7;
+        --neo-green: #35ff8b;
+        --neo-red: #ff4d4d;
+        --neo-shadow: 8px 8px 0 var(--neo-ink);
+        --neo-shadow-sm: 4px 4px 0 var(--neo-ink);
+      }
+
+      body {
+        font-family:
+          "Space Grotesk", "Plus Jakarta Sans", sans-serif !important;
+        background:
+          linear-gradient(90deg, rgba(11, 11, 15, 0.06) 1px, transparent 1px),
+          linear-gradient(rgba(11, 11, 15, 0.06) 1px, transparent 1px),
+          radial-gradient(
+            circle at 18% 14%,
+            rgba(255, 95, 183, 0.32),
+            transparent 28%
+          ),
+          radial-gradient(
+            circle at 86% 28%,
+            rgba(56, 213, 255, 0.34),
+            transparent 30%
+          ),
+          #fffdf2 !important;
+        background-size:
+          24px 24px,
+          24px 24px,
+          auto,
+          auto,
+          auto !important;
+        color: var(--neo-ink) !important;
+      }
+
+      body.dark-theme {
+        background:
+          linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.07) 1px,
+            transparent 1px
+          ),
+          linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+          #101827 !important;
+        color: #f8fafc !important;
+      }
+
+      .top-bar,
+      .auth-card,
+      .hero-feature,
+      .auth-mini-benefit,
+      .toast,
+      .social-proof {
+        background: var(--neo-paper) !important;
+        border: 3px solid var(--neo-ink) !important;
+        border-radius: 22px !important;
+        box-shadow: var(--neo-shadow) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+      }
+
+      body.dark-theme .top-bar,
+      body.dark-theme .auth-card,
+      body.dark-theme .hero-feature,
+      body.dark-theme .auth-mini-benefit,
+      body.dark-theme .toast,
+      body.dark-theme .social-proof {
+        background: #111827 !important;
+        border-color: #f8fafc !important;
+        box-shadow: 8px 8px 0 #f8fafc !important;
+      }
+
+      .top-bar {
+        border-radius: 0 !important;
+        border-left: 0 !important;
+        border-right: 0 !important;
+        border-top: 0 !important;
+        box-shadow: 0 6px 0 var(--neo-ink) !important;
+      }
+
+      .brand-mark,
+      .auth-emoji,
+      .hero-feature-icon {
+        border: 3px solid var(--neo-ink) !important;
+        box-shadow: var(--neo-shadow-sm) !important;
+        border-radius: 18px !important;
+        background: var(--neo-yellow) !important;
+        color: var(--neo-ink) !important;
+      }
+
+      .brand-name,
+      .hero-title,
+      .auth-title {
+        font-family: "Bebas Neue", "Space Grotesk", sans-serif !important;
+        letter-spacing: 0.04em !important;
+        color: var(--neo-ink) !important;
+      }
+
+      body.dark-theme .brand-name,
+      body.dark-theme .hero-title,
+      body.dark-theme .auth-title {
+        color: #f8fafc !important;
+      }
+
+      .hero-title .grad {
+        background: none !important;
+        -webkit-text-fill-color: var(--neo-ink) !important;
+        color: var(--neo-ink) !important;
+        text-decoration: underline;
+        text-decoration-thickness: 8px;
+        text-decoration-color: var(--neo-pink);
+        text-underline-offset: 5px;
+      }
+
+      .auth-tabs {
+        background: #ffffff !important;
+        border: 3px solid var(--neo-ink) !important;
+        border-radius: 999px !important;
+        box-shadow: var(--neo-shadow-sm) !important;
+      }
+
+      .auth-tab-indicator {
+        background: var(--neo-pink) !important;
+        border: 2px solid var(--neo-ink) !important;
+        box-shadow: 3px 3px 0 var(--neo-ink) !important;
+      }
+
+      .auth-tab.active {
+        color: var(--neo-ink) !important;
+      }
+
+      .input-group input {
+        border: 3px solid var(--neo-ink) !important;
+        border-radius: 16px !important;
+        background: #ffffff !important;
+        color: var(--neo-ink) !important;
+        box-shadow: 4px 4px 0 var(--neo-ink) !important;
+      }
+
+      .input-group input:focus {
+        border-color: var(--neo-ink) !important;
+        box-shadow:
+          6px 6px 0 var(--neo-ink),
+          0 0 0 5px rgba(255, 240, 74, 0.55) !important;
+      }
+
+      .password-toggle-btn,
+      .link-action,
+      .lang-btn,
+      .icon-btn {
+        border: 2px solid var(--neo-ink) !important;
+        border-radius: 999px !important;
+        box-shadow: 3px 3px 0 var(--neo-ink) !important;
+        background: #ffffff !important;
+        color: var(--neo-ink) !important;
+      }
+
+      .lang-btn.active {
+        background: var(--neo-yellow) !important;
+      }
+
+      .btn-primary,
+      button[type="submit"] {
+        border: 3px solid var(--neo-ink) !important;
+        border-radius: 16px !important;
+        box-shadow: var(--neo-shadow-sm) !important;
+        background: var(--neo-yellow) !important;
+        color: var(--neo-ink) !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.06em !important;
+      }
+
+      .btn-primary:hover,
+      .icon-btn:hover,
+      .password-toggle-btn:hover {
+        transform: translate(-2px, -2px) !important;
+        box-shadow: 7px 7px 0 var(--neo-ink) !important;
+      }
+
+      .hero-eyebrow {
+        background: var(--neo-green) !important;
+        color: var(--neo-ink) !important;
+        border: 3px solid var(--neo-ink) !important;
+        box-shadow: var(--neo-shadow-sm) !important;
+      }
+
+      @media (max-width: 860px) {
+        .main {
+          grid-template-columns: 1fr !important;
+          gap: 24px !important;
+          padding: 28px 14px 40px !important;
+        }
+
+        .hero {
+          text-align: center !important;
+        }
+
+        .auth-card {
+          padding: 28px 18px !important;
+          box-shadow: 5px 5px 0 var(--neo-ink) !important;
+        }
+
+        .hero-features {
+          display: none !important;
+        }
+      }
     </style>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
   </head>
 
   <body onload="applyAuthLanguage()">
