@@ -100,7 +100,7 @@ const translations = {
     chatAdminTitle: "Chat Admin",
     chatAdminSub: "Fast response",
     footerTagline:
-      "Solusi top-up game tercepat dan terpercaya di Indonesia. Otomatis 24 jam non-stop.",
+  "Top up game key cepat, aman, dan terpercaya bersama AE Game Store.",
     metaGames: "Game tersedia",
     metaStock: "Stok ready",
     filterFavorites: "Favorit",
@@ -286,7 +286,7 @@ const translations = {
     voucherToggleTitle: "Have a voucher?",
     voucherToggleDesc: "Enter code if you have one",
     footerTagline:
-      "The fastest and most trusted game top-up service in Indonesia. Automatic 24/7.",
+  "Fast, secure, and trusted game key top-up with AE Game Store.",
     metaGames: "Games available",
     metaStock: "Stock ready",
     filterFavorites: "Favorites",
