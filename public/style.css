@@ -13744,3 +13744,132 @@ body.dark-theme .game-card h3 {
   }
 }
 
+/* =========================================================
+   FINAL FIX — remove bottom horizontal line + compact chat FAB
+   MUST be placed at the very end of style.css
+   ========================================================= */
+
+@media (max-width: 768px) {
+  /* Garis horizontal bawah: matikan border/shadow footer & section brutal */
+  .site-footer,
+  .footer,
+  footer,
+  .testimonial-section,
+  .review-section,
+  .store-layout,
+  .shop-card {
+    border-top: 0 !important;
+    border-bottom: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .site-footer::before,
+  .site-footer::after,
+  .footer::before,
+  .footer::after,
+  footer::before,
+  footer::after,
+  .testimonial-section::before,
+  .testimonial-section::after,
+  .review-section::before,
+  .review-section::after,
+  .store-layout::before,
+  .store-layout::after,
+  .shop-card::before,
+  .shop-card::after {
+    display: none !important;
+    content: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  /* Kalau footer masih muncul di mobile, bikin transparan agar tidak jadi garis */
+  .site-footer,
+  footer {
+    background: transparent !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+
+  /* Chat admin: paksa jadi tombol bulat kecil, bukan banner */
+  .floating-admin-btn,
+  .admin-chat-fab {
+    position: fixed !important;
+    right: 14px !important;
+    bottom: 18px !important;
+    width: 52px !important;
+    height: 52px !important;
+    min-width: 52px !important;
+    max-width: 52px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 999px !important;
+    background: linear-gradient(135deg, #0ea5e9, #0284c7) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.65) !important;
+    box-shadow: 0 12px 26px rgba(2, 132, 199, 0.35) !important;
+    transform: none !important;
+    overflow: hidden !important;
+    z-index: 900 !important;
+  }
+
+  .floating-admin-btn:hover,
+  .admin-chat-fab:hover,
+  .floating-admin-btn:active,
+  .admin-chat-fab:active {
+    transform: none !important;
+    background: linear-gradient(135deg, #0ea5e9, #0284c7) !important;
+    box-shadow: 0 12px 26px rgba(2, 132, 199, 0.35) !important;
+  }
+
+  .floating-admin-content,
+  .floating-admin-content strong,
+  .floating-admin-content small,
+  .floating-admin-btn span:not(.floating-admin-icon),
+  .admin-chat-fab span:not(.floating-admin-icon) {
+    display: none !important;
+  }
+
+  .floating-admin-icon {
+    width: 52px !important;
+    height: 52px !important;
+    min-width: 52px !important;
+    margin: 0 !important;
+    border-radius: 999px !important;
+    background: transparent !important;
+    color: #ffffff !important;
+    font-size: 22px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .floating-admin-online {
+    display: none !important;
+  }
+
+  /* Tombol back-to-top jangan tabrakan dengan chat */
+  .back-to-top {
+    left: 14px !important;
+    bottom: 18px !important;
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    border-radius: 14px !important;
+    border: 1px solid rgba(14, 165, 233, 0.18) !important;
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.14) !important;
+  }
+
+  /* Hilangkan sisa garis dari bottom nav lama kalau elemennya masih ada */
+  .bottom-nav,
+  #bottomNav {
+    display: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+}
