@@ -12791,6 +12791,7 @@ body.dark-theme .swal2-html-container {
     font-size: 11.5px !important;
     line-height: 1.35 !important;
     display: -webkit-box !important;
+    line-clamp: 2 !important;
     -webkit-line-clamp: 2 !important;
     -webkit-box-orient: vertical !important;
     overflow: hidden !important;
@@ -12897,6 +12898,7 @@ body.dark-theme .swal2-html-container {
     line-height: 1.2 !important;
     margin: 0 !important;
     display: -webkit-box !important;
+    line-clamp: 2 !important;
     -webkit-line-clamp: 2 !important;
     -webkit-box-orient: vertical !important;
     overflow: hidden !important;
@@ -13016,5 +13018,34 @@ body.dark-theme .swal2-html-container {
 
   .promo-slider {
     height: 100px !important;
+  }
+}
+/* === FIX: remove ugly black line near admin chat button on mobile === */
+@media (max-width: 768px) {
+  .bottom-nav {
+    border: 1px solid rgba(14, 165, 233, 0.18) !important;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.14) !important;
+    overflow: hidden !important;
+  }
+
+  .bottom-nav::before,
+  .bottom-nav::after {
+    display: none !important;
+    content: none !important;
+  }
+
+  .floating-admin-btn,
+  .admin-chat-fab {
+    border: 2px solid #0a0a0a !important;
+    box-shadow: 4px 4px 0 #0a0a0a !important;
+    bottom: calc(86px + env(safe-area-inset-bottom)) !important;
+    right: 14px !important;
+    z-index: 260 !important;
+  }
+
+  .back-to-top {
+    bottom: calc(86px + env(safe-area-inset-bottom)) !important;
+    left: 14px !important;
+    z-index: 260 !important;
   }
 }
