@@ -8666,145 +8666,6 @@ body.dark-theme .order-step.is-active .order-step-label {
     grid-template-columns: 280px minmax(0, 1fr);
   }
 }
-/* === FIX: Restore clean mobile-friendly order popup === */
-.order-modal {
-  align-items: center !important;
-  justify-content: center !important;
-  padding: 18px !important;
-  z-index: 9999 !important;
-}
-
-.order-modal-backdrop {
-  background: rgba(8, 47, 73, 0.58) !important;
-  -webkit-backdrop-filter: blur(8px) !important;
-  backdrop-filter: blur(8px) !important;
-}
-
-.order-modal-card {
-  width: min(560px, calc(100vw - 28px)) !important;
-  max-width: 560px !important;
-  max-height: calc(100dvh - 36px) !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-  padding: 26px !important;
-  border-radius: 28px !important;
-  background: var(--card-bg-strong) !important;
-  box-shadow: 0 24px 70px rgba(8, 47, 73, 0.28) !important;
-}
-
-/* Hide the new banner because it makes mobile popup too tall */
-.modal-game-banner {
-  display: none !important;
-}
-
-.modal-close-btn {
-  top: 14px !important;
-  right: 14px !important;
-  width: 38px !important;
-  height: 38px !important;
-  background: rgba(56, 189, 248, 0.14) !important;
-  color: var(--text-muted) !important;
-  border: 1px solid var(--border-soft) !important;
-  z-index: 20 !important;
-}
-
-.modal-close-btn:hover {
-  background: var(--torii-red) !important;
-  color: white !important;
-}
-
-/* Give header room from close button */
-.modal-head {
-  padding-right: 44px !important;
-  margin-bottom: 20px !important;
-}
-
-.modal-head h2 {
-  display: block !important;
-  font-size: 24px !important;
-  line-height: 1.2 !important;
-}
-
-.modal-head p {
-  font-size: 14px !important;
-  line-height: 1.55 !important;
-}
-
-/* Make step bar readable again */
-.order-steps {
-  margin: 16px 0 22px !important;
-}
-
-/* Restore form layout */
-.form-grid {
-  display: grid !important;
-  grid-template-columns: 1fr 1fr !important;
-  gap: 16px !important;
-  margin-bottom: 16px !important;
-}
-
-.order-brand-pills,
-.order-product-cards {
-  max-width: 100% !important;
-}
-
-/* Prevent bottom nav from appearing above modal */
-body.order-modal-open .bottom-nav,
-body.order-modal-open .floating-admin-btn,
-body.order-modal-open .back-to-top,
-body.order-modal-open .sticky-catalog-search {
-  display: none !important;
-}
-
-@media (max-width: 640px) {
-  .order-modal {
-    padding: 12px !important;
-    align-items: center !important;
-  }
-
-  .order-modal-card {
-    width: calc(100vw - 24px) !important;
-    max-height: calc(100dvh - 24px) !important;
-    padding: 22px 20px !important;
-    border-radius: 26px !important;
-  }
-
-  .form-grid {
-    grid-template-columns: 1fr !important;
-    gap: 14px !important;
-  }
-
-  .order-brand-pills {
-    display: flex !important;
-    overflow-x: auto !important;
-    gap: 10px !important;
-    padding-bottom: 6px !important;
-  }
-
-  .order-product-cards {
-    display: grid !important;
-    grid-template-columns: 1fr !important;
-    gap: 12px !important;
-    max-height: none !important;
-    overflow: visible !important;
-  }
-
-  .order-product-card {
-    min-height: 112px !important;
-  }
-
-  .modal-summary {
-    grid-template-columns: 1fr !important;
-  }
-
-  .voucher-row {
-    grid-template-columns: 1fr auto !important;
-  }
-
-  button#buyBtn {
-    margin-bottom: 0 !important;
-  }
-}
 
 /* === FINAL STABLE FIX: order popup after UI upgrade === */
 .order-modal {
@@ -8822,15 +8683,15 @@ body.order-modal-open .sticky-catalog-search {
 
 .order-modal-card {
   position: relative !important;
-  width: min(560px, calc(100vw - 28px)) !important;
-  max-width: 560px !important;
-  max-height: calc(100dvh - 28px) !important;
+  width: min(540px, calc(100vw - 24px)) !important;
+  max-width: 540px !important;
+  max-height: calc(100dvh - 24px) !important;
   overflow-y: auto !important;
   overflow-x: hidden !important;
-  padding: 24px !important;
-  border-radius: 28px !important;
+  padding: 20px !important;
+  border-radius: 24px !important;
   background: var(--card-bg-strong) !important;
-  box-shadow: 0 24px 70px rgba(8, 47, 73, 0.28) !important;
+  box-shadow: 0 18px 54px rgba(8, 47, 73, 0.26) !important;
   transform: translateY(16px) scale(0.98) !important;
   opacity: 0 !important;
 }
@@ -8932,10 +8793,10 @@ body.order-modal-open .sticky-catalog-search {
   }
 
   .order-modal-card {
-    width: calc(100vw - 24px) !important;
-    max-height: calc(100dvh - 24px) !important;
-    padding: 22px 20px !important;
-    border-radius: 26px !important;
+    width: calc(100vw - 20px) !important;
+    max-height: calc(100dvh - 20px) !important;
+    padding: 18px 16px !important;
+    border-radius: 22px !important;
   }
 
   .form-grid {
@@ -10226,8 +10087,17 @@ body.dark-theme .bottom-nav-label {
 .delivery-estimate {
   background: var(--nb-lime) !important;
   border: var(--nb-border) !important;
-  border-radius: 6px !important;
+  border-radius: 12px !important;
   box-shadow: var(--nb-shadow) !important;
+  padding: 12px 14px !important;
+  margin: 10px 0 12px !important;
+}
+
+.delivery-estimate p,
+.delivery-estimate small {
+  font-size: 12px !important;
+  line-height: 1.35 !important;
+  margin: 0 !important;
 }
 
 body.dark-theme .delivery-estimate {
@@ -10395,12 +10265,47 @@ button#buyBtn,.payment-modal-pay-btn,.swal2-confirm{background:var(--nb-pink)!im
 .game-card-fav{background:#fff!important;border:var(--nb-border-thin)!important;box-shadow:var(--nb-shadow-sm)!important;color:var(--nb-pink)!important;}
 .order-modal,.payment-modal,.policy-modal,.admin-chat-modal{z-index:1000!important;}
 .order-modal-backdrop,.payment-modal-backdrop,.policy-modal-backdrop,.admin-chat-backdrop{background:rgba(10,10,10,.72)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}
-.order-modal-card{max-width:640px!important;}
+.order-modal-card{
+  max-width:560px!important;
+  padding:18px!important;
+  border-radius:22px!important;
+}
 .modal-close-btn,.payment-modal-close,.policy-modal-close,.admin-chat-close{background:var(--nb-red)!important;color:#fff!important;border:var(--nb-border-thin)!important;box-shadow:var(--nb-shadow-sm)!important;border-radius:10px!important;}
-.modal-head{background:var(--nb-yellow)!important;margin:-28px -28px 20px!important;padding:24px 60px 20px 28px!important;border-bottom:var(--nb-border)!important;}
-.price-breakdown .price-total{border-top:var(--nb-border-thin)!important;}
-.price-breakdown .price-total b,#previewPrice{color:var(--nb-pink)!important;background:none!important;-webkit-text-fill-color:currentColor!important;}
-button#buyBtn{min-height:56px!important;text-transform:uppercase!important;letter-spacing:.08em!important;}
+.modal-head{
+  background:var(--nb-yellow)!important;
+  margin:-18px -18px 14px!important;
+  padding:18px 54px 16px 18px!important;
+  border-bottom:var(--nb-border)!important;
+}
+.price-breakdown{
+  padding:12px 14px!important;
+  margin:10px 0 12px!important;
+}
+
+.price-breakdown > div{
+  padding:5px 0!important;
+  font-size:13px!important;
+}
+
+.price-breakdown .price-total{
+  margin-top:6px!important;
+  padding-top:10px!important;
+  border-top:var(--nb-border-thin)!important;
+}
+
+.price-breakdown .price-total b,
+#previewPrice{
+  color:var(--nb-pink)!important;
+  background:none!important;
+  -webkit-text-fill-color:currentColor!important;
+}
+button#buyBtn{
+  min-height:54px!important;
+  padding:15px 18px!important;
+  margin:12px 0 0!important;
+  text-transform:uppercase!important;
+  letter-spacing:.08em!important;
+}
 .payment-modal-card{max-width:760px!important;overflow:hidden!important;}
 .payment-modal-head{background:var(--nb-yellow)!important;color:var(--nb-ink)!important;border-bottom:var(--nb-border)!important;padding:22px 64px 20px 22px!important;}
 .payment-modal-title{font-size:clamp(34px,5vw,56px)!important;line-height:.9!important;}
@@ -10446,7 +10351,26 @@ button#buyBtn{min-height:56px!important;text-transform:uppercase!important;lette
   .game-card-title{font-size:14px!important;line-clamp:2!important;-webkit-line-clamp:2!important}.game-card-price{padding:6px!important}.game-card-stock{font-size:10px!important;padding:4px 6px!important}
   .order-modal,.payment-modal,.policy-modal,.admin-chat-modal{padding:8px!important;align-items:flex-end!important}.order-modal-card,.payment-modal-card,.policy-modal-card,.admin-chat-panel{width:100%!important;max-width:none!important;max-height:calc(100dvh - 18px)!important;border-radius:18px 18px 10px 10px!important;padding:14px!important;overflow-y:auto!important;box-shadow:0 -4px 0 var(--nb-ink)!important}
   .modal-head{margin:-14px -14px 14px!important;padding:18px 52px 16px 14px!important}.payment-modal-card{padding:0!important}.payment-modal-head,.payment-modal-body,.payment-modal-footer{padding:14px!important}.payment-modal-title{font-size:34px!important}.payment-modal-footer{display:grid!important;gap:10px!important}
-  .form-grid,.modal-summary,.voucher-row{grid-template-columns:1fr!important}
+  .form-grid,.voucher-row{grid-template-columns:1fr!important}
+.modal-summary{
+  grid-template-columns:1fr!important;
+  gap:8px!important;
+  padding:12px 14px!important;
+  margin:10px 0 12px!important;
+}
+.modal-summary > div{
+  display:grid!important;
+  grid-template-columns:86px minmax(0,1fr)!important;
+  align-items:start!important;
+  gap:10px!important;
+}
+.modal-summary > div:not(:last-child)::after{
+  display:none!important;
+}
+.modal-summary strong{
+  white-space:normal!important;
+  line-height:1.25!important;
+}
   .floating-admin-btn{right:12px!important;bottom:12px!important;width:52px!important;height:52px!important;min-width:52px!important;max-width:52px!important;padding:0!important;border-radius:999px!important;z-index:650!important}.floating-admin-content,.floating-admin-online{display:none!important}.floating-admin-icon{width:34px!important;height:34px!important;min-width:34px!important;margin:0!important}
   .back-to-top,.purchase-ticker,.social-proof,.bottom-nav,.recent-panel,.search-history-panel,.watercolor-blob,.promo-deco{display:none!important}
   .testi-track{grid-auto-columns:minmax(250px,84vw)!important}.install-prompt-banner,.resume-cart-bar{left:10px!important;right:10px!important;bottom:74px!important;width:auto!important}
