@@ -2517,8 +2517,6 @@ async function submitReview({ rating, comment }) {
       confirmButtonColor: "#0ea5e9",
     });
 
-    loadReviews();
-    loadMyReview();
     return true;
   } catch (err) {
     Swal.fire({

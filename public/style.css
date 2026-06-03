@@ -9414,6 +9414,7 @@ body.dark-theme .hero h1 {
   color: var(--nb-black) !important;
   -webkit-text-fill-color: unset !important;
   background: none !important;
+  background-clip: unset !important;
   -webkit-background-clip: unset !important;
 }
 
@@ -10225,6 +10226,7 @@ body.dark-theme .bottom-nav-label {
   letter-spacing: 1px !important;
   -webkit-text-fill-color: var(--nb-yellow) !important;
   background: none !important;
+  background-clip: unset !important;
   -webkit-background-clip: unset !important;
 }
 
