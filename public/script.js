@@ -30,7 +30,7 @@ const translations = {
     guideStep3: "Isi Data: Nama player otomatis dari akun login.",
     guideStep4: "Checkout: Klik 'Beli Sekarang' dan selesaikan pembayaran.",
     guideStep5: "Selesai! Game akan langsung dikirim setelah sukses.",
-    guideOk: "Mengerti! 🌊",
+    guideOk: "Mengerti",
     loginBtn: "Masuk / Daftar",
     navHome: "Beranda",
     navStore: "Katalog Game",
@@ -81,7 +81,7 @@ const translations = {
     skipToContent: "Lewati ke konten",
     brandTagline: "Premium Digital Keys",
     navReviews: "Review Buyer",
-    heroBadge: "\uD83C\uDF0A SEAMLESS TOP-UP EXPERIENCE",
+    heroBadge: "⚡ NEO DIGITAL TOP-UP",
     heroCtaPrimary: "Buka Katalog Game",
     heroCtaGuide: "\uD83D\uDCD6 Cara Beli",
     trustInstantTitle: "Pengiriman Instan",
@@ -265,7 +265,7 @@ const translations = {
     skipToContent: "Skip to content",
     brandTagline: "Premium Digital Keys",
     navReviews: "Buyer Reviews",
-    heroBadge: "\uD83C\uDF0A SEAMLESS TOP-UP EXPERIENCE",
+    heroBadge: "⚡ NEO DIGITAL TOP-UP",
     heroCtaPrimary: "Open Game Catalog",
     heroCtaGuide: "\uD83D\uDCD6 How to Buy",
     trustInstantTitle: "Instant Delivery",
@@ -472,7 +472,7 @@ const gameImages = {
 };
 
 const fallbackImage =
-  "https://placehold.co/400x220/e0f2fe/0284c7?text=AE+Game+Store";
+  "https://placehold.co/400x220/ffd600/0a0a0a?text=AE+GAME";
 
 function normalizeGameImageKey(gameName) {
   return String(gameName || "")
@@ -614,7 +614,7 @@ async function loadAllProducts() {
       allProducts = [];
       gameGrid.innerHTML = `
     <div class="empty-category-card">
-      <div class="empty-category-icon">🌊</div>
+      <div class="empty-category-icon">⚡</div>
       <h3>Produk belum tersedia</h3>
       <p>Belum ada produk aktif saat ini. Silakan hubungi admin untuk info stok.</p>
       <a href="https://t.me/aegamestore" target="_blank">Chat Admin</a>
@@ -2803,12 +2803,12 @@ function showTelegramPopup() {
           <div style="background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%); width: 90px; height: 90px; border-radius: 24px; display: flex; align-items: center; justify-content: center; margin: 0 auto 22px; box-shadow: 0 10px 20px rgba(14, 165, 233, 0.15);">
             <iconify-icon icon="logos:telegram" width="54"></iconify-icon>
           </div>
-          <h2 style="color: #0c4a6e; font-size: 22px; font-weight: 800; margin-bottom: 12px; letter-spacing: -0.5px;">Eksklusif Community ⛩️</h2>
-          <p style="color: #475569; font-size: 14px; line-height: 1.6; margin-bottom: 5px;">
+          <h2 style="color: #0c4a6e; font-size: 22px; font-weight: 800; margin-bottom: 12px; letter-spacing: -0.5px;">Eksklusif Community</h2>
+          <p style="color: #5a5550; font-size: 14px; line-height: 1.6; margin-bottom: 5px;">
             Dapatkan <b>voucher diskon harian</b> dan update stok tercepat hanya di Telegram.
           </p>
-          <div style="font-size: 12px; color: #0ea5e9; font-weight: 700; margin-top: 18px; display: inline-flex; align-items: center; gap: 6px; background: #e0f2fe; padding: 6px 14px; border-radius: 99px;">
-            <span style="width: 8px; height: 8px; background: #0ea5e9; border-radius: 50%; display: inline-block; animation: bluePulse 2s infinite;"></span>
+          <div style="font-size: 12px; color: #0a0a0a; font-weight: 700; margin-top: 18px; display: inline-flex; align-items: center; gap: 6px; background: #ffd600; padding: 6px 14px; border-radius: 99px;">
+            <span style="width: 8px; height: 8px; background: #00e5a0; border-radius: 50%; display: inline-block; animation: bluePulse 2s infinite;"></span>
             Join 2,400+ Gamers Lainnya
           </div>
         </div>
