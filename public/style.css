@@ -12907,6 +12907,7 @@ body.dark-theme .game-card h3 {
     font-size: 14px !important;
     display: -webkit-box !important;
     -webkit-line-clamp: 2 !important;
+    line-clamp: 2 !important;
     -webkit-box-orient: vertical !important;
     overflow: hidden !important;
   }
