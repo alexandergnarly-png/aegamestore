@@ -9064,9 +9064,7 @@ body.swal2-shown .admin-chat-sheet {
    Paste at END of style.css — all class names preserved
    ========================================================= */
 
-/* ── FONT IMPORT ── */
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Bebas+Neue&family=DM+Mono:wght@400;500&display=swap');
-
+/* ── FONT LOADED FROM index.html ── */
 /* ── ROOT OVERRIDES ── */
 :root {
   /* Neo-Brutalism palette: stark black, white, neon accents */
@@ -10306,3 +10304,622 @@ body.dark-theme ::-webkit-scrollbar-thumb {
   50%  { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--nb-black); }
   100% { transform: translate(0, 0); box-shadow: var(--nb-shadow); }
 }
+
+/* =========================================================
+   AE GAME STORE — NEO BRUTALISM FINAL FIX PATCH
+   Keep neo-brutalism, but fix mobile, modals, SweetAlert,
+   payment modal, bottom nav, and touch targets.
+   ========================================================= */
+
+:root {
+  --nb-edge: 3px solid var(--nb-black);
+  --nb-edge-sm: 2px solid var(--nb-black);
+  --nb-tap-shadow: 4px 4px 0 var(--nb-black);
+  --nb-tap-shadow-lg: 7px 7px 0 var(--nb-black);
+}
+
+body.dark-theme {
+  --nb-edge: 3px solid #fafaf5;
+  --nb-edge-sm: 2px solid #fafaf5;
+  --nb-tap-shadow: 4px 4px 0 #fafaf5;
+  --nb-tap-shadow-lg: 7px 7px 0 #fafaf5;
+}
+
+/* Neo background pattern, but not too noisy */
+body {
+  background-color: var(--nb-white) !important;
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(10,10,10,0.12) 1px, transparent 0),
+    linear-gradient(135deg, rgba(255,225,53,0.22), rgba(0,229,255,0.12) 42%, rgba(255,45,120,0.1)) !important;
+  background-size: 18px 18px, 100% 100% !important;
+}
+
+body.dark-theme {
+  background-color: #0f0f0f !important;
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(255,255,255,0.12) 1px, transparent 0),
+    linear-gradient(135deg, rgba(255,225,53,0.08), rgba(0,229,255,0.06) 42%, rgba(255,45,120,0.06)) !important;
+}
+
+/* Header: keep brutal but usable on mobile */
+.site-header {
+  z-index: 300 !important;
+  border-bottom: var(--nb-edge) !important;
+}
+
+.brand-home-link {
+  padding: 6px 8px !important;
+  border: 2px solid transparent !important;
+}
+
+.brand-home-link:hover {
+  border-color: var(--nb-black) !important;
+  box-shadow: 3px 3px 0 var(--nb-black) !important;
+  transform: translate(-1px, -1px) !important;
+}
+
+body.dark-theme .brand-home-link:hover {
+  border-color: var(--nb-yellow) !important;
+  box-shadow: 3px 3px 0 var(--nb-yellow) !important;
+}
+
+/* Main cards: bold, but still readable */
+.shop-card,
+.testi-card,
+.review-action-card,
+.review-summary,
+.recent-viewed-rail,
+.catalog-toolbar,
+.promo-slider,
+.empty-category-card,
+.trending-rail,
+.quick-buy-card,
+.recommendation-rail {
+  border: var(--nb-edge) !important;
+  box-shadow: var(--nb-tap-shadow-lg) !important;
+  border-radius: 12px !important;
+}
+
+/* Game cards: better neo hitbox and no cramped meta */
+.game-card {
+  border: var(--nb-edge) !important;
+  border-radius: 12px !important;
+  box-shadow: var(--nb-tap-shadow) !important;
+  background: #fffdf3 !important;
+  transform: none !important;
+}
+
+.game-card:hover {
+  transform: translate(-3px, -3px) !important;
+  box-shadow: 8px 8px 0 var(--nb-black) !important;
+}
+
+.game-card.active {
+  outline: 4px solid var(--nb-yellow) !important;
+  outline-offset: 2px !important;
+}
+
+body.dark-theme .game-card {
+  background: #171717 !important;
+  box-shadow: 4px 4px 0 #fafaf5 !important;
+}
+
+body.dark-theme .game-card:hover {
+  box-shadow: 8px 8px 0 var(--nb-yellow) !important;
+}
+
+.game-card-thumb {
+  border-bottom: var(--nb-edge-sm) !important;
+}
+
+.game-card-title,
+.game-card-thumb-overlay strong {
+  font-family: 'Space Grotesk', sans-serif !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.2px !important;
+}
+
+.game-card-price b,
+.catalog-meta-value {
+  font-family: 'Bebas Neue', sans-serif !important;
+  letter-spacing: 1px !important;
+}
+
+.game-card-stock,
+.game-card-chip,
+.game-card-ribbon {
+  border: 2px solid var(--nb-black) !important;
+  box-shadow: 2px 2px 0 var(--nb-black) !important;
+}
+
+/* Recently viewed: compact neo mini cards */
+.recent-viewed-card {
+  flex: 0 0 112px !important;
+  width: 112px !important;
+  border: var(--nb-edge-sm) !important;
+  border-radius: 10px !important;
+  box-shadow: 3px 3px 0 var(--nb-black) !important;
+  background: var(--nb-white) !important;
+}
+
+.recent-viewed-card:hover {
+  transform: translate(-2px, -2px) !important;
+  box-shadow: 6px 6px 0 var(--nb-black) !important;
+}
+
+.recent-viewed-card .game-card-thumb {
+  aspect-ratio: 3 / 4 !important;
+  border-bottom: 0 !important;
+}
+
+.recent-viewed-card .game-card-thumb-overlay {
+  background: linear-gradient(0deg, rgba(10,10,10,0.92), transparent) !important;
+}
+
+/* Order modal: brutal card, centered, not broken bottom-sheet */
+.order-modal {
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 18px !important;
+  z-index: 15000 !important;
+}
+
+.order-modal-backdrop {
+  background: rgba(10, 10, 10, 0.55) !important;
+  -webkit-backdrop-filter: blur(2px) !important;
+  backdrop-filter: blur(2px) !important;
+}
+
+.order-modal-card {
+  width: min(620px, calc(100vw - 28px)) !important;
+  max-width: 620px !important;
+  max-height: calc(100dvh - 34px) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  border: var(--nb-edge) !important;
+  border-radius: 14px !important;
+  box-shadow: 10px 10px 0 var(--nb-black) !important;
+  background: var(--nb-white) !important;
+  padding: 24px !important;
+}
+
+body.dark-theme .order-modal-card {
+  background: #121212 !important;
+  border-color: var(--nb-yellow) !important;
+  box-shadow: 10px 10px 0 var(--nb-yellow) !important;
+}
+
+.modal-game-banner {
+  display: block !important;
+  height: 118px !important;
+  margin: -4px -4px 18px !important;
+  border: var(--nb-edge-sm) !important;
+  border-radius: 10px !important;
+  overflow: hidden !important;
+  background: var(--nb-yellow) !important;
+}
+
+.modal-game-banner img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  filter: saturate(1.15) contrast(1.08) !important;
+}
+
+.modal-game-banner::after {
+  background: linear-gradient(90deg, rgba(10,10,10,0.82), rgba(10,10,10,0.18)) !important;
+}
+
+.modal-game-banner-chip {
+  background: var(--nb-yellow) !important;
+  color: var(--nb-black) !important;
+  border: 2px solid var(--nb-black) !important;
+  box-shadow: 2px 2px 0 var(--nb-black) !important;
+  border-radius: 4px !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+.modal-close-btn {
+  top: 12px !important;
+  right: 12px !important;
+  border: var(--nb-edge-sm) !important;
+  border-radius: 8px !important;
+  box-shadow: 3px 3px 0 var(--nb-black) !important;
+  background: var(--nb-white) !important;
+  color: var(--nb-black) !important;
+  z-index: 50 !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+.modal-close-btn:hover {
+  background: var(--nb-pink) !important;
+  color: #fff !important;
+  transform: translate(-1px, -1px) rotate(0deg) !important;
+  box-shadow: 5px 5px 0 var(--nb-black) !important;
+}
+
+.modal-head {
+  padding-right: 48px !important;
+}
+
+.modal-head h2 {
+  font-family: 'Bebas Neue', sans-serif !important;
+  font-size: clamp(30px, 5vw, 46px) !important;
+  line-height: 0.95 !important;
+  letter-spacing: 1px !important;
+  text-transform: uppercase !important;
+}
+
+.summary-badge,
+.order-step,
+.order-brand-pill,
+.order-product-card,
+.modal-summary,
+.price-breakdown,
+.voucher-toggle-card,
+.payment-methods-preview,
+.delivery-estimate {
+  border: var(--nb-edge-sm) !important;
+  border-radius: 8px !important;
+  box-shadow: 3px 3px 0 var(--nb-black) !important;
+}
+
+.order-product-card.is-active,
+.order-brand-pill.is-active {
+  background: var(--nb-yellow) !important;
+  color: var(--nb-black) !important;
+  border-color: var(--nb-black) !important;
+}
+
+.form-grid {
+  gap: 16px !important;
+}
+
+.field input,
+.field select,
+.voucher-row input,
+input[type="text"]:not(#gameSearch),
+select {
+  border: var(--nb-edge-sm) !important;
+  border-radius: 8px !important;
+  box-shadow: 3px 3px 0 var(--nb-black) !important;
+  background: #fff !important;
+  color: var(--nb-black) !important;
+}
+
+.field input:focus,
+.field select:focus,
+.voucher-row input:focus,
+input[type="text"]:not(#gameSearch):focus,
+select:focus {
+  outline: 3px solid var(--nb-yellow) !important;
+  outline-offset: 2px !important;
+}
+
+button#buyBtn,
+.voucher-check-btn,
+.hero-cta,
+.auth-btn,
+.open-review-btn,
+.payment-modal-btn,
+.swal2-confirm,
+.swal2-cancel,
+.swal2-deny {
+  border: var(--nb-edge-sm) !important;
+  border-radius: 8px !important;
+  box-shadow: var(--nb-tap-shadow) !important;
+  text-transform: uppercase !important;
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-weight: 800 !important;
+}
+
+button#buyBtn,
+.swal2-confirm,
+.payment-modal-btn-primary {
+  background: var(--nb-yellow) !important;
+  color: var(--nb-black) !important;
+}
+
+button#buyBtn:hover:not(:disabled),
+.voucher-check-btn:hover,
+.hero-cta:hover,
+.auth-btn:hover,
+.open-review-btn:hover,
+.payment-modal-btn:hover,
+.swal2-confirm:hover,
+.swal2-cancel:hover,
+.swal2-deny:hover {
+  transform: translate(-2px, -2px) !important;
+  box-shadow: 7px 7px 0 var(--nb-black) !important;
+}
+
+/* Payment modal: keep Midtrans iframe clickable and readable */
+.payment-modal,
+.payment-modal-overlay {
+  z-index: 18000 !important;
+}
+
+.payment-modal-card {
+  border: var(--nb-edge) !important;
+  border-radius: 14px !important;
+  box-shadow: 10px 10px 0 var(--nb-black) !important;
+  background: var(--nb-white) !important;
+}
+
+#snap-container,
+.snap-container,
+.payment-snap-container {
+  border: var(--nb-edge-sm) !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  background: #fff !important;
+}
+
+#snap-container iframe {
+  max-width: 100% !important;
+}
+
+/* SweetAlert guide popup: neo, not blocked by bottom nav */
+body.swal2-shown .bottom-nav,
+body.swal2-height-auto .bottom-nav,
+body.swal2-shown .floating-admin-btn,
+body.swal2-shown .back-to-top,
+body.swal2-shown .sticky-catalog-search,
+body.swal2-shown .admin-chat-fab,
+body.swal2-shown .admin-chat-sheet,
+body.order-modal-open .bottom-nav,
+body.order-modal-open .floating-admin-btn,
+body.order-modal-open .back-to-top,
+body.order-modal-open .sticky-catalog-search,
+body.payment-modal-open .bottom-nav,
+body.payment-modal-open .floating-admin-btn,
+body.payment-modal-open .back-to-top,
+body.payment-modal-open .sticky-catalog-search {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+.swal2-container {
+  z-index: 20000 !important;
+}
+
+.swal2-popup {
+  border: var(--nb-edge) !important;
+  border-radius: 14px !important;
+  box-shadow: 10px 10px 0 var(--nb-black) !important;
+  background: var(--nb-white) !important;
+  color: var(--nb-black) !important;
+}
+
+.swal2-title {
+  font-family: 'Bebas Neue', sans-serif !important;
+  letter-spacing: 1px !important;
+  text-transform: uppercase !important;
+}
+
+/* Bottom nav: floating card style on mobile, full brutal on desktop */
+.bottom-nav {
+  border: var(--nb-edge) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 0 0 0 transparent, 5px 5px 0 var(--nb-black) !important;
+  background: var(--nb-white) !important;
+  z-index: 9998 !important;
+  isolation: isolate !important;
+}
+
+.bottom-nav::before {
+  pointer-events: none !important;
+}
+
+.bottom-nav-item {
+  min-height: 50px !important;
+  border-radius: 10px !important;
+  touch-action: manipulation !important;
+  pointer-events: auto !important;
+}
+
+.bottom-nav-item.is-active {
+  background: var(--nb-yellow) !important;
+  border: 2px solid var(--nb-black) !important;
+}
+
+.bottom-nav-item * {
+  pointer-events: none !important;
+}
+
+/* Desktop modal layout */
+@media (min-width: 769px) {
+  .order-modal-card {
+    max-width: 760px !important;
+    padding: 28px 32px !important;
+  }
+
+  .modal-game-banner {
+    height: 142px !important;
+  }
+
+  .form-grid {
+    grid-template-columns: 250px minmax(0, 1fr) !important;
+    align-items: start !important;
+    gap: 22px !important;
+  }
+
+  .order-brand-pills {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    max-height: 280px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding-right: 6px !important;
+  }
+
+  .order-product-cards {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+    max-height: 340px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding-right: 6px !important;
+  }
+}
+
+/* Mobile tuning */
+@media (max-width: 640px) {
+  body {
+    background-size: 14px 14px, 100% 100% !important;
+  }
+
+  .page {
+    padding-inline: 14px !important;
+    gap: 34px !important;
+  }
+
+  .shop-card {
+    padding: 18px !important;
+    box-shadow: 5px 5px 0 var(--nb-black) !important;
+  }
+
+  .catalog-toolbar {
+    padding: 12px !important;
+    gap: 10px !important;
+  }
+
+  .filter-pills {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    padding-bottom: 6px !important;
+  }
+
+  .pill {
+    flex: 0 0 auto !important;
+  }
+
+  .game-grid,
+  .compact-game-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  .game-card-body {
+    padding: 10px !important;
+  }
+
+  .game-card-title {
+    font-size: 12px !important;
+  }
+
+  .game-card-price b {
+    font-size: 16px !important;
+  }
+
+  .game-card-stock {
+    font-size: 9px !important;
+    padding: 4px 6px !important;
+  }
+
+  .recent-viewed-card {
+    flex-basis: 98px !important;
+    width: 98px !important;
+  }
+
+  .order-modal {
+    padding: 10px !important;
+  }
+
+  .order-modal-card {
+    width: calc(100vw - 20px) !important;
+    max-height: calc(100dvh - 20px) !important;
+    padding: 16px !important;
+    border-radius: 12px !important;
+    box-shadow: 6px 6px 0 var(--nb-black) !important;
+  }
+
+  .modal-game-banner {
+    height: 92px !important;
+    margin: 0 0 14px !important;
+  }
+
+  .modal-head {
+    padding-right: 42px !important;
+    margin-bottom: 14px !important;
+  }
+
+  .modal-head h2 {
+    font-size: 30px !important;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  .order-brand-pills {
+    display: flex !important;
+    overflow-x: auto !important;
+    gap: 10px !important;
+    padding-bottom: 6px !important;
+  }
+
+  .order-brand-pill {
+    flex: 0 0 auto !important;
+    min-width: 112px !important;
+  }
+
+  .order-product-cards {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .modal-summary {
+    grid-template-columns: 1fr !important;
+  }
+
+  .price-breakdown {
+    padding: 12px !important;
+  }
+
+  .voucher-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  .voucher-check-btn {
+    min-height: 46px !important;
+    justify-content: center !important;
+  }
+
+  .bottom-nav {
+    left: 10px !important;
+    right: 10px !important;
+    bottom: calc(8px + env(safe-area-inset-bottom)) !important;
+    min-height: 66px !important;
+    padding: 7px 6px !important;
+  }
+
+  .swal2-container {
+    padding: 12px !important;
+  }
+
+  .swal2-popup {
+    width: calc(100vw - 24px) !important;
+    max-height: calc(100dvh - 24px) !important;
+    overflow-y: auto !important;
+  }
+
+  .swal2-confirm,
+  .swal2-cancel,
+  .swal2-deny {
+    min-height: 48px !important;
+  }
+
+  .payment-modal-card {
+    width: calc(100vw - 20px) !important;
+    max-height: calc(100dvh - 20px) !important;
+    box-shadow: 6px 6px 0 var(--nb-black) !important;
+  }
+}
+
