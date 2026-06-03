@@ -5109,8 +5109,21 @@ document.addEventListener("DOMContentLoaded", () => {
       if (shouldShow) syncFromSource();
     };
 
-    window.addEventListener("scroll", updateVisibility, { passive: true });
-    window.addEventListener("resize", updateVisibility, { passive: true });
+    let rafId = 0;
+    const scheduleUpdateVisibility = () => {
+      if (rafId) return;
+      rafId = window.requestAnimationFrame(() => {
+        rafId = 0;
+        updateVisibility();
+      });
+    };
+
+    window.addEventListener("scroll", scheduleUpdateVisibility, {
+      passive: true,
+    });
+    window.addEventListener("resize", scheduleUpdateVisibility, {
+      passive: true,
+    });
     updateVisibility();
   }
 
@@ -5189,6 +5202,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function setupLightCardStagger() {
+    if (isMobile()) return;
     const grid = document.getElementById("gameGrid");
     if (!grid || grid.__aeStaggerReady) return;
     grid.__aeStaggerReady = true;

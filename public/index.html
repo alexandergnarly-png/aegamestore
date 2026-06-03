@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/style.css?v=20260603-1" />
+    <link rel="stylesheet" href="/style.css?v=20260603-3" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#0ea5e9" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -1436,11 +1436,22 @@
     </footer>
 
     <script>
-      setTimeout(() => {
-        document.getElementById("preloader")?.classList.add("fade-out");
-      }, 5000);
+      (() => {
+        const hidePreloader = () => {
+          document.getElementById("preloader")?.classList.add("fade-out");
+        };
+
+        window.addEventListener(
+          "load",
+          () => window.setTimeout(hidePreloader, 300),
+          { once: true },
+        );
+
+        // Fallback biar mobile tidak terasa nunggu lama kalau asset eksternal lambat
+        window.setTimeout(hidePreloader, 1600);
+      })();
     </script>
 
-    <script src="/script.js?v=20260603-1" defer></script>
+    <script src="/script.js?v=20260603-3" defer></script>
   </body>
 </html>

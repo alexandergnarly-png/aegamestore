@@ -3336,6 +3336,7 @@ body.dark-theme .recent-viewed-title {
 .recent-viewed-card .game-card-thumb-overlay strong {
   font-size: 11px;
   line-height: 1.2;
+  line-clamp: 1;
   -webkit-line-clamp: 1;
   line-clamp: 1;
 }
@@ -6816,6 +6817,7 @@ body.dark-theme .order-steps {
 
   .game-card-title {
     font-size: 13px;
+    line-clamp: 1;
     -webkit-line-clamp: 1;
     line-clamp: 1;
   }
@@ -7740,6 +7742,7 @@ body.dark-theme .order-product-main b {
   line-height: 1.2;
   color: white;
   text-shadow: 0 2px 8px rgba(15, 23, 42, 0.45);
+  line-clamp: 2;
   -webkit-line-clamp: 2;
   line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -7968,6 +7971,7 @@ body.dark-theme .recent-viewed-card .game-card-thumb {
   color: #fff;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
   display: -webkit-box;
+  line-clamp: 2;
   -webkit-line-clamp: 2;
 line-clamp: 2;
 -webkit-box-orient: vertical;
@@ -13047,5 +13051,189 @@ body.dark-theme .swal2-html-container {
     bottom: calc(86px + env(safe-area-inset-bottom)) !important;
     left: 14px !important;
     z-index: 260 !important;
+  }
+}
+
+/* =========================================================
+   FINAL MOBILE CLEAN + PERFORMANCE PATCH — 20260603-3
+   Purpose:
+   - Hilangkan garis hitam di area Chat Admin / Bottom Nav
+   - Ringankan animasi, blur, dan shadow berat di mobile
+   - Tetap mempertahankan selector lama supaya JS tidak rusak
+   ========================================================= */
+
+@media (max-width: 768px) {
+  /* Mobile performance: dekorasi berat dimatikan */
+  .watercolor-blob,
+  .blob,
+  .promo-deco,
+  .promo-deco-circles,
+  .social-proof,
+  .purchase-ticker {
+    display: none !important;
+  }
+
+  .hero-copy,
+  .loader-logo,
+  .loader-progress,
+  .game-card,
+  .testi-card,
+  .promo-slide,
+  .floating-admin-btn,
+  .bottom-nav,
+  .order-modal-card {
+    animation: none !important;
+  }
+
+  /* Blur besar mahal di mobile, ganti surface solid/translucent */
+  .site-header,
+  .shop-card,
+  .game-card,
+  .testi-card,
+  .review-action-card,
+  .review-summary,
+  .catalog-toolbar,
+  .bottom-nav,
+  .order-modal-card,
+  .main-nav,
+  .modal-summary,
+  .price-breakdown {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* Hindari hover transform di layar touch */
+  .game-card:hover,
+  .testi-card:hover,
+  .hero-cta:hover,
+  .promo-arrow:hover,
+  .floating-admin-btn:hover,
+  .bottom-nav-item:hover {
+    transform: none !important;
+  }
+
+  /* ===== Fix garis hitam Chat Admin / Bottom Nav ===== */
+  .bottom-nav,
+  #bottomNav {
+    border: 1px solid rgba(14, 165, 233, 0.18) !important;
+    box-shadow: 0 -10px 26px rgba(15, 23, 42, 0.12) !important;
+    outline: none !important;
+    overflow: hidden !important;
+    isolation: isolate !important;
+  }
+
+  body.dark-theme .bottom-nav,
+  body.dark-theme #bottomNav {
+    border-color: rgba(56, 189, 248, 0.18) !important;
+    box-shadow: 0 -10px 26px rgba(0, 0, 0, 0.32) !important;
+  }
+
+  .bottom-nav::before,
+  .bottom-nav::after,
+  #bottomNav::before,
+  #bottomNav::after,
+  .floating-admin-btn::before,
+  .floating-admin-btn::after,
+  .admin-chat-fab::before,
+  .admin-chat-fab::after {
+    display: none !important;
+    content: none !important;
+    box-shadow: none !important;
+    border: 0 !important;
+  }
+
+  .floating-admin-btn,
+  .admin-chat-fab {
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    max-width: 48px !important;
+    padding: 0 !important;
+    right: 14px !important;
+    bottom: calc(86px + env(safe-area-inset-bottom)) !important;
+    border-radius: 50% !important;
+    border: 1px solid rgba(14, 165, 233, 0.22) !important;
+    background: linear-gradient(135deg, #0ea5e9, #0284c7) !important;
+    box-shadow: 0 12px 24px rgba(14, 165, 233, 0.28) !important;
+    z-index: 260 !important;
+    overflow: hidden !important;
+  }
+
+  body.dark-theme .floating-admin-btn,
+  body.dark-theme .admin-chat-fab {
+    border-color: rgba(56, 189, 248, 0.24) !important;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.34) !important;
+  }
+
+  .floating-admin-icon {
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    background: transparent !important;
+    font-size: 22px !important;
+  }
+
+  .floating-admin-content {
+    display: none !important;
+  }
+
+  .back-to-top {
+    left: 14px !important;
+    bottom: calc(86px + env(safe-area-inset-bottom)) !important;
+    width: 42px !important;
+    height: 42px !important;
+    border: 1px solid rgba(14, 165, 233, 0.18) !important;
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.14) !important;
+    z-index: 260 !important;
+  }
+
+  /* Kurangi shadow kotak hitam neo-brutal yang terlihat seperti bug di mobile */
+  .nb-card,
+  .nb-button,
+  .shop-card,
+  .game-card,
+  .promo-slider,
+  .review-summary,
+  .review-action-card,
+  .testi-card {
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.10) !important;
+  }
+
+  /* Smoothing layout mobile */
+  .page {
+    padding-bottom: calc(104px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .promo-slider {
+    will-change: auto !important;
+  }
+
+  .game-card,
+  .testi-card,
+  .shop-card,
+  .promo-slider {
+    contain: layout paint !important;
+  }
+
+  .game-card-thumb img {
+    transition: none !important;
+  }
+
+  .game-card:hover .game-card-thumb img {
+    transform: none !important;
+  }
+
+}
+
+@media (max-width: 380px) {
+  .floating-admin-btn,
+  .admin-chat-fab {
+    right: 10px !important;
+    bottom: calc(82px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .back-to-top {
+    left: 10px !important;
+    bottom: calc(82px + env(safe-area-inset-bottom)) !important;
   }
 }
