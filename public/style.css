@@ -6252,15 +6252,17 @@ body.dark-theme .payment-modal-btn-ghost {
   }
 
   .game-card-top {
-    position: static !important;
-    grid-column: 2 !important;
-    grid-row: 1 !important;
-    align-self: start !important;
-    justify-content: flex-start !important;
-    gap: 5px !important;
-    margin-top: 2px !important;
-    pointer-events: none !important;
-  }
+  position: static !important;
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  align-self: start !important;
+  justify-content: flex-start !important;
+  gap: 5px !important;
+  margin-top: 0 !important;
+  margin-bottom: 6px !important;
+  pointer-events: none !important;
+  min-height: 20px !important;
+}
 
   .game-card-chip {
     font-size: 9px !important;
@@ -6285,12 +6287,12 @@ body.dark-theme .payment-modal-btn-ghost {
   }
 
   .game-card-body {
-    grid-column: 2 / 4 !important;
-    grid-row: 1 !important;
-    min-width: 0 !important;
-    padding: 20px 0 0 !important;
-    gap: 5px !important;
-  }
+  grid-column: 2 / 4 !important;
+  grid-row: 1 !important;
+  min-width: 0 !important;
+  padding: 30px 0 0 !important;
+  gap: 5px !important;
+}
 
   .game-card-title {
     font-size: 14px !important;
