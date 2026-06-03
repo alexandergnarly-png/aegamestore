@@ -4351,36 +4351,7 @@ body.dark-theme .order-step-dot {
 
 /* ----- Bottom nav (F1) ----- */
 .bottom-nav {
-  display: none;
-}
-@media (max-width: 640px) {
-  .bottom-nav {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: var(--card-bg-strong, #fff);
-    border-top: 1px solid rgba(14, 165, 233, 0.15);
-    box-shadow: 0 -4px 16px -8px rgba(15, 23, 42, 0.12);
-    padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
-    z-index: 150;
-    isolation: isolate;
-  }
-  body {
-    padding-bottom: 64px;
-  }
-  .floating-admin-btn {
-    bottom: 76px !important;
-  }
-  .back-to-top {
-    bottom: 76px !important;
-  }
-  .resume-cart-bar,
-  .install-prompt-banner {
-    bottom: 76px;
-  }
+  display: none !important;
 }
 .bottom-nav-item {
   display: flex;
@@ -13235,5 +13206,26 @@ body.dark-theme .swal2-html-container {
   .back-to-top {
     left: 10px !important;
     bottom: calc(82px + env(safe-area-inset-bottom)) !important;
+  }
+}
+
+/* === OVERRIDES: Remove bottom-nav and admin chat button === */
+.bottom-nav,
+#bottomNav {
+  display: none !important;
+}
+
+/* Remove padding-bottom added for bottom-nav */
+body {
+  padding-bottom: 0 !important;
+}
+
+/* Reset floating admin btn position since bottom-nav is gone */
+@media (max-width: 640px) {
+  .floating-admin-btn {
+    bottom: 24px !important;
+  }
+  .admin-chat-card {
+    bottom: 96px !important;
   }
 }
