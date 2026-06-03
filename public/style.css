@@ -13539,3 +13539,208 @@ body.dark-theme .game-card h3 {
     top: 60px !important;
   }
 }
+
+
+/* =========================================================
+   FINAL FIX v20260603-5
+   - Hilangkan garis hitam area bawah / footer / review
+   - Chat admin mobile jadi tombol kecil bulat, bukan banner besar
+   - Ringankan efek mobile
+   Tempel PALING BAWAH style.css
+   ========================================================= */
+
+@media (max-width: 768px) {
+  /* Garis hitam yang terlihat dekat chat biasanya dari border/box-shadow
+     neo-brutalism di footer / testimonial / floating element */
+  .site-footer,
+  .testimonial-section,
+  .review-section-head,
+  .review-action-card,
+  .review-summary,
+  .testi-scroll-container {
+    border-top: 0 !important;
+    border-bottom: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .site-footer::before,
+  .site-footer::after,
+  .testimonial-section::before,
+  .testimonial-section::after,
+  .review-section-head::before,
+  .review-section-head::after,
+  .review-action-card::before,
+  .review-action-card::after,
+  .review-summary::before,
+  .review-summary::after,
+  .floating-admin-btn::before,
+  .floating-admin-btn::after,
+  #chatAdminBtn::before,
+  #chatAdminBtn::after {
+    display: none !important;
+    content: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  /* Chat admin: paksa jadi FAB kecil bulat di mobile */
+  .floating-admin-btn,
+  #chatAdminBtn,
+  .admin-chat-fab {
+    position: fixed !important;
+    right: 14px !important;
+    bottom: calc(18px + env(safe-area-inset-bottom)) !important;
+    left: auto !important;
+    top: auto !important;
+
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    max-width: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0 !important;
+    padding: 0 !important;
+
+    border-radius: 999px !important;
+    border: 1px solid rgba(14, 165, 233, 0.28) !important;
+    background: linear-gradient(135deg, #0ea5e9, #0284c7) !important;
+    background-image: linear-gradient(135deg, #0ea5e9, #0284c7) !important;
+    color: #ffffff !important;
+
+    box-shadow: 0 10px 22px rgba(14, 165, 233, 0.28) !important;
+    outline: none !important;
+    overflow: hidden !important;
+    transform: none !important;
+    z-index: 320 !important;
+  }
+
+  body.dark-theme .floating-admin-btn,
+  body.dark-theme #chatAdminBtn,
+  body.dark-theme .admin-chat-fab {
+    border-color: rgba(56, 189, 248, 0.24) !important;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.34) !important;
+  }
+
+  .floating-admin-btn:hover,
+  #chatAdminBtn:hover,
+  .admin-chat-fab:hover {
+    transform: none !important;
+    box-shadow: 0 10px 22px rgba(14, 165, 233, 0.28) !important;
+    background: linear-gradient(135deg, #0ea5e9, #0284c7) !important;
+    background-image: linear-gradient(135deg, #0ea5e9, #0284c7) !important;
+  }
+
+  .floating-admin-icon,
+  #chatAdminBtn .floating-admin-icon {
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    max-width: 48px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: transparent !important;
+    color: #ffffff !important;
+    font-size: 21px !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .floating-admin-content,
+  #chatAdminBtn .floating-admin-content,
+  .floating-admin-content strong,
+  .floating-admin-content small {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    max-width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Tombol back-to-top jangan ikut garis hitam / terlalu berat */
+  .back-to-top {
+    left: 14px !important;
+    bottom: calc(18px + env(safe-area-inset-bottom)) !important;
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 14px !important;
+    border: 1px solid rgba(14, 165, 233, 0.2) !important;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.14) !important;
+    background: rgba(255, 255, 255, 0.94) !important;
+    color: #0f172a !important;
+    transform: none !important;
+    z-index: 319 !important;
+  }
+
+  body.dark-theme .back-to-top {
+    background: rgba(15, 23, 42, 0.94) !important;
+    color: #f8fafc !important;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.32) !important;
+  }
+
+  /* Lebih ringan di mobile */
+  body::before,
+  .watercolor-blob,
+  .blob,
+  .blob-1,
+  .blob-2,
+  .promo-deco,
+  .promo-deco-circles,
+  .social-proof,
+  .purchase-ticker {
+    display: none !important;
+  }
+
+  .site-header,
+  .shop-card,
+  .game-card,
+  .testi-card,
+  .review-action-card,
+  .review-summary,
+  .catalog-toolbar,
+  .order-modal-card,
+  .admin-chat-card {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .floating-admin-btn,
+  #chatAdminBtn,
+  .admin-chat-fab {
+    right: 12px !important;
+    bottom: calc(16px + env(safe-area-inset-bottom)) !important;
+    width: 46px !important;
+    height: 46px !important;
+    min-width: 46px !important;
+    max-width: 46px !important;
+  }
+
+  .floating-admin-icon,
+  #chatAdminBtn .floating-admin-icon {
+    width: 46px !important;
+    height: 46px !important;
+    min-width: 46px !important;
+    max-width: 46px !important;
+  }
+
+  .back-to-top {
+    left: 12px !important;
+    bottom: calc(16px + env(safe-area-inset-bottom)) !important;
+    width: 42px !important;
+    height: 42px !important;
+  }
+}
+
