@@ -14,16 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <script>
-      window.AE_ASSET_VERSION = String(Date.now());
-      const aeStyle = document.createElement("link");
-      aeStyle.rel = "stylesheet";
-      aeStyle.href = "/style.css?v=" + window.AE_ASSET_VERSION;
-      document.head.appendChild(aeStyle);
-    </script>
-    <noscript>
-      <link rel="stylesheet" href="/style.css" />
-    </noscript>
+    <link rel="stylesheet" href="/style.css?v=20260603-1" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#0ea5e9" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -1450,13 +1441,6 @@
       }, 5000);
     </script>
 
-    <script>
-      (() => {
-        const script = document.createElement("script");
-        script.src = "/script.js?v=" + (window.AE_ASSET_VERSION || Date.now());
-        script.defer = false;
-        document.body.appendChild(script);
-      })();
-    </script>
+    <script src="/script.js?v=20260603" defer></script>
   </body>
 </html>

@@ -1,3 +1,11 @@
+// Safe DOM ready helper: tetap jalan walau script.js telat dimuat oleh dynamic script injection
+function onReady(callback) {
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", callback, { once: true });
+  } else {
+    callback();
+  }
+}
 const translations = {
   id: {
     selectProduct: "Pilih Produk",
@@ -2255,7 +2263,12 @@ async function loadReviews() {
   if (!reviewTrack) return;
 
   try {
-    const res = await fetch("/reviews");
+    const res = await fetch("/reviews", { cache: "no-store" });
+
+    if (!res.ok) {
+      throw new Error(`Gagal mengambil review: ${res.status}`);
+    }
+
     const data = await res.json();
 
     if (!Array.isArray(data) || data.length === 0) {

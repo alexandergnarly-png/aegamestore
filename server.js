@@ -4452,19 +4452,25 @@ app.get("/reviews", async (req, res) => {
     const result = await query(
       `
   SELECT
-    r.user_id,
-    r.username,
-    r.rating,
-    r.comment,
-    r.created_at,
-    COUNT(o.id) FILTER (WHERE o.payment_status = 'paid')::int AS paid_order_count,
-    COALESCE(SUM(o.price) FILTER (WHERE o.payment_status = 'paid'), 0)::int AS total_spend
-  FROM reviews r
-  LEFT JOIN orders o ON o.user_id = r.user_id
-  WHERE r.active = 1
-  GROUP BY r.id
-  ORDER BY r.updated_at DESC, r.id DESC
-  LIMIT 12
+  r.user_id,
+  r.username,
+  r.rating,
+  r.comment,
+  r.created_at,
+  COALESCE(os.paid_order_count, 0)::int AS paid_order_count,
+  COALESCE(os.total_spend, 0)::int AS total_spend
+FROM reviews r
+LEFT JOIN (
+  SELECT
+    user_id,
+    COUNT(*) FILTER (WHERE payment_status = 'paid')::int AS paid_order_count,
+    COALESCE(SUM(price) FILTER (WHERE payment_status = 'paid'), 0)::int AS total_spend
+  FROM orders
+  GROUP BY user_id
+) os ON os.user_id = r.user_id
+WHERE r.active = 1
+ORDER BY r.updated_at DESC, r.id DESC
+LIMIT 12
   `,
     );
 
