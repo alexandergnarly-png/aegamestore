@@ -13,17 +13,17 @@ const translations = {
     selectGame: "1. Pilih Game",
     buyNow: "Beli Sekarang",
     processing: "Memproses...",
-    loadingWebsite: "Loading AE Store...",
-    howToBuy: "Cara Beli 📖",
+    loadingWebsite: "Memuat Website...",
+    howToBuy: "Cara Beli",
     searchGamePlaceholder: "Cari nama game (contoh: PUBG)...",
     processingOrder: "Memproses pesanan...",
-    heroTitle: "TOP-UP GAME CEPAT, TEGAS, DAN ANTI RIBET",
+    heroTitle: "Top-up digital cepat dengan gaya brutal yang tegas",
     heroDesc:
-      "Pilih game, pilih produk, bayar, lalu tunggu pesanan diproses cepat.",
+      "Cari game favoritmu, pilih produk, lalu checkout cepat. Tampilan lebih tegas, ringan, dan fokus ke pembelian.",
     totalPayment: "Total Pembayaran",
     previewEmpty: "Produk belum dipilih",
     previewWait: "Silakan pilih platform dan produk",
-    guideTitle: "Panduan Top-Up",
+    guideTitle: "Panduan Top-Up ",
     guideStep1: "Pilih Game: Cari dan klik game yang kamu inginkan.",
     guideStep2:
       "Tentukan Produk: Pilih tipe device (iOS/Android) dan produknya.",
@@ -81,15 +81,15 @@ const translations = {
     skipToContent: "Lewati ke konten",
     brandTagline: "Premium Digital Keys",
     navReviews: "Review Buyer",
-    heroBadge: "⚡ NEO DIGITAL TOP-UP",
-    heroCtaPrimary: "Buka Katalog Game",
+    heroBadge: "\uD83C\uDF0A SEAMLESS TOP-UP EXPERIENCE",
+    heroCtaPrimary: "Browse Game Catalog",
     heroCtaGuide: "\uD83D\uDCD6 Cara Beli",
-    trustInstantTitle: "Pengiriman Instan",
-    trustInstantDesc: "Key terkirim otomatis setelah bayar",
+    trustInstantTitle: "Kirim Cepat",
+    trustInstantDesc: "Auto/manual sesuai stok produk",
     trustSecureTitle: "Pembayaran Aman",
     trustSecureDesc: "QRIS GoPay Merchant resmi",
-    trustSupportTitle: "Support 24/7",
-    trustSupportDesc: "Admin standby setiap saat",
+    trustSupportTitle: "Admin Siaga",
+    trustSupportDesc: "Bantu order & kendala transaksi",
     filterTools: "Tools / GBox",
     testiTitle: "Kepercayaan Gamers",
     testiDesc:
@@ -196,25 +196,25 @@ const translations = {
     selectProduct: "Select Product",
     fillDetails: "Fill in the details below to start your order.",
     selectGame: "1. Select Game",
-    buyNow: "Buy Now",
+    buyNow: "Buy Now ",
     processing: "Processing...",
-    loadingWebsite: "Loading AE Store...",
+    loadingWebsite: "Loading Website...",
     howToBuy: "How to Buy 📖",
     searchGamePlaceholder: "Search game name (e.g. PUBG)...",
     processingOrder: "Processing order...",
-    heroTitle: "FAST, BOLD, NO-NONSENSE GAME TOP-UPS",
+    heroTitle: "Fast digital top-ups with bold brutal UI",
     heroDesc:
-      "Pick a game, choose a product, pay, and let the order process fast.",
+      "Find your game, choose a product, and check out fast with a bold lightweight interface.",
     totalPayment: "Total Payment",
     previewEmpty: "No product selected",
     previewWait: "Please select platform and product",
-    guideTitle: "Top-Up Guide",
+    guideTitle: "Top-Up Guide ",
     guideStep1: "Select Game: Find and choose your desired game.",
     guideStep2: "Choose Product: Select device type (iOS/Android) and product.",
     guideStep3: "Fill Data: Player name is filled from your logged-in account.",
     guideStep4: "Checkout: Click 'Buy Now' and complete the payment.",
     guideStep5: "Done! Your game will be delivered instantly after success.",
-    guideOk: "Mengerti",
+    guideOk: "Got it! ",
     loginBtn: "Login / Register",
     navHome: "Home",
     navStore: "Game Catalog",
@@ -265,8 +265,8 @@ const translations = {
     skipToContent: "Skip to content",
     brandTagline: "Premium Digital Keys",
     navReviews: "Buyer Reviews",
-    heroBadge: "⚡ NEO DIGITAL TOP-UP",
-    heroCtaPrimary: "Open Game Catalog",
+    heroBadge: "\uD83C\uDF0A SEAMLESS TOP-UP EXPERIENCE",
+    heroCtaPrimary: "Browse Game Catalog",
     heroCtaGuide: "\uD83D\uDCD6 How to Buy",
     trustInstantTitle: "Instant Delivery",
     trustInstantDesc: "Key delivered automatically after payment",
@@ -472,7 +472,7 @@ const gameImages = {
 };
 
 const fallbackImage =
-  "https://placehold.co/400x220/ffd600/0a0a0a?text=AE+GAME";
+  "https://placehold.co/400x220/e0f2fe/0284c7?text=AE+Game+Store";
 
 function normalizeGameImageKey(gameName) {
   return String(gameName || "")
@@ -614,7 +614,7 @@ async function loadAllProducts() {
       allProducts = [];
       gameGrid.innerHTML = `
     <div class="empty-category-card">
-      <div class="empty-category-icon">⚡</div>
+      <div class="empty-category-icon"></div>
       <h3>Produk belum tersedia</h3>
       <p>Belum ada produk aktif saat ini. Silakan hubungi admin untuk info stok.</p>
       <a href="https://t.me/aegamestore" target="_blank">Chat Admin</a>
@@ -2803,12 +2803,12 @@ function showTelegramPopup() {
           <div style="background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%); width: 90px; height: 90px; border-radius: 24px; display: flex; align-items: center; justify-content: center; margin: 0 auto 22px; box-shadow: 0 10px 20px rgba(14, 165, 233, 0.15);">
             <iconify-icon icon="logos:telegram" width="54"></iconify-icon>
           </div>
-          <h2 style="color: #0c4a6e; font-size: 22px; font-weight: 800; margin-bottom: 12px; letter-spacing: -0.5px;">Eksklusif Community</h2>
-          <p style="color: #5a5550; font-size: 14px; line-height: 1.6; margin-bottom: 5px;">
+          <h2 style="color: #0c4a6e; font-size: 22px; font-weight: 800; margin-bottom: 12px; letter-spacing: -0.5px;">Eksklusif Community </h2>
+          <p style="color: #475569; font-size: 14px; line-height: 1.6; margin-bottom: 5px;">
             Dapatkan <b>voucher diskon harian</b> dan update stok tercepat hanya di Telegram.
           </p>
-          <div style="font-size: 12px; color: #0a0a0a; font-weight: 700; margin-top: 18px; display: inline-flex; align-items: center; gap: 6px; background: #ffd600; padding: 6px 14px; border-radius: 99px;">
-            <span style="width: 8px; height: 8px; background: #00e5a0; border-radius: 50%; display: inline-block; animation: bluePulse 2s infinite;"></span>
+          <div style="font-size: 12px; color: #0ea5e9; font-weight: 700; margin-top: 18px; display: inline-flex; align-items: center; gap: 6px; background: #e0f2fe; padding: 6px 14px; border-radius: 99px;">
+            <span style="width: 8px; height: 8px; background: #0ea5e9; border-radius: 50%; display: inline-block; animation: bluePulse 2s infinite;"></span>
             Join 2,400+ Gamers Lainnya
           </div>
         </div>
