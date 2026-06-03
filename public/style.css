@@ -13229,3 +13229,160 @@ body {
     bottom: 96px !important;
   }
 }
+
+/* =========================================================
+   NEO BRUTALISM MOBILE CONSISTENCY FIX
+   Override semua rounded/glassmorphism di mobile breakpoints
+   ========================================================= */
+
+/* === HEADER MOBILE: kuning + border hitam di semua ukuran === */
+@media (max-width: 768px) {
+  .site-header {
+    background: var(--nb-yellow) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-bottom: 3px solid var(--nb-black) !important;
+    box-shadow: 0 3px 0 var(--nb-black) !important;
+  }
+
+  body.dark-theme .site-header {
+    background: var(--nb-black) !important;
+    border-bottom: 3px solid var(--nb-yellow) !important;
+    box-shadow: 0 3px 0 var(--nb-yellow) !important;
+  }
+
+  /* Hamburger dropdown nav: brutal card bukan glassmorphism */
+  .main-nav {
+    background: #fafaf5 !important;
+    border: 3px solid var(--nb-black) !important;
+    box-shadow: 5px 5px 0 var(--nb-black) !important;
+    border-radius: 8px !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  body.dark-theme .main-nav {
+    background: #1a1a1a !important;
+    border-color: #fafaf5 !important;
+    box-shadow: 5px 5px 0 #fafaf5 !important;
+  }
+
+  .nav-link {
+    background: transparent !important;
+    border-radius: 4px !important;
+    color: var(--nb-black) !important;
+    font-weight: 700 !important;
+  }
+
+  .nav-link:hover {
+    background: var(--nb-yellow) !important;
+  }
+
+  body.dark-theme .nav-link {
+    color: #fafaf5 !important;
+  }
+
+  /* Lang btn & theme toggle: kotak bukan pill */
+  .lang-btn,
+  .theme-toggle-btn,
+  .theme-btn {
+    border-radius: 4px !important;
+  }
+
+  /* Auth btn: kotak bukan pill, hapus emoji injection */
+  .auth-btn,
+  #userMenu .auth-btn,
+  #userMenu .user-action-btn {
+    border-radius: 4px !important;
+  }
+
+  #userMenu .auth-btn::after {
+    content: none !important;
+  }
+
+  /* Hero CTA: kotak + shadow hitam */
+  .hero-cta {
+    border-radius: 0 !important;
+    box-shadow: var(--nb-shadow) !important;
+  }
+
+  /* Hero trust cards: radius kecil */
+  .hero-trust li {
+    border-radius: 6px !important;
+    border: var(--nb-border-2) !important;
+    box-shadow: 3px 3px 0 var(--nb-black) !important;
+    background: var(--nb-white) !important;
+  }
+
+  .hero-trust-icon {
+    border-radius: 6px !important;
+  }
+
+  /* Pills/filter: kotak bukan pill */
+  .pill,
+  .filter-pills button,
+  .filter-pills a,
+  .genre-pills button {
+    border-radius: 0 !important;
+  }
+
+  /* Promo slider: radius lebih kecil */
+  .promo-slider,
+  .promo-container {
+    border-radius: 8px !important;
+  }
+
+  /* Testi & review cards: radius kecil */
+  .testi-card {
+    border-radius: 8px !important;
+  }
+
+  .review-summary,
+  .review-action-card {
+    border-radius: 8px !important;
+  }
+
+  /* Shop card: radius kecil */
+  .shop-card {
+    border-radius: 8px !important;
+  }
+
+  /* Game card: tetap angular */
+  .game-card {
+    border-radius: 8px !important;
+  }
+
+  /* Floating admin: kotak bukan bulat */
+  .floating-admin-btn {
+    border-radius: 4px !important;
+    width: auto !important;
+    height: auto !important;
+    padding: 10px 14px !important;
+    min-width: 120px !important;
+    justify-content: flex-start !important;
+    bottom: 24px !important;
+  }
+
+  .floating-admin-content {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* Back to top: kotak */
+  .back-to-top {
+    border-radius: 4px !important;
+    bottom: 24px !important;
+  }
+
+  /* Install prompt & resume cart: radius kecil */
+  .install-prompt-banner,
+  .resume-cart-bar {
+    border-radius: 6px !important;
+    bottom: 24px !important;
+  }
+}
+
+/* Semua ukuran layar: nav toggle kotak */
+.nav-toggle {
+  border-radius: 4px !important;
+}

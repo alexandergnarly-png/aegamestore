@@ -625,7 +625,7 @@ async function loadAllProducts() {
         icon: "info",
         title: "Stok Kosong",
         text: "Produk belum tersedia saat ini.",
-        confirmButtonColor: "#0ea5e9",
+        confirmButtonColor: "#0a0a0a",
       });
       return;
     }
@@ -652,7 +652,7 @@ async function loadAllProducts() {
       icon: "error",
       title: "Oops...",
       text: "Gagal memuat daftar produk dari server.",
-      confirmButtonColor: "#fb7185",
+      confirmButtonColor: "#ffe135",
     });
   }
 }
@@ -1199,7 +1199,7 @@ async function openOrderModal(game) {
         icon: "warning",
         title: "Login Dulu",
         text: "Kamu harus login dulu sebelum order.",
-        confirmButtonColor: "#0ea5e9",
+        confirmButtonColor: "#0a0a0a",
         confirmButtonText: "Login Sekarang",
       }).then(() => {
         window.location.href = "/auth";
@@ -1220,7 +1220,7 @@ async function openOrderModal(game) {
       icon: "error",
       title: "Gagal Cek Login",
       text: "Coba refresh halaman lalu login ulang.",
-      confirmButtonColor: "#fb7185",
+      confirmButtonColor: "#ffe135",
     });
     return;
   }
@@ -1514,7 +1514,7 @@ async function buy() {
       icon: "warning",
       title: "Oops...",
       text: "Nama player belum terisi.",
-      confirmButtonColor: "#0ea5e9",
+      confirmButtonColor: "#0a0a0a",
     });
     return;
   }
@@ -1523,7 +1523,7 @@ async function buy() {
       icon: "info",
       title: "Pilih Produk",
       text: "Pilih game dan durasi produknya dulu.",
-      confirmButtonColor: "#0ea5e9",
+      confirmButtonColor: "#0a0a0a",
     });
     return;
   }
@@ -1538,7 +1538,7 @@ async function buy() {
       icon: "error",
       title: translations[currentLanguage].outOfStockTitle,
       text: translations[currentLanguage].outOfStockText,
-      confirmButtonColor: "#fb7185",
+      confirmButtonColor: "#ffe135",
     });
 
     return;
@@ -1569,7 +1569,7 @@ async function buy() {
         icon: "warning",
         title: "Login Dulu",
         text: data.message || "Kamu harus login dulu sebelum order",
-        confirmButtonColor: "#0ea5e9",
+        confirmButtonColor: "#0a0a0a",
       }).then(() => {
         window.location.href = data.redirectUrl || "/auth";
       });
@@ -1622,8 +1622,8 @@ async function buy() {
             String(snapErr?.message || snapErr || "Unknown") +
             "</code><br><br>Buka pembayaran di tab Midtrans?",
           showCancelButton: true,
-          confirmButtonColor: "#0ea5e9",
-          cancelButtonColor: "#94a3b8",
+          confirmButtonColor: "#0a0a0a",
+          cancelButtonColor: "#fafaf5",
           confirmButtonText: "Buka di Midtrans",
           cancelButtonText: "Batal",
         }).then((res) => {
@@ -1667,7 +1667,7 @@ async function buy() {
         icon: "error",
         title: translations[currentLanguage].outOfStockTitle,
         text: errorMessage,
-        confirmButtonColor: "#fb7185",
+        confirmButtonColor: "#ffe135",
       });
 
       return;
@@ -1677,14 +1677,14 @@ async function buy() {
       icon: "error",
       title: "Gagal",
       text: errorMessage,
-      confirmButtonColor: "#fb7185",
+      confirmButtonColor: "#ffe135",
     });
   } catch (err) {
     Swal.fire({
       icon: "error",
       title: "Error",
       text: "Terjadi error server",
-      confirmButtonColor: "#fb7185",
+      confirmButtonColor: "#ffe135",
     });
   }
 
@@ -1729,8 +1729,8 @@ async function logoutUser() {
     text: "Kamu akan keluar dari sesi ini.",
     icon: "question",
     showCancelButton: true,
-    confirmButtonColor: "#fb7185",
-    cancelButtonColor: "#475569",
+    confirmButtonColor: "#ffe135",
+    cancelButtonColor: "#fafaf5",
     confirmButtonText: "Ya, Keluar",
   }).then(async (result) => {
     if (result.isConfirmed) {
@@ -1877,7 +1877,7 @@ function showPrivacyPolicy() {
     text: t.privacyContent,
     icon: "info",
     confirmButtonText: t.policyOk,
-    confirmButtonColor: "#0ea5e9",
+    confirmButtonColor: "#0a0a0a",
     background: "#f0f9ff",
   });
 }
@@ -1890,7 +1890,7 @@ function showTermsPolicy() {
     text: t.termsContent,
     icon: "info",
     confirmButtonText: t.policyOk,
-    confirmButtonColor: "#0ea5e9",
+    confirmButtonColor: "#0a0a0a",
     background: "#f0f9ff",
   });
 }
@@ -2381,7 +2381,7 @@ async function openReviewPopup() {
         title: "Login dulu",
         text: "Kamu harus login dan pernah berhasil order untuk kasih review.",
         confirmButtonText: "Login Sekarang",
-        confirmButtonColor: "#0ea5e9",
+        confirmButtonColor: "#0a0a0a",
       }).then(() => {
         window.location.href = "/auth";
       });
@@ -2432,8 +2432,8 @@ async function openReviewPopup() {
     showCancelButton: true,
     confirmButtonText: "Kirim Review",
     cancelButtonText: "Batal",
-    confirmButtonColor: "#0ea5e9",
-    cancelButtonColor: "#64748b",
+    confirmButtonColor: "#0a0a0a",
+    cancelButtonColor: "#fafaf5",
     didOpen: () => {
       const starsBox = document.getElementById("reviewPopupStars");
 
@@ -2480,7 +2480,7 @@ async function submitReview({ rating, comment }) {
       icon: "warning",
       title: "Komentar terlalu pendek",
       text: "Tulis review minimal 8 karakter.",
-      confirmButtonColor: "#0ea5e9",
+      confirmButtonColor: "#0a0a0a",
     });
     return false;
   }
@@ -2505,7 +2505,7 @@ async function submitReview({ rating, comment }) {
         icon: "error",
         title: "Gagal",
         text: data.message || "Gagal menyimpan review",
-        confirmButtonColor: "#fb7185",
+        confirmButtonColor: "#ffe135",
       });
       return false;
     }
@@ -2514,7 +2514,7 @@ async function submitReview({ rating, comment }) {
       icon: "success",
       title: "Review Tersimpan",
       text: data.message || "Terima kasih untuk review kamu!",
-      confirmButtonColor: "#0ea5e9",
+      confirmButtonColor: "#0a0a0a",
     });
 
     return true;
@@ -2523,7 +2523,7 @@ async function submitReview({ rating, comment }) {
       icon: "error",
       title: "Error",
       text: "Terjadi error server saat menyimpan review.",
-      confirmButtonColor: "#fb7185",
+      confirmButtonColor: "#ffe135",
     });
     return false;
   }
@@ -2782,7 +2782,7 @@ function showGuide() {
     `,
     icon: "info",
     confirmButtonText: t.guideOk,
-    confirmButtonColor: "#0ea5e9",
+    confirmButtonColor: "#0a0a0a",
     background: "#f0f9ff",
     backdrop: "rgba(12, 74, 110, 0.4)",
   });
@@ -2817,8 +2817,8 @@ function showTelegramPopup() {
       showDenyButton: true,
       confirmButtonText: "Gabung Sekarang! 🚀",
       denyButtonText: "Sembunyikan",
-      confirmButtonColor: "#0ea5e9",
-      denyButtonColor: "#94a3b8",
+      confirmButtonColor: "#0a0a0a",
+      denyButtonColor: "#fafaf5",
       padding: "2em",
       background: document.body.classList.contains("dark-theme")
         ? "#1e293b"
@@ -3954,7 +3954,7 @@ document.addEventListener("DOMContentLoaded", () => {
           icon: "info",
           title: "Install manual",
           text: "Kalau tombol install belum muncul, tekan menu browser lalu pilih Tambahkan ke layar utama.",
-          confirmButtonColor: "#0ea5e9",
+          confirmButtonColor: "#0a0a0a",
         });
         return;
       }
@@ -4785,8 +4785,8 @@ document.addEventListener("DOMContentLoaded", () => {
         title: t("paymentConfirmCloseTitle"),
         text: t("paymentConfirmCloseText"),
         showCancelButton: true,
-        confirmButtonColor: "#fb7185",
-        cancelButtonColor: "#0ea5e9",
+        confirmButtonColor: "#ffe135",
+        cancelButtonColor: "#fafaf5",
         confirmButtonText: t("paymentConfirmCloseYes"),
         cancelButtonText: t("paymentConfirmCloseNo"),
         backdrop: "rgba(12, 74, 110, 0.4)",
@@ -4917,7 +4917,7 @@ document.addEventListener("DOMContentLoaded", () => {
             icon: "warning",
             title: "Belum login",
             text: "Login dulu untuk lanjut bayar order.",
-            confirmButtonColor: "#0ea5e9",
+            confirmButtonColor: "#0a0a0a",
             confirmButtonText: "Login",
           }).then(() => {
             window.location.href = "/auth";
@@ -4944,7 +4944,7 @@ document.addEventListener("DOMContentLoaded", () => {
             icon: code === "EXPIRED" ? "info" : "error",
             title: "Tidak bisa lanjut bayar",
             text: msg,
-            confirmButtonColor: "#0ea5e9",
+            confirmButtonColor: "#0a0a0a",
           });
         }
         return;
@@ -4956,7 +4956,7 @@ document.addEventListener("DOMContentLoaded", () => {
             icon: "error",
             title: "Token pembayaran tidak tersedia",
             text: "Server tidak menyertakan snapToken pada response. Coba refresh atau buat order baru.",
-            confirmButtonColor: "#0ea5e9",
+            confirmButtonColor: "#0a0a0a",
           });
         }
         return;
@@ -4980,7 +4980,7 @@ document.addEventListener("DOMContentLoaded", () => {
           icon: "error",
           title: "Gagal lanjut bayar",
           text: "Terjadi kesalahan saat memuat order. Coba lagi atau buka dari halaman akun.",
-          confirmButtonColor: "#0ea5e9",
+          confirmButtonColor: "#0a0a0a",
         });
       }
     }
