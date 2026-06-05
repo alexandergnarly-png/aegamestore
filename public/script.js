@@ -17,7 +17,7 @@ const translations = {
     howToBuy: "Cara Beli",
     searchGamePlaceholder: "Cari nama game (contoh: PUBG)...",
     processingOrder: "Memproses pesanan...",
-   heroTitle: "Top Up Game Key Bareng AE Game Store",
+    heroTitle: "Top Up Game Key Bareng AE Game Store",
     heroDesc:
       "Cari game favoritmu, pilih produk, lalu checkout cepat. Tampilan lebih tegas, ringan, dan fokus ke pembelian.",
     totalPayment: "Total Pembayaran",
@@ -100,7 +100,7 @@ const translations = {
     chatAdminTitle: "Chat Admin",
     chatAdminSub: "Fast response",
     footerTagline:
-  "Top up game key cepat, aman, dan terpercaya bersama AE Game Store.",
+      "Top up game key cepat, aman, dan terpercaya bersama AE Game Store.",
     metaGames: "Game tersedia",
     metaStock: "Stok ready",
     filterFavorites: "Favorit",
@@ -286,7 +286,7 @@ const translations = {
     voucherToggleTitle: "Have a voucher?",
     voucherToggleDesc: "Enter code if you have one",
     footerTagline:
-  "Fast, secure, and trusted game key top-up with AE Game Store.",
+      "Fast, secure, and trusted game key top-up with AE Game Store.",
     metaGames: "Games available",
     metaStock: "Stock ready",
     filterFavorites: "Favorites",
@@ -582,7 +582,9 @@ function formatRupiah(num) {
 }
 
 function normalizePlayStatus(status) {
-  const value = String(status || "safe").trim().toLowerCase();
+  const value = String(status || "safe")
+    .trim()
+    .toLowerCase();
 
   if (value === "maintenance") return "maintenance";
   if (value === "risk") return "risk";
@@ -621,9 +623,9 @@ function setLoading(isLoading) {
   );
 
   const availableKeys = Number(selectedProduct?.available_keys || 0);
-const playStatus = normalizePlayStatus(selectedProduct?.play_status);
-const isMaintenance = selectedProduct && playStatus === "maintenance";
-const isOutOfStock = selectedProduct && availableKeys <= 0;
+  const playStatus = normalizePlayStatus(selectedProduct?.play_status);
+  const isMaintenance = selectedProduct && playStatus === "maintenance";
+  const isOutOfStock = selectedProduct && availableKeys <= 0;
 
   loadingText.style.display = isLoading ? "block" : "none";
 
@@ -634,11 +636,11 @@ const isOutOfStock = selectedProduct && availableKeys <= 0;
   }
 
   buyBtn.disabled = Boolean(isOutOfStock || isMaintenance);
-buyBtn.innerText = isMaintenance
-  ? "Maintenance"
-  : isOutOfStock
-    ? translations[currentLanguage].outOfStockLabel
-    : translations[currentLanguage].buyNow;
+  buyBtn.innerText = isMaintenance
+    ? "Maintenance"
+    : isOutOfStock
+      ? translations[currentLanguage].outOfStockLabel
+      : translations[currentLanguage].buyNow;
 }
 
 async function loadAllProducts() {
@@ -1387,10 +1389,10 @@ function renderOrderProductCards(products) {
 
   products.forEach((item) => {
     const availableKeys = Number(item.available_keys || 0);
-const playMeta = getPlayStatusMeta(item.play_status);
-const isMaintenance = playMeta.value === "maintenance";
-const isOutOfStock = availableKeys <= 0;
-const isDisabled = isOutOfStock || isMaintenance;
+    const playMeta = getPlayStatusMeta(item.play_status);
+    const isMaintenance = playMeta.value === "maintenance";
+    const isOutOfStock = availableKeys <= 0;
+    const isDisabled = isOutOfStock || isMaintenance;
     const deliveryType = String(item.delivery_type || "auto").toLowerCase();
     const deliveryLabel = deliveryType === "manual" ? "Manual" : "Auto";
 
@@ -1408,15 +1410,15 @@ const isDisabled = isOutOfStock || isMaintenance;
     if (String(item.id) === String(productSelect.value))
       btn.classList.add("active");
     if (isOutOfStock) btn.classList.add("is-empty");
-if (isMaintenance) btn.classList.add("is-maintenance");
-if (playMeta.value === "risk") btn.classList.add("is-risk");
-if (playMeta.value === "safe") btn.classList.add("is-safe");
+    if (isMaintenance) btn.classList.add("is-maintenance");
+    if (playMeta.value === "risk") btn.classList.add("is-risk");
+    if (playMeta.value === "safe") btn.classList.add("is-safe");
 
     const stockText = isMaintenance
-  ? "MAINTENANCE"
-  : isOutOfStock
-    ? "OUT OF STOCK"
-    : `${availableKeys} READY`;
+      ? "MAINTENANCE"
+      : isOutOfStock
+        ? "OUT OF STOCK"
+        : `${availableKeys} READY`;
 
     btn.innerHTML = `
       <div class="order-product-main">
@@ -1431,17 +1433,17 @@ if (playMeta.value === "safe") btn.classList.add("is-safe");
     `;
 
     btn.addEventListener("click", () => {
-  if (isMaintenance) {
-    Swal.fire({
-      icon: "info",
-      title: "Maintenance",
-      text: playMeta.text,
-      confirmButtonColor: "#0a0a0a",
-    });
-    return;
-  }
+      if (isMaintenance) {
+        Swal.fire({
+          icon: "info",
+          title: "Maintenance",
+          text: playMeta.text,
+          confirmButtonColor: "#0a0a0a",
+        });
+        return;
+      }
 
-  if (isOutOfStock) return;
+      if (isOutOfStock) return;
       productSelect.value = item.id;
       productSelect.dispatchEvent(new Event("change", { bubbles: true }));
       syncOrderProductCardsActive();
@@ -1491,10 +1493,10 @@ function loadDurations() {
 
   filteredProducts.forEach((item) => {
     const availableKeys = Number(item.available_keys || 0);
-const playMeta = getPlayStatusMeta(item.play_status);
-const isMaintenance = playMeta.value === "maintenance";
-const isOutOfStock = availableKeys <= 0;
-const isDisabled = isOutOfStock || isMaintenance;
+    const playMeta = getPlayStatusMeta(item.play_status);
+    const isMaintenance = playMeta.value === "maintenance";
+    const isOutOfStock = availableKeys <= 0;
+    const isDisabled = isOutOfStock || isMaintenance;
 
     const stockText = isOutOfStock
       ? translations[currentLanguage].outOfStockLabel
@@ -1508,10 +1510,10 @@ const isDisabled = isOutOfStock || isMaintenance;
   });
 
   const firstAvailable = filteredProducts.find((item) => {
-  const availableKeys = Number(item.available_keys || 0);
-  const playStatus = normalizePlayStatus(item.play_status);
-  return availableKeys > 0 && playStatus !== "maintenance";
-});
+    const availableKeys = Number(item.available_keys || 0);
+    const playStatus = normalizePlayStatus(item.play_status);
+    return availableKeys > 0 && playStatus !== "maintenance";
+  });
 
   if (firstAvailable) {
     productSelect.value = firstAvailable.id;
@@ -1548,14 +1550,14 @@ function updatePreview() {
   selectedProductBasePrice = Number(selectedProduct.price || 0);
 
   const availableKeys = Number(selectedProduct.available_keys || 0);
-const playMeta = getPlayStatusMeta(selectedProduct.play_status);
-const isMaintenance = playMeta.value === "maintenance";
-const isOutOfStock = availableKeys <= 0;
-const statusHint = document.getElementById("productStatusHint");
-if (statusHint) {
-  statusHint.className = `product-status-hint product-status-${playMeta.value}`;
-  statusHint.innerText = playMeta.text;
-}
+  const playMeta = getPlayStatusMeta(selectedProduct.play_status);
+  const isMaintenance = playMeta.value === "maintenance";
+  const isOutOfStock = availableKeys <= 0;
+  const statusHint = document.getElementById("productStatusHint");
+  if (statusHint) {
+    statusHint.className = `product-status-hint product-status-${playMeta.value}`;
+    statusHint.innerText = playMeta.text;
+  }
 
   document.getElementById("previewGame").innerText = selectedProduct.game;
   document.getElementById("previewProduct").innerText =
@@ -1563,11 +1565,11 @@ if (statusHint) {
   showDefaultPriceBreakdown(selectedProduct.price);
 
   buyBtn.disabled = Boolean(isOutOfStock || isMaintenance);
-buyBtn.innerText = isMaintenance
-  ? "Maintenance"
-  : isOutOfStock
-    ? translations[currentLanguage].outOfStockLabel
-    : translations[currentLanguage].buyNow;
+  buyBtn.innerText = isMaintenance
+    ? "Maintenance"
+    : isOutOfStock
+      ? translations[currentLanguage].outOfStockLabel
+      : translations[currentLanguage].buyNow;
 
   resetVoucherPreview();
   refreshCheckoutDiscountPreview();
@@ -1606,15 +1608,15 @@ async function buy() {
   const availableKeys = Number(selectedProduct.available_keys || 0);
   const playMeta = getPlayStatusMeta(selectedProduct.play_status);
 
-if (playMeta.value === "maintenance") {
-  Swal.fire({
-    icon: "info",
-    title: "Maintenance",
-    text: playMeta.text,
-    confirmButtonColor: "#0a0a0a",
-  });
-  return;
-}
+  if (playMeta.value === "maintenance") {
+    Swal.fire({
+      icon: "info",
+      title: "Maintenance",
+      text: playMeta.text,
+      confirmButtonColor: "#0a0a0a",
+    });
+    return;
+  }
 
   if (availableKeys <= 0) {
     closeOrderModal();
@@ -2899,7 +2901,7 @@ function showTelegramPopup() {
           </div>
         </div>
       `,
-            showCancelButton: false,
+      showCancelButton: false,
       showDenyButton: true,
       confirmButtonText: "Gabung Sekarang! 🚀",
       denyButtonText: "Sembunyikan",
@@ -2936,7 +2938,7 @@ function showTelegramPopup() {
 
         localStorage.setItem("tg_popup_hide_until", now + hideDuration);
 
-                Swal.fire({
+        Swal.fire({
           toast: true,
           position: "top-end",
           icon: "success",

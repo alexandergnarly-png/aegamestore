@@ -3023,13 +3023,16 @@
               </select>
             </div>
             <div class="field">
-  <select id="productPlayStatusFilter" onchange="applyProductFilters()">
-    <option value="">Semua Play Status</option>
-    <option value="safe">Safe to Play</option>
-    <option value="risk">Use at Your Own Risk</option>
-    <option value="maintenance">Maintenance</option>
-  </select>
-</div>
+              <select
+                id="productPlayStatusFilter"
+                onchange="applyProductFilters()"
+              >
+                <option value="">Semua Play Status</option>
+                <option value="safe">Safe to Play</option>
+                <option value="risk">Use at Your Own Risk</option>
+                <option value="maintenance">Maintenance</option>
+              </select>
+            </div>
           </div>
           <div class="toolbar">
             <input type="hidden" id="editingProductId" />
@@ -3062,12 +3065,12 @@
               />
             </div>
             <div class="field">
-  <select id="productPlayStatus">
-    <option value="safe">Safe to Play</option>
-    <option value="risk">Use at Your Own Risk</option>
-    <option value="maintenance">Maintenance</option>
-  </select>
-</div>
+              <select id="productPlayStatus">
+                <option value="safe">Safe to Play</option>
+                <option value="risk">Use at Your Own Risk</option>
+                <option value="maintenance">Maintenance</option>
+              </select>
+            </div>
           </div>
 
           <div class="toolbar">
@@ -4105,18 +4108,18 @@
       }
 
       function playStatusBadge(status) {
-  const value = String(status || "safe").toLowerCase();
+        const value = String(status || "safe").toLowerCase();
 
-  if (value === "maintenance") {
-    return `<span class="badge used">🛠 Maintenance</span>`;
-  }
+        if (value === "maintenance") {
+          return `<span class="badge used">🛠 Maintenance</span>`;
+        }
 
-  if (value === "risk") {
-    return `<span class="badge warning">⚠ Use at Your Own Risk</span>`;
-  }
+        if (value === "risk") {
+          return `<span class="badge warning">⚠ Use at Your Own Risk</span>`;
+        }
 
-  return `<span class="badge available">✅ Safe to Play</span>`;
-}
+        return `<span class="badge available">✅ Safe to Play</span>`;
+      }
 
       function keyBadge(used) {
         if (Number(used) === 1) {
@@ -6134,12 +6137,12 @@
               "x-csrf-token": getCsrfToken(),
             },
             body: JSON.stringify({
-  game,
-  brand,
-  duration,
-  price,
-  play_status,
-}),
+              game,
+              brand,
+              duration,
+              price,
+              play_status,
+            }),
           });
 
           const data = await res.json();
@@ -6355,7 +6358,9 @@
             const safeGame = JSON.stringify(String(item.game || ""));
             const safeBrand = JSON.stringify(String(item.brand || ""));
             const safeDuration = JSON.stringify(String(item.duration || ""));
-            const safePlayStatus = JSON.stringify(String(item.play_status || "safe"));
+            const safePlayStatus = JSON.stringify(
+              String(item.play_status || "safe"),
+            );
 
             return `
                                 <tr>
@@ -6737,7 +6742,14 @@
         });
       }
 
-      function editProduct(id, game, brand, duration, price, playStatus = "safe") {
+      function editProduct(
+        id,
+        game,
+        brand,
+        duration,
+        price,
+        playStatus = "safe",
+      ) {
         document.getElementById("editingProductId").value = id;
         document.getElementById("productGame").value = game;
         document.getElementById("productBrand").value = brand;

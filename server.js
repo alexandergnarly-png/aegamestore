@@ -277,7 +277,9 @@ db.query(
 );
 
 function normalizePlayStatus(status) {
-  const value = String(status || "safe").trim().toLowerCase();
+  const value = String(status || "safe")
+    .trim()
+    .toLowerCase();
 
   if (value === "maintenance") return "maintenance";
   if (value === "risk") return "risk";
@@ -2058,12 +2060,12 @@ app.post("/create-order", orderLimiter, async (req, res) => {
 
     const playStatus = normalizePlayStatus(productRow.play_status);
 
-if (playStatus === "maintenance") {
-  return res.status(400).json({
-    message:
-      "Produk sedang maintenance. Produk tetap tersedia di katalog, tapi belum bisa dibeli saat ini.",
-  });
-}
+    if (playStatus === "maintenance") {
+      return res.status(400).json({
+        message:
+          "Produk sedang maintenance. Produk tetap tersedia di katalog, tapi belum bisa dibeli saat ini.",
+      });
+    }
 
     const deliveryType = String(
       productRow.delivery_type || "auto",
@@ -3503,7 +3505,7 @@ app.post("/products", requireAdminAuth, requireAdminCsrf, async (req, res) => {
       .toLowerCase() === "manual"
       ? "manual"
       : "auto";
-      const cleanPlayStatus = normalizePlayStatus(play_status);
+  const cleanPlayStatus = normalizePlayStatus(play_status);
 
   if (!cleanGame || !cleanBrand || !cleanDuration) {
     return res.status(400).json({
@@ -3586,14 +3588,14 @@ app.put(
         : "auto"
       : null;
 
-      const hasPlayStatus = Object.prototype.hasOwnProperty.call(
-  req.body,
-  "play_status",
-);
+    const hasPlayStatus = Object.prototype.hasOwnProperty.call(
+      req.body,
+      "play_status",
+    );
 
-const cleanPlayStatus = hasPlayStatus
-  ? normalizePlayStatus(req.body.play_status)
-  : null;
+    const cleanPlayStatus = hasPlayStatus
+      ? normalizePlayStatus(req.body.play_status)
+      : null;
 
     if (!cleanGame || !cleanBrand || !cleanDuration) {
       return res.status(400).json({
@@ -3609,7 +3611,7 @@ const cleanPlayStatus = hasPlayStatus
 
     try {
       const result = await query(
-  `UPDATE products
+        `UPDATE products
    SET game = $1,
        brand = $2,
        duration = $3,
@@ -3618,16 +3620,16 @@ const cleanPlayStatus = hasPlayStatus
        play_status = COALESCE($6, play_status)
    WHERE id = $7
    RETURNING id`,
-  [
-    cleanGame,
-    cleanBrand,
-    cleanDuration,
-    cleanPrice,
-    cleanDeliveryType,
-    cleanPlayStatus,
-    productId,
-  ],
-);
+        [
+          cleanGame,
+          cleanBrand,
+          cleanDuration,
+          cleanPrice,
+          cleanDeliveryType,
+          cleanPlayStatus,
+          productId,
+        ],
+      );
 
       if (result.rows.length === 0) {
         return res.status(404).json({
