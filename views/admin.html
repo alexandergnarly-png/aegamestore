@@ -3022,6 +3022,14 @@
                 <option value="0">Inactive</option>
               </select>
             </div>
+            <div class="field">
+  <select id="productPlayStatusFilter" onchange="applyProductFilters()">
+    <option value="">Semua Play Status</option>
+    <option value="safe">Safe to Play</option>
+    <option value="risk">Use at Your Own Risk</option>
+    <option value="maintenance">Maintenance</option>
+  </select>
+</div>
           </div>
           <div class="toolbar">
             <input type="hidden" id="editingProductId" />
@@ -6048,7 +6056,7 @@
             statusText.innerText = "Belum ada produk.";
             tableBody.innerHTML = `
                                 <tr>
-                                  <td colspan="7" class="empty">Belum ada produk di database.</td>
+                                  <td colspan="8" class="empty">Belum ada produk di database.</td>
                                 </tr>
                               `;
             return;
@@ -6061,7 +6069,7 @@
           statusText.innerText = "Gagal memuat daftar produk.";
           tableBody.innerHTML = `
                               <tr>
-                                <td colspan="7" class="empty">Terjadi error saat mengambil produk.</td>
+                                <td colspan="8" class="empty">Terjadi error saat mengambil produk.</td>
                               </tr>
                             `;
         }
@@ -6336,7 +6344,7 @@
         if (filteredProducts.length === 0) {
           tableBody.innerHTML = `
                               <tr>
-                                <td colspan="10" class="empty">Tidak ada produk yang sesuai filter.</td>
+                                <td colspan="8" class="empty">Tidak ada produk yang sesuai filter.</td>
                               </tr>
                             `;
           return;

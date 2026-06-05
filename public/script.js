@@ -633,7 +633,7 @@ const isOutOfStock = selectedProduct && availableKeys <= 0;
     return;
   }
 
-  bbuyBtn.disabled = Boolean(isOutOfStock || isMaintenance);
+  buyBtn.disabled = Boolean(isOutOfStock || isMaintenance);
 buyBtn.innerText = isMaintenance
   ? "Maintenance"
   : isOutOfStock
@@ -1562,8 +1562,10 @@ if (statusHint) {
     `${selectedProduct.brand} - ${selectedProduct.duration}`;
   showDefaultPriceBreakdown(selectedProduct.price);
 
-  buyBtn.disabled = isOutOfStock;
-  buyBtn.innerText = isOutOfStock
+  buyBtn.disabled = Boolean(isOutOfStock || isMaintenance);
+buyBtn.innerText = isMaintenance
+  ? "Maintenance"
+  : isOutOfStock
     ? translations[currentLanguage].outOfStockLabel
     : translations[currentLanguage].buyNow;
 
