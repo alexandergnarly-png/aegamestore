@@ -3053,6 +3053,13 @@
                 placeholder="Harga, contoh: 30000"
               />
             </div>
+            <div class="field">
+  <select id="productPlayStatus">
+    <option value="safe">Safe to Play</option>
+    <option value="risk">Use at Your Own Risk</option>
+    <option value="maintenance">Maintenance</option>
+  </select>
+</div>
           </div>
 
           <div class="toolbar">
@@ -3084,6 +3091,7 @@
                   <th>Brand</th>
                   <th>Durasi</th>
                   <th>Harga</th>
+                  <th>Play Status</th>
                   <th>Status</th>
                   <th style="width: 220px">Aksi</th>
                 </tr>
@@ -4087,6 +4095,20 @@
         }
         return `<span class="badge used">Inactive</span>`;
       }
+
+      function playStatusBadge(status) {
+  const value = String(status || "safe").toLowerCase();
+
+  if (value === "maintenance") {
+    return `<span class="badge used">🛠 Maintenance</span>`;
+  }
+
+  if (value === "risk") {
+    return `<span class="badge warning">⚠ Use at Your Own Risk</span>`;
+  }
+
+  return `<span class="badge available">✅ Safe to Play</span>`;
+}
 
       function keyBadge(used) {
         if (Number(used) === 1) {
@@ -6084,6 +6106,8 @@
           .getElementById("productDuration")
           .value.trim();
         const price = document.getElementById("productPrice").value.trim();
+        const play_status =
+          document.getElementById("productPlayStatus")?.value || "safe";
 
         if (!game || !brand || !duration || !price) {
           Swal.fire("Semua data produk wajib diisi.");
@@ -6102,11 +6126,12 @@
               "x-csrf-token": getCsrfToken(),
             },
             body: JSON.stringify({
-              game,
-              brand,
-              duration,
-              price,
-            }),
+  game,
+  brand,
+  duration,
+  price,
+  play_status,
+}),
           });
 
           const data = await res.json();
@@ -6322,6 +6347,7 @@
             const safeGame = JSON.stringify(String(item.game || ""));
             const safeBrand = JSON.stringify(String(item.brand || ""));
             const safeDuration = JSON.stringify(String(item.duration || ""));
+            const safePlayStatus = JSON.stringify(String(item.play_status || "safe"));
 
             return `
                                 <tr>
@@ -6330,9 +6356,10 @@
                                   <td>${escapeHtml(item.brand)}</td>
                                   <td>${escapeHtml(item.duration)}</td>
                                   <td>${formatRupiah(item.price)}</td>
-                                  <td>${activeBadge(item.active)}</td>
-                                  <td>
-                                    <button onclick='editProduct(${item.id}, ${safeGame}, ${safeBrand}, ${safeDuration}, ${Number(item.price || 0)})'>Edit</button>
+<td>${playStatusBadge(item.play_status)}</td>
+<td>${activeBadge(item.active)}</td>
+<td>
+  <button onclick='editProduct(${item.id}, ${safeGame}, ${safeBrand}, ${safeDuration}, ${Number(item.price || 0)}, ${safePlayStatus})'>Edit</button>
                                     <button class="ghost-btn" onclick="toggleProductActive(${item.id}, ${Number(item.active) === 1 ? 0 : 1})">
                                       ${Number(item.active) === 1 ? "Nonaktifkan" : "Aktifkan"}
                                     </button>
@@ -6680,6 +6707,7 @@
         const brandInput = document.getElementById("productBrand");
         const durationInput = document.getElementById("productDuration");
         const priceInput = document.getElementById("productPrice");
+        const playStatusInput = document.getElementById("productPlayStatus");
         const saveBtn = document.getElementById("saveProductBtn");
 
         if (editingInput) editingInput.value = "";
@@ -6687,6 +6715,7 @@
         if (brandInput) brandInput.value = "";
         if (durationInput) durationInput.value = "";
         if (priceInput) priceInput.value = "";
+        if (playStatusInput) playStatusInput.value = "safe";
         if (saveBtn) saveBtn.innerText = "Tambah Produk";
 
         Swal.fire({
@@ -6700,12 +6729,14 @@
         });
       }
 
-      function editProduct(id, game, brand, duration, price) {
+      function editProduct(id, game, brand, duration, price, playStatus = "safe") {
         document.getElementById("editingProductId").value = id;
         document.getElementById("productGame").value = game;
         document.getElementById("productBrand").value = brand;
         document.getElementById("productDuration").value = duration;
         document.getElementById("productPrice").value = price;
+        const playStatusInput = document.getElementById("productPlayStatus");
+        if (playStatusInput) playStatusInput.value = playStatus || "safe";
         document.getElementById("saveProductBtn").innerText = "Update Produk";
 
         window.scrollTo({

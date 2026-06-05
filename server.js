@@ -273,6 +273,17 @@ db.query(
   `ALTER TABLE products ADD COLUMN IF NOT EXISTS delivery_type TEXT DEFAULT 'auto'`,
 );
 db.query(
+  `ALTER TABLE products ADD COLUMN IF NOT EXISTS play_status TEXT DEFAULT 'safe'`,
+);
+
+function normalizePlayStatus(status) {
+  const value = String(status || "safe").trim().toLowerCase();
+
+  if (value === "maintenance") return "maintenance";
+  if (value === "risk") return "risk";
+  return "safe";
+}
+db.query(
   `
   CREATE TABLE IF NOT EXISTS reviews (
     id SERIAL PRIMARY KEY,
@@ -2045,6 +2056,15 @@ app.post("/create-order", orderLimiter, async (req, res) => {
         .json({ message: "Produk tidak ditemukan atau tidak aktif" });
     }
 
+    const playStatus = normalizePlayStatus(productRow.play_status);
+
+if (playStatus === "maintenance") {
+  return res.status(400).json({
+    message:
+      "Produk sedang maintenance. Produk tetap tersedia di katalog, tapi belum bisa dibeli saat ini.",
+  });
+}
+
     const deliveryType = String(
       productRow.delivery_type || "auto",
     ).toLowerCase();
@@ -3472,8 +3492,7 @@ app.get("/products", requireAdminAuth, async (req, res) => {
 });
 
 app.post("/products", requireAdminAuth, requireAdminCsrf, async (req, res) => {
-  const { game, brand, duration, price, delivery_type } = req.body;
-
+  const { game, brand, duration, price, delivery_type, play_status } = req.body;
   const cleanGame = String(game || "").trim();
   const cleanBrand = String(brand || "").trim();
   const cleanDuration = String(duration || "").trim();
@@ -3484,6 +3503,7 @@ app.post("/products", requireAdminAuth, requireAdminCsrf, async (req, res) => {
       .toLowerCase() === "manual"
       ? "manual"
       : "auto";
+      const cleanPlayStatus = normalizePlayStatus(play_status);
 
   if (!cleanGame || !cleanBrand || !cleanDuration) {
     return res.status(400).json({
@@ -3509,7 +3529,7 @@ app.post("/products", requireAdminAuth, requireAdminCsrf, async (req, res) => {
 
   try {
     const result = await query(
-      "INSERT INTO products (game, brand, duration, price, active, created_at, delivery_type) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id",
+      "INSERT INTO products (game, brand, duration, price, active, created_at, delivery_type, play_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id",
       [
         cleanGame,
         cleanBrand,
@@ -3518,6 +3538,7 @@ app.post("/products", requireAdminAuth, requireAdminCsrf, async (req, res) => {
         1,
         createdAt,
         cleanDeliveryType,
+        cleanPlayStatus,
       ],
     );
 
@@ -3565,6 +3586,15 @@ app.put(
         : "auto"
       : null;
 
+      const hasPlayStatus = Object.prototype.hasOwnProperty.call(
+  req.body,
+  "play_status",
+);
+
+const cleanPlayStatus = hasPlayStatus
+  ? normalizePlayStatus(req.body.play_status)
+  : null;
+
     if (!cleanGame || !cleanBrand || !cleanDuration) {
       return res.status(400).json({
         message: "Data produk belum lengkap",
@@ -3578,22 +3608,26 @@ app.put(
     }
 
     try {
-      const result = cleanDeliveryType
-        ? await query(
-            "UPDATE products SET game = $1, brand = $2, duration = $3, price = $4, delivery_type = $5 WHERE id = $6 RETURNING id",
-            [
-              cleanGame,
-              cleanBrand,
-              cleanDuration,
-              cleanPrice,
-              cleanDeliveryType,
-              productId,
-            ],
-          )
-        : await query(
-            "UPDATE products SET game = $1, brand = $2, duration = $3, price = $4 WHERE id = $5 RETURNING id",
-            [cleanGame, cleanBrand, cleanDuration, cleanPrice, productId],
-          );
+      const result = await query(
+  `UPDATE products
+   SET game = $1,
+       brand = $2,
+       duration = $3,
+       price = $4,
+       delivery_type = COALESCE($5, delivery_type),
+       play_status = COALESCE($6, play_status)
+   WHERE id = $7
+   RETURNING id`,
+  [
+    cleanGame,
+    cleanBrand,
+    cleanDuration,
+    cleanPrice,
+    cleanDeliveryType,
+    cleanPlayStatus,
+    productId,
+  ],
+);
 
       if (result.rows.length === 0) {
         return res.status(404).json({
@@ -3745,6 +3779,7 @@ app.get("/public-products", async (req, res) => {
   SELECT
     p.*,
     COALESCE(p.delivery_type, 'auto') AS delivery_type,
+    COALESCE(p.play_status, 'safe') AS play_status,
     CASE
       WHEN LOWER(COALESCE(p.delivery_type, 'auto')) = 'manual' THEN 9999
       ELSE COUNT(k.id) FILTER (WHERE k.used = 0)::int

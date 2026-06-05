@@ -581,13 +581,49 @@ function formatRupiah(num) {
   return "Rp " + Number(num || 0).toLocaleString("id-ID");
 }
 
+function normalizePlayStatus(status) {
+  const value = String(status || "safe").trim().toLowerCase();
+
+  if (value === "maintenance") return "maintenance";
+  if (value === "risk") return "risk";
+  return "safe";
+}
+
+function getPlayStatusMeta(status) {
+  const value = normalizePlayStatus(status);
+
+  if (value === "maintenance") {
+    return {
+      value,
+      label: "MAINTENANCE",
+      text: "Produk sedang maintenance dan belum bisa dibeli.",
+    };
+  }
+
+  if (value === "risk") {
+    return {
+      value,
+      label: "USE AT YOUR OWN RISK",
+      text: "Produk bisa dibeli, tapi gunakan dengan risiko sendiri.",
+    };
+  }
+
+  return {
+    value,
+    label: "SAFE TO PLAY",
+    text: "Produk aman digunakan saat ini.",
+  };
+}
+
 function setLoading(isLoading) {
   const selectedProduct = allProducts.find(
     (item) => String(item.id) === String(productSelect.value),
   );
 
   const availableKeys = Number(selectedProduct?.available_keys || 0);
-  const isOutOfStock = selectedProduct && availableKeys <= 0;
+const playStatus = normalizePlayStatus(selectedProduct?.play_status);
+const isMaintenance = selectedProduct && playStatus === "maintenance";
+const isOutOfStock = selectedProduct && availableKeys <= 0;
 
   loadingText.style.display = isLoading ? "block" : "none";
 
@@ -597,8 +633,10 @@ function setLoading(isLoading) {
     return;
   }
 
-  buyBtn.disabled = Boolean(isOutOfStock);
-  buyBtn.innerText = isOutOfStock
+  bbuyBtn.disabled = Boolean(isOutOfStock || isMaintenance);
+buyBtn.innerText = isMaintenance
+  ? "Maintenance"
+  : isOutOfStock
     ? translations[currentLanguage].outOfStockLabel
     : translations[currentLanguage].buyNow;
 }
@@ -1349,7 +1387,10 @@ function renderOrderProductCards(products) {
 
   products.forEach((item) => {
     const availableKeys = Number(item.available_keys || 0);
-    const isOutOfStock = availableKeys <= 0;
+const playMeta = getPlayStatusMeta(item.play_status);
+const isMaintenance = playMeta.value === "maintenance";
+const isOutOfStock = availableKeys <= 0;
+const isDisabled = isOutOfStock || isMaintenance;
     const deliveryType = String(item.delivery_type || "auto").toLowerCase();
     const deliveryLabel = deliveryType === "manual" ? "Manual" : "Auto";
 
@@ -1362,13 +1403,20 @@ function renderOrderProductCards(products) {
       String(item.id) === String(productSelect.value) ? "true" : "false",
     );
     btn.dataset.productId = String(item.id);
-    btn.disabled = isOutOfStock;
+    btn.disabled = isDisabled;
 
     if (String(item.id) === String(productSelect.value))
       btn.classList.add("active");
     if (isOutOfStock) btn.classList.add("is-empty");
+if (isMaintenance) btn.classList.add("is-maintenance");
+if (playMeta.value === "risk") btn.classList.add("is-risk");
+if (playMeta.value === "safe") btn.classList.add("is-safe");
 
-    const stockText = isOutOfStock ? "OUT OF STOCK" : `${availableKeys} READY`;
+    const stockText = isMaintenance
+  ? "MAINTENANCE"
+  : isOutOfStock
+    ? "OUT OF STOCK"
+    : `${availableKeys} READY`;
 
     btn.innerHTML = `
       <div class="order-product-main">
@@ -1376,11 +1424,24 @@ function renderOrderProductCards(products) {
         <b>${formatRupiah(item.price)}</b>
         <small>${escapeHtml(item.brand)} • ${deliveryLabel}</small>
       </div>
-      <span class="order-product-stock">${stockText}</span>
+      <span class="order-product-status order-product-status-${playMeta.value}">
+  ${playMeta.label}
+</span>
+<span class="order-product-stock">${stockText}</span>
     `;
 
     btn.addEventListener("click", () => {
-      if (isOutOfStock) return;
+  if (isMaintenance) {
+    Swal.fire({
+      icon: "info",
+      title: "Maintenance",
+      text: playMeta.text,
+      confirmButtonColor: "#0a0a0a",
+    });
+    return;
+  }
+
+  if (isOutOfStock) return;
       productSelect.value = item.id;
       productSelect.dispatchEvent(new Event("change", { bubbles: true }));
       syncOrderProductCardsActive();
@@ -1430,7 +1491,10 @@ function loadDurations() {
 
   filteredProducts.forEach((item) => {
     const availableKeys = Number(item.available_keys || 0);
-    const isOutOfStock = availableKeys <= 0;
+const playMeta = getPlayStatusMeta(item.play_status);
+const isMaintenance = playMeta.value === "maintenance";
+const isOutOfStock = availableKeys <= 0;
+const isDisabled = isOutOfStock || isMaintenance;
 
     const stockText = isOutOfStock
       ? translations[currentLanguage].outOfStockLabel
@@ -1438,14 +1502,16 @@ function loadDurations() {
 
     const option = document.createElement("option");
     option.value = item.id;
-    option.disabled = isOutOfStock;
-    option.textContent = `${item.duration} - ${formatRupiah(item.price)} - ${stockText}`;
+    option.disabled = isDisabled;
+    option.textContent = `${item.duration} - ${formatRupiah(item.price)} - ${playMeta.label} - ${stockText}`;
     productSelect.appendChild(option);
   });
 
-  const firstAvailable = filteredProducts.find(
-    (item) => Number(item.available_keys || 0) > 0,
-  );
+  const firstAvailable = filteredProducts.find((item) => {
+  const availableKeys = Number(item.available_keys || 0);
+  const playStatus = normalizePlayStatus(item.play_status);
+  return availableKeys > 0 && playStatus !== "maintenance";
+});
 
   if (firstAvailable) {
     productSelect.value = firstAvailable.id;
@@ -1482,7 +1548,14 @@ function updatePreview() {
   selectedProductBasePrice = Number(selectedProduct.price || 0);
 
   const availableKeys = Number(selectedProduct.available_keys || 0);
-  const isOutOfStock = availableKeys <= 0;
+const playMeta = getPlayStatusMeta(selectedProduct.play_status);
+const isMaintenance = playMeta.value === "maintenance";
+const isOutOfStock = availableKeys <= 0;
+const statusHint = document.getElementById("productStatusHint");
+if (statusHint) {
+  statusHint.className = `product-status-hint product-status-${playMeta.value}`;
+  statusHint.innerText = playMeta.text;
+}
 
   document.getElementById("previewGame").innerText = selectedProduct.game;
   document.getElementById("previewProduct").innerText =
@@ -1529,6 +1602,17 @@ async function buy() {
   }
 
   const availableKeys = Number(selectedProduct.available_keys || 0);
+  const playMeta = getPlayStatusMeta(selectedProduct.play_status);
+
+if (playMeta.value === "maintenance") {
+  Swal.fire({
+    icon: "info",
+    title: "Maintenance",
+    text: playMeta.text,
+    confirmButtonColor: "#0a0a0a",
+  });
+  return;
+}
 
   if (availableKeys <= 0) {
     closeOrderModal();
