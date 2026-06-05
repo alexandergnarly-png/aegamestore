@@ -2813,16 +2813,23 @@ function showTelegramPopup() {
           </div>
         </div>
       `,
-      showCancelButton: false,
+            showCancelButton: false,
       showDenyButton: true,
       confirmButtonText: "Gabung Sekarang! 🚀",
       denyButtonText: "Sembunyikan",
-      confirmButtonColor: "#0a0a0a",
-      denyButtonColor: "#fafaf5",
-      padding: "2em",
+      buttonsStyling: false,
+      width: "520px",
+      padding: "0",
+      customClass: {
+        popup: "ae-telegram-popup",
+        htmlContainer: "ae-telegram-html",
+        actions: "ae-telegram-actions",
+        confirmButton: "ae-telegram-confirm",
+        denyButton: "ae-telegram-deny",
+      },
       background: document.body.classList.contains("dark-theme")
         ? "#1e293b"
-        : "#ffffff",
+        : "#fffdf2",
       color: document.body.classList.contains("dark-theme")
         ? "#f8fafc"
         : "#0c4a6e",
@@ -2843,13 +2850,17 @@ function showTelegramPopup() {
 
         localStorage.setItem("tg_popup_hide_until", now + hideDuration);
 
-        Swal.fire({
+                Swal.fire({
           toast: true,
           position: "top-end",
           icon: "success",
           title: `Pop-up disembunyikan selama ${hours} jam`,
           showConfirmButton: false,
-          timer: 3000,
+          timer: 2600,
+          customClass: {
+            popup: "ae-toast-popup",
+            title: "ae-toast-title",
+          },
         });
       }
     });
