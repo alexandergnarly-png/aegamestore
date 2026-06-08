@@ -424,7 +424,7 @@ function setLanguage(lang) {
   ) {
     try {
       renderGames();
-    } catch (e) {}
+    } catch (e) { }
   }
   const btnId = document.getElementById("btn-id");
   const btnEn = document.getElementById("btn-en");
@@ -443,7 +443,7 @@ function setLanguage(lang) {
   if (typeof checkLoginStatus === "function") {
     try {
       checkLoginStatus();
-    } catch (e) {}
+    } catch (e) { }
   }
 }
 let allProducts = [];
@@ -510,7 +510,7 @@ function readJsonStorage(key, fallback) {
 function writeJsonStorage(key, value) {
   try {
     localStorage.setItem(key, JSON.stringify(value));
-  } catch (err) {}
+  } catch (err) { }
 }
 
 let favoriteGames = readJsonStorage(FAVORITES_STORAGE_KEY, []);
@@ -730,6 +730,58 @@ function getGameBrandCount(game) {
   return new Set(getGameProducts(game).map((item) => item.brand)).size;
 }
 
+function getGamePlayStatusSummary(game) {
+  const products = getGameProducts(game);
+
+  if (!products.length) {
+    return {
+      value: "safe",
+      label: "SAFE",
+      text: "Safe to Play",
+    };
+  }
+
+  const statuses = products.map((item) =>
+    normalizePlayStatus(item.play_status),
+  );
+
+  const total = statuses.length;
+  const maintenanceCount = statuses.filter(
+    (status) => status === "maintenance",
+  ).length;
+  const riskCount = statuses.filter((status) => status === "risk").length;
+
+  if (maintenanceCount === total) {
+    return {
+      value: "maintenance",
+      label: "MAINTENANCE",
+      text: "Maintenance",
+    };
+  }
+
+  if (maintenanceCount > 0 && maintenanceCount < total) {
+    return {
+      value: "mixed",
+      label: "MIXED",
+      text: "Mixed Status",
+    };
+  }
+
+  if (riskCount > 0) {
+    return {
+      value: "risk",
+      label: "RISK",
+      text: "Use at Your Own Risk",
+    };
+  }
+
+  return {
+    value: "safe",
+    label: "SAFE",
+    text: "Safe to Play",
+  };
+}
+
 function getGameCreatedAt(game) {
   const dates = getGameProducts(game)
     .map((item) => Date.parse(item.created_at || ""))
@@ -934,12 +986,12 @@ async function openOrderFromCheckoutQuery() {
       const matchedProduct = allProducts.find(
         (item) =>
           normalizeCheckoutValue(item.game) ===
-            normalizeCheckoutValue(targetGame) &&
+          normalizeCheckoutValue(targetGame) &&
           (!query.brand ||
             normalizeCheckoutValue(item.brand) ===
-              normalizeCheckoutValue(query.brand)) &&
+            normalizeCheckoutValue(query.brand)) &&
           normalizeCheckoutValue(item.duration) ===
-            normalizeCheckoutValue(query.duration),
+          normalizeCheckoutValue(query.duration),
       );
 
       if (matchedProduct) {
@@ -1082,7 +1134,7 @@ function renderGames() {
 
   visibleGames.forEach((game) => {
     const card = document.createElement("div");
-    card.className = "game-card";
+    card.className = `game-card game-card-status-${playSummary.value}`;
     card.setAttribute("data-game", game);
 
     const totalStock = getGameStock(game);
@@ -1095,17 +1147,18 @@ function renderGames() {
     const badgeKey = stockReady ? getGameBadgeKey(game) : "";
     const badgeLabel = badgeKey ? t[badgeKey] : "";
     const categoryLabel = getGameCategoryLabel(game);
+    const brandCount = getGameBrandCount(game);
+    const playSummary = getGamePlayStatusSummary(game);
     const fav = isFavorite(game);
 
     card.innerHTML = `
       ${renderGameCardThumb(game)}
       <div class="game-card-top">
         <span class="game-card-chip">${escapeHtml(categoryLabel)}</span>
-        ${
-          badgeKey
-            ? `<span class="game-card-ribbon ribbon-${badgeKey}">${escapeHtml(badgeLabel)}</span>`
-            : ""
-        }
+        ${badgeKey
+        ? `<span class="game-card-ribbon ribbon-${badgeKey}">${escapeHtml(badgeLabel)}</span>`
+        : ""
+      }
       </div>
       <button
         type="button"
@@ -1116,21 +1169,34 @@ function renderGames() {
         <span aria-hidden="true">${fav ? "\u2764\ufe0f" : "\ud83e\udd0d"}</span>
       </button>
       <div class="game-card-body">
-        <span class="game-card-title">${escapeHtml(game)}</span>
-        <div class="game-card-meta">
-          <span class="game-card-price">
-            ${
-              minPrice > 0
-                ? `<small>${escapeHtml(t.cardFromPrice)}</small><b>${formatRupiah(minPrice)}</b>`
-                : `<b>${escapeHtml(stockReady ? "—" : t.outOfStockLabel)}</b>`
-            }
-          </span>
-          <span class="game-card-stock ${stockReady ? "ready" : "empty"}">
-            <span class="game-card-stock-dot" aria-hidden="true"></span>
-            ${escapeHtml(stockLabel)}
-          </span>
-        </div>
-      </div>
+  <div class="game-card-status-row">
+    <span class="game-status-badge game-status-${playSummary.value}">
+      ${escapeHtml(playSummary.label)}
+    </span>
+    <span class="game-card-brand-count">
+      ${brandCount} ${brandCount > 1 ? "Brands" : "Brand"}
+    </span>
+  </div>
+
+  <span class="game-card-title">${escapeHtml(game)}</span>
+
+  <div class="game-card-meta">
+    <span class="game-card-price">
+      ${minPrice > 0
+        ? `<small>${escapeHtml(t.cardFromPrice)}</small><b>${formatRupiah(minPrice)}</b>`
+        : `<b>${escapeHtml(stockReady ? "—" : t.outOfStockLabel)}</b>`
+      }
+    </span>
+    <span class="game-card-stock ${stockReady ? "ready" : "empty"}">
+      <span class="game-card-stock-dot" aria-hidden="true"></span>
+      ${escapeHtml(stockLabel)}
+    </span>
+  </div>
+
+  <span class="game-card-cta">
+    Choose Product →
+  </span>
+</div>
     `;
 
     if (game === selectedGame) {
@@ -1673,8 +1739,8 @@ async function buy() {
         document.getElementById("finalPriceText")?.innerText || "";
       const totalPrice = Number(
         String(finalPriceText).replace(/[^0-9]/g, "") ||
-          selectedProductBasePrice ||
-          0,
+        selectedProductBasePrice ||
+        0,
       );
       const gameNameForModal =
         document.getElementById("previewGame")?.innerText ||
@@ -2114,7 +2180,7 @@ async function refreshCheckoutDiscountPreview() {
         voucherMessage.className = "voucher-message";
       }
     }
-  } catch (err) {}
+  } catch (err) { }
 }
 
 function resetVoucherPreview() {
@@ -2453,7 +2519,7 @@ async function loadMyReview() {
 
       updateRatingPicker();
     }
-  } catch (err) {}
+  } catch (err) { }
 }
 
 async function openReviewPopup() {
@@ -2482,7 +2548,7 @@ async function openReviewPopup() {
       popupRating = Number(data.review.rating || 5);
       existingComment = data.review.comment || "";
     }
-  } catch (err) {}
+  } catch (err) { }
 
   const renderPopupStars = () =>
     [1, 2, 3, 4, 5]
@@ -3087,7 +3153,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (window.matchMedia && window.matchMedia("(max-width: 640px)").matches) {
       try {
         if (navigator.vibrate) navigator.vibrate(pattern);
-      } catch (err) {}
+      } catch (err) { }
     }
   }
 
@@ -3177,7 +3243,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!Array.isArray(data)) return;
       state.trendingGames = data;
       renderTrending();
-    } catch (err) {}
+    } catch (err) { }
   }
 
   function renderTrending() {
@@ -3259,7 +3325,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       state.lastOrders = unique;
       renderQuickBuy();
-    } catch (err) {}
+    } catch (err) { }
   }
 
   function renderQuickBuy() {
@@ -3313,7 +3379,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!res.ok) return;
       const data = await res.json();
       if (Array.isArray(data)) state.publicVouchers = data;
-    } catch (err) {}
+    } catch (err) { }
   }
 
   function findBestVoucherForProduct(product) {
@@ -3417,9 +3483,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const desc = isManual
       ? safeT("deliveryManualDesc", "Admin proses manual \u2264 30 menit")
       : safeT(
-          "deliveryAutoDesc",
-          "Kirim otomatis \u2264 1 menit setelah bayar",
-        );
+        "deliveryAutoDesc",
+        "Kirim otomatis \u2264 1 menit setelah bayar",
+      );
     const icon = isManual ? "\ud83d\udc64" : "\u26a1";
 
     el.hidden = false;
@@ -3539,13 +3605,13 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       sessionStorage.setItem(STORAGE_KEYS.pendingCart, JSON.stringify(payload));
       state.pendingCart = payload;
-    } catch (err) {}
+    } catch (err) { }
   }
 
   function clearPendingCart() {
     try {
       sessionStorage.removeItem(STORAGE_KEYS.pendingCart);
-    } catch (err) {}
+    } catch (err) { }
     state.pendingCart = null;
   }
 
@@ -3648,7 +3714,7 @@ document.addEventListener("DOMContentLoaded", () => {
         STORAGE_KEYS.searchHistory,
         JSON.stringify(arr.slice(0, 5)),
       );
-    } catch (err) {}
+    } catch (err) { }
   }
 
   function pushSearchHistory(query) {
@@ -3800,7 +3866,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let recents = [];
     try {
       recents = JSON.parse(localStorage.getItem("ae_recent_games") || "[]");
-    } catch (err) {}
+    } catch (err) { }
     if (!Array.isArray(recents)) recents = [];
 
     const allGames = [...new Set(allProducts.map((p) => p.game))];
@@ -3998,7 +4064,7 @@ document.addEventListener("DOMContentLoaded", () => {
           await loadRecentPurchases();
         await loadTrending();
         await loadPublicVouchers();
-      } catch (err) {}
+      } catch (err) { }
       setTimeout(() => {
         indicator.classList.remove("is-refreshing", "is-ready");
         indicator.hidden = true;
@@ -4063,7 +4129,7 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         await prompt.prompt();
         await prompt.userChoice;
-      } catch (err) {}
+      } catch (err) { }
 
       state.deferredInstallPrompt = null;
       hideInstallBanner();
@@ -4160,7 +4226,7 @@ document.addEventListener("DOMContentLoaded", () => {
             productSel.addEventListener("change", onProductChange);
             onProductChange();
           }
-        } catch (err) {}
+        } catch (err) { }
         return result;
       };
       window.openOrderModal.__aeWrapped = true;
@@ -4177,7 +4243,7 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
           sessionStorage.removeItem(STORAGE_KEYS.pendingCart);
           state.pendingCart = null;
-        } catch (err) {}
+        } catch (err) { }
 
         return result;
       };
@@ -4195,7 +4261,7 @@ document.addEventListener("DOMContentLoaded", () => {
           renderTrending();
           renderQuickBuy();
           renderGenrePills();
-        } catch (err) {}
+        } catch (err) { }
         return result;
       };
       window.renderGames.__aeWrapped = true;
@@ -4207,7 +4273,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const result = await orig.apply(this, arguments);
         try {
           clearPendingCart();
-        } catch (err) {}
+        } catch (err) { }
         return result;
       };
       window.buy.__aeWrapped = true;
@@ -4246,7 +4312,7 @@ document.addEventListener("DOMContentLoaded", () => {
         loadTrending();
         loadPublicVouchers();
         loadLastOrders();
-      } catch (err) {}
+      } catch (err) { }
     }, 800);
 
     setTimeout(() => {
@@ -4254,7 +4320,7 @@ document.addEventListener("DOMContentLoaded", () => {
         renderTrending();
         renderQuickBuy();
         renderGenrePills();
-      } catch (err) {}
+      } catch (err) { }
     }, 1500);
   }
 
