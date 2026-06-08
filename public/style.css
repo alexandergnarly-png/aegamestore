@@ -11925,3 +11925,100 @@ button#buyBtn {
     padding: 3px 5px !important;
   }
 }
+/* === FINAL FIX: mobile game card v2 badge layout === */
+@media (max-width: 768px) {
+  .game-card-top {
+    display: none !important;
+  }
+
+  .game-card {
+    grid-template-columns: 86px minmax(0, 1fr) !important;
+    min-height: 128px !important;
+    overflow: hidden !important;
+  }
+
+  .game-card-thumb {
+    height: 100% !important;
+    min-height: 128px !important;
+  }
+
+  .game-card-body {
+    padding: 12px 48px 12px 12px !important;
+    justify-content: center !important;
+    gap: 7px !important;
+    min-width: 0 !important;
+  }
+
+  .game-card-status-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex-wrap: nowrap !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .game-status-badge,
+  .game-card-brand-count {
+    min-height: 20px !important;
+    padding: 4px 7px !important;
+    font-size: 8px !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+    box-shadow: 2px 2px 0 #0a0a0a !important;
+  }
+
+  .game-status-badge {
+    flex: 0 1 auto !important;
+    max-width: 78px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .game-card-brand-count {
+    flex: 0 0 auto !important;
+  }
+
+  .game-card-title {
+    font-size: 14px !important;
+    line-height: 1.15 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .game-card-meta {
+    display: flex !important;
+    align-items: center !important;
+    gap: 7px !important;
+    flex-wrap: wrap !important;
+  }
+
+  .game-card-price {
+    padding: 6px 8px !important;
+  }
+
+  .game-card-price small {
+    display: none !important;
+  }
+
+  .game-card-price b {
+    font-size: 12px !important;
+    line-height: 1 !important;
+  }
+
+  .game-card-stock {
+    font-size: 9px !important;
+    padding: 5px 8px !important;
+    line-height: 1 !important;
+  }
+
+  .game-card-fav {
+    top: 14px !important;
+    right: 14px !important;
+    width: 34px !important;
+    height: 34px !important;
+    z-index: 5 !important;
+  }
+}
