@@ -1572,11 +1572,11 @@ body.dark-theme .search-box input:focus {
   display: flex;
   flex-direction: column;
   background: var(--card-bg-strong);
-  border: 1px solid var(--border-soft);
+  border: 1.5px solid var(--border-soft);
   border-radius: var(--radius-lg);
   overflow: hidden;
   cursor: pointer;
-  box-shadow: var(--shadow-xs);
+  box-shadow: 0 4px 14px rgba(14, 165, 233, 0.10), 0 1px 3px rgba(0,0,0,0.06);
   backdrop-filter: blur(12px);
   transition:
     transform var(--dur-fast) var(--ease-out),
@@ -1601,9 +1601,9 @@ body.dark-theme .search-box input:focus {
 }
 
 .game-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-md);
-  border-color: var(--ocean-light);
+  transform: translateY(-5px) scale(1.01);
+  box-shadow: 0 16px 36px rgba(14, 165, 233, 0.18), 0 4px 10px rgba(0,0,0,0.07);
+  border-color: rgba(56, 189, 248, 0.55);
 }
 
 .game-card:hover::after {
@@ -1726,19 +1726,19 @@ body.dark-theme .game-card-thumb {
 .game-card-chip {
   font-size: 10px;
   font-weight: 800;
-  letter-spacing: 0.6px;
+  letter-spacing: 0.8px;
   text-transform: uppercase;
-  padding: 4px 9px;
+  padding: 4px 10px;
   border-radius: var(--radius-pill);
-  color: var(--ocean-deep);
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.18);
+  color: white;
+  background: linear-gradient(135deg, var(--ocean-deep), var(--ocean));
+  box-shadow: 0 3px 8px rgba(2, 132, 199, 0.35);
   pointer-events: auto;
+  border: none;
 }
-
 body.dark-theme .game-card-chip {
-  color: var(--ocean-light);
-  background: rgba(20, 30, 56, 0.92);
+  color: white;
+  background: linear-gradient(135deg, #0369a1, #0ea5e9);
 }
 
 .game-card-ribbon {
@@ -1856,14 +1856,21 @@ body.dark-theme .game-card-fav.is-active {
 }
 
 .game-card-price b {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 900;
   color: var(--ocean-deep);
-  letter-spacing: -0.3px;
+  letter-spacing: -0.4px;
+  background: linear-gradient(90deg, var(--ocean-deep), var(--ocean));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 body.dark-theme .game-card-price b {
-  color: var(--ocean-light);
+  background: linear-gradient(90deg, var(--ocean-light), #7dd3fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .game-card-stock {
