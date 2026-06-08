@@ -467,8 +467,7 @@ const gameImages = {
 
   bloodstrike: "https://www.blood-strike.com/favicon.ico",
 
-  deltaforce:
-    "https://cdn.cloudflare.steamstatic.com/steam/apps/2507950/header.jpg",
+  deltaforce: "/images/games/delta-force.jpg",
 };
 
 const fallbackImage =
@@ -1148,9 +1147,6 @@ function renderGames() {
   const brandCount = getGameBrandCount(game);
   const playSummary = getGamePlayStatusSummary(game);
   const fav = isFavorite(game);
-
-  card.className = `game-card game-card-status-${playSummary.value}`;
-  card.setAttribute("data-game", game);
 
   card.className = `game-card game-card-status-${playSummary.value}`;
   card.setAttribute("data-game", game);
