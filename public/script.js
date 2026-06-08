@@ -1152,6 +1152,9 @@ function renderGames() {
   card.className = `game-card game-card-status-${playSummary.value}`;
   card.setAttribute("data-game", game);
 
+  card.className = `game-card game-card-status-${playSummary.value}`;
+  card.setAttribute("data-game", game);
+
     card.innerHTML = `
       ${renderGameCardThumb(game)}
       <div class="game-card-top">
