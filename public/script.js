@@ -1133,23 +1133,24 @@ function renderGames() {
   const t = translations[currentLanguage];
 
   visibleGames.forEach((game) => {
-    const card = document.createElement("div");
-    card.className = `game-card game-card-status-${playSummary.value}`;
-    card.setAttribute("data-game", game);
+  const card = document.createElement("div");
 
-    const totalStock = getGameStock(game);
-    const minPrice = getGameMinPrice(game);
-    const stockReady = totalStock > 0;
-    const stockLabel = stockReady
-      ? `${totalStock.toLocaleString("id-ID")} ${t.catalogStockReady}`
-      : t.outOfStockLabel;
+  const totalStock = getGameStock(game);
+  const minPrice = getGameMinPrice(game);
+  const stockReady = totalStock > 0;
+  const stockLabel = stockReady
+    ? `${totalStock.toLocaleString("id-ID")} ${t.catalogStockReady}`
+    : t.outOfStockLabel;
 
-    const badgeKey = stockReady ? getGameBadgeKey(game) : "";
-    const badgeLabel = badgeKey ? t[badgeKey] : "";
-    const categoryLabel = getGameCategoryLabel(game);
-    const brandCount = getGameBrandCount(game);
-    const playSummary = getGamePlayStatusSummary(game);
-    const fav = isFavorite(game);
+  const badgeKey = stockReady ? getGameBadgeKey(game) : "";
+  const badgeLabel = badgeKey ? t[badgeKey] : "";
+  const categoryLabel = getGameCategoryLabel(game);
+  const brandCount = getGameBrandCount(game);
+  const playSummary = getGamePlayStatusSummary(game);
+  const fav = isFavorite(game);
+
+  card.className = `game-card game-card-status-${playSummary.value}`;
+  card.setAttribute("data-game", game);
 
     card.innerHTML = `
       ${renderGameCardThumb(game)}
