@@ -1,2202 +1,1379 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="id">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="Kelola akun, riwayat order, dan keamanan AE Game Store kamu."
-    />
-    <title>My Account - AE Game Store</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script
-      type="module"
-      src="https://cdn.jsdelivr.net/npm/iconify-icon@2.1.0/dist/iconify-icon.min.js"
-    ></script>
-    <style>
-      :root {
-        --ocean-deep: #0284c7;
-        --ocean: #0ea5e9;
-        --ocean-light: #38bdf8;
-        --water-foam: #e0f2fe;
-        --sakura: #fbcfe8;
-        --sakura-strong: #f472b6;
-        --torii-red: #fb7185;
-        --torii-red-strong: #e11d48;
-
-        --bg-color: #f5fbff;
-        --bg-grad:
-          radial-gradient(120% 90% at 0% 0%, #e0f2fe 0%, transparent 60%),
-          radial-gradient(120% 90% at 100% 100%, #fce7f3 0%, transparent 60%),
-          linear-gradient(180deg, #f5fbff, #ffffff);
-
-        --card-bg: rgba(255, 255, 255, 0.78);
-        --card-bg-strong: rgba(255, 255, 255, 0.92);
-        --border-color: rgba(56, 189, 248, 0.35);
-        --border-soft: rgba(14, 165, 233, 0.15);
-
-        --text-main: #0c4a6e;
-        --text-strong: #082f49;
-        --text-muted: #475569;
-
-        --success: #10b981;
-        --warning: #f59e0b;
-        --danger: #f43f5e;
-
-        --shadow-xs: 0 2px 6px rgba(14, 165, 233, 0.08);
-        --shadow-sm: 0 6px 18px rgba(14, 165, 233, 0.1);
-        --shadow-md: 0 14px 32px rgba(14, 165, 233, 0.14);
-        --shadow-lg: 0 24px 60px rgba(14, 165, 233, 0.18);
-        --shadow-pink: 0 14px 28px rgba(244, 114, 182, 0.22);
-        --ring: 0 0 0 4px rgba(56, 189, 248, 0.25);
-
-        --radius-sm: 12px;
-        --radius-md: 16px;
-        --radius-lg: 22px;
-        --radius-xl: 28px;
-        --radius-pill: 999px;
-
-        --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-        --dur-fast: 0.18s;
-        --dur: 0.28s;
-      }
-
-      body.dark-theme {
-        --bg-color: #060b1c;
-        --bg-grad:
-          radial-gradient(
-            120% 90% at 0% 0%,
-            rgba(14, 165, 233, 0.18) 0%,
-            transparent 60%
-          ),
-          radial-gradient(
-            120% 90% at 100% 100%,
-            rgba(244, 114, 182, 0.14) 0%,
-            transparent 60%
-          ),
-          linear-gradient(180deg, #060b1c, #0b1226);
-        --card-bg: rgba(20, 30, 56, 0.78);
-        --card-bg-strong: rgba(20, 30, 56, 0.92);
-        --border-color: rgba(56, 189, 248, 0.22);
-        --border-soft: rgba(56, 189, 248, 0.12);
-
-        --text-main: #e2e8f0;
-        --text-strong: #f8fafc;
-        --text-muted: #94a3b8;
-
-        --water-foam: rgba(56, 189, 248, 0.12);
-        --shadow-xs: 0 2px 6px rgba(0, 0, 0, 0.35);
-        --shadow-sm: 0 6px 18px rgba(0, 0, 0, 0.4);
-        --shadow-md: 0 14px 32px rgba(0, 0, 0, 0.45);
-        --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.5);
-      }
-
-      *,
-      *::before,
-      *::after {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-
-      html {
-        scroll-behavior: smooth;
-      }
-
-      body {
-        font-family: "Plus Jakarta Sans", "Segoe UI", Tahoma, sans-serif;
-        background: var(--bg-color);
-        background-image: var(--bg-grad);
-        background-attachment: fixed;
-        color: var(--text-main);
-        min-height: 100vh;
-        line-height: 1.55;
-        -webkit-font-smoothing: antialiased;
-      }
-
-      button {
-        font-family: inherit;
-        cursor: pointer;
-        border: none;
-        background: none;
-        color: inherit;
-      }
-
-      a {
-        color: inherit;
-        text-decoration: none;
-      }
-
-      :focus-visible {
-        outline: none;
-        box-shadow: var(--ring);
-        border-radius: 6px;
-      }
-
-      @media (prefers-reduced-motion: reduce) {
-        *,
-        *::before,
-        *::after {
-          animation-duration: 0.001ms !important;
-          transition-duration: 0.001ms !important;
-        }
-      }
-
-      /* Background blobs */
-      .blob {
-        position: fixed;
-        filter: blur(80px);
-        z-index: -1;
-        opacity: 0.45;
-        border-radius: 50%;
-        pointer-events: none;
-      }
-
-      .blob-1 {
-        top: -120px;
-        left: -120px;
-        width: 520px;
-        height: 520px;
-        background: radial-gradient(
-          circle,
-          var(--water-foam),
-          rgba(56, 189, 248, 0.5)
-        );
-      }
-
-      .blob-2 {
-        bottom: -160px;
-        right: -120px;
-        width: 480px;
-        height: 480px;
-        background: radial-gradient(circle, var(--sakura), #bae6fd);
-      }
-
-      body.dark-theme .blob {
-        opacity: 0.3;
-      }
-
-      /* Header */
-      .site-header {
-        position: sticky;
-        top: 0;
-        z-index: 80;
-        background: rgba(255, 255, 255, 0.78);
-        backdrop-filter: saturate(180%) blur(18px);
-        -webkit-backdrop-filter: saturate(180%) blur(18px);
-        border-bottom: 1px solid var(--border-soft);
-      }
-
-      body.dark-theme .site-header {
-        background: rgba(8, 14, 32, 0.78);
-      }
-
-      .header-inner {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        max-width: 1100px;
-        margin: 0 auto;
-        padding: 14px 24px;
-      }
-
-      .brand {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-      }
-
-      .brand-logo {
-        width: 44px;
-        height: 44px;
-        border-radius: 14px;
-        background: linear-gradient(
-          135deg,
-          var(--torii-red),
-          var(--torii-red-strong)
-        );
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 22px;
-        box-shadow: var(--shadow-pink);
-      }
-
-      .brand-copy strong {
-        display: block;
-        font-size: 17px;
-        font-weight: 800;
-        color: var(--text-strong);
-        letter-spacing: -0.2px;
-      }
-
-      .brand-copy span {
-        display: block;
-        font-size: 12px;
-        font-weight: 600;
-        color: var(--ocean-deep);
-      }
-
-      body.dark-theme .brand-copy strong {
-        color: var(--text-strong);
-      }
-
-      body.dark-theme .brand-copy span {
-        color: var(--ocean-light);
-      }
-
-      .header-actions {
-        margin-left: auto;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-
-      .lang-switch {
-        display: inline-flex;
-        background: rgba(56, 189, 248, 0.12);
-        padding: 4px;
-        border-radius: var(--radius-pill);
-        border: 1px solid var(--border-soft);
-      }
-
-      .lang-btn {
-        padding: 6px 12px;
-        font-size: 12px;
-        font-weight: 800;
-        color: var(--text-muted);
-        border-radius: var(--radius-pill);
-        letter-spacing: 0.5px;
-        transition: all var(--dur-fast) var(--ease-out);
-      }
-
-      .lang-btn.active {
-        background: linear-gradient(135deg, var(--ocean), var(--ocean-light));
-        color: white;
-        box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);
-      }
-
-      .icon-btn {
-        width: 36px;
-        height: 36px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(56, 189, 248, 0.12);
-        border: 1px solid var(--border-soft);
-        border-radius: var(--radius-pill);
-        font-size: 16px;
-      }
-
-      .icon-btn:hover {
-        background: rgba(56, 189, 248, 0.22);
-      }
-
-      .header-back {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 8px 14px;
-        font-size: 13px;
-        font-weight: 800;
-        color: var(--ocean-deep);
-        background: rgba(255, 255, 255, 0.78);
-        border: 1px solid var(--border-soft);
-        border-radius: var(--radius-pill);
-        transition: transform var(--dur-fast) var(--ease-out);
-      }
-
-      body.dark-theme .header-back {
-        background: rgba(20, 30, 56, 0.78);
-        color: var(--ocean-light);
-      }
-
-      .header-back:hover {
-        transform: translateY(-1px);
-      }
-
-      /* Layout */
-      .page {
-        max-width: 1100px;
-        margin: 0 auto;
-        padding: 36px 24px 80px;
-        display: grid;
-        grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
-        gap: 24px;
-      }
-
-      .surface {
-        background: var(--card-bg-strong);
-        backdrop-filter: blur(18px);
-        border: 1px solid var(--border-color);
-        border-radius: var(--radius-xl);
-        padding: 28px;
-        box-shadow: var(--shadow-md);
-        position: relative;
-      }
-
-      /* Profile card (left column) */
-      .profile-card {
-        text-align: center;
-        overflow: hidden;
-      }
-
-      .profile-card::before {
-        content: "";
-        position: absolute;
-        inset: 0 0 auto 0;
-        height: 6px;
-        background: linear-gradient(
-          90deg,
-          var(--ocean),
-          var(--sakura-strong),
-          var(--torii-red)
-        );
-      }
-
-      .avatar {
-        width: 88px;
-        height: 88px;
-        border-radius: 26px;
-        background: linear-gradient(135deg, var(--ocean), var(--sakura-strong));
-        color: white;
-        font-size: 38px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        margin: 4px auto 14px;
-        box-shadow: 0 14px 30px rgba(14, 165, 233, 0.28);
-      }
-
-      .profile-card h1 {
-        margin: 0 0 6px;
-        font-size: 22px;
-        font-weight: 800;
-        letter-spacing: -0.4px;
-        color: var(--text-strong);
-      }
-
-      .subtitle {
-        font-size: 13px;
-        color: var(--text-muted);
-      }
-
-      .buyer-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        margin-top: 12px;
-        padding: 7px 14px;
-        border-radius: var(--radius-pill);
-        background: var(--water-foam);
-        border: 1px solid rgba(56, 189, 248, 0.4);
-        color: var(--ocean-deep);
-        font-size: 12px;
-        font-weight: 800;
-      }
-
-      body.dark-theme .buyer-badge {
-        color: var(--ocean-light);
-      }
-
-      .buyer-badge.vip {
-        background: rgba(245, 158, 11, 0.15);
-        border-color: #facc15;
-        color: #b45309;
-      }
-
-      body.dark-theme .buyer-badge.vip {
-        color: #fcd34d;
-      }
-
-      .buyer-badge.loyal {
-        background: rgba(99, 102, 241, 0.15);
-        border-color: #93c5fd;
-        color: #1d4ed8;
-      }
-
-      body.dark-theme .buyer-badge.loyal {
-        color: #93c5fd;
-      }
-
-      .buyer-badge.verified,
-      .buyer-badge.reviewer {
-        background: rgba(16, 185, 129, 0.15);
-        border-color: #86efac;
-        color: #166534;
-      }
-
-      body.dark-theme .buyer-badge.verified,
-      body.dark-theme .buyer-badge.reviewer {
-        color: #6ee7b7;
-      }
-
-      .buyer-stats-mini {
-        margin-top: 12px;
-        font-size: 12px;
-        color: var(--text-muted);
-      }
-
-      .status-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-        margin-top: 22px;
-      }
-
-      .status-box {
-        padding: 12px 14px;
-        background: rgba(56, 189, 248, 0.08);
-        border: 1px solid var(--border-soft);
-        border-radius: var(--radius-md);
-        text-align: left;
-        font-size: 12px;
-      }
-
-      .status-box strong {
-        display: block;
-        font-size: 11px;
-        font-weight: 800;
-        color: var(--ocean-deep);
-        letter-spacing: 0.4px;
-        text-transform: uppercase;
-        margin-bottom: 4px;
-      }
-
-      body.dark-theme .status-box strong {
-        color: var(--ocean-light);
-      }
-
-      .status-box span {
-        font-size: 13px;
-        font-weight: 700;
-        color: var(--text-strong);
-      }
-
-      .profile-actions {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        margin-top: 22px;
-      }
-
-      .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        width: 100%;
-        padding: 13px 18px;
-        border-radius: var(--radius-md);
-        font-size: 14px;
-        font-weight: 800;
-        font-family: inherit;
-        cursor: pointer;
-        border: none;
-        transition:
-          transform var(--dur-fast) var(--ease-out),
-          box-shadow var(--dur-fast) var(--ease-out),
-          background var(--dur-fast) var(--ease-out),
-          filter var(--dur-fast) var(--ease-out);
-        position: relative;
-        overflow: hidden;
-      }
-
-      .btn-primary {
-        background: linear-gradient(
-          135deg,
-          var(--ocean-deep),
-          var(--ocean-light)
-        );
-        color: white;
-        box-shadow: 0 12px 26px rgba(14, 165, 233, 0.3);
-      }
-
-      .btn-primary:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 16px 32px rgba(14, 165, 233, 0.4);
-      }
-
-      .btn-secondary {
-        background: rgba(255, 255, 255, 0.78);
-        color: var(--ocean-deep);
-        border: 1px solid var(--border-soft);
-        box-shadow: var(--shadow-xs);
-      }
-
-      body.dark-theme .btn-secondary {
-        background: rgba(20, 30, 56, 0.78);
-        color: var(--ocean-light);
-      }
-
-      .btn-secondary:hover {
-        background: white;
-        transform: translateY(-1px);
-      }
-
-      body.dark-theme .btn-secondary:hover {
-        background: rgba(20, 30, 56, 1);
-      }
-
-      .btn-danger {
-        background: linear-gradient(
-          135deg,
-          var(--torii-red),
-          var(--torii-red-strong)
-        );
-        color: white;
-        box-shadow: var(--shadow-pink);
-      }
-
-      .btn-danger:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 16px 32px rgba(244, 63, 94, 0.36);
-      }
-
-      /* Right column tabs */
-      .tab-card {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        padding: 6px;
-        border-radius: var(--radius-pill);
-        background: var(--card-bg);
-        border: 1px solid var(--border-soft);
-        backdrop-filter: blur(14px);
-        margin-bottom: 16px;
-        flex-direction: row;
-        flex-wrap: wrap;
-      }
-
-      .tab-btn {
-        flex: 1;
-        min-width: 100px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        padding: 10px 14px;
-        border-radius: var(--radius-pill);
-        font-size: 13px;
-        font-weight: 800;
-        color: var(--text-muted);
-        font-family: inherit;
-        transition:
-          background var(--dur-fast) var(--ease-out),
-          color var(--dur-fast) var(--ease-out);
-      }
-
-      .tab-btn:hover {
-        color: var(--ocean-deep);
-      }
-
-      body.dark-theme .tab-btn:hover {
-        color: var(--ocean-light);
-      }
-
-      .tab-btn.active {
-        color: white;
-        background: linear-gradient(
-          135deg,
-          var(--ocean-deep),
-          var(--ocean-light)
-        );
-        box-shadow: 0 6px 14px rgba(14, 165, 233, 0.3);
-      }
-
-      .tab-btn iconify-icon {
-        font-size: 16px;
-      }
-
-      .panel {
-        display: none;
-      }
-
-      .panel.active {
-        display: block;
-        animation: fadeUp 0.4s var(--ease-out) both;
-      }
-
-      @keyframes fadeUp {
-        from {
-          opacity: 0;
-          transform: translateY(10px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      .section-title {
-        font-size: 16px;
-        font-weight: 800;
-        color: var(--text-strong);
-        letter-spacing: -0.2px;
-        margin-bottom: 4px;
-      }
-
-      .section-desc {
-        font-size: 13px;
-        color: var(--text-muted);
-        margin-bottom: 18px;
-      }
-
-      .field {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        margin-bottom: 14px;
-      }
-
-      .field label {
-        font-size: 12px;
-        font-weight: 800;
-        letter-spacing: 0.2px;
-        color: var(--ocean-deep);
-      }
-
-      body.dark-theme .field label {
-        color: var(--ocean-light);
-      }
-
-      .input-wrap {
-        position: relative;
-      }
-
-      .input-wrap iconify-icon {
-        position: absolute;
-        left: 14px;
-        top: 50%;
-        transform: translateY(-50%);
-        font-size: 16px;
-        color: var(--text-muted);
-      }
-
-      input {
-        width: 100%;
-        padding: 13px 14px;
-        border-radius: var(--radius-md);
-        border: 1px solid var(--border-color);
-        background: rgba(255, 255, 255, 0.78);
-        color: var(--text-main);
-        font-size: 14px;
-        font-weight: 500;
-        font-family: inherit;
-        outline: none;
-        transition:
-          border-color var(--dur-fast) var(--ease-out),
-          background var(--dur-fast) var(--ease-out),
-          box-shadow var(--dur-fast) var(--ease-out);
-      }
-
-      body.dark-theme input {
-        background: rgba(20, 30, 56, 0.78);
-      }
-
-      .input-wrap input {
-        padding-left: 42px;
-      }
-
-      input:focus {
-        background: white;
-        border-color: var(--ocean-light);
-        box-shadow: var(--ring);
-      }
-
-      body.dark-theme input:focus {
-        background: rgba(20, 30, 56, 1);
-      }
-
-      .password-toggle {
-        position: absolute;
-        right: 10px;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        font-size: 16px;
-        color: var(--text-muted);
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .password-toggle:hover {
-        background: rgba(56, 189, 248, 0.12);
-        color: var(--ocean-deep);
-      }
-
-      .note {
-        font-size: 12px;
-        color: var(--text-muted);
-        line-height: 1.6;
-        margin-top: 8px;
-      }
-
-      .note.ok {
-        color: var(--success);
-        font-weight: 800;
-      }
-
-      .note.warn {
-        color: var(--warning);
-        font-weight: 800;
-      }
-
-      .badge-soon {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        margin-left: 8px;
-        padding: 2px 8px;
-        font-size: 10px;
-        font-weight: 800;
-        letter-spacing: 0.4px;
-        background: rgba(245, 158, 11, 0.18);
-        color: #b45309;
-        border-radius: var(--radius-pill);
-        border: 1px solid rgba(245, 158, 11, 0.3);
-      }
-
-      body.dark-theme .badge-soon {
-        color: #fcd34d;
-      }
-
-      /* Order list */
-      .orders-empty,
-      .orders-error {
-        padding: 28px 18px;
-        text-align: center;
-        background: rgba(56, 189, 248, 0.08);
-        border: 1px dashed var(--border-color);
-        border-radius: var(--radius-lg);
-        color: var(--text-muted);
-        font-size: 14px;
-        line-height: 1.6;
-      }
-
-      .orders-empty iconify-icon,
-      .orders-error iconify-icon {
-        display: block;
-        margin: 0 auto 8px;
-        font-size: 36px;
-        color: var(--ocean);
-      }
-
-      .order-list {
-        display: grid;
-        gap: 14px;
-      }
-
-      .order-card {
-        padding: 18px;
-        border: 1px solid var(--border-soft);
-        border-radius: var(--radius-lg);
-        background: var(--card-bg);
-        backdrop-filter: blur(14px);
-        box-shadow: var(--shadow-xs);
-        transition:
-          transform var(--dur-fast) var(--ease-out),
-          box-shadow var(--dur-fast) var(--ease-out);
-      }
-
-      .order-card:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-sm);
-      }
-
-      .order-card-head {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 10px;
-        margin-bottom: 14px;
-      }
-
-      .order-card-head strong {
-        font-size: 15px;
-        font-weight: 800;
-        color: var(--text-strong);
-      }
-
-      .order-card-head .status-pill {
-        flex-shrink: 0;
-      }
-
-      .order-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 6px 0;
-        font-size: 13px;
-      }
-
-      .order-row + .order-row {
-        border-top: 1px dashed rgba(56, 189, 248, 0.25);
-      }
-
-      .order-row span:first-child {
-        color: var(--text-muted);
-        flex-shrink: 0;
-      }
-
-      .order-row b {
-        color: var(--text-main);
-        font-weight: 700;
-        text-align: right;
-        word-break: break-word;
-      }
-
-      .status-pill {
-        display: inline-flex;
-        align-items: center;
-        padding: 4px 10px;
-        border-radius: var(--radius-pill);
-        font-size: 11px;
-        font-weight: 800;
-        background: rgba(56, 189, 248, 0.16);
-        color: var(--ocean-deep);
-        text-transform: capitalize;
-        white-space: nowrap;
-      }
-
-      body.dark-theme .status-pill {
-        background: rgba(56, 189, 248, 0.22);
-        color: var(--ocean-light);
-      }
-
-      .status-pill.paid,
-      .status-pill.delivered {
-        background: rgba(16, 185, 129, 0.18);
-        color: #047857;
-      }
-
-      body.dark-theme .status-pill.paid,
-      body.dark-theme .status-pill.delivered {
-        color: #6ee7b7;
-      }
-
-      .status-pill.pending,
-      .status-pill.waiting_payment {
-        background: rgba(245, 158, 11, 0.18);
-        color: #b45309;
-      }
-
-      body.dark-theme .status-pill.pending,
-      body.dark-theme .status-pill.waiting_payment {
-        color: #fcd34d;
-      }
-
-      .status-pill.expired,
-      .status-pill.cancelled {
-        background: rgba(244, 63, 94, 0.18);
-        color: #be123c;
-      }
-
-      body.dark-theme .status-pill.expired,
-      body.dark-theme .status-pill.cancelled {
-        color: #fda4af;
-      }
-
-      .key-row {
-        margin-top: 12px;
-        padding: 10px 12px;
-        border: 1px solid var(--border-soft);
-        background: rgba(56, 189, 248, 0.08);
-        border-radius: var(--radius-md);
-      }
-
-      .key-row-head {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 10px;
-        margin-bottom: 6px;
-      }
-
-      .key-row-head span {
-        font-size: 11px;
-        font-weight: 800;
-        letter-spacing: 0.4px;
-        color: var(--ocean-deep);
-        text-transform: uppercase;
-      }
-
-      body.dark-theme .key-row-head span {
-        color: var(--ocean-light);
-      }
-
-      .copy-key-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        padding: 6px 12px;
-        font-size: 11px;
-        font-weight: 800;
-        color: white;
-        background: linear-gradient(
-          135deg,
-          var(--torii-red),
-          var(--torii-red-strong)
-        );
-        border-radius: var(--radius-pill);
-        font-family: inherit;
-        transition: transform var(--dur-fast) var(--ease-out);
-      }
-
-      .copy-key-btn:hover {
-        transform: translateY(-1px);
-      }
-
-      .key-code {
-        display: block;
-        padding: 8px 10px;
-        background: var(--card-bg-strong);
-        border: 1px solid var(--border-soft);
-        border-radius: var(--radius-sm);
-        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-        font-size: 12px;
-        color: var(--text-strong);
-        word-break: break-all;
-      }
-
-      .order-actions {
-        margin-top: 12px;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        align-items: center;
-      }
-
-      .order-link-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 9px 14px;
-        font-size: 12px;
-        font-weight: 800;
-        color: var(--ocean-deep);
-        background: rgba(56, 189, 248, 0.14);
-        border: 1px solid var(--border-soft);
-        border-radius: var(--radius-pill);
-        transition: background var(--dur-fast) var(--ease-out);
-      }
-
-      body.dark-theme .order-link-btn {
-        color: var(--ocean-light);
-      }
-
-      .order-link-btn:hover {
-        background: rgba(56, 189, 248, 0.24);
-      }
-
-      .resume-pay-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 10px 16px;
-        font-size: 12px;
-        font-weight: 800;
-        color: #ffffff;
-        background: linear-gradient(120deg, #0ea5e9 0%, #f472b6 100%);
-        border: none;
-        border-radius: var(--radius-pill);
-        cursor: pointer;
-        box-shadow: 0 6px 18px rgba(14, 165, 233, 0.35);
-        transition:
-          transform var(--dur-fast) var(--ease-out),
-          box-shadow var(--dur-fast) var(--ease-out),
-          filter var(--dur-fast) var(--ease-out);
-      }
-
-      .resume-pay-btn:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 8px 24px rgba(244, 114, 182, 0.4);
-      }
-
-      .resume-pay-btn:active {
-        transform: translateY(0);
-      }
-
-      .resume-pay-btn:disabled {
-        opacity: 0.7;
-        cursor: progress;
-        filter: saturate(0.6);
-      }
-
-      .resume-pay-btn iconify-icon {
-        font-size: 16px;
-      }
-
-      .discount-value {
-        color: var(--success);
-        font-weight: 800;
-      }
-
-      .skeleton-list {
-        display: grid;
-        gap: 12px;
-      }
-
-      .skeleton-card {
-        height: 120px;
-        border-radius: var(--radius-lg);
-        background: linear-gradient(
-          100deg,
-          rgba(56, 189, 248, 0.08) 30%,
-          rgba(56, 189, 248, 0.18) 50%,
-          rgba(56, 189, 248, 0.08) 70%
-        );
-        background-size: 200% 100%;
-        animation: shimmer 1.4s linear infinite;
-        border: 1px solid var(--border-soft);
-      }
-
-      @keyframes shimmer {
-        0% {
-          background-position: 200% 0;
-        }
-        100% {
-          background-position: -200% 0;
-        }
-      }
-
-      /* Swal overrides */
-      .swal2-popup {
-        border-radius: var(--radius-xl) !important;
-        font-family: "Plus Jakarta Sans", "Segoe UI", sans-serif !important;
-      }
-
-      body.dark-theme .swal2-popup {
-        background: #0f1730 !important;
-        color: #e2e8f0 !important;
-      }
-
-      body.dark-theme .swal2-title,
-      body.dark-theme .swal2-html-container {
-        color: #f8fafc !important;
-      }
-
-      /* === Orders filter chips === */
-      .orders-filter {
-        display: flex;
-        gap: 8px;
-        margin-bottom: 16px;
-        flex-wrap: wrap;
-      }
-
-      .filter-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 7px 14px;
-        border-radius: var(--radius-pill);
-        font-size: 12px;
-        font-weight: 800;
-        color: var(--text-muted);
-        background: rgba(56, 189, 248, 0.1);
-        border: 1px solid var(--border-soft);
-        transition:
-          color var(--dur-fast) var(--ease-out),
-          background var(--dur-fast) var(--ease-out);
-        cursor: pointer;
-      }
-
-      .filter-chip:hover {
-        color: var(--ocean-deep);
-        background: rgba(56, 189, 248, 0.18);
-      }
-
-      body.dark-theme .filter-chip:hover {
-        color: var(--ocean-light);
-      }
-
-      .filter-chip.active {
-        color: white;
-        background: linear-gradient(
-          135deg,
-          var(--ocean-deep),
-          var(--ocean-light)
-        );
-        border-color: transparent;
-        box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);
-      }
-
-      .filter-chip .dot {
-        width: 7px;
-        height: 7px;
-        border-radius: 50%;
-        flex-shrink: 0;
-      }
-      .filter-chip[data-filter="pending"] .dot {
-        background: var(--warning);
-      }
-      .filter-chip[data-filter="paid"] .dot {
-        background: var(--success);
-      }
-      .filter-chip[data-filter="failed"] .dot {
-        background: var(--danger);
-      }
-
-      .filter-chip .count {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 18px;
-        height: 18px;
-        padding: 0 5px;
-        font-size: 10px;
-        font-weight: 800;
-        border-radius: var(--radius-pill);
-        background: rgba(56, 189, 248, 0.18);
-        color: inherit;
-      }
-
-      .filter-chip.active .count {
-        background: rgba(255, 255, 255, 0.28);
-      }
-
-      /* Responsive */
-      @media (max-width: 880px) {
-        .page {
-          grid-template-columns: 1fr;
-          padding: 24px 16px 64px;
-        }
-
-        .surface {
-          padding: 22px;
-        }
-      }
-
-      /* === Mobile perf + visual cleanup (≤768px) === */
-      @media (max-width: 768px) {
-        /* B1: Disable backdrop-filter — major GPU saver */
-        .site-header,
-        .surface,
-        .tab-card,
-        .order-card {
-          backdrop-filter: none !important;
-          -webkit-backdrop-filter: none !important;
-        }
-
-        .site-header {
-          background: rgba(255, 255, 255, 0.96);
-        }
-        body.dark-theme .site-header {
-          background: rgba(8, 14, 32, 0.96);
-        }
-
-        .surface {
-          background: var(--card-bg-strong);
-        }
-
-        /* B2: Static skeleton (no shimmer animation) */
-        .skeleton-card {
-          animation: none !important;
-          background: rgba(56, 189, 248, 0.12);
-        }
-
-        /* B5: Disable fade-up panel animation */
-        .panel.active {
-          animation: none !important;
-        }
-
-        /* Hide decorative blobs to save GPU */
-        .blob {
-          display: none;
-        }
-
-        /* Disable card hover lift on touch — no hover anyway */
-        .order-card {
-          transition: none;
-        }
-        .order-card:hover {
-          transform: none;
-          box-shadow: var(--shadow-xs);
-        }
-
-        /* A3: Profile card compact — avatar + name horizontal */
-        .profile-card {
-          text-align: left;
-          padding: 18px;
-        }
-        .profile-card::before {
-          height: 4px;
-        }
-        .profile-card-head {
-          text-align: left;
-          display: grid;
-          grid-template-columns: 64px 1fr;
-          gap: 14px;
-          align-items: center;
-        }
-        .profile-card .avatar {
-          margin: 0;
-          width: 64px;
-          height: 64px;
-          font-size: 28px;
-          border-radius: 20px;
-        }
-        .profile-card h1 {
-          font-size: 18px;
-          margin: 0 0 2px;
-        }
-        .profile-card .subtitle {
-          font-size: 12px;
-        }
-        /* Hide buyer stats mini line on mobile to reduce clutter */
-        .buyer-stats-mini {
-          display: none;
-        }
-        .buyer-badge {
-          margin-top: 10px;
-        }
-        .status-grid {
-          margin-top: 14px;
-          gap: 8px;
-        }
-        .status-box {
-          padding: 10px 12px;
-        }
-        .profile-actions {
-          flex-direction: row;
-          margin-top: 14px;
-          gap: 8px;
-        }
-        .profile-actions .btn {
-          padding: 11px 14px;
-          font-size: 13px;
-        }
-      }
-
-      @media (max-width: 520px) {
-        .header-inner {
-          padding: 12px 14px;
-          flex-wrap: nowrap;
-          gap: 8px;
-        }
-
-        .brand {
-          flex: 0 0 auto;
-        }
-
-        .brand-logo {
-          width: 42px;
-          height: 42px;
-          border-radius: 14px;
-          font-size: 21px;
-        }
-
-        .brand-copy {
-          display: none;
-        }
-
-        .header-actions {
-          margin-left: auto;
-          gap: 8px;
-          min-width: 0;
-        }
-
-        .lang-switch {
-          padding: 3px;
-        }
-
-        .lang-btn {
-          padding: 6px 10px;
-          font-size: 12px;
-        }
-
-        .icon-btn,
-        .header-back {
-          width: 38px;
-          height: 38px;
-          min-width: 38px;
-          padding: 0;
-          justify-content: center;
-        }
-
-        .header-back span {
-          display: none !important;
-        }
-
-        .header-back iconify-icon {
-          font-size: 18px;
-        }
-
-        .status-grid {
-          grid-template-columns: 1fr;
-        }
-
-        .order-card-head {
-          flex-direction: column;
-          align-items: flex-start;
-        }
-
-        .order-row {
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 2px;
-        }
-
-        .order-row b {
-          text-align: left;
-        }
-
-        /* A4: Icon-only style tabs — icon top, label bottom small */
-        .tab-card {
-          padding: 4px;
-          gap: 4px;
-        }
-        .tab-btn {
-          flex-direction: column;
-          gap: 2px;
-          min-width: 0;
-          padding: 8px 6px;
-          font-size: 10px;
-          letter-spacing: 0.2px;
-          line-height: 1.2;
-        }
-        .tab-btn iconify-icon {
-          font-size: 18px;
-        }
-
-        /* A5: Hide redundant section description on mobile */
-        .section-desc {
-          display: none;
-        }
-
-        /* Compact filter chips */
-        .orders-filter {
-          gap: 6px;
-          margin-bottom: 12px;
-        }
-        .filter-chip {
-          padding: 6px 10px;
-          font-size: 11px;
-        }
-        .filter-chip .count {
-          min-width: 16px;
-          height: 16px;
-          font-size: 9px;
-        }
-      }
-
-      /* =========================================================
-         AE NEO BRUTALISM PATCH — ACCOUNT PAGE
-         Keep after original styles so it becomes the main skin.
-         ========================================================= */
-      :root {
-        --neo-ink: #0b0b0f;
-        --neo-paper: #fffdf2;
-        --neo-yellow: #fff04a;
-        --neo-cyan: #38d5ff;
-        --neo-pink: #ff5fb7;
-        --neo-green: #35ff8b;
-        --neo-red: #ff4d4d;
-        --neo-blue: #5a7dff;
-        --neo-shadow: 7px 7px 0 var(--neo-ink);
-        --neo-shadow-sm: 4px 4px 0 var(--neo-ink);
-        --neo-radius: 18px;
-      }
-
-      body {
-        font-family:
-          "Space Grotesk", "Plus Jakarta Sans", sans-serif !important;
-        background:
-          radial-gradient(
-            circle at 12% 10%,
-            rgba(255, 95, 183, 0.26),
-            transparent 28%
-          ),
-          radial-gradient(
-            circle at 88% 18%,
-            rgba(56, 213, 255, 0.32),
-            transparent 30%
-          ),
-          linear-gradient(135deg, #fffdf2 0%, #f7fbff 52%, #fff1fb 100%) !important;
-        color: var(--neo-ink) !important;
-      }
-
-      body.dark-theme {
-        background:
-          radial-gradient(
-            circle at 12% 10%,
-            rgba(255, 95, 183, 0.22),
-            transparent 28%
-          ),
-          radial-gradient(
-            circle at 88% 18%,
-            rgba(56, 213, 255, 0.22),
-            transparent 30%
-          ),
-          linear-gradient(135deg, #111827 0%, #0b1220 100%) !important;
-        color: #f8fafc !important;
-      }
-
-      .site-header {
-        background: rgba(255, 253, 242, 0.94) !important;
-        border-bottom: 4px solid var(--neo-ink) !important;
-        box-shadow: 0 6px 0 var(--neo-ink) !important;
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
-      }
-
-      body.dark-theme .site-header {
-        background: rgba(15, 23, 42, 0.96) !important;
-      }
-
-      .brand-logo,
-      .avatar,
-      .icon-btn {
-        border: 3px solid var(--neo-ink) !important;
-        box-shadow: var(--neo-shadow-sm) !important;
-        border-radius: 16px !important;
-      }
-
-      .brand-copy strong,
-      .profile-card h1,
-      .section-title {
-        font-family: "Bebas Neue", "Space Grotesk", sans-serif !important;
-        letter-spacing: 0.04em !important;
-        color: var(--neo-ink) !important;
-      }
-
-      body.dark-theme .brand-copy strong,
-      body.dark-theme .profile-card h1,
-      body.dark-theme .section-title {
-        color: #f8fafc !important;
-      }
-
-      .header-back,
-      .surface,
-      .tab-card,
-      .status-box,
-      .order-row,
-      .empty-state,
-      .skeleton-card {
-        background: var(--neo-paper) !important;
-        border: 3px solid var(--neo-ink) !important;
-        border-radius: var(--neo-radius) !important;
-        box-shadow: var(--neo-shadow) !important;
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
-      }
-
-      body.dark-theme .header-back,
-      body.dark-theme .surface,
-      body.dark-theme .tab-card,
-      body.dark-theme .status-box,
-      body.dark-theme .order-row,
-      body.dark-theme .empty-state {
-        background: #111827 !important;
-        border-color: #f8fafc !important;
-        box-shadow: 7px 7px 0 #f8fafc !important;
-      }
-
-      .profile-card::before {
-        height: 12px !important;
-        background: repeating-linear-gradient(
-          90deg,
-          var(--neo-yellow) 0 34px,
-          var(--neo-cyan) 34px 68px,
-          var(--neo-pink) 68px 102px
-        ) !important;
-        border-bottom: 3px solid var(--neo-ink) !important;
-      }
-
-      .tab-card {
-        border-radius: 20px !important;
-        padding: 8px !important;
-      }
-
-      .tab-btn,
-      .filter-chip,
-      .buyer-badge {
-        border: 2px solid var(--neo-ink) !important;
-        border-radius: 999px !important;
-        background: #fff !important;
-        color: var(--neo-ink) !important;
-        box-shadow: 3px 3px 0 var(--neo-ink) !important;
-        transition:
-          transform 0.16s ease,
-          box-shadow 0.16s ease !important;
-      }
-
-      .tab-btn.active,
-      .filter-chip.active,
-      .buyer-badge.vip {
-        background: var(--neo-yellow) !important;
-        color: var(--neo-ink) !important;
-      }
-
-      .tab-btn:hover,
-      .filter-chip:hover,
-      .btn:hover,
-      .header-back:hover {
-        transform: translate(-2px, -2px) !important;
-        box-shadow: 7px 7px 0 var(--neo-ink) !important;
-      }
-
-      .btn,
-      button.btn,
-      .btn-primary,
-      .btn-secondary,
-      .btn-danger {
-        border: 3px solid var(--neo-ink) !important;
-        border-radius: 16px !important;
-        box-shadow: var(--neo-shadow-sm) !important;
-        color: var(--neo-ink) !important;
-        background: var(--neo-cyan) !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.04em !important;
-      }
-
-      .btn-primary {
-        background: var(--neo-yellow) !important;
-      }
-      .btn-secondary {
-        background: #ffffff !important;
-      }
-      .btn-danger {
-        background: var(--neo-red) !important;
-        color: #ffffff !important;
-      }
-
-      input,
-      select,
-      textarea {
-        border: 3px solid var(--neo-ink) !important;
-        border-radius: 14px !important;
-        background: #ffffff !important;
-        color: var(--neo-ink) !important;
-        box-shadow: 3px 3px 0 var(--neo-ink) !important;
-        font-family: "Space Grotesk", sans-serif !important;
-      }
-
-      input:focus,
-      select:focus,
-      textarea:focus {
-        box-shadow:
-          5px 5px 0 var(--neo-ink),
-          0 0 0 4px rgba(255, 240, 74, 0.55) !important;
-        border-color: var(--neo-ink) !important;
-      }
-
-      .status-pill,
-      .dot,
-      .count {
-        border: 2px solid var(--neo-ink) !important;
-        box-shadow: 2px 2px 0 var(--neo-ink) !important;
-      }
-
-      @media (max-width: 760px) {
-        .page {
-          grid-template-columns: 1fr !important;
-          padding: 24px 14px 80px !important;
-        }
-
-        .surface {
-          padding: 22px 18px !important;
-          box-shadow: 5px 5px 0 var(--neo-ink) !important;
-        }
-
-        .header-inner {
-          padding: 12px 14px !important;
-        }
-
-        .brand-copy span {
-          display: none !important;
-        }
-
-        .tab-btn {
-          min-width: 44% !important;
-        }
-      }
-    </style>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap"
-      rel="stylesheet"
-    />
-  
-<style id="ae-neo-brutalism-v2-page">
-/* AE Neo Brutalism V2 — standalone page overlay */
-:root{
-  --nb-ink:#101010;
-  --nb-paper:#fffdf2;
-  --nb-yellow:#ffe135;
-  --nb-cyan:#28d7ff;
-  --nb-pink:#ff4fa3;
-  --nb-red:#ff4d4d;
-  --nb-green:#27d17f;
-  --nb-muted:#555;
-  --nb-border:3px solid var(--nb-ink);
-  --nb-border-thin:2px solid var(--nb-ink);
-  --nb-radius:20px;
-  --nb-shadow:6px 6px 0 var(--nb-ink);
-  --nb-shadow-sm:4px 4px 0 var(--nb-ink);
-  --primary:var(--nb-cyan);
-  --primary-strong:#1dbde5;
-  --primary-deep:var(--nb-ink);
-  --secondary:var(--nb-pink);
-  --secondary-strong:#e5398a;
-  --bg:var(--nb-paper);
-  --bg-color:var(--nb-paper);
-  --card-bg:#fff;
-  --card-bg-strong:#fff;
-  --surface:#fff;
-  --surface-strong:#fff;
-  --text-main:var(--nb-ink);
-  --text-strong:var(--nb-ink);
-  --text:#101010;
-  --text-muted:#555;
-  --border:var(--nb-ink);
-  --border-color:var(--nb-ink);
-  --shadow:var(--nb-shadow);
-  --shadow-md:var(--nb-shadow);
-  --shadow-lg:8px 8px 0 var(--nb-ink);
-  --radius-xl:24px;
-  --radius-lg:20px;
-  --radius-md:14px;
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="Kelola akun, riwayat order, dan keamanan AE Game Store kamu." name="description"/>
+<title>My Account - AE Game Store</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&amp;family=DM+Mono:wght@400;500&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/iconify-icon@2.1.0/dist/iconify-icon.min.js" type="module"></script>
+
+
+
+<style>
+/* =========================================================
+   AE Game Store — Account Page Neo Brutalism Clean v1
+   One-file safe skin: no duplicated overlays, no external CSS.
+   ========================================================= */
+:root {
+  --ink: #101010;
+  --paper: #fffdf2;
+  --surface: #ffffff;
+  --yellow: #ffe135;
+  --cyan: #2bdcff;
+  --pink: #ff4fa3;
+  --green: #35ff8b;
+  --red: #ff4d4d;
+  --blue: #5a7dff;
+  --muted: #5b6472;
+  --soft: #eef7ff;
+  --border: 3px solid var(--ink);
+  --border-sm: 2px solid var(--ink);
+  --shadow: 7px 7px 0 var(--ink);
+  --shadow-sm: 4px 4px 0 var(--ink);
+  --radius: 20px;
+  --radius-sm: 14px;
+  --radius-pill: 999px;
+  --max: 1120px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
-body.dark-theme{
-  --nb-paper:#171717;
-  --card-bg:#242424;
-  --card-bg-strong:#2a2a2a;
-  --surface:#242424;
-  --surface-strong:#2a2a2a;
-  --text-main:#fffdf2;
-  --text-strong:#fff;
-  --text:#fffdf2;
-  --text-muted:#d5d5d5;
+
+body.dark-theme {
+  --ink: #f8fafc;
+  --paper: #111827;
+  --surface: #172033;
+  --muted: #cbd5e1;
+  --soft: #1f2937;
+  --border: 3px solid #f8fafc;
+  --border-sm: 2px solid #f8fafc;
+  --shadow: 7px 7px 0 #f8fafc;
+  --shadow-sm: 4px 4px 0 #f8fafc;
 }
-html,body{scroll-behavior:smooth}
-body{
-  background-color:var(--nb-paper)!important;
-  background-image:radial-gradient(circle at 1px 1px,rgba(16,16,16,.13) 1px,transparent 0)!important;
-  background-size:18px 18px!important;
-  color:var(--text-main)!important;
-  font-family:"Space Grotesk","Plus Jakarta Sans",system-ui,sans-serif!important;
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
-.bg-blob,.watercolor-blob,.blob-1,.blob-2{display:none!important}
-main,.auth-shell,.account-shell,.result-shell,.admin-shell,.offline-card,.payment-card,.card,.panel,.auth-card,.account-card,.result-card,.security-card,.order-card,.profile-card,.login-card,.admin-card,.status-card{
-  background:var(--card-bg-strong)!important;
-  color:var(--text-main)!important;
-  border:var(--nb-border)!important;
-  border-radius:var(--nb-radius)!important;
-  box-shadow:var(--nb-shadow)!important;
-  backdrop-filter:none!important;
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
-h1,h2,h3,.brand-title,.page-title,.card-title{
-  color:var(--text-strong)!important;
-  background:none!important;
-  -webkit-text-fill-color:currentColor!important;
-  font-family:"Space Grotesk","Plus Jakarta Sans",system-ui,sans-serif!important;
-  font-weight:900!important;
-  letter-spacing:-.04em!important;
+
+body {
+  min-height: 100vh;
+  overflow-x: hidden;
+  color: var(--ink);
+  font-family: "Space Grotesk", "Plus Jakarta Sans", system-ui, sans-serif;
+  line-height: 1.55;
+  background-color: var(--paper);
+  background-image: radial-gradient(circle at 1px 1px, rgba(16, 16, 16, 0.14) 1px, transparent 0);
+  background-size: 18px 18px;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
-p,small,span,label{color:inherit}
-input,select,textarea,.input,.form-input{
-  background:#fff!important;
-  color:#101010!important;
-  border:var(--nb-border-thin)!important;
-  border-radius:14px!important;
-  box-shadow:3px 3px 0 var(--nb-ink)!important;
-  outline:none!important;
+
+body.dark-theme {
+  background-image: radial-gradient(circle at 1px 1px, rgba(248, 250, 252, 0.12) 1px, transparent 0);
 }
-input:focus,select:focus,textarea:focus{
-  box-shadow:0 0 0 4px var(--nb-yellow),3px 3px 0 var(--nb-ink)!important;
+
+a {
+  color: inherit;
+  text-decoration: none;
 }
-button,a.btn,.btn,.primary-btn,.secondary-btn,.ghost-btn,.action-btn,.admin-btn,.payment-actions button,.payment-actions a,.back-link,.theme-toggle,.submit-btn{
-  border:var(--nb-border-thin)!important;
-  border-radius:999px!important;
-  box-shadow:var(--nb-shadow-sm)!important;
-  background:var(--nb-yellow)!important;
-  color:#101010!important;
-  font-weight:900!important;
-  text-decoration:none!important;
-  transition:transform .14s ease,box-shadow .14s ease!important;
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
 }
-button:hover,a.btn:hover,.btn:hover,.primary-btn:hover,.action-btn:hover{
-  transform:translate(2px,2px)!important;
-  box-shadow:2px 2px 0 var(--nb-ink)!important;
+
+button {
+  cursor: pointer;
+  border: 0;
+  background: transparent;
+  color: inherit;
 }
-.primary-btn,.submit-btn,.payment-actions button,.admin-btn{background:var(--nb-cyan)!important}
-.danger,.danger-btn,.logout-btn{background:var(--nb-red)!important;color:#fff!important}
-.success,.success-badge{background:var(--nb-green)!important;color:#101010!important}
-.badge,.status-badge,.pill,.tag,.kicker,.payment-kicker{
-  display:inline-flex!important;
-  width:fit-content!important;
-  background:var(--nb-yellow)!important;
-  color:#101010!important;
-  border:var(--nb-border-thin)!important;
-  border-radius:999px!important;
-  box-shadow:3px 3px 0 var(--nb-ink)!important;
-  font-weight:900!important;
+
+:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(43, 220, 255, 0.42), var(--shadow-sm);
 }
-.payment-card{max-width:480px!important}
-.payment-amount,.payment-qr,.payment-status,.detail-box,.info-box,.alert,.history-item,.order-item{
-  background:#fff!important;
-  border:var(--nb-border-thin)!important;
-  border-radius:16px!important;
-  box-shadow:3px 3px 0 var(--nb-ink)!important;
+
+::selection {
+  background: var(--yellow);
+  color: #101010;
 }
-.payment-qr img{border-radius:12px!important}
-@media(max-width:768px){
-  :root{--nb-border:2px solid var(--nb-ink);--nb-shadow:4px 4px 0 var(--nb-ink)}
-  body{background-size:16px 16px!important}
-  main,.auth-shell,.account-shell,.result-shell,.admin-shell,.offline-card,.payment-card,.card,.panel,.auth-card,.account-card,.result-card{
-    border-radius:18px!important;
-    box-shadow:4px 4px 0 var(--nb-ink)!important;
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
   }
-  h1{font-size:clamp(28px,10vw,42px)!important}
-  .bg-blob,.decor,.floating,.animation{display:none!important}
-  button,a.btn,.btn{min-height:42px!important}
 }
-</style>
 
-  </head>
-  <body
-    onload="
+/* Decorative blobs kept but made cheap */
+.blob {
+  position: fixed;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 50%;
+  opacity: 0.28;
+  filter: blur(30px);
+}
+
+.blob-1 {
+  width: 320px;
+  height: 320px;
+  top: -120px;
+  left: -100px;
+  background: var(--cyan);
+}
+
+.blob-2 {
+  width: 320px;
+  height: 320px;
+  right: -120px;
+  bottom: -120px;
+  background: var(--pink);
+}
+
+/* Header */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 80;
+  background: rgba(255, 253, 242, 0.96);
+  border-bottom: var(--border);
+  box-shadow: 0 5px 0 var(--ink);
+}
+
+body.dark-theme .site-header {
+  background: rgba(17, 24, 39, 0.96);
+}
+
+.header-inner {
+  width: min(var(--max), 100%);
+  min-height: 70px;
+  margin: 0 auto;
+  padding: 12px 22px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.brand {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.brand-logo,
+.avatar,
+.icon-btn {
+  border: var(--border);
+  box-shadow: var(--shadow-sm);
+  color: #101010;
+}
+
+.brand-logo {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 44px;
+  border-radius: 14px;
+  background: var(--yellow);
+  font-size: 20px;
+}
+
+.brand-copy {
+  min-width: 0;
+  display: grid;
+  line-height: 1.1;
+}
+
+.brand-copy strong {
+  overflow: hidden;
+  color: var(--ink);
+  font-family: "Bebas Neue", "Space Grotesk", sans-serif;
+  font-size: 22px;
+  letter-spacing: 0.04em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.brand-copy span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.header-actions {
+  min-width: 0;
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.lang-switch {
+  display: inline-flex;
+  padding: 3px;
+  border: var(--border-sm);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.lang-btn {
+  min-width: 36px;
+  height: 32px;
+  padding: 0 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: 0.04em;
+}
+
+.lang-btn.active {
+  background: var(--pink);
+  color: #fff;
+  border: var(--border-sm);
+}
+
+.icon-btn,
+.header-back {
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 13px;
+  background: var(--surface);
+}
+
+.icon-btn {
+  width: 42px;
+  flex: 0 0 42px;
+  font-size: 16px;
+}
+
+.header-back {
+  gap: 7px;
+  padding: 0 14px;
+  border: var(--border-sm);
+  box-shadow: var(--shadow-sm);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.header-back:hover,
+.icon-btn:hover,
+.lang-switch:hover,
+.btn:hover,
+.tab-btn:hover,
+.filter-chip:hover,
+.order-link-btn:hover,
+.resume-pay-btn:hover,
+.copy-key-btn:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+/* Main layout */
+.page {
+  width: min(var(--max), 100%);
+  margin: 0 auto;
+  padding: 34px 22px 88px;
+  display: grid;
+  grid-template-columns: 340px minmax(0, 1fr);
+  gap: 20px;
+}
+
+.surface {
+  position: relative;
+  min-width: 0;
+  padding: 22px;
+  background: var(--surface);
+  border: var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+/* Profile */
+.profile-card {
+  align-self: start;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.profile-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 14px;
+  background: repeating-linear-gradient(90deg, var(--yellow) 0 40px, var(--cyan) 40px 80px, var(--pink) 80px 120px);
+  border-bottom: var(--border);
+}
+
+.profile-card-head {
+  padding-top: 12px;
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+}
+
+.avatar {
+  width: 78px;
+  height: 78px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 22px;
+  background: var(--cyan);
+  font-size: 34px;
+}
+
+.profile-card-text {
+  min-width: 0;
+}
+
+.profile-card h1,
+.section-title {
+  color: var(--ink);
+  font-family: "Bebas Neue", "Space Grotesk", sans-serif;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+.profile-card h1 {
+  font-size: 30px;
+}
+
+.subtitle {
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  word-break: break-word;
+}
+
+.buyer-badge {
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 14px;
+  padding: 7px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: var(--border-sm);
+  border-radius: var(--radius-pill);
+  background: var(--yellow);
+  box-shadow: var(--shadow-sm);
+  color: #101010;
+  font-size: 11px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.buyer-badge.vip { background: var(--yellow); }
+.buyer-badge.loyal { background: var(--cyan); }
+.buyer-badge.verified,
+.buyer-badge.reviewer { background: var(--green); }
+
+.buyer-stats-mini {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.status-grid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 9px;
+}
+
+.status-box {
+  padding: 12px;
+  display: grid;
+  gap: 3px;
+  border: var(--border-sm);
+  border-radius: var(--radius-sm);
+  background: var(--soft);
+  box-shadow: var(--shadow-sm);
+}
+
+.status-box strong {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.status-box span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.profile-actions {
+  margin-top: 16px;
+  display: grid;
+  gap: 9px;
+}
+
+.profile-actions .btn-secondary {
+  display: none;
+}
+
+/* Tabs */
+.tab-card {
+  margin-bottom: 16px;
+  padding: 6px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+  border: var(--border-sm);
+  border-radius: 18px;
+  background: var(--soft);
+}
+
+.tab-btn {
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: var(--border-sm);
+  border-radius: 13px;
+  background: var(--surface);
+  box-shadow: 3px 3px 0 var(--ink);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 950;
+  line-height: 1.1;
+}
+
+.tab-btn iconify-icon {
+  flex: 0 0 auto;
+  font-size: 17px;
+}
+
+.tab-btn span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tab-btn.active {
+  background: var(--yellow);
+}
+
+.panel {
+  display: none;
+}
+
+.panel.active {
+  display: block;
+  animation: fadeUp 0.22s var(--ease) both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.section-title {
+  margin-bottom: 4px;
+  font-size: 26px;
+}
+
+.section-desc {
+  margin-bottom: 15px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* Forms */
+.field {
+  margin-bottom: 13px;
+  display: grid;
+  gap: 7px;
+}
+
+.field label {
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.input-wrap {
+  position: relative;
+}
+
+.input-wrap iconify-icon {
+  position: absolute;
+  top: 50%;
+  left: 13px;
+  z-index: 1;
+  transform: translateY(-50%);
+  color: #101010;
+  font-size: 18px;
+}
+
+input {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 13px;
+  border: var(--border-sm);
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+  color: #101010;
+  font-size: 14px;
+  font-weight: 800;
+  outline: none;
+}
+
+.input-wrap input {
+  padding-left: 43px;
+  padding-right: 45px;
+}
+
+input:focus {
+  box-shadow: 0 0 0 4px rgba(255, 225, 53, 0.55), var(--shadow-sm);
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 9px;
+  z-index: 2;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateY(-50%);
+  border: var(--border-sm);
+  border-radius: 11px;
+  background: var(--yellow);
+  color: #101010;
+}
+
+.note {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.note.ok { color: #0f7a4a; font-weight: 900; }
+.note.warn { color: #b45309; font-weight: 900; }
+
+/* Buttons */
+.btn,
+.resume-pay-btn,
+.order-link-btn,
+.copy-key-btn {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: var(--border-sm);
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+  color: #101010;
+  font-weight: 950;
+  line-height: 1.1;
+  transition: transform 0.14s ease, box-shadow 0.14s ease;
+}
+
+.btn {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.btn-primary { background: var(--yellow); }
+.btn-secondary { background: #fff; }
+.btn-danger { background: var(--red); color: #fff; }
+
+/* Filters */
+.orders-filter {
+  margin-bottom: 14px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-chip {
+  min-height: 36px;
+  padding: 7px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: var(--border-sm);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  box-shadow: 3px 3px 0 var(--ink);
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 950;
+}
+
+.filter-chip.active { background: var(--yellow); }
+
+.filter-chip .dot {
+  width: 9px;
+  height: 9px;
+  border: var(--border-sm);
+  border-radius: 50%;
+}
+
+.filter-chip[data-filter="pending"] .dot { background: #f59e0b; }
+.filter-chip[data-filter="paid"] .dot { background: var(--green); }
+.filter-chip[data-filter="failed"] .dot { background: var(--red); }
+
+.filter-chip .count {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--border-sm);
+  border-radius: var(--radius-pill);
+  background: var(--cyan);
+  color: #101010;
+  font-size: 10px;
+  font-weight: 950;
+}
+
+/* Orders */
+.orders-content {
+  min-height: 120px;
+}
+
+.order-list,
+.skeleton-list {
+  display: grid;
+  gap: 12px;
+}
+
+.order-card {
+  padding: 15px;
+  border: var(--border-sm);
+  border-radius: 17px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.order-card-head {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.order-card-head strong {
+  min-width: 0;
+  color: var(--ink);
+  font-size: 17px;
+  font-weight: 950;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.status-pill {
+  width: fit-content;
+  max-width: 100%;
+  min-height: 26px;
+  padding: 4px 9px;
+  display: inline-flex;
+  align-items: center;
+  border: var(--border-sm);
+  border-radius: var(--radius-pill);
+  background: var(--cyan);
+  box-shadow: 2px 2px 0 var(--ink);
+  color: #101010;
+  font-size: 10px;
+  font-weight: 950;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.status-pill.paid,
+.status-pill.delivered { background: var(--green); }
+.status-pill.pending,
+.status-pill.waiting_payment { background: #fbbf24; }
+.status-pill.expired,
+.status-pill.cancelled,
+.status-pill.failed { background: var(--red); color: #fff; }
+.status-pill.problem,
+.status-pill.manual { background: var(--pink); color: #fff; }
+
+.order-row {
+  display: grid;
+  grid-template-columns: minmax(90px, 0.75fr) minmax(0, 1fr);
+  gap: 10px;
+  padding: 8px 0;
+  border-top: 2px dashed rgba(16, 16, 16, 0.18);
+  font-size: 13px;
+}
+
+body.dark-theme .order-row {
+  border-top-color: rgba(248, 250, 252, 0.22);
+}
+
+.order-row span:first-child {
+  color: var(--muted);
+  font-weight: 900;
+}
+
+.order-row b {
+  min-width: 0;
+  color: var(--ink);
+  font-weight: 950;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.discount-value { color: #0f7a4a !important; }
+
+.key-row {
+  margin-top: 12px;
+  padding: 11px;
+  border: var(--border-sm);
+  border-radius: 15px;
+  background: var(--soft);
+  box-shadow: var(--shadow-sm);
+}
+
+.key-row-head {
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+}
+
+.key-row-head span {
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.copy-key-btn,
+.order-link-btn,
+.resume-pay-btn {
+  min-height: 34px;
+  padding: 8px 11px;
+  font-size: 11px;
+}
+
+.copy-key-btn { background: var(--pink); color: #fff; }
+.order-link-btn { background: #fff; }
+.resume-pay-btn { background: var(--yellow); }
+
+.key-code {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  border: var(--border-sm);
+  border-radius: 12px;
+  background: #fff;
+  color: #101010;
+  font-family: "DM Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.order-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.orders-empty,
+.orders-error {
+  padding: 26px 16px;
+  border: var(--border-sm);
+  border-radius: 17px;
+  background: var(--soft);
+  box-shadow: var(--shadow-sm);
+  color: var(--muted);
+  text-align: center;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.orders-empty iconify-icon,
+.orders-error iconify-icon {
+  display: block;
+  margin: 0 auto 8px;
+  color: var(--ink);
+  font-size: 36px;
+}
+
+.skeleton-card {
+  height: 118px;
+  border: var(--border-sm);
+  border-radius: 17px;
+  background: linear-gradient(90deg, var(--soft), #fff, var(--soft));
+  box-shadow: var(--shadow-sm);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite linear;
+}
+
+@keyframes shimmer {
+  to { background-position: -200% 0; }
+}
+
+/* SweetAlert */
+.swal2-popup {
+  border: var(--border) !important;
+  border-radius: 20px !important;
+  box-shadow: var(--shadow) !important;
+  font-family: "Space Grotesk", "Plus Jakarta Sans", sans-serif !important;
+}
+
+.swal2-confirm,
+.swal2-cancel,
+.swal2-deny {
+  border: var(--border-sm) !important;
+  border-radius: 14px !important;
+  box-shadow: var(--shadow-sm) !important;
+  font-weight: 950 !important;
+}
+
+body.dark-theme .swal2-popup {
+  background: #172033 !important;
+  color: #f8fafc !important;
+}
+
+body.dark-theme .swal2-title,
+body.dark-theme .swal2-html-container {
+  color: #f8fafc !important;
+}
+
+/* Mobile */
+@media (max-width: 900px) {
+  .page {
+    grid-template-columns: 1fr;
+    padding: 22px 15px 76px;
+  }
+
+  .profile-card {
+    position: relative;
+  }
+
+  .profile-card-head {
+    grid-template-columns: 64px minmax(0, 1fr);
+  }
+
+  .avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
+    font-size: 28px;
+  }
+
+  .profile-card h1 {
+    font-size: 26px;
+  }
+
+  .status-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  body {
+    background-size: 16px 16px;
+  }
+
+  .blob {
+    display: none;
+  }
+
+  .header-inner {
+    min-height: 62px;
+    padding: 10px 12px;
+    gap: 9px;
+  }
+
+  .brand-logo {
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
+    border-radius: 13px;
+    font-size: 18px;
+  }
+
+  .brand-copy {
+    display: none;
+  }
+
+  .header-actions {
+    gap: 7px;
+  }
+
+  .lang-switch {
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+
+  .lang-btn {
+    min-width: 31px;
+    height: 29px;
+    padding: 0 8px;
+    font-size: 11px;
+  }
+
+  .icon-btn,
+  .header-back {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    padding: 0;
+    border-radius: 12px;
+  }
+
+  .header-back span {
+    display: none;
+  }
+
+  .page {
+    padding: 18px 12px 72px;
+    gap: 14px;
+  }
+
+  .surface {
+    padding: 17px;
+    border-width: 2px;
+    border-radius: 18px;
+    box-shadow: 5px 5px 0 var(--ink);
+  }
+
+  .profile-card::before {
+    height: 10px;
+    border-bottom-width: 2px;
+  }
+
+  .profile-card-head {
+    padding-top: 8px;
+    grid-template-columns: 56px minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .avatar {
+    width: 56px;
+    height: 56px;
+    border-width: 2px;
+    border-radius: 16px;
+    box-shadow: 3px 3px 0 var(--ink);
+    font-size: 24px;
+  }
+
+  .profile-card h1 {
+    font-size: 24px;
+  }
+
+  .subtitle {
+    font-size: 12px;
+  }
+
+  .buyer-stats-mini {
+    display: none;
+  }
+
+  .buyer-badge {
+    margin-top: 12px;
+    padding: 6px 10px;
+    font-size: 10px;
+  }
+
+  .status-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .status-box {
+    padding: 10px;
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+
+  .profile-actions {
+    margin-top: 13px;
+  }
+
+  .tab-card {
+    position: sticky;
+    top: 72px;
+    z-index: 10;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding: 5px;
+    gap: 5px;
+    border-width: 2px;
+    border-radius: 16px;
+    background: var(--paper);
+  }
+
+  .tab-btn {
+    min-height: 48px;
+    padding: 7px 5px;
+    flex-direction: column;
+    gap: 3px;
+    border-width: 2px;
+    border-radius: 12px;
+    box-shadow: 2px 2px 0 var(--ink);
+    font-size: 9.5px;
+  }
+
+  .tab-btn iconify-icon {
+    font-size: 18px;
+  }
+
+  .section-title {
+    font-size: 24px;
+  }
+
+  .section-desc {
+    display: none;
+  }
+
+  .orders-filter {
+    margin: 12px -2px 12px;
+    padding: 0 2px 4px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .orders-filter::-webkit-scrollbar {
+    display: none;
+  }
+
+  .filter-chip {
+    flex: 0 0 auto;
+    min-height: 34px;
+    padding: 6px 9px;
+    box-shadow: 2px 2px 0 var(--ink);
+    font-size: 10px;
+  }
+
+  .order-card {
+    padding: 13px;
+    border-radius: 15px;
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+
+  .order-card-head {
+    align-items: flex-start;
+  }
+
+  .order-card-head strong {
+    font-size: 15px;
+  }
+
+  .order-row {
+    grid-template-columns: 1fr;
+    gap: 2px;
+    padding: 7px 0;
+    font-size: 12px;
+  }
+
+  .order-row b {
+    text-align: left;
+  }
+
+  .order-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .order-link-btn,
+  .resume-pay-btn {
+    width: 100%;
+  }
+
+  .key-row {
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+
+  .key-row-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .copy-key-btn {
+    width: 100%;
+  }
+
+  .btn,
+  input {
+    min-height: 45px;
+  }
+
+  .skeleton-card {
+    height: 104px;
+    animation: none;
+  }
+}
+
+</style></head>
+<body onload="
       applyAccountTheme();
       applyAccountLanguage();
       checkUser();
-    "
-  >
-    <span class="blob blob-1" aria-hidden="true"></span>
-    <span class="blob blob-2" aria-hidden="true"></span>
-
-    <header class="site-header">
-      <div class="header-inner">
-        <a href="/" class="brand" aria-label="AE Game Store - Beranda">
-          <span class="brand-logo" aria-hidden="true">⛩️</span>
-          <span class="brand-copy">
-            <strong>AE Game Store</strong>
-            <span data-account-i18n="brandTagline">Premium Digital Keys</span>
-          </span>
-        </a>
-
-        <div class="header-actions">
-          <div class="lang-switch" role="group" aria-label="Language switcher">
-            <button
-              type="button"
-              id="btn-id"
-              class="lang-btn"
-              onclick="setAccountLanguage('id')"
-              aria-pressed="true"
-            >
+    ">
+<span aria-hidden="true" class="blob blob-1"></span>
+<span aria-hidden="true" class="blob blob-2"></span>
+<header class="site-header">
+<div class="header-inner">
+<a aria-label="AE Game Store - Beranda" class="brand" href="/">
+<span aria-hidden="true" class="brand-logo">⛩️</span>
+<span class="brand-copy">
+<strong>AE Game Store</strong>
+<span data-account-i18n="brandTagline">Premium Digital Keys</span>
+</span>
+</a>
+<div class="header-actions">
+<div aria-label="Language switcher" class="lang-switch" role="group">
+<button aria-pressed="true" class="lang-btn" id="btn-id" onclick="setAccountLanguage('id')" type="button">
               ID
             </button>
-            <button
-              type="button"
-              id="btn-en"
-              class="lang-btn"
-              onclick="setAccountLanguage('en')"
-              aria-pressed="false"
-            >
+<button aria-pressed="false" class="lang-btn" id="btn-en" onclick="setAccountLanguage('en')" type="button">
               EN
             </button>
-          </div>
-
-          <button
-            type="button"
-            id="theme-toggle"
-            class="icon-btn"
-            onclick="toggleAccountTheme()"
-            aria-label="Toggle dark mode"
-          >
+</div>
+<button aria-label="Toggle dark mode" class="icon-btn" id="theme-toggle" onclick="toggleAccountTheme()" type="button">
             🌙
           </button>
-
-          <a href="/" class="header-back" aria-label="Kembali ke Beranda">
-            <iconify-icon
-              icon="mdi:arrow-left"
-              aria-hidden="true"
-            ></iconify-icon>
-            <span data-account-i18n="backHome">Kembali ke Home</span>
-          </a>
-        </div>
-      </div>
-    </header>
-
-    <main class="page">
-      <!-- Profile column -->
-      <aside class="surface profile-card" aria-label="Profil pengguna">
-        <div class="profile-card-head">
-          <div class="avatar" aria-hidden="true">👤</div>
-          <div class="profile-card-text">
-            <h1 data-account-i18n="accountTitle">Akun Saya</h1>
-            <p
-              class="subtitle"
-              id="userText"
-              data-account-i18n="checkingAccount"
-            >
+<a aria-label="Kembali ke Beranda" class="header-back" href="/">
+<iconify-icon aria-hidden="true" icon="mdi:arrow-left"></iconify-icon>
+<span data-account-i18n="backHome">Kembali ke Home</span>
+</a>
+</div>
+</div>
+</header>
+<main class="page">
+<!-- Profile column -->
+<aside aria-label="Profil pengguna" class="surface profile-card">
+<div class="profile-card-head">
+<div aria-hidden="true" class="avatar">👤</div>
+<div class="profile-card-text">
+<h1 data-account-i18n="accountTitle">Akun Saya</h1>
+<p class="subtitle" data-account-i18n="checkingAccount" id="userText">
               Mengecek akun...
             </p>
-          </div>
-        </div>
-
-        <div id="buyerBadgeBox" aria-live="polite"></div>
-        <div
-          id="buyerStatsBox"
-          class="buyer-stats-mini"
-          aria-live="polite"
-        ></div>
-
-        <div class="status-grid">
-          <div class="status-box">
-            <strong data-account-i18n="loginStatusTitle">Status Login</strong>
-            <span id="loginStatus" data-account-i18n="loginStatusActive"
-              >Aktif</span
-            >
-          </div>
-          <div class="status-box">
-            <strong data-account-i18n="contactOrderTitle">Kontak Order</strong>
-            <span id="contactStatus" data-account-i18n="contactNotSaved"
-              >Belum disimpan</span
-            >
-          </div>
-        </div>
-
-        <div class="profile-actions">
-          <a href="/" class="btn btn-secondary" data-account-i18n="backHome">
+</div>
+</div>
+<div aria-live="polite" id="buyerBadgeBox"></div>
+<div aria-live="polite" class="buyer-stats-mini" id="buyerStatsBox"></div>
+<div class="status-grid">
+<div class="status-box">
+<strong data-account-i18n="loginStatusTitle">Status Login</strong>
+<span data-account-i18n="loginStatusActive" id="loginStatus">Aktif</span>
+</div>
+<div class="status-box">
+<strong data-account-i18n="contactOrderTitle">Kontak Order</strong>
+<span data-account-i18n="contactNotSaved" id="contactStatus">Belum disimpan</span>
+</div>
+</div>
+<div class="profile-actions">
+<a class="btn btn-secondary" data-account-i18n="backHome" href="/">
             Kembali ke Home
           </a>
-          <button
-            type="button"
-            class="btn btn-danger"
-            onclick="logoutUser()"
-            data-account-i18n="logout"
-          >
+<button class="btn btn-danger" data-account-i18n="logout" onclick="logoutUser()" type="button">
             Logout
           </button>
-        </div>
-      </aside>
-
-      <!-- Main column with tabs -->
-      <section class="surface" aria-label="Pengaturan akun">
-        <nav class="tab-card" role="tablist" aria-label="Account section tabs">
-          <button
-            type="button"
-            class="tab-btn active"
-            data-tab="orders"
-            role="tab"
-            aria-selected="true"
-            onclick="switchTab('orders')"
-          >
-            <iconify-icon icon="mdi:history" aria-hidden="true"></iconify-icon>
-            <span data-account-i18n="orderHistoryTitle">Riwayat Order</span>
-          </button>
-          <button
-            type="button"
-            class="tab-btn"
-            data-tab="default"
-            role="tab"
-            aria-selected="false"
-            onclick="switchTab('default')"
-          >
-            <iconify-icon
-              icon="mdi:account-edit-outline"
-              aria-hidden="true"
-            ></iconify-icon>
-            <span data-account-i18n="defaultOrderTitle">Data Default</span>
-          </button>
-          <button
-            type="button"
-            class="tab-btn"
-            data-tab="security"
-            role="tab"
-            aria-selected="false"
-            onclick="switchTab('security')"
-          >
-            <iconify-icon
-              icon="mdi:shield-lock-outline"
-              aria-hidden="true"
-            ></iconify-icon>
-            <span data-account-i18n="changePasswordTitle">Keamanan</span>
-          </button>
-        </nav>
-
-        <!-- Orders panel -->
-        <div
-          id="panel-orders"
-          class="panel active"
-          role="tabpanel"
-          aria-labelledby="tab-orders"
-        >
-          <div class="section-title" data-account-i18n="orderHistoryTitle">
+</div>
+</aside>
+<!-- Main column with tabs -->
+<section aria-label="Pengaturan akun" class="surface">
+<nav aria-label="Account section tabs" class="tab-card" role="tablist">
+<button aria-selected="true" class="tab-btn active" data-tab="orders" onclick="switchTab('orders')" role="tab" type="button">
+<iconify-icon aria-hidden="true" icon="mdi:history"></iconify-icon>
+<span data-account-i18n="orderHistoryTitle">Riwayat Order</span>
+</button>
+<button aria-selected="false" class="tab-btn" data-tab="default" onclick="switchTab('default')" role="tab" type="button">
+<iconify-icon aria-hidden="true" icon="mdi:account-edit-outline"></iconify-icon>
+<span data-account-i18n="defaultOrderTitle">Data Default</span>
+</button>
+<button aria-selected="false" class="tab-btn" data-tab="security" onclick="switchTab('security')" role="tab" type="button">
+<iconify-icon aria-hidden="true" icon="mdi:shield-lock-outline"></iconify-icon>
+<span data-account-i18n="changePasswordTitle">Keamanan</span>
+</button>
+</nav>
+<!-- Orders panel -->
+<div aria-labelledby="tab-orders" class="panel active" id="panel-orders" role="tabpanel">
+<div class="section-title" data-account-i18n="orderHistoryTitle">
             Riwayat Order
           </div>
-          <p class="section-desc" data-account-i18n="orderHistoryDesc">
+<p class="section-desc" data-account-i18n="orderHistoryDesc">
             Semua transaksi yang terhubung ke akunmu, lengkap dengan key game
             dan detail pembayaran.
           </p>
-
-          <div
-            class="orders-filter"
-            role="group"
-            aria-label="Filter order status"
-            id="ordersFilter"
-          >
-            <button
-              type="button"
-              class="filter-chip active"
-              data-filter="all"
-              aria-pressed="true"
-              onclick="setOrderFilter('all')"
-            >
-              <span data-account-i18n="filterAll">Semua</span>
-              <span class="count" id="filterCount-all">0</span>
-            </button>
-            <button
-              type="button"
-              class="filter-chip"
-              data-filter="pending"
-              aria-pressed="false"
-              onclick="setOrderFilter('pending')"
-            >
-              <span class="dot" aria-hidden="true"></span>
-              <span data-account-i18n="filterPending">Pending</span>
-              <span class="count" id="filterCount-pending">0</span>
-            </button>
-            <button
-              type="button"
-              class="filter-chip"
-              data-filter="paid"
-              aria-pressed="false"
-              onclick="setOrderFilter('paid')"
-            >
-              <span class="dot" aria-hidden="true"></span>
-              <span data-account-i18n="filterPaid">Lunas</span>
-              <span class="count" id="filterCount-paid">0</span>
-            </button>
-            <button
-              type="button"
-              class="filter-chip"
-              data-filter="failed"
-              aria-pressed="false"
-              onclick="setOrderFilter('failed')"
-            >
-              <span class="dot" aria-hidden="true"></span>
-              <span data-account-i18n="filterFailed">Gagal</span>
-              <span class="count" id="filterCount-failed">0</span>
-            </button>
-          </div>
-
-          <div id="orderHistory" class="orders-content">
-            <div class="skeleton-list">
-              <div class="skeleton-card"></div>
-              <div class="skeleton-card"></div>
-              <div class="skeleton-card"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Default order data panel -->
-        <div
-          id="panel-default"
-          class="panel"
-          role="tabpanel"
-          aria-labelledby="tab-default"
-        >
-          <div class="section-title" data-account-i18n="defaultOrderTitle">
+<div aria-label="Filter order status" class="orders-filter" id="ordersFilter" role="group">
+<button aria-pressed="true" class="filter-chip active" data-filter="all" onclick="setOrderFilter('all')" type="button">
+<span data-account-i18n="filterAll">Semua</span>
+<span class="count" id="filterCount-all">0</span>
+</button>
+<button aria-pressed="false" class="filter-chip" data-filter="pending" onclick="setOrderFilter('pending')" type="button">
+<span aria-hidden="true" class="dot"></span>
+<span data-account-i18n="filterPending">Pending</span>
+<span class="count" id="filterCount-pending">0</span>
+</button>
+<button aria-pressed="false" class="filter-chip" data-filter="paid" onclick="setOrderFilter('paid')" type="button">
+<span aria-hidden="true" class="dot"></span>
+<span data-account-i18n="filterPaid">Lunas</span>
+<span class="count" id="filterCount-paid">0</span>
+</button>
+<button aria-pressed="false" class="filter-chip" data-filter="failed" onclick="setOrderFilter('failed')" type="button">
+<span aria-hidden="true" class="dot"></span>
+<span data-account-i18n="filterFailed">Gagal</span>
+<span class="count" id="filterCount-failed">0</span>
+</button>
+</div>
+<div class="orders-content" id="orderHistory">
+<div class="skeleton-list">
+<div class="skeleton-card"></div>
+<div class="skeleton-card"></div>
+<div class="skeleton-card"></div>
+</div>
+</div>
+</div>
+<!-- Default order data panel -->
+<div aria-labelledby="tab-default" class="panel" id="panel-default" role="tabpanel">
+<div class="section-title" data-account-i18n="defaultOrderTitle">
             Data Order Default
           </div>
-          <p class="section-desc" data-account-i18n="defaultOrderNote">
+<p class="section-desc" data-account-i18n="defaultOrderNote">
             Data ini bisa dipakai untuk mengisi otomatis nama dan kontak saat
             checkout.
           </p>
-
-          <div class="field">
-            <label for="defaultName" data-account-i18n="defaultNameLabel">
+<div class="field">
+<label data-account-i18n="defaultNameLabel" for="defaultName">
               Nama Default
             </label>
-            <div class="input-wrap">
-              <iconify-icon
-                icon="mdi:account-outline"
-                aria-hidden="true"
-              ></iconify-icon>
-              <input
-                type="text"
-                id="defaultName"
-                placeholder="Nama default untuk order"
-                data-account-placeholder="defaultNamePlaceholder"
-                autocomplete="name"
-              />
-            </div>
-          </div>
-
-          <div class="field">
-            <label for="defaultContact" data-account-i18n="defaultContactLabel">
+<div class="input-wrap">
+<iconify-icon aria-hidden="true" icon="mdi:account-outline"></iconify-icon>
+<input autocomplete="name" data-account-placeholder="defaultNamePlaceholder" id="defaultName" placeholder="Nama default untuk order" type="text"/>
+</div>
+</div>
+<div class="field">
+<label data-account-i18n="defaultContactLabel" for="defaultContact">
               Kontak Default
             </label>
-            <div class="input-wrap">
-              <iconify-icon
-                icon="mdi:email-outline"
-                aria-hidden="true"
-              ></iconify-icon>
-              <input
-                type="text"
-                id="defaultContact"
-                placeholder="Email / Nomor WA aktif"
-                data-account-placeholder="defaultContactPlaceholder"
-                autocomplete="email"
-              />
-            </div>
-          </div>
-
-          <button
-            type="button"
-            class="btn btn-primary"
-            onclick="saveDefaultOrderData()"
-            data-account-i18n="saveDefaultOrder"
-          >
+<div class="input-wrap">
+<iconify-icon aria-hidden="true" icon="mdi:email-outline"></iconify-icon>
+<input autocomplete="email" data-account-placeholder="defaultContactPlaceholder" id="defaultContact" placeholder="Email / Nomor WA aktif" type="text"/>
+</div>
+</div>
+<button class="btn btn-primary" data-account-i18n="saveDefaultOrder" onclick="saveDefaultOrderData()" type="button">
             Simpan Data Order
           </button>
-        </div>
-
-        <!-- Security panel -->
-        <div
-          id="panel-security"
-          class="panel"
-          role="tabpanel"
-          aria-labelledby="tab-security"
-        >
-          <div class="section-title" data-account-i18n="changePasswordTitle">
+</div>
+<!-- Security panel -->
+<div aria-labelledby="tab-security" class="panel" id="panel-security" role="tabpanel">
+<div class="section-title" data-account-i18n="changePasswordTitle">
             Ganti Password
           </div>
-          <p class="section-desc" data-account-i18n="changePasswordNote">
+<p class="section-desc" data-account-i18n="changePasswordNote">
             Kalau password kamu hasil reset admin, isi password random itu
             sebagai password lama.
           </p>
-
-          <div class="field">
-            <label for="oldPassword" data-account-i18n="oldPasswordLabel">
+<div class="field">
+<label data-account-i18n="oldPasswordLabel" for="oldPassword">
               Password Lama
             </label>
-            <div class="input-wrap">
-              <iconify-icon
-                icon="mdi:lock-outline"
-                aria-hidden="true"
-              ></iconify-icon>
-              <input
-                type="password"
-                id="oldPassword"
-                placeholder="Password lama / password random"
-                data-account-placeholder="oldPasswordPlaceholder"
-                autocomplete="current-password"
-              />
-              <button
-                type="button"
-                class="password-toggle"
-                onclick="togglePassword('oldPassword', this)"
-                aria-label="Tampilkan password"
-              >
-                <iconify-icon
-                  icon="mdi:eye-outline"
-                  aria-hidden="true"
-                ></iconify-icon>
-              </button>
-            </div>
-          </div>
-
-          <div class="field">
-            <label for="newPassword" data-account-i18n="newPasswordLabel">
+<div class="input-wrap">
+<iconify-icon aria-hidden="true" icon="mdi:lock-outline"></iconify-icon>
+<input autocomplete="current-password" data-account-placeholder="oldPasswordPlaceholder" id="oldPassword" placeholder="Password lama / password random" type="password"/>
+<button aria-label="Tampilkan password" class="password-toggle" onclick="togglePassword('oldPassword', this)" type="button">
+<iconify-icon aria-hidden="true" icon="mdi:eye-outline"></iconify-icon>
+</button>
+</div>
+</div>
+<div class="field">
+<label data-account-i18n="newPasswordLabel" for="newPassword">
               Password Baru
             </label>
-            <div class="input-wrap">
-              <iconify-icon
-                icon="mdi:lock-reset"
-                aria-hidden="true"
-              ></iconify-icon>
-              <input
-                type="password"
-                id="newPassword"
-                placeholder="Password baru minimal 6 karakter"
-                data-account-placeholder="newPasswordPlaceholder"
-                autocomplete="new-password"
-              />
-              <button
-                type="button"
-                class="password-toggle"
-                onclick="togglePassword('newPassword', this)"
-                aria-label="Tampilkan password"
-              >
-                <iconify-icon
-                  icon="mdi:eye-outline"
-                  aria-hidden="true"
-                ></iconify-icon>
-              </button>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            class="btn btn-primary"
-            onclick="changePassword()"
-            data-account-i18n="saveNewPassword"
-          >
+<div class="input-wrap">
+<iconify-icon aria-hidden="true" icon="mdi:lock-reset"></iconify-icon>
+<input autocomplete="new-password" data-account-placeholder="newPasswordPlaceholder" id="newPassword" placeholder="Password baru minimal 6 karakter" type="password"/>
+<button aria-label="Tampilkan password" class="password-toggle" onclick="togglePassword('newPassword', this)" type="button">
+<iconify-icon aria-hidden="true" icon="mdi:eye-outline"></iconify-icon>
+</button>
+</div>
+</div>
+<button class="btn btn-primary" data-account-i18n="saveNewPassword" onclick="changePassword()" type="button">
             Simpan Password Baru
           </button>
-
-          <div style="height: 22px"></div>
-
-          <div class="section-title" data-account-i18n="verifyEmailTitle">
+<div style="height: 22px"></div>
+<div class="section-title" data-account-i18n="verifyEmailTitle">
             Verifikasi Email
           </div>
-          <p class="section-desc" data-account-i18n="verifyEmailNote">
+<p class="section-desc" data-account-i18n="verifyEmailNote">
             Kirim link verifikasi ke email kamu. Email yang sudah verified bisa
             dipakai untuk data order dan notifikasi akun.
           </p>
-
-          <div class="field">
-            <label for="verifyEmail" data-account-i18n="verifyEmailLabel">
+<div class="field">
+<label data-account-i18n="verifyEmailLabel" for="verifyEmail">
               Email
             </label>
-            <div class="input-wrap">
-              <iconify-icon
-                icon="mdi:email-check-outline"
-                aria-hidden="true"
-              ></iconify-icon>
-              <input
-                type="email"
-                id="verifyEmail"
-                placeholder="email@example.com"
-                data-account-placeholder="verifyEmailPlaceholder"
-                autocomplete="email"
-              />
-            </div>
-            <p
-              class="note"
-              id="emailVerifyStatus"
-              data-account-i18n="emailNotVerified"
-            >
+<div class="input-wrap">
+<iconify-icon aria-hidden="true" icon="mdi:email-check-outline"></iconify-icon>
+<input autocomplete="email" data-account-placeholder="verifyEmailPlaceholder" id="verifyEmail" placeholder="email@example.com" type="email"/>
+</div>
+<p class="note" data-account-i18n="emailNotVerified" id="emailVerifyStatus">
               Email belum terverifikasi.
             </p>
-          </div>
-
-          <button
-            type="button"
-            class="btn btn-secondary"
-            onclick="requestEmailVerification()"
-            data-account-i18n="verifyEmailButton"
-          >
+</div>
+<button class="btn btn-secondary" data-account-i18n="verifyEmailButton" onclick="requestEmailVerification()" type="button">
             Kirim Link Verifikasi
           </button>
-        </div>
-      </section>
-    </main>
-
-    <script>
+</div>
+</section>
+</main>
+<script>
       const accountTranslations = {
         id: {
           accountTitle: "Akun Saya",
@@ -3061,5 +2238,5 @@ button:hover,a.btn:hover,.btn:hover,.primary-btn:hover,.action-btn:hover{
         }
       }
     </script>
-  </body>
+</body>
 </html>
