@@ -2067,20 +2067,16 @@ app.post("/create-order", orderLimiter, async (req, res) => {
       });
     }
 
-    const deliveryType = String(
-      productRow.delivery_type || "auto",
-    ).toLowerCase();
+    const keyCheck = await query(
+  "SELECT id FROM keys WHERE product_id = $1 AND used = 0 LIMIT 1",
+  [cleanProductId],
+);
 
-    if (deliveryType !== "manual") {
-      const keyCheck = await query(
-        "SELECT id FROM keys WHERE product_id = $1 AND used = 0 LIMIT 1",
-        [cleanProductId],
-      );
-
-      if (keyCheck.rows.length === 0) {
-        return res.status(400).json({ message: "Stok key habis" });
-      }
-    }
+if (keyCheck.rows.length === 0) {
+  return res.status(400).json({
+    message: "Stok key habis",
+  });
+}
 
     const orderId = "ORDER-" + crypto.randomUUID();
     const accessToken = crypto.randomBytes(24).toString("hex");
@@ -2260,22 +2256,6 @@ app.post("/midtrans-notification", webhookLimiter, async (req, res) => {
           return res.status(200).send("OK");
         }
 
-        const deliveryType = String(
-          order.delivery_type || "auto",
-        ).toLowerCase();
-
-        if (deliveryType === "manual") {
-          await client.query(
-            `UPDATE orders
-             SET payment_status = $1, delivery_status = $2, gameKey = $3
-             WHERE id = $4`,
-            ["paid", "manual", "MENUNGGU ADMIN", orderId],
-          );
-
-          await client.query("COMMIT");
-          return res.status(200).send("OK");
-        }
-
         const keyResult = await client.query(
           `SELECT * FROM keys
    WHERE product_id = $1 AND used = 0
@@ -2288,16 +2268,16 @@ app.post("/midtrans-notification", webhookLimiter, async (req, res) => {
         const keyRow = keyResult.rows[0];
 
         if (!keyRow) {
-          await client.query(
-            `UPDATE orders
-                         SET payment_status = $1, delivery_status = $2, gameKey = $3
-                         WHERE id = $4`,
-            ["paid", "manual", "STOK HABIS - CEK ADMIN", orderId],
-          );
+  await client.query(
+    `UPDATE orders
+     SET payment_status = $1, delivery_status = $2, gameKey = $3
+     WHERE id = $4`,
+    ["paid", "problem", "STOK HABIS - HUBUNGI ADMIN", orderId],
+  );
 
-          await client.query("COMMIT");
-          return res.status(200).send("OK");
-        }
+  await client.query("COMMIT");
+  return res.status(200).send("OK");
+}
 
         const lockResult = await client.query(
           "UPDATE keys SET used = 1 WHERE id = $1 AND used = 0 RETURNING id",
@@ -2551,22 +2531,6 @@ app.post(
         return res.json({ message: "Order sudah dibayar sebelumnya" });
       }
 
-      const deliveryType = String(order.delivery_type || "auto").toLowerCase();
-
-      if (deliveryType === "manual") {
-        await client.query(
-          `UPDATE orders
-           SET payment_status = $1, delivery_status = $2, gameKey = $3
-           WHERE id = $4`,
-          ["paid", "manual", "MENUNGGU ADMIN", orderId],
-        );
-
-        await client.query("COMMIT");
-        return res.json({
-          message: "Pembayaran dikonfirmasi, order masuk proses manual admin",
-        });
-      }
-
       const keyResult = await client.query(
         `SELECT * FROM keys
    WHERE product_id = $1 AND used = 0
@@ -2579,18 +2543,11 @@ app.post(
       const keyRow = keyResult.rows[0];
 
       if (!keyRow) {
-        await client.query(
-          `UPDATE orders
-                 SET payment_status = $1, delivery_status = $2, gameKey = $3
-                 WHERE id = $4`,
-          ["paid", "manual", "STOK HABIS - CEK ADMIN", orderId],
-        );
-
-        await client.query("COMMIT");
-        return res.json({
-          message: "Pembayaran dikonfirmasi, tapi stok key habis",
-        });
-      }
+  await client.query("ROLLBACK");
+  return res.status(400).json({
+    message: "Stok key habis. Tambahkan key dulu sebelum konfirmasi pembayaran.",
+  });
+}
 
       const lockResult = await client.query(
         "UPDATE keys SET used = 1 WHERE id = $1 AND used = 0 RETURNING id",
@@ -3499,12 +3456,7 @@ app.post("/products", requireAdminAuth, requireAdminCsrf, async (req, res) => {
   const cleanBrand = String(brand || "").trim();
   const cleanDuration = String(duration || "").trim();
   const cleanPrice = Number(price);
-  const cleanDeliveryType =
-    String(delivery_type || "auto")
-      .trim()
-      .toLowerCase() === "manual"
-      ? "manual"
-      : "auto";
+  const cleanDeliveryType = "auto";
   const cleanPlayStatus = normalizePlayStatus(play_status);
 
   if (!cleanGame || !cleanBrand || !cleanDuration) {
@@ -3576,17 +3528,7 @@ app.put(
     const cleanBrand = String(brand || "").trim();
     const cleanDuration = String(duration || "").trim();
     const cleanPrice = Number(price);
-    const hasDeliveryType = Object.prototype.hasOwnProperty.call(
-      req.body,
-      "delivery_type",
-    );
-    const cleanDeliveryType = hasDeliveryType
-      ? String(req.body.delivery_type || "auto")
-          .trim()
-          .toLowerCase() === "manual"
-        ? "manual"
-        : "auto"
-      : null;
+    const cleanDeliveryType = "auto";
 
     const hasPlayStatus = Object.prototype.hasOwnProperty.call(
       req.body,
