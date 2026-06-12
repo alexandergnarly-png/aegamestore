@@ -6213,220 +6213,6 @@ body.dark-theme .payment-modal-btn-ghost {
   }
 }
 
-/* ===== MOBILE GAME CARD - CLEAN COMPACT FINAL ===== */
-@media (max-width: 640px) {
-  .game-grid,
-  .compact-game-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .game-card {
-    display: grid;
-    grid-template-columns: 72px minmax(0, 1fr) 30px;
-    align-items: center;
-    gap: 9px;
-    min-height: 88px;
-    padding: 8px 9px;
-    border-radius: 14px;
-    overflow: hidden;
-    box-shadow: var(--brutal-shadow);
-    content-visibility: auto;
-    contain-intrinsic-size: 88px;
-    will-change: auto;
-  }
-
-  .game-card:hover,
-  .game-card:active {
-    transform: none;
-  }
-
-  .game-card::after,
-  .game-card-top,
-  .game-card-chip,
-  .game-card-ribbon,
-  .game-card-cta,
-  .game-card-thumb-overlay {
-    display: none;
-  }
-
-  .game-card-thumb {
-    width: 72px;
-    height: 72px;
-    min-height: 72px;
-    aspect-ratio: 1 / 1;
-    border-radius: 10px;
-    overflow: hidden;
-    border: var(--brutal-border);
-    box-shadow: 2px 2px 0 #0c1a2e;
-  }
-
-  .game-card-thumb img,
-  .game-card-thumb-fallback {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-  }
-
-  .game-card-body {
-    min-width: 0;
-    padding: 0;
-    gap: 4px;
-    justify-content: center;
-  }
-
-  .game-card-status-row {
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 4px;
-    overflow: hidden;
-  }
-
-  .game-status-badge,
-  .game-card-brand-count {
-    min-height: 17px;
-    padding: 3px 5px;
-    font-size: 7.5px;
-    line-height: 1;
-    border-width: 1.5px;
-    box-shadow: 1.5px 1.5px 0 #0c1a2e;
-    white-space: nowrap;
-  }
-
-  .game-status-badge {
-    max-width: 70px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .game-card-title {
-    display: block;
-    margin: 0;
-    font-size: 12.5px;
-    line-height: 1.12;
-    font-weight: 900;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .game-card-meta {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    flex-wrap: nowrap;
-    min-width: 0;
-  }
-
-  .game-card-price {
-    max-width: 104px;
-    min-width: 0;
-    padding: 4px 6px;
-    border-radius: 8px;
-    box-shadow: 2px 2px 0 #0c1a2e;
-  }
-
-  .game-card-price small {
-    display: none;
-  }
-
-  .game-card-price b {
-    font-size: 11px;
-    line-height: 1;
-  }
-
-  .game-card-stock {
-    max-width: 86px;
-    padding: 4px 5px;
-    font-size: 8px;
-    line-height: 1;
-    border-radius: 8px;
-    box-shadow: 2px 2px 0 #0c1a2e;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .game-card-stock-dot {
-    display: none;
-    animation: none;
-  }
-
-  .game-card-fav {
-    position: static;
-    width: 28px;
-    height: 28px;
-    font-size: 13px;
-    border-radius: 9px;
-    box-shadow: 2px 2px 0 #0c1a2e;
-    justify-self: end;
-  }
-}
-
-@media (max-width: 420px) {
-  .game-card {
-    grid-template-columns: 66px minmax(0, 1fr) 28px;
-    min-height: 82px;
-    padding: 7px 8px;
-    gap: 8px;
-  }
-
-  .game-card-thumb {
-    width: 66px;
-    height: 66px;
-    min-height: 66px;
-  }
-
-  .game-card-title {
-    font-size: 12px;
-  }
-
-  .game-card-price {
-    max-width: 96px;
-  }
-
-  .game-card-price b {
-    font-size: 10.5px;
-  }
-
-  .game-card-stock {
-    max-width: 78px;
-    font-size: 7.5px;
-  }
-
-  .game-card-fav {
-    width: 26px;
-    height: 26px;
-  }
-}
-
-@media (max-width: 420px) {
-  .game-card {
-    grid-template-columns: 56px 1fr 30px !important;
-    min-height: 72px !important;
-    padding: 8px 9px !important;
-  }
-
-  .game-card-thumb {
-    width: 56px !important;
-    height: 56px !important;
-    border-radius: 13px !important;
-  }
-
-  .game-card-title {
-    font-size: 13px !important;
-  }
-
-  .game-card-price b {
-    font-size: 11.5px !important;
-  }
-
-  .game-card-stock {
-    font-size: 8.5px !important;
-  }
-}
 /* ===== ORDER VOUCHER COLLAPSIBLE ===== */
 .voucher-panel {
   margin: 4px 0 14px;
@@ -6792,93 +6578,6 @@ body.dark-theme .order-steps {
     top: auto;
     z-index: 1;
     box-shadow: none;
-  }
-
-  /* compact horizontal mobile game cards */
-  .game-grid,
-  .compact-game-grid {
-    grid-template-columns: 1fr !important;
-    gap: 9px !important;
-  }
-
-  .game-card {
-    min-height: 94px;
-    display: grid;
-    grid-template-columns: 92px minmax(0, 1fr);
-    align-items: stretch;
-    border-radius: 18px;
-    overflow: hidden;
-    content-visibility: auto;
-    contain-intrinsic-size: 0 104px;
-  }
-
-  .game-card:active {
-    transform: scale(0.992) !important;
-  }
-
-  .game-card-thumb {
-    width: 92px;
-    height: 100%;
-    min-height: 94px;
-    aspect-ratio: auto;
-  }
-
-  .game-card-thumb-overlay {
-    padding: 26px 7px 7px;
-  }
-
-  .game-card-thumb-overlay strong {
-    display: none;
-  }
-
-  .game-card-top {
-    left: 102px;
-    top: 10px;
-    right: 48px;
-  }
-
-  .game-card-chip {
-    display: inline-flex;
-    font-size: 8.5px;
-    padding: 3px 7px;
-  }
-
-  .game-card-ribbon {
-    display: none;
-  }
-
-  .game-card-fav {
-    top: 10px;
-    right: 10px;
-    width: 30px;
-    height: 30px;
-  }
-
-  .game-card-body {
-    justify-content: flex-end;
-    min-width: 0;
-    padding: 36px 10px 10px;
-  }
-
-  .game-card-title {
-    font-size: 13px;
-    line-clamp: 1;
-    -webkit-line-clamp: 1;
-    line-clamp: 1;
-  }
-
-  .game-card-meta {
-    align-items: flex-end;
-  }
-
-  .game-card-price b {
-    font-size: 12.5px;
-  }
-
-  .game-card-stock {
-    max-width: 48%;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 
   .order-modal-card {
@@ -11324,44 +11023,6 @@ button#buyBtn {
     min-height: 48px !important;
     padding-left: 42px !important;
   }
-  .game-grid,
-  .compact-game-grid {
-    grid-template-columns: 1fr !important;
-    gap: 12px !important;
-  }
-  .game-card {
-    display: grid !important;
-    grid-template-columns: 92px 1fr !important;
-    min-height: 110px !important;
-    border-radius: 16px !important;
-  }
-  .game-card-thumb {
-    height: 100% !important;
-    aspect-ratio: auto !important;
-    border-bottom: 0 !important;
-    border-right: var(--nb-border-thin) !important;
-  }
-  .game-card-thumb-overlay,
-  .game-card-ribbon {
-    display: none !important;
-  }
-  .game-card-body {
-    padding: 34px 10px 10px !important;
-    justify-content: center !important;
-  }
-  .game-card-title {
-    font-size: 14px !important;
-    line-clamp: 2 !important;
-    -webkit-line-clamp: 2 !important;
-    line-height: 1.15 !important;
-  }
-  .game-card-price {
-    padding: 6px !important;
-  }
-  .game-card-stock {
-    font-size: 10px !important;
-    padding: 4px 6px !important;
-  }
   .order-modal,
   .payment-modal,
   .policy-modal,
@@ -11476,9 +11137,6 @@ button#buyBtn {
   }
   .hero h1 {
     font-size: 42px !important;
-  }
-  .game-card {
-    grid-template-columns: 84px 1fr !important;
   }
 }
 @media (max-width: 768px) {
@@ -11833,141 +11491,97 @@ button#buyBtn {
 .game-card-status-safe .game-card-price {
   background: #ffe135 !important;
 }
-/* === GAME CARD V2 MOBILE === */
-@media (max-width: 768px) {
-  .game-card {
-    grid-template-columns: 88px minmax(0, 1fr) !important;
-    min-height: 118px !important;
-  }
 
-  .game-card-body {
-    padding: 10px 10px 10px 12px !important;
-    justify-content: center !important;
-    gap: 6px !important;
-  }
-
-  .game-card-status-row {
-    gap: 5px !important;
-    margin-bottom: 2px !important;
-  }
-
-  .game-status-badge,
-  .game-card-brand-count {
-    min-height: 19px !important;
-    padding: 3px 6px !important;
-    font-size: 8px !important;
-    box-shadow: 1.5px 1.5px 0 #0a0a0a !important;
-    max-width: 100% !important;
-  }
-
-  .game-card-title {
-    font-size: 14px !important;
-    line-height: 1.12 !important;
-    margin: 0 !important;
-  }
-
-  .game-card-meta {
+/* ===== MOBILE GAME CARD - CLEAN COMPACT FINAL =====
+   Single canonical mobile layout. Keep this block after GAME CARD V2 desktop styles
+   so mobile rules do not fight older desktop/status styles. */
+@media (max-width: 640px) {
+  .game-grid,
+  .compact-game-grid {
     display: flex !important;
+    flex-direction: column !important;
+    gap: 9px !important;
+  }
+
+  .game-card {
+    display: grid !important;
+    grid-template-columns: 64px minmax(0, 1fr) 28px !important;
+    grid-template-areas: "thumb body fav" !important;
     align-items: center !important;
-    gap: 6px !important;
-    flex-wrap: wrap !important;
-  }
-
-  .game-card-price {
-    padding: 5px 6px !important;
-    max-width: 100% !important;
-  }
-
-  .game-card-price small {
-    display: none !important;
-  }
-
-  .game-card-price b {
-    font-size: 12px !important;
-    line-height: 1 !important;
-  }
-
-  .game-card-stock {
-    max-width: 100% !important;
-    font-size: 9px !important;
-    padding: 4px 6px !important;
-    line-height: 1 !important;
-  }
-
-  .game-card-cta {
-    display: none !important;
-  }
-
-  .game-card-fav {
-    top: 8px !important;
-    right: 8px !important;
-    width: 32px !important;
-    height: 32px !important;
-  }
-}
-
-@media (max-width: 380px) {
-  .game-card {
-    grid-template-columns: 82px minmax(0, 1fr) !important;
-  }
-
-  .game-card-title {
-    font-size: 13px !important;
-  }
-
-  .game-status-badge,
-  .game-card-brand-count {
-    font-size: 7.5px !important;
-    padding: 3px 5px !important;
-  }
-}
-/* === FINAL FIX: mobile game card v2 badge layout === */
-@media (max-width: 768px) {
-  .game-card-top {
-    display: none !important;
-  }
-
-  .game-card {
-    grid-template-columns: 86px minmax(0, 1fr) !important;
-    min-height: 128px !important;
+    gap: 9px !important;
+    min-height: 84px !important;
+    padding: 8px 9px !important;
+    border-radius: 14px !important;
     overflow: hidden !important;
+    box-shadow: var(--brutal-shadow) !important;
+    content-visibility: auto !important;
+    contain-intrinsic-size: 84px !important;
+    will-change: auto !important;
+  }
+
+  .game-card:hover,
+  .game-card:active {
+    transform: none !important;
+  }
+
+  .game-card::after,
+  .game-card-top,
+  .game-card-chip,
+  .game-card-ribbon,
+  .game-card-cta,
+  .game-card-thumb-overlay {
+    display: none !important;
   }
 
   .game-card-thumb {
+    grid-area: thumb !important;
+    width: 64px !important;
+    height: 64px !important;
+    min-height: 64px !important;
+    aspect-ratio: 1 / 1 !important;
+    border-radius: 10px !important;
+    overflow: hidden !important;
+    border: var(--brutal-border) !important;
+    box-shadow: 2px 2px 0 #0c1a2e !important;
+  }
+
+  .game-card-thumb img,
+  .game-card-thumb-fallback {
+    width: 100% !important;
     height: 100% !important;
-    min-height: 128px !important;
+    object-fit: cover !important;
+    object-position: center !important;
   }
 
   .game-card-body {
-    padding: 12px 48px 12px 12px !important;
-    justify-content: center !important;
-    gap: 7px !important;
+    grid-area: body !important;
     min-width: 0 !important;
+    padding: 0 !important;
+    gap: 4px !important;
+    justify-content: center !important;
   }
 
   .game-card-status-row {
     display: flex !important;
-    align-items: center !important;
-    gap: 6px !important;
     flex-wrap: nowrap !important;
-    max-width: 100% !important;
-    margin: 0 !important;
+    gap: 4px !important;
     overflow: hidden !important;
+    margin: 0 !important;
   }
 
   .game-status-badge,
   .game-card-brand-count {
-    min-height: 20px !important;
-    padding: 4px 7px !important;
-    font-size: 8px !important;
+    min-height: 17px !important;
+    padding: 3px 5px !important;
+    font-size: 7.5px !important;
     line-height: 1 !important;
+    border-width: 1.5px !important;
+    box-shadow: 1.5px 1.5px 0 #0c1a2e !important;
     white-space: nowrap !important;
-    box-shadow: 2px 2px 0 #0a0a0a !important;
   }
 
   .game-status-badge {
-    flex: 0 1 auto !important;
-    max-width: 78px !important;
+    max-width: 68px !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
   }
@@ -11977,22 +11591,30 @@ button#buyBtn {
   }
 
   .game-card-title {
-    font-size: 14px !important;
-    line-height: 1.15 !important;
+    display: block !important;
     margin: 0 !important;
-    padding: 0 !important;
-    max-width: 100% !important;
+    font-size: 12.5px !important;
+    line-height: 1.12 !important;
+    font-weight: 900 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
   }
 
   .game-card-meta {
     display: flex !important;
     align-items: center !important;
-    gap: 7px !important;
-    flex-wrap: wrap !important;
+    gap: 5px !important;
+    flex-wrap: nowrap !important;
+    min-width: 0 !important;
   }
 
   .game-card-price {
-    padding: 6px 8px !important;
+    max-width: 102px !important;
+    min-width: 0 !important;
+    padding: 4px 6px !important;
+    border-radius: 8px !important;
+    box-shadow: 2px 2px 0 #0c1a2e !important;
   }
 
   .game-card-price small {
@@ -12000,21 +11622,73 @@ button#buyBtn {
   }
 
   .game-card-price b {
-    font-size: 12px !important;
+    font-size: 11px !important;
     line-height: 1 !important;
   }
 
   .game-card-stock {
-    font-size: 9px !important;
-    padding: 5px 8px !important;
+    max-width: 82px !important;
+    padding: 4px 5px !important;
+    font-size: 8px !important;
     line-height: 1 !important;
+    border-radius: 8px !important;
+    box-shadow: 2px 2px 0 #0c1a2e !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  .game-card-stock-dot {
+    display: none !important;
+    animation: none !important;
   }
 
   .game-card-fav {
-    top: 14px !important;
-    right: 14px !important;
-    width: 34px !important;
-    height: 34px !important;
-    z-index: 5 !important;
+    grid-area: fav !important;
+    position: static !important;
+    width: 26px !important;
+    height: 26px !important;
+    font-size: 12px !important;
+    border-radius: 9px !important;
+    box-shadow: 2px 2px 0 #0c1a2e !important;
+    justify-self: end !important;
+    align-self: start !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .game-card {
+    grid-template-columns: 56px minmax(0, 1fr) 26px !important;
+    min-height: 76px !important;
+    padding: 7px 8px !important;
+    gap: 8px !important;
+  }
+
+  .game-card-thumb {
+    width: 56px !important;
+    height: 56px !important;
+    min-height: 56px !important;
+  }
+
+  .game-card-title {
+    font-size: 12px !important;
+  }
+
+  .game-card-price {
+    max-width: 94px !important;
+  }
+
+  .game-card-price b {
+    font-size: 10.5px !important;
+  }
+
+  .game-card-stock {
+    max-width: 74px !important;
+    font-size: 7.5px !important;
+  }
+
+  .game-card-fav {
+    width: 25px !important;
+    height: 25px !important;
   }
 }
