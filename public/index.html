@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/style.css?v=20260612-mobile-card-clean-1" />
+    <link rel="stylesheet" href="/style.css?v=20260612-popup-compact-1" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#ffe135" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -262,7 +262,7 @@
               <div>
                 <strong data-i18n="trustInstantTitle">Kirim Cepat</strong>
                 <small data-i18n="trustInstantDesc">
-                  Auto/manual sesuai stok produk
+                  Key otomatis setelah pembayaran
                 </small>
               </div>
             </li>
@@ -877,9 +877,15 @@
           aria-live="polite"
         ></div>
 
-        <button id="buyBtn" onclick="buy()" data-i18n="buyNow">
-          Beli Sekarang 🌊
-        </button>
+        <div class="checkout-sticky-bar" id="checkoutStickyBar">
+          <div class="checkout-sticky-total">
+            <small data-i18n="finalPriceLabel">Total Bayar</small>
+            <strong id="stickyFinalPrice">Rp 0</strong>
+          </div>
+          <button id="buyBtn" onclick="buy()" data-i18n="buyNow">
+            Beli Sekarang 🌊
+          </button>
+        </div>
 
         <div
           class="payment-methods-preview"
@@ -1415,6 +1421,6 @@
       })();
     </script>
 
-    <script src="/script.js?v=20260603-neo-final-1" defer></script>
+    <script src="/script.js?v=20260612-popup-compact-1" defer></script>
   </body>
 </html>

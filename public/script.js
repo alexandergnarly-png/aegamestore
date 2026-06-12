@@ -85,7 +85,7 @@ const translations = {
     heroCtaPrimary: "Browse Game Catalog",
     heroCtaGuide: "\uD83D\uDCD6 Cara Beli",
     trustInstantTitle: "Kirim Cepat",
-    trustInstantDesc: "Auto/manual sesuai stok produk",
+    trustInstantDesc: "Key otomatis setelah pembayaran",
     trustSecureTitle: "Pembayaran Aman",
     trustSecureDesc: "QRIS GoPay Merchant resmi",
     trustSupportTitle: "Admin Siaga",
@@ -2099,6 +2099,7 @@ function showPriceBreakdown({
   const discountText = document.getElementById("discountText");
   const paymentFeeText = document.getElementById("paymentFeeText");
   const finalPriceText = document.getElementById("finalPriceText");
+  const stickyFinalPrice = document.getElementById("stickyFinalPrice");
   const previewPrice = document.getElementById("previewPrice");
 
   if (!priceBreakdown) return;
@@ -2109,6 +2110,7 @@ function showPriceBreakdown({
     discountText.innerText = "- " + formatRupiah(discountAmount);
   if (paymentFeeText) paymentFeeText.innerText = formatRupiah(paymentFee);
   if (finalPriceText) finalPriceText.innerText = formatRupiah(finalPrice);
+  if (stickyFinalPrice) stickyFinalPrice.innerText = formatRupiah(finalPrice);
   if (previewPrice) previewPrice.innerText = formatRupiah(finalPrice);
 
   priceBreakdown.style.display = "block";
