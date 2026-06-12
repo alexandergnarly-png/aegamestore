@@ -2068,15 +2068,15 @@ app.post("/create-order", orderLimiter, async (req, res) => {
     }
 
     const keyCheck = await query(
-  "SELECT id FROM keys WHERE product_id = $1 AND used = 0 LIMIT 1",
-  [cleanProductId],
-);
+      "SELECT id FROM keys WHERE product_id = $1 AND used = 0 LIMIT 1",
+      [cleanProductId],
+    );
 
-if (keyCheck.rows.length === 0) {
-  return res.status(400).json({
-    message: "Stok key habis",
-  });
-}
+    if (keyCheck.rows.length === 0) {
+      return res.status(400).json({
+        message: "Stok key habis",
+      });
+    }
 
     const orderId = "ORDER-" + crypto.randomUUID();
     const accessToken = crypto.randomBytes(24).toString("hex");
@@ -2268,16 +2268,16 @@ app.post("/midtrans-notification", webhookLimiter, async (req, res) => {
         const keyRow = keyResult.rows[0];
 
         if (!keyRow) {
-  await client.query(
-    `UPDATE orders
+          await client.query(
+            `UPDATE orders
      SET payment_status = $1, delivery_status = $2, gameKey = $3
      WHERE id = $4`,
-    ["paid", "problem", "STOK HABIS - HUBUNGI ADMIN", orderId],
-  );
+            ["paid", "problem", "STOK HABIS - HUBUNGI ADMIN", orderId],
+          );
 
-  await client.query("COMMIT");
-  return res.status(200).send("OK");
-}
+          await client.query("COMMIT");
+          return res.status(200).send("OK");
+        }
 
         const lockResult = await client.query(
           "UPDATE keys SET used = 1 WHERE id = $1 AND used = 0 RETURNING id",
@@ -2543,11 +2543,12 @@ app.post(
       const keyRow = keyResult.rows[0];
 
       if (!keyRow) {
-  await client.query("ROLLBACK");
-  return res.status(400).json({
-    message: "Stok key habis. Tambahkan key dulu sebelum konfirmasi pembayaran.",
-  });
-}
+        await client.query("ROLLBACK");
+        return res.status(400).json({
+          message:
+            "Stok key habis. Tambahkan key dulu sebelum konfirmasi pembayaran.",
+        });
+      }
 
       const lockResult = await client.query(
         "UPDATE keys SET used = 1 WHERE id = $1 AND used = 0 RETURNING id",
@@ -3075,6 +3076,10 @@ app.post(
   requireAdminAuth,
   requireAdminCsrf,
   async (req, res) => {
+    return res.status(410).json({
+      message:
+        "Manual delivery dinonaktifkan. Tambahkan stok key agar order bisa otomatis delivered.",
+    });
     const orderId = String(req.params.id || "").trim();
     const gameKey = String(req.body?.game_key || "").trim();
     const note = String(req.body?.note || "").trim();
