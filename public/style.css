@@ -3039,29 +3039,33 @@ body.order-modal-open .sticky-catalog-search {
 
   .order-product-cards {
     grid-template-columns: 1fr;
-    max-height: min(138px, 28dvh);
-    gap: 8px;
-    padding: 1px 3px 4px 1px;
+    max-height: min(218px, 42dvh);
+    gap: 10px;
+    padding: 2px 5px 6px 2px;
   }
 
   .order-product-card {
-    min-height: 74px;
-    padding: 10px;
-    gap: 8px;
+    min-height: 94px;
+    padding: 12px;
+    gap: 10px;
     box-shadow: 2px 2px 0 #0c1a2e;
   }
 
   .order-product-main strong {
-    font-size: 12.5px;
+    font-size: 13.5px;
   }
 
   .order-product-main b {
-    font-size: 16px;
+    font-size: 18px;
   }
 
-  .order-product-main small,
+  .order-product-main small {
+    font-size: 10.5px;
+  }
+
   .order-product-stock {
-    font-size: 9.5px;
+    font-size: 10px;
+    padding: 5px 8px;
   }
 
   .voucher-panel {
@@ -3216,7 +3220,15 @@ body.order-modal-open .sticky-catalog-search {
   }
 
   .order-product-cards {
-    max-height: min(118px, 24dvh);
+    max-height: min(188px, 38dvh);
+  }
+
+  .order-product-card {
+    min-height: 88px;
+  }
+
+  .order-product-main b {
+    font-size: 17px;
   }
 
   .checkout-sticky-bar {
