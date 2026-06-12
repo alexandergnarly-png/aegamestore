@@ -2788,19 +2788,18 @@ body.dark-theme .modal-summary {
 }
 
 .checkout-sticky-bar {
-  position: sticky;
-  bottom: -1px;
-  z-index: 18;
+  position: static;
+  z-index: 1;
   display: grid;
   grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
   align-items: center;
   gap: 10px;
-  margin: 14px -4px 0;
+  margin: 14px 0 0;
   padding: 10px;
   border: var(--brutal-border);
   border-radius: 14px;
   background: rgba(255, 253, 242, 0.96);
-  box-shadow: 0 -5px 0 #0c1a2e;
+  box-shadow: var(--brutal-shadow);
 }
 
 body.dark-theme .checkout-sticky-bar {
@@ -2936,12 +2935,12 @@ body.order-modal-open .sticky-catalog-search {
 @media (max-width: 768px) {
   .order-modal {
     align-items: flex-start;
-    padding: 10px 10px calc(96px + env(safe-area-inset-bottom));
+    padding: 10px;
   }
 
   .order-modal-card {
     width: min(100%, 430px);
-    max-height: calc(100dvh - 122px - env(safe-area-inset-bottom));
+    max-height: calc(100dvh - 20px);
     padding: 14px 13px 14px;
     border-radius: 18px;
     overscroll-behavior: contain;
@@ -3163,13 +3162,13 @@ body.order-modal-open .sticky-catalog-search {
   }
 
   .checkout-sticky-bar {
-    position: fixed;
-    left: 50%;
-    bottom: max(10px, env(safe-area-inset-bottom));
-    z-index: 10001;
-    width: min(390px, calc(100vw - 24px));
-    transform: translateX(-50%);
-    margin: 0;
+    position: static;
+    left: auto;
+    bottom: auto;
+    z-index: 1;
+    width: 100%;
+    transform: none;
+    margin: 12px 0 0;
     padding: 8px;
     background: #fffdf2;
     border: var(--brutal-border);
@@ -3222,8 +3221,8 @@ body.order-modal-open .sticky-catalog-search {
 
   .checkout-sticky-bar {
     grid-template-columns: 0.78fr 1.22fr;
-    width: calc(100vw - 18px);
-    bottom: max(8px, env(safe-area-inset-bottom));
+    width: 100%;
+    bottom: auto;
   }
 
   .checkout-sticky-total small {
@@ -8848,6 +8847,8 @@ button#buyBtn {
 }
 .checkout-sticky-bar {
   isolation: isolate;
+  position: static !important;
+  transform: none !important;
 }
 .checkout-sticky-bar button#buyBtn:hover:not(:disabled),
 .checkout-sticky-bar button#buyBtn:active:not(:disabled) {
