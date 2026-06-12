@@ -958,6 +958,107 @@
         margin-top: 18px;
       }
 
+      .private-group-box {
+        margin-top: 16px;
+        margin-bottom: 18px;
+        padding: 16px;
+        display: grid;
+        grid-template-columns: 48px minmax(0, 1fr);
+        gap: 12px;
+        align-items: center;
+        background: #fffdf2;
+        border: 3px solid #0b0b0f;
+        border-radius: 18px;
+        box-shadow: 5px 5px 0 #0b0b0f;
+        text-align: left;
+      }
+
+      .private-group-box[hidden] {
+        display: none !important;
+      }
+
+      .private-group-icon {
+        width: 48px;
+        height: 48px;
+        border: 3px solid #0b0b0f;
+        border-radius: 14px;
+        background: #38d5ff;
+        color: #0b0b0f;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 3px 3px 0 #0b0b0f;
+        font-size: 26px;
+      }
+
+      .private-group-copy {
+        min-width: 0;
+      }
+
+      .private-group-kicker {
+        display: inline-flex;
+        width: fit-content;
+        margin-bottom: 5px;
+        padding: 4px 8px;
+        border: 2px solid #0b0b0f;
+        border-radius: 999px;
+        background: #fff04a;
+        color: #0b0b0f;
+        font-size: 10px;
+        font-weight: 950;
+        line-height: 1;
+        text-transform: uppercase;
+      }
+
+      .private-group-copy strong {
+        display: block;
+        color: #0b0b0f;
+        font-size: 15px;
+        font-weight: 950;
+        line-height: 1.2;
+      }
+
+      .private-group-copy p {
+        margin-top: 4px;
+        color: #334155;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .private-group-btn {
+        grid-column: 1 / -1;
+        background: #ff5fb7 !important;
+        color: #ffffff !important;
+        border: 3px solid #0b0b0f !important;
+        border-radius: 12px !important;
+        box-shadow: 4px 4px 0 #0b0b0f !important;
+        font-weight: 950 !important;
+      }
+
+      .private-group-btn:hover {
+        transform: translate(2px, 2px) !important;
+        box-shadow: 2px 2px 0 #0b0b0f !important;
+      }
+
+      body.dark-theme .private-group-box {
+        background: #111827;
+        border-color: #38d5ff;
+        box-shadow: 5px 5px 0 #38d5ff;
+      }
+
+      body.dark-theme .private-group-copy strong {
+        color: #f8fafc;
+      }
+
+      body.dark-theme .private-group-copy p {
+        color: #cbd5e1;
+      }
+
+      body.dark-theme .private-group-icon {
+        border-color: #38d5ff;
+        box-shadow: 3px 3px 0 #38d5ff;
+      }
+
       .result-actions .span-2 {
         grid-column: 1 / -1;
       }
@@ -1138,6 +1239,26 @@
         }
         .result-actions {
           grid-template-columns: 1fr;
+        }
+
+        .private-group-box {
+          grid-template-columns: 42px minmax(0, 1fr);
+          padding: 14px;
+          gap: 10px;
+        }
+
+        .private-group-icon {
+          width: 42px;
+          height: 42px;
+          font-size: 23px;
+        }
+
+        .private-group-copy strong {
+          font-size: 14px;
+        }
+
+        .private-group-copy p {
+          font-size: 11px;
         }
       }
 
@@ -1352,143 +1473,266 @@
       href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
-  
-<style id="ae-neo-brutalism-v2-page">
-/* AE Neo Brutalism V2 — standalone page overlay */
-:root{
-  --nb-ink:#101010;
-  --nb-paper:#fffdf2;
-  --nb-yellow:#ffe135;
-  --nb-cyan:#28d7ff;
-  --nb-pink:#ff4fa3;
-  --nb-red:#ff4d4d;
-  --nb-green:#27d17f;
-  --nb-muted:#555;
-  --nb-border:3px solid var(--nb-ink);
-  --nb-border-thin:2px solid var(--nb-ink);
-  --nb-radius:20px;
-  --nb-shadow:6px 6px 0 var(--nb-ink);
-  --nb-shadow-sm:4px 4px 0 var(--nb-ink);
-  --primary:var(--nb-cyan);
-  --primary-strong:#1dbde5;
-  --primary-deep:var(--nb-ink);
-  --secondary:var(--nb-pink);
-  --secondary-strong:#e5398a;
-  --bg:var(--nb-paper);
-  --bg-color:var(--nb-paper);
-  --card-bg:#fff;
-  --card-bg-strong:#fff;
-  --surface:#fff;
-  --surface-strong:#fff;
-  --text-main:var(--nb-ink);
-  --text-strong:var(--nb-ink);
-  --text:#101010;
-  --text-muted:#555;
-  --border:var(--nb-ink);
-  --border-color:var(--nb-ink);
-  --shadow:var(--nb-shadow);
-  --shadow-md:var(--nb-shadow);
-  --shadow-lg:8px 8px 0 var(--nb-ink);
-  --radius-xl:24px;
-  --radius-lg:20px;
-  --radius-md:14px;
-}
-body.dark-theme{
-  --nb-paper:#171717;
-  --card-bg:#242424;
-  --card-bg-strong:#2a2a2a;
-  --surface:#242424;
-  --surface-strong:#2a2a2a;
-  --text-main:#fffdf2;
-  --text-strong:#fff;
-  --text:#fffdf2;
-  --text-muted:#d5d5d5;
-}
-html,body{scroll-behavior:smooth}
-body{
-  background-color:var(--nb-paper)!important;
-  background-image:radial-gradient(circle at 1px 1px,rgba(16,16,16,.13) 1px,transparent 0)!important;
-  background-size:18px 18px!important;
-  color:var(--text-main)!important;
-  font-family:"Space Grotesk","Plus Jakarta Sans",system-ui,sans-serif!important;
-}
-.bg-blob,.watercolor-blob,.blob-1,.blob-2{display:none!important}
-main,.auth-shell,.account-shell,.result-shell,.admin-shell,.offline-card,.payment-card,.card,.panel,.auth-card,.account-card,.result-card,.security-card,.order-card,.profile-card,.login-card,.admin-card,.status-card{
-  background:var(--card-bg-strong)!important;
-  color:var(--text-main)!important;
-  border:var(--nb-border)!important;
-  border-radius:var(--nb-radius)!important;
-  box-shadow:var(--nb-shadow)!important;
-  backdrop-filter:none!important;
-}
-h1,h2,h3,.brand-title,.page-title,.card-title{
-  color:var(--text-strong)!important;
-  background:none!important;
-  -webkit-text-fill-color:currentColor!important;
-  font-family:"Space Grotesk","Plus Jakarta Sans",system-ui,sans-serif!important;
-  font-weight:900!important;
-  letter-spacing:-.04em!important;
-}
-p,small,span,label{color:inherit}
-input,select,textarea,.input,.form-input{
-  background:#fff!important;
-  color:#101010!important;
-  border:var(--nb-border-thin)!important;
-  border-radius:14px!important;
-  box-shadow:3px 3px 0 var(--nb-ink)!important;
-  outline:none!important;
-}
-input:focus,select:focus,textarea:focus{
-  box-shadow:0 0 0 4px var(--nb-yellow),3px 3px 0 var(--nb-ink)!important;
-}
-button,a.btn,.btn,.primary-btn,.secondary-btn,.ghost-btn,.action-btn,.admin-btn,.payment-actions button,.payment-actions a,.back-link,.theme-toggle,.submit-btn{
-  border:var(--nb-border-thin)!important;
-  border-radius:999px!important;
-  box-shadow:var(--nb-shadow-sm)!important;
-  background:var(--nb-yellow)!important;
-  color:#101010!important;
-  font-weight:900!important;
-  text-decoration:none!important;
-  transition:transform .14s ease,box-shadow .14s ease!important;
-}
-button:hover,a.btn:hover,.btn:hover,.primary-btn:hover,.action-btn:hover{
-  transform:translate(2px,2px)!important;
-  box-shadow:2px 2px 0 var(--nb-ink)!important;
-}
-.primary-btn,.submit-btn,.payment-actions button,.admin-btn{background:var(--nb-cyan)!important}
-.danger,.danger-btn,.logout-btn{background:var(--nb-red)!important;color:#fff!important}
-.success,.success-badge{background:var(--nb-green)!important;color:#101010!important}
-.badge,.status-badge,.pill,.tag,.kicker,.payment-kicker{
-  display:inline-flex!important;
-  width:fit-content!important;
-  background:var(--nb-yellow)!important;
-  color:#101010!important;
-  border:var(--nb-border-thin)!important;
-  border-radius:999px!important;
-  box-shadow:3px 3px 0 var(--nb-ink)!important;
-  font-weight:900!important;
-}
-.payment-card{max-width:480px!important}
-.payment-amount,.payment-qr,.payment-status,.detail-box,.info-box,.alert,.history-item,.order-item{
-  background:#fff!important;
-  border:var(--nb-border-thin)!important;
-  border-radius:16px!important;
-  box-shadow:3px 3px 0 var(--nb-ink)!important;
-}
-.payment-qr img{border-radius:12px!important}
-@media(max-width:768px){
-  :root{--nb-border:2px solid var(--nb-ink);--nb-shadow:4px 4px 0 var(--nb-ink)}
-  body{background-size:16px 16px!important}
-  main,.auth-shell,.account-shell,.result-shell,.admin-shell,.offline-card,.payment-card,.card,.panel,.auth-card,.account-card,.result-card{
-    border-radius:18px!important;
-    box-shadow:4px 4px 0 var(--nb-ink)!important;
-  }
-  h1{font-size:clamp(28px,10vw,42px)!important}
-  .bg-blob,.decor,.floating,.animation{display:none!important}
-  button,a.btn,.btn{min-height:42px!important}
-}
-</style>
 
+    <style id="ae-neo-brutalism-v2-page">
+      /* AE Neo Brutalism V2 — standalone page overlay */
+      :root {
+        --nb-ink: #101010;
+        --nb-paper: #fffdf2;
+        --nb-yellow: #ffe135;
+        --nb-cyan: #28d7ff;
+        --nb-pink: #ff4fa3;
+        --nb-red: #ff4d4d;
+        --nb-green: #27d17f;
+        --nb-muted: #555;
+        --nb-border: 3px solid var(--nb-ink);
+        --nb-border-thin: 2px solid var(--nb-ink);
+        --nb-radius: 20px;
+        --nb-shadow: 6px 6px 0 var(--nb-ink);
+        --nb-shadow-sm: 4px 4px 0 var(--nb-ink);
+        --primary: var(--nb-cyan);
+        --primary-strong: #1dbde5;
+        --primary-deep: var(--nb-ink);
+        --secondary: var(--nb-pink);
+        --secondary-strong: #e5398a;
+        --bg: var(--nb-paper);
+        --bg-color: var(--nb-paper);
+        --card-bg: #fff;
+        --card-bg-strong: #fff;
+        --surface: #fff;
+        --surface-strong: #fff;
+        --text-main: var(--nb-ink);
+        --text-strong: var(--nb-ink);
+        --text: #101010;
+        --text-muted: #555;
+        --border: var(--nb-ink);
+        --border-color: var(--nb-ink);
+        --shadow: var(--nb-shadow);
+        --shadow-md: var(--nb-shadow);
+        --shadow-lg: 8px 8px 0 var(--nb-ink);
+        --radius-xl: 24px;
+        --radius-lg: 20px;
+        --radius-md: 14px;
+      }
+      body.dark-theme {
+        --nb-paper: #171717;
+        --card-bg: #242424;
+        --card-bg-strong: #2a2a2a;
+        --surface: #242424;
+        --surface-strong: #2a2a2a;
+        --text-main: #fffdf2;
+        --text-strong: #fff;
+        --text: #fffdf2;
+        --text-muted: #d5d5d5;
+      }
+      html,
+      body {
+        scroll-behavior: smooth;
+      }
+      body {
+        background-color: var(--nb-paper) !important;
+        background-image: radial-gradient(
+          circle at 1px 1px,
+          rgba(16, 16, 16, 0.13) 1px,
+          transparent 0
+        ) !important;
+        background-size: 18px 18px !important;
+        color: var(--text-main) !important;
+        font-family:
+          "Space Grotesk", "Plus Jakarta Sans", system-ui, sans-serif !important;
+      }
+      .bg-blob,
+      .watercolor-blob,
+      .blob-1,
+      .blob-2 {
+        display: none !important;
+      }
+      main,
+      .auth-shell,
+      .account-shell,
+      .result-shell,
+      .admin-shell,
+      .offline-card,
+      .payment-card,
+      .card,
+      .panel,
+      .auth-card,
+      .account-card,
+      .result-card,
+      .security-card,
+      .order-card,
+      .profile-card,
+      .login-card,
+      .admin-card,
+      .status-card {
+        background: var(--card-bg-strong) !important;
+        color: var(--text-main) !important;
+        border: var(--nb-border) !important;
+        border-radius: var(--nb-radius) !important;
+        box-shadow: var(--nb-shadow) !important;
+        backdrop-filter: none !important;
+      }
+      h1,
+      h2,
+      h3,
+      .brand-title,
+      .page-title,
+      .card-title {
+        color: var(--text-strong) !important;
+        background: none !important;
+        -webkit-text-fill-color: currentColor !important;
+        font-family:
+          "Space Grotesk", "Plus Jakarta Sans", system-ui, sans-serif !important;
+        font-weight: 900 !important;
+        letter-spacing: -0.04em !important;
+      }
+      p,
+      small,
+      span,
+      label {
+        color: inherit;
+      }
+      input,
+      select,
+      textarea,
+      .input,
+      .form-input {
+        background: #fff !important;
+        color: #101010 !important;
+        border: var(--nb-border-thin) !important;
+        border-radius: 14px !important;
+        box-shadow: 3px 3px 0 var(--nb-ink) !important;
+        outline: none !important;
+      }
+      input:focus,
+      select:focus,
+      textarea:focus {
+        box-shadow:
+          0 0 0 4px var(--nb-yellow),
+          3px 3px 0 var(--nb-ink) !important;
+      }
+      button,
+      a.btn,
+      .btn,
+      .primary-btn,
+      .secondary-btn,
+      .ghost-btn,
+      .action-btn,
+      .admin-btn,
+      .payment-actions button,
+      .payment-actions a,
+      .back-link,
+      .theme-toggle,
+      .submit-btn {
+        border: var(--nb-border-thin) !important;
+        border-radius: 999px !important;
+        box-shadow: var(--nb-shadow-sm) !important;
+        background: var(--nb-yellow) !important;
+        color: #101010 !important;
+        font-weight: 900 !important;
+        text-decoration: none !important;
+        transition:
+          transform 0.14s ease,
+          box-shadow 0.14s ease !important;
+      }
+      button:hover,
+      a.btn:hover,
+      .btn:hover,
+      .primary-btn:hover,
+      .action-btn:hover {
+        transform: translate(2px, 2px) !important;
+        box-shadow: 2px 2px 0 var(--nb-ink) !important;
+      }
+      .primary-btn,
+      .submit-btn,
+      .payment-actions button,
+      .admin-btn {
+        background: var(--nb-cyan) !important;
+      }
+      .danger,
+      .danger-btn,
+      .logout-btn {
+        background: var(--nb-red) !important;
+        color: #fff !important;
+      }
+      .success,
+      .success-badge {
+        background: var(--nb-green) !important;
+        color: #101010 !important;
+      }
+      .badge,
+      .status-badge,
+      .pill,
+      .tag,
+      .kicker,
+      .payment-kicker {
+        display: inline-flex !important;
+        width: fit-content !important;
+        background: var(--nb-yellow) !important;
+        color: #101010 !important;
+        border: var(--nb-border-thin) !important;
+        border-radius: 999px !important;
+        box-shadow: 3px 3px 0 var(--nb-ink) !important;
+        font-weight: 900 !important;
+      }
+      .payment-card {
+        max-width: 480px !important;
+      }
+      .payment-amount,
+      .payment-qr,
+      .payment-status,
+      .detail-box,
+      .info-box,
+      .alert,
+      .history-item,
+      .order-item {
+        background: #fff !important;
+        border: var(--nb-border-thin) !important;
+        border-radius: 16px !important;
+        box-shadow: 3px 3px 0 var(--nb-ink) !important;
+      }
+      .payment-qr img {
+        border-radius: 12px !important;
+      }
+      @media (max-width: 768px) {
+        :root {
+          --nb-border: 2px solid var(--nb-ink);
+          --nb-shadow: 4px 4px 0 var(--nb-ink);
+        }
+        body {
+          background-size: 16px 16px !important;
+        }
+        main,
+        .auth-shell,
+        .account-shell,
+        .result-shell,
+        .admin-shell,
+        .offline-card,
+        .payment-card,
+        .card,
+        .panel,
+        .auth-card,
+        .account-card,
+        .result-card {
+          border-radius: 18px !important;
+          box-shadow: 4px 4px 0 var(--nb-ink) !important;
+        }
+        h1 {
+          font-size: clamp(28px, 10vw, 42px) !important;
+        }
+        .bg-blob,
+        .decor,
+        .floating,
+        .animation {
+          display: none !important;
+        }
+        button,
+        a.btn,
+        .btn {
+          min-height: 42px !important;
+        }
+      }
+    </style>
   </head>
 
   <body>
@@ -1669,6 +1913,41 @@ button:hover,a.btn:hover,.btn:hover,.primary-btn:hover,.action-btn:hover{
             </ol>
           </div>
 
+          <div class="private-group-box" id="privateGroupBox" hidden>
+            <div class="private-group-icon">
+              <iconify-icon
+                icon="mdi:telegram"
+                aria-hidden="true"
+              ></iconify-icon>
+            </div>
+
+            <div class="private-group-copy">
+              <span
+                class="private-group-kicker"
+                data-result-i18n="privateGroupKicker"
+              >
+                Buyer Access
+              </span>
+              <strong data-result-i18n="privateGroupTitle">
+                Join Private Buyer Group
+              </strong>
+              <p data-result-i18n="privateGroupDesc">
+                Dapatkan update stok, info maintenance, voucher, dan
+                announcement khusus buyer.
+              </p>
+            </div>
+
+            <a
+              class="btn private-group-btn"
+              href="https://t.me/+xzf51S3w6XJjZWQ9"
+              target="_blank"
+              rel="noopener noreferrer"
+              data-result-i18n="privateGroupBtn"
+            >
+              Join Group
+            </a>
+          </div>
+
           <p
             class="helper-text"
             id="statusText"
@@ -1797,6 +2076,11 @@ button:hover,a.btn:hover,.btn:hover,.primary-btn:hover,.action-btn:hover{
           howtoStep3: "Redeem / login sesuai instruksi brand.",
           chatAdmin: "Chat Admin",
           needHelp: "Butuh bantuan? Hubungi admin.",
+          privateGroupKicker: "Buyer Access",
+          privateGroupTitle: "Join Private Buyer Group",
+          privateGroupDesc:
+            "Dapatkan update stok, info maintenance, voucher, dan announcement khusus buyer.",
+          privateGroupBtn: "Join Group",
         },
         en: {
           pageTitle: "Order Result - AE Game Store",
@@ -1862,6 +2146,11 @@ button:hover,a.btn:hover,.btn:hover,.primary-btn:hover,.action-btn:hover{
           howtoStep3: "Redeem / login according to the brand instructions.",
           chatAdmin: "Chat Admin",
           needHelp: "Need help? Contact admin.",
+          privateGroupKicker: "Buyer Access",
+          privateGroupTitle: "Join Private Buyer Group",
+          privateGroupDesc:
+            "Get stock updates, maintenance info, vouchers, and buyer-only announcements.",
+          privateGroupBtn: "Join Group",
         },
       };
 
@@ -2106,6 +2395,8 @@ button:hover,a.btn:hover,.btn:hover,.primary-btn:hover,.action-btn:hover{
         if (howtoBox) howtoBox.classList.remove("show");
         const resultHelp = document.getElementById("resultHelp");
         if (resultHelp) resultHelp.style.display = "none";
+        const privateGroupBox = document.getElementById("privateGroupBox");
+if (privateGroupBox) privateGroupBox.hidden = true;
 
         const paymentStatus = String(data.payment_status || "").toLowerCase();
         const deliveryStatus = String(data.delivery_status || "").toLowerCase();
@@ -2133,6 +2424,7 @@ button:hover,a.btn:hover,.btn:hover,.primary-btn:hover,.action-btn:hover{
             </div>
           `;
           setProgress("delivered");
+          if (privateGroupBox) privateGroupBox.hidden = false;
           return "deliveredToast";
         }
 
