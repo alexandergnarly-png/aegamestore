@@ -11002,3 +11002,105 @@ body:has(.payment-modal.show) .floating-admin-btn {
     border-radius: 20px !important;
   }
 }
+
+/* ===== STATUS BADGE SOFT COLORS v1 =====
+   Soft visual status for Nothing + Bento UI
+   Maintenance = soft red, Risk = soft yellow, Safe = soft green. */
+.game-status-badge,
+.order-product-status,
+.status-pill {
+  border-width: 1px !important;
+  box-shadow: none !important;
+}
+
+.game-status-safe,
+.order-product-status-safe,
+.status-pill.paid,
+.status-pill.delivered,
+.badge.paid,
+.badge.delivered,
+.badge.available {
+  background: #e8f8ee !important;
+  color: #176b3a !important;
+  border-color: #bfe8cc !important;
+}
+
+.game-status-risk,
+.order-product-status-risk,
+.status-pill.pending,
+.status-pill.waiting_payment,
+.badge.pending,
+.badge.waiting_payment {
+  background: #fff7df !important;
+  color: #8a5a00 !important;
+  border-color: #f2df9b !important;
+}
+
+.game-status-maintenance,
+.order-product-status-maintenance,
+.status-pill.expired,
+.status-pill.cancelled,
+.badge.expired,
+.badge.cancelled,
+.game-card-stock.empty {
+  background: #feecec !important;
+  color: #9f2a2a !important;
+  border-color: #f3c4c4 !important;
+}
+
+.game-status-mixed {
+  background: #eef0f3 !important;
+  color: #4b5563 !important;
+  border-color: #d7dbe1 !important;
+}
+
+body.dark-theme .game-status-safe,
+body.dark-theme .order-product-status-safe,
+body.dark-theme .status-pill.paid,
+body.dark-theme .status-pill.delivered,
+body.dark-theme .badge.paid,
+body.dark-theme .badge.delivered,
+body.dark-theme .badge.available {
+  background: rgba(34, 197, 94, 0.16) !important;
+  color: #86efac !important;
+  border-color: rgba(134, 239, 172, 0.28) !important;
+}
+
+body.dark-theme .game-status-risk,
+body.dark-theme .order-product-status-risk,
+body.dark-theme .status-pill.pending,
+body.dark-theme .status-pill.waiting_payment,
+body.dark-theme .badge.pending,
+body.dark-theme .badge.waiting_payment {
+  background: rgba(245, 158, 11, 0.16) !important;
+  color: #facc15 !important;
+  border-color: rgba(250, 204, 21, 0.3) !important;
+}
+
+body.dark-theme .game-status-maintenance,
+body.dark-theme .order-product-status-maintenance,
+body.dark-theme .status-pill.expired,
+body.dark-theme .status-pill.cancelled,
+body.dark-theme .badge.expired,
+body.dark-theme .badge.cancelled,
+body.dark-theme .game-card-stock.empty {
+  background: rgba(239, 68, 68, 0.16) !important;
+  color: #fca5a5 !important;
+  border-color: rgba(252, 165, 165, 0.3) !important;
+}
+
+.order-product-card.active .order-product-status-safe,
+.order-product-card.active .order-product-status-risk,
+.order-product-card.active .order-product-status-maintenance {
+  background: rgba(255, 255, 255, 0.16) !important;
+  color: currentColor !important;
+  border-color: rgba(255, 255, 255, 0.26) !important;
+}
+
+@media (max-width: 640px) {
+  .game-status-badge,
+  .order-product-status {
+    font-weight: 900 !important;
+  }
+}
+
