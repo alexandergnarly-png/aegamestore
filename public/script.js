@@ -2174,7 +2174,7 @@ async function refreshCheckoutDiscountPreview() {
       if (Number(data.discount_amount || 0) > 0) {
         voucherMessage.innerText =
           data.discount_type === "vip"
-            ? "Diskon VIP berhasil digunakan"
+            ? "Diskon VIP digunakan"
             : data.message || translations[currentLanguage].voucherSuccessMsg;
         voucherMessage.className = "voucher-message success";
       } else {

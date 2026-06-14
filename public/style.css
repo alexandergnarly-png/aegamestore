@@ -11323,3 +11323,485 @@ textarea:focus {
   .game-card { border-radius: 26px !important; }
   .floating-admin-btn { bottom: calc(18px + env(safe-area-inset-bottom)) !important; right: 14px !important; }
 }
+
+/* =========================================================
+   AE NOTHING BENTO CHECKOUT MODAL v4
+   Latest index-only checkout polish: monochrome, readable pills,
+   receipt summary, no green/pink, simpler payment methods.
+   ========================================================= */
+.order-modal-card {
+  background: var(--nb-surface) !important;
+  color: var(--nb-ink) !important;
+  border: 1px solid var(--nb-line) !important;
+  border-radius: 30px !important;
+  box-shadow: 0 28px 90px rgba(17, 17, 17, .22) !important;
+}
+
+.modal-head {
+  padding-bottom: 18px !important;
+  border-bottom: 2px solid var(--nb-ink) !important;
+}
+
+.modal-head h2,
+#modalGameTitle {
+  max-width: calc(100% - 46px) !important;
+  color: var(--nb-ink) !important;
+  font-family: "Space Grotesk", "Plus Jakarta Sans", system-ui, sans-serif !important;
+  letter-spacing: -.055em !important;
+  line-height: 1.02 !important;
+  overflow-wrap: anywhere !important;
+}
+
+.summary-badge {
+  background: var(--nb-surface-2) !important;
+  color: var(--nb-muted) !important;
+  border: 1px solid var(--nb-line) !important;
+  border-radius: 999px !important;
+  padding: 6px 10px !important;
+  box-shadow: none !important;
+}
+
+.order-steps {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  margin: 18px 0 !important;
+}
+
+.order-step {
+  min-width: 0 !important;
+  min-height: 44px !important;
+  padding: 8px 10px !important;
+  border-radius: 999px !important;
+  border: 1px solid var(--nb-line) !important;
+  background: var(--nb-surface) !important;
+  color: var(--nb-muted) !important;
+  box-shadow: none !important;
+}
+
+.order-step.is-active {
+  background: var(--nb-ink) !important;
+  color: var(--nb-bg) !important;
+  border-color: var(--nb-ink) !important;
+}
+
+.order-step-dot {
+  width: 24px !important;
+  height: 24px !important;
+  flex: 0 0 24px !important;
+  border: 0 !important;
+  background: rgba(255,255,255,.12) !important;
+  color: inherit !important;
+  box-shadow: none !important;
+}
+
+.order-step:not(.is-active) .order-step-dot {
+  background: var(--nb-surface-2) !important;
+  color: var(--nb-ink) !important;
+}
+
+.order-step-label {
+  display: none !important;
+}
+
+.order-brand-pills {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)) !important;
+  gap: 10px !important;
+  overflow: visible !important;
+}
+
+.order-brand-pill {
+  min-width: 0 !important;
+  width: 100% !important;
+  min-height: 52px !important;
+  padding: 11px 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  border-radius: 999px !important;
+  background: var(--nb-surface) !important;
+  color: var(--nb-ink) !important;
+  border: 1px solid var(--nb-line) !important;
+  box-shadow: none !important;
+}
+
+.order-brand-pill.active {
+  background: var(--nb-ink) !important;
+  color: var(--nb-bg) !important;
+  border-color: var(--nb-ink) !important;
+}
+
+.order-brand-pill span {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  color: inherit !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  letter-spacing: -.025em !important;
+}
+
+.order-brand-pill small {
+  flex: 0 0 auto !important;
+  padding: 4px 8px !important;
+  border-radius: 999px !important;
+  border: 1px solid currentColor !important;
+  color: inherit !important;
+  background: transparent !important;
+  font-size: 10px !important;
+  line-height: 1 !important;
+  opacity: .82 !important;
+}
+
+.order-product-cards {
+  gap: 10px !important;
+  padding-right: 4px !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(17,17,17,.22) transparent !important;
+}
+
+.order-product-cards::-webkit-scrollbar { width: 4px !important; }
+.order-product-cards::-webkit-scrollbar-track { background: transparent !important; }
+.order-product-cards::-webkit-scrollbar-thumb { background: rgba(17,17,17,.22) !important; border-radius: 99px !important; }
+
+.order-product-card {
+  min-height: 94px !important;
+  padding: 14px !important;
+  border-radius: 22px !important;
+  background: var(--nb-surface) !important;
+  color: var(--nb-ink) !important;
+  border: 1px solid var(--nb-line) !important;
+  box-shadow: none !important;
+}
+
+.order-product-card.active {
+  background: #111 !important;
+  color: #fff !important;
+  border-color: #111 !important;
+  box-shadow: none !important;
+}
+
+body.dark-theme .order-product-card.active {
+  background: #f5f4ef !important;
+  color: #111 !important;
+  border-color: #f5f4ef !important;
+}
+
+.order-product-main {
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 4px !important;
+}
+
+.order-product-main strong,
+.order-product-main b,
+.order-product-main small {
+  color: inherit !important;
+  text-shadow: none !important;
+}
+
+.order-product-main strong {
+  font-size: 12px !important;
+  line-height: 1.15 !important;
+  color: inherit !important;
+  opacity: .78 !important;
+}
+
+.order-product-main b {
+  font-size: 22px !important;
+  line-height: 1 !important;
+  font-weight: 950 !important;
+  letter-spacing: -.055em !important;
+}
+
+.order-product-main small {
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  opacity: .72 !important;
+}
+
+.order-product-status,
+.order-product-status-safe,
+.order-product-status-risk,
+.order-product-status-maintenance,
+.order-product-stock {
+  align-self: start !important;
+  justify-self: end !important;
+  background: var(--nb-surface-2) !important;
+  color: var(--nb-muted) !important;
+  border: 1px solid var(--nb-line) !important;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+  font-size: 9px !important;
+  letter-spacing: .04em !important;
+}
+
+.order-product-card.active .order-product-status,
+.order-product-card.active .order-product-stock {
+  background: rgba(255,255,255,.12) !important;
+  color: currentColor !important;
+  border-color: rgba(255,255,255,.22) !important;
+}
+
+/* Voucher + price: neutral, no green/pink */
+.voucher-panel,
+.price-breakdown,
+.modal-summary,
+.delivery-estimate,
+.auto-voucher-banner {
+  background: var(--nb-surface) !important;
+  color: var(--nb-ink) !important;
+  border: 1px solid var(--nb-line) !important;
+  border-radius: 22px !important;
+  box-shadow: none !important;
+}
+
+.voucher-toggle-arrow,
+.voucher-check-btn,
+.auto-voucher-apply {
+  background: var(--nb-ink) !important;
+  color: var(--nb-bg) !important;
+  border: 1px solid var(--nb-ink) !important;
+  box-shadow: none !important;
+}
+
+.voucher-message,
+.voucher-message.success,
+.voucher-message.error {
+  color: var(--nb-ink) !important;
+  background: transparent !important;
+  border: 0 !important;
+  font-weight: 800 !important;
+}
+
+.price-breakdown {
+  display: grid !important;
+  gap: 0 !important;
+  padding: 16px 18px !important;
+}
+
+.price-breakdown > div {
+  min-height: 38px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  padding: 6px 0 !important;
+  border-bottom: 1px solid var(--nb-line) !important;
+}
+
+.price-breakdown > div:last-child {
+  border-bottom: 0 !important;
+}
+
+.price-breakdown span {
+  color: var(--nb-muted) !important;
+  font-weight: 650 !important;
+}
+
+.price-breakdown b,
+#originalPriceText,
+#discountText,
+#paymentFeeText,
+#finalPriceText,
+#stickyFinalPrice,
+.final-price,
+.total-price,
+.checkout-sticky-total strong {
+  color: var(--nb-ink) !important;
+  -webkit-text-fill-color: currentColor !important;
+  background: none !important;
+  text-shadow: none !important;
+}
+
+.price-total {
+  margin-top: 4px !important;
+  padding-top: 12px !important;
+  border-top: 2px solid var(--nb-ink) !important;
+}
+
+.price-total b,
+#finalPriceText {
+  padding: 8px 12px !important;
+  border: 1px solid var(--nb-line-strong) !important;
+  border-radius: 12px !important;
+}
+
+/* Receipt-style summary: no clipped D... / A... */
+.modal-summary {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 0 !important;
+  padding: 14px 18px !important;
+}
+
+.modal-summary > div {
+  min-width: 0 !important;
+  min-height: 36px !important;
+  display: grid !important;
+  grid-template-columns: minmax(84px, 34%) minmax(0, 1fr) !important;
+  align-items: center !important;
+  gap: 14px !important;
+  padding: 9px 0 !important;
+  border-bottom: 1px solid var(--nb-line) !important;
+}
+
+.modal-summary > div:last-child {
+  border-bottom: 0 !important;
+}
+
+.modal-summary small {
+  color: var(--nb-muted) !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  letter-spacing: .055em !important;
+  text-transform: uppercase !important;
+}
+
+.modal-summary strong {
+  min-width: 0 !important;
+  color: var(--nb-ink) !important;
+  text-align: right !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  word-break: break-word !important;
+  font-size: 13px !important;
+  font-weight: 850 !important;
+  letter-spacing: -.02em !important;
+}
+
+.delivery-estimate,
+.delivery-estimate.is-auto,
+.delivery-estimate.is-manual,
+.auto-voucher-banner {
+  background: var(--nb-surface-2) !important;
+  color: var(--nb-ink) !important;
+  border: 1px solid var(--nb-line) !important;
+}
+
+.delivery-estimate-icon,
+.auto-voucher-emoji {
+  display: none !important;
+}
+
+.delivery-estimate-text strong,
+.delivery-estimate-text small,
+.auto-voucher-text strong,
+.auto-voucher-text small,
+.auto-voucher-text small b {
+  color: var(--nb-ink) !important;
+}
+
+.delivery-estimate-text small,
+.auto-voucher-text small {
+  color: var(--nb-muted) !important;
+}
+
+.checkout-sticky-bar {
+  background: var(--nb-surface) !important;
+  color: var(--nb-ink) !important;
+  border: 1px solid var(--nb-line) !important;
+  border-radius: 24px !important;
+  box-shadow: 0 14px 36px rgba(17,17,17,.055) !important;
+  padding: 12px !important;
+}
+
+.checkout-sticky-total small {
+  color: var(--nb-muted) !important;
+  font-weight: 850 !important;
+}
+
+#buyBtn {
+  background: var(--nb-ink) !important;
+  color: var(--nb-bg) !important;
+  border: 1px solid var(--nb-ink) !important;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+}
+
+.payment-methods-preview {
+  margin-top: 10px !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  color: var(--nb-muted) !important;
+}
+
+.payment-methods-preview small {
+  display: none !important;
+}
+
+.payment-methods-icons,
+.payment-methods-text {
+  display: flex !important;
+  justify-content: center !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+}
+
+.payment-methods-icons span,
+.payment-methods-text span {
+  width: auto !important;
+  height: auto !important;
+  padding: 6px 10px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 1px solid var(--nb-line) !important;
+  border-radius: 999px !important;
+  background: var(--nb-surface-2) !important;
+  color: var(--nb-muted) !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  box-shadow: none !important;
+}
+
+.trust-text {
+  color: var(--nb-muted) !important;
+  font-size: 11px !important;
+}
+
+@media (max-width: 640px) {
+  .order-modal-card {
+    padding: 16px !important;
+    border-radius: 28px !important;
+    max-height: 92dvh !important;
+  }
+
+  .order-brand-pills {
+    grid-template-columns: 1fr !important;
+  }
+
+  .order-product-cards {
+    max-height: min(240px, 42dvh) !important;
+  }
+
+  .order-product-card {
+    min-height: 90px !important;
+    border-radius: 20px !important;
+  }
+
+  .price-breakdown,
+  .modal-summary,
+  .delivery-estimate,
+  .auto-voucher-banner,
+  .checkout-sticky-bar,
+  .voucher-panel {
+    border-radius: 20px !important;
+  }
+
+  .checkout-sticky-bar {
+    grid-template-columns: 1fr 1.1fr !important;
+    gap: 10px !important;
+  }
+
+  #buyBtn {
+    min-height: 50px !important;
+  }
+}
+
