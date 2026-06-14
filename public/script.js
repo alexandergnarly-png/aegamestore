@@ -53,7 +53,7 @@ const translations = {
     summaryGame: "Game",
     summaryProduct: "Produk",
     summaryTotalPayment: "Total Pembayaran",
-    trustText: "Secure Pembayaran aman via QRIS GoPay Merchant • Pengiriman instan",
+    trustText: "Pembayaran aman via QRIS GoPay Merchant • Pengiriman instan",
     originalPriceLabel: "Harga Produk",
     voucherDiscountLabel: "Diskon Voucher",
     qrisFeeLabel: "Fee QRIS",
@@ -237,7 +237,7 @@ const translations = {
     summaryGame: "Game",
     summaryProduct: "Product",
     summaryTotalPayment: "Total Payment",
-    trustText: "Secure Secure payment via QRIS GoPay Merchant • Instant delivery",
+    trustText: "Secure payment via QRIS GoPay Merchant • Instant delivery",
     originalPriceLabel: "Product Price",
     voucherDiscountLabel: "Voucher Discount",
     qrisFeeLabel: "QRIS Fee",
@@ -5389,7 +5389,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.addEventListener("DOMContentLoaded", () => {
     setupPricePulse();
-    setupStickyCatalogSearch();
+    // Disabled in Nothing Bento BW v3: the floating search was covering catalog content on mobile.
+    // The main catalog search inside the toolbar remains active.
+    // setupStickyCatalogSearch();
     setupPromoSwipe();
     setupBottomNavIndicator();
     setupOrderModalPolish();
