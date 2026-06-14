@@ -9872,3 +9872,544 @@ button#buyBtn {
     height: 25px !important;
   }
 }
+
+/* =========================================================
+   AE NOTHING BENTO SAFE MIGRATION v1
+   Purpose: keep old layout/features intact, only calm the visual skin.
+   ========================================================= */
+:root {
+  --nb-bg: #f6f5f2;
+  --nb-surface: #ffffff;
+  --nb-surface-2: #f1f1ee;
+  --nb-ink: #121212;
+  --nb-muted: #6b6b66;
+  --nb-line: rgba(18, 18, 18, 0.10);
+  --nb-line-strong: rgba(18, 18, 18, 0.18);
+  --nb-red: #ff3b30;
+  --nb-red-soft: rgba(255, 59, 48, 0.10);
+  --nb-radius: 24px;
+  --nb-radius-sm: 16px;
+  --nb-shadow: 0 14px 40px rgba(18, 18, 18, 0.055);
+  --nb-shadow-sm: 0 8px 22px rgba(18, 18, 18, 0.045);
+
+  --ocean-deep: #171717;
+  --ocean: #171717;
+  --ocean-light: #ff3b30;
+  --water-foam: #f1f1ee;
+  --sakura: #f5f5f2;
+  --sakura-strong: #ff3b30;
+  --torii-red: #ff3b30;
+  --torii-red-strong: #d92d25;
+  --bg-color: var(--nb-bg);
+  --bg-grad: radial-gradient(circle at top left, rgba(255, 59, 48, 0.055), transparent 34%), linear-gradient(180deg, #f8f7f4, #eeede9);
+  --card-bg: rgba(255,255,255,0.82);
+  --card-bg-strong: #ffffff;
+  --border-color: var(--nb-line);
+  --border-soft: var(--nb-line);
+  --text-main: #2b2b28;
+  --text-strong: #111111;
+  --text-muted: var(--nb-muted);
+  --ring: 0 0 0 4px rgba(255, 59, 48, 0.12);
+  --shadow-xs: var(--nb-shadow-sm);
+  --shadow-sm: var(--nb-shadow-sm);
+  --shadow-md: var(--nb-shadow);
+  --shadow-lg: 0 24px 60px rgba(18, 18, 18, 0.07);
+  --shadow-pink: 0 12px 32px rgba(255, 59, 48, 0.12);
+  --brutal-border: 1px solid var(--nb-line-strong);
+  --brutal-shadow: var(--nb-shadow-sm);
+  --brutal-shadow-md: var(--nb-shadow);
+  --brutal-shadow-lg: 0 26px 70px rgba(18, 18, 18, 0.085);
+  --brutal-radius: 18px;
+}
+
+body.dark-theme {
+  --nb-bg: #101010;
+  --nb-surface: #181818;
+  --nb-surface-2: #202020;
+  --nb-ink: #f5f5f2;
+  --nb-muted: #a9a9a3;
+  --nb-line: rgba(255,255,255,0.11);
+  --nb-line-strong: rgba(255,255,255,0.18);
+  --nb-shadow: 0 16px 40px rgba(0,0,0,0.32);
+  --nb-shadow-sm: 0 8px 20px rgba(0,0,0,0.26);
+  --bg-color: #101010;
+  --bg-grad: radial-gradient(circle at top left, rgba(255, 59, 48, 0.10), transparent 32%), linear-gradient(180deg, #101010, #151515);
+  --card-bg: rgba(24,24,24,0.86);
+  --card-bg-strong: #181818;
+  --border-color: var(--nb-line);
+  --border-soft: var(--nb-line);
+  --text-main: #e8e8e3;
+  --text-strong: #ffffff;
+  --text-muted: var(--nb-muted);
+  --brutal-border: 1px solid var(--nb-line-strong);
+  --brutal-shadow: var(--nb-shadow-sm);
+  --brutal-shadow-md: var(--nb-shadow);
+  --brutal-shadow-lg: 0 26px 70px rgba(0,0,0,0.42);
+}
+
+html { color-scheme: light; }
+body.dark-theme { color-scheme: dark; }
+
+body {
+  background: var(--bg-color) !important;
+  background-image: var(--bg-grad) !important;
+  background-attachment: scroll !important;
+  color: var(--text-main) !important;
+}
+
+.watercolor-blob,
+.blob,
+.blob-1,
+.blob-2,
+.bg-blob,
+.sakura,
+.floating,
+.decor {
+  opacity: 0.10 !important;
+  filter: blur(42px) !important;
+  animation: none !important;
+}
+
+.site-header {
+  background: rgba(246,245,242,.86) !important;
+  border-bottom: 1px solid var(--nb-line) !important;
+  box-shadow: 0 10px 35px rgba(18,18,18,.055) !important;
+  backdrop-filter: blur(16px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(160%) !important;
+}
+body.dark-theme .site-header { background: rgba(16,16,16,.86) !important; }
+
+.header-inner { min-height: 66px !important; }
+.brand-logo,
+.loader-logo {
+  background: var(--nb-surface) !important;
+  color: var(--nb-ink) !important;
+  border: 1px solid var(--nb-line-strong) !important;
+  border-radius: 16px !important;
+  box-shadow: var(--nb-shadow-sm) !important;
+}
+.brand-copy strong,
+.hero h1,
+.section-head h2,
+.modal-head h2,
+.game-card-title {
+  color: var(--text-strong) !important;
+  background: none !important;
+  -webkit-text-fill-color: currentColor !important;
+  letter-spacing: -0.045em !important;
+}
+.brand-copy span,
+.nav-link,
+.hero p,
+.section-head p,
+.modal-head p { color: var(--text-muted) !important; }
+
+.auth-btn,
+.hero-cta,
+.open-review-btn,
+.buy-btn,
+.btn-primary,
+.resume-pay-btn,
+.checkout-submit,
+.submit-btn,
+.primary-btn,
+.order-link-btn.primary {
+  background: var(--nb-ink) !important;
+  color: var(--nb-bg) !important;
+  border: 1px solid var(--nb-ink) !important;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+body.dark-theme .auth-btn,
+body.dark-theme .hero-cta,
+body.dark-theme .open-review-btn,
+body.dark-theme .buy-btn,
+body.dark-theme .btn-primary,
+body.dark-theme .resume-pay-btn,
+body.dark-theme .checkout-submit,
+body.dark-theme .submit-btn,
+body.dark-theme .primary-btn {
+  background: #f5f5f2 !important;
+  color: #111 !important;
+  border-color: #f5f5f2 !important;
+}
+.hero-cta-ghost,
+.lang-btn,
+.theme-toggle-btn,
+.nav-toggle,
+.user-action-btn,
+.pill,
+.filter-chip,
+.promo-arrow,
+.copy-key-btn,
+.order-link-btn,
+.secondary-btn,
+.btn-secondary {
+  background: var(--nb-surface) !important;
+  color: var(--nb-ink) !important;
+  border: 1px solid var(--nb-line-strong) !important;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+}
+.lang-btn.active,
+.pill.active,
+.filter-chip.active,
+.promo-dot.active,
+.user-action-danger,
+.danger-btn,
+.btn-danger {
+  background: var(--nb-red) !important;
+  color: #fff !important;
+  border-color: var(--nb-red) !important;
+}
+button:hover,
+a:hover,
+.hero-cta:hover,
+.game-card:hover,
+.pill:hover,
+.auth-btn:hover,
+.order-product-card:hover,
+.order-brand-pill:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: var(--nb-shadow-sm) !important;
+}
+
+.hero {
+  padding-top: 10px !important;
+}
+.hero-copy {
+  gap: 14px !important;
+}
+.hero-badge,
+.summary-badge,
+.kicker,
+.badge,
+.status-badge,
+.payment-kicker,
+.game-card-chip,
+.game-card-ribbon,
+.buyer-badge {
+  background: var(--nb-surface-2) !important;
+  color: var(--nb-ink) !important;
+  border: 1px solid var(--nb-line-strong) !important;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+  letter-spacing: .08em !important;
+}
+.hero-trust {
+  max-width: 920px !important;
+}
+.hero-trust li,
+.shop-card,
+.review-action-card,
+.testi-card,
+.catalog-toolbar,
+.trending-panel,
+.quick-buy-panel,
+.recommendation-panel,
+.search-history-panel,
+.game-card,
+.order-card,
+.payment-card,
+.result-card,
+.account-card,
+.auth-card,
+.offline-card,
+.admin-card,
+.info-box,
+.detail-box,
+.alert {
+  background: var(--nb-surface) !important;
+  border: 1px solid var(--nb-line) !important;
+  border-radius: var(--nb-radius) !important;
+  box-shadow: var(--nb-shadow) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.hero-trust-icon {
+  background: var(--nb-surface-2) !important;
+  color: var(--nb-ink) !important;
+  border: 1px solid var(--nb-line) !important;
+  box-shadow: none !important;
+  border-radius: 16px !important;
+}
+
+/* Store intro as bento */
+.shop-card .section-head {
+  border-bottom: 1px solid var(--nb-line) !important;
+  padding-bottom: 16px !important;
+}
+.catalog-meta {
+  background: var(--nb-surface-2) !important;
+  border: 1px solid var(--nb-line) !important;
+  border-radius: 20px !important;
+  box-shadow: none !important;
+  padding: 10px 14px !important;
+}
+.catalog-meta-value { color: var(--nb-ink) !important; }
+.catalog-meta-label { color: var(--nb-muted) !important; }
+.catalog-meta-divider { background: var(--nb-line) !important; }
+.catalog-toolbar { padding: 10px !important; gap: 10px !important; }
+.search-box input,
+input[type="text"]:not(#gameSearch),
+input[type="email"],
+input[type="password"],
+select,
+textarea {
+  background: var(--nb-surface) !important;
+  color: var(--nb-ink) !important;
+  border: 1px solid var(--nb-line-strong) !important;
+  border-radius: 16px !important;
+  box-shadow: none !important;
+}
+.search-box input:focus,
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: rgba(255,59,48,.55) !important;
+  box-shadow: 0 0 0 4px rgba(255,59,48,.10) !important;
+}
+
+/* Promo becomes quiet Nothing announcement */
+.promo-container { gap: 8px !important; }
+.promo-slider {
+  height: 138px !important;
+  background: #111 !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
+  border-radius: 28px !important;
+  box-shadow: var(--nb-shadow) !important;
+  overflow: hidden !important;
+}
+.promo-slide {
+  padding: 22px 24px !important;
+  opacity: 0 !important;
+  transform: translateY(10px) scale(.985) !important;
+  transition: opacity 560ms cubic-bezier(.22,1,.36,1), transform 560ms cubic-bezier(.22,1,.36,1) !important;
+}
+.promo-slide.active { opacity: 1 !important; transform: translateY(0) scale(1) !important; }
+.promo-slide-blue,
+.promo-slide-pink {
+  background: #111 !important;
+}
+.promo-slide::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 86% 10%, rgba(255,59,48,.26), transparent 30%),
+    radial-gradient(circle at 10% 105%, rgba(255,255,255,.10), transparent 28%),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.035) 0 1px, transparent 1px 20px);
+  pointer-events: none;
+}
+.promo-slide::after {
+  content: "" !important;
+  inset: auto 18px 18px auto !important;
+  width: 9px !important;
+  height: 9px !important;
+  border-radius: 50% !important;
+  background: var(--nb-red) !important;
+}
+.promo-deco { opacity: .26 !important; }
+.promo-content { max-width: 84% !important; gap: 6px !important; }
+.promo-content span {
+  background: rgba(255,255,255,.10) !important;
+  color: rgba(255,255,255,.76) !important;
+  border: 1px solid rgba(255,255,255,.14) !important;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+  letter-spacing: .08em !important;
+}
+.promo-content h3 {
+  color: #fff !important;
+  font-size: clamp(24px, 4vw, 36px) !important;
+  line-height: 1.02 !important;
+  letter-spacing: -.055em !important;
+  text-shadow: none !important;
+}
+.promo-content p,
+.promo-countdown { color: rgba(255,255,255,.66) !important; }
+.promo-controls { margin-top: 2px !important; }
+.promo-dot {
+  width: 7px !important;
+  height: 7px !important;
+  background: rgba(18,18,18,.18) !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+.promo-dot.active { width: 24px !important; background: var(--nb-red) !important; }
+.promo-arrow { display: none !important; }
+
+/* Game cards bento */
+.game-grid,
+.compact-game-grid { gap: 14px !important; }
+.game-card {
+  overflow: hidden !important;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease !important;
+}
+.game-card:hover { border-color: rgba(18,18,18,.22) !important; }
+body.dark-theme .game-card:hover { border-color: rgba(255,255,255,.22) !important; }
+.game-card-thumb {
+  background: var(--nb-surface-2) !important;
+  border-bottom: 1px solid var(--nb-line) !important;
+}
+.game-card-thumb-overlay { background: linear-gradient(180deg, transparent, rgba(0,0,0,.74)) !important; }
+.game-card-body { padding: 14px !important; }
+.game-card-price {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+.game-card-price b {
+  color: var(--nb-ink) !important;
+  background: none !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+.game-card-stock,
+.game-status-badge,
+.game-card-brand-count,
+.order-product-stock,
+.status-pill {
+  background: rgba(18,18,18,.055) !important;
+  color: var(--nb-muted) !important;
+  border: 1px solid var(--nb-line) !important;
+  box-shadow: none !important;
+  border-radius: 999px !important;
+}
+.game-status-maintenance,
+.status-pill.expired,
+.status-pill.cancelled,
+.game-card-stock.empty { background: var(--nb-red-soft) !important; color: var(--nb-red) !important; }
+.game-status-risk,
+.status-pill.pending,
+.status-pill.waiting_payment { background: rgba(245, 158, 11, .10) !important; color: #a16207 !important; }
+.game-status-safe,
+.status-pill.paid,
+.status-pill.delivered { background: rgba(16,185,129,.10) !important; color: #047857 !important; }
+.game-card-fav {
+  background: rgba(255,255,255,.82) !important;
+  border: 1px solid var(--nb-line) !important;
+  box-shadow: var(--nb-shadow-sm) !important;
+}
+body.dark-theme .game-card-fav { background: rgba(24,24,24,.84) !important; }
+.game-card-fav.is-active { color: var(--nb-red) !important; background: var(--nb-red-soft) !important; }
+
+/* Order modal cleaner */
+.order-modal-backdrop { background: rgba(0,0,0,.58) !important; }
+.order-modal-card {
+  background: var(--nb-surface) !important;
+  color: var(--nb-ink) !important;
+  border: 1px solid var(--nb-line) !important;
+  border-radius: 28px !important;
+  box-shadow: 0 30px 100px rgba(0,0,0,.24) !important;
+}
+.modal-close-btn {
+  background: var(--nb-surface-2) !important;
+  color: var(--nb-ink) !important;
+  border: 1px solid var(--nb-line) !important;
+  border-radius: 50% !important;
+  box-shadow: none !important;
+}
+.order-step,
+.order-step-dot,
+.order-brand-pill,
+.order-product-card,
+.voucher-panel,
+.payment-preview-card,
+.summary-row,
+.checkout-sticky-bar {
+  background: var(--nb-surface) !important;
+  color: var(--nb-ink) !important;
+  border: 1px solid var(--nb-line) !important;
+  border-radius: 18px !important;
+  box-shadow: none !important;
+}
+.order-step.is-active,
+.order-brand-pill.active,
+.order-product-card.active {
+  background: #111 !important;
+  color: #fff !important;
+  border-color: #111 !important;
+}
+body.dark-theme .order-step.is-active,
+body.dark-theme .order-brand-pill.active,
+body.dark-theme .order-product-card.active {
+  background: #f5f5f2 !important;
+  color: #111 !important;
+  border-color: #f5f5f2 !important;
+}
+.order-brand-pill.active span,
+.order-product-card.active strong,
+.order-product-card.active b,
+.order-product-card.active small { color: inherit !important; }
+.order-product-status {
+  background: rgba(16,185,129,.10) !important;
+  color: #047857 !important;
+  border: 1px solid rgba(16,185,129,.18) !important;
+  box-shadow: none !important;
+}
+.order-product-status-risk { background: rgba(245,158,11,.12) !important; color: #a16207 !important; }
+.order-product-status-maintenance { background: var(--nb-red-soft) !important; color: var(--nb-red) !important; }
+.payment-preview-card strong,
+.final-price,
+.total-price { color: var(--nb-ink) !important; }
+
+/* Footer/bottom nav/chat */
+.site-footer,
+.bottom-nav,
+.mobile-bottom-nav,
+.chat-admin-fab,
+.install-prompt,
+.toast,
+.quick-search-panel {
+  background: rgba(255,255,255,.86) !important;
+  border: 1px solid var(--nb-line) !important;
+  box-shadow: var(--nb-shadow) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+}
+body.dark-theme .site-footer,
+body.dark-theme .bottom-nav,
+body.dark-theme .mobile-bottom-nav,
+body.dark-theme .chat-admin-fab,
+body.dark-theme .install-prompt,
+body.dark-theme .toast,
+body.dark-theme .quick-search-panel { background: rgba(18,18,18,.86) !important; }
+
+@media (max-width: 768px) {
+  :root { --nb-radius: 20px; }
+  .page { gap: 34px !important; padding: 22px 14px 86px !important; }
+  .hero-copy { align-items: flex-start !important; text-align: left !important; }
+  .hero h1 { font-size: clamp(34px, 11vw, 48px) !important; line-height: .98 !important; }
+  .hero p { font-size: 14px !important; }
+  .hero-cta-row { width: 100% !important; justify-content: flex-start !important; }
+  .hero-cta { min-height: 44px !important; padding: 12px 18px !important; }
+  .hero-trust { grid-template-columns: 1fr !important; gap: 10px !important; }
+  .hero-trust li { padding: 12px !important; border-radius: 20px !important; }
+  .shop-card { padding: 18px !important; border-radius: 24px !important; }
+  .catalog-toolbar { border-radius: 22px !important; }
+  .promo-slider { height: 122px !important; border-radius: 24px !important; }
+  .promo-slide { padding: 18px !important; }
+  .promo-content { max-width: 92% !important; }
+  .promo-content h3 { font-size: 27px !important; }
+  .promo-content p { font-size: 11.5px !important; }
+  .game-card {
+    border-radius: 20px !important;
+    box-shadow: var(--nb-shadow-sm) !important;
+  }
+  .game-card-thumb { border-radius: 16px !important; border: 0 !important; box-shadow: none !important; }
+  .game-card-price,
+  .game-card-stock,
+  .game-status-badge,
+  .game-card-brand-count,
+  .game-card-fav { box-shadow: none !important; }
+  .order-modal { padding: 10px !important; }
+  .order-modal-card { border-radius: 26px !important; padding: 16px !important; }
+  .order-product-cards { max-height: min(230px, 42dvh) !important; }
+}
+
+@media (max-width: 420px) {
+  .promo-slider { height: 116px !important; }
+  .promo-content h3 { font-size: 24px !important; }
+  .catalog-meta { width: 100% !important; justify-content: space-between !important; }
+}
