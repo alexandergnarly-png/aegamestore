@@ -10760,3 +10760,64 @@ body:has(.payment-modal.show) .floating-admin-btn {
     line-height: 1.45 !important;
   }
 }
+
+/* =========================================================
+   AE Nothing Bento — Topbar login CTA visibility fix
+   Makes the logged-out auth button readable on compact mobile headers.
+   ========================================================= */
+@media (max-width: 640px) {
+  #userMenu .auth-btn {
+    width: auto !important;
+    min-width: 64px !important;
+    height: 36px !important;
+    padding: 0 12px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    overflow: visible !important;
+    flex-shrink: 0 !important;
+    border-radius: 999px !important;
+    font-size: 12px !important;
+    line-height: 1 !important;
+  }
+
+  #userMenu .auth-btn::before {
+    content: "↗";
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  #userMenu .auth-btn span[data-i18n="loginBtn"] {
+    display: inline-flex !important;
+    align-items: center !important;
+    font-size: 0 !important;
+    line-height: 1 !important;
+  }
+
+  html[lang="id"] #userMenu .auth-btn span[data-i18n="loginBtn"]::after {
+    content: "Masuk";
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: -0.01em;
+  }
+
+  html[lang="en"] #userMenu .auth-btn span[data-i18n="loginBtn"]::after {
+    content: "Login";
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: -0.01em;
+  }
+}
+
+@media (max-width: 380px) {
+  #userMenu .auth-btn {
+    min-width: 58px !important;
+    height: 34px !important;
+    padding-inline: 10px !important;
+  }
+}
