@@ -1753,7 +1753,118 @@
           scroll-behavior: auto !important;
         }
       }
-    </style>
+    
+
+      /* ===== ADMIN MORE SHEET COMPACT FIX v2 ===== */
+      .admin-more-sheet {
+        left: 12px;
+        right: 12px;
+        bottom: calc(76px + var(--safe-bottom));
+        max-height: min(68dvh, 420px);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding: 12px;
+        border-radius: 26px;
+        visibility: hidden;
+        pointer-events: none;
+      }
+
+      .admin-more-sheet.show {
+        visibility: visible;
+        pointer-events: auto;
+      }
+
+      .admin-more-sheet-backdrop {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        background: rgba(17, 17, 17, 0.22);
+      }
+
+      body.admin-more-open {
+        overflow: hidden;
+      }
+
+      .admin-more-sheet-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+
+      .admin-more-sheet h4 {
+        margin: 0;
+        color: var(--ink-2);
+        font-size: 14px;
+        font-weight: 900;
+        letter-spacing: -0.02em;
+      }
+
+      .admin-more-sheet-close {
+        width: 38px;
+        height: 38px;
+        min-height: 38px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--surface-2);
+        color: var(--ink);
+        box-shadow: none;
+        font-size: 22px;
+        line-height: 1;
+      }
+
+      .admin-more-sheet-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        margin-top: 0;
+      }
+
+      .admin-more-sheet-item {
+        min-height: 62px;
+        padding: 10px 8px;
+        border-radius: 18px;
+      }
+
+      .admin-more-sheet-item .ico {
+        font-size: 19px;
+      }
+
+      .admin-more-sheet-item span:last-child {
+        font-size: 12px;
+        font-weight: 900;
+        line-height: 1.2;
+      }
+
+      .admin-more-sheet-logout {
+        min-height: 46px;
+        margin-top: 10px;
+        border-radius: 18px;
+      }
+
+      @media (max-width: 380px) {
+        .admin-more-sheet {
+          left: 8px;
+          right: 8px;
+          bottom: calc(72px + var(--safe-bottom));
+          max-height: min(66dvh, 390px);
+          padding: 10px;
+        }
+
+        .admin-more-sheet-grid {
+          gap: 7px;
+        }
+
+        .admin-more-sheet-item {
+          min-height: 58px;
+          border-radius: 17px;
+        }
+      }
+
+</style>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </head>
 
@@ -2921,7 +3032,17 @@
       aria-labelledby="adminMoreSheetTitle"
     >
       <div class="admin-more-sheet-handle" aria-hidden="true"></div>
-      <h4 id="adminMoreSheetTitle">Menu Lainnya</h4>
+      <div class="admin-more-sheet-head">
+        <h4 id="adminMoreSheetTitle">Menu Lainnya</h4>
+        <button
+          type="button"
+          class="admin-more-sheet-close"
+          onclick="closeMoreSheet()"
+          aria-label="Tutup menu lainnya"
+        >
+          ×
+        </button>
+      </div>
       <div class="admin-more-sheet-grid">
         <button
           type="button"
@@ -6442,6 +6563,7 @@
 
         sheet.classList.add("show");
         backdrop.classList.add("show");
+        document.body.classList.add("admin-more-open");
         hapticTap();
       }
 
@@ -6450,6 +6572,7 @@
         const backdrop = document.getElementById("adminMoreSheetBackdrop");
         if (sheet) sheet.classList.remove("show");
         if (backdrop) backdrop.classList.remove("show");
+        document.body.classList.remove("admin-more-open");
       }
       // Auto data-label for all tables → enables mobile card layout
       function attachAutoDataLabel() {
