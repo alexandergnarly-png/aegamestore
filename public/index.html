@@ -14,9 +14,9 @@
       href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/style.css?v=20260614-nothing-bento-1" />
+    <link rel="stylesheet" href="/style.css?v=20260614-nothing-bento-complete-1" />
     <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#111111" />
+    <meta name="theme-color" content="#f4f3ee" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="AE Store" />
@@ -201,12 +201,12 @@
             id="theme-toggle"
             aria-label="Toggle dark mode"
           >
-            🌙
+            ◐
           </button>
 
           <div id="userMenu">
             <a href="/auth" class="auth-btn">
-              <span data-i18n="loginBtn">Masuk / Daftar</span> ⛩️
+              <span data-i18n="loginBtn">Masuk / Daftar</span>
             </a>
           </div>
 
@@ -258,7 +258,7 @@
 
           <ul class="hero-trust" aria-label="Trust badges">
             <li>
-              <span class="hero-trust-icon" aria-hidden="true">⚡</span>
+              <span class="hero-trust-icon" aria-hidden="true">01</span>
               <div>
                 <strong data-i18n="trustInstantTitle">Kirim Cepat</strong>
                 <small data-i18n="trustInstantDesc">
@@ -267,7 +267,7 @@
               </div>
             </li>
             <li>
-              <span class="hero-trust-icon" aria-hidden="true">🔒</span>
+              <span class="hero-trust-icon" aria-hidden="true">02</span>
               <div>
                 <strong data-i18n="trustSecureTitle">Pembayaran Aman</strong>
                 <small data-i18n="trustSecureDesc">
@@ -276,7 +276,7 @@
               </div>
             </li>
             <li>
-              <span class="hero-trust-icon" aria-hidden="true">💬</span>
+              <span class="hero-trust-icon" aria-hidden="true">03</span>
               <div>
                 <strong data-i18n="trustSupportTitle">Admin Siaga</strong>
                 <small data-i18n="trustSupportDesc">
@@ -352,7 +352,7 @@
                   fill="rgba(255,255,255,0.25)"
                 />
               </svg>
-              <div class="promo-deco-icon">🎮</div>
+              <div class="promo-deco-icon">AE</div>
             </div>
             <div class="promo-content">
               <span>LIMITED OFFER</span>
@@ -426,7 +426,7 @@
                   fill="rgba(255,255,255,0.45)"
                 />
               </svg>
-              <div class="promo-deco-icon">⭐</div>
+              <div class="promo-deco-icon">•</div>
             </div>
             <div class="promo-content">
               <span>NEW BUYER</span>
@@ -489,7 +489,7 @@
           <div class="testi-track" id="reviewTrack">
             <div class="testi-card">
               <div class="testi-header">
-                <div class="testi-avatar">⛩️</div>
+                <div class="testi-avatar">AE</div>
                 <div>
                   <strong>AE Game Store</strong>
                   <span class="testi-game">Review Buyer</span>
@@ -554,7 +554,7 @@
             aria-label="Quick buy your last orders"
           >
             <div class="quick-buy-head">
-              <span class="quick-buy-icon" aria-hidden="true">🔁</span>
+              <span class="quick-buy-icon" aria-hidden="true">↻</span>
               <strong data-i18n="quickBuyTitle">Beli Lagi</strong>
               <small data-i18n="quickBuySub">
                 Order terakhir kamu — 1 klik checkout
@@ -612,7 +612,7 @@
                 data-category="Favorites"
                 aria-label="Filter favorit"
               >
-                <span aria-hidden="true">❤️</span>
+                <span aria-hidden="true">♡</span>
                 <span data-i18n="filterFavorites">Favorit</span>
                 <span class="pill-count" data-count-for="Favorites"></span>
               </button>
@@ -620,7 +620,7 @@
 
             <div class="catalog-toolbar-right">
               <div class="search-box">
-                <span class="search-icon" aria-hidden="true">🔍</span>
+                <span class="search-icon" aria-hidden="true">⌕</span>
                 <input
                   type="text"
                   id="gameSearch"
@@ -790,7 +790,7 @@
         <details class="voucher-panel" id="voucherPanel">
           <summary class="voucher-toggle">
             <span class="voucher-toggle-main">
-              <span aria-hidden="true">🎟️</span>
+              <span aria-hidden="true">CODE</span>
               <b data-i18n="voucherToggleTitle">Punya voucher?</b>
             </span>
             <small data-i18n="voucherToggleDesc">Masukkan kode jika ada</small>
@@ -816,7 +816,7 @@
                 class="voucher-check-btn"
                 onclick="checkVoucher()"
               >
-                <span aria-hidden="true">🎟️</span>
+                <span aria-hidden="true">CODE</span>
                 <b data-i18n="checkVoucherBtn">Cek</b>
               </button>
             </div>
@@ -883,7 +883,7 @@
             <strong id="stickyFinalPrice">Rp 0</strong>
           </div>
           <button id="buyBtn" onclick="buy()" data-i18n="buyNow">
-            Beli Sekarang 🌊
+            Beli Sekarang
           </button>
         </div>
 
@@ -916,7 +916,7 @@
         </div>
 
         <p class="trust-text" data-i18n="trustText">
-          🔒 Pembayaran aman via QRIS GoPay Merchant • Pengiriman instan
+          Pembayaran aman via QRIS GoPay Merchant • Pengiriman instan
         </p>
       </div>
     </div>
@@ -927,7 +927,7 @@
       id="chatAdminBtn"
       aria-label="Buka bantuan admin"
     >
-      <span class="floating-admin-icon" aria-hidden="true">💬</span>
+      <span class="floating-admin-icon" aria-hidden="true">•</span>
       <span class="floating-admin-content">
         <strong data-i18n="chatAdminTitle">Chat Admin</strong>
         <small data-i18n="chatAdminSub">Fast response</small>
@@ -955,7 +955,7 @@
         </button>
 
         <div class="admin-chat-head">
-          <div class="admin-chat-avatar">💬</div>
+          <div class="admin-chat-avatar">•</div>
           <div>
             <h3 id="adminChatTitle" data-i18n="adminChatHelpTitle">
               Butuh Bantuan?
@@ -981,7 +981,7 @@
             rel="noopener noreferrer"
             class="admin-chat-action primary"
           >
-            <span>📨</span>
+            <span>@</span>
             <div>
               <strong data-i18n="adminChatTelegramTitle"
                 >Chat via Telegram</strong
@@ -993,7 +993,7 @@
           </a>
 
           <a href="/account.html" class="admin-chat-action">
-            <span>📦</span>
+            <span>#</span>
             <div>
               <strong data-i18n="adminChatHistoryTitle"
                 >Cek Riwayat Pesanan</strong
@@ -1009,7 +1009,7 @@
             class="admin-chat-action"
             id="adminChatGuideBtn"
           >
-            <span>📖</span>
+            <span>i</span>
             <div>
               <strong data-i18n="adminChatGuideTitle">Lihat How it works</strong>
               <small data-i18n="adminChatGuideDesc"
@@ -1040,7 +1040,7 @@
       <div class="payment-modal-card" role="document">
         <header class="payment-modal-header">
           <div class="payment-modal-brand">
-            <span class="payment-modal-torii" aria-hidden="true">⛩️</span>
+            <span class="payment-modal-torii" aria-hidden="true">AE</span>
             <div class="payment-modal-brand-text">
               <strong id="paymentModalTitle" data-i18n="paymentModalTitle">
                 Selesaikan Pembayaran
@@ -1152,7 +1152,7 @@
 
         <footer class="payment-modal-footer">
           <div class="payment-modal-footer-hint">
-            <span aria-hidden="true">🛡️</span>
+            <span aria-hidden="true">SEC</span>
             <span data-i18n="paymentSecureHint">
               Pembayaran aman via Midtrans (QRIS, GoPay, OVO, DANA, VA, dll)
             </span>
@@ -1164,7 +1164,7 @@
               id="paymentRefreshStatus"
               data-i18n="paymentRefreshStatus"
             >
-              🔄 Cek Status
+              Cek Status
             </button>
             <button
               type="button"
@@ -1195,7 +1195,7 @@
         ×
       </button>
       <div class="resume-cart-info">
-        <span class="resume-cart-icon" aria-hidden="true">🛒</span>
+        <span class="resume-cart-icon" aria-hidden="true">↻</span>
         <div class="resume-cart-text">
           <small data-i18n="resumeCartTitle">Pesananmu masih ada</small>
           <strong id="resumeCartLabel">—</strong>
@@ -1281,7 +1281,7 @@
 
     <div class="pull-to-refresh" id="pullToRefresh" hidden aria-hidden="true">
       <div class="pull-to-refresh-spinner">
-        <span class="pull-to-refresh-icon">🌊</span>
+        <span class="pull-to-refresh-icon">↓</span>
       </div>
     </div>
 
@@ -1421,6 +1421,6 @@
       })();
     </script>
 
-    <script src="/script.js?v=20260614-nothing-bento-1" defer></script>
+    <script src="/script.js?v=20260614-nothing-bento-complete-1" defer></script>
   </body>
 </html>

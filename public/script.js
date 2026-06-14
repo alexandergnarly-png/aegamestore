@@ -23,7 +23,7 @@ const translations = {
     totalPayment: "Total Pembayaran",
     previewEmpty: "Produk belum dipilih",
     previewWait: "Silakan pilih platform dan produk",
-    guideTitle: "Panduan Top-Up ",
+    guideTitle: "Panduan Top-Up",
     guideStep1: "Pilih Game: Cari dan klik game yang kamu inginkan.",
     guideStep2:
       "Tentukan Produk: Pilih tipe device (iOS/Android) dan produknya.",
@@ -53,7 +53,7 @@ const translations = {
     summaryGame: "Game",
     summaryProduct: "Produk",
     summaryTotalPayment: "Total Pembayaran",
-    trustText: "🔒 Pembayaran aman via QRIS GoPay Merchant • Pengiriman instan",
+    trustText: "Secure Pembayaran aman via QRIS GoPay Merchant • Pengiriman instan",
     originalPriceLabel: "Harga Produk",
     voucherDiscountLabel: "Diskon Voucher",
     qrisFeeLabel: "Fee QRIS",
@@ -81,9 +81,9 @@ const translations = {
     skipToContent: "Lewati ke konten",
     brandTagline: "Premium Digital Keys",
     navReviews: "Review Buyer",
-    heroBadge: "MINIMAL DIGITAL COMMERCE",
+    heroBadge: "MINIMAL GAME COMMERCE",
     heroCtaPrimary: "Browse Games",
-    heroCtaGuide: "\uD83D\uDCD6 Cara Beli",
+    heroCtaGuide: "Cara Beli",
     trustInstantTitle: "Kirim Cepat",
     trustInstantDesc: "Key otomatis setelah pembayaran",
     trustSecureTitle: "Pembayaran Aman",
@@ -98,7 +98,7 @@ const translations = {
     reviewNote:
       "Review hanya bisa dikirim oleh buyer yang sudah pernah berhasil order.",
     chatAdminTitle: "Chat Admin",
-    chatAdminSub: "Fast response",
+    chatAdminSub: "Support",
     footerTagline:
       "Top up game key cepat, aman, dan terpercaya bersama AE Game Store.",
     metaGames: "Game tersedia",
@@ -127,13 +127,13 @@ const translations = {
     resetFilterBtn: "Reset filter",
     emptyFavoritesTitle: "Belum ada game favorit",
     emptyFavoritesDesc:
-      "Klik ikon ❤️ di kartu game untuk menyimpannya di sini.",
+      "Klik ikon ♡️ di kartu game untuk menyimpannya di sini.",
     orderStep1: "Pilih produk",
     orderStep2: "Detail player",
     orderStep3: "Bayar",
     promoEndsIn: "Refresh in",
     catalogStockReady: "stok ready",
-    trendingTitle: "🔥 Lagi Naik Daun",
+    trendingTitle: "Trending",
     trendingSub: "Top game minggu ini",
     trendingEmpty: "Belum ada data trending",
     quickBuyTitle: "Beli Lagi",
@@ -196,10 +196,10 @@ const translations = {
     selectProduct: "Choose Game",
     fillDetails: "Choose a game first, then pick brand and duration.",
     selectGame: "1. Select Game",
-    buyNow: "Buy Now ",
+    buyNow: "Buy Now",
     processing: "Processing...",
     loadingWebsite: "Loading Website...",
-    howToBuy: "How to Buy 📖",
+    howToBuy: "How it works",
     searchGamePlaceholder: "Search game name (e.g. PUBG)...",
     processingOrder: "Processing order...",
     heroTitle: "Top up game keys, clean and fast.",
@@ -208,13 +208,13 @@ const translations = {
     totalPayment: "Total Payment",
     previewEmpty: "No product selected",
     previewWait: "Please select platform and product",
-    guideTitle: "Top-Up Guide ",
+    guideTitle: "Top-Up Guide",
     guideStep1: "Select Game: Find and choose your desired game.",
     guideStep2: "Choose Product: Select device type (iOS/Android) and product.",
     guideStep3: "Fill Data: Player name is filled from your logged-in account.",
     guideStep4: "Checkout: Click 'Buy Now' and complete the payment.",
     guideStep5: "Done! Your game will be delivered instantly after success.",
-    guideOk: "Got it! ",
+    guideOk: "Got it",
     loginBtn: "Login / Register",
     navHome: "Home",
     navStore: "Game Catalog",
@@ -237,7 +237,7 @@ const translations = {
     summaryGame: "Game",
     summaryProduct: "Product",
     summaryTotalPayment: "Total Payment",
-    trustText: "🔒 Secure payment via QRIS GoPay Merchant • Instant delivery",
+    trustText: "Secure Secure payment via QRIS GoPay Merchant • Instant delivery",
     originalPriceLabel: "Product Price",
     voucherDiscountLabel: "Voucher Discount",
     qrisFeeLabel: "QRIS Fee",
@@ -265,9 +265,9 @@ const translations = {
     skipToContent: "Skip to content",
     brandTagline: "Premium Digital Keys",
     navReviews: "Buyer Reviews",
-    heroBadge: "MINIMAL DIGITAL COMMERCE",
+    heroBadge: "MINIMAL GAME COMMERCE",
     heroCtaPrimary: "Browse Games",
-    heroCtaGuide: "\uD83D\uDCD6 How to Buy",
+    heroCtaGuide: "How it works",
     trustInstantTitle: "Instant Delivery",
     trustInstantDesc: "Key delivered automatically after payment",
     trustSecureTitle: "Secure Payment",
@@ -282,7 +282,7 @@ const translations = {
     reviewNote:
       "Reviews can only be submitted by buyers who have completed an order.",
     chatAdminTitle: "Chat Admin",
-    chatAdminSub: "Fast response",
+    chatAdminSub: "Support",
     voucherToggleTitle: "Have a voucher?",
     voucherToggleDesc: "Enter code if you have one",
     footerTagline:
@@ -312,13 +312,13 @@ const translations = {
     toastRecentCleared: "History cleared",
     resetFilterBtn: "Reset filter",
     emptyFavoritesTitle: "No favorite games yet",
-    emptyFavoritesDesc: "Tap the ❤️ icon on a game card to save it here.",
+    emptyFavoritesDesc: "Tap the ♡️ icon on a game card to save it here.",
     orderStep1: "Pick product",
     orderStep2: "Player details",
     orderStep3: "Pay",
     promoEndsIn: "Refresh in",
     catalogStockReady: "stock ready",
-    trendingTitle: "🔥 Trending Now",
+    trendingTitle: "Trending",
     trendingSub: "Top games this week",
     trendingEmpty: "No trending data yet",
     quickBuyTitle: "Buy Again",
@@ -553,7 +553,7 @@ function showToast(message, options = {}) {
   toast.className = "toast" + (options.tone ? " toast-" + options.tone : "");
   toast.setAttribute("role", "status");
 
-  const icon = options.icon || "\u2728";
+  const icon = options.icon || "•";
   toast.innerHTML = `
     <span class="toast-icon" aria-hidden="true">${icon}</span>
     <span class="toast-text">${escapeHtml(message)}</span>
@@ -680,7 +680,7 @@ async function loadAllProducts() {
   } catch (err) {
     gameGrid.innerHTML = `
   <div class="empty-category-card">
-    <div class="empty-category-icon">⚠️</div>
+    <div class="empty-category-icon">!</div>
     <h3>Gagal memuat produk</h3>
     <p>Coba refresh halaman atau hubungi admin jika masalah masih terjadi.</p>
     <a href="https://t.me/aegamestore" target="_blank">Chat Admin</a>
@@ -1858,7 +1858,7 @@ async function checkLoginStatus() {
       userMenu.innerHTML = `
     <div class="user-menu">
       <span class="user-greeting">
-        <span aria-hidden="true">👤</span>
+        <span aria-hidden="true">M</span>
         <strong>${escapeHtml(data.username || "")}</strong>
       </span>
       <a href="/account.html" class="user-action-btn">
@@ -2012,7 +2012,7 @@ function showSocialProof() {
       : `<b>${item.name}</b> baru saja membeli <b>${item.game}</b>`;
 
   sp.innerHTML = `
-  🚀
+  Go
   <div style="font-size: 13px;">
     ${socialText}
   </div>
@@ -2312,10 +2312,10 @@ function toggleTheme() {
 
   if (body.classList.contains("dark-theme")) {
     localStorage.setItem("ae_theme", "dark");
-    if (themeBtn) themeBtn.innerText = "☀️"; // Ganti jadi cerah
+    if (themeBtn) themeBtn.innerText = "●"; // Ganti jadi cerah
   } else {
     localStorage.setItem("ae_theme", "light");
-    if (themeBtn) themeBtn.innerText = "🌙"; // Kembali malam
+    if (themeBtn) themeBtn.innerText = "◐"; // Kembali malam
   }
 }
 
@@ -2326,7 +2326,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (savedTheme === "dark") {
     document.body.classList.add("dark-theme");
-    if (themeToggleBtn) themeToggleBtn.innerText = "☀️";
+    if (themeToggleBtn) themeToggleBtn.innerText = "●";
   }
 });
 
@@ -2476,7 +2476,7 @@ async function loadReviews() {
               <div>
                 <strong>${escapeHtml(item.username || "Buyer")}</strong>
                 <span class="testi-game">
-  ${escapeHtml(item.badge?.emoji || "✅")} ${escapeHtml(item.badge?.label || "Verified Buyer")}
+  ${escapeHtml(item.badge?.emoji || "Done")} ${escapeHtml(item.badge?.label || "Verified Buyer")}
 </span>
               </div>
               <div class="testi-rating">${renderStars(item.rating)}</div>
@@ -2561,7 +2561,7 @@ async function openReviewPopup() {
             class="${rating <= popupRating ? "active" : ""}"
             data-popup-rating="${rating}"
           >
-            ★
+            *
           </button>
         `,
       )
@@ -2693,7 +2693,7 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("DOMContentLoaded", () => {
   const themeBtn = document.getElementById("theme-toggle");
   if (document.body.classList.contains("dark-theme") && themeBtn) {
-    themeBtn.innerText = "☀️";
+    themeBtn.innerText = "●";
   }
 });
 setLanguage(currentLanguage);
@@ -2971,7 +2971,7 @@ function showTelegramPopup() {
       `,
       showCancelButton: false,
       showDenyButton: true,
-      confirmButtonText: "Gabung Sekarang! 🚀",
+      confirmButtonText: "Gabung Sekarang! Go",
       denyButtonText: "Sembunyikan",
       buttonsStyling: false,
       width: "520px",
@@ -3488,7 +3488,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "deliveryAutoDesc",
         "Kirim otomatis \u2264 1 menit setelah bayar",
       );
-    const icon = isManual ? "\ud83d\udc64" : "\u26a1";
+    const icon = isManual ? "M" : "A";
 
     el.hidden = false;
     el.className = `delivery-estimate ${isManual ? "is-manual" : "is-auto"}`;
@@ -4440,9 +4440,9 @@ document.addEventListener("DOMContentLoaded", () => {
       paymentLoadingSnap: "Memuat metode pembayaran…",
       paymentSecureHint:
         "Pembayaran aman via Midtrans (QRIS, GoPay, OVO, DANA, VA, dll)",
-      paymentRefreshStatus: "🔄 Cek Status",
+      paymentRefreshStatus: "Refresh Cek Status",
       paymentExitLater: "Bayar Nanti",
-      paymentStateTitlePaid: "Pembayaran Berhasil 🎉",
+      paymentStateTitlePaid: "Pembayaran Berhasil Done",
       paymentStateDescPaid: "Game key sedang dikirim, sebentar lagi…",
       paymentStateTitleExpired: "Waktu Habis",
       paymentStateDescExpired: "QR kadaluwarsa. Silakan buat order baru.",
@@ -4475,9 +4475,9 @@ document.addEventListener("DOMContentLoaded", () => {
       paymentLoadingSnap: "Loading payment methods…",
       paymentSecureHint:
         "Secured by Midtrans (QRIS, GoPay, OVO, DANA, VA, etc)",
-      paymentRefreshStatus: "🔄 Check Status",
+      paymentRefreshStatus: "Refresh Check Status",
       paymentExitLater: "Pay Later",
-      paymentStateTitlePaid: "Payment Successful 🎉",
+      paymentStateTitlePaid: "Payment Successful Done",
       paymentStateDescPaid: "Your game key is being delivered…",
       paymentStateTitleExpired: "Time Expired",
       paymentStateDescExpired: "QR code expired. Please create a new order.",
@@ -4753,7 +4753,7 @@ document.addEventListener("DOMContentLoaded", () => {
     stopCountdown();
     setStatus("paid");
     showStateOverlay({
-      icon: "🎉",
+      icon: "Done",
       title: t("paymentStateTitlePaid"),
       desc: t("paymentStateDescPaid"),
       primary: {
@@ -4811,7 +4811,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function handleSnapError() {
     setStatus("error");
     showStateOverlay({
-      icon: "⚠️",
+      icon: "!",
       title: t("paymentStateTitleError"),
       desc: t("paymentStateDescError"),
       primary: {
@@ -5212,7 +5212,7 @@ document.addEventListener("DOMContentLoaded", () => {
     wrap.id = "aeStickySearch";
     wrap.setAttribute("aria-hidden", "true");
     wrap.innerHTML = `
-      <span class="ae-sticky-search-icon" aria-hidden="true">🔍</span>
+      <span class="ae-sticky-search-icon" aria-hidden="true">Search</span>
       <input type="text" id="aeStickySearchInput" placeholder="Cari game cepat..." autocomplete="off" aria-label="Cari game cepat" />
       <button type="button" class="ae-sticky-search-clear" aria-label="Bersihkan pencarian">×</button>
     `;
