@@ -10682,3 +10682,81 @@ body:has(.payment-modal.show) .floating-admin-btn {
     grid-template-columns: 1fr !important;
   }
 }
+
+
+/* =========================================================
+   AE Payment Modal Header Fix v2
+   Fix mobile order ID being squeezed into vertical text.
+   ========================================================= */
+.payment-modal-header {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 44px !important;
+  align-items: start !important;
+  gap: 12px !important;
+}
+
+.payment-modal-brand {
+  min-width: 0 !important;
+  width: 100% !important;
+  display: grid !important;
+  grid-template-columns: 44px minmax(0, 1fr) !important;
+  align-items: start !important;
+  gap: 12px !important;
+}
+
+.payment-modal-brand-text {
+  min-width: 0 !important;
+  width: 100% !important;
+  display: block !important;
+}
+
+.payment-modal-brand-text strong {
+  display: block !important;
+  max-width: 100% !important;
+  white-space: normal !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+}
+
+.payment-modal-brand-text small {
+  display: block !important;
+  max-width: 100% !important;
+  margin-top: 5px !important;
+  line-height: 1.45 !important;
+  white-space: normal !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+}
+
+.payment-modal-order-id {
+  display: inline !important;
+  margin-left: 4px !important;
+  max-width: 100% !important;
+  line-height: inherit !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  word-break: normal !important;
+}
+
+.payment-modal-close {
+  justify-self: end !important;
+  align-self: start !important;
+  flex: 0 0 auto !important;
+}
+
+@media (max-width: 640px) {
+  .payment-modal-header {
+    grid-template-columns: minmax(0, 1fr) 40px !important;
+    gap: 10px !important;
+  }
+
+  .payment-modal-brand {
+    grid-template-columns: 38px minmax(0, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  .payment-modal-brand-text small {
+    font-size: 11px !important;
+    line-height: 1.45 !important;
+  }
+}
