@@ -202,7 +202,7 @@ const translations = {
     howToBuy: "How it works",
     searchGamePlaceholder: "Search game name (e.g. PUBG)...",
     processingOrder: "Processing order...",
-    heroTitle: "Game keys, simple and fast.",
+    heroTitle: "Top Up Game keys, simple and fast.",
     heroDesc:
       "Choose a product, complete the payment, and your key will be delivered automatically.",
     totalPayment: "Total Payment",
