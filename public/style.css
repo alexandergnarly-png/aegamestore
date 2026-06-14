@@ -11805,3 +11805,185 @@ body.dark-theme .order-product-card.active {
   }
 }
 
+
+
+/* =========================================================
+   AE NOTHING BENTO — Brand Pill Fix v5
+   Focus: restore horizontal brand selector + clean checkout spacing.
+   ========================================================= */
+
+/* Brand selector: back to horizontal pill rail, not stacked cards */
+.order-brand-pills {
+  display: flex !important;
+  grid-template-columns: none !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  max-height: none !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  padding: 2px 2px 10px !important;
+  scrollbar-width: none !important;
+  -webkit-overflow-scrolling: touch !important;
+  scroll-snap-type: x proximity !important;
+}
+
+.order-brand-pills::-webkit-scrollbar {
+  display: none !important;
+}
+
+.order-brand-pill {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: max-content !important;
+  max-width: none !important;
+  min-height: 42px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  padding: 10px 14px !important;
+  border-radius: 999px !important;
+  border: 1px solid var(--nb-line, rgba(17,17,17,.14)) !important;
+  background: var(--nb-surface, #fff) !important;
+  color: var(--nb-ink, #111) !important;
+  box-shadow: none !important;
+  scroll-snap-align: start !important;
+}
+
+.order-brand-pill.active {
+  background: var(--nb-ink, #111) !important;
+  color: var(--nb-bg, #f5f4ef) !important;
+  border-color: var(--nb-ink, #111) !important;
+}
+
+.order-brand-pill span {
+  min-width: 0 !important;
+  max-width: none !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: nowrap !important;
+  color: inherit !important;
+  font-size: 13px !important;
+  font-weight: 850 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.order-brand-pill small {
+  flex: 0 0 auto !important;
+  min-width: max-content !important;
+  padding: 4px 8px !important;
+  border-radius: 999px !important;
+  border: 1px solid currentColor !important;
+  background: transparent !important;
+  color: inherit !important;
+  font-size: 10px !important;
+  line-height: 1 !important;
+  font-weight: 800 !important;
+  opacity: .72 !important;
+}
+
+.order-brand-pill.is-empty,
+.order-brand-pill[data-ready="0"] {
+  opacity: .52 !important;
+}
+
+.order-brand-pill.is-empty.active,
+.order-brand-pill[data-ready="0"].active {
+  opacity: 1 !important;
+}
+
+/* Product cards: keep badges readable and avoid text collision */
+.order-product-card {
+  position: relative !important;
+  padding: 42px 16px 16px !important;
+}
+
+.order-product-status,
+.order-product-status-safe,
+.order-product-status-risk,
+.order-product-status-maintenance {
+  position: absolute !important;
+  top: 12px !important;
+  left: 14px !important;
+  right: auto !important;
+  max-width: calc(100% - 126px) !important;
+  justify-self: start !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.order-product-stock {
+  position: absolute !important;
+  top: 12px !important;
+  right: 14px !important;
+  left: auto !important;
+  max-width: 104px !important;
+  justify-self: end !important;
+  white-space: nowrap !important;
+}
+
+.order-product-main {
+  padding-top: 0 !important;
+}
+
+/* Keep voucher compact so checkout does not feel too tall */
+.voucher-panel {
+  padding: 14px !important;
+}
+
+.voucher-panel:not([open]) {
+  padding: 12px 14px !important;
+}
+
+.voucher-panel:not([open]) .voucher-body {
+  display: none !important;
+}
+
+/* Mobile refinements */
+@media (max-width: 640px) {
+  .order-modal-card {
+    padding: 15px !important;
+  }
+
+  .order-brand-pills {
+    display: flex !important;
+    grid-template-columns: none !important;
+    gap: 8px !important;
+    margin-inline: -2px !important;
+    padding: 2px 2px 10px !important;
+  }
+
+  .order-brand-pill {
+    min-height: 40px !important;
+    padding: 9px 13px !important;
+  }
+
+  .order-product-cards {
+    max-height: min(230px, 40dvh) !important;
+  }
+
+  .order-product-card {
+    min-height: 96px !important;
+    padding: 40px 15px 15px !important;
+  }
+
+  .order-product-status,
+  .order-product-status-safe,
+  .order-product-status-risk,
+  .order-product-status-maintenance {
+    top: 11px !important;
+    left: 13px !important;
+    max-width: calc(100% - 116px) !important;
+    font-size: 8.5px !important;
+  }
+
+  .order-product-stock {
+    top: 11px !important;
+    right: 13px !important;
+    max-width: 94px !important;
+    font-size: 8.5px !important;
+  }
+}
