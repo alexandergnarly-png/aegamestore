@@ -625,6 +625,122 @@
         color: var(--ink) !important;
       }
 
+
+
+      .timeline-mini {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        margin: -4px 0 14px;
+      }
+      .timeline-item {
+        min-height: 76px;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-md);
+        background: var(--surface);
+      }
+      .timeline-item strong {
+        display: block;
+        color: var(--ink-2);
+        font-size: 12px;
+        font-weight: 900;
+        letter-spacing: -.01em;
+        line-height: 1.25;
+      }
+      .timeline-item span {
+        display: block;
+        margin-top: 7px;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 750;
+        line-height: 1.35;
+      }
+      .timeline-item.is-current {
+        background: var(--ink);
+        border-color: var(--ink);
+        color: var(--surface);
+      }
+      .timeline-item.is-current strong,
+      .timeline-item.is-current span { color: var(--surface); }
+      .timeline-item.is-muted { opacity: .58; }
+
+      .order-tools {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin: -2px 0 14px;
+      }
+      .tool-btn {
+        min-height: 48px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        padding: 11px 14px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: var(--surface);
+        color: var(--ink);
+        font-size: 13px;
+        font-weight: 900;
+        transition: transform .18s var(--ease), background .18s var(--ease), border-color .18s var(--ease);
+      }
+      .tool-btn:hover { transform: translateY(-1px); background: var(--surface-2); border-color: var(--line-strong); }
+      .tool-btn.primary {
+        background: var(--ink);
+        color: var(--surface);
+        border-color: var(--ink);
+      }
+      .tool-btn.primary:hover { opacity: .94; }
+      .tool-btn[hidden] { display: none !important; }
+
+      .license-card {
+        width: 100%;
+        display: grid;
+        gap: 8px;
+      }
+      .license-kicker {
+        width: fit-content;
+        padding: 5px 9px;
+        border: 1px solid var(--line);
+        border-radius: var(--pill);
+        background: var(--surface);
+        color: var(--muted);
+        font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+        font-size: 10px;
+        font-weight: 900;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+      }
+      .license-code {
+        display: block;
+        color: var(--ink-2);
+        font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: clamp(15px, 4vw, 22px);
+        font-weight: 900;
+        line-height: 1.35;
+        letter-spacing: .02em;
+        word-break: break-word;
+      }
+      .security-note {
+        margin: 0 0 14px;
+        padding: 14px 16px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-lg);
+        background: var(--surface-2);
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.6;
+      }
+      .security-note strong {
+        display: block;
+        color: var(--ink-2);
+        font-size: 12px;
+        font-weight: 900;
+        margin-bottom: 4px;
+      }
+
       @media (max-width: 640px) {
         body { background-size: 18px 18px; }
         .site-header { position: sticky; }
@@ -656,6 +772,13 @@
         .private-group-btn { grid-column: 1 / -1; }
         .btn { min-height: 48px; border-radius: 17px; }
         .skeleton-line { animation: none; }
+      }
+
+
+      @media (max-width: 640px) {
+        .timeline-mini,
+        .order-tools { grid-template-columns: 1fr; }
+        .timeline-item { min-height: auto; }
       }
 
       @media (prefers-reduced-motion: reduce) {
@@ -724,6 +847,12 @@
             <span class="progress-fill" id="progressFill"></span>
           </div>
 
+          <div class="timeline-mini" id="timelineMini" aria-live="polite">
+            <div class="timeline-item is-current"><strong data-result-i18n="timelineCreated">Order Created</strong><span data-result-i18n="timelineWaiting">Menunggu data...</span></div>
+            <div class="timeline-item"><strong data-result-i18n="timelinePayment">Payment</strong><span data-result-i18n="timelineWaiting">Menunggu data...</span></div>
+            <div class="timeline-item"><strong data-result-i18n="timelineDelivery">Delivery</strong><span data-result-i18n="timelineWaiting">Menunggu data...</span></div>
+          </div>
+
           <div class="summary" id="summary">
             <div class="summary-item" id="nameText"><span class="skeleton-line long"></span><span class="skeleton-line short"></span></div>
             <div class="summary-item" id="gameText"><span class="skeleton-line long"></span><span class="skeleton-line short"></span></div>
@@ -741,6 +870,22 @@
             <span class="key-title"><iconify-icon icon="mdi:key-variant" aria-hidden="true"></iconify-icon><span data-result-i18n="keyTitle">Game Key / Voucher</span></span>
             <div id="keyBox" data-result-i18n="awaitingKey">Menunggu key...</div>
             <button class="btn copy-btn" id="copyBtn" type="button" onclick="copyKey()" style="display:none" data-result-i18n="copyKey">Copy Kode</button>
+          </div>
+
+          <div class="order-tools" id="orderTools">
+            <button class="tool-btn" id="copyDetailBtn" type="button" onclick="copyOrderDetail()">
+              <iconify-icon icon="mdi:content-copy" aria-hidden="true"></iconify-icon>
+              <span data-result-i18n="copyOrderDetail">Copy Order Detail</span>
+            </button>
+            <button class="tool-btn primary" id="continuePayBtn" type="button" onclick="continuePayment()" hidden>
+              <iconify-icon icon="mdi:credit-card-fast-outline" aria-hidden="true"></iconify-icon>
+              <span data-result-i18n="continuePayment">Continue Payment</span>
+            </button>
+          </div>
+
+          <div class="security-note" id="securityNote">
+            <strong data-result-i18n="securityTitle">Security Note</strong>
+            <span data-result-i18n="securityNote">Never share your key before redeeming. AE Game Store will never ask for your game password.</span>
           </div>
 
           <div class="howto-box" id="howtoBox">
@@ -848,6 +993,22 @@ const resultTranslations = {
           privateGroupDesc:
             "Dapatkan update stok, info maintenance, voucher, dan announcement khusus buyer.",
           privateGroupBtn: "Join Group",
+          copyOrderDetail: "Copy Order Detail",
+          continuePayment: "Lanjut Bayar",
+          continuePaymentLoading: "Memuat pembayaran...",
+          continuePaymentFailed: "Gagal lanjut bayar",
+          continuePaymentLogin: "Login dulu untuk lanjut bayar.",
+          orderDetailCopied: "Detail order berhasil dicopy",
+          securityTitle: "Catatan Keamanan",
+          securityNote: "Jangan bagikan key sebelum redeem. AE Game Store tidak akan pernah meminta password game kamu.",
+          timelineCreated: "Order Dibuat",
+          timelinePayment: "Pembayaran",
+          timelineDelivery: "Pengiriman",
+          timelineWaiting: "Menunggu data...",
+          timelineDone: "Selesai",
+          timelineCurrent: "Sedang diproses",
+          timelineFailed: "Tidak aktif",
+          autoRefreshActive: "Auto refresh aktif. Halaman akan cek status otomatis.",
         },
         en: {
           pageTitle: "Order Result - AE Game Store",
@@ -918,6 +1079,22 @@ const resultTranslations = {
           privateGroupDesc:
             "Get stock updates, maintenance info, vouchers, and buyer-only announcements.",
           privateGroupBtn: "Join Group",
+          copyOrderDetail: "Copy Order Detail",
+          continuePayment: "Continue Payment",
+          continuePaymentLoading: "Loading payment...",
+          continuePaymentFailed: "Failed to continue payment",
+          continuePaymentLogin: "Please log in to continue payment.",
+          orderDetailCopied: "Order detail copied",
+          securityTitle: "Security Note",
+          securityNote: "Never share your key before redeeming. AE Game Store will never ask for your game password.",
+          timelineCreated: "Order Created",
+          timelinePayment: "Payment",
+          timelineDelivery: "Delivery",
+          timelineWaiting: "Waiting for data...",
+          timelineDone: "Done",
+          timelineCurrent: "In progress",
+          timelineFailed: "Inactive",
+          autoRefreshActive: "Auto refresh is active. This page will check status automatically.",
         },
       };
 
@@ -978,6 +1155,10 @@ const resultTranslations = {
 
       let latestGameKey = "";
       let lastOrderData = null;
+      let pendingRefreshTimer = null;
+      let pendingRefreshCount = 0;
+      const PENDING_REFRESH_LIMIT = 10;
+      const PENDING_REFRESH_INTERVAL = 12000;
 
       function formatRupiah(num) {
         return "Rp " + Number(num || 0).toLocaleString("id-ID");
@@ -1011,7 +1192,125 @@ const resultTranslations = {
       }
 
       function refreshOrder() {
-        loadOrder();
+        loadOrder({ silent: false, manual: true });
+      }
+
+      function getOrderIdFromUrl() {
+        return new URLSearchParams(window.location.search).get("order_id") || "";
+      }
+
+      function stopPendingAutoRefresh() {
+        if (pendingRefreshTimer) clearInterval(pendingRefreshTimer);
+        pendingRefreshTimer = null;
+        pendingRefreshCount = 0;
+      }
+
+      function startPendingAutoRefresh() {
+        if (pendingRefreshTimer) return;
+        pendingRefreshCount = 0;
+        pendingRefreshTimer = setInterval(() => {
+          pendingRefreshCount += 1;
+          if (pendingRefreshCount > PENDING_REFRESH_LIMIT) {
+            stopPendingAutoRefresh();
+            return;
+          }
+          loadOrder({ silent: true, auto: true });
+        }, PENDING_REFRESH_INTERVAL);
+      }
+
+      function formatOrderTime(value) {
+        if (!value) return tResult("timelineWaiting");
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return tResult("timelineWaiting");
+        return date.toLocaleString(getResultLanguage() === "en" ? "en-US" : "id-ID", {
+          day: "2-digit",
+          month: "short",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      }
+
+      function renderTimeline(data, state) {
+        const box = document.getElementById("timelineMini");
+        if (!box) return;
+        const createdAt = formatOrderTime(data?.created_at);
+        const paymentText = state === "delivered" || state === "manual"
+          ? tResult("timelineDone")
+          : state === "failed"
+            ? tResult("timelineFailed")
+            : tResult("timelineCurrent");
+        const deliveryText = state === "delivered"
+          ? tResult("timelineDone")
+          : state === "manual"
+            ? tResult("timelineCurrent")
+            : state === "failed"
+              ? tResult("timelineFailed")
+              : tResult("timelineWaiting");
+        box.innerHTML = `
+          <div class="timeline-item ${state === "created" ? "is-current" : ""}">
+            <strong>${tResult("timelineCreated")}</strong>
+            <span>${escapeHtml(createdAt)}</span>
+          </div>
+          <div class="timeline-item ${state === "payment" ? "is-current" : state === "failed" ? "is-muted" : ""}">
+            <strong>${tResult("timelinePayment")}</strong>
+            <span>${escapeHtml(paymentText)}</span>
+          </div>
+          <div class="timeline-item ${state === "manual" ? "is-current" : state === "payment" ? "is-muted" : state === "failed" ? "is-muted" : ""}">
+            <strong>${tResult("timelineDelivery")}</strong>
+            <span>${escapeHtml(deliveryText)}</span>
+          </div>
+        `;
+      }
+
+      function copyOrderDetail() {
+        if (!lastOrderData) return;
+        const lines = [
+          `Order ID: ${lastOrderData.id || getOrderIdFromUrl() || "-"}`,
+          `Name: ${lastOrderData.name || "-"}`,
+          `Game: ${lastOrderData.game || "-"}`,
+          `Product: ${lastOrderData.product || "-"}`,
+          `Total: ${lastOrderData.price ? formatRupiah(lastOrderData.price) : "-"}`,
+          `Payment Status: ${lastOrderData.payment_status || "-"}`,
+          `Delivery Status: ${lastOrderData.delivery_status || "-"}`,
+          `Key: ${lastOrderData.gameKey || latestGameKey || "-"}`,
+        ];
+        navigator.clipboard.writeText(lines.join("\n")).then(() => {
+          showToast("success", tResult("orderDetailCopied"));
+        }).catch(() => {
+          Swal.fire({ icon: "error", title: tResult("copyFailTitle"), text: tResult("copyFailText"), confirmButtonColor: "#111111" });
+        });
+      }
+
+      async function continuePayment() {
+        const orderId = getOrderIdFromUrl();
+        const btn = document.getElementById("continuePayBtn");
+        if (!orderId) return;
+        const original = btn ? btn.innerHTML : "";
+        if (btn) {
+          btn.disabled = true;
+          btn.innerHTML = `<iconify-icon icon="mdi:loading" aria-hidden="true"></iconify-icon><span>${tResult("continuePaymentLoading")}</span>`;
+        }
+        try {
+          const res = await fetch(`/order/${encodeURIComponent(orderId)}/resume`);
+          const data = await res.json();
+          if (res.status === 401 && data.redirectUrl) {
+            window.location.href = data.redirectUrl;
+            return;
+          }
+          if (!res.ok) throw new Error(data.message || tResult("continuePaymentFailed"));
+          if (data.paymentUrl) {
+            window.location.href = data.paymentUrl;
+            return;
+          }
+          throw new Error(tResult("continuePaymentFailed"));
+        } catch (err) {
+          Swal.fire({ icon: "error", title: tResult("continuePaymentFailed"), text: err.message || tResult("continuePaymentFailed"), confirmButtonColor: "#111111" });
+        } finally {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = original;
+          }
+        }
       }
 
       function copyKey() {
@@ -1163,7 +1462,9 @@ const resultTranslations = {
         const resultHelp = document.getElementById("resultHelp");
         if (resultHelp) resultHelp.style.display = "none";
         const privateGroupBox = document.getElementById("privateGroupBox");
-if (privateGroupBox) privateGroupBox.hidden = true;
+        if (privateGroupBox) privateGroupBox.hidden = true;
+        const continuePayBtn = document.getElementById("continuePayBtn");
+        if (continuePayBtn) continuePayBtn.hidden = true;
 
         const paymentStatus = String(data.payment_status || "").toLowerCase();
         const deliveryStatus = String(data.delivery_status || "").toLowerCase();
@@ -1180,8 +1481,14 @@ if (privateGroupBox) privateGroupBox.hidden = true;
 
         if (deliveryStatus === "delivered" && data.gameKey) {
           latestGameKey = data.gameKey;
+          stopPendingAutoRefresh();
           copyBtn.style.display = "flex";
-          keyBox.innerText = data.gameKey;
+          keyBox.innerHTML = `
+            <div class="license-card">
+              <span class="license-kicker">LICENSE KEY</span>
+              <code class="license-code">${escapeHtml(data.gameKey)}</code>
+            </div>
+          `;
           if (keyWrapper) keyWrapper.className = "key-box delivered";
           if (howtoBox) howtoBox.classList.add("show");
           statusText.innerHTML = `
@@ -1191,11 +1498,13 @@ if (privateGroupBox) privateGroupBox.hidden = true;
             </div>
           `;
           setProgress("delivered");
+          renderTimeline(data, "delivered");
           if (privateGroupBox) privateGroupBox.hidden = false;
           return "deliveredToast";
         }
 
         if (deliveryStatus === "manual") {
+          stopPendingAutoRefresh();
           latestGameKey = "";
           copyBtn.style.display = "none";
           keyBox.innerText = data.gameKey || tResult("manualKeyFallback");
@@ -1207,6 +1516,7 @@ if (privateGroupBox) privateGroupBox.hidden = true;
             </div>
           `;
           setProgress("manual");
+          renderTimeline(data, "manual");
           return "manualToast";
         }
 
@@ -1216,6 +1526,7 @@ if (privateGroupBox) privateGroupBox.hidden = true;
         ) {
           latestGameKey = "";
           copyBtn.style.display = "none";
+          if (continuePayBtn) continuePayBtn.hidden = false;
           if (keyWrapper) keyWrapper.className = "key-box pending";
           keyBox.innerHTML = `
             <div class="pending-msg">${tResult("pendingTitle")}</div>
@@ -1228,6 +1539,8 @@ if (privateGroupBox) privateGroupBox.hidden = true;
             </div>
           `;
           setProgress("payment");
+          renderTimeline(data, "payment");
+          startPendingAutoRefresh();
           return "pendingToast";
         }
 
@@ -1236,6 +1549,7 @@ if (privateGroupBox) privateGroupBox.hidden = true;
           paymentStatus === "cancelled" ||
           deliveryStatus === "cancelled"
         ) {
+          stopPendingAutoRefresh();
           latestGameKey = "";
           copyBtn.style.display = "none";
           if (keyWrapper) keyWrapper.className = "key-box problem";
@@ -1247,11 +1561,13 @@ if (privateGroupBox) privateGroupBox.hidden = true;
             </div>
           `;
           setProgress("failed");
+          renderTimeline(data, "failed");
           return "inactiveToast";
         }
 
         latestGameKey = "";
         copyBtn.style.display = "none";
+        if (continuePayBtn) continuePayBtn.hidden = false;
         if (keyWrapper) keyWrapper.className = "key-box pending";
         keyBox.innerText = tResult("fallbackKey");
         statusText.innerHTML = `
@@ -1261,10 +1577,12 @@ if (privateGroupBox) privateGroupBox.hidden = true;
           </div>
         `;
         setProgress("payment");
+        renderTimeline(data, "payment");
+        startPendingAutoRefresh();
         return "fallbackToast";
       }
 
-      async function loadOrder() {
+      async function loadOrder(options = {}) {
         const params = new URLSearchParams(window.location.search);
         const orderId = params.get("order_id");
 
@@ -1275,7 +1593,10 @@ if (privateGroupBox) privateGroupBox.hidden = true;
         const keyWrapper = document.querySelector(".key-box");
 
         if (!orderId) {
+          stopPendingAutoRefresh();
           lastOrderData = null;
+          const continuePayBtn = document.getElementById("continuePayBtn");
+          if (continuePayBtn) continuePayBtn.hidden = true;
           statusRow.innerHTML = `<span class="badge cancelled">${tResult(
             "incompleteBadge",
           )}</span>`;
@@ -1292,6 +1613,7 @@ if (privateGroupBox) privateGroupBox.hidden = true;
           copyBtn.style.display = "none";
           if (keyWrapper) keyWrapper.className = "key-box problem";
           setProgress("failed");
+          renderTimeline({}, "failed");
           return;
         }
 
@@ -1304,7 +1626,7 @@ if (privateGroupBox) privateGroupBox.hidden = true;
           }
 
           const toastKey = renderOrder(data);
-          if (toastKey) {
+          if (toastKey && !options.silent) {
             const iconMap = {
               deliveredToast: "success",
               manualToast: "info",
@@ -1315,6 +1637,9 @@ if (privateGroupBox) privateGroupBox.hidden = true;
             showToast(iconMap[toastKey] || "info", tResult(toastKey));
           }
         } catch (error) {
+          stopPendingAutoRefresh();
+          const continuePayBtn = document.getElementById("continuePayBtn");
+          if (continuePayBtn) continuePayBtn.hidden = true;
           lastOrderData = null;
           statusRow.innerHTML = `<span class="badge cancelled">${tResult(
             "loadFailedBadge",
@@ -1333,6 +1658,7 @@ if (privateGroupBox) privateGroupBox.hidden = true;
           copyBtn.style.display = "none";
           if (keyWrapper) keyWrapper.className = "key-box problem";
           setProgress("failed");
+          renderTimeline({}, "failed");
         }
       }
 
