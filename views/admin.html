@@ -755,6 +755,46 @@
         min-height: 44px;
       }
 
+
+      .product-sync-toggle {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border: 1px solid var(--line);
+        border-radius: 17px;
+        background: var(--surface-2);
+        color: var(--ink);
+        cursor: pointer;
+      }
+
+      .product-sync-toggle input {
+        width: 18px;
+        height: 18px;
+        flex: 0 0 18px;
+        accent-color: var(--ink);
+      }
+
+      .product-sync-toggle span {
+        display: grid;
+        gap: 2px;
+        line-height: 1.2;
+      }
+
+      .product-sync-toggle b {
+        color: var(--ink-2);
+        font-size: 12px;
+        font-weight: 900;
+        letter-spacing: -.02em;
+      }
+
+      .product-sync-toggle small {
+        color: var(--muted);
+        font-size: 10.5px;
+        font-weight: 750;
+      }
+
       .info-row {
         margin: 0 0 14px;
       }
@@ -2288,6 +2328,15 @@
                 <option value="risk">Use at Your Own Risk</option>
                 <option value="maintenance">Maintenance</option>
               </select>
+            </div>
+            <div class="field">
+              <label class="product-sync-toggle" for="productSyncBrandStatus">
+                <input type="checkbox" id="productSyncBrandStatus" checked />
+                <span>
+                  <b>Samakan status brand</b>
+                  <small>Game + brand sama, semua durasi ikut berubah</small>
+                </span>
+              </label>
             </div>
           </div>
 
@@ -5377,6 +5426,9 @@
         const price = document.getElementById("productPrice").value.trim();
         const play_status =
           document.getElementById("productPlayStatus")?.value || "safe";
+        const sync_brand_status = Boolean(
+          document.getElementById("productSyncBrandStatus")?.checked,
+        );
 
         if (!game || !brand || !duration || !price) {
           Swal.fire("Semua data produk wajib diisi.");
@@ -5400,6 +5452,7 @@
               duration,
               price,
               play_status,
+              sync_brand_status,
             }),
           });
 
@@ -6021,6 +6074,7 @@
         const durationInput = document.getElementById("productDuration");
         const priceInput = document.getElementById("productPrice");
         const playStatusInput = document.getElementById("productPlayStatus");
+        const syncBrandStatusInput = document.getElementById("productSyncBrandStatus");
         const saveBtn = document.getElementById("saveProductBtn");
 
         if (editingInput) editingInput.value = "";
@@ -6029,6 +6083,7 @@
         if (durationInput) durationInput.value = "";
         if (priceInput) priceInput.value = "";
         if (playStatusInput) playStatusInput.value = "safe";
+        if (syncBrandStatusInput) syncBrandStatusInput.checked = true;
         if (saveBtn) saveBtn.innerText = "Tambah Produk";
 
         Swal.fire({
@@ -6057,6 +6112,8 @@
         document.getElementById("productPrice").value = price;
         const playStatusInput = document.getElementById("productPlayStatus");
         if (playStatusInput) playStatusInput.value = playStatus || "safe";
+        const syncBrandStatusInput = document.getElementById("productSyncBrandStatus");
+        if (syncBrandStatusInput) syncBrandStatusInput.checked = true;
         document.getElementById("saveProductBtn").innerText = "Update Produk";
 
         window.scrollTo({

@@ -3615,6 +3615,9 @@ app.get("/products", requireAdminAuth, async (req, res) => {
 
 app.post("/products", requireAdminAuth, requireAdminCsrf, async (req, res) => {
   const { game, brand, duration, price, delivery_type, play_status } = req.body;
+  const syncBrandStatus =
+    req.body.sync_brand_status === true ||
+    req.body.sync_brand_status === "true";
   const cleanGame = String(game || "").trim();
   const cleanBrand = String(brand || "").trim();
   const cleanDuration = String(duration || "").trim();
@@ -3661,9 +3664,24 @@ app.post("/products", requireAdminAuth, requireAdminCsrf, async (req, res) => {
 
     console.log("INSERT SUCCESS:", result.rows);
 
+    let syncedCount = 0;
+    if (syncBrandStatus) {
+      const syncResult = await query(
+        `UPDATE products
+         SET play_status = $1
+         WHERE LOWER(TRIM(game)) = LOWER(TRIM($2))
+           AND LOWER(TRIM(brand)) = LOWER(TRIM($3))`,
+        [cleanPlayStatus, cleanGame, cleanBrand],
+      );
+      syncedCount = Number(syncResult.rowCount || 0);
+    }
+
     return res.json({
-      message: "Produk berhasil ditambahkan",
+      message: syncBrandStatus
+        ? `Produk berhasil ditambahkan. Status ${syncedCount} produk dalam brand ini ikut disamakan.`
+        : "Produk berhasil ditambahkan",
       id: result.rows[0].id,
+      synced_count: syncedCount,
     });
   } catch (err) {
     console.error("ERROR ADD PRODUCT:", err);
@@ -3692,6 +3710,9 @@ app.put(
     const cleanDuration = String(duration || "").trim();
     const cleanPrice = Number(price);
     const cleanDeliveryType = "auto";
+    const syncBrandStatus =
+      req.body.sync_brand_status === true ||
+      req.body.sync_brand_status === "true";
 
     const hasPlayStatus = Object.prototype.hasOwnProperty.call(
       req.body,
@@ -3742,8 +3763,23 @@ app.put(
         });
       }
 
+      let syncedCount = 0;
+      if (syncBrandStatus && cleanPlayStatus) {
+        const syncResult = await query(
+          `UPDATE products
+           SET play_status = $1
+           WHERE LOWER(TRIM(game)) = LOWER(TRIM($2))
+             AND LOWER(TRIM(brand)) = LOWER(TRIM($3))`,
+          [cleanPlayStatus, cleanGame, cleanBrand],
+        );
+        syncedCount = Number(syncResult.rowCount || 0);
+      }
+
       return res.json({
-        message: "Produk berhasil diupdate",
+        message: syncBrandStatus
+          ? `Produk berhasil diupdate. Status ${syncedCount} produk dalam brand ini ikut disamakan.`
+          : "Produk berhasil diupdate",
+        synced_count: syncedCount,
       });
     } catch (err) {
       console.error("ERROR UPDATE PRODUCT:", err);
