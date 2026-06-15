@@ -5767,7 +5767,13 @@
             const targetLabel = productCount > 0
               ? `${productCount} Produk`
               : String(item.game_name || "-");
-            const targetDetail = productScope || [item.brand_name, item.duration_name].filter(Boolean).join(" — ") || "Legacy scope";
+            const legacyScope = [item.brand_name, item.duration_name].filter(Boolean).join(" — ") || "Legacy scope";
+            const targetDetail = productCount > 1
+              ? "Multi produk — klik Edit untuk lihat pilihan"
+              : productCount === 1
+                ? (productScope || "1 produk dipilih")
+                : legacyScope;
+            const targetTooltip = productScope || targetDetail;
             const safeGameName = JSON.stringify(String(item.game_name || ""));
             const safeBrandName = JSON.stringify(String(item.brand_name || ""));
             const safeDurationName = JSON.stringify(
@@ -5785,9 +5791,11 @@
         <tr>
           <td>${item.id}</td>
           <td><b>${escapeHtml(item.code || "-")}</b></td>
-          <td>
-            <b>${escapeHtml(targetLabel)}</b><br>
-            <small>${escapeHtml(targetDetail)}</small>
+          <td class="voucher-target-cell" title="${escapeHtml(targetTooltip)}">
+            <div class="voucher-scope-cell">
+              <span class="voucher-scope-chip">${escapeHtml(targetLabel)}</span>
+              <small class="voucher-scope-detail">${escapeHtml(targetDetail)}</small>
+            </div>
           </td>
           <td>${escapeHtml(item.brand_name || (productCount > 0 ? "Multi" : "Semua"))}</td>
           <td>${escapeHtml(item.duration_name || (productCount > 0 ? "Multi" : "Semua"))}</td>
