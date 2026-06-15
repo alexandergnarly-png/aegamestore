@@ -3392,23 +3392,33 @@ document.addEventListener("DOMContentLoaded", () => {
     ) {
       return null;
     }
+    const productId = Number(product.id || 0);
     const game = String(product.game || "").toLowerCase();
     const brand = String(product.brand || "").toLowerCase();
     const duration = String(product.duration || "").toLowerCase();
 
     let best = null;
     for (const v of state.publicVouchers) {
+      const productIds = Array.isArray(v.product_ids)
+        ? v.product_ids
+            .map((entry) => Number(entry))
+            .filter((entry) => Number.isInteger(entry) && entry > 0)
+        : [];
       const vGame = String(v.game_name || "").toLowerCase();
       const vBrand = String(v.brand_name || "").toLowerCase();
       const vDuration = String(v.duration_name || "").toLowerCase();
 
-      if (
-        v.scope === "duration" &&
-        (vGame !== game || vBrand !== brand || vDuration !== duration)
-      )
-        continue;
-      if (v.scope === "brand" && (vGame !== game || vBrand !== brand)) continue;
-      if (v.scope === "game" && vGame !== game) continue;
+      if (productIds.length) {
+        if (!productId || !productIds.includes(productId)) continue;
+      } else {
+        if (
+          v.scope === "duration" &&
+          (vGame !== game || vBrand !== brand || vDuration !== duration)
+        )
+          continue;
+        if (v.scope === "brand" && (vGame !== game || vBrand !== brand)) continue;
+        if (v.scope === "game" && vGame !== game) continue;
+      }
 
       const disc = Number(v.discount_amount || 0);
       if (disc <= 0) continue;

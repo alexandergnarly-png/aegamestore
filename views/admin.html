@@ -1864,6 +1864,106 @@
         }
       }
 
+
+
+      /* ===== MULTI PRODUCT VOUCHER PICKER ===== */
+      .voucher-product-target-panel {
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        background: var(--surface-2);
+      }
+
+      .voucher-target-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .voucher-target-head small {
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 850;
+      }
+
+      .voucher-target-controls {
+        display: grid;
+        grid-template-columns: minmax(0, 1.3fr) minmax(150px, .8fr) auto auto;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+
+      .voucher-product-checklist {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 8px;
+        max-height: 260px;
+        overflow: auto;
+        padding-right: 2px;
+      }
+
+      .voucher-product-option {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        padding: 11px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: var(--surface);
+        cursor: pointer;
+      }
+
+      .voucher-product-option:hover {
+        border-color: var(--line-strong);
+      }
+
+      .voucher-product-option input {
+        width: 18px;
+        height: 18px;
+        margin-top: 2px;
+        accent-color: var(--ink);
+        flex: 0 0 auto;
+      }
+
+      .voucher-product-option strong {
+        display: block;
+        color: var(--ink-2);
+        font-size: 13px;
+        font-weight: 900;
+        line-height: 1.25;
+      }
+
+      .voucher-product-option span {
+        display: block;
+        margin-top: 3px;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 750;
+      }
+
+      .voucher-product-empty {
+        grid-column: 1 / -1;
+        padding: 18px;
+        border: 1px dashed var(--line);
+        border-radius: 18px;
+        color: var(--muted);
+        text-align: center;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      @media (max-width: 768px) {
+        .voucher-target-controls {
+          grid-template-columns: 1fr;
+        }
+
+        .voucher-product-checklist {
+          grid-template-columns: 1fr;
+          max-height: 310px;
+        }
+      }
 </style>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </head>
@@ -2710,8 +2810,7 @@
             <div class="card-title-wrap">
               <h2>Kelola Voucher</h2>
               <p class="card-subtitle">
-                Buat kode voucher khusus game tertentu, contoh DELTA5K untuk
-                Delta Force.
+                Buat 1 kode voucher untuk satu atau banyak produk sekaligus.
               </p>
             </div>
             <div class="section-badge">Voucher Manager</div>
@@ -2745,11 +2844,40 @@
               />
             </div>
 
-            <div class="field">
-              <label>Pilih Produk</label>
+            <div class="field-wide voucher-product-target-panel">
+              <div class="voucher-target-head">
+                <div>
+                  <label>Produk yang berlaku</label>
+                  <div class="card-subtitle">
+                    Centang 1 atau banyak produk. Kode voucher tetap sama.
+                  </div>
+                </div>
+                <small id="voucherProductSelectedCount">0 produk dipilih</small>
+              </div>
+              <div class="voucher-target-controls">
+                <input
+                  type="text"
+                  id="voucherProductSearch"
+                  placeholder="Cari game / brand / durasi..."
+                  oninput="renderVoucherProductChecklist()"
+                />
+                <select id="voucherProductGameFilter" onchange="renderVoucherProductChecklist()">
+                  <option value="">Semua Game</option>
+                </select>
+                <button type="button" class="ghost-btn" onclick="selectVisibleVoucherProducts()">
+                  Select Visible
+                </button>
+                <button type="button" class="ghost-btn" onclick="clearVoucherProductSelection()">
+                  Clear
+                </button>
+              </div>
+              <div id="voucherProductChecklist" class="voucher-product-checklist">
+                <div class="voucher-product-empty">Memuat produk...</div>
+              </div>
               <select
                 id="voucherProductSelect"
                 onchange="syncVoucherProductFields()"
+                hidden
               >
                 <option value="">Pilih produk...</option>
               </select>
@@ -3114,6 +3242,8 @@
       let selectedOrderIds = new Set();
       let allProducts = [];
       let allVouchers = [];
+      let allVoucherProducts = [];
+      let selectedVoucherProductIds = new Set();
       let allKeys = [];
 
       function toggleSidebar() {
@@ -5520,6 +5650,9 @@
           "voucherProductSelect",
         );
         if (voucherProductSelect) voucherProductSelect.value = "";
+        selectedVoucherProductIds = new Set();
+        renderVoucherProductChecklist();
+        updateVoucherProductSelectionSummary();
 
         document.getElementById("voucherGameName").value = "";
         document.getElementById("voucherBrandName").value = "";
@@ -5598,6 +5731,9 @@
               .includes(searchValue) ||
             String(item.duration_name || "")
               .toLowerCase()
+              .includes(searchValue) ||
+            String(item.product_scope || "")
+              .toLowerCase()
               .includes(searchValue);
 
           const matchesStatus =
@@ -5622,6 +5758,16 @@
             const active = Number(item.active) === 1;
             const safeCode = JSON.stringify(String(item.code || ""));
             const safeProductId = Number(item.product_id || 0);
+            const productIds = Array.isArray(item.product_ids)
+              ? item.product_ids.map((entry) => Number(entry)).filter((entry) => Number.isInteger(entry) && entry > 0)
+              : [];
+            const safeProductIds = JSON.stringify(productIds);
+            const productCount = Number(item.product_count || productIds.length || 0);
+            const productScope = String(item.product_scope || "").trim();
+            const targetLabel = productCount > 0
+              ? `${productCount} Produk`
+              : String(item.game_name || "-");
+            const targetDetail = productScope || [item.brand_name, item.duration_name].filter(Boolean).join(" — ") || "Legacy scope";
             const safeGameName = JSON.stringify(String(item.game_name || ""));
             const safeBrandName = JSON.stringify(String(item.brand_name || ""));
             const safeDurationName = JSON.stringify(
@@ -5639,9 +5785,12 @@
         <tr>
           <td>${item.id}</td>
           <td><b>${escapeHtml(item.code || "-")}</b></td>
-          <td>${escapeHtml(item.game_name || "-")}</td>
-          <td>${escapeHtml(item.brand_name || "Semua")}</td>
-          <td>${escapeHtml(item.duration_name || "Semua")}</td>
+          <td>
+            <b>${escapeHtml(targetLabel)}</b><br>
+            <small>${escapeHtml(targetDetail)}</small>
+          </td>
+          <td>${escapeHtml(item.brand_name || (productCount > 0 ? "Multi" : "Semua"))}</td>
+          <td>${escapeHtml(item.duration_name || (productCount > 0 ? "Multi" : "Semua"))}</td>
           <td>${formatRupiah(item.discount_amount || 0)}</td>
          <td>
   ${
@@ -5659,7 +5808,7 @@
 </td>
 <td>${escapeHtml(item.expires_at || "-")}</td>
           <td>
-            <button onclick='editVoucher(${item.id}, ${safeCode}, ${safeProductId}, ${safeGameName}, ${safeBrandName}, ${safeDurationName}, ${safeDiscount}, ${safeExpiresAt}, ${safeVisibility}, ${safeTargetUsername})'>Edit</button>
+            <button onclick='editVoucher(${item.id}, ${safeCode}, ${safeProductId}, ${safeProductIds}, ${safeGameName}, ${safeBrandName}, ${safeDurationName}, ${safeDiscount}, ${safeExpiresAt}, ${safeVisibility}, ${safeTargetUsername})'>Edit</button>
             <button class="ghost-btn" onclick="toggleVoucherActive(${item.id}, ${active ? 0 : 1})">
               ${active ? "Nonaktifkan" : "Aktifkan"}
             </button>
@@ -5675,6 +5824,7 @@
         id,
         code,
         productId,
+        productIds,
         gameName,
         brandName,
         durationName,
@@ -5694,6 +5844,18 @@
           "voucherProductSelect",
         );
         if (voucherProductSelect) voucherProductSelect.value = productId || "";
+        const normalizedProductIds = Array.isArray(productIds)
+          ? productIds.map((entry) => Number(entry)).filter((entry) => Number.isInteger(entry) && entry > 0)
+          : [];
+        selectedVoucherProductIds = new Set(
+          normalizedProductIds.length
+            ? normalizedProductIds
+            : productId
+              ? [Number(productId)]
+              : [],
+        );
+        renderVoucherProductChecklist();
+        updateVoucherProductSelectionSummary();
 
         document.getElementById("voucherGameName").value = gameName;
         document.getElementById("voucherBrandName").value = brandName || "";
@@ -5728,6 +5890,7 @@
 
         const productId =
           document.getElementById("voucherProductSelect")?.value || "";
+        const productIds = getSelectedVoucherProductIds();
 
         const editingVoucherId =
           document.getElementById("editingVoucherId").value;
@@ -5736,8 +5899,8 @@
           : "/vouchers";
         const voucherMethod = editingVoucherId ? "PUT" : "POST";
 
-        if (!code || !gameName || !discountAmount) {
-          Swal.fire("Kode, nama game, dan nominal diskon wajib diisi.");
+        if (!code || (!gameName && productIds.length === 0) || !discountAmount) {
+          Swal.fire("Kode, target produk/nama game, dan nominal diskon wajib diisi.");
           return;
         }
 
@@ -5750,7 +5913,8 @@
             },
             body: JSON.stringify({
               code,
-              product_id: productId ? Number(productId) : null,
+              product_id: productIds.length === 1 ? productIds[0] : (productId ? Number(productId) : null),
+              product_ids: productIds,
               game_name: gameName,
               brand_name: brandName || null,
               duration_name: durationName || null,
@@ -6129,9 +6293,142 @@
         }
       }
 
+      function getSelectedVoucherProductIds() {
+        return Array.from(selectedVoucherProductIds)
+          .map((entry) => Number(entry))
+          .filter((entry) => Number.isInteger(entry) && entry > 0);
+      }
+
+      function getVisibleVoucherProducts() {
+        const searchValue = String(
+          document.getElementById("voucherProductSearch")?.value || "",
+        )
+          .trim()
+          .toLowerCase();
+        const gameFilter = String(
+          document.getElementById("voucherProductGameFilter")?.value || "",
+        ).trim();
+
+        return allVoucherProducts.filter((item) => {
+          const productText = [item.game, item.brand, item.duration, item.price]
+            .join(" ")
+            .toLowerCase();
+          const matchesSearch = !searchValue || productText.includes(searchValue);
+          const matchesGame = !gameFilter || String(item.game || "") === gameFilter;
+          return matchesSearch && matchesGame;
+        });
+      }
+
+      function updateVoucherProductSelectionSummary() {
+        const count = getSelectedVoucherProductIds().length;
+        const countNode = document.getElementById("voucherProductSelectedCount");
+        if (countNode) {
+          countNode.textContent = `${count} produk dipilih`;
+        }
+
+        const selectedProducts = allVoucherProducts.filter((item) =>
+          selectedVoucherProductIds.has(Number(item.id)),
+        );
+
+        const select = document.getElementById("voucherProductSelect");
+        if (select) {
+          select.value = selectedProducts.length === 1 ? String(selectedProducts[0].id) : "";
+        }
+
+        const gameInput = document.getElementById("voucherGameName");
+        const brandInput = document.getElementById("voucherBrandName");
+        const durationInput = document.getElementById("voucherDurationName");
+
+        if (!selectedProducts.length) return;
+
+        const uniqueGames = [...new Set(selectedProducts.map((item) => String(item.game || "").trim()).filter(Boolean))];
+        const uniqueBrands = [...new Set(selectedProducts.map((item) => String(item.brand || "").trim()).filter(Boolean))];
+        const uniqueDurations = [...new Set(selectedProducts.map((item) => String(item.duration || "").trim()).filter(Boolean))];
+
+        if (gameInput) gameInput.value = uniqueGames.length === 1 ? uniqueGames[0] : "Multiple Products";
+        if (brandInput) brandInput.value = uniqueBrands.length === 1 ? uniqueBrands[0] : "";
+        if (durationInput) durationInput.value = uniqueDurations.length === 1 ? uniqueDurations[0] : "";
+      }
+
+      function renderVoucherProductChecklist() {
+        const wrap = document.getElementById("voucherProductChecklist");
+        if (!wrap) return;
+
+        if (!Array.isArray(allVoucherProducts) || allVoucherProducts.length === 0) {
+          wrap.innerHTML = `<div class="voucher-product-empty">Belum ada produk</div>`;
+          updateVoucherProductSelectionSummary();
+          return;
+        }
+
+        const visibleProducts = getVisibleVoucherProducts();
+
+        if (!visibleProducts.length) {
+          wrap.innerHTML = `<div class="voucher-product-empty">Produk tidak ditemukan</div>`;
+          updateVoucherProductSelectionSummary();
+          return;
+        }
+
+        wrap.innerHTML = visibleProducts
+          .map((item) => {
+            const id = Number(item.id);
+            const checked = selectedVoucherProductIds.has(id) ? "checked" : "";
+            return `
+              <label class="voucher-product-option">
+                <input
+                  type="checkbox"
+                  value="${id}"
+                  ${checked}
+                  onchange="toggleVoucherProductSelection(${id}, this.checked)"
+                />
+                <span>
+                  <strong>${escapeHtml(item.game || "-")}</strong>
+                  <span>${escapeHtml(item.brand || "-")} — ${escapeHtml(item.duration || "-")} — ${formatRupiah(item.price || 0)}</span>
+                </span>
+              </label>
+            `;
+          })
+          .join("");
+
+        updateVoucherProductSelectionSummary();
+      }
+
+      function toggleVoucherProductSelection(productId, checked) {
+        const id = Number(productId);
+        if (!Number.isInteger(id) || id <= 0) return;
+
+        if (checked) {
+          selectedVoucherProductIds.add(id);
+        } else {
+          selectedVoucherProductIds.delete(id);
+        }
+
+        updateVoucherProductSelectionSummary();
+      }
+
+      function selectVisibleVoucherProducts() {
+        getVisibleVoucherProducts().forEach((item) => {
+          const id = Number(item.id);
+          if (Number.isInteger(id) && id > 0) selectedVoucherProductIds.add(id);
+        });
+        renderVoucherProductChecklist();
+      }
+
+      function clearVoucherProductSelection() {
+        selectedVoucherProductIds = new Set();
+        const select = document.getElementById("voucherProductSelect");
+        if (select) select.value = "";
+        renderVoucherProductChecklist();
+        updateVoucherProductSelectionSummary();
+      }
+
       async function loadVoucherProductOptions() {
         const select = document.getElementById("voucherProductSelect");
-        if (!select) return;
+        const wrap = document.getElementById("voucherProductChecklist");
+        const gameFilter = document.getElementById("voucherProductGameFilter");
+
+        if (wrap) {
+          wrap.innerHTML = `<div class="voucher-product-empty">Memuat produk...</div>`;
+        }
 
         try {
           const res = await fetch("/products");
@@ -6142,33 +6439,26 @@
           }
 
           const data = await res.json();
+          allVoucherProducts = Array.isArray(data) ? data : [];
 
-          select.innerHTML = `<option value="">Pilih produk...</option>`;
+          if (select) {
+            select.innerHTML = `<option value="">Pilih produk...</option>`;
+          }
 
-          if (!Array.isArray(data) || data.length === 0) {
-            select.innerHTML = `<option value="">Belum ada produk</option>`;
+          if (!allVoucherProducts.length) {
+            if (select) select.innerHTML = `<option value="">Belum ada produk</option>`;
+            renderVoucherProductChecklist();
             return;
           }
 
-          const seenProducts = new Set();
+          const games = [...new Set(allVoucherProducts.map((item) => String(item.game || "").trim()).filter(Boolean))].sort();
+          if (gameFilter) {
+            gameFilter.innerHTML = `<option value="">Semua Game</option>` +
+              games.map((game) => `<option value="${escapeHtml(game)}">${escapeHtml(game)}</option>`).join("");
+          }
 
-          data.forEach((item) => {
-            const dedupeKey = [
-              String(item.game || "")
-                .trim()
-                .toLowerCase(),
-              String(item.brand || "")
-                .trim()
-                .toLowerCase(),
-              String(item.duration || "")
-                .trim()
-                .toLowerCase(),
-              String(item.price || "0").trim(),
-            ].join("|");
-
-            if (seenProducts.has(dedupeKey)) return;
-            seenProducts.add(dedupeKey);
-
+          allVoucherProducts.forEach((item) => {
+            if (!select) return;
             const option = document.createElement("option");
             option.value = item.id;
             option.textContent = `${item.game} — ${item.brand} — ${item.duration} — ${formatRupiah(item.price || 0)}`;
@@ -6177,8 +6467,11 @@
             option.dataset.duration = item.duration || "";
             select.appendChild(option);
           });
+
+          renderVoucherProductChecklist();
         } catch (err) {
-          select.innerHTML = `<option value="">Gagal memuat produk</option>`;
+          if (select) select.innerHTML = `<option value="">Gagal memuat produk</option>`;
+          if (wrap) wrap.innerHTML = `<div class="voucher-product-empty">Gagal memuat produk</div>`;
         }
       }
 
@@ -6186,16 +6479,11 @@
         const select = document.getElementById("voucherProductSelect");
         const selected = select?.selectedOptions?.[0];
 
-        if (!selected) return;
+        if (!selected || !selected.value) return;
 
-        const gameInput = document.getElementById("voucherGameName");
-        const brandInput = document.getElementById("voucherBrandName");
-        const durationInput = document.getElementById("voucherDurationName");
-
-        if (gameInput) gameInput.value = selected.dataset.game || "";
-        if (brandInput) brandInput.value = selected.dataset.brand || "";
-        if (durationInput)
-          durationInput.value = selected.dataset.duration || "";
+        selectedVoucherProductIds = new Set([Number(selected.value)]);
+        renderVoucherProductChecklist();
+        updateVoucherProductSelectionSummary();
       }
 
       async function loadVipDiscountProductOptions() {
