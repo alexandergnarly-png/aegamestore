@@ -11104,3 +11104,203 @@ body.dark-theme .game-card-stock.empty {
   }
 }
 
+
+
+/* ===== CHECKOUT MODAL MOBILE POLISH v6 =====
+   Compact product cards, readable steps, hidden mobile scrollbars,
+   and soft status badge colors even when product card is selected. */
+.order-step-label {
+  display: inline !important;
+  color: inherit !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  letter-spacing: -0.02em !important;
+  white-space: nowrap !important;
+}
+
+.order-step {
+  justify-content: center !important;
+  gap: 7px !important;
+}
+
+.order-step-dot {
+  width: 22px !important;
+  height: 22px !important;
+  flex-basis: 22px !important;
+  font-size: 10px !important;
+}
+
+.order-product-cards {
+  position: relative !important;
+  padding-right: 0 !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.order-product-cards::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+}
+
+.order-product-card {
+  min-height: 82px !important;
+  padding: 34px 13px 12px !important;
+  border-radius: 19px !important;
+}
+
+.order-product-main {
+  gap: 2px !important;
+}
+
+.order-product-main strong {
+  font-size: 12px !important;
+  line-height: 1.05 !important;
+}
+
+.order-product-main b {
+  font-size: 19px !important;
+  line-height: 0.98 !important;
+}
+
+.order-product-main small {
+  font-size: 10.5px !important;
+  line-height: 1.15 !important;
+}
+
+.order-product-status,
+.order-product-status-safe,
+.order-product-status-risk,
+.order-product-status-maintenance,
+.order-product-stock {
+  top: 9px !important;
+  font-size: 8.5px !important;
+  line-height: 1 !important;
+  padding: 5px 8px !important;
+}
+
+.order-product-status,
+.order-product-status-safe,
+.order-product-status-risk,
+.order-product-status-maintenance {
+  left: 11px !important;
+  max-width: calc(100% - 108px) !important;
+}
+
+.order-product-stock {
+  right: 11px !important;
+  max-width: 92px !important;
+}
+
+.order-product-card.active .order-product-status-safe,
+body.dark-theme .order-product-card.active .order-product-status-safe {
+  background: #e8f8ee !important;
+  color: #176b3a !important;
+  border-color: #bfe8cc !important;
+}
+
+.order-product-card.active .order-product-status-risk,
+body.dark-theme .order-product-card.active .order-product-status-risk {
+  background: #fff7df !important;
+  color: #8a5a00 !important;
+  border-color: #f2df9b !important;
+}
+
+.order-product-card.active .order-product-status-maintenance,
+body.dark-theme .order-product-card.active .order-product-status-maintenance {
+  background: #feecec !important;
+  color: #9f2a2a !important;
+  border-color: #f3c4c4 !important;
+}
+
+.order-choice-grid + .form-grid {
+  margin-top: 12px !important;
+}
+
+@media (max-width: 640px) {
+  .order-modal-card {
+    max-height: 92dvh !important;
+    padding: 14px !important;
+  }
+
+  .order-steps {
+    gap: 7px !important;
+    margin: 13px 0 15px !important;
+  }
+
+  .order-step {
+    min-height: 40px !important;
+    padding: 7px 8px !important;
+  }
+
+  .order-step-label {
+    display: inline !important;
+    font-size: 10px !important;
+  }
+
+  .order-brand-pills {
+    gap: 7px !important;
+    padding-bottom: 8px !important;
+  }
+
+  .order-brand-pill {
+    min-height: 38px !important;
+    padding: 8px 12px !important;
+  }
+
+  .order-product-cards {
+    max-height: min(198px, 35dvh) !important;
+    gap: 8px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .order-product-card {
+    min-height: 78px !important;
+    padding: 33px 12px 11px !important;
+    border-radius: 18px !important;
+  }
+
+  .order-product-main b {
+    font-size: 18px !important;
+  }
+
+  .order-product-status,
+  .order-product-status-safe,
+  .order-product-status-risk,
+  .order-product-status-maintenance,
+  .order-product-stock {
+    top: 8px !important;
+    padding: 5px 7px !important;
+    font-size: 8px !important;
+  }
+
+  .order-product-status,
+  .order-product-status-safe,
+  .order-product-status-risk,
+  .order-product-status-maintenance {
+    left: 10px !important;
+    max-width: calc(100% - 104px) !important;
+  }
+
+  .order-product-stock {
+    right: 10px !important;
+    max-width: 88px !important;
+  }
+
+  .order-choice-grid + .form-grid {
+    margin-top: 14px !important;
+  }
+}
+
+@media (max-width: 370px) {
+  .order-step-label {
+    font-size: 9px !important;
+  }
+
+  .order-step-dot {
+    width: 20px !important;
+    height: 20px !important;
+    flex-basis: 20px !important;
+  }
+}
