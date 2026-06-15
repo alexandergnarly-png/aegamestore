@@ -532,9 +532,21 @@ function buildVoucherScopeFromProducts(products) {
     };
   }
 
-  const uniqueGames = [...new Set(rows.map((item) => String(item.game || "").trim()).filter(Boolean))];
-  const uniqueBrands = [...new Set(rows.map((item) => String(item.brand || "").trim()).filter(Boolean))];
-  const uniqueDurations = [...new Set(rows.map((item) => String(item.duration || "").trim()).filter(Boolean))];
+  const uniqueGames = [
+    ...new Set(
+      rows.map((item) => String(item.game || "").trim()).filter(Boolean),
+    ),
+  ];
+  const uniqueBrands = [
+    ...new Set(
+      rows.map((item) => String(item.brand || "").trim()).filter(Boolean),
+    ),
+  ];
+  const uniqueDurations = [
+    ...new Set(
+      rows.map((item) => String(item.duration || "").trim()).filter(Boolean),
+    ),
+  ];
 
   return {
     gameName: uniqueGames.length === 1 ? uniqueGames[0] : "Multiple Products",
@@ -1247,6 +1259,8 @@ app.use(
         "connect-src": [
           "'self'",
           "https://api.iconify.design",
+          "https://api.simplesvg.com",
+          "https://api.unisvg.com",
           "https://app.midtrans.com",
           "https://app.sandbox.midtrans.com",
           "https://api.midtrans.com",
@@ -1557,9 +1571,10 @@ app.post("/vouchers", requireAdminAuth, requireAdminCsrf, async (req, res) => {
   let cleanGameName = String(game_name || "").trim();
   let cleanBrandName = String(brand_name || "").trim();
   let cleanDurationName = String(duration_name || "").trim();
-  let cleanProductId = Number.isInteger(legacyProductId) && legacyProductId > 0
-    ? legacyProductId
-    : null;
+  let cleanProductId =
+    Number.isInteger(legacyProductId) && legacyProductId > 0
+      ? legacyProductId
+      : null;
 
   const discountAmount = Number(discount_amount);
   const expiresAt = expires_at ? String(expires_at).trim() : null;
@@ -1605,7 +1620,11 @@ app.post("/vouchers", requireAdminAuth, requireAdminCsrf, async (req, res) => {
       });
     }
 
-    if (!cleanGameName || cleanGameName.length < 2 || cleanGameName.length > 80) {
+    if (
+      !cleanGameName ||
+      cleanGameName.length < 2 ||
+      cleanGameName.length > 80
+    ) {
       return res.status(400).json({
         message: "Pilih minimal 1 produk atau isi nama game voucher",
       });
@@ -1691,9 +1710,10 @@ app.put(
     let cleanGameName = String(game_name || "").trim();
     let cleanBrandName = String(brand_name || "").trim();
     let cleanDurationName = String(duration_name || "").trim();
-    let cleanProductId = Number.isInteger(legacyProductId) && legacyProductId > 0
-      ? legacyProductId
-      : null;
+    let cleanProductId =
+      Number.isInteger(legacyProductId) && legacyProductId > 0
+        ? legacyProductId
+        : null;
 
     const discountAmount = Number(discount_amount);
     const expiresAt = expires_at ? String(expires_at).trim() : null;
@@ -1744,7 +1764,11 @@ app.put(
         });
       }
 
-      if (!cleanGameName || cleanGameName.length < 2 || cleanGameName.length > 80) {
+      if (
+        !cleanGameName ||
+        cleanGameName.length < 2 ||
+        cleanGameName.length > 80
+      ) {
         return res.status(400).json({
           message: "Pilih minimal 1 produk atau isi nama game voucher",
         });
@@ -3989,7 +4013,9 @@ WHERE vouchers.active = 1
         ? String(row.duration_name).trim()
         : "";
       const productIds = Array.isArray(row.product_ids)
-        ? row.product_ids.map((entry) => Number(entry)).filter((entry) => Number.isInteger(entry) && entry > 0)
+        ? row.product_ids
+            .map((entry) => Number(entry))
+            .filter((entry) => Number.isInteger(entry) && entry > 0)
         : [];
       let scope = productIds.length ? "product" : "all";
 
