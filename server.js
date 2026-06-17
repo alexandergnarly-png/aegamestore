@@ -1039,7 +1039,9 @@ async function getBuyerStats(userId) {
 async function isVipBuyer(userId) {
   const overrideBadge = await getUserBadgeOverride(userId);
 
-  if (["prestige", "sovereign", "vip"].includes(String(overrideBadge?.code || ""))) {
+  if (
+    ["prestige", "sovereign", "vip"].includes(String(overrideBadge?.code || ""))
+  ) {
     return true;
   }
 
@@ -2039,12 +2041,26 @@ app.get("/vouchers", requireAdminAuth, async (req, res) => {
         LEFT JOIN users ON users.id = vouchers.target_user_id
         LEFT JOIN LATERAL (
           SELECT
-            json_agg(vp.product_id ORDER BY p.game ASC, p.brand ASC, p.duration ASC, vp.product_id ASC) AS product_ids,
+            json_agg(
+              vp.product_id
+              ORDER BY p.game ASC, COALESCE(NULLIF(p.platform, ''), 'android') ASC, p.brand ASC, p.duration ASC, vp.product_id ASC
+            ) AS product_ids,
             COUNT(vp.product_id)::int AS product_count,
             string_agg(
-              CONCAT(p.game, ' — ', p.brand, ' — ', p.duration),
+              CONCAT(
+                p.game,
+                ' — ',
+                CASE
+                  WHEN LOWER(TRIM(COALESCE(p.platform, 'android'))) = 'ios' THEN 'iOS'
+                  ELSE 'Android'
+                END,
+                ' — ',
+                p.brand,
+                ' — ',
+                p.duration
+              ),
               ', '
-              ORDER BY p.game ASC, p.brand ASC, p.duration ASC, vp.product_id ASC
+              ORDER BY p.game ASC, COALESCE(NULLIF(p.platform, ''), 'android') ASC, p.brand ASC, p.duration ASC, vp.product_id ASC
             ) AS product_scope
           FROM voucher_products vp
           LEFT JOIN products p ON p.id = vp.product_id
@@ -2142,6 +2158,7 @@ app.get("/vip-discounts", requireAdminAuth, async (req, res) => {
       SELECT
         vd.*,
         p.game,
+        COALESCE(NULLIF(p.platform, ''), 'android') AS platform,
         p.brand,
         p.duration,
         p.price
@@ -3661,6 +3678,7 @@ app.get("/keys", requireAdminAuth, async (req, res) => {
             SELECT
                 keys.*,
                 products.game,
+                COALESCE(NULLIF(products.platform, ''), 'android') AS platform,
                 products.brand,
                 products.duration
             FROM keys
@@ -3826,7 +3844,8 @@ app.get("/products", requireAdminAuth, async (req, res) => {
 });
 
 app.post("/products", requireAdminAuth, requireAdminCsrf, async (req, res) => {
-  const { game, platform, brand, duration, price, delivery_type, play_status } = req.body;
+  const { game, platform, brand, duration, price, delivery_type, play_status } =
+    req.body;
   const syncBrandStatus =
     req.body.sync_brand_status === true ||
     req.body.sync_brand_status === "true";

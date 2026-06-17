@@ -109,10 +109,21 @@
         display: flex;
         overflow-x: hidden;
         color: var(--ink);
-        font-family: "Plus Jakarta Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-family:
+          "Plus Jakarta Sans",
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
         line-height: 1.55;
         background:
-          radial-gradient(circle at 1px 1px, rgba(17, 17, 17, .075) 1px, transparent 0) 0 0 / 22px 22px,
+          radial-gradient(
+              circle at 1px 1px,
+              rgba(17, 17, 17, 0.075) 1px,
+              transparent 0
+            )
+            0 0 / 22px 22px,
           linear-gradient(180deg, var(--bg-2) 0%, var(--bg) 100%);
         -webkit-font-smoothing: antialiased;
         text-rendering: optimizeLegibility;
@@ -120,7 +131,12 @@
 
       body.dark-theme {
         background:
-          radial-gradient(circle at 1px 1px, rgba(255, 255, 255, .07) 1px, transparent 0) 0 0 / 22px 22px,
+          radial-gradient(
+              circle at 1px 1px,
+              rgba(255, 255, 255, 0.07) 1px,
+              transparent 0
+            )
+            0 0 / 22px 22px,
           linear-gradient(180deg, #161616 0%, #0e0e0e 100%);
       }
 
@@ -165,12 +181,12 @@
         padding: 18px;
         overflow-x: hidden;
         overflow-y: auto;
-        background: rgba(255, 255, 255, .78);
+        background: rgba(255, 255, 255, 0.78);
         border-right: 1px solid var(--line);
       }
 
       body.dark-theme .sidebar {
-        background: rgba(20, 20, 20, .84);
+        background: rgba(20, 20, 20, 0.84);
       }
 
       .sidebar-brand,
@@ -212,7 +228,7 @@
         background: var(--ink);
         color: var(--surface);
         font-weight: 900;
-        letter-spacing: .08em;
+        letter-spacing: 0.08em;
       }
 
       .sidebar-logo {
@@ -233,7 +249,7 @@
         color: var(--muted);
         font-size: 10px;
         font-weight: 850;
-        letter-spacing: .08em;
+        letter-spacing: 0.08em;
         text-transform: uppercase;
       }
 
@@ -242,7 +258,7 @@
         color: var(--ink-2);
         font-size: 15px;
         font-weight: 900;
-        letter-spacing: -.03em;
+        letter-spacing: -0.03em;
         white-space: nowrap;
       }
 
@@ -272,7 +288,7 @@
         color: var(--muted);
         font-size: 10px;
         font-weight: 900;
-        letter-spacing: .09em;
+        letter-spacing: 0.09em;
         text-transform: uppercase;
       }
 
@@ -290,7 +306,10 @@
         text-align: left;
         font-size: 13px;
         font-weight: 850;
-        transition: transform .18s var(--ease), background .18s var(--ease), color .18s var(--ease);
+        transition:
+          transform 0.18s var(--ease),
+          background 0.18s var(--ease),
+          color 0.18s var(--ease);
       }
 
       .nav-btn:hover {
@@ -308,7 +327,7 @@
         min-width: 22px;
         text-align: center;
         filter: grayscale(1);
-        opacity: .9;
+        opacity: 0.9;
       }
 
       .sidebar-footer {
@@ -374,7 +393,7 @@
 
       .admin-section.active {
         display: block;
-        animation: fadeUp .28s var(--ease) both;
+        animation: fadeUp 0.28s var(--ease) both;
       }
 
       .top-nav {
@@ -409,7 +428,7 @@
         color: var(--muted);
         font-size: 10px;
         font-weight: 900;
-        letter-spacing: .09em;
+        letter-spacing: 0.09em;
         text-transform: uppercase;
       }
 
@@ -417,7 +436,7 @@
         color: var(--ink-2);
         font-size: 14px;
         font-weight: 900;
-        letter-spacing: -.03em;
+        letter-spacing: -0.03em;
         font-variant-numeric: tabular-nums;
       }
 
@@ -449,7 +468,7 @@
         color: var(--ink);
         font-size: 11px;
         font-weight: 900;
-        letter-spacing: .02em;
+        letter-spacing: 0.02em;
         white-space: nowrap;
       }
 
@@ -460,7 +479,7 @@
         height: 7px;
         border-radius: 50%;
         background: currentColor;
-        opacity: .75;
+        opacity: 0.75;
       }
 
       .hero {
@@ -482,7 +501,7 @@
         height: 130px;
         border-radius: 36px;
         background: var(--surface-2);
-        opacity: .8;
+        opacity: 0.8;
       }
 
       .hero-row {
@@ -506,14 +525,14 @@
         color: var(--muted);
         font-size: 10px;
         font-weight: 900;
-        letter-spacing: .09em;
+        letter-spacing: 0.09em;
       }
 
       .hero h1 {
         color: var(--ink-2);
         font-size: clamp(26px, 4vw, 42px);
-        line-height: .98;
-        letter-spacing: -.07em;
+        line-height: 0.98;
+        letter-spacing: -0.07em;
         font-weight: 900;
         margin-bottom: 10px;
       }
@@ -545,7 +564,9 @@
         min-height: 142px;
         padding: 17px;
         border-radius: 26px;
-        transition: transform .18s var(--ease), border-color .18s var(--ease);
+        transition:
+          transform 0.18s var(--ease),
+          border-color 0.18s var(--ease);
       }
 
       .stat-card:hover {
@@ -589,7 +610,7 @@
         color: var(--ink-2);
         font-size: 28px;
         font-weight: 900;
-        letter-spacing: -.05em;
+        letter-spacing: -0.05em;
         font-variant-numeric: tabular-nums;
       }
 
@@ -619,7 +640,7 @@
         color: var(--ink-2);
         font-size: 22px;
         font-weight: 900;
-        letter-spacing: -.055em;
+        letter-spacing: -0.055em;
         line-height: 1.05;
       }
 
@@ -662,7 +683,7 @@
         font-size: 11px;
         font-weight: 900;
         text-transform: uppercase;
-        letter-spacing: .07em;
+        letter-spacing: 0.07em;
       }
 
       input[type="text"],
@@ -684,7 +705,10 @@
         outline: none;
         font-size: 13px;
         font-weight: 650;
-        transition: border-color .18s var(--ease), background .18s var(--ease), box-shadow .18s var(--ease);
+        transition:
+          border-color 0.18s var(--ease),
+          background 0.18s var(--ease),
+          box-shadow 0.18s var(--ease);
       }
 
       textarea,
@@ -717,16 +741,20 @@
         box-shadow: none;
         font-size: 13px;
         font-weight: 900;
-        transition: transform .18s var(--ease), opacity .18s var(--ease), background .18s var(--ease), border-color .18s var(--ease);
+        transition:
+          transform 0.18s var(--ease),
+          opacity 0.18s var(--ease),
+          background 0.18s var(--ease),
+          border-color 0.18s var(--ease);
       }
 
       button:hover {
         transform: translateY(-1px);
-        opacity: .94;
+        opacity: 0.94;
       }
 
       button:disabled {
-        opacity: .45;
+        opacity: 0.45;
         cursor: not-allowed;
         transform: none;
       }
@@ -754,7 +782,6 @@
       .logout-btn {
         min-height: 44px;
       }
-
 
       .product-sync-toggle {
         min-height: 44px;
@@ -786,7 +813,7 @@
         color: var(--ink-2);
         font-size: 12px;
         font-weight: 900;
-        letter-spacing: -.02em;
+        letter-spacing: -0.02em;
       }
 
       .product-sync-toggle small {
@@ -834,7 +861,7 @@
         color: var(--muted);
         font-size: 10px;
         font-weight: 900;
-        letter-spacing: .08em;
+        letter-spacing: 0.08em;
         text-transform: uppercase;
         white-space: nowrap;
       }
@@ -942,7 +969,8 @@
         border-radius: 13px;
         background: var(--surface-2);
         color: var(--ink);
-        font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-family:
+          "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
         font-size: 12px;
         font-weight: 800;
         word-break: break-all;
@@ -990,7 +1018,7 @@
         color: var(--muted);
         font-size: 10px;
         font-weight: 900;
-        letter-spacing: .07em;
+        letter-spacing: 0.07em;
         text-transform: uppercase;
       }
 
@@ -1028,7 +1056,7 @@
         font-weight: 900;
         text-align: center;
         transform: translateY(-160%);
-        transition: transform .22s var(--ease);
+        transition: transform 0.22s var(--ease);
       }
 
       .admin-offline-banner.show {
@@ -1040,10 +1068,10 @@
         position: fixed;
         inset: 0;
         z-index: 600;
-        background: rgba(0, 0, 0, .28);
+        background: rgba(0, 0, 0, 0.28);
         opacity: 0;
         pointer-events: none;
-        transition: opacity .18s var(--ease);
+        transition: opacity 0.18s var(--ease);
       }
 
       .order-drawer-backdrop.show,
@@ -1064,7 +1092,7 @@
         flex-direction: column;
         border-radius: 28px 0 0 28px;
         transform: translateX(110%);
-        transition: transform .24s var(--ease);
+        transition: transform 0.24s var(--ease);
         overflow: hidden;
       }
 
@@ -1088,7 +1116,7 @@
         color: var(--ink-2);
         font-size: 16px;
         font-weight: 900;
-        letter-spacing: -.04em;
+        letter-spacing: -0.04em;
       }
 
       .order-drawer-body {
@@ -1106,7 +1134,7 @@
         color: var(--muted);
         font-size: 10px;
         font-weight: 900;
-        letter-spacing: .08em;
+        letter-spacing: 0.08em;
         text-transform: uppercase;
       }
 
@@ -1157,7 +1185,7 @@
         text-align: center;
         font-size: 10px;
         font-weight: 900;
-        letter-spacing: .04em;
+        letter-spacing: 0.04em;
         text-transform: uppercase;
       }
 
@@ -1184,7 +1212,12 @@
       .skeleton-row,
       .skeleton-block {
         border-radius: 14px;
-        background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-3) 50%, var(--surface-2) 75%);
+        background: linear-gradient(
+          90deg,
+          var(--surface-2) 25%,
+          var(--surface-3) 50%,
+          var(--surface-2) 75%
+        );
         background-size: 200% 100%;
         animation: shimmer 1.2s linear infinite;
       }
@@ -1276,7 +1309,7 @@
         padding-bottom: calc(14px + var(--safe-bottom));
         border-radius: 28px;
         transform: translateY(120%);
-        transition: transform .24s var(--ease);
+        transition: transform 0.24s var(--ease);
       }
 
       .admin-more-sheet.show {
@@ -1389,7 +1422,7 @@
         color: var(--muted);
         font-size: 10px;
         font-weight: 900;
-        letter-spacing: .08em;
+        letter-spacing: 0.08em;
         text-transform: uppercase;
       }
 
@@ -1684,7 +1717,7 @@
           color: var(--muted);
           font-size: 10px;
           font-weight: 900;
-          letter-spacing: .08em;
+          letter-spacing: 0.08em;
           text-align: left;
           text-transform: uppercase;
         }
@@ -1791,13 +1824,12 @@
         *,
         *::before,
         *::after {
-          animation-duration: .001ms !important;
+          animation-duration: 0.001ms !important;
           animation-iteration-count: 1 !important;
-          transition-duration: .001ms !important;
+          transition-duration: 0.001ms !important;
           scroll-behavior: auto !important;
         }
       }
-    
 
       /* ===== ADMIN MORE SHEET COMPACT FIX v2 ===== */
       .admin-more-sheet {
@@ -1908,8 +1940,6 @@
         }
       }
 
-
-
       /* ===== MULTI PRODUCT VOUCHER PICKER ===== */
       .voucher-product-target-panel {
         padding: 14px;
@@ -1934,7 +1964,7 @@
 
       .voucher-target-controls {
         display: grid;
-        grid-template-columns: minmax(0, 1.3fr) minmax(150px, .8fr) auto auto;
+        grid-template-columns: minmax(0, 1.3fr) minmax(150px, 0.8fr) auto auto;
         gap: 8px;
         margin-bottom: 12px;
       }
@@ -2008,7 +2038,7 @@
           max-height: 310px;
         }
       }
-</style>
+    </style>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </head>
 
@@ -2278,6 +2308,14 @@
             </div>
 
             <div class="field">
+              <select id="productPlatformFilter" onchange="applyProductFilters()">
+                <option value="">Semua Platform</option>
+                <option value="android">Android</option>
+                <option value="ios">iOS</option>
+              </select>
+            </div>
+
+            <div class="field">
               <select id="productStatusFilter" onchange="applyProductFilters()">
                 <option value="">Semua Status</option>
                 <option value="1">Active</option>
@@ -2304,6 +2342,12 @@
                 id="productGame"
                 placeholder="Game, contoh: Delta Force"
               />
+            </div>
+            <div class="field">
+              <select id="productPlatform" aria-label="Platform produk">
+                <option value="android">Android</option>
+                <option value="ios">iOS</option>
+              </select>
             </div>
             <div class="field">
               <input
@@ -2370,6 +2414,7 @@
                 <tr>
                   <th style="width: 70px">ID</th>
                   <th>Game</th>
+                  <th>Platform</th>
                   <th>Brand</th>
                   <th>Durasi</th>
                   <th>Harga</th>
@@ -2912,20 +2957,34 @@
                 <input
                   type="text"
                   id="voucherProductSearch"
-                  placeholder="Cari game / brand / durasi..."
+                  placeholder="Cari game / platform / brand / durasi..."
                   oninput="renderVoucherProductChecklist()"
                 />
-                <select id="voucherProductGameFilter" onchange="renderVoucherProductChecklist()">
+                <select
+                  id="voucherProductGameFilter"
+                  onchange="renderVoucherProductChecklist()"
+                >
                   <option value="">Semua Game</option>
                 </select>
-                <button type="button" class="ghost-btn" onclick="selectVisibleVoucherProducts()">
+                <button
+                  type="button"
+                  class="ghost-btn"
+                  onclick="selectVisibleVoucherProducts()"
+                >
                   Select Visible
                 </button>
-                <button type="button" class="ghost-btn" onclick="clearVoucherProductSelection()">
+                <button
+                  type="button"
+                  class="ghost-btn"
+                  onclick="clearVoucherProductSelection()"
+                >
                   Clear
                 </button>
               </div>
-              <div id="voucherProductChecklist" class="voucher-product-checklist">
+              <div
+                id="voucherProductChecklist"
+                class="voucher-product-checklist"
+              >
                 <div class="voucher-product-empty">Memuat produk...</div>
               </div>
               <select
@@ -3402,6 +3461,32 @@
           .replace(/'/g, "&#39;");
       }
 
+      function normalizeAdminPlatform(platform) {
+        const value = String(platform || "android").trim().toLowerCase();
+        return value === "ios" || value === "iphone" || value === "ipad"
+          ? "ios"
+          : "android";
+      }
+
+      function getAdminPlatformLabel(platform) {
+        return normalizeAdminPlatform(platform) === "ios" ? "iOS" : "Android";
+      }
+
+      function platformBadge(platform) {
+        const normalized = normalizeAdminPlatform(platform);
+        const label = getAdminPlatformLabel(normalized);
+        const badgeClass = normalized === "ios" ? "paid" : "available";
+        return `<span class="badge ${badgeClass}">${label}</span>`;
+      }
+
+      function formatAdminProductLabel(item, separator = " — ") {
+        const game = item?.game || "-";
+        const platform = getAdminPlatformLabel(item?.platform);
+        const brand = item?.brand || "-";
+        const duration = item?.duration || "-";
+        return [game, platform, brand, duration].join(separator);
+      }
+
       function orderBadge(status) {
         const s = (status || "").toLowerCase();
         return `<span class="badge ${s}">${escapeHtml(status || "-")}</span>`;
@@ -3609,6 +3694,12 @@
               .includes(searchValue) ||
             String(item.duration || "")
               .toLowerCase()
+              .includes(searchValue) ||
+            getAdminPlatformLabel(item.platform)
+              .toLowerCase()
+              .includes(searchValue) ||
+            String(item.platform || "")
+              .toLowerCase()
               .includes(searchValue);
 
           const matchesStatus =
@@ -3633,7 +3724,7 @@
             (item) => `
         <tr>
           <td>${item.id}</td>
-          <td>${escapeHtml(item.game || "-")} - ${escapeHtml(item.brand || "-")} - ${escapeHtml(item.duration || "-")}</td>
+          <td>${escapeHtml(formatAdminProductLabel(item, " - "))}</td>
           <td>${renderMaskedKey(item.key)}</td>
           <td>${keyBadge(item.used)}</td>
           <td>
@@ -5371,7 +5462,7 @@
             statusText.innerText = "Belum ada produk.";
             tableBody.innerHTML = `
                                 <tr>
-                                  <td colspan="8" class="empty">Belum ada produk di database.</td>
+                                  <td colspan="9" class="empty">Belum ada produk di database.</td>
                                 </tr>
                               `;
             return;
@@ -5384,7 +5475,7 @@
           statusText.innerText = "Gagal memuat daftar produk.";
           tableBody.innerHTML = `
                               <tr>
-                                <td colspan="8" class="empty">Terjadi error saat mengambil produk.</td>
+                                <td colspan="9" class="empty">Terjadi error saat mengambil produk.</td>
                               </tr>
                             `;
         }
@@ -5424,6 +5515,9 @@
       async function saveProduct() {
         const editingId = document.getElementById("editingProductId").value;
         const game = document.getElementById("productGame").value.trim();
+        const platform = normalizeAdminPlatform(
+          document.getElementById("productPlatform")?.value || "android",
+        );
         const brand = document.getElementById("productBrand").value.trim();
         const duration = document
           .getElementById("productDuration")
@@ -5453,6 +5547,7 @@
             },
             body: JSON.stringify({
               game,
+              platform,
               brand,
               duration,
               price,
@@ -5574,11 +5669,13 @@
       function populateProductFilters(products) {
         const gameFilter = document.getElementById("productGameFilter");
         const brandFilter = document.getElementById("productBrandFilter");
+        const platformFilter = document.getElementById("productPlatformFilter");
 
         if (!gameFilter || !brandFilter) return;
 
         const currentGame = gameFilter.value;
         const currentBrand = brandFilter.value;
+        const currentPlatform = platformFilter?.value || "";
 
         const games = [
           ...new Set(products.map((item) => item.game).filter(Boolean)),
@@ -5607,6 +5704,7 @@
 
         if (games.includes(currentGame)) gameFilter.value = currentGame;
         if (brands.includes(currentBrand)) brandFilter.value = currentBrand;
+        if (platformFilter) platformFilter.value = currentPlatform;
       }
 
       function applyProductFilters() {
@@ -5627,6 +5725,10 @@
           document.getElementById("productBrandFilter")?.value || "",
         );
 
+        const platformValue = String(
+          document.getElementById("productPlatformFilter")?.value || "",
+        );
+
         const statusValue = String(
           document.getElementById("productStatusFilter")?.value || "",
         );
@@ -5643,6 +5745,12 @@
             String(item.duration || "")
               .toLowerCase()
               .includes(searchValue) ||
+            getAdminPlatformLabel(item.platform)
+              .toLowerCase()
+              .includes(searchValue) ||
+            String(item.platform || "")
+              .toLowerCase()
+              .includes(searchValue) ||
             String(item.price || "")
               .toLowerCase()
               .includes(searchValue);
@@ -5651,10 +5759,18 @@
             !gameValue || String(item.game || "") === gameValue;
           const matchesBrand =
             !brandValue || String(item.brand || "") === brandValue;
+          const matchesPlatform =
+            !platformValue || normalizeAdminPlatform(item.platform) === platformValue;
           const matchesStatus =
             statusValue === "" || String(Number(item.active)) === statusValue;
 
-          return matchesSearch && matchesGame && matchesBrand && matchesStatus;
+          return (
+            matchesSearch &&
+            matchesGame &&
+            matchesBrand &&
+            matchesPlatform &&
+            matchesStatus
+          );
         });
 
         updateProductStats(filteredProducts);
@@ -5663,7 +5779,7 @@
         if (filteredProducts.length === 0) {
           tableBody.innerHTML = `
                               <tr>
-                                <td colspan="8" class="empty">Tidak ada produk yang sesuai filter.</td>
+                                <td colspan="9" class="empty">Tidak ada produk yang sesuai filter.</td>
                               </tr>
                             `;
           return;
@@ -5672,6 +5788,9 @@
         tableBody.innerHTML = filteredProducts
           .map((item) => {
             const safeGame = JSON.stringify(String(item.game || ""));
+            const safePlatform = JSON.stringify(
+              normalizeAdminPlatform(item.platform),
+            );
             const safeBrand = JSON.stringify(String(item.brand || ""));
             const safeDuration = JSON.stringify(String(item.duration || ""));
             const safePlayStatus = JSON.stringify(
@@ -5682,13 +5801,14 @@
                                 <tr>
                                   <td>${item.id}</td>
                                   <td>${escapeHtml(item.game)}</td>
+                                  <td>${platformBadge(item.platform)}</td>
                                   <td>${escapeHtml(item.brand)}</td>
                                   <td>${escapeHtml(item.duration)}</td>
                                   <td>${formatRupiah(item.price)}</td>
 <td>${playStatusBadge(item.play_status)}</td>
 <td>${activeBadge(item.active)}</td>
 <td>
-  <button onclick='editProduct(${item.id}, ${safeGame}, ${safeBrand}, ${safeDuration}, ${Number(item.price || 0)}, ${safePlayStatus})'>Edit</button>
+  <button onclick='editProduct(${item.id}, ${safeGame}, ${safePlatform}, ${safeBrand}, ${safeDuration}, ${Number(item.price || 0)}, ${safePlayStatus})'>Edit</button>
                                     <button class="ghost-btn" onclick="toggleProductActive(${item.id}, ${Number(item.active) === 1 ? 0 : 1})">
                                       ${Number(item.active) === 1 ? "Nonaktifkan" : "Aktifkan"}
                                     </button>
@@ -5817,20 +5937,29 @@
             const safeCode = JSON.stringify(String(item.code || ""));
             const safeProductId = Number(item.product_id || 0);
             const productIds = Array.isArray(item.product_ids)
-              ? item.product_ids.map((entry) => Number(entry)).filter((entry) => Number.isInteger(entry) && entry > 0)
+              ? item.product_ids
+                  .map((entry) => Number(entry))
+                  .filter((entry) => Number.isInteger(entry) && entry > 0)
               : [];
             const safeProductIds = JSON.stringify(productIds);
-            const productCount = Number(item.product_count || productIds.length || 0);
+            const productCount = Number(
+              item.product_count || productIds.length || 0,
+            );
             const productScope = String(item.product_scope || "").trim();
-            const targetLabel = productCount > 0
-              ? `${productCount} Produk`
-              : String(item.game_name || "-");
-            const legacyScope = [item.brand_name, item.duration_name].filter(Boolean).join(" — ") || "Legacy scope";
-            const targetDetail = productCount > 1
-              ? "Multi produk — klik Edit untuk lihat pilihan"
-              : productCount === 1
-                ? (productScope || "1 produk dipilih")
-                : legacyScope;
+            const targetLabel =
+              productCount > 0
+                ? `${productCount} Produk`
+                : String(item.game_name || "-");
+            const legacyScope =
+              [item.brand_name, item.duration_name]
+                .filter(Boolean)
+                .join(" — ") || "Legacy scope";
+            const targetDetail =
+              productCount > 1
+                ? "Multi produk — klik Edit untuk lihat pilihan"
+                : productCount === 1
+                  ? productScope || "1 produk dipilih"
+                  : legacyScope;
             const targetTooltip = productScope || targetDetail;
             const safeGameName = JSON.stringify(String(item.game_name || ""));
             const safeBrandName = JSON.stringify(String(item.brand_name || ""));
@@ -5911,7 +6040,9 @@
         );
         if (voucherProductSelect) voucherProductSelect.value = productId || "";
         const normalizedProductIds = Array.isArray(productIds)
-          ? productIds.map((entry) => Number(entry)).filter((entry) => Number.isInteger(entry) && entry > 0)
+          ? productIds
+              .map((entry) => Number(entry))
+              .filter((entry) => Number.isInteger(entry) && entry > 0)
           : [];
         selectedVoucherProductIds = new Set(
           normalizedProductIds.length
@@ -5965,8 +6096,14 @@
           : "/vouchers";
         const voucherMethod = editingVoucherId ? "PUT" : "POST";
 
-        if (!code || (!gameName && productIds.length === 0) || !discountAmount) {
-          Swal.fire("Kode, target produk/nama game, dan nominal diskon wajib diisi.");
+        if (
+          !code ||
+          (!gameName && productIds.length === 0) ||
+          !discountAmount
+        ) {
+          Swal.fire(
+            "Kode, target produk/nama game, dan nominal diskon wajib diisi.",
+          );
           return;
         }
 
@@ -5979,7 +6116,12 @@
             },
             body: JSON.stringify({
               code,
-              product_id: productIds.length === 1 ? productIds[0] : (productId ? Number(productId) : null),
+              product_id:
+                productIds.length === 1
+                  ? productIds[0]
+                  : productId
+                    ? Number(productId)
+                    : null,
               product_ids: productIds,
               game_name: gameName,
               brand_name: brandName || null,
@@ -6075,15 +6217,19 @@
       function resetProductForm() {
         const editingInput = document.getElementById("editingProductId");
         const gameInput = document.getElementById("productGame");
+        const platformInput = document.getElementById("productPlatform");
         const brandInput = document.getElementById("productBrand");
         const durationInput = document.getElementById("productDuration");
         const priceInput = document.getElementById("productPrice");
         const playStatusInput = document.getElementById("productPlayStatus");
-        const syncBrandStatusInput = document.getElementById("productSyncBrandStatus");
+        const syncBrandStatusInput = document.getElementById(
+          "productSyncBrandStatus",
+        );
         const saveBtn = document.getElementById("saveProductBtn");
 
         if (editingInput) editingInput.value = "";
         if (gameInput) gameInput.value = "";
+        if (platformInput) platformInput.value = "android";
         if (brandInput) brandInput.value = "";
         if (durationInput) durationInput.value = "";
         if (priceInput) priceInput.value = "";
@@ -6105,6 +6251,7 @@
       function editProduct(
         id,
         game,
+        platform,
         brand,
         duration,
         price,
@@ -6112,12 +6259,16 @@
       ) {
         document.getElementById("editingProductId").value = id;
         document.getElementById("productGame").value = game;
+        const platformInput = document.getElementById("productPlatform");
+        if (platformInput) platformInput.value = normalizeAdminPlatform(platform);
         document.getElementById("productBrand").value = brand;
         document.getElementById("productDuration").value = duration;
         document.getElementById("productPrice").value = price;
         const playStatusInput = document.getElementById("productPlayStatus");
         if (playStatusInput) playStatusInput.value = playStatus || "safe";
-        const syncBrandStatusInput = document.getElementById("productSyncBrandStatus");
+        const syncBrandStatusInput = document.getElementById(
+          "productSyncBrandStatus",
+        );
         if (syncBrandStatusInput) syncBrandStatusInput.checked = true;
         document.getElementById("saveProductBtn").innerText = "Update Produk";
 
@@ -6153,7 +6304,7 @@
           data.forEach((item) => {
             const option = document.createElement("option");
             option.value = item.id;
-            option.textContent = `${item.game} - ${item.brand} - ${item.duration}`;
+            option.textContent = `${formatAdminProductLabel(item)} — ${formatRupiah(item.price || 0)}`;
             select.appendChild(option);
           });
         } catch (err) {
@@ -6185,7 +6336,7 @@
           data.forEach((item) => {
             const option = document.createElement("option");
             option.value = item.id;
-            option.textContent = `${item.game} — ${item.brand} — ${item.duration} — ${formatRupiah(item.price || 0)}`;
+            option.textContent = `${formatAdminProductLabel(item)} — ${formatRupiah(item.price || 0)}`;
             select.appendChild(option);
           });
         } catch (err) {
@@ -6231,7 +6382,7 @@
               return `
           <tr>
             <td data-label="Produk">
-              ${escapeHtml(item.game || "-")} — ${escapeHtml(item.brand || "-")} — ${escapeHtml(item.duration || "-")}
+              ${escapeHtml(formatAdminProductLabel(item))}
             </td>
             <td data-label="Harga">${formatRupiah(item.price || 0)}</td>
             <td data-label="Diskon Prestige">${formatRupiah(item.discount_amount || 0)}</td>
@@ -6380,18 +6531,29 @@
         ).trim();
 
         return allVoucherProducts.filter((item) => {
-          const productText = [item.game, item.brand, item.duration, item.price]
+          const productText = [
+            item.game,
+            item.platform,
+            getAdminPlatformLabel(item.platform),
+            item.brand,
+            item.duration,
+            item.price,
+          ]
             .join(" ")
             .toLowerCase();
-          const matchesSearch = !searchValue || productText.includes(searchValue);
-          const matchesGame = !gameFilter || String(item.game || "") === gameFilter;
+          const matchesSearch =
+            !searchValue || productText.includes(searchValue);
+          const matchesGame =
+            !gameFilter || String(item.game || "") === gameFilter;
           return matchesSearch && matchesGame;
         });
       }
 
       function updateVoucherProductSelectionSummary() {
         const count = getSelectedVoucherProductIds().length;
-        const countNode = document.getElementById("voucherProductSelectedCount");
+        const countNode = document.getElementById(
+          "voucherProductSelectedCount",
+        );
         if (countNode) {
           countNode.textContent = `${count} produk dipilih`;
         }
@@ -6402,7 +6564,8 @@
 
         const select = document.getElementById("voucherProductSelect");
         if (select) {
-          select.value = selectedProducts.length === 1 ? String(selectedProducts[0].id) : "";
+          select.value =
+            selectedProducts.length === 1 ? String(selectedProducts[0].id) : "";
         }
 
         const gameInput = document.getElementById("voucherGameName");
@@ -6411,20 +6574,46 @@
 
         if (!selectedProducts.length) return;
 
-        const uniqueGames = [...new Set(selectedProducts.map((item) => String(item.game || "").trim()).filter(Boolean))];
-        const uniqueBrands = [...new Set(selectedProducts.map((item) => String(item.brand || "").trim()).filter(Boolean))];
-        const uniqueDurations = [...new Set(selectedProducts.map((item) => String(item.duration || "").trim()).filter(Boolean))];
+        const uniqueGames = [
+          ...new Set(
+            selectedProducts
+              .map((item) => String(item.game || "").trim())
+              .filter(Boolean),
+          ),
+        ];
+        const uniqueBrands = [
+          ...new Set(
+            selectedProducts
+              .map((item) => String(item.brand || "").trim())
+              .filter(Boolean),
+          ),
+        ];
+        const uniqueDurations = [
+          ...new Set(
+            selectedProducts
+              .map((item) => String(item.duration || "").trim())
+              .filter(Boolean),
+          ),
+        ];
 
-        if (gameInput) gameInput.value = uniqueGames.length === 1 ? uniqueGames[0] : "Multiple Products";
-        if (brandInput) brandInput.value = uniqueBrands.length === 1 ? uniqueBrands[0] : "";
-        if (durationInput) durationInput.value = uniqueDurations.length === 1 ? uniqueDurations[0] : "";
+        if (gameInput)
+          gameInput.value =
+            uniqueGames.length === 1 ? uniqueGames[0] : "Multiple Products";
+        if (brandInput)
+          brandInput.value = uniqueBrands.length === 1 ? uniqueBrands[0] : "";
+        if (durationInput)
+          durationInput.value =
+            uniqueDurations.length === 1 ? uniqueDurations[0] : "";
       }
 
       function renderVoucherProductChecklist() {
         const wrap = document.getElementById("voucherProductChecklist");
         if (!wrap) return;
 
-        if (!Array.isArray(allVoucherProducts) || allVoucherProducts.length === 0) {
+        if (
+          !Array.isArray(allVoucherProducts) ||
+          allVoucherProducts.length === 0
+        ) {
           wrap.innerHTML = `<div class="voucher-product-empty">Belum ada produk</div>`;
           updateVoucherProductSelectionSummary();
           return;
@@ -6451,7 +6640,7 @@
                   onchange="toggleVoucherProductSelection(${id}, this.checked)"
                 />
                 <span>
-                  <strong>${escapeHtml(item.game || "-")}</strong>
+                  <strong>${escapeHtml(item.game || "-")} · ${escapeHtml(getAdminPlatformLabel(item.platform))}</strong>
                   <span>${escapeHtml(item.brand || "-")} — ${escapeHtml(item.duration || "-")} — ${formatRupiah(item.price || 0)}</span>
                 </span>
               </label>
@@ -6516,23 +6705,37 @@
           }
 
           if (!allVoucherProducts.length) {
-            if (select) select.innerHTML = `<option value="">Belum ada produk</option>`;
+            if (select)
+              select.innerHTML = `<option value="">Belum ada produk</option>`;
             renderVoucherProductChecklist();
             return;
           }
 
-          const games = [...new Set(allVoucherProducts.map((item) => String(item.game || "").trim()).filter(Boolean))].sort();
+          const games = [
+            ...new Set(
+              allVoucherProducts
+                .map((item) => String(item.game || "").trim())
+                .filter(Boolean),
+            ),
+          ].sort();
           if (gameFilter) {
-            gameFilter.innerHTML = `<option value="">Semua Game</option>` +
-              games.map((game) => `<option value="${escapeHtml(game)}">${escapeHtml(game)}</option>`).join("");
+            gameFilter.innerHTML =
+              `<option value="">Semua Game</option>` +
+              games
+                .map(
+                  (game) =>
+                    `<option value="${escapeHtml(game)}">${escapeHtml(game)}</option>`,
+                )
+                .join("");
           }
 
           allVoucherProducts.forEach((item) => {
             if (!select) return;
             const option = document.createElement("option");
             option.value = item.id;
-            option.textContent = `${item.game} — ${item.brand} — ${item.duration} — ${formatRupiah(item.price || 0)}`;
+            option.textContent = `${formatAdminProductLabel(item)} — ${formatRupiah(item.price || 0)}`;
             option.dataset.game = item.game || "";
+            option.dataset.platform = normalizeAdminPlatform(item.platform);
             option.dataset.brand = item.brand || "";
             option.dataset.duration = item.duration || "";
             select.appendChild(option);
@@ -6540,8 +6743,10 @@
 
           renderVoucherProductChecklist();
         } catch (err) {
-          if (select) select.innerHTML = `<option value="">Gagal memuat produk</option>`;
-          if (wrap) wrap.innerHTML = `<div class="voucher-product-empty">Gagal memuat produk</div>`;
+          if (select)
+            select.innerHTML = `<option value="">Gagal memuat produk</option>`;
+          if (wrap)
+            wrap.innerHTML = `<div class="voucher-product-empty">Gagal memuat produk</div>`;
         }
       }
 
@@ -6580,7 +6785,7 @@
           data.forEach((item) => {
             const option = document.createElement("option");
             option.value = item.id;
-            option.textContent = `${item.game} — ${item.brand} — ${item.duration} — ${formatRupiah(item.price || 0)}`;
+            option.textContent = `${formatAdminProductLabel(item)} — ${formatRupiah(item.price || 0)}`;
             select.appendChild(option);
           });
         } catch (err) {
@@ -6626,7 +6831,7 @@
               return `
           <tr>
             <td data-label="Produk">
-              ${escapeHtml(item.game || "-")} — ${escapeHtml(item.brand || "-")} — ${escapeHtml(item.duration || "-")}
+              ${escapeHtml(formatAdminProductLabel(item))}
             </td>
             <td data-label="Harga">${formatRupiah(item.price || 0)}</td>
             <td data-label="Diskon Prestige">${formatRupiah(item.discount_amount || 0)}</td>
