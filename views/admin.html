@@ -882,7 +882,8 @@
       .badge.delivered,
       .badge.available,
       .badge.verified,
-      .badge.reviewer {
+      .badge.reviewer,
+      .badge.advocate {
         background: var(--success-bg);
         color: var(--success-text);
         border-color: var(--success-border);
@@ -897,6 +898,8 @@
       }
 
       .badge.vip,
+      .badge.prestige,
+      .badge.sovereign,
       .admin-role-chip.owner {
         background: var(--gold-bg);
         color: var(--gold-text);
@@ -904,7 +907,8 @@
       }
 
       .badge.loyal,
-      .badge.new,
+      .badge.prime,
+      .badge.entry,
       .admin-role-chip.staff,
       .admin-role-chip.admin {
         background: var(--neutral-bg);
@@ -2084,7 +2088,7 @@
           onclick="showSection('vip-discounts', this)"
         >
           <span class="nav-ico" aria-hidden="true">👑</span>
-          <span>VIP Discount</span>
+          <span>Prestige Discount</span>
         </button>
       </nav>
 
@@ -2268,14 +2272,6 @@
             </div>
 
             <div class="field">
-              <select id="productPlatformFilter" onchange="applyProductFilters()">
-                <option value="">Semua Platform</option>
-                <option value="android">Android</option>
-                <option value="ios">iOS</option>
-              </select>
-            </div>
-
-            <div class="field">
               <select id="productBrandFilter" onchange="applyProductFilters()">
                 <option value="">Semua Brand</option>
               </select>
@@ -2310,12 +2306,6 @@
               />
             </div>
             <div class="field">
-              <select id="productPlatform">
-                <option value="android">Android</option>
-                <option value="ios">iOS</option>
-              </select>
-            </div>
-            <div class="field">
               <input
                 type="text"
                 id="productBrand"
@@ -2348,7 +2338,7 @@
                 <input type="checkbox" id="productSyncBrandStatus" checked />
                 <span>
                   <b>Samakan status brand</b>
-                  <small>Game + platform + brand sama, semua durasi ikut berubah</small>
+                  <small>Game + brand sama, semua durasi ikut berubah</small>
                 </span>
               </label>
             </div>
@@ -2380,7 +2370,6 @@
                 <tr>
                   <th style="width: 70px">ID</th>
                   <th>Game</th>
-                  <th>Platform</th>
                   <th>Brand</th>
                   <th>Durasi</th>
                   <th>Harga</th>
@@ -2714,11 +2703,12 @@
 
             <div class="field">
               <select id="badgeOverrideSelect">
-                <option value="vip">👑 VIP Buyer</option>
-                <option value="loyal">🌊 Loyal Buyer</option>
-                <option value="verified">✅ Verified Buyer</option>
-                <option value="reviewer">⭐ Reviewer</option>
-                <option value="new">🎐 New Buyer</option>
+                <option value="prestige">✧ Prestige</option>
+                <option value="sovereign">♛ Sovereign</option>
+                <option value="prime">✦ Prime</option>
+                <option value="verified">◆ Verified</option>
+                <option value="advocate">★ Advocate</option>
+                <option value="entry">◇ Entry</option>
               </select>
             </div>
 
@@ -3031,7 +3021,6 @@
                   <th style="width: 80px">ID</th>
                   <th>Kode</th>
                   <th>Game</th>
-                  <th>Platform</th>
                   <th>Brand</th>
                   <th>Durasi</th>
                   <th>Diskon</th>
@@ -3050,12 +3039,12 @@
         <div class="card">
           <div class="card-header">
             <div class="card-title-wrap">
-              <h2>VIP Discount Rules</h2>
+              <h2>Prestige Discount Rules</h2>
               <p class="card-subtitle">
-                Atur diskon otomatis untuk buyer dengan badge VIP.
+                Atur diskon otomatis untuk buyer dengan badge Prestige.
               </p>
             </div>
-            <span class="section-badge">VIP Benefit</span>
+            <span class="section-badge">Prestige Benefit</span>
           </div>
 
           <div class="toolbar">
@@ -3069,14 +3058,14 @@
               <input
                 type="number"
                 id="vipDiscountAmount"
-                placeholder="Diskon VIP, contoh: 5000"
+                placeholder="Diskon Prestige, contoh: 5000"
                 min="1"
               />
             </div>
 
             <div class="btn-group">
               <button type="button" onclick="saveVipDiscount()">
-                Simpan Diskon VIP
+                Simpan Diskon Prestige
               </button>
               <button
                 type="button"
@@ -3098,7 +3087,7 @@
                 <tr>
                   <th>Produk</th>
                   <th>Harga</th>
-                  <th>Diskon VIP</th>
+                  <th>Diskon Prestige</th>
                   <th>Status</th>
                   <th>Aksi</th>
                 </tr>
@@ -3268,7 +3257,7 @@
           "
         >
           <span class="ico">👑</span>
-          <span>VIP Discount</span>
+          <span>Prestige Discount</span>
         </button>
         <button
           type="button"
@@ -3616,9 +3605,6 @@
               .toLowerCase()
               .includes(searchValue) ||
             String(item.brand || "")
-              .toLowerCase()
-              .includes(searchValue) ||
-            productPlatformLabel(item.platform)
               .toLowerCase()
               .includes(searchValue) ||
             String(item.duration || "")
@@ -5357,22 +5343,6 @@
         }
       }
 
-      function normalizeProductPlatform(platform) {
-        const value = String(platform || "android").trim().toLowerCase();
-        return value === "ios" || value === "iphone" || value === "ipad"
-          ? "ios"
-          : "android";
-      }
-
-      function productPlatformLabel(platform) {
-        return normalizeProductPlatform(platform) === "ios" ? "iOS" : "Android";
-      }
-
-      function productPlatformBadge(platform) {
-        const normalized = normalizeProductPlatform(platform);
-        return `<span class="badge ${normalized === "ios" ? "manual" : "available"}">${productPlatformLabel(normalized)}</span>`;
-      }
-
       function updateProductStats(products) {
         document.getElementById("totalProductStat").innerText = products.length;
       }
@@ -5401,7 +5371,7 @@
             statusText.innerText = "Belum ada produk.";
             tableBody.innerHTML = `
                                 <tr>
-                                  <td colspan="9" class="empty">Belum ada produk di database.</td>
+                                  <td colspan="8" class="empty">Belum ada produk di database.</td>
                                 </tr>
                               `;
             return;
@@ -5414,7 +5384,7 @@
           statusText.innerText = "Gagal memuat daftar produk.";
           tableBody.innerHTML = `
                               <tr>
-                                <td colspan="9" class="empty">Terjadi error saat mengambil produk.</td>
+                                <td colspan="8" class="empty">Terjadi error saat mengambil produk.</td>
                               </tr>
                             `;
         }
@@ -5454,7 +5424,6 @@
       async function saveProduct() {
         const editingId = document.getElementById("editingProductId").value;
         const game = document.getElementById("productGame").value.trim();
-        const platform = document.getElementById("productPlatform")?.value || "android";
         const brand = document.getElementById("productBrand").value.trim();
         const duration = document
           .getElementById("productDuration")
@@ -5484,7 +5453,6 @@
             },
             body: JSON.stringify({
               game,
-              platform,
               brand,
               duration,
               price,
@@ -5605,13 +5573,11 @@
 
       function populateProductFilters(products) {
         const gameFilter = document.getElementById("productGameFilter");
-        const platformFilter = document.getElementById("productPlatformFilter");
         const brandFilter = document.getElementById("productBrandFilter");
 
         if (!gameFilter || !brandFilter) return;
 
         const currentGame = gameFilter.value;
-        const currentPlatform = platformFilter ? platformFilter.value : "";
         const currentBrand = brandFilter.value;
 
         const games = [
@@ -5623,7 +5589,6 @@
         ].sort((a, b) => String(a).localeCompare(String(b)));
 
         gameFilter.innerHTML = `<option value="">Semua Game</option>`;
-        if (platformFilter) platformFilter.innerHTML = `<option value="">Semua Platform</option><option value="android">Android</option><option value="ios">iOS</option>`;
         brandFilter.innerHTML = `<option value="">Semua Brand</option>`;
 
         games.forEach((game) => {
@@ -5641,7 +5606,6 @@
         });
 
         if (games.includes(currentGame)) gameFilter.value = currentGame;
-        if (platformFilter && ["android", "ios"].includes(currentPlatform)) platformFilter.value = currentPlatform;
         if (brands.includes(currentBrand)) brandFilter.value = currentBrand;
       }
 
@@ -5657,10 +5621,6 @@
 
         const gameValue = String(
           document.getElementById("productGameFilter")?.value || "",
-        );
-
-        const platformValue = String(
-          document.getElementById("productPlatformFilter")?.value || "",
         );
 
         const brandValue = String(
@@ -5680,9 +5640,6 @@
             String(item.brand || "")
               .toLowerCase()
               .includes(searchValue) ||
-            productPlatformLabel(item.platform)
-              .toLowerCase()
-              .includes(searchValue) ||
             String(item.duration || "")
               .toLowerCase()
               .includes(searchValue) ||
@@ -5692,20 +5649,12 @@
 
           const matchesGame =
             !gameValue || String(item.game || "") === gameValue;
-          const matchesPlatform =
-            !platformValue || normalizeProductPlatform(item.platform) === platformValue;
           const matchesBrand =
             !brandValue || String(item.brand || "") === brandValue;
           const matchesStatus =
             statusValue === "" || String(Number(item.active)) === statusValue;
 
-          return (
-            matchesSearch &&
-            matchesGame &&
-            matchesPlatform &&
-            matchesBrand &&
-            matchesStatus
-          );
+          return matchesSearch && matchesGame && matchesBrand && matchesStatus;
         });
 
         updateProductStats(filteredProducts);
@@ -5714,7 +5663,7 @@
         if (filteredProducts.length === 0) {
           tableBody.innerHTML = `
                               <tr>
-                                <td colspan="9" class="empty">Tidak ada produk yang sesuai filter.</td>
+                                <td colspan="8" class="empty">Tidak ada produk yang sesuai filter.</td>
                               </tr>
                             `;
           return;
@@ -5723,7 +5672,6 @@
         tableBody.innerHTML = filteredProducts
           .map((item) => {
             const safeGame = JSON.stringify(String(item.game || ""));
-            const safePlatform = JSON.stringify(normalizeProductPlatform(item.platform));
             const safeBrand = JSON.stringify(String(item.brand || ""));
             const safeDuration = JSON.stringify(String(item.duration || ""));
             const safePlayStatus = JSON.stringify(
@@ -5734,14 +5682,13 @@
                                 <tr>
                                   <td>${item.id}</td>
                                   <td>${escapeHtml(item.game)}</td>
-                                  <td>${productPlatformBadge(item.platform)}</td>
                                   <td>${escapeHtml(item.brand)}</td>
                                   <td>${escapeHtml(item.duration)}</td>
                                   <td>${formatRupiah(item.price)}</td>
 <td>${playStatusBadge(item.play_status)}</td>
 <td>${activeBadge(item.active)}</td>
 <td>
-  <button onclick='editProduct(${item.id}, ${safeGame}, ${safePlatform}, ${safeBrand}, ${safeDuration}, ${Number(item.price || 0)}, ${safePlayStatus})'>Edit</button>
+  <button onclick='editProduct(${item.id}, ${safeGame}, ${safeBrand}, ${safeDuration}, ${Number(item.price || 0)}, ${safePlayStatus})'>Edit</button>
                                     <button class="ghost-btn" onclick="toggleProductActive(${item.id}, ${Number(item.active) === 1 ? 0 : 1})">
                                       ${Number(item.active) === 1 ? "Nonaktifkan" : "Aktifkan"}
                                     </button>
@@ -6128,7 +6075,6 @@
       function resetProductForm() {
         const editingInput = document.getElementById("editingProductId");
         const gameInput = document.getElementById("productGame");
-        const platformInput = document.getElementById("productPlatform");
         const brandInput = document.getElementById("productBrand");
         const durationInput = document.getElementById("productDuration");
         const priceInput = document.getElementById("productPrice");
@@ -6138,7 +6084,6 @@
 
         if (editingInput) editingInput.value = "";
         if (gameInput) gameInput.value = "";
-        if (platformInput) platformInput.value = "android";
         if (brandInput) brandInput.value = "";
         if (durationInput) durationInput.value = "";
         if (priceInput) priceInput.value = "";
@@ -6160,7 +6105,6 @@
       function editProduct(
         id,
         game,
-        platform,
         brand,
         duration,
         price,
@@ -6168,8 +6112,6 @@
       ) {
         document.getElementById("editingProductId").value = id;
         document.getElementById("productGame").value = game;
-        const platformInput = document.getElementById("productPlatform");
-        if (platformInput) platformInput.value = normalizeProductPlatform(platform);
         document.getElementById("productBrand").value = brand;
         document.getElementById("productDuration").value = duration;
         document.getElementById("productPrice").value = price;
@@ -6292,7 +6234,7 @@
               ${escapeHtml(item.game || "-")} — ${escapeHtml(item.brand || "-")} — ${escapeHtml(item.duration || "-")}
             </td>
             <td data-label="Harga">${formatRupiah(item.price || 0)}</td>
-            <td data-label="Diskon VIP">${formatRupiah(item.discount_amount || 0)}</td>
+            <td data-label="Diskon Prestige">${formatRupiah(item.discount_amount || 0)}</td>
             <td data-label="Status">
               <span class="badge ${active ? "paid" : "expired"}">
                 ${active ? "Aktif" : "Nonaktif"}
@@ -6353,7 +6295,7 @@
             return;
           }
 
-          Swal.fire(data.message || "Diskon VIP berhasil disimpan");
+          Swal.fire(data.message || "Diskon Prestige berhasil disimpan");
           document.getElementById("vipDiscountAmount").value = "";
           loadVipDiscounts();
         } catch (err) {
@@ -6388,8 +6330,8 @@
 
       async function deleteVipDiscount(id) {
         const result = await Swal.fire({
-          title: "Hapus Diskon VIP?",
-          text: "Diskon VIP yang dihapus tidak akan otomatis berlaku lagi.",
+          title: "Hapus Diskon Prestige?",
+          text: "Diskon Prestige yang dihapus tidak akan otomatis berlaku lagi.",
           icon: "warning",
           showCancelButton: true,
           confirmButtonText: "Ya, Hapus",
@@ -6414,7 +6356,7 @@
             return;
           }
 
-          Swal.fire(data.message || "Diskon VIP berhasil dihapus");
+          Swal.fire(data.message || "Diskon Prestige berhasil dihapus");
           loadVipDiscounts();
         } catch (err) {
           Swal.fire("Terjadi error server saat menghapus diskon VIP");
@@ -6438,7 +6380,7 @@
         ).trim();
 
         return allVoucherProducts.filter((item) => {
-          const productText = [item.game, productPlatformLabel(item.platform), item.brand, item.duration, item.price]
+          const productText = [item.game, item.brand, item.duration, item.price]
             .join(" ")
             .toLowerCase();
           const matchesSearch = !searchValue || productText.includes(searchValue);
@@ -6687,7 +6629,7 @@
               ${escapeHtml(item.game || "-")} — ${escapeHtml(item.brand || "-")} — ${escapeHtml(item.duration || "-")}
             </td>
             <td data-label="Harga">${formatRupiah(item.price || 0)}</td>
-            <td data-label="Diskon VIP">${formatRupiah(item.discount_amount || 0)}</td>
+            <td data-label="Diskon Prestige">${formatRupiah(item.discount_amount || 0)}</td>
             <td data-label="Status">
               <span class="badge ${active ? "paid" : "expired"}">
                 ${active ? "Aktif" : "Nonaktif"}
@@ -6748,7 +6690,7 @@
             return;
           }
 
-          Swal.fire(data.message || "Diskon VIP berhasil disimpan");
+          Swal.fire(data.message || "Diskon Prestige berhasil disimpan");
           document.getElementById("vipDiscountAmount").value = "";
           loadVipDiscounts();
         } catch (err) {
@@ -6783,8 +6725,8 @@
 
       async function deleteVipDiscount(id) {
         const result = await Swal.fire({
-          title: "Hapus Diskon VIP?",
-          text: "Diskon VIP yang dihapus tidak akan otomatis berlaku lagi.",
+          title: "Hapus Diskon Prestige?",
+          text: "Diskon Prestige yang dihapus tidak akan otomatis berlaku lagi.",
           icon: "warning",
           showCancelButton: true,
           confirmButtonText: "Ya, Hapus",
@@ -6809,7 +6751,7 @@
             return;
           }
 
-          Swal.fire(data.message || "Diskon VIP berhasil dihapus");
+          Swal.fire(data.message || "Diskon Prestige berhasil dihapus");
           loadVipDiscounts();
         } catch (err) {
           Swal.fire("Terjadi error server saat menghapus diskon VIP");

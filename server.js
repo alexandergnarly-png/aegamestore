@@ -721,6 +721,164 @@ function verifyMidtransSignature(notification) {
   return crypto.timingSafeEqual(actualBuffer, expectedBuffer);
 }
 
+function createBuyerBadge({
+  code,
+  label,
+  emoji,
+  description,
+  descriptionEn,
+  benefitsId,
+  benefitsEn,
+  requirement,
+  requirementEn,
+}) {
+  return {
+    code,
+    label,
+    emoji,
+    description,
+    description_en: descriptionEn,
+    benefits: {
+      id: benefitsId,
+      en: benefitsEn,
+    },
+    requirement,
+    requirement_en: requirementEn,
+  };
+}
+
+function getBadgeByCode(code) {
+  const cleanCode = String(code || "")
+    .trim()
+    .toLowerCase();
+
+  const badges = {
+    entry: createBuyerBadge({
+      code: "entry",
+      label: "Entry",
+      emoji: "◇",
+      description: "Buyer baru AE Game Store",
+      descriptionEn: "New AE Game Store buyer",
+      requirement: "Akun buyer baru",
+      requirementEn: "New buyer account",
+      benefitsId: [
+        "Akses halaman akun dan riwayat order",
+        "Simpan nama default untuk checkout lebih cepat",
+        "Bisa ikut promo publik yang sedang aktif",
+      ],
+      benefitsEn: [
+        "Access account page and order history",
+        "Save default name for faster checkout",
+        "Eligible for active public promos",
+      ],
+    }),
+    verified: createBuyerBadge({
+      code: "verified",
+      label: "Verified",
+      emoji: "◆",
+      description: "Buyer yang sudah berhasil transaksi",
+      descriptionEn: "Buyer with at least one successful order",
+      requirement: "Minimal 1 order berhasil",
+      requirementEn: "At least 1 successful order",
+      benefitsId: [
+        "Profil buyer terlihat lebih terpercaya",
+        "Riwayat transaksi tersimpan untuk pembelian ulang",
+        "Lebih mudah dibantu admin saat ada kendala order",
+      ],
+      benefitsEn: [
+        "More trusted buyer profile",
+        "Saved transaction history for repeat orders",
+        "Easier admin support when an order needs help",
+      ],
+    }),
+    prime: createBuyerBadge({
+      code: "prime",
+      label: "Prime",
+      emoji: "✦",
+      description: "Buyer aktif yang sering transaksi",
+      descriptionEn: "Active buyer with repeated orders",
+      requirement: "Minimal 3 order berhasil",
+      requirementEn: "At least 3 successful orders",
+      benefitsId: [
+        "Prioritas informasi stok dan update produk",
+        "Lebih sering masuk target promo buyer aktif",
+        "Badge lebih tinggi di review dan profil akun",
+      ],
+      benefitsEn: [
+        "Priority stock and product update information",
+        "More likely to receive active-buyer promos",
+        "Higher badge on reviews and account profile",
+      ],
+    }),
+    prestige: createBuyerBadge({
+      code: "prestige",
+      label: "Prestige",
+      emoji: "✧",
+      description: "Buyer high value AE Game Store",
+      descriptionEn: "High-value AE Game Store buyer",
+      requirement: "10 order berhasil atau total spent Rp500.000+",
+      requirementEn: "10 successful orders or Rp500,000+ total spend",
+      benefitsId: [
+        "Eligible untuk diskon Prestige jika produk mendukung",
+        "Prioritas bantuan admin untuk order dan kendala transaksi",
+        "Akses peluang voucher private / buyer-only saat tersedia",
+      ],
+      benefitsEn: [
+        "Eligible for Prestige discount when supported by a product",
+        "Priority admin assistance for orders and transaction issues",
+        "Access to private / buyer-only voucher opportunities when available",
+      ],
+    }),
+    sovereign: createBuyerBadge({
+      code: "sovereign",
+      label: "Sovereign",
+      emoji: "♛",
+      description: "Tier tertinggi untuk top spender",
+      descriptionEn: "Highest tier for top spenders",
+      requirement: "20 order berhasil atau total spent Rp1.000.000+",
+      requirementEn: "20 successful orders or Rp1,000,000+ total spend",
+      benefitsId: [
+        "Tier buyer tertinggi di AE Game Store",
+        "Prioritas utama untuk bantuan transaksi dan info penting",
+        "Potensi akses lebih awal ke promo, stok, dan penawaran khusus",
+      ],
+      benefitsEn: [
+        "Highest buyer tier on AE Game Store",
+        "Top priority for transaction support and important updates",
+        "Potential early access to promos, stock, and special offers",
+      ],
+    }),
+    advocate: createBuyerBadge({
+      code: "advocate",
+      label: "Advocate",
+      emoji: "★",
+      description: "Buyer yang sudah memberi review aktif",
+      descriptionEn: "Buyer with an active review",
+      requirement: "Review aktif setelah transaksi berhasil",
+      requirementEn: "Active review after a successful order",
+      benefitsId: [
+        "Review tampil dengan label terpercaya",
+        "Membantu buyer lain menilai kualitas layanan",
+        "Badge khusus untuk kontribusi ke reputasi toko",
+      ],
+      benefitsEn: [
+        "Review appears with a trusted label",
+        "Helps other buyers judge service quality",
+        "Special badge for contributing to store reputation",
+      ],
+    }),
+  };
+
+  const aliases = {
+    new: "entry",
+    loyal: "prime",
+    vip: "prestige",
+    reviewer: "advocate",
+  };
+
+  return badges[cleanCode] || badges[aliases[cleanCode]] || null;
+}
+
 function getBuyerBadge({
   paidOrderCount = 0,
   totalSpend = 0,
@@ -729,90 +887,88 @@ function getBuyerBadge({
   const paidOrders = Number(paidOrderCount || 0);
   const spend = Number(totalSpend || 0);
 
+  if (paidOrders >= 20 || spend >= 1000000) {
+    return getBadgeByCode("sovereign");
+  }
+
+  if (paidOrders >= 10 || spend >= 500000) {
+    return getBadgeByCode("prestige");
+  }
+
+  if (paidOrders >= 3) {
+    return getBadgeByCode("prime");
+  }
+
   if (hasReview) {
+    return getBadgeByCode("advocate");
+  }
+
+  if (paidOrders >= 1) {
+    return getBadgeByCode("verified");
+  }
+
+  return getBadgeByCode("entry");
+}
+
+function getBuyerBadgeProgress({ paidOrderCount = 0, totalSpend = 0 }) {
+  const paidOrders = Number(paidOrderCount || 0);
+  const spend = Number(totalSpend || 0);
+
+  if (paidOrders >= 20 || spend >= 1000000) {
     return {
-      code: "reviewer",
-      label: "Reviewer",
-      emoji: "⭐",
-      description: "Buyer yang sudah memberi review",
+      nextBadge: null,
+      message: "Kamu sudah berada di tier tertinggi.",
+      message_en: "You are already on the highest tier.",
     };
   }
 
   if (paidOrders >= 10 || spend >= 500000) {
+    const remainingOrders = Math.max(20 - paidOrders, 0);
+    const remainingSpend = Math.max(1000000 - spend, 0);
     return {
-      code: "vip",
-      label: "VIP Buyer",
-      emoji: "👑",
-      description: "Buyer premium AE Game Store",
+      nextBadge: getBadgeByCode("sovereign"),
+      remaining_orders: remainingOrders,
+      remaining_spend: remainingSpend,
+      message: `Menuju Sovereign: tambah ${remainingOrders} order berhasil atau ${formatCurrencyForText(remainingSpend)} total spent lagi.`,
+      message_en: `Next Sovereign: add ${remainingOrders} successful orders or ${formatCurrencyForText(remainingSpend)} more total spend.`,
     };
   }
 
   if (paidOrders >= 3) {
+    const remainingOrders = Math.max(10 - paidOrders, 0);
+    const remainingSpend = Math.max(500000 - spend, 0);
     return {
-      code: "loyal",
-      label: "Loyal Buyer",
-      emoji: "🌊",
-      description: "Buyer yang sering transaksi",
+      nextBadge: getBadgeByCode("prestige"),
+      remaining_orders: remainingOrders,
+      remaining_spend: remainingSpend,
+      message: `Menuju Prestige: tambah ${remainingOrders} order berhasil atau ${formatCurrencyForText(remainingSpend)} total spent lagi.`,
+      message_en: `Next Prestige: add ${remainingOrders} successful orders or ${formatCurrencyForText(remainingSpend)} more total spend.`,
     };
   }
 
   if (paidOrders >= 1) {
+    const remainingOrders = Math.max(3 - paidOrders, 0);
     return {
-      code: "verified",
-      label: "Verified Buyer",
-      emoji: "✅",
-      description: "Sudah pernah berhasil order",
+      nextBadge: getBadgeByCode("prime"),
+      remaining_orders: remainingOrders,
+      remaining_spend: 0,
+      message: `Menuju Prime: tambah ${remainingOrders} order berhasil lagi.`,
+      message_en: `Next Prime: add ${remainingOrders} more successful orders.`,
     };
   }
 
   return {
-    code: "new",
-    label: "New Buyer",
-    emoji: "🎐",
-    description: "Buyer baru AE Game Store",
+    nextBadge: getBadgeByCode("verified"),
+    remaining_orders: 1,
+    remaining_spend: 0,
+    message: "Menuju Verified: selesaikan 1 order pertama kamu.",
+    message_en: "Next Verified: complete your first order.",
   };
 }
-function getBadgeByCode(code) {
-  const cleanCode = String(code || "")
-    .trim()
-    .toLowerCase();
 
-  const badges = {
-    new: {
-      code: "new",
-      label: "New Buyer",
-      emoji: "🎐",
-      description: "Buyer baru AE Game Store",
-    },
-    verified: {
-      code: "verified",
-      label: "Verified Buyer",
-      emoji: "✅",
-      description: "Sudah pernah berhasil order",
-    },
-    loyal: {
-      code: "loyal",
-      label: "Loyal Buyer",
-      emoji: "🌊",
-      description: "Buyer yang sering transaksi",
-    },
-    vip: {
-      code: "vip",
-      label: "VIP Buyer",
-      emoji: "👑",
-      description: "Buyer premium AE Game Store",
-    },
-    reviewer: {
-      code: "reviewer",
-      label: "Reviewer",
-      emoji: "⭐",
-      description: "Buyer yang sudah memberi review",
-    },
-  };
-
-  return badges[cleanCode] || null;
+function formatCurrencyForText(value) {
+  return "Rp" + Number(value || 0).toLocaleString("id-ID");
 }
-
 async function getUserBadgeOverride(userId) {
   const cleanUserId = Number(userId);
 
@@ -883,7 +1039,7 @@ async function getBuyerStats(userId) {
 async function isVipBuyer(userId) {
   const overrideBadge = await getUserBadgeOverride(userId);
 
-  if (overrideBadge?.code === "vip") {
+  if (["prestige", "sovereign", "vip"].includes(String(overrideBadge?.code || ""))) {
     return true;
   }
 
@@ -4693,6 +4849,10 @@ app.get("/api/user/me", async (req, res) => {
         new Date(user.email_verification_expires_at) > new Date(),
       ),
       badge,
+      badgeProgress: getBuyerBadgeProgress({
+        paidOrderCount,
+        totalSpend,
+      }),
       stats: {
         paid_order_count: paidOrderCount,
         total_spend: totalSpend,
