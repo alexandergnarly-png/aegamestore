@@ -300,6 +300,35 @@ db.query(
 db.query(
   `ALTER TABLE products ADD COLUMN IF NOT EXISTS play_status TEXT DEFAULT 'safe'`,
 );
+db.query(
+  `ALTER TABLE products ADD COLUMN IF NOT EXISTS platform TEXT DEFAULT 'android'`,
+);
+db.query(
+  `UPDATE products
+   SET platform = 'ios'
+   WHERE LOWER(TRIM(COALESCE(platform, 'android'))) = 'android'
+     AND (LOWER(TRIM(COALESCE(brand, ''))) LIKE '%ios%'
+       OR LOWER(TRIM(COALESCE(game, ''))) LIKE '%ios%'
+       OR LOWER(TRIM(COALESCE(duration, ''))) LIKE '%ios%')`,
+);
+db.query(
+  `UPDATE products
+   SET platform = 'android'
+   WHERE LOWER(TRIM(COALESCE(platform, ''))) NOT IN ('android', 'ios')`,
+);
+
+function normalizePlatform(platform) {
+  const value = String(platform || "android")
+    .trim()
+    .toLowerCase();
+
+  if (value === "ios" || value === "iphone" || value === "ipad") return "ios";
+  return "android";
+}
+
+function getPlatformLabel(platform) {
+  return normalizePlatform(platform) === "ios" ? "iOS" : "Android";
+}
 
 function normalizePlayStatus(status) {
   const value = String(status || "safe")
@@ -2263,7 +2292,8 @@ app.post("/create-order", orderLimiter, async (req, res) => {
     const orderId = "ORDER-" + crypto.randomUUID();
     const accessToken = crypto.randomBytes(24).toString("hex");
     const createdAt = new Date().toISOString();
-    const productName = `${productRow.brand} - ${productRow.duration}`;
+    const productPlatformLabel = getPlatformLabel(productRow.platform);
+    const productName = `${productPlatformLabel} • ${productRow.brand} - ${productRow.duration}`;
     const game = productRow.game;
     const originalPrice = Number(productRow.price);
 
@@ -3614,6 +3644,7 @@ app.get("/products", requireAdminAuth, async (req, res) => {
   try {
     const result = await query(`
   SELECT *,
+    COALESCE(NULLIF(platform, ''), 'android') AS platform,
     CASE
       WHEN LOWER(duration) LIKE '%jam%' THEN
         COALESCE(NULLIF(regexp_replace(duration, '[^0-9]', '', 'g'), '')::int, 0)
@@ -3625,7 +3656,7 @@ app.get("/products", requireAdminAuth, async (req, res) => {
         999999
     END AS duration_order
   FROM products
-  ORDER BY game ASC, brand ASC, duration_order ASC, price ASC, id ASC
+  ORDER BY game ASC, platform ASC, brand ASC, duration_order ASC, price ASC, id ASC
 `);
 
     return res.json(result.rows);
@@ -3638,12 +3669,13 @@ app.get("/products", requireAdminAuth, async (req, res) => {
 });
 
 app.post("/products", requireAdminAuth, requireAdminCsrf, async (req, res) => {
-  const { game, brand, duration, price, delivery_type, play_status } = req.body;
+  const { game, platform, brand, duration, price, delivery_type, play_status } = req.body;
   const syncBrandStatus =
     req.body.sync_brand_status === true ||
     req.body.sync_brand_status === "true";
   const cleanGame = String(game || "").trim();
   const cleanBrand = String(brand || "").trim();
+  const cleanPlatform = normalizePlatform(platform);
   const cleanDuration = String(duration || "").trim();
   const cleanPrice = Number(price);
   const cleanDeliveryType = "auto";
@@ -3668,14 +3700,16 @@ app.post("/products", requireAdminAuth, requireAdminCsrf, async (req, res) => {
     brand: cleanBrand,
     duration: cleanDuration,
     price: cleanPrice,
+    platform: cleanPlatform,
     delivery_type: cleanDeliveryType,
   });
 
   try {
     const result = await query(
-      "INSERT INTO products (game, brand, duration, price, active, created_at, delivery_type, play_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id",
+      "INSERT INTO products (game, platform, brand, duration, price, active, created_at, delivery_type, play_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id",
       [
         cleanGame,
+        cleanPlatform,
         cleanBrand,
         cleanDuration,
         cleanPrice,
@@ -3694,15 +3728,16 @@ app.post("/products", requireAdminAuth, requireAdminCsrf, async (req, res) => {
         `UPDATE products
          SET play_status = $1
          WHERE LOWER(TRIM(game)) = LOWER(TRIM($2))
-           AND LOWER(TRIM(brand)) = LOWER(TRIM($3))`,
-        [cleanPlayStatus, cleanGame, cleanBrand],
+           AND LOWER(TRIM(COALESCE(platform, 'android'))) = LOWER(TRIM($3))
+           AND LOWER(TRIM(brand)) = LOWER(TRIM($4))`,
+        [cleanPlayStatus, cleanGame, cleanPlatform, cleanBrand],
       );
       syncedCount = Number(syncResult.rowCount || 0);
     }
 
     return res.json({
       message: syncBrandStatus
-        ? `Produk berhasil ditambahkan. Status ${syncedCount} produk dalam brand ini ikut disamakan.`
+        ? `Produk berhasil ditambahkan. Status ${syncedCount} produk di platform + brand ini ikut disamakan.`
         : "Produk berhasil ditambahkan",
       id: result.rows[0].id,
       synced_count: syncedCount,
@@ -3721,7 +3756,7 @@ app.put(
   requireAdminCsrf,
   async (req, res) => {
     const productId = Number(req.params.id);
-    const { game, brand, duration, price } = req.body;
+    const { game, platform, brand, duration, price } = req.body;
 
     if (!Number.isInteger(productId) || productId <= 0) {
       return res.status(400).json({
@@ -3731,6 +3766,7 @@ app.put(
 
     const cleanGame = String(game || "").trim();
     const cleanBrand = String(brand || "").trim();
+    const cleanPlatform = normalizePlatform(platform);
     const cleanDuration = String(duration || "").trim();
     const cleanPrice = Number(price);
     const cleanDeliveryType = "auto";
@@ -3763,15 +3799,17 @@ app.put(
       const result = await query(
         `UPDATE products
    SET game = $1,
-       brand = $2,
-       duration = $3,
-       price = $4,
-       delivery_type = COALESCE($5, delivery_type),
-       play_status = COALESCE($6, play_status)
-   WHERE id = $7
+       platform = $2,
+       brand = $3,
+       duration = $4,
+       price = $5,
+       delivery_type = COALESCE($6, delivery_type),
+       play_status = COALESCE($7, play_status)
+   WHERE id = $8
    RETURNING id`,
         [
           cleanGame,
+          cleanPlatform,
           cleanBrand,
           cleanDuration,
           cleanPrice,
@@ -3793,15 +3831,16 @@ app.put(
           `UPDATE products
            SET play_status = $1
            WHERE LOWER(TRIM(game)) = LOWER(TRIM($2))
-             AND LOWER(TRIM(brand)) = LOWER(TRIM($3))`,
-          [cleanPlayStatus, cleanGame, cleanBrand],
+             AND LOWER(TRIM(COALESCE(platform, 'android'))) = LOWER(TRIM($3))
+             AND LOWER(TRIM(brand)) = LOWER(TRIM($4))`,
+          [cleanPlayStatus, cleanGame, cleanPlatform, cleanBrand],
         );
         syncedCount = Number(syncResult.rowCount || 0);
       }
 
       return res.json({
         message: syncBrandStatus
-          ? `Produk berhasil diupdate. Status ${syncedCount} produk dalam brand ini ikut disamakan.`
+          ? `Produk berhasil diupdate. Status ${syncedCount} produk di platform + brand ini ikut disamakan.`
           : "Produk berhasil diupdate",
         synced_count: syncedCount,
       });
@@ -3945,6 +3984,7 @@ app.get("/public-products", async (req, res) => {
     const result = await query(`
   SELECT
     p.*,
+    COALESCE(NULLIF(p.platform, ''), 'android') AS platform,
     COALESCE(p.delivery_type, 'auto') AS delivery_type,
     COALESCE(p.play_status, 'safe') AS play_status,
     CASE
@@ -3965,7 +4005,7 @@ app.get("/public-products", async (req, res) => {
   LEFT JOIN keys k ON k.product_id = p.id
   WHERE p.active = 1
   GROUP BY p.id
-  ORDER BY p.game ASC, p.brand ASC, duration_order ASC, p.price ASC, p.id ASC
+  ORDER BY p.game ASC, platform ASC, p.brand ASC, duration_order ASC, p.price ASC, p.id ASC
 `);
 
     return res.json(result.rows);

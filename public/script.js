@@ -41,6 +41,7 @@ const translations = {
     filterVoucher: "Voucher",
     orderGameBadge: "Order Game",
     modalOrderDesc: "Pilih produk, cek total, lalu lanjut bayar.",
+    platformLabel: "Platform",
     brandLabel: "Brand",
     durationLabel: "Nominal / Durasi",
     playerNameLabel: "Nama Player",
@@ -225,6 +226,7 @@ const translations = {
     filterVoucher: "Voucher",
     orderGameBadge: "Order Game",
     modalOrderDesc: "Choose product, review total, then continue payment.",
+    platformLabel: "Platform",
     brandLabel: "Brand",
     durationLabel: "Nominal / Duration",
     playerNameLabel: "Player Name",
@@ -571,6 +573,7 @@ function showToast(message, options = {}) {
 }
 
 const gameGrid = document.getElementById("gameGrid");
+const platformSelect = document.getElementById("platform");
 const brandSelect = document.getElementById("brand");
 const productSelect = document.getElementById("product");
 const buyBtn = document.getElementById("buyBtn");
@@ -588,6 +591,23 @@ function normalizePlayStatus(status) {
   if (value === "maintenance") return "maintenance";
   if (value === "risk") return "risk";
   return "safe";
+}
+
+function normalizePlatform(platform) {
+  const value = String(platform || "android")
+    .trim()
+    .toLowerCase();
+
+  if (value === "ios" || value === "iphone" || value === "ipad") return "ios";
+  return "android";
+}
+
+function getPlatformLabel(platform) {
+  return normalizePlatform(platform) === "ios" ? "iOS" : "Android";
+}
+
+function getProductPlatform(product) {
+  return normalizePlatform(product?.platform || product?.device || "android");
 }
 
 function getPlayStatusMeta(status) {
@@ -885,6 +905,7 @@ function getCheckoutQueryParams() {
 
   return {
     game: String(params.get("game") || "").trim(),
+    platform: String(params.get("platform") || "").trim(),
     brand: String(params.get("brand") || "").trim(),
     duration: String(params.get("duration") || "").trim(),
     productId: Number.isInteger(productId) && productId > 0 ? productId : null,
@@ -905,6 +926,7 @@ function findProductFromCheckoutQuery(query) {
   }
 
   const targetGame = normalizeCheckoutValue(query.game);
+  const targetPlatform = normalizeCheckoutValue(query.platform);
   const targetBrand = normalizeCheckoutValue(query.brand);
   const targetDuration = normalizeCheckoutValue(query.duration);
 
@@ -912,13 +934,15 @@ function findProductFromCheckoutQuery(query) {
     allProducts.find((item) => {
       const sameGame =
         !targetGame || normalizeCheckoutValue(item.game) === targetGame;
+      const samePlatform =
+        !targetPlatform || normalizeCheckoutValue(getProductPlatform(item)) === targetPlatform;
       const sameBrand =
         !targetBrand || normalizeCheckoutValue(item.brand) === targetBrand;
       const sameDuration =
         !targetDuration ||
         normalizeCheckoutValue(item.duration) === targetDuration;
 
-      return sameGame && sameBrand && sameDuration;
+      return sameGame && samePlatform && sameBrand && sameDuration;
     }) || null
   );
 }
@@ -927,6 +951,7 @@ function cleanCheckoutQueryFromUrl() {
   const url = new URL(window.location.href);
 
   url.searchParams.delete("game");
+  url.searchParams.delete("platform");
   url.searchParams.delete("brand");
   url.searchParams.delete("duration");
   url.searchParams.delete("productId");
@@ -962,6 +987,11 @@ async function openOrderFromCheckoutQuery() {
 
   setTimeout(() => {
     if (targetProduct) {
+      if (platformSelect && targetProduct.platform) {
+        platformSelect.value = getProductPlatform(targetProduct);
+        platformSelect.dispatchEvent(new Event("change"));
+      }
+
       if (brandSelect && targetProduct.brand) {
         brandSelect.value = targetProduct.brand;
         brandSelect.dispatchEvent(new Event("change"));
@@ -976,6 +1006,11 @@ async function openOrderFromCheckoutQuery() {
       return;
     }
 
+    if (query.platform && platformSelect) {
+      platformSelect.value = normalizePlatform(query.platform);
+      platformSelect.dispatchEvent(new Event("change"));
+    }
+
     if (query.brand && brandSelect) {
       brandSelect.value = query.brand;
       brandSelect.dispatchEvent(new Event("change"));
@@ -986,6 +1021,9 @@ async function openOrderFromCheckoutQuery() {
         (item) =>
           normalizeCheckoutValue(item.game) ===
           normalizeCheckoutValue(targetGame) &&
+          (!query.platform ||
+            normalizeCheckoutValue(getProductPlatform(item)) ===
+            normalizeCheckoutValue(normalizePlatform(query.platform))) &&
           (!query.brand ||
             normalizeCheckoutValue(item.brand) ===
             normalizeCheckoutValue(query.brand)) &&
@@ -1335,7 +1373,7 @@ async function openOrderModal(game) {
   updateOrderModalBanner(game);
   pushRecentGame(game);
   renderGames();
-  loadBrands();
+  loadPlatforms();
   setOrderStep(1);
 
   const modal = document.getElementById("orderModal");
@@ -1398,6 +1436,56 @@ function closeOrderModal() {
   resetVoucherPreview();
 }
 
+function renderOrderPlatformPills(platforms) {
+  const wrap = document.getElementById("platformPills");
+  if (!wrap) return;
+
+  wrap.innerHTML = "";
+
+  platforms.forEach((platform) => {
+    const normalizedPlatform = normalizePlatform(platform);
+    const products = allProducts.filter(
+      (item) => item.game === selectedGame && getProductPlatform(item) === normalizedPlatform,
+    );
+    const readyCount = products.reduce(
+      (sum, item) => sum + Number(item.available_keys || 0),
+      0,
+    );
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "order-platform-pill";
+    btn.setAttribute("role", "radio");
+    btn.setAttribute(
+      "aria-checked",
+      normalizePlatform(platformSelect?.value) === normalizedPlatform ? "true" : "false",
+    );
+    btn.dataset.platform = normalizedPlatform;
+    btn.innerHTML = `
+      <span>${getPlatformLabel(normalizedPlatform)}</span>
+      <small>${readyCount} ready</small>
+    `;
+
+    if (normalizePlatform(platformSelect?.value) === normalizedPlatform) btn.classList.add("active");
+
+    btn.addEventListener("click", () => {
+      if (!platformSelect || platformSelect.value === normalizedPlatform) return;
+      platformSelect.value = normalizedPlatform;
+      loadBrands();
+    });
+
+    wrap.appendChild(btn);
+  });
+}
+
+function syncOrderPlatformPillsActive() {
+  document.querySelectorAll(".order-platform-pill").forEach((btn) => {
+    const active = btn.dataset.platform === normalizePlatform(platformSelect?.value);
+    btn.classList.toggle("active", active);
+    btn.setAttribute("aria-checked", active ? "true" : "false");
+  });
+}
+
 function renderOrderBrandPills(brands) {
   const wrap = document.getElementById("brandPills");
   if (!wrap) return;
@@ -1406,7 +1494,10 @@ function renderOrderBrandPills(brands) {
 
   brands.forEach((brand) => {
     const products = allProducts.filter(
-      (item) => item.game === selectedGame && item.brand === brand,
+      (item) =>
+        item.game === selectedGame &&
+        getProductPlatform(item) === normalizePlatform(platformSelect?.value) &&
+        item.brand === brand,
     );
     const readyCount = products.reduce(
       (sum, item) => sum + Number(item.available_keys || 0),
@@ -1527,11 +1618,51 @@ function syncOrderProductCardsActive() {
   });
 }
 
-function loadBrands() {
-  const brands = [
+function loadPlatforms() {
+  if (!platformSelect) {
+    loadBrands();
+    return;
+  }
+
+  const platforms = [
     ...new Set(
       allProducts
         .filter((item) => item.game === selectedGame)
+        .map((item) => getProductPlatform(item)),
+    ),
+  ].filter(Boolean);
+
+  if (!platforms.length) platforms.push("android");
+
+  platformSelect.innerHTML = "";
+
+  platforms.forEach((platform) => {
+    const normalizedPlatform = normalizePlatform(platform);
+    const option = document.createElement("option");
+    option.value = normalizedPlatform;
+    option.textContent = getPlatformLabel(normalizedPlatform);
+    platformSelect.appendChild(option);
+  });
+
+  if (!platforms.includes(normalizePlatform(platformSelect.value))) {
+    platformSelect.value = platforms[0];
+  }
+
+  renderOrderPlatformPills(platforms);
+  syncOrderPlatformPillsActive();
+  loadBrands();
+}
+
+function loadBrands() {
+  const currentPlatform = normalizePlatform(platformSelect?.value);
+  const brands = [
+    ...new Set(
+      allProducts
+        .filter(
+          (item) =>
+            item.game === selectedGame &&
+            getProductPlatform(item) === currentPlatform,
+        )
         .map((item) => item.brand),
     ),
   ];
@@ -1546,13 +1677,18 @@ function loadBrands() {
   });
 
   renderOrderBrandPills(brands);
+  syncOrderPlatformPillsActive();
   syncOrderBrandPillsActive();
   loadDurations();
 }
 
 function loadDurations() {
+  const currentPlatform = normalizePlatform(platformSelect?.value);
   const filteredProducts = allProducts.filter(
-    (item) => item.game === selectedGame && item.brand === brandSelect.value,
+    (item) =>
+      item.game === selectedGame &&
+      getProductPlatform(item) === currentPlatform &&
+      item.brand === brandSelect.value,
   );
 
   productSelect.innerHTML = "";
@@ -1627,7 +1763,7 @@ function updatePreview() {
 
   document.getElementById("previewGame").innerText = selectedProduct.game;
   document.getElementById("previewProduct").innerText =
-    `${selectedProduct.brand} - ${selectedProduct.duration}`;
+    `${getPlatformLabel(getProductPlatform(selectedProduct))} • ${selectedProduct.brand} - ${selectedProduct.duration}`;
   showDefaultPriceBreakdown(selectedProduct.price);
 
   buyBtn.disabled = Boolean(isOutOfStock || isMaintenance);
@@ -1641,6 +1777,7 @@ function updatePreview() {
   refreshCheckoutDiscountPreview();
 }
 
+if (platformSelect) platformSelect.addEventListener("change", loadBrands);
 brandSelect.addEventListener("change", loadDurations);
 productSelect.addEventListener("change", updatePreview);
 
@@ -3607,6 +3744,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const payload = {
       game: product.game,
       product_id: product.id,
+      platform: getProductPlatform(product),
       brand: product.brand,
       duration: product.duration,
       price: product.price,
@@ -3678,6 +3816,11 @@ document.addEventListener("DOMContentLoaded", () => {
           await openOrderModal(cart.game);
         }
         setTimeout(() => {
+          const platform = document.getElementById("platform");
+          if (platform && cart.platform) {
+            platform.value = normalizePlatform(cart.platform);
+            platform.dispatchEvent(new Event("change"));
+          }
           const brand = document.getElementById("brand");
           if (brand && cart.brand) {
             brand.value = cart.brand;

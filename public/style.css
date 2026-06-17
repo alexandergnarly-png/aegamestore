@@ -11683,3 +11683,101 @@ body.dark-theme .order-product-card.active .order-product-status-maintenance {
     color: #111111 !important;
   }
 }
+
+
+/* Platform split polish — Android / iOS */
+.order-platform-pills {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.order-platform-pill {
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 16px;
+  border: 1px solid rgba(17, 17, 17, 0.14);
+  border-radius: 999px;
+  background: #ffffff;
+  color: #111111;
+  font-weight: 900;
+  box-shadow: none;
+}
+
+.order-platform-pill span {
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.order-platform-pill small {
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  color: inherit;
+  opacity: .78;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.order-platform-pill.active {
+  background: #111111;
+  color: #ffffff;
+  border-color: #111111;
+}
+
+body.dark-theme .order-platform-pill {
+  background: #1b1b1b;
+  color: #f5f5f0;
+  border-color: rgba(245, 245, 240, .16);
+}
+
+body.dark-theme .order-platform-pill.active {
+  background: #f5f5f0;
+  color: #111111;
+  border-color: #f5f5f0;
+}
+
+@media (min-width: 769px) {
+  .order-choice-grid {
+    grid-template-columns: minmax(160px, .75fr) minmax(210px, 1fr) minmax(280px, 1.35fr) !important;
+    align-items: start;
+  }
+
+  .order-platform-pills,
+  .order-brand-pills {
+    max-height: 146px;
+    overflow-y: auto;
+    padding-right: 2px;
+  }
+}
+
+@media (max-width: 768px) {
+  .order-choice-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .order-platform-pills,
+  .order-brand-pills {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .order-platform-pills::-webkit-scrollbar,
+  .order-brand-pills::-webkit-scrollbar {
+    display: none;
+  }
+
+  .order-platform-pill {
+    min-height: 44px;
+    flex: 0 0 auto;
+    padding: 9px 14px;
+  }
+}
