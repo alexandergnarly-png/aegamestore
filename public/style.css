@@ -11781,3 +11781,463 @@ body.dark-theme .order-platform-pill.active {
     padding: 9px 14px;
   }
 }
+
+/* ============================================================
+   AE Help Center — Render-inspired support hub (lightweight)
+   Added on top of platform split UI. No backend required.
+   ============================================================ */
+.ae-help-fab {
+  right: 22px !important;
+  bottom: 24px !important;
+  min-width: 176px !important;
+  min-height: 56px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 9px 14px 9px 10px !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  color: #0f172a !important;
+  border: 1px solid rgba(15, 23, 42, 0.12) !important;
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.16) !important;
+  backdrop-filter: blur(18px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(160%) !important;
+  z-index: 240 !important;
+}
+
+.ae-help-fab:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 22px 54px rgba(15, 23, 42, 0.2) !important;
+}
+
+.ae-help-fab-icon {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 16px !important;
+  display: grid !important;
+  place-items: center !important;
+  background: #0f172a !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+.ae-help-fab-icon iconify-icon {
+  font-size: 22px;
+}
+
+.ae-help-fab-copy {
+  display: grid !important;
+  gap: 0 !important;
+  min-width: 0 !important;
+}
+
+.ae-help-fab-copy strong {
+  font-size: 13px !important;
+  line-height: 1.1 !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.02em !important;
+  color: #0f172a !important;
+}
+
+.ae-help-fab-copy small {
+  font-size: 10.5px !important;
+  line-height: 1.1 !important;
+  font-weight: 800 !important;
+  color: rgba(15, 23, 42, 0.58) !important;
+}
+
+.ae-help-fab-online {
+  position: absolute !important;
+  top: 9px !important;
+  left: 41px !important;
+  width: 10px !important;
+  height: 10px !important;
+  border: 2px solid #ffffff !important;
+  border-radius: 999px !important;
+  background: #22c55e !important;
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15) !important;
+}
+
+.ae-help-sheet {
+  z-index: 290 !important;
+}
+
+.ae-help-backdrop {
+  background: rgba(15, 23, 42, 0.2) !important;
+  backdrop-filter: blur(5px) !important;
+  -webkit-backdrop-filter: blur(5px) !important;
+}
+
+.ae-help-card {
+  right: 22px !important;
+  bottom: 94px !important;
+  width: min(430px, calc(100vw - 28px)) !important;
+  padding: 0 !important;
+  border-radius: 32px !important;
+  overflow: hidden !important;
+  background:
+    radial-gradient(circle at 14px 14px, rgba(15, 23, 42, 0.08) 1px, transparent 1.5px) 0 0 / 18px 18px,
+    linear-gradient(180deg, rgba(248, 250, 252, 0.98), rgba(255, 255, 255, 0.96)) !important;
+  border: 1px solid rgba(15, 23, 42, 0.1) !important;
+  box-shadow: 0 28px 90px rgba(15, 23, 42, 0.22) !important;
+  color: #0f172a !important;
+}
+
+.ae-help-close {
+  top: 18px !important;
+  right: 18px !important;
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.72) !important;
+  color: #0f172a !important;
+  border: 1px solid rgba(15, 23, 42, 0.08) !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
+.ae-help-hero {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  gap: 14px;
+  padding: 26px 24px 18px;
+}
+
+.ae-help-logo {
+  width: 54px;
+  height: 54px;
+  border-radius: 20px;
+  display: grid;
+  place-items: center;
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 1000;
+  letter-spacing: -0.06em;
+}
+
+.ae-help-kicker {
+  display: block;
+  margin-bottom: 5px;
+  color: rgba(15, 23, 42, 0.52);
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: 0.1em;
+}
+
+.ae-help-hero h3 {
+  margin: 0;
+  color: #0f172a;
+  font-size: clamp(27px, 5vw, 38px);
+  line-height: 0.98;
+  font-weight: 950;
+  letter-spacing: -0.07em;
+}
+
+.ae-help-hero p {
+  margin-top: 9px;
+  color: rgba(15, 23, 42, 0.62);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.ae-help-status-card,
+.ae-help-question-card {
+  margin: 0 18px 12px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 15px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.84);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+}
+
+.ae-help-status-icon {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: #22c55e;
+  color: #ffffff;
+  font-size: 20px;
+}
+
+.ae-help-status-card strong,
+.ae-help-question-card strong,
+.ae-help-tile strong {
+  display: block;
+  color: #0f172a;
+  font-size: 13px;
+  line-height: 1.2;
+  font-weight: 950;
+  letter-spacing: -0.02em;
+}
+
+.ae-help-status-card small,
+.ae-help-question-card small,
+.ae-help-tile small {
+  display: block;
+  margin-top: 4px;
+  color: rgba(15, 23, 42, 0.56);
+  font-size: 11px;
+  line-height: 1.25;
+  font-weight: 700;
+}
+
+.ae-help-question-card {
+  justify-content: space-between;
+  text-align: left;
+  transition:
+    transform 0.18s var(--ease-out, ease),
+    border-color 0.18s var(--ease-out, ease),
+    box-shadow 0.18s var(--ease-out, ease);
+}
+
+.ae-help-question-card:hover,
+.ae-help-tile:hover {
+  transform: translateY(-2px);
+  border-color: rgba(15, 23, 42, 0.16);
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.12);
+}
+
+.ae-help-agent-stack {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.ae-help-agent-stack span {
+  width: 34px;
+  height: 34px;
+  margin-left: -8px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #0f172a;
+  color: #ffffff;
+  border: 2px solid #ffffff;
+  font-size: 11px;
+  font-weight: 950;
+}
+
+.ae-help-agent-stack span:first-child {
+  margin-left: 0;
+  background: #ffffff;
+  color: #0f172a;
+}
+
+.ae-help-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 6px 18px 16px;
+}
+
+.ae-help-tile {
+  min-height: 104px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 14px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  text-align: left;
+  color: #0f172a;
+  font: inherit;
+  transition:
+    transform 0.18s var(--ease-out, ease),
+    border-color 0.18s var(--ease-out, ease),
+    box-shadow 0.18s var(--ease-out, ease);
+}
+
+.ae-help-tile > span {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: #f1f5f9;
+  color: #0f172a;
+  font-size: 21px;
+}
+
+.ae-help-tile-primary {
+  background: #0f172a;
+  color: #ffffff;
+}
+
+.ae-help-tile-primary strong,
+.ae-help-tile-primary small {
+  color: #ffffff;
+}
+
+.ae-help-tile-primary small {
+  opacity: 0.72;
+}
+
+.ae-help-tile-primary > span {
+  background: rgba(255, 255, 255, 0.13);
+  color: #ffffff;
+}
+
+.ae-help-note-wrap {
+  padding: 12px 18px calc(16px + env(safe-area-inset-bottom));
+  background: rgba(255, 255, 255, 0.45);
+  border-top: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.ae-help-note {
+  margin: 0 !important;
+  color: rgba(15, 23, 42, 0.52) !important;
+  font-size: 11px !important;
+  font-weight: 750 !important;
+  text-align: center !important;
+}
+
+body.dark-theme .ae-help-fab,
+body.dark-theme .ae-help-card,
+body.dark-theme .ae-help-status-card,
+body.dark-theme .ae-help-question-card,
+body.dark-theme .ae-help-tile {
+  background-color: rgba(18, 18, 18, 0.92) !important;
+  color: #f8fafc !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+body.dark-theme .ae-help-card {
+  background:
+    radial-gradient(circle at 14px 14px, rgba(255, 255, 255, 0.08) 1px, transparent 1.5px) 0 0 / 18px 18px,
+    linear-gradient(180deg, rgba(23, 23, 23, 0.98), rgba(12, 12, 12, 0.96)) !important;
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.52) !important;
+}
+
+body.dark-theme .ae-help-fab-icon,
+body.dark-theme .ae-help-logo,
+body.dark-theme .ae-help-tile-primary {
+  background: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+body.dark-theme .ae-help-fab-copy strong,
+body.dark-theme .ae-help-hero h3,
+body.dark-theme .ae-help-status-card strong,
+body.dark-theme .ae-help-question-card strong,
+body.dark-theme .ae-help-tile strong {
+  color: #f8fafc !important;
+}
+
+body.dark-theme .ae-help-kicker,
+body.dark-theme .ae-help-hero p,
+body.dark-theme .ae-help-status-card small,
+body.dark-theme .ae-help-question-card small,
+body.dark-theme .ae-help-tile small,
+body.dark-theme .ae-help-note,
+body.dark-theme .ae-help-fab-copy small {
+  color: rgba(248, 250, 252, 0.6) !important;
+}
+
+body.dark-theme .ae-help-tile > span,
+body.dark-theme .ae-help-close,
+body.dark-theme .ae-help-agent-stack span:first-child {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #f8fafc !important;
+}
+
+body.dark-theme .ae-help-tile-primary strong,
+body.dark-theme .ae-help-tile-primary small {
+  color: #0f172a !important;
+}
+
+body.dark-theme .ae-help-note-wrap {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-top-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+@media (max-width: 768px) {
+  .ae-help-fab {
+    right: 16px !important;
+    bottom: calc(86px + env(safe-area-inset-bottom)) !important;
+    min-width: 54px !important;
+    width: 54px !important;
+    height: 54px !important;
+    padding: 7px !important;
+    border-radius: 22px !important;
+  }
+
+  .ae-help-fab-copy {
+    display: none !important;
+  }
+
+  .ae-help-fab-online {
+    top: 7px !important;
+    left: 38px !important;
+  }
+
+  .ae-help-backdrop {
+    background: rgba(15, 23, 42, 0.34) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .ae-help-card {
+    left: 10px !important;
+    right: 10px !important;
+    bottom: calc(10px + env(safe-area-inset-bottom)) !important;
+    width: auto !important;
+    max-height: min(82dvh, 640px) !important;
+    overflow-y: auto !important;
+    border-radius: 30px !important;
+  }
+
+  .ae-help-hero {
+    grid-template-columns: 46px minmax(0, 1fr);
+    padding: 22px 18px 14px;
+  }
+
+  .ae-help-logo {
+    width: 46px;
+    height: 46px;
+    border-radius: 17px;
+  }
+
+  .ae-help-hero h3 {
+    font-size: 30px;
+  }
+
+  .ae-help-status-card,
+  .ae-help-question-card {
+    margin-left: 14px;
+    margin-right: 14px;
+    border-radius: 20px;
+  }
+
+  .ae-help-grid {
+    padding-left: 14px;
+    padding-right: 14px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ae-help-tile {
+    min-height: 98px;
+    padding: 12px;
+    border-radius: 20px;
+  }
+}
+
+@media (max-width: 380px) {
+  .ae-help-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ae-help-tile {
+    min-height: 78px;
+  }
+}

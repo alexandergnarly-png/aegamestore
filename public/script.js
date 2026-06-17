@@ -98,8 +98,8 @@ const translations = {
     giveReviewBtn: "Kasih Review",
     reviewNote:
       "Review hanya bisa dikirim oleh buyer yang sudah pernah berhasil order.",
-    chatAdminTitle: "Chat Admin",
-    chatAdminSub: "Support",
+    chatAdminTitle: "AE Help",
+    chatAdminSub: "Support center",
     footerTagline:
       "Top up game key cepat, aman, dan terpercaya bersama AE Game Store.",
     metaGames: "Game tersedia",
@@ -179,16 +179,22 @@ const translations = {
     installAppBtn: "Install",
     detailRatingLabel: "Rating",
     detailViewBtn: "Lihat Detail",
-    adminChatHelpTitle: "Butuh Bantuan?",
-    adminChatHelpDesc: "Admin AE Game Store siap bantu kamu.",
+    adminChatHelpTitle: "Hi bro 👋 Butuh bantuan?",
+    adminChatHelpDesc: "Support cepat untuk order, pembayaran, dan key.",
     adminChatOnline: "Online sekarang",
     adminChatEstimate: "Estimasi balasan 1–5 menit",
-    adminChatTelegramTitle: "Chat via Telegram",
-    adminChatTelegramDesc: "Order, komplain, atau bantuan cepat",
-    adminChatHistoryTitle: "Cek Riwayat Pesanan",
-    adminChatHistoryDesc: "Lihat status order kamu",
-    adminChatGuideTitle: "Lihat Cara Beli",
-    adminChatGuideDesc: "Panduan singkat sebelum order",
+    adminChatTelegramTitle: "Chat Telegram",
+    adminChatTelegramDesc: "Order / komplain cepat",
+    adminChatHistoryTitle: "Cek Order",
+    adminChatHistoryDesc: "Status & riwayat",
+    adminChatGuideTitle: "Cara Beli",
+    adminChatGuideDesc: "Panduan singkat",
+    adminChatStatusTitle: "Status: Admin Online",
+    adminChatStatusDesc: "Auto delivery & payment gateway aktif.",
+    adminChatQuestionTitle: "Ask a question",
+    adminChatQuestionDesc: "Chat admin via Telegram untuk bantuan cepat.",
+    adminChatTermsTitle: "Terms",
+    adminChatTermsDesc: "Refund & ketentuan",
     adminChatNote: "Sertakan Order ID kalau bertanya soal transaksi.",
     voucherToggleTitle: "Punya voucher?",
     voucherToggleDesc: "Masukkan kode jika ada",
@@ -283,8 +289,8 @@ const translations = {
     giveReviewBtn: "Leave a Review",
     reviewNote:
       "Reviews can only be submitted by buyers who have completed an order.",
-    chatAdminTitle: "Chat Admin",
-    chatAdminSub: "Support",
+    chatAdminTitle: "AE Help",
+    chatAdminSub: "Support center",
     voucherToggleTitle: "Have a voucher?",
     voucherToggleDesc: "Enter code if you have one",
     footerTagline:
@@ -365,16 +371,22 @@ const translations = {
     installAppBtn: "Install",
     detailRatingLabel: "Rating",
     detailViewBtn: "View Details",
-    adminChatHelpTitle: "Need Help?",
-    adminChatHelpDesc: "AE Game Store admin is ready to help you.",
+    adminChatHelpTitle: "Hi bro 👋 Need help?",
+    adminChatHelpDesc: "Fast support for orders, payments, and keys.",
     adminChatOnline: "Online now",
     adminChatEstimate: "Estimated reply 1–5 minutes",
-    adminChatTelegramTitle: "Chat via Telegram",
-    adminChatTelegramDesc: "Orders, complaints, or quick support",
-    adminChatHistoryTitle: "Check Order History",
-    adminChatHistoryDesc: "View your order status",
-    adminChatGuideTitle: "View Buying Guide",
-    adminChatGuideDesc: "Quick guide before ordering",
+    adminChatTelegramTitle: "Chat Telegram",
+    adminChatTelegramDesc: "Orders / quick support",
+    adminChatHistoryTitle: "Check Order",
+    adminChatHistoryDesc: "Status & history",
+    adminChatGuideTitle: "How to Buy",
+    adminChatGuideDesc: "Quick guide",
+    adminChatStatusTitle: "Status: Admin Online",
+    adminChatStatusDesc: "Auto delivery & payment gateway active.",
+    adminChatQuestionTitle: "Ask a question",
+    adminChatQuestionDesc: "Chat admin via Telegram for quick support.",
+    adminChatTermsTitle: "Terms",
+    adminChatTermsDesc: "Refund & policy",
     adminChatNote: "Include your Order ID when asking about a transaction.",
   },
 };
@@ -4492,6 +4504,7 @@ function setupAdminChatPopup() {
   const closeBtn = document.getElementById("adminChatClose");
   const backdrop = document.getElementById("adminChatBackdrop");
   const guideBtn = document.getElementById("adminChatGuideBtn");
+  const termsBtn = document.getElementById("adminChatTermsBtn");
 
   if (!btn || !sheet) return;
   sheet.setAttribute("inert", "");
@@ -4535,6 +4548,14 @@ function setupAdminChatPopup() {
 
     if (typeof showGuide === "function") {
       showGuide();
+    }
+  });
+
+  termsBtn?.addEventListener("click", () => {
+    closeAdminChat();
+
+    if (typeof showTermsPolicy === "function") {
+      showTermsPolicy();
     }
   });
 

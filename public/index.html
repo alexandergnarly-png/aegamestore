@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/style.css?v=20260618-platform-android-ios-v2" />
+    <link rel="stylesheet" href="/style.css?v=20260618-ae-help-center-v1" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#f4f3ee" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -938,105 +938,119 @@
 
     <button
       type="button"
-      class="floating-admin-btn"
+      class="floating-admin-btn ae-help-fab"
       id="chatAdminBtn"
-      aria-label="Buka bantuan admin"
+      aria-label="Buka AE Help Center"
+      aria-haspopup="dialog"
+      aria-controls="adminChatSheet"
     >
-      <span class="floating-admin-icon" aria-hidden="true">?</span>
-      <span class="floating-admin-content">
-        <strong data-i18n="chatAdminTitle">Chat Admin</strong>
-        <small data-i18n="chatAdminSub">Fast response</small>
+      <span class="floating-admin-icon ae-help-fab-icon" aria-hidden="true">
+        <iconify-icon icon="ph:chat-circle-dots-bold"></iconify-icon>
       </span>
-      <span class="floating-admin-badge" aria-hidden="true"></span>
-      <span class="floating-admin-online" aria-hidden="true"></span>
+      <span class="floating-admin-content ae-help-fab-copy">
+        <strong data-i18n="chatAdminTitle">AE Help</strong>
+        <small data-i18n="chatAdminSub">Support center</small>
+      </span>
+      <span class="floating-admin-online ae-help-fab-online" aria-hidden="true"></span>
     </button>
 
-    <div class="admin-chat-sheet" id="adminChatSheet" aria-hidden="true">
-      <div class="admin-chat-backdrop" id="adminChatBackdrop"></div>
+    <div class="admin-chat-sheet ae-help-sheet" id="adminChatSheet" aria-hidden="true">
+      <div class="admin-chat-backdrop ae-help-backdrop" id="adminChatBackdrop"></div>
 
       <div
-        class="admin-chat-card"
+        class="admin-chat-card ae-help-card"
         role="dialog"
         aria-modal="true"
         aria-labelledby="adminChatTitle"
       >
         <button
           type="button"
-          class="admin-chat-close"
+          class="admin-chat-close ae-help-close"
           id="adminChatClose"
-          aria-label="Tutup bantuan admin"
+          aria-label="Tutup AE Help Center"
         >
           ×
         </button>
 
-        <div class="admin-chat-head">
-          <div class="admin-chat-avatar">•</div>
-          <div>
+        <header class="ae-help-hero">
+          <div class="ae-help-logo" aria-hidden="true">AE</div>
+          <div class="ae-help-hero-copy">
+            <span class="ae-help-kicker">AE GAME STORE</span>
             <h3 id="adminChatTitle" data-i18n="adminChatHelpTitle">
-              Butuh Bantuan?
+              Hi bro 👋<br />Butuh bantuan?
             </h3>
             <p data-i18n="adminChatHelpDesc">
-              Admin AE Game Store siap bantu kamu.
+              Support cepat untuk order, pembayaran, dan key.
             </p>
+          </div>
+        </header>
+
+        <div class="ae-help-status-card">
+          <span class="ae-help-status-icon" aria-hidden="true">
+            <iconify-icon icon="ph:check-bold"></iconify-icon>
+          </span>
+          <div>
+            <strong data-i18n="adminChatStatusTitle">Status: Admin Online</strong>
+            <small data-i18n="adminChatStatusDesc">
+              Auto delivery & payment gateway aktif.
+            </small>
           </div>
         </div>
 
-        <div class="admin-chat-status">
-          <span class="admin-chat-dot"></span>
-          <strong data-i18n="adminChatOnline">Online sekarang</strong>
-          <small data-i18n="adminChatEstimate"
-            >Estimasi balasan 1–5 menit</small
-          >
-        </div>
+        <a
+          href="https://t.me/aegamestore"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="ae-help-question-card"
+        >
+          <div>
+            <strong data-i18n="adminChatQuestionTitle">Ask a question</strong>
+            <small data-i18n="adminChatQuestionDesc">
+              Chat admin via Telegram untuk bantuan cepat.
+            </small>
+          </div>
+          <div class="ae-help-agent-stack" aria-hidden="true">
+            <span>A</span>
+            <span>E</span>
+          </div>
+        </a>
 
-        <div class="admin-chat-actions">
+        <div class="ae-help-grid" aria-label="Menu bantuan cepat">
           <a
             href="https://t.me/aegamestore"
             target="_blank"
             rel="noopener noreferrer"
-            class="admin-chat-action primary"
+            class="ae-help-tile ae-help-tile-primary"
           >
-            <span>@</span>
-            <div>
-              <strong data-i18n="adminChatTelegramTitle"
-                >Chat via Telegram</strong
-              >
-              <small data-i18n="adminChatTelegramDesc"
-                >Order, komplain, atau bantuan cepat</small
-              >
-            </div>
+            <span aria-hidden="true"><iconify-icon icon="logos:telegram"></iconify-icon></span>
+            <strong data-i18n="adminChatTelegramTitle">Chat Telegram</strong>
+            <small data-i18n="adminChatTelegramDesc">Order / komplain cepat</small>
           </a>
 
-          <a href="/account.html" class="admin-chat-action">
-            <span>#</span>
-            <div>
-              <strong data-i18n="adminChatHistoryTitle"
-                >Cek Riwayat Pesanan</strong
-              >
-              <small data-i18n="adminChatHistoryDesc"
-                >Lihat status order kamu</small
-              >
-            </div>
+          <a href="/account.html" class="ae-help-tile">
+            <span aria-hidden="true"><iconify-icon icon="ph:receipt-bold"></iconify-icon></span>
+            <strong data-i18n="adminChatHistoryTitle">Cek Order</strong>
+            <small data-i18n="adminChatHistoryDesc">Status & riwayat</small>
           </a>
 
-          <button
-            type="button"
-            class="admin-chat-action"
-            id="adminChatGuideBtn"
-          >
-            <span>i</span>
-            <div>
-              <strong data-i18n="adminChatGuideTitle">Lihat How it works</strong>
-              <small data-i18n="adminChatGuideDesc"
-                >Panduan singkat sebelum order</small
-              >
-            </div>
+          <button type="button" class="ae-help-tile" id="adminChatGuideBtn">
+            <span aria-hidden="true"><iconify-icon icon="ph:book-open-text-bold"></iconify-icon></span>
+            <strong data-i18n="adminChatGuideTitle">Cara Beli</strong>
+            <small data-i18n="adminChatGuideDesc">Panduan singkat</small>
+          </button>
+
+          <button type="button" class="ae-help-tile" id="adminChatTermsBtn">
+            <span aria-hidden="true"><iconify-icon icon="ph:shield-check-bold"></iconify-icon></span>
+            <strong data-i18n="adminChatTermsTitle">Terms</strong>
+            <small data-i18n="adminChatTermsDesc">Refund & ketentuan</small>
           </button>
         </div>
 
-        <p class="admin-chat-note" data-i18n="adminChatNote">
-          Sertakan Order ID kalau bertanya soal transaksi.
-        </p>
+        <div class="ae-help-note-wrap">
+          <p class="admin-chat-note ae-help-note" data-i18n="adminChatNote">
+            Sertakan Order ID kalau bertanya soal transaksi.
+          </p>
+        </div>
       </div>
     </div>
 
@@ -1436,6 +1450,6 @@
       })();
     </script>
 
-    <script src="/script.js?v=20260618-platform-android-ios-v2" defer></script>
+    <script src="/script.js?v=20260618-ae-help-center-v1" defer></script>
   </body>
 </html>
