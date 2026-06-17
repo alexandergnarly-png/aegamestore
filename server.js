@@ -3643,20 +3643,21 @@ app.post("/keys/bulk", requireAdminAuth, requireAdminCsrf, async (req, res) => {
 app.get("/products", requireAdminAuth, async (req, res) => {
   try {
     const result = await query(`
-  SELECT *,
-    COALESCE(NULLIF(platform, ''), 'android') AS platform,
+  SELECT
+    products.*,
+    COALESCE(NULLIF(products.platform, ''), 'android') AS platform,
     CASE
-      WHEN LOWER(duration) LIKE '%jam%' THEN
-        COALESCE(NULLIF(regexp_replace(duration, '[^0-9]', '', 'g'), '')::int, 0)
-      WHEN LOWER(duration) LIKE '%hari%' THEN
-        COALESCE(NULLIF(regexp_replace(duration, '[^0-9]', '', 'g'), '')::int, 0) * 24
-      WHEN LOWER(duration) LIKE '%bulan%' THEN
-        COALESCE(NULLIF(regexp_replace(duration, '[^0-9]', '', 'g'), '')::int, 0) * 24 * 30
+      WHEN LOWER(products.duration) LIKE '%jam%' THEN
+        COALESCE(NULLIF(regexp_replace(products.duration, '[^0-9]', '', 'g'), '')::int, 0)
+      WHEN LOWER(products.duration) LIKE '%hari%' THEN
+        COALESCE(NULLIF(regexp_replace(products.duration, '[^0-9]', '', 'g'), '')::int, 0) * 24
+      WHEN LOWER(products.duration) LIKE '%bulan%' THEN
+        COALESCE(NULLIF(regexp_replace(products.duration, '[^0-9]', '', 'g'), '')::int, 0) * 24 * 30
       ELSE
         999999
     END AS duration_order
   FROM products
-  ORDER BY game ASC, platform ASC, brand ASC, duration_order ASC, price ASC, id ASC
+  ORDER BY products.game ASC, COALESCE(NULLIF(products.platform, ''), 'android') ASC, products.brand ASC, duration_order ASC, products.price ASC, products.id ASC
 `);
 
     return res.json(result.rows);
@@ -4005,7 +4006,7 @@ app.get("/public-products", async (req, res) => {
   LEFT JOIN keys k ON k.product_id = p.id
   WHERE p.active = 1
   GROUP BY p.id
-  ORDER BY p.game ASC, platform ASC, p.brand ASC, duration_order ASC, p.price ASC, p.id ASC
+  ORDER BY p.game ASC, COALESCE(NULLIF(p.platform, ''), 'android') ASC, p.brand ASC, duration_order ASC, p.price ASC, p.id ASC
 `);
 
     return res.json(result.rows);
