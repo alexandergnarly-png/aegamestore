@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/style.css?v=20260618-ae-help-center-v1" />
+    <link rel="stylesheet" href="/style.css?v=20260618-compact-sort-v1" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#f4f3ee" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -640,15 +640,55 @@
                   hidden
                 ></div>
               </div>
-              <div class="sort-control">
-                <label
-                  class="sort-label"
-                  for="sortSelect"
-                  data-i18n="sortLabel"
-                >
+              <div class="sort-control sort-chip-control">
+                <span class="sort-label" data-i18n="sortLabel">
                   Urutkan
-                </label>
-                <select id="sortSelect" aria-label="Urutkan game">
+                </span>
+                <div
+                  class="sort-chip-list"
+                  id="sortChipList"
+                  role="listbox"
+                  aria-label="Urutkan game"
+                >
+                  <button
+                    type="button"
+                    class="sort-chip"
+                    data-sort-value="default"
+                    data-i18n="sortDefault"
+                  >
+                    Rekomendasi
+                  </button>
+                  <button
+                    type="button"
+                    class="sort-chip"
+                    data-sort-value="price-asc"
+                    data-i18n="sortCheapest"
+                  >
+                    Termurah
+                  </button>
+                  <button
+                    type="button"
+                    class="sort-chip"
+                    data-sort-value="az"
+                    data-i18n="sortAZ"
+                  >
+                    A–Z
+                  </button>
+                  <button
+                    type="button"
+                    class="sort-chip"
+                    data-sort-value="stock"
+                    data-i18n="sortStock"
+                  >
+                    Stok Terbanyak
+                  </button>
+                </div>
+                <select
+                  id="sortSelect"
+                  class="sort-select-fallback"
+                  aria-label="Urutkan game"
+                  tabindex="-1"
+                >
                   <option value="default" data-i18n="sortDefault">
                     Rekomendasi
                   </option>
@@ -1450,6 +1490,6 @@
       })();
     </script>
 
-    <script src="/script.js?v=20260618-ae-help-center-v1" defer></script>
+    <script src="/script.js?v=20260618-compact-sort-v1" defer></script>
   </body>
 </html>

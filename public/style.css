@@ -12257,3 +12257,172 @@ body.dark-theme .ae-help-note-wrap {
     display: none !important;
   }
 }
+
+/* Compact sort chips — mobile friendly catalog toolbar v1 */
+.search-dropdown:empty {
+  display: none !important;
+}
+
+.sort-chip-control {
+  position: relative;
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  border: 1px solid rgba(12, 26, 46, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 10px 26px rgba(12, 26, 46, 0.055);
+  overflow: hidden;
+}
+
+body.dark-theme .sort-chip-control {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(20, 30, 56, 0.72);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22);
+}
+
+.sort-chip-control .sort-label {
+  flex: 0 0 auto;
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 11px;
+  border-radius: 999px;
+  background: rgba(12, 26, 46, 0.055);
+  color: rgba(12, 26, 46, 0.72);
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+body.dark-theme .sort-chip-control .sort-label {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.sort-chip-list {
+  min-width: 0;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sort-chip-list::-webkit-scrollbar {
+  display: none;
+}
+
+.sort-chip {
+  flex: 0 0 auto;
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 13px;
+  border: 1px solid rgba(12, 26, 46, 0.1);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.62);
+  color: var(--text-strong);
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+
+.sort-chip:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.sort-chip.active {
+  border-color: #0c1a2e;
+  background: #0c1a2e;
+  color: #ffffff;
+}
+
+body.dark-theme .sort-chip {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-strong);
+}
+
+body.dark-theme .sort-chip:hover {
+  background: rgba(255, 255, 255, 0.11);
+}
+
+body.dark-theme .sort-chip.active {
+  border-color: rgba(56, 189, 248, 0.56);
+  background: rgba(56, 189, 248, 0.92);
+  color: #04111f;
+}
+
+.sort-select-fallback {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+@media (max-width: 768px) {
+  .catalog-toolbar {
+    gap: 10px;
+    padding: 14px;
+  }
+
+  .catalog-toolbar-right {
+    gap: 8px;
+  }
+
+  .sort-chip-control {
+    width: 100% !important;
+    min-height: 44px !important;
+    padding: 5px !important;
+    border-radius: 18px !important;
+    align-self: stretch !important;
+  }
+
+  .sort-chip-control .sort-label {
+    min-height: 32px !important;
+    padding: 0 10px !important;
+    font-size: 9.5px !important;
+    letter-spacing: 0.06em !important;
+  }
+
+  .sort-chip-list {
+    gap: 5px;
+    padding-right: 2px;
+  }
+
+  .sort-chip {
+    min-height: 32px;
+    padding: 0 12px;
+    font-size: 11.5px;
+  }
+}
+
+@media (max-width: 380px) {
+  .sort-chip-control .sort-label {
+    max-width: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .sort-chip {
+    padding: 0 11px;
+    font-size: 11px;
+  }
+}
+

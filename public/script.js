@@ -2944,14 +2944,42 @@ document.addEventListener("DOMContentLoaded", () => {
 // --- CATALOG ENHANCEMENTS (sort, shortcuts, recent rail, modal step tracking) ---
 document.addEventListener("DOMContentLoaded", () => {
   const sortSelect = document.getElementById("sortSelect");
-  if (sortSelect) {
-    sortSelect.value = currentSort;
-    sortSelect.addEventListener("change", () => {
-      currentSort = sortSelect.value || "default";
-      localStorage.setItem("ae_sort", currentSort);
-      renderGames();
+  const sortChips = Array.from(
+    document.querySelectorAll(".sort-chip[data-sort-value]"),
+  );
+
+  function syncSortControls(value = currentSort) {
+    if (sortSelect) {
+      sortSelect.value = value;
+    }
+
+    sortChips.forEach((chip) => {
+      const isActive = chip.dataset.sortValue === value;
+      chip.classList.toggle("active", isActive);
+      chip.setAttribute("aria-selected", isActive ? "true" : "false");
     });
   }
+
+  function applySort(value) {
+    currentSort = value || "default";
+    localStorage.setItem("ae_sort", currentSort);
+    syncSortControls(currentSort);
+    renderGames();
+  }
+
+  syncSortControls(currentSort);
+
+  if (sortSelect) {
+    sortSelect.addEventListener("change", () => {
+      applySort(sortSelect.value || "default");
+    });
+  }
+
+  sortChips.forEach((chip) => {
+    chip.addEventListener("click", () => {
+      applySort(chip.dataset.sortValue || "default");
+    });
+  });
 
   const recentClearBtn = document.getElementById("recentViewedClear");
   if (recentClearBtn) {
