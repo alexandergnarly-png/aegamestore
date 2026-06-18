@@ -12163,13 +12163,14 @@ body.dark-theme .ae-help-note-wrap {
 
 @media (max-width: 768px) {
   .ae-help-fab {
-    right: 16px !important;
-    bottom: calc(86px + env(safe-area-inset-bottom)) !important;
+    right: 14px !important;
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px)) !important;
     min-width: 54px !important;
     width: 54px !important;
     height: 54px !important;
     padding: 7px !important;
     border-radius: 22px !important;
+    z-index: 950 !important;
   }
 
   .ae-help-fab-copy {
@@ -12239,5 +12240,20 @@ body.dark-theme .ae-help-note-wrap {
 
   .ae-help-tile {
     min-height: 78px;
+  }
+}
+
+
+/* AE Help Center FAB position fix — align with back-to-top on compact mobile */
+@media (max-width: 640px) {
+  .ae-help-fab {
+    right: 18px !important;
+    bottom: calc(18px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  body.order-modal-open .ae-help-fab,
+  body.swal2-shown .ae-help-fab,
+  body:has(.payment-modal.show) .ae-help-fab {
+    display: none !important;
   }
 }
