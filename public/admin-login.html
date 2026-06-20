@@ -447,14 +447,229 @@
         *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
       }
 
+
+      /* AE patch 20260621-admin-login-mobile-polish-v1
+         Compact mobile polish for admin login. */
+      .admin-login-version {
+        display: none;
+      }
+
+      @media (max-width: 640px) {
+        body {
+          padding: max(10px, env(safe-area-inset-top)) 10px max(12px, env(safe-area-inset-bottom));
+        }
+
+        .top-bar {
+          width: min(420px, 100%);
+          min-height: 52px;
+          margin-bottom: 10px;
+          padding: 7px;
+          border-radius: 24px;
+        }
+
+        .brand-link {
+          width: 40px !important;
+          min-width: 40px;
+          height: 38px;
+          justify-content: center;
+          padding: 0 !important;
+          border: 1px solid var(--line);
+          background: var(--surface);
+        }
+
+        .brand-link span {
+          display: none !important;
+        }
+
+        .controls {
+          gap: 6px;
+        }
+
+        .lang-group {
+          padding: 3px;
+          gap: 3px;
+        }
+
+        .lang-btn,
+        .icon-btn {
+          height: 32px;
+          min-width: 32px;
+          font-size: 11px;
+        }
+
+        .lang-btn {
+          padding: 0 10px;
+        }
+
+        .login-wrapper {
+          width: min(420px, 100%);
+        }
+
+        .card {
+          padding: 13px;
+          border-radius: 28px;
+        }
+
+        .card-inner {
+          gap: 13px;
+        }
+
+        .auth-head {
+          padding: 3px 4px 0;
+        }
+
+        .lock-pill {
+          min-height: 30px;
+          margin-bottom: 10px;
+          padding: 6px 10px;
+          font-size: 9.5px;
+          letter-spacing: 0.07em;
+        }
+
+        .logo-badge {
+          width: 50px;
+          height: 50px;
+          border-radius: 18px;
+          margin-bottom: 10px;
+          font-size: 16px;
+        }
+
+        .card h2 {
+          font-size: 28px;
+          letter-spacing: -0.065em;
+        }
+
+        .subtitle {
+          max-width: 29ch;
+          margin-top: 7px;
+          font-size: 12px;
+          line-height: 1.55;
+        }
+
+        .form-grid {
+          gap: 12px;
+        }
+
+        .input-label {
+          margin-bottom: 6px;
+          font-size: 10px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+          min-height: 50px;
+          border-radius: 17px;
+          font-size: 13.5px;
+        }
+
+        .row-between {
+          margin-top: -1px;
+          gap: 8px;
+        }
+
+        .remember {
+          font-size: 12.5px;
+        }
+
+        .link {
+          color: var(--muted);
+          font-size: 12.5px;
+          font-weight: 800;
+          text-decoration-thickness: 1px;
+        }
+
+        .submit-btn {
+          min-height: 52px;
+          margin-top: 0;
+          border-radius: 17px;
+          font-size: 13.5px;
+        }
+
+        .footer {
+          margin-top: 12px;
+          padding: 12px;
+          border-radius: 17px;
+          font-size: 10px;
+        }
+
+        .footer-sub {
+          font-size: 10.5px;
+        }
+      }
+
+      @media (max-width: 360px) {
+        .card {
+          padding: 12px;
+          border-radius: 26px;
+        }
+
+        .card h2 {
+          font-size: 26px;
+        }
+
+        .subtitle {
+          font-size: 11.5px;
+        }
+
+        .lock-pill {
+          font-size: 9px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+          min-height: 48px;
+        }
+
+        .submit-btn {
+          min-height: 50px;
+        }
+      }
+
+
+      /* AE patch 20260621-admin-login-back-button-fix-v2
+         Fix back button: i18n must not replace the whole anchor content. */
+      .brand-link {
+        white-space: nowrap;
+        overflow: hidden;
+      }
+
+      .brand-link iconify-icon {
+        flex: 0 0 auto;
+      }
+
+      @media (max-width: 768px) {
+        .brand-link {
+          width: 40px !important;
+          min-width: 40px !important;
+          height: 38px !important;
+          padding: 0 !important;
+          justify-content: center !important;
+          border: 1px solid var(--line) !important;
+          background: var(--surface) !important;
+          font-size: 0 !important;
+          line-height: 0 !important;
+        }
+
+        .brand-link span {
+          display: none !important;
+        }
+
+        .brand-link iconify-icon {
+          display: inline-flex !important;
+          font-size: 18px !important;
+          line-height: 1 !important;
+        }
+      }
+
     </style>
   </head>
 
   <body class="auto-dark">
+    <span style="display:none">20260621-admin-login-back-button-fix-v2</span>
     <div class="top-bar">
-      <a href="/" class="brand-link" data-i18n="backHome" aria-label="Kembali ke beranda">
+      <a href="/" class="brand-link" aria-label="Kembali ke beranda">
         <iconify-icon icon="solar:arrow-left-linear" aria-hidden="true"></iconify-icon>
-        <span>Kembali ke beranda</span>
+        <span data-i18n="backHome">Kembali ke beranda</span>
       </a>
       <div class="controls">
         <div class="lang-group" role="group" aria-label="Language">
