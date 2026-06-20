@@ -3166,7 +3166,6 @@ function showTelegramPopup() {
       color: document.body.classList.contains("dark-theme")
         ? "#f8fafc"
         : "#0c4a6e",
-      borderRadius: "28px",
       backdrop: "rgba(12, 74, 110, 0.4)",
     }).then((result) => {
       if (result.isConfirmed) {
