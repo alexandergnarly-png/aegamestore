@@ -741,6 +741,206 @@ async function buildVipStoreProductSnapshot(deliveryType, supplierProductId) {
     };
   }
 }
+
+
+async function syncVipStoreMappedProducts(options = {}) {
+  const rawProductIds = Array.isArray(options.productIds)
+    ? options.productIds
+    : options.productId
+      ? [options.productId]
+      : [];
+
+  const productIds = [
+    ...new Set(
+      rawProductIds
+        .map((entry) => Number(entry))
+        .filter((entry) => Number.isInteger(entry) && entry > 0),
+    ),
+  ];
+
+  const params = [];
+  let productFilter = "";
+
+  if (productIds.length) {
+    params.push(productIds);
+    productFilter = ` AND id = ANY($${params.length}::int[])`;
+  }
+
+  const mappedProductsResult = await query(
+    `
+    SELECT id, supplier_product_id
+    FROM products
+    WHERE LOWER(COALESCE(delivery_type, 'auto')) = 'vipstore_api'
+      AND COALESCE(NULLIF(supplier_product_id, ''), '') <> ''
+      ${productFilter}
+    ORDER BY id ASC
+    `,
+    params,
+  );
+
+  const mappedProducts = mappedProductsResult.rows || [];
+
+  if (!mappedProducts.length) {
+    return {
+      synced: 0,
+      total_mapped: 0,
+      ready: 0,
+      out_of_stock: 0,
+      maintenance: 0,
+      hidden: 0,
+      not_found: 0,
+      failed: 0,
+      message: productIds.length
+        ? "Produk ini belum dimapping ke VIP Store API."
+        : "Belum ada produk yang dimapping ke VIP Store API.",
+    };
+  }
+
+  const catalogResult = await getVipStoreCatalog();
+  const rawCatalogItems = extractVipStoreCatalogItems(catalogResult.data);
+  const normalizedCatalog = rawCatalogItems
+    .map(normalizeVipStoreCatalogProduct)
+    .filter((item) => item.product_id);
+
+  const catalogById = new Map(
+    normalizedCatalog.map((item) => [String(item.product_id), item]),
+  );
+
+  const syncedAt = new Date().toISOString();
+  const summary = {
+    synced: 0,
+    total_mapped: mappedProducts.length,
+    total_catalog_items: rawCatalogItems.length,
+    ready: 0,
+    out_of_stock: 0,
+    maintenance: 0,
+    hidden: 0,
+    not_found: 0,
+    failed: 0,
+    synced_at: syncedAt,
+  };
+
+  for (const mappedProduct of mappedProducts) {
+    const supplierProductId = String(mappedProduct.supplier_product_id || "").trim();
+    const supplierProduct = catalogById.get(supplierProductId);
+
+    try {
+      if (!supplierProduct) {
+        await query(
+          `
+          UPDATE products
+          SET supplier_source = 'vipstore',
+              supplier_product_name = '',
+              supplier_price = NULL,
+              supplier_stock = 0,
+              supplier_status = 'not_found',
+              supplier_maintenance = 1,
+              supplier_maintenance_reason = 'Product ID tidak ditemukan di catalog VIP Store',
+              supplier_last_sync = $1
+          WHERE id = $2
+          `,
+          [syncedAt, mappedProduct.id],
+        );
+
+        summary.not_found += 1;
+        summary.synced += 1;
+        continue;
+      }
+
+      const status = String(supplierProduct.status || "ready").trim() || "ready";
+      const maintenanceFlag =
+        supplierProduct.is_maintenance ||
+        supplierProduct.is_hidden ||
+        status === "maintenance" ||
+        status === "hidden"
+          ? 1
+          : 0;
+
+      await query(
+        `
+        UPDATE products
+        SET supplier_source = 'vipstore',
+            supplier_product_id = $1,
+            supplier_product_name = $2,
+            supplier_price = $3,
+            supplier_stock = $4,
+            supplier_status = $5,
+            supplier_maintenance = $6,
+            supplier_maintenance_reason = $7,
+            supplier_last_sync = $8
+        WHERE id = $9
+        `,
+        [
+          supplierProduct.product_id,
+          supplierProduct.name,
+          supplierProduct.price,
+          supplierProduct.stock,
+          status,
+          maintenanceFlag,
+          supplierProduct.maintenance_reason || "",
+          syncedAt,
+          mappedProduct.id,
+        ],
+      );
+
+      if (status === "ready") summary.ready += 1;
+      else if (status === "out_of_stock") summary.out_of_stock += 1;
+      else if (status === "maintenance") summary.maintenance += 1;
+      else if (status === "hidden") summary.hidden += 1;
+
+      summary.synced += 1;
+    } catch (err) {
+      summary.failed += 1;
+      console.error("ERROR SYNC VIPSTORE PRODUCT:", {
+        product_id: mappedProduct.id,
+        supplier_product_id: supplierProductId,
+        error: err.message,
+      });
+    }
+  }
+
+  summary.message = `Sync VIP Store selesai: ${summary.synced}/${summary.total_mapped} produk diproses.`;
+  return summary;
+}
+
+let vipStoreAutoSyncRunning = false;
+
+async function runVipStoreAutoSync(reason = "interval") {
+  if (!isVipStoreConfigured() || vipStoreAutoSyncRunning) return;
+
+  vipStoreAutoSyncRunning = true;
+  try {
+    const result = await syncVipStoreMappedProducts();
+    if (Number(result.total_mapped || 0) > 0) {
+      console.log("VIPSTORE AUTO SYNC:", reason, result.message);
+    }
+  } catch (err) {
+    console.error("VIPSTORE AUTO SYNC ERROR:", err.message);
+  } finally {
+    vipStoreAutoSyncRunning = false;
+  }
+}
+
+function startVipStoreAutoSync() {
+  if (process.env.VIPSTORE_AUTO_SYNC === "false") {
+    console.log("VIP Store auto sync disabled by VIPSTORE_AUTO_SYNC=false");
+    return;
+  }
+
+  const intervalMs = Math.max(
+    Number(process.env.VIPSTORE_SYNC_INTERVAL_MS || 5 * 60 * 1000),
+    60 * 1000,
+  );
+
+  setTimeout(() => runVipStoreAutoSync("startup"), 30 * 1000);
+
+  const timer = setInterval(() => runVipStoreAutoSync("interval"), intervalMs);
+  if (typeof timer.unref === "function") timer.unref();
+
+  console.log(`VIP Store auto sync ready every ${Math.round(intervalMs / 1000)}s`);
+}
+
+
 db.query(
   `
   CREATE TABLE IF NOT EXISTS reviews (
@@ -2155,8 +2355,9 @@ app.get("/api/admin/vipstore/status", requireAdminAuth, async (req, res) => {
       balance: "/api/admin/vipstore/balance",
       product_lookup: "/api/admin/vipstore/product/:productId",
       catalog_picker: "/api/admin/vipstore/catalog-normalized",
+      sync_products: "/api/admin/vipstore/sync-products",
     },
-    note: "Step 2 supports product mapping. Buyer checkout is not changed yet.",
+    note: "Step 3 supports supplier stock sync. Buyer checkout auto-claim is not changed yet.",
   });
 });
 
@@ -2290,6 +2491,63 @@ app.get("/api/admin/vipstore/balance", requireAdminAuth, async (req, res) => {
       ok: false,
       code: err.code || "VIPSTORE_ERROR",
       message: err.message || "Gagal mengambil balance VIP Store",
+    });
+  }
+});
+
+
+
+app.post("/api/admin/vipstore/sync-products", requireAdminAuth, requireAdminCsrf, async (req, res) => {
+  try {
+    const productIds = Array.isArray(req.body?.product_ids)
+      ? req.body.product_ids
+      : req.body?.product_id
+        ? [req.body.product_id]
+        : [];
+
+    const result = await syncVipStoreMappedProducts({ productIds });
+
+    return res.json({
+      ok: true,
+      ...result,
+    });
+  } catch (err) {
+    console.error("ERROR VIPSTORE SYNC PRODUCTS:", err);
+    const statusCode = err.code === "VIPSTORE_NOT_CONFIGURED" ? 503 : 502;
+
+    return res.status(statusCode).json({
+      ok: false,
+      code: err.code || "VIPSTORE_SYNC_ERROR",
+      message: err.message || "Gagal sync stok VIP Store",
+    });
+  }
+});
+
+app.post("/api/admin/vipstore/sync-products/:productId", requireAdminAuth, requireAdminCsrf, async (req, res) => {
+  try {
+    const productId = Number(req.params.productId);
+
+    if (!Number.isInteger(productId) || productId <= 0) {
+      return res.status(400).json({
+        ok: false,
+        message: "ID produk tidak valid",
+      });
+    }
+
+    const result = await syncVipStoreMappedProducts({ productId });
+
+    return res.json({
+      ok: true,
+      ...result,
+    });
+  } catch (err) {
+    console.error("ERROR VIPSTORE SYNC SINGLE PRODUCT:", err);
+    const statusCode = err.code === "VIPSTORE_NOT_CONFIGURED" ? 503 : 502;
+
+    return res.status(statusCode).json({
+      ok: false,
+      code: err.code || "VIPSTORE_SYNC_ERROR",
+      message: err.message || "Gagal sync stok produk VIP Store",
     });
   }
 });
@@ -4795,6 +5053,19 @@ app.get("/public-products", async (req, res) => {
     COALESCE(p.play_status, 'safe') AS play_status,
     CASE
       WHEN LOWER(COALESCE(p.delivery_type, 'auto')) = 'manual' THEN 9999
+      WHEN LOWER(COALESCE(p.delivery_type, 'auto')) = 'vipstore_api' THEN
+        CASE
+          WHEN COALESCE(p.supplier_maintenance, 0) = 1 THEN 0
+          WHEN LOWER(COALESCE(p.supplier_status, '')) IN (
+            'maintenance',
+            'hidden',
+            'not_found',
+            'lookup_failed',
+            'not_configured',
+            'mapped_pending'
+          ) THEN 0
+          ELSE GREATEST(COALESCE(p.supplier_stock, 0), 0)
+        END
       ELSE COUNT(k.id) FILTER (WHERE k.used = 0)::int
     END AS available_keys,
     CASE
@@ -5845,4 +6116,5 @@ app.get("/admin-sessions", requireAdminAuth, async (req, res) => {
 
 app.listen(port, () => {
   console.log("Server jalan di port", port);
+  startVipStoreAutoSync();
 });

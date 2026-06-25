@@ -2651,6 +2651,9 @@
               <button class="ghost-btn" onclick="loadProducts()">
                 Refresh Produk
               </button>
+              <button class="ghost-btn" onclick="syncVipStoreProducts()">
+                Sync VIP Stock
+              </button>
             </div>
           </div>
 
@@ -3994,79 +3997,6 @@
         document.getElementById("supplierPickerBackdrop")?.classList.remove("show");
       }
 
-
-      function getSupplierPickerTermAliases(term) {
-        const value = normalizeSupplierSearchText(term);
-        const aliases = new Set([value]);
-
-        if (value === "hari") {
-          aliases.add("day");
-          aliases.add("days");
-        }
-
-        if (value === "day" || value === "days") {
-          aliases.add("hari");
-        }
-
-        if (value === "delta" || value === "force" || value === "dfm") {
-          aliases.add("dfm");
-          aliases.add("delta");
-          aliases.add("force");
-        }
-
-        if (value === "aorus") {
-          aliases.add("aorus");
-          aliases.add("phantom");
-          aliases.add("dfm");
-        }
-
-        if (value === "android") {
-          aliases.add("android");
-          aliases.add("apk");
-        }
-
-        if (value === "ios") {
-          aliases.add("ios");
-          aliases.add("iphone");
-          aliases.add("ipad");
-          aliases.add("ipa");
-          aliases.add("testflight");
-        }
-
-        return Array.from(aliases).filter(Boolean);
-      }
-
-      function scoreSupplierPickerItem(item, terms) {
-        if (!terms.length) return 1;
-
-        const haystack = normalizeSupplierSearchText(
-          [
-            item.product_id,
-            item.name,
-            item.category,
-            item.duration,
-            item.status,
-            item.stock,
-            item.price,
-          ].join(" "),
-        );
-
-        let score = 0;
-
-        terms.forEach((term) => {
-          const aliases = getSupplierPickerTermAliases(term);
-          if (aliases.some((alias) => haystack.includes(alias))) {
-            score += 2;
-          }
-
-          if (String(item.product_id || "") === term) {
-            score += 6;
-          }
-        });
-
-        return score;
-      }
-
       function renderVipStoreProductPicker() {
         const listEl = document.getElementById("supplierPickerList");
         const statusEl = document.getElementById("supplierPickerStatus");
@@ -4080,12 +4010,22 @@
 
         let items = [...vipStorePickerItems];
 
-        items = items
-          .map((item) => ({
-            ...item,
-            __pickerScore: scoreSupplierPickerItem(item, terms),
-          }))
-          .filter((item) => !terms.length || item.__pickerScore > 0);
+        if (terms.length) {
+          items = items.filter((item) => {
+            const haystack = normalizeSupplierSearchText(
+              [
+                item.product_id,
+                item.name,
+                item.category,
+                item.duration,
+                item.status,
+                item.stock,
+                item.price,
+              ].join(" "),
+            );
+            return terms.every((term) => haystack.includes(term));
+          });
+        }
 
         items.sort((a, b) => {
           const aPlatform = detectSupplierPlatform(a);
@@ -4093,10 +4033,6 @@
           const aPlatformScore = aPlatform === localPlatform ? 0 : aPlatform ? 1 : 2;
           const bPlatformScore = bPlatform === localPlatform ? 0 : bPlatform ? 1 : 2;
           if (aPlatformScore !== bPlatformScore) return aPlatformScore - bPlatformScore;
-
-          if ((b.__pickerScore || 0) !== (a.__pickerScore || 0)) {
-            return (b.__pickerScore || 0) - (a.__pickerScore || 0);
-          }
 
           const statusRank = { ready: 0, out_of_stock: 1, maintenance: 2, hidden: 3 };
           const aStatus = statusRank[a.status] ?? 9;
@@ -4116,7 +4052,7 @@
         }
 
         if (!visibleItems.length) {
-          listEl.innerHTML = `<div class="supplier-picker-empty">Tidak ada produk cocok. Coba kata lain: dfm, phantom, android, ios, pubg, 1 day.</div>`;
+          listEl.innerHTML = `<div class="supplier-picker-empty">Tidak ada produk cocok. Coba kata lain: dfm, phantom, android, ios, 1 day.</div>`;
           return;
         }
 
@@ -6472,6 +6408,54 @@
         }
       }
 
+
+
+      async function syncVipStoreProducts(productId = null) {
+        const isSingle = Number(productId || 0) > 0;
+        const confirmText = isSingle
+          ? "Sync stok supplier untuk produk ini sekarang?"
+          : "Sync semua stok produk VIP Store sekarang?";
+
+        if (!confirm(confirmText)) return;
+
+        try {
+          const url = isSingle
+            ? `/api/admin/vipstore/sync-products/${Number(productId)}`
+            : "/api/admin/vipstore/sync-products";
+
+          const res = await fetch(url, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-csrf-token": getCsrfToken(),
+            },
+            body: JSON.stringify({}),
+          });
+
+          const data = await res.json();
+
+          if (res.status === 401) {
+            window.location.href = "/ae-auth";
+            return;
+          }
+
+          if (!res.ok || data.ok === false) {
+            Swal.fire("Sync gagal", data.message || "Gagal sync VIP Store", "error");
+            return;
+          }
+
+          Swal.fire(
+            "Sync selesai",
+            `${data.message || "Stok supplier berhasil disync."}\nReady: ${data.ready || 0}, Out: ${data.out_of_stock || 0}, Maintenance: ${data.maintenance || 0}, Not found: ${data.not_found || 0}`,
+            "success",
+          );
+
+          loadProducts();
+        } catch (err) {
+          Swal.fire("Sync gagal", "Terjadi error saat sync stok VIP Store.", "error");
+        }
+      }
+
       function populateProductFilters(products) {
         const gameFilter = document.getElementById("productGameFilter");
         const brandFilter = document.getElementById("productBrandFilter");
@@ -6639,6 +6623,7 @@
 <td>${activeBadge(item.active)}</td>
 <td>
   <button onclick='editProduct(${item.id}, ${safeGame}, ${safePlatform}, ${safeBrand}, ${safeDuration}, ${Number(item.price || 0)}, ${safePlayStatus}, ${safeDeliveryType}, ${safeSupplierProductId})'>Edit</button>
+                                    ${normalizeAdminDeliveryType(item.delivery_type) === "vipstore_api" ? `<button class="ghost-btn" onclick="syncVipStoreProducts(${item.id})">Sync</button>` : ""}
                                     <button class="ghost-btn" onclick="toggleProductActive(${item.id}, ${Number(item.active) === 1 ? 0 : 1})">
                                       ${Number(item.active) === 1 ? "Nonaktifkan" : "Aktifkan"}
                                     </button>
