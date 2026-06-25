@@ -317,6 +317,19 @@ db.query(
    WHERE LOWER(TRIM(COALESCE(platform, ''))) NOT IN ('android', 'ios')`,
 );
 
+// VIP Store product mapping columns — STEP 2 (20260625-vipstore-step2-product-mapping-v1)
+db.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS supplier_source TEXT DEFAULT ''`);
+db.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS supplier_product_id TEXT DEFAULT ''`);
+db.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS supplier_product_name TEXT DEFAULT ''`);
+db.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS supplier_price NUMERIC(12,2)`);
+db.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS supplier_stock INTEGER DEFAULT 0`);
+db.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS supplier_status TEXT DEFAULT 'unmapped'`);
+db.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS supplier_maintenance INTEGER DEFAULT 0`);
+db.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS supplier_maintenance_reason TEXT`);
+db.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS supplier_last_sync TEXT`);
+db.query(`CREATE INDEX IF NOT EXISTS idx_products_supplier_source ON products(supplier_source)`);
+db.query(`CREATE INDEX IF NOT EXISTS idx_products_supplier_product_id ON products(supplier_product_id)`);
+
 function normalizePlatform(platform) {
   const value = String(platform || "android")
     .trim()
@@ -338,6 +351,42 @@ function normalizePlayStatus(status) {
   if (value === "maintenance") return "maintenance";
   if (value === "risk") return "risk";
   return "safe";
+}
+
+function normalizeProductDeliveryType(deliveryType) {
+  const value = String(deliveryType || "auto")
+    .trim()
+    .toLowerCase();
+
+  if (
+    value === "vipstore_api" ||
+    value === "vipstore" ||
+    value === "supplier_api" ||
+    value === "supplier"
+  ) {
+    return "vipstore_api";
+  }
+
+  if (value === "manual" || value === "manual_delivery") return "manual";
+
+  // Existing AE Game Store auto/local key flow uses local keys table.
+  return "auto";
+}
+
+function normalizeSupplierProductId(value) {
+  const text = String(value || "").trim();
+  if (!text) return "";
+
+  const numberValue = Number(text);
+  if (!Number.isInteger(numberValue) || numberValue <= 0) return "";
+
+  return String(numberValue);
+}
+
+function getSupplierSourceFromDelivery(deliveryType) {
+  return normalizeProductDeliveryType(deliveryType) === "vipstore_api"
+    ? "vipstore"
+    : "";
 }
 
 
@@ -511,6 +560,186 @@ function extractVipStoreCatalogItems(payload) {
   }
 
   return [];
+}
+
+function getFirstDefinedValue(source, keys) {
+  if (!source || typeof source !== "object") return undefined;
+
+  for (const key of keys) {
+    if (Object.prototype.hasOwnProperty.call(source, key)) {
+      const value = source[key];
+      if (value !== undefined && value !== null && value !== "") return value;
+    }
+  }
+
+  return undefined;
+}
+
+function isTruthyApiValue(value) {
+  if (value === true || value === 1) return true;
+  const text = String(value || "").trim().toLowerCase();
+  return ["1", "true", "yes", "on", "active", "maintenance"].includes(text);
+}
+
+function parseApiNumber(value, fallback = 0) {
+  const numberValue = Number(value);
+  return Number.isFinite(numberValue) ? numberValue : fallback;
+}
+
+function normalizeVipStoreCatalogProduct(item) {
+  const productId = String(
+    getFirstDefinedValue(item, ["id", "product_id", "productId"]) || "",
+  ).trim();
+
+  const name = String(
+    getFirstDefinedValue(item, ["name", "product_name", "title"]) || "",
+  ).trim();
+
+  const stock = Math.max(
+    0,
+    Math.floor(
+      parseApiNumber(
+        getFirstDefinedValue(item, [
+          "stock",
+          "available_stock",
+          "availableCodes",
+          "available_codes",
+          "available_codes_count",
+          "api_stock",
+        ]),
+        0,
+      ),
+    ),
+  );
+
+  const isHidden = isTruthyApiValue(
+    getFirstDefinedValue(item, ["is_hidden", "hidden"]),
+  );
+  const isMaintenance = isTruthyApiValue(
+    getFirstDefinedValue(item, [
+      "is_maintenance",
+      "maintenance_status",
+      "is_maintenance_mode",
+      "maintenance_mode",
+    ]),
+  );
+
+  const rawStatus = String(getFirstDefinedValue(item, ["status"]) || "")
+    .trim()
+    .toLowerCase();
+
+  const maintenanceReason = String(
+    getFirstDefinedValue(item, ["maintenance_reason", "maintenance_note"])
+      || "",
+  ).trim();
+
+  let status = "ready";
+  if (isHidden) status = "hidden";
+  else if (isMaintenance || rawStatus.includes("maintenance")) status = "maintenance";
+  else if (stock <= 0) status = "out_of_stock";
+
+  return {
+    product_id: productId,
+    name,
+    price: parseApiNumber(getFirstDefinedValue(item, ["price", "reseller_price"]), null),
+    stock,
+    status,
+    category: String(getFirstDefinedValue(item, ["category", "category_name"]) || "").trim(),
+    duration: String(getFirstDefinedValue(item, ["duration", "variant_label", "variantLabel"]) || "").trim(),
+    is_hidden: isHidden,
+    is_maintenance: isMaintenance || rawStatus.includes("maintenance"),
+    maintenance_reason: maintenanceReason,
+    custom_link: String(getFirstDefinedValue(item, ["custom_link", "download_link", "downloadLink"]) || "").trim(),
+    youtube_link: String(getFirstDefinedValue(item, ["youtube_link", "youtubeLink", "youtube_url"]) || "").trim(),
+  };
+}
+
+async function findVipStoreProductById(productId) {
+  const cleanSupplierProductId = normalizeSupplierProductId(productId);
+
+  if (!cleanSupplierProductId) {
+    return { found: false, product: null, raw: null, http_code: 400 };
+  }
+
+  const result = await getVipStoreCatalog();
+  const items = extractVipStoreCatalogItems(result.data);
+  const rawProduct = items.find((item) => {
+    const itemId = String(
+      getFirstDefinedValue(item, ["id", "product_id", "productId"]) || "",
+    ).trim();
+    return itemId === cleanSupplierProductId;
+  });
+
+  if (!rawProduct) {
+    return {
+      found: false,
+      product: null,
+      raw: null,
+      http_code: result.http_code,
+      total_detected_items: items.length,
+    };
+  }
+
+  return {
+    found: true,
+    product: normalizeVipStoreCatalogProduct(rawProduct),
+    raw: rawProduct,
+    http_code: result.http_code,
+    total_detected_items: items.length,
+  };
+}
+
+async function buildVipStoreProductSnapshot(deliveryType, supplierProductId) {
+  const cleanDeliveryType = normalizeProductDeliveryType(deliveryType);
+  const cleanSupplierProductId = normalizeSupplierProductId(supplierProductId);
+
+  const baseSnapshot = {
+    supplier_source: getSupplierSourceFromDelivery(cleanDeliveryType),
+    supplier_product_id: cleanSupplierProductId,
+    supplier_product_name: "",
+    supplier_price: null,
+    supplier_stock: 0,
+    supplier_status: cleanDeliveryType === "vipstore_api" ? "mapped_pending" : "local",
+    supplier_maintenance: 0,
+    supplier_maintenance_reason: "",
+    supplier_last_sync: null,
+  };
+
+  if (cleanDeliveryType !== "vipstore_api" || !cleanSupplierProductId) {
+    return baseSnapshot;
+  }
+
+  try {
+    const lookup = await findVipStoreProductById(cleanSupplierProductId);
+
+    if (!lookup.found || !lookup.product) {
+      return {
+        ...baseSnapshot,
+        supplier_status: "not_found",
+        supplier_last_sync: new Date().toISOString(),
+      };
+    }
+
+    return {
+      supplier_source: "vipstore",
+      supplier_product_id: lookup.product.product_id,
+      supplier_product_name: lookup.product.name,
+      supplier_price: lookup.product.price,
+      supplier_stock: lookup.product.stock,
+      supplier_status: lookup.product.status,
+      supplier_maintenance: lookup.product.is_maintenance || lookup.product.is_hidden ? 1 : 0,
+      supplier_maintenance_reason: lookup.product.maintenance_reason,
+      supplier_last_sync: new Date().toISOString(),
+    };
+  } catch (err) {
+    console.error("WARN VIPSTORE PRODUCT LOOKUP:", err.message);
+    return {
+      ...baseSnapshot,
+      supplier_status: err.code === "VIPSTORE_NOT_CONFIGURED" ? "not_configured" : "lookup_failed",
+      supplier_maintenance_reason: err.message || "Gagal cek produk supplier",
+      supplier_last_sync: new Date().toISOString(),
+    };
+  }
 }
 db.query(
   `
@@ -1924,8 +2153,9 @@ app.get("/api/admin/vipstore/status", requireAdminAuth, async (req, res) => {
     endpoints: {
       catalog: "/api/admin/vipstore/catalog",
       balance: "/api/admin/vipstore/balance",
+      product_lookup: "/api/admin/vipstore/product/:productId",
     },
-    note: "Step 1 only tests VIP Store API connection. Buyer checkout is not changed yet.",
+    note: "Step 2 supports product mapping. Buyer checkout is not changed yet.",
   });
 });
 
@@ -1967,6 +2197,41 @@ app.get("/api/admin/vipstore/balance", requireAdminAuth, async (req, res) => {
       ok: false,
       code: err.code || "VIPSTORE_ERROR",
       message: err.message || "Gagal mengambil balance VIP Store",
+    });
+  }
+});
+
+
+app.get("/api/admin/vipstore/product/:productId", requireAdminAuth, async (req, res) => {
+  try {
+    const lookup = await findVipStoreProductById(req.params.productId);
+
+    if (!lookup.found || !lookup.product) {
+      return res.status(404).json({
+        ok: false,
+        found: false,
+        http_code: lookup.http_code || 404,
+        total_detected_items: lookup.total_detected_items || 0,
+        message: "Produk supplier tidak ditemukan. Cek lagi VIP Store Product ID.",
+      });
+    }
+
+    return res.json({
+      ok: true,
+      found: true,
+      http_code: lookup.http_code || 200,
+      total_detected_items: lookup.total_detected_items || 0,
+      product: lookup.product,
+    });
+  } catch (err) {
+    console.error("ERROR VIPSTORE PRODUCT LOOKUP:", err);
+    const statusCode = err.code === "VIPSTORE_NOT_CONFIGURED" ? 503 : 502;
+
+    return res.status(statusCode).json({
+      ok: false,
+      found: false,
+      code: err.code || "VIPSTORE_ERROR",
+      message: err.message || "Gagal cek produk VIP Store",
     });
   }
 });
@@ -4078,8 +4343,16 @@ app.get("/products", requireAdminAuth, async (req, res) => {
 });
 
 app.post("/products", requireAdminAuth, requireAdminCsrf, async (req, res) => {
-  const { game, platform, brand, duration, price, delivery_type, play_status } =
-    req.body;
+  const {
+    game,
+    platform,
+    brand,
+    duration,
+    price,
+    delivery_type,
+    play_status,
+    supplier_product_id,
+  } = req.body;
   const syncBrandStatus =
     req.body.sync_brand_status === true ||
     req.body.sync_brand_status === "true";
@@ -4088,7 +4361,8 @@ app.post("/products", requireAdminAuth, requireAdminCsrf, async (req, res) => {
   const cleanPlatform = normalizePlatform(platform);
   const cleanDuration = String(duration || "").trim();
   const cleanPrice = Number(price);
-  const cleanDeliveryType = "auto";
+  const cleanDeliveryType = normalizeProductDeliveryType(delivery_type);
+  const cleanSupplierProductId = normalizeSupplierProductId(supplier_product_id);
   const cleanPlayStatus = normalizePlayStatus(play_status);
 
   if (!cleanGame || !cleanBrand || !cleanDuration) {
@@ -4103,6 +4377,12 @@ app.post("/products", requireAdminAuth, requireAdminCsrf, async (req, res) => {
     });
   }
 
+  if (cleanDeliveryType === "vipstore_api" && !cleanSupplierProductId) {
+    return res.status(400).json({
+      message: "Supplier Product ID wajib diisi untuk VIP Store API",
+    });
+  }
+
   const createdAt = new Date().toISOString();
 
   console.log("ADD PRODUCT REQUEST:", {
@@ -4112,11 +4392,30 @@ app.post("/products", requireAdminAuth, requireAdminCsrf, async (req, res) => {
     price: cleanPrice,
     platform: cleanPlatform,
     delivery_type: cleanDeliveryType,
+    supplier_product_id: cleanSupplierProductId,
   });
 
   try {
+    const supplierSnapshot = await buildVipStoreProductSnapshot(
+      cleanDeliveryType,
+      cleanSupplierProductId,
+    );
+
     const result = await query(
-      "INSERT INTO products (game, platform, brand, duration, price, active, created_at, delivery_type, play_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id",
+      `INSERT INTO products (
+         game, platform, brand, duration, price, active, created_at,
+         delivery_type, play_status,
+         supplier_source, supplier_product_id, supplier_product_name,
+         supplier_price, supplier_stock, supplier_status,
+         supplier_maintenance, supplier_maintenance_reason, supplier_last_sync
+       )
+       VALUES (
+         $1, $2, $3, $4, $5, $6, $7,
+         $8, $9,
+         $10, $11, $12,
+         $13, $14, $15,
+         $16, $17, $18
+       ) RETURNING id`,
       [
         cleanGame,
         cleanPlatform,
@@ -4127,6 +4426,15 @@ app.post("/products", requireAdminAuth, requireAdminCsrf, async (req, res) => {
         createdAt,
         cleanDeliveryType,
         cleanPlayStatus,
+        supplierSnapshot.supplier_source,
+        supplierSnapshot.supplier_product_id,
+        supplierSnapshot.supplier_product_name,
+        supplierSnapshot.supplier_price,
+        supplierSnapshot.supplier_stock,
+        supplierSnapshot.supplier_status,
+        supplierSnapshot.supplier_maintenance,
+        supplierSnapshot.supplier_maintenance_reason,
+        supplierSnapshot.supplier_last_sync,
       ],
     );
 
@@ -4166,7 +4474,7 @@ app.put(
   requireAdminCsrf,
   async (req, res) => {
     const productId = Number(req.params.id);
-    const { game, platform, brand, duration, price } = req.body;
+    const { game, platform, brand, duration, price, delivery_type, supplier_product_id } = req.body;
 
     if (!Number.isInteger(productId) || productId <= 0) {
       return res.status(400).json({
@@ -4179,7 +4487,8 @@ app.put(
     const cleanPlatform = normalizePlatform(platform);
     const cleanDuration = String(duration || "").trim();
     const cleanPrice = Number(price);
-    const cleanDeliveryType = "auto";
+    const cleanDeliveryType = normalizeProductDeliveryType(delivery_type);
+    const cleanSupplierProductId = normalizeSupplierProductId(supplier_product_id);
     const syncBrandStatus =
       req.body.sync_brand_status === true ||
       req.body.sync_brand_status === "true";
@@ -4205,7 +4514,18 @@ app.put(
       });
     }
 
+    if (cleanDeliveryType === "vipstore_api" && !cleanSupplierProductId) {
+      return res.status(400).json({
+        message: "Supplier Product ID wajib diisi untuk VIP Store API",
+      });
+    }
+
     try {
+      const supplierSnapshot = await buildVipStoreProductSnapshot(
+        cleanDeliveryType,
+        cleanSupplierProductId,
+      );
+
       const result = await query(
         `UPDATE products
    SET game = $1,
@@ -4214,8 +4534,17 @@ app.put(
        duration = $4,
        price = $5,
        delivery_type = COALESCE($6, delivery_type),
-       play_status = COALESCE($7, play_status)
-   WHERE id = $8
+       play_status = COALESCE($7, play_status),
+       supplier_source = $8,
+       supplier_product_id = $9,
+       supplier_product_name = $10,
+       supplier_price = $11,
+       supplier_stock = $12,
+       supplier_status = $13,
+       supplier_maintenance = $14,
+       supplier_maintenance_reason = $15,
+       supplier_last_sync = $16
+   WHERE id = $17
    RETURNING id`,
         [
           cleanGame,
@@ -4225,6 +4554,15 @@ app.put(
           cleanPrice,
           cleanDeliveryType,
           cleanPlayStatus,
+          supplierSnapshot.supplier_source,
+          supplierSnapshot.supplier_product_id,
+          supplierSnapshot.supplier_product_name,
+          supplierSnapshot.supplier_price,
+          supplierSnapshot.supplier_stock,
+          supplierSnapshot.supplier_status,
+          supplierSnapshot.supplier_maintenance,
+          supplierSnapshot.supplier_maintenance_reason,
+          supplierSnapshot.supplier_last_sync,
           productId,
         ],
       );

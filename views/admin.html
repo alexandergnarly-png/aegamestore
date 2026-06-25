@@ -2038,6 +2038,46 @@
           max-height: 310px;
         }
       }
+
+
+      /* VIP Store mapping UI — STEP 2 (20260625-vipstore-step2-product-mapping-v1) */
+      .supplier-map-preview {
+        min-height: 42px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 12px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-sm);
+        background: var(--surface-2);
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 750;
+        line-height: 1.35;
+      }
+
+      .supplier-map-preview strong {
+        color: var(--ink);
+      }
+
+      .supplier-map-preview.ok {
+        background: var(--success-bg);
+        color: var(--success-text);
+        border-color: var(--success-border);
+      }
+
+      .supplier-map-preview.warn {
+        background: var(--warn-bg);
+        color: var(--warn-text);
+        border-color: var(--warn-border);
+      }
+
+      .supplier-map-preview.error {
+        background: var(--danger-bg);
+        color: var(--danger-text);
+        border-color: var(--danger-border);
+      }
+
     </style>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </head>
@@ -2333,6 +2373,14 @@
                 <option value="maintenance">Maintenance</option>
               </select>
             </div>
+            <div class="field">
+              <select id="productDeliveryFilter" onchange="applyProductFilters()">
+                <option value="">Semua Source</option>
+                <option value="auto">Local Stock</option>
+                <option value="vipstore_api">VIP Store API</option>
+                <option value="manual">Manual</option>
+              </select>
+            </div>
           </div>
           <div class="toolbar">
             <input type="hidden" id="editingProductId" />
@@ -2378,6 +2426,32 @@
               </select>
             </div>
             <div class="field">
+              <select id="productDeliveryType" onchange="updateProductSupplierUi()">
+                <option value="auto">Local Stock</option>
+                <option value="vipstore_api">VIP Store API</option>
+                <option value="manual">Manual Delivery</option>
+              </select>
+            </div>
+            <div class="field">
+              <input
+                type="number"
+                id="productSupplierProductId"
+                placeholder="VIP Store Product ID"
+                min="1"
+                inputmode="numeric"
+              />
+            </div>
+            <div class="field">
+              <button type="button" class="ghost-btn" onclick="testVipStoreProduct()">
+                Test Supplier
+              </button>
+            </div>
+            <div class="field field-wide">
+              <div class="supplier-map-preview" id="supplierMapPreview">
+                Pilih VIP Store API lalu isi Product ID untuk mapping stok supplier.
+              </div>
+            </div>
+            <div class="field">
               <label class="product-sync-toggle" for="productSyncBrandStatus">
                 <input type="checkbox" id="productSyncBrandStatus" checked />
                 <span>
@@ -2419,8 +2493,10 @@
                   <th>Durasi</th>
                   <th>Harga</th>
                   <th>Play Status</th>
+                  <th>Source</th>
+                  <th>Supplier</th>
                   <th>Status</th>
-                  <th style="width: 220px">Aksi</th>
+                  <th style="width: 240px">Aksi</th>
                 </tr>
               </thead>
               <tbody id="productTableBody"></tbody>
@@ -3434,6 +3510,7 @@
 
       function refreshAllData() {
         loadProducts();
+        updateProductSupplierUi();
         loadKeyProductOptions();
         loadKeys();
         loadOrders();
@@ -3477,6 +3554,141 @@
         const label = getAdminPlatformLabel(normalized);
         const badgeClass = normalized === "ios" ? "paid" : "available";
         return `<span class="badge ${badgeClass}">${label}</span>`;
+      }
+
+      function normalizeAdminDeliveryType(deliveryType) {
+        const value = String(deliveryType || "auto").trim().toLowerCase();
+        if (value === "vipstore_api" || value === "vipstore" || value === "supplier") {
+          return "vipstore_api";
+        }
+        if (value === "manual" || value === "manual_delivery") return "manual";
+        return "auto";
+      }
+
+      function deliverySourceBadge(deliveryType) {
+        const value = normalizeAdminDeliveryType(deliveryType);
+        if (value === "vipstore_api") {
+          return `<span class="badge vip">VIP Store</span>`;
+        }
+        if (value === "manual") {
+          return `<span class="badge manual">Manual</span>`;
+        }
+        return `<span class="badge available">Local Stock</span>`;
+      }
+
+      function supplierStatusBadge(item) {
+        const status = String(item?.supplier_status || "").trim().toLowerCase();
+        const stock = Number(item?.supplier_stock || 0);
+        const delivery = normalizeAdminDeliveryType(item?.delivery_type);
+
+        if (delivery !== "vipstore_api") return `<span class="badge entry">-</span>`;
+        if (status === "ready") return `<span class="badge available">${stock} Ready</span>`;
+        if (status === "out_of_stock") return `<span class="badge stock_empty">0 Stock</span>`;
+        if (status === "maintenance") return `<span class="badge used">Maintenance</span>`;
+        if (status === "hidden") return `<span class="badge used">Hidden</span>`;
+        if (status === "not_found") return `<span class="badge used">Not Found</span>`;
+        if (status === "lookup_failed") return `<span class="badge pending">Lookup Failed</span>`;
+        if (status === "not_configured") return `<span class="badge used">No Config</span>`;
+        return `<span class="badge pending">Mapped</span>`;
+      }
+
+      function supplierProductText(item) {
+        if (normalizeAdminDeliveryType(item?.delivery_type) !== "vipstore_api") return "-";
+        const id = String(item?.supplier_product_id || "").trim();
+        const name = String(item?.supplier_product_name || "").trim();
+        const status = supplierStatusBadge(item);
+        const reason = String(item?.supplier_maintenance_reason || "").trim();
+        return `
+          <div><strong>#${escapeHtml(id || "-")}</strong></div>
+          <div>${escapeHtml(name || "Belum sync / belum ditest")}</div>
+          <div style="margin-top:6px;">${status}</div>
+          ${reason ? `<small>${escapeHtml(reason)}</small>` : ""}
+        `;
+      }
+
+      function updateProductSupplierUi() {
+        const deliveryType = normalizeAdminDeliveryType(
+          document.getElementById("productDeliveryType")?.value || "auto",
+        );
+        const supplierInput = document.getElementById("productSupplierProductId");
+        const preview = document.getElementById("supplierMapPreview");
+
+        if (!supplierInput || !preview) return;
+
+        const isVipStore = deliveryType === "vipstore_api";
+        supplierInput.disabled = !isVipStore;
+
+        if (!isVipStore) {
+          supplierInput.value = "";
+          preview.className = "supplier-map-preview";
+          preview.innerText = deliveryType === "manual"
+            ? "Manual Delivery aktif. Produk diproses admin, tidak ambil key otomatis."
+            : "Local Stock aktif. Stok dihitung dari key yang kamu input manual.";
+          return;
+        }
+
+        preview.className = "supplier-map-preview warn";
+        preview.innerText = "VIP Store API aktif. Isi Product ID supplier lalu klik Test Supplier.";
+      }
+
+      async function testVipStoreProduct() {
+        const deliveryType = normalizeAdminDeliveryType(
+          document.getElementById("productDeliveryType")?.value || "auto",
+        );
+        const supplierInput = document.getElementById("productSupplierProductId");
+        const preview = document.getElementById("supplierMapPreview");
+        const supplierProductId = String(supplierInput?.value || "").trim();
+
+        if (deliveryType !== "vipstore_api") {
+          Swal.fire("Pilih VIP Store API dulu untuk test supplier.");
+          return;
+        }
+
+        if (!supplierProductId) {
+          Swal.fire("Isi VIP Store Product ID dulu.");
+          return;
+        }
+
+        if (preview) {
+          preview.className = "supplier-map-preview warn";
+          preview.innerText = "Mengecek produk ke VIP Store...";
+        }
+
+        try {
+          const res = await fetch(`/api/admin/vipstore/product/${encodeURIComponent(supplierProductId)}`);
+          const data = await res.json();
+
+          if (res.status === 401) {
+            window.location.href = "/ae-auth";
+            return;
+          }
+
+          if (!res.ok || !data.found) {
+            if (preview) {
+              preview.className = "supplier-map-preview error";
+              preview.innerText = data.message || "Produk supplier tidak ditemukan.";
+            }
+            Swal.fire(data.message || "Produk supplier tidak ditemukan.");
+            return;
+          }
+
+          const product = data.product || {};
+          const statusText = String(product.status || "-").replace(/_/g, " ");
+          if (preview) {
+            preview.className = product.status === "ready" ? "supplier-map-preview ok" : "supplier-map-preview warn";
+            preview.innerHTML = `
+              <div>
+                <strong>#${escapeHtml(product.product_id)} • ${escapeHtml(product.name || "-")}</strong><br>
+                Stock: ${Number(product.stock || 0)} • Status: ${escapeHtml(statusText)} • Supplier price: ${product.price ?? "-"}
+              </div>
+            `;
+          }
+        } catch (err) {
+          if (preview) {
+            preview.className = "supplier-map-preview error";
+            preview.innerText = "Gagal cek supplier. Coba refresh / cek login admin.";
+          }
+        }
       }
 
       function formatAdminProductLabel(item, separator = " — ") {
@@ -5462,7 +5674,7 @@
             statusText.innerText = "Belum ada produk.";
             tableBody.innerHTML = `
                                 <tr>
-                                  <td colspan="9" class="empty">Belum ada produk di database.</td>
+                                  <td colspan="11" class="empty">Belum ada produk di database.</td>
                                 </tr>
                               `;
             return;
@@ -5475,7 +5687,7 @@
           statusText.innerText = "Gagal memuat daftar produk.";
           tableBody.innerHTML = `
                               <tr>
-                                <td colspan="9" class="empty">Terjadi error saat mengambil produk.</td>
+                                <td colspan="11" class="empty">Terjadi error saat mengambil produk.</td>
                               </tr>
                             `;
         }
@@ -5525,9 +5737,20 @@
         const price = document.getElementById("productPrice").value.trim();
         const play_status =
           document.getElementById("productPlayStatus")?.value || "safe";
+        const delivery_type = normalizeAdminDeliveryType(
+          document.getElementById("productDeliveryType")?.value || "auto",
+        );
+        const supplier_product_id = String(
+          document.getElementById("productSupplierProductId")?.value || "",
+        ).trim();
         const sync_brand_status = Boolean(
           document.getElementById("productSyncBrandStatus")?.checked,
         );
+
+        if (delivery_type === "vipstore_api" && !supplier_product_id) {
+          Swal.fire("Supplier Product ID wajib diisi untuk VIP Store API.");
+          return;
+        }
 
         if (!game || !brand || !duration || !price) {
           Swal.fire("Semua data produk wajib diisi.");
@@ -5552,6 +5775,8 @@
               duration,
               price,
               play_status,
+              delivery_type,
+              supplier_product_id,
               sync_brand_status,
             }),
           });
@@ -5733,6 +5958,10 @@
           document.getElementById("productStatusFilter")?.value || "",
         );
 
+        const deliveryValue = String(
+          document.getElementById("productDeliveryFilter")?.value || "",
+        );
+
         const filteredProducts = allProducts.filter((item) => {
           const matchesSearch =
             !searchValue ||
@@ -5753,6 +5982,15 @@
               .includes(searchValue) ||
             String(item.price || "")
               .toLowerCase()
+              .includes(searchValue) ||
+            String(item.delivery_type || "")
+              .toLowerCase()
+              .includes(searchValue) ||
+            String(item.supplier_product_id || "")
+              .toLowerCase()
+              .includes(searchValue) ||
+            String(item.supplier_product_name || "")
+              .toLowerCase()
               .includes(searchValue);
 
           const matchesGame =
@@ -5763,13 +6001,16 @@
             !platformValue || normalizeAdminPlatform(item.platform) === platformValue;
           const matchesStatus =
             statusValue === "" || String(Number(item.active)) === statusValue;
+          const matchesDelivery =
+            !deliveryValue || normalizeAdminDeliveryType(item.delivery_type) === deliveryValue;
 
           return (
             matchesSearch &&
             matchesGame &&
             matchesBrand &&
             matchesPlatform &&
-            matchesStatus
+            matchesStatus &&
+            matchesDelivery
           );
         });
 
@@ -5779,7 +6020,7 @@
         if (filteredProducts.length === 0) {
           tableBody.innerHTML = `
                               <tr>
-                                <td colspan="9" class="empty">Tidak ada produk yang sesuai filter.</td>
+                                <td colspan="11" class="empty">Tidak ada produk yang sesuai filter.</td>
                               </tr>
                             `;
           return;
@@ -5796,6 +6037,12 @@
             const safePlayStatus = JSON.stringify(
               String(item.play_status || "safe"),
             );
+            const safeDeliveryType = JSON.stringify(
+              normalizeAdminDeliveryType(item.delivery_type),
+            );
+            const safeSupplierProductId = JSON.stringify(
+              String(item.supplier_product_id || ""),
+            );
 
             return `
                                 <tr>
@@ -5806,9 +6053,11 @@
                                   <td>${escapeHtml(item.duration)}</td>
                                   <td>${formatRupiah(item.price)}</td>
 <td>${playStatusBadge(item.play_status)}</td>
+<td>${deliverySourceBadge(item.delivery_type)}</td>
+<td>${supplierProductText(item)}</td>
 <td>${activeBadge(item.active)}</td>
 <td>
-  <button onclick='editProduct(${item.id}, ${safeGame}, ${safePlatform}, ${safeBrand}, ${safeDuration}, ${Number(item.price || 0)}, ${safePlayStatus})'>Edit</button>
+  <button onclick='editProduct(${item.id}, ${safeGame}, ${safePlatform}, ${safeBrand}, ${safeDuration}, ${Number(item.price || 0)}, ${safePlayStatus}, ${safeDeliveryType}, ${safeSupplierProductId})'>Edit</button>
                                     <button class="ghost-btn" onclick="toggleProductActive(${item.id}, ${Number(item.active) === 1 ? 0 : 1})">
                                       ${Number(item.active) === 1 ? "Nonaktifkan" : "Aktifkan"}
                                     </button>
@@ -6222,6 +6471,9 @@
         const durationInput = document.getElementById("productDuration");
         const priceInput = document.getElementById("productPrice");
         const playStatusInput = document.getElementById("productPlayStatus");
+        const deliveryTypeInput = document.getElementById("productDeliveryType");
+        const supplierProductIdInput = document.getElementById("productSupplierProductId");
+        const supplierPreview = document.getElementById("supplierMapPreview");
         const syncBrandStatusInput = document.getElementById(
           "productSyncBrandStatus",
         );
@@ -6234,6 +6486,15 @@
         if (durationInput) durationInput.value = "";
         if (priceInput) priceInput.value = "";
         if (playStatusInput) playStatusInput.value = "safe";
+        if (deliveryTypeInput) deliveryTypeInput.value = "auto";
+        if (supplierProductIdInput) {
+          supplierProductIdInput.value = "";
+          supplierProductIdInput.disabled = true;
+        }
+        if (supplierPreview) {
+          supplierPreview.className = "supplier-map-preview";
+          supplierPreview.innerText = "Local Stock aktif. Stok dihitung dari key yang kamu input manual.";
+        }
         if (syncBrandStatusInput) syncBrandStatusInput.checked = true;
         if (saveBtn) saveBtn.innerText = "Tambah Produk";
 
@@ -6256,6 +6517,8 @@
         duration,
         price,
         playStatus = "safe",
+        deliveryType = "auto",
+        supplierProductId = "",
       ) {
         document.getElementById("editingProductId").value = id;
         document.getElementById("productGame").value = game;
@@ -6266,6 +6529,11 @@
         document.getElementById("productPrice").value = price;
         const playStatusInput = document.getElementById("productPlayStatus");
         if (playStatusInput) playStatusInput.value = playStatus || "safe";
+        const deliveryTypeInput = document.getElementById("productDeliveryType");
+        if (deliveryTypeInput) deliveryTypeInput.value = normalizeAdminDeliveryType(deliveryType);
+        const supplierProductIdInput = document.getElementById("productSupplierProductId");
+        if (supplierProductIdInput) supplierProductIdInput.value = supplierProductId || "";
+        updateProductSupplierUi();
         const syncBrandStatusInput = document.getElementById(
           "productSyncBrandStatus",
         );
