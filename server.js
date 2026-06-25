@@ -3646,7 +3646,7 @@ app.post("/midtrans-notification", webhookLimiter, async (req, res) => {
            LEFT JOIN products p ON p.id = o.product_id
            WHERE o.id = $1
            LIMIT 1
-           FOR UPDATE`,
+           FOR UPDATE OF o`,
           [orderId],
         );
 
