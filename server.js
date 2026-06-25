@@ -743,6 +743,134 @@ async function buildVipStoreProductSnapshot(deliveryType, supplierProductId) {
 }
 
 
+
+
+function extractVipStoreClaimKeys(payload) {
+  const keys = [];
+  const seen = new Set();
+
+  function pushKey(value) {
+    const text = String(value || "").trim();
+    if (!text) return;
+    if (text.length < 4) return;
+
+    const blocked = [
+      "success",
+      "true",
+      "false",
+      "ready",
+      "maintenance",
+      "manual",
+      "vipstore",
+    ];
+
+    if (blocked.includes(text.toLowerCase())) return;
+    if (seen.has(text)) return;
+
+    seen.add(text);
+    keys.push(text);
+  }
+
+  function collect(value, forceString = false) {
+    if (value === undefined || value === null) return;
+
+    if (typeof value === "string" || typeof value === "number") {
+      if (forceString) pushKey(value);
+      return;
+    }
+
+    if (Array.isArray(value)) {
+      value.forEach((entry) => collect(entry, forceString));
+      return;
+    }
+
+    if (typeof value !== "object") return;
+
+    for (const [rawKey, entryValue] of Object.entries(value)) {
+      const key = String(rawKey || "").toLowerCase();
+
+      const isDirectKeyField = [
+        "key",
+        "keys",
+        "code",
+        "codes",
+        "license",
+        "licenses",
+        "license_key",
+        "licensekey",
+        "serial",
+        "pin",
+        "voucher",
+        "game_key",
+        "gamekey",
+        "activation_code",
+        "activationcode",
+        "generated_key",
+        "generatedkey",
+      ].includes(key);
+
+      const isLikelyContainer = [
+        "data",
+        "result",
+        "results",
+        "item",
+        "items",
+        "product",
+        "products",
+        "claimed",
+        "claim",
+        "generated",
+        "orders",
+      ].includes(key);
+
+      if (isDirectKeyField) {
+        collect(entryValue, true);
+      } else if (isLikelyContainer) {
+        collect(entryValue, forceString || key === "data" || key === "result");
+      } else if (entryValue && typeof entryValue === "object") {
+        collect(entryValue, forceString);
+      }
+    }
+  }
+
+  collect(payload, false);
+
+  return keys;
+}
+
+async function claimVipStoreKeyForOrder(order) {
+  const supplierProductId = normalizeSupplierProductId(order.supplier_product_id);
+
+  if (!supplierProductId) {
+    throw new Error("Produk belum punya VIP Store Product ID");
+  }
+
+  const claimResult = await claimVipStoreKey(supplierProductId, 1);
+  const claimData = claimResult.data || {};
+
+  if (!claimResult.ok || claimData.success === false) {
+    throw new Error(
+      claimData.message ||
+        claimData.error ||
+        `VIP Store claim gagal. HTTP ${claimResult.http_code || "-"}`,
+    );
+  }
+
+  const claimedKeys = extractVipStoreClaimKeys(claimData);
+
+  if (!claimedKeys.length) {
+    throw new Error("VIP Store tidak mengembalikan key pada response claim");
+  }
+
+  return {
+    supplier_product_id: supplierProductId,
+    key: claimedKeys.join("\n"),
+    keys: claimedKeys,
+    http_code: claimResult.http_code,
+  };
+}
+
+
 async function syncVipStoreMappedProducts(options = {}) {
   const rawProductIds = Array.isArray(options.productIds)
     ? options.productIds
@@ -3266,15 +3394,45 @@ app.post("/create-order", orderLimiter, async (req, res) => {
       });
     }
 
-    const keyCheck = await query(
-      "SELECT id FROM keys WHERE product_id = $1 AND used = 0 LIMIT 1",
-      [cleanProductId],
-    );
+    const productDeliveryType = normalizeProductDeliveryType(productRow.delivery_type);
 
-    if (keyCheck.rows.length === 0) {
-      return res.status(400).json({
-        message: "Stok key habis",
-      });
+    if (productDeliveryType === "vipstore_api") {
+      const supplierProductId = normalizeSupplierProductId(productRow.supplier_product_id);
+      const supplierStatus = String(productRow.supplier_status || "").toLowerCase();
+      const supplierStock = Number(productRow.supplier_stock || 0);
+      const supplierMaintenance = Number(productRow.supplier_maintenance || 0) === 1;
+
+      if (!supplierProductId) {
+        return res.status(400).json({
+          message: "Produk belum terhubung ke supplier. Hubungi admin.",
+        });
+      }
+
+      if (
+        supplierMaintenance ||
+        ["maintenance", "hidden", "not_found", "lookup_failed", "not_configured", "mapped_pending"].includes(supplierStatus)
+      ) {
+        return res.status(400).json({
+          message: "Produk supplier sedang tidak tersedia. Coba lagi nanti.",
+        });
+      }
+
+      if (supplierStock <= 0) {
+        return res.status(400).json({
+          message: "Stok supplier habis. Coba lagi nanti.",
+        });
+      }
+    } else if (productDeliveryType === "auto") {
+      const keyCheck = await query(
+        "SELECT id FROM keys WHERE product_id = $1 AND used = 0 LIMIT 1",
+        [cleanProductId],
+      );
+
+      if (keyCheck.rows.length === 0) {
+        return res.status(400).json({
+          message: "Stok key habis",
+        });
+      }
     }
 
     const orderId = "ORDER-" + crypto.randomUUID();
@@ -3436,11 +3594,20 @@ app.post("/midtrans-notification", webhookLimiter, async (req, res) => {
         await client.query("BEGIN");
 
         const orderResult = await client.query(
-          `SELECT o.*, COALESCE(p.delivery_type, 'auto') AS delivery_type
+          `SELECT
+             o.*,
+             COALESCE(p.delivery_type, 'auto') AS delivery_type,
+             COALESCE(p.supplier_source, '') AS supplier_source,
+             COALESCE(p.supplier_product_id, '') AS supplier_product_id,
+             COALESCE(p.supplier_product_name, '') AS supplier_product_name,
+             COALESCE(p.supplier_stock, 0) AS supplier_stock,
+             COALESCE(p.supplier_status, '') AS supplier_status,
+             COALESCE(p.supplier_maintenance, 0) AS supplier_maintenance
            FROM orders o
            LEFT JOIN products p ON p.id = o.product_id
            WHERE o.id = $1
-           LIMIT 1`,
+           LIMIT 1
+           FOR UPDATE`,
           [orderId],
         );
 
@@ -3452,6 +3619,99 @@ app.post("/midtrans-notification", webhookLimiter, async (req, res) => {
         }
 
         if (String(order.payment_status).toLowerCase() === "paid") {
+          await client.query("COMMIT");
+          return res.status(200).send("OK");
+        }
+
+        const orderDeliveryType = normalizeProductDeliveryType(order.delivery_type);
+
+        if (orderDeliveryType === "vipstore_api") {
+          await client.query(
+            `UPDATE orders
+             SET payment_status = $1,
+                 delivery_status = $2,
+                 admin_note = $3
+             WHERE id = $4`,
+            [
+              "paid",
+              "processing_supplier",
+              "VIP Store claim sedang diproses otomatis",
+              orderId,
+            ],
+          );
+
+          await client.query("COMMIT");
+
+          try {
+            const claim = await claimVipStoreKeyForOrder(order);
+            const deliveredAt = new Date().toISOString();
+
+            await query(
+              `UPDATE orders
+               SET delivery_status = $1,
+                   gameKey = $2,
+                   delivered_at = $3,
+                   admin_note = $4
+               WHERE id = $5
+                 AND delivery_status = $6`,
+              [
+                "delivered",
+                claim.key,
+                deliveredAt,
+                `VIP Store claim success. Supplier product #${claim.supplier_product_id}.`,
+                orderId,
+                "processing_supplier",
+              ],
+            );
+
+            await query(
+              `UPDATE products
+               SET supplier_stock = GREATEST(COALESCE(supplier_stock, 0) - 1, 0),
+                   supplier_last_sync = $1
+               WHERE id = $2
+                 AND LOWER(COALESCE(delivery_type, 'auto')) = 'vipstore_api'`,
+              [deliveredAt, order.product_id],
+            );
+          } catch (claimErr) {
+            console.error("VIPSTORE CLAIM ERROR:", claimErr.message);
+
+            await query(
+              `UPDATE orders
+               SET delivery_status = $1,
+                   gameKey = $2,
+                   admin_note = $3
+               WHERE id = $4
+                 AND delivery_status = $5`,
+              [
+                "problem",
+                "VIP STORE CLAIM FAILED - HUBUNGI ADMIN",
+                `VIP Store claim failed: ${String(claimErr.message || "Unknown error").slice(0, 500)}`,
+                orderId,
+                "processing_supplier",
+              ],
+            );
+          }
+
+          return res.status(200).send("OK");
+        }
+
+        if (orderDeliveryType === "manual") {
+          await client.query(
+            `UPDATE orders
+             SET payment_status = $1,
+                 delivery_status = $2,
+                 gameKey = $3,
+                 admin_note = $4
+             WHERE id = $5`,
+            [
+              "paid",
+              "manual",
+              "MANUAL DELIVERY - HUBUNGI ADMIN",
+              "Produk manual delivery, proses key manual.",
+              orderId,
+            ],
+          );
+
           await client.query("COMMIT");
           return res.status(200).send("OK");
         }
