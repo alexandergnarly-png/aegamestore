@@ -2078,6 +2078,179 @@
         border-color: var(--danger-border);
       }
 
+      /* VIP Store supplier picker — STEP 2.5 */
+      .supplier-picker-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .supplier-picker-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 180;
+        display: none;
+        background: rgba(0, 0, 0, 0.45);
+        backdrop-filter: blur(8px);
+      }
+
+      .supplier-picker-backdrop.show {
+        display: block;
+      }
+
+      .supplier-picker-modal {
+        position: fixed;
+        inset: 5vh 18px auto;
+        z-index: 181;
+        display: none;
+        width: min(980px, calc(100vw - 36px));
+        max-height: 90vh;
+        margin: 0 auto;
+        border: 1px solid var(--line);
+        border-radius: 30px;
+        background: var(--surface);
+        color: var(--ink);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .supplier-picker-modal.show {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .supplier-picker-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 16px;
+        border-bottom: 1px solid var(--line);
+        background: var(--surface);
+      }
+
+      .supplier-picker-head h3 {
+        color: var(--ink-2);
+        font-size: 18px;
+        font-weight: 900;
+        letter-spacing: -0.04em;
+      }
+
+      .supplier-picker-head p {
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 750;
+      }
+
+      .supplier-picker-close {
+        width: 40px;
+        height: 40px;
+        flex: 0 0 40px;
+        padding: 0;
+        border-radius: 999px;
+      }
+
+      .supplier-picker-body {
+        display: grid;
+        gap: 12px;
+        padding: 16px;
+        overflow: hidden;
+      }
+
+      .supplier-picker-search-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+      }
+
+      .supplier-picker-status {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .supplier-picker-list {
+        display: grid;
+        gap: 10px;
+        max-height: min(58vh, 560px);
+        overflow: auto;
+        padding-right: 4px;
+      }
+
+      .supplier-picker-item {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 12px;
+        align-items: center;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        background: var(--surface-2);
+      }
+
+      .supplier-picker-item strong {
+        color: var(--ink-2);
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      .supplier-picker-item small {
+        display: block;
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 750;
+        line-height: 1.45;
+      }
+
+      .supplier-picker-meta {
+        display: flex;
+        gap: 7px;
+        flex-wrap: wrap;
+        margin-top: 8px;
+      }
+
+      .supplier-picker-warning {
+        margin-top: 8px;
+        padding: 7px 9px;
+        border: 1px solid var(--warn-border);
+        border-radius: 14px;
+        background: var(--warn-bg);
+        color: var(--warn-text);
+        font-size: 11px;
+        font-weight: 850;
+      }
+
+      .supplier-picker-empty {
+        padding: 22px 14px;
+        border: 1px dashed var(--line);
+        border-radius: 20px;
+        color: var(--muted);
+        text-align: center;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      @media (max-width: 720px) {
+        .supplier-picker-modal {
+          inset: auto 10px 10px;
+          width: calc(100vw - 20px);
+          max-height: 86vh;
+          border-radius: 26px;
+        }
+
+        .supplier-picker-search-row,
+        .supplier-picker-item {
+          grid-template-columns: 1fr;
+        }
+
+        .supplier-picker-item button {
+          width: 100%;
+        }
+      }
+
+
     </style>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </head>
@@ -2442,9 +2615,14 @@
               />
             </div>
             <div class="field">
-              <button type="button" class="ghost-btn" onclick="testVipStoreProduct()">
-                Test Supplier
-              </button>
+              <div class="supplier-picker-actions">
+                <button type="button" class="ghost-btn" onclick="openVipStoreProductPicker()">
+                  Cari Supplier
+                </button>
+                <button type="button" class="ghost-btn" onclick="testVipStoreProduct()">
+                  Test Supplier
+                </button>
+              </div>
             </div>
             <div class="field field-wide">
               <div class="supplier-map-preview" id="supplierMapPreview">
@@ -3282,6 +3460,54 @@
       <div class="order-drawer-actions" id="orderDrawerActions"></div>
     </aside>
 
+
+    <!-- ===== VIP Store Product Picker ===== -->
+    <div
+      class="supplier-picker-backdrop"
+      id="supplierPickerBackdrop"
+      onclick="closeVipStoreProductPicker()"
+    ></div>
+    <section
+      class="supplier-picker-modal"
+      id="supplierPickerModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="supplierPickerTitle"
+    >
+      <div class="supplier-picker-head">
+        <div>
+          <h3 id="supplierPickerTitle">Cari Produk VIP Store</h3>
+          <p>Pilih produk supplier yang cocok. Product ID akan otomatis terisi.</p>
+        </div>
+        <button
+          type="button"
+          class="supplier-picker-close ghost-btn"
+          onclick="closeVipStoreProductPicker()"
+          aria-label="Tutup supplier picker"
+        >
+          ✕
+        </button>
+      </div>
+      <div class="supplier-picker-body">
+        <div class="supplier-picker-search-row">
+          <input
+            type="text"
+            id="supplierPickerSearch"
+            placeholder="Cari: phantom dfm android 1 day / aorus / pubg ios"
+          />
+          <button type="button" class="ghost-btn" onclick="loadVipStorePickerCatalog(true)">
+            Refresh
+          </button>
+        </div>
+        <div class="supplier-picker-status" id="supplierPickerStatus">
+          Catalog belum dimuat.
+        </div>
+        <div class="supplier-picker-list" id="supplierPickerList">
+          <div class="supplier-picker-empty">Klik Cari Supplier untuk memuat catalog.</div>
+        </div>
+      </div>
+    </section>
+
     <!-- ===== ADMIN UPGRADE: Bottom navigation (mobile) ===== -->
     <nav
       class="admin-bottom-nav"
@@ -3434,6 +3660,8 @@
       let allVoucherProducts = [];
       let selectedVoucherProductIds = new Set();
       let allKeys = [];
+      let vipStorePickerItems = [];
+      let vipStorePickerLoadedAt = null;
 
       function toggleSidebar() {
         document.body.classList.toggle("sidebar-collapsed");
@@ -3606,6 +3834,301 @@
         `;
       }
 
+
+      function normalizeSupplierSearchText(value) {
+        return String(value || "")
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, " ")
+          .trim();
+      }
+
+      function detectSupplierPlatform(item) {
+        const text = normalizeSupplierSearchText(
+          [item?.name, item?.category, item?.duration].join(" "),
+        );
+
+        if (
+          text.includes(" ios ") ||
+          text.startsWith("ios ") ||
+          text.endsWith(" ios") ||
+          text.includes(" iphone ") ||
+          text.includes(" ipad ") ||
+          text.includes(" ipa ") ||
+          text.includes(" testflight ")
+        ) {
+          return "ios";
+        }
+
+        if (
+          text.includes(" android ") ||
+          text.startsWith("android ") ||
+          text.endsWith(" android") ||
+          text.includes(" apk ")
+        ) {
+          return "android";
+        }
+
+        return "";
+      }
+
+      function getLocalProductPlatformForPicker() {
+        return normalizeAdminPlatform(
+          document.getElementById("productPlatform")?.value || "android",
+        );
+      }
+
+      function getSupplierPickerSearchSeed() {
+        const game = document.getElementById("productGame")?.value || "";
+        const platform = getAdminPlatformLabel(getLocalProductPlatformForPicker());
+        const brand = document.getElementById("productBrand")?.value || "";
+        const duration = document.getElementById("productDuration")?.value || "";
+        return [brand, game, platform, duration].filter(Boolean).join(" ").trim();
+      }
+
+      function getSupplierPickerMismatchWarning(item) {
+        const localPlatform = getLocalProductPlatformForPicker();
+        const supplierPlatform = detectSupplierPlatform(item);
+
+        if (supplierPlatform && supplierPlatform !== localPlatform) {
+          return `Warning: produk lokal kamu ${getAdminPlatformLabel(localPlatform)}, tapi supplier terlihat ${getAdminPlatformLabel(supplierPlatform)}.`;
+        }
+
+        return "";
+      }
+
+      function renderSupplierMapPreview(product, forceClass = "") {
+        const preview = document.getElementById("supplierMapPreview");
+        if (!preview || !product) return;
+
+        const statusText = String(product.status || "-").replace(/_/g, " ");
+        const warning = getSupplierPickerMismatchWarning(product);
+        const previewClass = forceClass || (
+          warning
+            ? "warn"
+            : product.status === "ready"
+              ? "ok"
+              : "warn"
+        );
+
+        preview.className = `supplier-map-preview ${previewClass}`;
+        preview.innerHTML = `
+          <div>
+            <strong>#${escapeHtml(product.product_id)} • ${escapeHtml(product.name || "-")}</strong><br>
+            Stock: ${Number(product.stock || 0)} • Status: ${escapeHtml(statusText)} • Supplier price: ${product.price ?? "-"}
+            ${warning ? `<br><span>${escapeHtml(warning)}</span>` : ""}
+          </div>
+        `;
+      }
+
+      async function loadVipStorePickerCatalog(force = false) {
+        const statusEl = document.getElementById("supplierPickerStatus");
+        const listEl = document.getElementById("supplierPickerList");
+
+        if (vipStorePickerItems.length && !force) {
+          renderVipStoreProductPicker();
+          return;
+        }
+
+        if (statusEl) statusEl.innerText = "Memuat catalog VIP Store...";
+        if (listEl) {
+          listEl.innerHTML = `<div class="supplier-picker-empty">Loading catalog supplier...</div>`;
+        }
+
+        try {
+          const res = await fetch("/api/admin/vipstore/catalog-normalized?limit=800");
+          const data = await res.json();
+
+          if (res.status === 401) {
+            window.location.href = "/ae-auth";
+            return;
+          }
+
+          if (!res.ok || data.ok === false) {
+            throw new Error(data.message || "Gagal memuat catalog VIP Store");
+          }
+
+          vipStorePickerItems = Array.isArray(data.items) ? data.items : [];
+          vipStorePickerLoadedAt = new Date();
+
+          if (statusEl) {
+            statusEl.innerText = `${vipStorePickerItems.length} produk dimuat dari ${data.total_detected_items || vipStorePickerItems.length} catalog VIP Store.`;
+          }
+
+          renderVipStoreProductPicker();
+        } catch (err) {
+          if (statusEl) statusEl.innerText = err.message || "Gagal memuat catalog VIP Store.";
+          if (listEl) {
+            listEl.innerHTML = `<div class="supplier-picker-empty">Gagal memuat catalog. Coba klik Refresh.</div>`;
+          }
+        }
+      }
+
+      function openVipStoreProductPicker() {
+        const deliveryInput = document.getElementById("productDeliveryType");
+        if (deliveryInput && normalizeAdminDeliveryType(deliveryInput.value) !== "vipstore_api") {
+          deliveryInput.value = "vipstore_api";
+          updateProductSupplierUi();
+        }
+
+        const modal = document.getElementById("supplierPickerModal");
+        const backdrop = document.getElementById("supplierPickerBackdrop");
+        const searchInput = document.getElementById("supplierPickerSearch");
+
+        if (modal) modal.classList.add("show");
+        if (backdrop) backdrop.classList.add("show");
+
+        if (searchInput && !searchInput.value.trim()) {
+          searchInput.value = getSupplierPickerSearchSeed();
+        }
+
+        loadVipStorePickerCatalog(false);
+
+        setTimeout(() => {
+          searchInput?.focus();
+          searchInput?.select();
+        }, 80);
+      }
+
+      function closeVipStoreProductPicker() {
+        document.getElementById("supplierPickerModal")?.classList.remove("show");
+        document.getElementById("supplierPickerBackdrop")?.classList.remove("show");
+      }
+
+      function renderVipStoreProductPicker() {
+        const listEl = document.getElementById("supplierPickerList");
+        const statusEl = document.getElementById("supplierPickerStatus");
+        const query = normalizeSupplierSearchText(
+          document.getElementById("supplierPickerSearch")?.value || "",
+        );
+        const terms = query ? query.split(/\s+/).filter(Boolean) : [];
+        const localPlatform = getLocalProductPlatformForPicker();
+
+        if (!listEl) return;
+
+        let items = [...vipStorePickerItems];
+
+        if (terms.length) {
+          items = items.filter((item) => {
+            const haystack = normalizeSupplierSearchText(
+              [
+                item.product_id,
+                item.name,
+                item.category,
+                item.duration,
+                item.status,
+                item.stock,
+                item.price,
+              ].join(" "),
+            );
+            return terms.every((term) => haystack.includes(term));
+          });
+        }
+
+        items.sort((a, b) => {
+          const aPlatform = detectSupplierPlatform(a);
+          const bPlatform = detectSupplierPlatform(b);
+          const aPlatformScore = aPlatform === localPlatform ? 0 : aPlatform ? 1 : 2;
+          const bPlatformScore = bPlatform === localPlatform ? 0 : bPlatform ? 1 : 2;
+          if (aPlatformScore !== bPlatformScore) return aPlatformScore - bPlatformScore;
+
+          const statusRank = { ready: 0, out_of_stock: 1, maintenance: 2, hidden: 3 };
+          const aStatus = statusRank[a.status] ?? 9;
+          const bStatus = statusRank[b.status] ?? 9;
+          if (aStatus !== bStatus) return aStatus - bStatus;
+
+          return String(a.name || "").localeCompare(String(b.name || ""));
+        });
+
+        const visibleItems = items.slice(0, 80);
+
+        if (statusEl) {
+          const loadedText = vipStorePickerLoadedAt
+            ? `Loaded ${vipStorePickerLoadedAt.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}`
+            : "Catalog belum dimuat";
+          statusEl.innerText = `${visibleItems.length} hasil tampil dari ${items.length} hasil cocok. ${loadedText}.`;
+        }
+
+        if (!visibleItems.length) {
+          listEl.innerHTML = `<div class="supplier-picker-empty">Tidak ada produk cocok. Coba kata lain: dfm, phantom, android, ios, 1 day.</div>`;
+          return;
+        }
+
+        listEl.innerHTML = visibleItems
+          .map((item) => {
+            const supplierPlatform = detectSupplierPlatform(item);
+            const warning = getSupplierPickerMismatchWarning(item);
+            const statusText = String(item.status || "-").replace(/_/g, " ");
+            const statusClass =
+              item.status === "ready"
+                ? "available"
+                : item.status === "out_of_stock"
+                  ? "stock_empty"
+                  : item.status === "maintenance" || item.status === "hidden"
+                    ? "used"
+                    : "pending";
+
+            return `
+              <article class="supplier-picker-item">
+                <div>
+                  <strong>#${escapeHtml(item.product_id)} • ${escapeHtml(item.name || "-")}</strong>
+                  <small>
+                    ${escapeHtml(item.category || "-")} • ${escapeHtml(item.duration || "-")}
+                  </small>
+                  <div class="supplier-picker-meta">
+                    <span class="badge ${statusClass}">${escapeHtml(statusText)}</span>
+                    <span class="badge available">${Number(item.stock || 0)} stock</span>
+                    <span class="badge entry">Price ${item.price ?? "-"}</span>
+                    ${supplierPlatform ? `<span class="badge ${supplierPlatform === "ios" ? "paid" : "available"}">${getAdminPlatformLabel(supplierPlatform)}</span>` : ""}
+                  </div>
+                  ${warning ? `<div class="supplier-picker-warning">${escapeHtml(warning)}</div>` : ""}
+                </div>
+                <button type="button" class="choose-supplier-btn" data-product-id="${escapeHtml(item.product_id)}">
+                  Pilih
+                </button>
+              </article>
+            `;
+          })
+          .join("");
+
+        listEl.querySelectorAll(".choose-supplier-btn").forEach((button) => {
+          button.addEventListener("click", () => {
+            chooseVipStoreProduct(button.dataset.productId || "");
+          });
+        });
+      }
+
+      function chooseVipStoreProduct(productId) {
+        const item = vipStorePickerItems.find(
+          (product) => String(product.product_id) === String(productId),
+        );
+
+        if (!item) {
+          Swal.fire("Produk supplier tidak ditemukan di list.");
+          return;
+        }
+
+        const deliveryInput = document.getElementById("productDeliveryType");
+        const supplierInput = document.getElementById("productSupplierProductId");
+
+        if (deliveryInput) deliveryInput.value = "vipstore_api";
+        if (supplierInput) {
+          supplierInput.disabled = false;
+          supplierInput.value = item.product_id;
+        }
+
+        renderSupplierMapPreview(item);
+        closeVipStoreProductPicker();
+
+        const warning = getSupplierPickerMismatchWarning(item);
+        if (warning) {
+          Swal.fire({
+            icon: "warning",
+            title: "Cek platform dulu",
+            text: warning,
+          });
+        }
+      }
+
       function updateProductSupplierUi() {
         const deliveryType = normalizeAdminDeliveryType(
           document.getElementById("productDeliveryType")?.value || "auto",
@@ -3628,7 +4151,7 @@
         }
 
         preview.className = "supplier-map-preview warn";
-        preview.innerText = "VIP Store API aktif. Isi Product ID supplier lalu klik Test Supplier.";
+        preview.innerText = "VIP Store API aktif. Klik Cari Supplier supaya tidak perlu cari ID manual, atau isi ID lalu Test Supplier.";
       }
 
       async function testVipStoreProduct() {
@@ -3673,16 +4196,7 @@
           }
 
           const product = data.product || {};
-          const statusText = String(product.status || "-").replace(/_/g, " ");
-          if (preview) {
-            preview.className = product.status === "ready" ? "supplier-map-preview ok" : "supplier-map-preview warn";
-            preview.innerHTML = `
-              <div>
-                <strong>#${escapeHtml(product.product_id)} • ${escapeHtml(product.name || "-")}</strong><br>
-                Stock: ${Number(product.stock || 0)} • Status: ${escapeHtml(statusText)} • Supplier price: ${product.price ?? "-"}
-              </div>
-            `;
-          }
+          renderSupplierMapPreview(product);
         } catch (err) {
           if (preview) {
             preview.className = "supplier-map-preview error";
@@ -7259,6 +7773,11 @@
           document.getElementById("productSearchInput");
         if (productSearchInput) {
           productSearchInput.addEventListener("input", applyProductFilters);
+        }
+
+        const supplierPickerSearchInput = document.getElementById("supplierPickerSearch");
+        if (supplierPickerSearchInput) {
+          supplierPickerSearchInput.addEventListener("input", renderVipStoreProductPicker);
         }
         loadAdminSessions();
         setInterval(loadAdminSessions, 60000);

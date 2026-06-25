@@ -2154,6 +2154,7 @@ app.get("/api/admin/vipstore/status", requireAdminAuth, async (req, res) => {
       catalog: "/api/admin/vipstore/catalog",
       balance: "/api/admin/vipstore/balance",
       product_lookup: "/api/admin/vipstore/product/:productId",
+      catalog_picker: "/api/admin/vipstore/catalog-normalized",
     },
     note: "Step 2 supports product mapping. Buyer checkout is not changed yet.",
   });
@@ -2177,26 +2178,6 @@ app.get("/api/admin/vipstore/catalog", requireAdminAuth, async (req, res) => {
       ok: false,
       code: err.code || "VIPSTORE_ERROR",
       message: err.message || "Gagal mengambil catalog VIP Store",
-    });
-  }
-});
-
-app.get("/api/admin/vipstore/balance", requireAdminAuth, async (req, res) => {
-  try {
-    const result = await getVipStoreBalance();
-
-    return res.status(result.ok ? 200 : result.http_code || 502).json({
-      ok: result.ok,
-      http_code: result.http_code,
-      data: result.data,
-    });
-  } catch (err) {
-    console.error("ERROR VIPSTORE BALANCE:", err);
-    const statusCode = err.code === "VIPSTORE_NOT_CONFIGURED" ? 503 : 502;
-    return res.status(statusCode).json({
-      ok: false,
-      code: err.code || "VIPSTORE_ERROR",
-      message: err.message || "Gagal mengambil balance VIP Store",
     });
   }
 });
@@ -2232,6 +2213,83 @@ app.get("/api/admin/vipstore/product/:productId", requireAdminAuth, async (req, 
       found: false,
       code: err.code || "VIPSTORE_ERROR",
       message: err.message || "Gagal cek produk VIP Store",
+    });
+  }
+});
+
+
+app.get("/api/admin/vipstore/catalog-normalized", requireAdminAuth, async (req, res) => {
+  try {
+    const q = String(req.query.q || "").trim().toLowerCase();
+    const limit = Math.min(Math.max(Number(req.query.limit || 500), 1), 800);
+    const result = await getVipStoreCatalog();
+    const items = extractVipStoreCatalogItems(result.data);
+    let products = items.map(normalizeVipStoreCatalogProduct);
+
+    if (q) {
+      const terms = q.split(/\s+/).filter(Boolean);
+      products = products.filter((item) => {
+        const haystack = [
+          item.product_id,
+          item.name,
+          item.category,
+          item.duration,
+          item.status,
+          item.stock,
+          item.price,
+        ]
+          .join(" ")
+          .toLowerCase();
+
+        return terms.every((term) => haystack.includes(term));
+      });
+    }
+
+    products = products
+      .sort((a, b) => {
+        const statusRank = { ready: 0, out_of_stock: 1, maintenance: 2, hidden: 3 };
+        const aRank = statusRank[a.status] ?? 9;
+        const bRank = statusRank[b.status] ?? 9;
+        if (aRank !== bRank) return aRank - bRank;
+        return String(a.name || "").localeCompare(String(b.name || ""));
+      })
+      .slice(0, limit);
+
+    return res.status(result.ok ? 200 : result.http_code || 502).json({
+      ok: result.ok,
+      http_code: result.http_code,
+      total_detected_items: items.length,
+      total_returned_items: products.length,
+      items: products,
+    });
+  } catch (err) {
+    console.error("ERROR VIPSTORE NORMALIZED CATALOG:", err);
+    const statusCode = err.code === "VIPSTORE_NOT_CONFIGURED" ? 503 : 502;
+    return res.status(statusCode).json({
+      ok: false,
+      code: err.code || "VIPSTORE_ERROR",
+      message: err.message || "Gagal mengambil catalog normal VIP Store",
+      items: [],
+    });
+  }
+});
+
+app.get("/api/admin/vipstore/balance", requireAdminAuth, async (req, res) => {
+  try {
+    const result = await getVipStoreBalance();
+
+    return res.status(result.ok ? 200 : result.http_code || 502).json({
+      ok: result.ok,
+      http_code: result.http_code,
+      data: result.data,
+    });
+  } catch (err) {
+    console.error("ERROR VIPSTORE BALANCE:", err);
+    const statusCode = err.code === "VIPSTORE_NOT_CONFIGURED" ? 503 : 502;
+    return res.status(statusCode).json({
+      ok: false,
+      code: err.code || "VIPSTORE_ERROR",
+      message: err.message || "Gagal mengambil balance VIP Store",
     });
   }
 });
