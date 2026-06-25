@@ -5727,6 +5727,15 @@
                                   )
                                   .join("")}
                               </div>
+
+                              <div class="admin-alert-actions">
+                                <button type="button" class="danger-btn" onclick="logoutOtherAdminSessions()">
+                                  Logout Semua Session Lain
+                                </button>
+                                <button type="button" class="ghost-btn" onclick="loadAdminSessions()">
+                                  Refresh Session
+                                </button>
+                              </div>
                             `;
 
           box.style.display = "block";
@@ -6145,6 +6154,51 @@
             text: "Terjadi error server saat menghapus key",
             confirmButtonColor: "#0ea5e9",
           });
+        }
+      }
+
+
+      async function logoutOtherAdminSessions() {
+        const result = await Swal.fire({
+          icon: "warning",
+          title: "Logout session lain?",
+          text: "Semua admin session selain device ini akan dikeluarkan.",
+          showCancelButton: true,
+          confirmButtonText: "Ya, logout session lain",
+          cancelButtonText: "Batal",
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+          const res = await fetch("/admin-logout-other-sessions", {
+            method: "POST",
+            headers: {
+              "x-csrf-token": getCsrfToken(),
+            },
+          });
+
+          const data = await res.json().catch(() => ({}));
+
+          if (res.status === 401) {
+            window.location.href = "/ae-auth";
+            return;
+          }
+
+          if (!res.ok) {
+            Swal.fire("Gagal", data.message || "Gagal logout session lain", "error");
+            return;
+          }
+
+          await Swal.fire(
+            "Berhasil",
+            `${data.deleted_sessions || 0} session lain sudah dilogout.`,
+            "success",
+          );
+
+          loadAdminSessions();
+        } catch (err) {
+          Swal.fire("Gagal", "Terjadi error saat logout session lain.", "error");
         }
       }
 
