@@ -3607,7 +3607,7 @@ app.post("/midtrans-notification", webhookLimiter, async (req, res) => {
            LEFT JOIN products p ON p.id = o.product_id
            WHERE o.id = $1
            LIMIT 1
-           FOR UPDATE`,
+           FOR UPDATE OF o`,
           [orderId],
         );
 
@@ -3971,11 +3971,20 @@ app.post(
       await client.query("BEGIN");
 
       const orderResult = await client.query(
-        `SELECT o.*, COALESCE(p.delivery_type, 'auto') AS delivery_type
+        `SELECT
+           o.*,
+           COALESCE(p.delivery_type, 'auto') AS delivery_type,
+           COALESCE(p.supplier_source, '') AS supplier_source,
+           COALESCE(p.supplier_product_id, '') AS supplier_product_id,
+           COALESCE(p.supplier_product_name, '') AS supplier_product_name,
+           COALESCE(p.supplier_stock, 0) AS supplier_stock,
+           COALESCE(p.supplier_status, '') AS supplier_status,
+           COALESCE(p.supplier_maintenance, 0) AS supplier_maintenance
          FROM orders o
          LEFT JOIN products p ON p.id = o.product_id
          WHERE o.id = $1
-         LIMIT 1`,
+         LIMIT 1
+         FOR UPDATE OF o`,
         [orderId],
       );
 
@@ -3989,6 +3998,107 @@ app.post(
       if (String(order.payment_status).toLowerCase() === "paid") {
         await client.query("COMMIT");
         return res.json({ message: "Order sudah dibayar sebelumnya" });
+      }
+
+      const orderDeliveryType = normalizeProductDeliveryType(order.delivery_type);
+
+      if (orderDeliveryType === "vipstore_api") {
+        await client.query(
+          `UPDATE orders
+           SET payment_status = $1,
+               delivery_status = $2,
+               admin_note = $3
+           WHERE id = $4`,
+          [
+            "paid",
+            "processing_supplier",
+            "VIP Store claim diproses dari admin confirm payment",
+            orderId,
+          ],
+        );
+
+        await client.query("COMMIT");
+
+        try {
+          const claim = await claimVipStoreKeyForOrder(order);
+          const deliveredAt = new Date().toISOString();
+
+          await query(
+            `UPDATE orders
+             SET delivery_status = $1,
+                 gameKey = $2,
+                 delivered_at = $3,
+                 admin_note = $4
+             WHERE id = $5
+               AND delivery_status = $6`,
+            [
+              "delivered",
+              claim.key,
+              deliveredAt,
+              `VIP Store claim success via admin confirm. Supplier product #${claim.supplier_product_id}.`,
+              orderId,
+              "processing_supplier",
+            ],
+          );
+
+          await query(
+            `UPDATE products
+             SET supplier_stock = GREATEST(COALESCE(supplier_stock, 0) - 1, 0),
+                 supplier_last_sync = $1
+             WHERE id = $2
+               AND LOWER(COALESCE(delivery_type, 'auto')) = 'vipstore_api'`,
+            [deliveredAt, order.product_id],
+          );
+
+          return res.json({
+            message: "Pembayaran dikonfirmasi dan key VIP Store berhasil dikirim",
+          });
+        } catch (claimErr) {
+          await query(
+            `UPDATE orders
+             SET delivery_status = $1,
+                 gameKey = $2,
+                 admin_note = $3
+             WHERE id = $4
+               AND delivery_status = $5`,
+            [
+              "problem",
+              "VIP STORE CLAIM FAILED - HUBUNGI ADMIN",
+              `VIP Store claim failed via admin confirm: ${String(claimErr.message || "Unknown error").slice(0, 500)}`,
+              orderId,
+              "processing_supplier",
+            ],
+          );
+
+          return res.status(502).json({
+            message:
+              "Pembayaran sudah dikonfirmasi, tapi claim VIP Store gagal. Order masuk problem.",
+          });
+        }
+      }
+
+      if (orderDeliveryType === "manual") {
+        await client.query(
+          `UPDATE orders
+           SET payment_status = $1,
+               delivery_status = $2,
+               gameKey = $3,
+               admin_note = $4
+           WHERE id = $5`,
+          [
+            "paid",
+            "manual",
+            "MANUAL DELIVERY - HUBUNGI ADMIN",
+            "Produk manual delivery, proses key manual.",
+            orderId,
+          ],
+        );
+
+        await client.query("COMMIT");
+
+        return res.json({
+          message: "Pembayaran dikonfirmasi. Produk manual delivery perlu diproses manual.",
+        });
       }
 
       const keyResult = await client.query(
