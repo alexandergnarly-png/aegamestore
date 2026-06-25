@@ -955,6 +955,14 @@ const resultTranslations = {
           manualMessage:
             "Pembayaran sudah dicek, tapi order ini perlu dikirim manual oleh admin. Hubungi admin jika belum diproses.",
           manualToast: "Order perlu diproses manual 🌊",
+          processingKey: "Key sedang diproses otomatis...",
+          processingMessage:
+            "Pembayaran berhasil. Key sedang diclaim otomatis dari supplier, biasanya hanya butuh beberapa detik.",
+          processingToast: "Key sedang diproses otomatis",
+          claimProblemKey: "Key belum berhasil dikirim.",
+          claimProblemMessage:
+            "Pembayaran berhasil, tetapi pengiriman key sedang bermasalah. Admin akan bantu proses ulang. Silakan hubungi admin jika belum berubah.",
+          claimProblemToast: "Pengiriman key bermasalah",
           pendingTitle: "Pembayaran belum selesai.",
           pendingSub:
             "Jika kamu sudah membayar, tunggu beberapa saat lalu klik Refresh Status. Game key akan muncul otomatis setelah pembayaran dikonfirmasi.",
@@ -1038,6 +1046,14 @@ const resultTranslations = {
           manualMessage:
             "Payment was confirmed, but this order needs manual delivery by admin. Contact admin if it hasn't been processed.",
           manualToast: "Order needs manual processing 🌊",
+          processingKey: "Key is being processed automatically...",
+          processingMessage:
+            "Payment confirmed. The key is being claimed from the supplier automatically, usually within a few seconds.",
+          processingToast: "Key is being processed automatically",
+          claimProblemKey: "Key has not been delivered yet.",
+          claimProblemMessage:
+            "Payment confirmed, but key delivery has an issue. Admin will help retry the process. Please contact admin if it does not update.",
+          claimProblemToast: "Key delivery needs attention",
           pendingTitle: "Payment not completed yet.",
           pendingSub:
             "If you have already paid, wait a moment and click Refresh Status. The game key will appear automatically once payment is confirmed.",
@@ -1512,6 +1528,46 @@ const resultTranslations = {
           return "manualToast";
         }
 
+
+        if (paymentStatus === "paid" && deliveryStatus === "processing_supplier") {
+          latestGameKey = "";
+          copyBtn.style.display = "none";
+          if (continuePayBtn) continuePayBtn.hidden = true;
+          if (keyWrapper) keyWrapper.className = "key-box pending";
+          keyBox.innerHTML = `
+            <div class="pending-msg">${tResult("processingKey")}</div>
+            <div class="pending-sub">${tResult("processingMessage")}</div>
+          `;
+          statusText.innerHTML = `
+            <div class="status-message-card warning">
+              <iconify-icon icon="mdi:progress-clock" aria-hidden="true"></iconify-icon>
+              <span>${tResult("processingMessage")}</span>
+            </div>
+          `;
+          setProgress("manual");
+          renderTimeline(data, "manual");
+          startPendingAutoRefresh();
+          return "processingToast";
+        }
+
+        if (paymentStatus === "paid" && deliveryStatus === "problem") {
+          stopPendingAutoRefresh();
+          latestGameKey = "";
+          copyBtn.style.display = "none";
+          if (continuePayBtn) continuePayBtn.hidden = true;
+          if (keyWrapper) keyWrapper.className = "key-box problem";
+          keyBox.innerText = tResult("claimProblemKey");
+          statusText.innerHTML = `
+            <div class="status-message-card danger">
+              <iconify-icon icon="mdi:alert-circle-outline" aria-hidden="true"></iconify-icon>
+              <span>${tResult("claimProblemMessage")}</span>
+            </div>
+          `;
+          setProgress("manual");
+          renderTimeline(data, "manual");
+          return "claimProblemToast";
+        }
+
         if (
           paymentStatus === "pending" ||
           deliveryStatus === "waiting_payment"
@@ -1624,6 +1680,8 @@ const resultTranslations = {
               manualToast: "info",
               pendingToast: "info",
               inactiveToast: "error",
+              processingToast: "info",
+              claimProblemToast: "error",
               fallbackToast: "info",
             };
             showToast(iconMap[toastKey] || "info", tResult(toastKey));

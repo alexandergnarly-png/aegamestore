@@ -2408,6 +2408,11 @@
           style="display: none"
         ></div>
         <div
+          id="vipStoreSafetyBox"
+          class="admin-alerts-box"
+          style="display: none"
+        ></div>
+        <div
           id="adminSessionsBox"
           class="admin-alerts-box"
           style="display: none"
@@ -3736,6 +3741,7 @@
         if (sectionName === "dashboard") {
           loadStockSummary();
           loadAdminStats();
+          loadVipStoreSafetyAlerts();
         }
       }
 
@@ -3748,6 +3754,7 @@
         loadStockSummary();
         loadAdminStats();
         loadAdminAlerts();
+        loadVipStoreSafetyAlerts();
         loadAdminSessions();
       }
 
@@ -5068,6 +5075,12 @@
               ps !== "paid" && !isCancelled
                 ? `<button class="ghost-btn" onclick='confirmPayment(${safeId})'>Konfirmasi Bayar</button>`
                 : "";
+            const isVipStoreOrder =
+              normalizeAdminDeliveryType(item.delivery_type) === "vipstore_api";
+            const retryClaimBtn =
+              isVipStoreOrder && ps === "paid" && ds !== "delivered" && !isCancelled
+                ? `<button class="ghost-btn" onclick='retryVipStoreClaim(${safeId})'>Retry Claim</button>`
+                : "";
             const manualBtn =
               ps === "paid" && ds !== "delivered" && !isCancelled
                 ? `<button class="ghost-btn" onclick='openManualDeliverModal(${safeId})'>Kirim Manual</button>`
@@ -5109,6 +5122,7 @@
                     ${detailBtn}
                     ${copyBtn}
                     ${confirmBtn}
+                    ${retryClaimBtn}
                     ${manualBtn}
                     ${cancelBtn}
                     ${deleteBtn}
@@ -5431,6 +5445,23 @@
                 : ""
             }
           </div>
+
+          ${
+            Array.isArray(order.claim_logs) && order.claim_logs.length
+              ? `<div class="order-drawer-section">
+                  <h4>VIP Store Claim Log</h4>
+                  ${order.claim_logs
+                    .map(
+                      (log) => `<div class="order-drawer-field" style="flex-direction: column; align-items: stretch;">
+                        <span class="label">${escapeHtml(log.status || "-")} • ${escapeHtml(log.source || "-")} • ${formatTanggal(log.created_at)}</span>
+                        <span class="value" style="text-align:left;">${escapeHtml(log.message || "-")}</span>
+                        <span class="value" style="text-align:left;color:var(--muted);font-size:11px;">Supplier #${escapeHtml(log.supplier_product_id || "-")} • HTTP ${escapeHtml(log.http_code || "-")} • Key ${escapeHtml(log.key_count || 0)}</span>
+                      </div>`,
+                    )
+                    .join("")}
+                </div>`
+              : ""
+          }
         `;
 
         const buttons = [];
@@ -5447,6 +5478,13 @@
             `<button class="ghost-btn" onclick='confirmPayment(${safeId})'>Konfirmasi Bayar</button>`,
           );
         }
+        const isVipStoreDrawerOrder =
+          normalizeAdminDeliveryType(order.delivery_type) === "vipstore_api";
+        if (isVipStoreDrawerOrder && ps === "paid" && ds !== "delivered" && !isCancelled) {
+          buttons.push(
+            `<button class="ghost-btn" onclick='retryVipStoreClaim(${safeId})'>Retry Claim VIP Store</button>`,
+          );
+        }
         if (ps === "paid" && ds !== "delivered" && !isCancelled) {
           buttons.push(
             `<button class="ghost-btn" onclick='openManualDeliverModal(${safeId})'>Kirim Manual</button>`,
@@ -5459,6 +5497,57 @@
         }
 
         actions.innerHTML = buttons.join("");
+      }
+
+
+      async function retryVipStoreClaim(orderId) {
+        const cleanOrderId = String(orderId || "").trim();
+        if (!cleanOrderId) return;
+
+        const result = await Swal.fire({
+          icon: "warning",
+          title: "Retry Claim VIP Store?",
+          text: "Pastikan payment sudah paid dan balance supplier cukup. Sistem tidak akan claim ulang jika order sudah delivered.",
+          showCancelButton: true,
+          confirmButtonText: "Retry Claim",
+          cancelButtonText: "Batal",
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+          const res = await fetch(
+            `/api/admin/vipstore/retry-claim/${encodeURIComponent(cleanOrderId)}`,
+            {
+              method: "POST",
+              headers: {
+                "x-csrf-token": getCsrfToken(),
+              },
+            },
+          );
+
+          const data = await res.json().catch(() => ({}));
+
+          if (res.status === 401) {
+            window.location.href = "/ae-auth";
+            return;
+          }
+
+          if (!res.ok || data.ok === false) {
+            Swal.fire("Retry gagal", data.message || "Gagal retry claim VIP Store", "error");
+            loadOrders();
+            loadVipStoreSafetyAlerts();
+            openOrderDrawer(cleanOrderId);
+            return;
+          }
+
+          await Swal.fire("Berhasil", data.message || "Retry claim berhasil.", "success");
+          loadOrders();
+          loadVipStoreSafetyAlerts();
+          openOrderDrawer(cleanOrderId);
+        } catch (err) {
+          Swal.fire("Retry gagal", "Terjadi error saat retry claim VIP Store.", "error");
+        }
       }
 
       // ===== ADMIN UPGRADE: Manual deliver (input key + send to buyer) =====
@@ -5678,6 +5767,78 @@
                               </div>
                             `;
 
+          box.style.display = "block";
+        } catch (err) {
+          box.style.display = "none";
+        }
+      }
+
+
+      async function loadVipStoreSafetyAlerts() {
+        const box = document.getElementById("vipStoreSafetyBox");
+        if (!box) return;
+
+        try {
+          const res = await fetch("/api/admin/vipstore/safety");
+
+          if (!res.ok) {
+            box.style.display = "none";
+            return;
+          }
+
+          const data = await res.json();
+          const alerts = [];
+
+          if (data.low_balance) {
+            alerts.push(`
+              <div class="admin-alert-item">
+                <span class="admin-alert-tag">LOW BALANCE</span><br>
+                <b>VIP Store balance rendah</b><br>
+                Balance: ${data.balance ?? "-"}<br>
+                Threshold: ${data.low_balance_threshold ?? "-"}
+              </div>
+            `);
+          }
+
+          if (Number(data.problem_count || 0) > 0) {
+            alerts.push(`
+              <div class="admin-alert-item">
+                <span class="admin-alert-tag">CLAIM PROBLEM</span><br>
+                <b>${Number(data.problem_count || 0)} order claim gagal</b><br>
+                Cek menu Order lalu klik Retry Claim.
+              </div>
+            `);
+          }
+
+          if (Number(data.processing_count || 0) > 0) {
+            alerts.push(`
+              <div class="admin-alert-item">
+                <span class="admin-alert-tag">PROCESSING</span><br>
+                <b>${Number(data.processing_count || 0)} order sedang claim</b><br>
+                Tunggu beberapa detik atau refresh.
+              </div>
+            `);
+          }
+
+          if (!alerts.length) {
+            box.style.display = "none";
+            box.innerHTML = "";
+            return;
+          }
+
+          box.innerHTML = `
+            <div class="admin-alerts-head">
+              <strong>🛡️ VIP Store Safety</strong>
+              <span>Balance: ${data.balance ?? "-"}</span>
+            </div>
+            <div class="admin-alert-list">
+              ${alerts.join("")}
+            </div>
+            <div class="admin-alert-actions">
+              <button type="button" onclick="loadVipStoreSafetyAlerts()">Refresh Safety</button>
+              <button type="button" class="ghost-btn" onclick="setQuickOrderFilter('paid')">Cek Order Paid</button>
+            </div>
+          `;
           box.style.display = "block";
         } catch (err) {
           box.style.display = "none";
