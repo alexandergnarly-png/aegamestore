@@ -339,6 +339,179 @@ function normalizePlayStatus(status) {
   if (value === "risk") return "risk";
   return "safe";
 }
+
+
+// VIP Store reseller API integration — STEP 1 (20260625-vipstore-step1-api-client-v1)
+// Only admin test endpoints are enabled here. Buyer checkout is not changed yet.
+const VIPSTORE_DEFAULT_BASE_URL = "https://vipstore.web.id/backend/api/reseller";
+
+function getVipStoreConfig() {
+  const baseUrl = String(
+    process.env.VIPSTORE_API_BASE_URL || VIPSTORE_DEFAULT_BASE_URL,
+  )
+    .trim()
+    .replace(/\/+$/, "");
+
+  return {
+    baseUrl,
+    apiKey: String(process.env.VIPSTORE_API_KEY || "").trim(),
+    apiSecret: String(process.env.VIPSTORE_API_SECRET || "").trim(),
+    userId: String(process.env.VIPSTORE_USER_ID || "").trim(),
+  };
+}
+
+function isVipStoreConfigured() {
+  const config = getVipStoreConfig();
+  return Boolean(config.baseUrl && config.apiKey && config.apiSecret);
+}
+
+function maskSecret(value) {
+  const text = String(value || "").trim();
+  if (!text) return "";
+  if (text.length <= 8) return "configured";
+  return `${text.slice(0, 4)}...${text.slice(-4)}`;
+}
+
+function createVipStoreHeaders(rawBody = "") {
+  const config = getVipStoreConfig();
+  const timestamp = Math.floor(Date.now() / 1000).toString();
+  const nonce = crypto.randomBytes(16).toString("hex");
+  const bodyHash = crypto.createHash("sha256").update(rawBody).digest("hex");
+  const payload = `${timestamp}.${nonce}.${bodyHash}`;
+  const signature = crypto
+    .createHmac("sha256", config.apiSecret)
+    .update(payload)
+    .digest("hex");
+
+  return {
+    "Content-Type": "application/json",
+    "X-API-Key": config.apiKey,
+    "X-Timestamp": timestamp,
+    "X-Nonce": nonce,
+    "X-Signature": signature,
+  };
+}
+
+function normalizeVipStoreEndpoint(endpoint) {
+  const cleanEndpoint = String(endpoint || "")
+    .trim()
+    .replace(/^\/+/, "");
+
+  if (!cleanEndpoint) {
+    throw new Error("VIP Store endpoint kosong");
+  }
+
+  return cleanEndpoint;
+}
+
+async function vipStoreRequest(endpoint, options = {}) {
+  const config = getVipStoreConfig();
+
+  if (!isVipStoreConfigured()) {
+    const error = new Error(
+      "VIP Store API belum dikonfigurasi. Isi VIPSTORE_API_KEY dan VIPSTORE_API_SECRET di env.",
+    );
+    error.code = "VIPSTORE_NOT_CONFIGURED";
+    throw error;
+  }
+
+  const method = String(options.method || "GET").toUpperCase();
+  const body = options.body && method !== "GET" ? options.body : null;
+  const rawBody = method === "GET" ? "" : JSON.stringify(body || {});
+  const url = `${config.baseUrl}/${normalizeVipStoreEndpoint(endpoint)}`;
+  const controller = new AbortController();
+  const timeoutMs = Number(options.timeoutMs || 30000);
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(url, {
+      method,
+      headers: createVipStoreHeaders(rawBody),
+      body: method === "GET" ? undefined : rawBody,
+      signal: controller.signal,
+    });
+
+    const rawResponse = await response.text();
+    let data = null;
+
+    try {
+      data = rawResponse ? JSON.parse(rawResponse) : null;
+    } catch (parseErr) {
+      data = {
+        success: false,
+        message: "VIP Store mengembalikan response non-JSON",
+        raw_response: rawResponse,
+      };
+    }
+
+    return {
+      ok: response.ok,
+      http_code: response.status,
+      data,
+    };
+  } catch (err) {
+    const isTimeout = err && err.name === "AbortError";
+    const error = new Error(
+      isTimeout
+        ? "Request VIP Store timeout"
+        : `Gagal menghubungi VIP Store: ${err.message}`,
+    );
+    error.code = isTimeout ? "VIPSTORE_TIMEOUT" : "VIPSTORE_REQUEST_FAILED";
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+async function getVipStoreCatalog() {
+  return vipStoreRequest("catalog.php", { method: "GET" });
+}
+
+async function getVipStoreBalance() {
+  return vipStoreRequest("balance.php", { method: "GET" });
+}
+
+async function claimVipStoreKey(productId, quantity = 1) {
+  const cleanProductId = Number(productId);
+  const cleanQuantity = Math.max(Number(quantity || 1), 1);
+
+  if (!Number.isInteger(cleanProductId) || cleanProductId <= 0) {
+    throw new Error("VIP Store product_id tidak valid");
+  }
+
+  if (!Number.isInteger(cleanQuantity) || cleanQuantity <= 0) {
+    throw new Error("VIP Store quantity tidak valid");
+  }
+
+  return vipStoreRequest("claim.php", {
+    method: "POST",
+    body: { product_id: cleanProductId, quantity: cleanQuantity },
+  });
+}
+
+function extractVipStoreCatalogItems(payload) {
+  if (Array.isArray(payload)) return payload;
+  if (!payload || typeof payload !== "object") return [];
+
+  const candidates = [
+    payload.data,
+    payload.products,
+    payload.catalog,
+    payload.items,
+    payload.result,
+  ];
+
+  for (const candidate of candidates) {
+    if (Array.isArray(candidate)) return candidate;
+    if (candidate && typeof candidate === "object") {
+      for (const value of Object.values(candidate)) {
+        if (Array.isArray(value)) return value;
+      }
+    }
+  }
+
+  return [];
+}
 db.query(
   `
   CREATE TABLE IF NOT EXISTS reviews (
@@ -1733,6 +1906,67 @@ app.get("/api/admin/me", requireAdminAuth, async (req, res) => {
     return res.status(500).json({
       loggedIn: false,
       message: "Gagal mengambil data admin",
+    });
+  }
+});
+
+
+// VIP Store reseller API admin test endpoints — STEP 1 (20260625-vipstore-step1-api-client-v1)
+app.get("/api/admin/vipstore/status", requireAdminAuth, async (req, res) => {
+  const config = getVipStoreConfig();
+
+  return res.json({
+    configured: isVipStoreConfigured(),
+    baseUrl: config.baseUrl,
+    userId: config.userId || null,
+    apiKey: maskSecret(config.apiKey),
+    apiSecretConfigured: Boolean(config.apiSecret),
+    endpoints: {
+      catalog: "/api/admin/vipstore/catalog",
+      balance: "/api/admin/vipstore/balance",
+    },
+    note: "Step 1 only tests VIP Store API connection. Buyer checkout is not changed yet.",
+  });
+});
+
+app.get("/api/admin/vipstore/catalog", requireAdminAuth, async (req, res) => {
+  try {
+    const result = await getVipStoreCatalog();
+    const items = extractVipStoreCatalogItems(result.data);
+
+    return res.status(result.ok ? 200 : result.http_code || 502).json({
+      ok: result.ok,
+      http_code: result.http_code,
+      total_detected_items: items.length,
+      data: result.data,
+    });
+  } catch (err) {
+    console.error("ERROR VIPSTORE CATALOG:", err);
+    const statusCode = err.code === "VIPSTORE_NOT_CONFIGURED" ? 503 : 502;
+    return res.status(statusCode).json({
+      ok: false,
+      code: err.code || "VIPSTORE_ERROR",
+      message: err.message || "Gagal mengambil catalog VIP Store",
+    });
+  }
+});
+
+app.get("/api/admin/vipstore/balance", requireAdminAuth, async (req, res) => {
+  try {
+    const result = await getVipStoreBalance();
+
+    return res.status(result.ok ? 200 : result.http_code || 502).json({
+      ok: result.ok,
+      http_code: result.http_code,
+      data: result.data,
+    });
+  } catch (err) {
+    console.error("ERROR VIPSTORE BALANCE:", err);
+    const statusCode = err.code === "VIPSTORE_NOT_CONFIGURED" ? 503 : 502;
+    return res.status(statusCode).json({
+      ok: false,
+      code: err.code || "VIPSTORE_ERROR",
+      message: err.message || "Gagal mengambil balance VIP Store",
     });
   }
 });
