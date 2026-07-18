@@ -6352,7 +6352,6 @@ body.dark-theme .payment-modal-btn-ghost {
   .promo-container,
   .testi-card,
   .review-action-card,
-  .order-modal-content,
   .payment-modal-card {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
@@ -6366,7 +6365,6 @@ body.dark-theme .payment-modal-btn-ghost {
   .testi-card,
   .review-action-card,
   .game-card,
-  .order-modal-content,
   .payment-modal-card {
     box-shadow: none !important;
   }
@@ -6487,10 +6485,6 @@ body.dark-theme .payment-modal-btn-ghost {
     font-size: 20px !important;
   }
 
-  .order-modal-content {
-    max-height: 88dvh !important;
-    overflow-y: auto !important;
-  }
 }
 
 @media (max-width: 640px) {
@@ -7924,12 +7918,8 @@ body.dark-theme .site-header {
 body.dark-theme .auth-btn,
 body.dark-theme .hero-cta,
 body.dark-theme .open-review-btn,
-body.dark-theme .buy-btn,
 body.dark-theme .btn-primary,
-body.dark-theme .resume-pay-btn,
-body.dark-theme .checkout-submit,
-body.dark-theme .submit-btn,
-body.dark-theme .primary-btn {
+body.dark-theme .resume-pay-btn {
   background: #f5f5f2 !important;
   color: #111 !important;
   border-color: #f5f5f2 !important;
@@ -9919,16 +9909,14 @@ body.dark-theme .order-product-card.active {
   display: none !important;
 }
 
-.payment-methods-icons,
-.payment-methods-text {
+.payment-methods-icons {
   display: flex !important;
   justify-content: center !important;
   flex-wrap: wrap !important;
   gap: 8px !important;
 }
 
-.payment-methods-icons span,
-.payment-methods-text span {
+.payment-methods-icons span {
   width: auto !important;
   height: auto !important;
   padding: 6px 10px !important;
@@ -10109,10 +10097,6 @@ body.dark-theme .order-product-card.active {
 
 .voucher-panel:not([open]) {
   padding: 12px 14px !important;
-}
-
-.voucher-panel:not([open]) .voucher-body {
-  display: none !important;
 }
 
 @media (max-width: 640px) {
@@ -12694,9 +12678,8 @@ body.dark-theme .install-prompt-close {
   }
 }
 
-/* ===== NOTHING COMMERCE MOBILE v1 =====
-   Conversion-first mobile layout. This final layer intentionally normalizes
-   legacy mobile patches without changing desktop or checkout behavior. */
+/* ===== NOTHING COMMERCE MOBILE v2 =====
+   Conversion-first mobile layout plus a single final checkout composition. */
 .catalog-kicker {
   display: inline-flex;
   align-items: center;
@@ -12711,6 +12694,14 @@ body.dark-theme .install-prompt-close {
   font-size: 9px;
   font-weight: 950;
   letter-spacing: 0.12em;
+}
+
+.checkout-sticky-bar button#buyBtn,
+.payment-modal-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
 }
 
 @media (max-width: 768px) {
@@ -13251,8 +13242,8 @@ body.dark-theme .install-prompt-close {
     padding: 0 !important;
   }
 
-  .order-modal-card,
-  .payment-modal-card {
+  .order-modal .order-modal-card,
+  .payment-modal .payment-modal-card {
     width: 100% !important;
     height: 100dvh !important;
     max-width: none !important;
@@ -13262,6 +13253,17 @@ body.dark-theme .install-prompt-close {
     border: 0 !important;
     border-radius: 0 !important;
     overscroll-behavior: contain !important;
+  }
+
+  .order-modal .order-modal-card {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+
+  .payment-modal .payment-modal-card {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    background: #f7f7f4 !important;
   }
 
   .modal-game-banner {
@@ -13290,6 +13292,45 @@ body.dark-theme .install-prompt-close {
     font-size: 9.5px !important;
   }
 
+  .order-choice-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  .order-platform-pills,
+  .order-brand-pills {
+    width: 100% !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    padding: 2px 1px 7px !important;
+    scroll-snap-type: x proximity !important;
+    scrollbar-width: none !important;
+  }
+
+  .order-platform-pill,
+  .order-brand-pill {
+    flex: 0 0 auto !important;
+    min-width: max-content !important;
+    min-height: 44px !important;
+    scroll-snap-align: start !important;
+  }
+
+  .order-product-cards {
+    grid-template-columns: 1fr !important;
+    max-height: none !important;
+    overflow: visible !important;
+    gap: 9px !important;
+    margin-bottom: 4px !important;
+  }
+
+  .order-product-card {
+    width: 100% !important;
+    min-height: 86px !important;
+  }
+
   .field input,
   .field select,
   .voucher-row input {
@@ -13297,10 +13338,38 @@ body.dark-theme .install-prompt-close {
     font-size: 16px !important;
   }
 
+  .modal-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .modal-summary > div {
+    min-height: 68px !important;
+    grid-template-columns: 1fr !important;
+    align-content: center !important;
+    gap: 4px !important;
+    padding: 10px !important;
+    border: 1px solid var(--nb-line) !important;
+    border-radius: 16px !important;
+    background: var(--nb-surface-2) !important;
+  }
+
+  .modal-summary > div:last-child {
+    grid-column: 1 / -1 !important;
+    min-height: 58px !important;
+  }
+
+  .modal-summary strong {
+    text-align: left !important;
+  }
+
   .checkout-sticky-bar {
     position: sticky !important;
     z-index: 30 !important;
     bottom: 0 !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 9px !important;
     margin: 18px -14px 0 !important;
     padding: 11px 14px calc(11px + env(safe-area-inset-bottom, 0px)) !important;
     border-width: 1px 0 0 !important;
@@ -13310,10 +13379,46 @@ body.dark-theme .install-prompt-close {
     -webkit-backdrop-filter: blur(18px) saturate(150%) !important;
   }
 
+  .checkout-sticky-total {
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    padding-inline: 2px !important;
+  }
+
   .checkout-sticky-bar button,
   button#buyBtn {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
     min-height: 48px !important;
     padding-inline: 18px !important;
+    margin: 0 auto !important;
+  }
+
+  .payment-modal-header {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 4 !important;
+    border-radius: 0 !important;
+  }
+
+  .payment-modal-footer {
+    border-radius: 0 !important;
+    padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  .payment-modal-footer-actions,
+  .payment-modal-state-actions {
+    width: 100% !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  .payment-modal-footer-actions .payment-modal-btn,
+  .payment-modal-state-actions .payment-modal-btn {
+    width: 100% !important;
   }
 
   body.install-prompt-open .ae-help-fab,
