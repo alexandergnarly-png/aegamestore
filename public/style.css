@@ -13368,27 +13368,40 @@ body.dark-theme .install-prompt-close {
   .checkout-sticky-bar {
     position: sticky !important;
     z-index: 30 !important;
-    bottom: 0 !important;
+    bottom: max(8px, env(safe-area-inset-bottom, 0px)) !important;
     display: grid !important;
     grid-template-columns: 1fr !important;
     gap: 9px !important;
-    margin: 18px -14px 0 !important;
-    padding: 11px 14px calc(11px + env(safe-area-inset-bottom, 0px)) !important;
-    border-width: 1px 0 0 !important;
-    border-radius: 22px 22px 0 0 !important;
+    width: 100% !important;
+    max-width: 520px !important;
+    margin: 18px auto 0 !important;
+    padding: 11px !important;
+    box-sizing: border-box !important;
+    justify-self: center !important;
+    border-width: 1px !important;
+    border-radius: 22px !important;
     background: color-mix(in srgb, var(--nb-surface) 94%, transparent) !important;
+    box-shadow: 0 -10px 28px rgba(17, 17, 17, 0.1) !important;
     backdrop-filter: blur(18px) saturate(150%) !important;
     -webkit-backdrop-filter: blur(18px) saturate(150%) !important;
+    transform: none !important;
   }
 
   .checkout-sticky-total {
     width: 100% !important;
     display: flex !important;
-    flex-direction: row !important;
+    flex-direction: column !important;
     align-items: center !important;
-    justify-content: space-between !important;
-    gap: 12px !important;
-    padding-inline: 2px !important;
+    justify-content: center !important;
+    gap: 2px !important;
+    padding-inline: 0 !important;
+    text-align: center !important;
+  }
+
+  .checkout-sticky-total small,
+  .checkout-sticky-total strong {
+    width: 100% !important;
+    text-align: center !important;
   }
 
   .checkout-sticky-bar button,
@@ -13398,6 +13411,11 @@ body.dark-theme .install-prompt-close {
     min-height: 48px !important;
     padding-inline: 18px !important;
     margin: 0 auto !important;
+  }
+
+  .checkout-sticky-bar button#buyBtn:hover,
+  .checkout-sticky-bar button#buyBtn:active {
+    transform: none !important;
   }
 
   .payment-modal-header {
