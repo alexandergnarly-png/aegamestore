@@ -8,24 +8,27 @@ export function getGameThumbnail(game: string) {
   const normalized = normalizeGameName(game);
 
   const thumbnails: Record<string, string> = {
-    deltaforce: "/images/games/delta-force.jpg",
+    deltaforce: "/images/games/delta-force.webp",
 
-    pubg: "/images/games/pubg.jpg",
-    pubgm: "/images/games/pubg.jpg",
-    pubgmobile: "/images/games/pubg.jpg",
+    pubg: "/images/games/pubg.webp",
+    pubgm: "/images/games/pubg.webp",
+    pubgmobile: "/images/games/pubg.webp",
 
-    bloodstrike: "/images/games/blood-strike.jpg",
+    bloodstrike: "/images/games/blood-strike.webp",
 
-    freefire: "/images/games/free-fire.jpg",
-    ff: "/images/games/free-fire.jpg",
+    freefire: "/images/games/free-fire.webp",
+    ff: "/images/games/free-fire.webp",
 
-    mlbb: "/images/games/mlbb.jpg",
-    mobilelegends: "/images/games/mlbb.jpg",
-    mobilelegend: "/images/games/mlbb.jpg",
+    mlbb: "/images/games/mlbb.webp",
+    mobilelegends: "/images/games/mlbb.webp",
+    mobilelegend: "/images/games/mlbb.webp",
 
-    codm: "/images/games/codm.jpg",
-    callofdutymobile: "/images/games/codm.jpg",
-    callofduty: "/images/games/codm.jpg",
+    codm: "/images/games/codm.webp",
+    callofdutymobile: "/images/games/codm.webp",
+    callofduty: "/images/games/codm.webp",
+
+    arenabreakout: "/images/games/arena-breakout.webp",
+    valorant: "/images/games/valorant.webp",
   };
 
   return thumbnails[normalized] || "";

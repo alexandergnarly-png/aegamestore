@@ -113,6 +113,7 @@ const translations = {
     recentTitle: "Terakhir dilihat",
     recentClear: "Bersihkan",
     cardFromPrice: "Mulai",
+    cardChooseProduct: "Pilih Produk",
     cardBadgeHot: "HOT",
     cardBadgeBest: "BEST SELLER",
     cardBadgeNew: "NEW",
@@ -306,6 +307,7 @@ const translations = {
     recentTitle: "Recently viewed",
     recentClear: "Clear",
     cardFromPrice: "From",
+    cardChooseProduct: "Choose Product",
     cardBadgeHot: "HOT",
     cardBadgeBest: "BEST SELLER",
     cardBadgeNew: "NEW",
@@ -463,29 +465,28 @@ function setLanguage(lang) {
 let allProducts = [];
 
 const gameImages = {
-  pubgmobile:
-    "https://cdn.cloudflare.steamstatic.com/steam/apps/578080/header.jpg",
-  pubgm: "https://cdn.cloudflare.steamstatic.com/steam/apps/578080/header.jpg",
+  pubgmobile: "/images/games/pubg.webp",
+  pubgm: "/images/games/pubg.webp",
 
-  mobilelegends: "/images/games/mlbb.png",
-  mobilelegend: "/images/games/mlbb.png",
-  mlbb: "/images/games/mlbb.png",
+  mobilelegends: "/images/games/mlbb.webp",
+  mobilelegend: "/images/games/mlbb.webp",
+  mlbb: "/images/games/mlbb.webp",
 
-  freefire:
-    "https://play-lh.googleusercontent.com/6llpraFcTI0rEUuRpWEG9NWWblvm106y5JXcDzu60ACuaUYDD3i70a-p9_QM65NsGDE=s512",
-  ff: "https://play-lh.googleusercontent.com/6llpraFcTI0rEUuRpWEG9NWWblvm106y5JXcDzu60ACuaUYDD3i70a-p9_QM65NsGDE=s512",
+  freefire: "/images/games/free-fire.webp",
+  ff: "/images/games/free-fire.webp",
 
-  codm: "/images/games/codm.png",
-  callofdutymobile: "/images/games/codm.png",
-  callofduty: "/images/games/codm.png",
+  codm: "/images/games/codm.webp",
+  callofdutymobile: "/images/games/codm.webp",
+  callofduty: "/images/games/codm.webp",
 
-  bloodstrike: "https://www.blood-strike.com/favicon.ico",
+  bloodstrike: "/images/games/blood-strike.webp",
 
   deltaforce: "/images/games/delta-force.webp",
+  arenabreakout: "/images/games/arena-breakout.webp",
+  valorant: "/images/games/valorant.webp",
 };
 
-const fallbackImage =
-  "https://placehold.co/400x220/e0f2fe/0284c7?text=AE+Game+Store";
+const fallbackImage = "/og-ae-game-store.jpg";
 
 function normalizeGameImageKey(gameName) {
   return String(gameName || "")
@@ -1244,7 +1245,7 @@ function renderGames() {
   </div>
 
   <span class="game-card-cta">
-    Choose Product →
+    ${escapeHtml(t.cardChooseProduct)} →
   </span>
 </div>
     `;

@@ -13069,7 +13069,7 @@ body.dark-theme .install-prompt-close {
   .game-card:hover,
   .game-card.active {
     min-width: 0 !important;
-    min-height: 284px !important;
+    min-height: 248px !important;
     display: flex !important;
     flex-direction: column !important;
     padding: 0 !important;
@@ -13087,7 +13087,7 @@ body.dark-theme .install-prompt-close {
     width: 100% !important;
     height: auto !important;
     min-height: 0 !important;
-    aspect-ratio: 1 / 0.72 !important;
+    aspect-ratio: 16 / 9 !important;
     border-radius: 0 !important;
     border-bottom: 1px solid var(--nb-line) !important;
   }
@@ -13106,8 +13106,8 @@ body.dark-theme .install-prompt-close {
     flex: 1 1 auto !important;
     display: flex !important;
     flex-direction: column !important;
-    gap: 8px !important;
-    padding: 11px !important;
+    gap: 6px !important;
+    padding: 9px !important;
   }
 
   .game-card-status-row {
@@ -13128,7 +13128,7 @@ body.dark-theme .install-prompt-close {
   }
 
   .game-card-title {
-    min-height: 32px !important;
+    min-height: 30px !important;
     display: -webkit-box !important;
     overflow: hidden !important;
     font-size: 14px !important;
@@ -13180,7 +13180,7 @@ body.dark-theme .install-prompt-close {
 
   .game-card-cta {
     width: 100% !important;
-    min-height: 36px !important;
+    min-height: 34px !important;
     margin-top: auto !important;
     display: inline-flex !important;
     align-items: center !important;
@@ -13194,6 +13194,8 @@ body.dark-theme .install-prompt-close {
   }
 
   .game-card-fav {
+    position: absolute !important;
+    z-index: 5 !important;
     width: 40px !important;
     height: 40px !important;
     min-width: 40px !important;
@@ -13442,16 +13444,54 @@ body.dark-theme .install-prompt-close {
 
   .game-grid,
   .compact-game-grid {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
   }
 
   .game-card,
   .game-card:hover,
   .game-card.active {
-    min-height: 0 !important;
+    min-height: 224px !important;
+    border-radius: 16px !important;
   }
 
   .game-card-thumb {
-    aspect-ratio: 16 / 8.5 !important;
+    aspect-ratio: 16 / 9 !important;
+  }
+
+  .game-card-body {
+    gap: 5px !important;
+    padding: 8px !important;
+  }
+
+  .game-card-fav {
+    position: absolute !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    top: 6px !important;
+    right: 6px !important;
+  }
+
+  .game-card-title {
+    min-height: 27px !important;
+    font-size: 12px !important;
+  }
+
+  .game-card-price b {
+    font-size: 12px !important;
+  }
+
+  .game-card-stock,
+  .game-status-badge {
+    padding: 3px 5px !important;
+    font-size: 7px !important;
+  }
+
+  .game-card-cta {
+    min-height: 31px !important;
+    padding-inline: 6px !important;
+    border-radius: 10px !important;
+    font-size: 8px !important;
   }
 }
