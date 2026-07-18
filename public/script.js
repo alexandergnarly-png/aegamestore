@@ -17,9 +17,8 @@ const translations = {
     howToBuy: "Cara Beli",
     searchGamePlaceholder: "Cari nama game (contoh: PUBG)...",
     processingOrder: "Memproses pesanan...",
-    heroTitle: "Top up key game tanpa ribet.",
-    heroDesc:
-      "Pilih produk, bayar, lalu tunggu key dikirim otomatis setelah pembayaran berhasil.",
+    heroTitle: "Key game, simpel dan cepat.",
+    heroDesc: "Pilih game, bayar aman, dan key dikirim otomatis.",
     totalPayment: "Total Pembayaran",
     previewEmpty: "Produk belum dipilih",
     previewWait: "Silakan pilih platform dan produk",
@@ -210,9 +209,8 @@ const translations = {
     howToBuy: "How it works",
     searchGamePlaceholder: "Search game name (e.g. PUBG)...",
     processingOrder: "Processing order...",
-    heroTitle: "Top Up Game keys, simple and fast.",
-    heroDesc:
-      "Choose a product, complete the payment, and your key will be delivered automatically.",
+    heroTitle: "Game keys, simple and fast.",
+    heroDesc: "Choose a game, pay securely, and get your key automatically.",
     totalPayment: "Total Payment",
     previewEmpty: "No product selected",
     previewWait: "Please select platform and product",
