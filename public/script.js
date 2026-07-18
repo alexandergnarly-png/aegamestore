@@ -481,7 +481,7 @@ const gameImages = {
 
   bloodstrike: "https://www.blood-strike.com/favicon.ico",
 
-  deltaforce: "/images/games/delta-force.jpg",
+  deltaforce: "/images/games/delta-force.webp",
 };
 
 const fallbackImage =

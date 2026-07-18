@@ -3,6 +3,7 @@ const express = require("express");
 const midtransClient = require("midtrans-client");
 const path = require("path");
 const cookieParser = require("cookie-parser");
+const compression = require("compression");
 const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
 const helmet = require("helmet");
@@ -16,6 +17,7 @@ app.set("trust proxy", 1);
 const port = process.env.PORT || 3000;
 const isMidtransProduction = process.env.MIDTRANS_IS_PRODUCTION === "true";
 const jwtSecret = String(process.env.JWT_SECRET || "").trim();
+let isShuttingDown = false;
 
 if (!jwtSecret || jwtSecret.length < 32) {
   throw new Error("JWT_SECRET wajib diisi minimal 32 karakter");
@@ -1257,6 +1259,8 @@ async function syncVipStoreMappedProducts(options = {}) {
 }
 
 let vipStoreAutoSyncRunning = false;
+let vipStoreStartupTimer = null;
+let vipStoreIntervalTimer = null;
 
 async function runVipStoreAutoSync(reason = "interval") {
   if (!isVipStoreConfigured() || vipStoreAutoSyncRunning) return;
@@ -1285,12 +1289,35 @@ function startVipStoreAutoSync() {
     60 * 1000,
   );
 
-  setTimeout(() => runVipStoreAutoSync("startup"), 30 * 1000);
+  vipStoreStartupTimer = setTimeout(
+    () => runVipStoreAutoSync("startup"),
+    30 * 1000,
+  );
+  if (typeof vipStoreStartupTimer.unref === "function") {
+    vipStoreStartupTimer.unref();
+  }
 
-  const timer = setInterval(() => runVipStoreAutoSync("interval"), intervalMs);
-  if (typeof timer.unref === "function") timer.unref();
+  vipStoreIntervalTimer = setInterval(
+    () => runVipStoreAutoSync("interval"),
+    intervalMs,
+  );
+  if (typeof vipStoreIntervalTimer.unref === "function") {
+    vipStoreIntervalTimer.unref();
+  }
 
   console.log(`VIP Store auto sync ready every ${Math.round(intervalMs / 1000)}s`);
+}
+
+function stopVipStoreAutoSync() {
+  if (vipStoreStartupTimer) {
+    clearTimeout(vipStoreStartupTimer);
+    vipStoreStartupTimer = null;
+  }
+
+  if (vipStoreIntervalTimer) {
+    clearInterval(vipStoreIntervalTimer);
+    vipStoreIntervalTimer = null;
+  }
 }
 
 
@@ -2427,6 +2454,12 @@ app.use(
   }),
 );
 
+app.use(
+  compression({
+    threshold: 1024,
+  }),
+);
+
 app.use(express.json({ limit: "50kb" }));
 app.use(cookieParser());
 
@@ -2440,6 +2473,28 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => {
+  const nonIndexablePaths = [
+    "/account",
+    "/admin",
+    "/ae-auth",
+    "/ae-control",
+    "/auth",
+    "/health",
+    "/offline",
+    "/payment",
+    "/result",
+  ];
+
+  if (
+    nonIndexablePaths.some(
+      (routePath) =>
+        req.path === routePath || req.path.startsWith(`${routePath}/`),
+    ) ||
+    req.path.startsWith("/api/")
+  ) {
+    res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive");
+  }
+
   if (
     req.path.startsWith("/orders") ||
     req.path.startsWith("/order/") ||
@@ -2473,21 +2528,49 @@ app.use(
     etag: true,
     maxAge: 0,
     setHeaders: (res, filePath) => {
+      const originalUrl = String(res.req?.originalUrl || "");
+      const isVersionedAsset = /[?&]v=[a-zA-Z0-9._-]+(?:&|$)/.test(
+        originalUrl,
+      );
+      const isStyleOrScript =
+        filePath.endsWith(".css") || filePath.endsWith(".js");
+      const isLongLivedAsset =
+        /\.(?:avif|gif|ico|jpe?g|png|svg|webp|woff2?)$/i.test(filePath);
+
       if (
         filePath.endsWith(".html") ||
-        filePath.endsWith(".css") ||
-        filePath.endsWith(".js") ||
         filePath.endsWith("service-worker.js")
       ) {
         res.setHeader("Cache-Control", "no-cache");
+      } else if (isStyleOrScript && isVersionedAsset) {
+        res.setHeader(
+          "Cache-Control",
+          "public, max-age=31536000, immutable",
+        );
+      } else if (isStyleOrScript) {
+        res.setHeader("Cache-Control", "no-cache");
+      } else if (isLongLivedAsset) {
+        res.setHeader("Cache-Control", "public, max-age=604800");
+      } else if (filePath.endsWith("manifest.json")) {
+        res.setHeader("Cache-Control", "public, max-age=86400");
       }
     },
   }),
 );
 
 app.get("/health", async (req, res) => {
+  res.setHeader("Cache-Control", "no-store");
+
+  if (isShuttingDown) {
+    return res.status(503).json({
+      ok: false,
+      db: false,
+      message: "Server is shutting down",
+    });
+  }
+
   try {
-    await query("SELECT 1");
+    await db.query({ text: "SELECT 1", query_timeout: 3000 });
     return res.json({
       ok: true,
       db: true,
@@ -7066,7 +7149,41 @@ app.get("/admin-sessions", requireAdminAuth, async (req, res) => {
   }
 });
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log("Server jalan di port", port);
   startVipStoreAutoSync();
 });
+
+async function shutdown(signal) {
+  if (isShuttingDown) return;
+
+  isShuttingDown = true;
+  stopVipStoreAutoSync();
+  console.log(`${signal} diterima, memulai graceful shutdown`);
+
+  const forceShutdownTimer = setTimeout(() => {
+    console.error("Graceful shutdown timeout, proses dihentikan paksa");
+    process.exit(1);
+  }, 25 * 1000);
+  if (typeof forceShutdownTimer.unref === "function") {
+    forceShutdownTimer.unref();
+  }
+
+  server.close(async (serverError) => {
+    try {
+      await db.end();
+      clearTimeout(forceShutdownTimer);
+      process.exit(serverError ? 1 : 0);
+    } catch (dbError) {
+      console.error("ERROR CLOSE DATABASE POOL:", dbError);
+      process.exit(1);
+    }
+  });
+
+  if (typeof server.closeIdleConnections === "function") {
+    server.closeIdleConnections();
+  }
+}
+
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT", () => shutdown("SIGINT"));

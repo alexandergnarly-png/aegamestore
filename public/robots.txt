@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+Disallow: /account
+Disallow: /admin
+Disallow: /ae-auth
+Disallow: /ae-control
+Disallow: /api/
+Disallow: /auth
+Disallow: /health
+Disallow: /payment
+Disallow: /result
+
+Sitemap: https://aegamestore.com/sitemap.xml
