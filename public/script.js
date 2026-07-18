@@ -4275,6 +4275,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const banner = document.getElementById("installPromptBanner");
     const action = document.getElementById("installPromptAction");
     const closeBtn = document.getElementById("installPromptClose");
+    let showTimer = null;
 
     if (!banner || !action || !closeBtn) return;
 
@@ -4290,7 +4291,18 @@ document.addEventListener("DOMContentLoaded", () => {
       document.body.classList.add("install-prompt-open");
     }
 
+    function scheduleInstallBanner() {
+      if (showTimer) window.clearTimeout(showTimer);
+      showTimer = window.setTimeout(() => {
+        if (!state.deferredInstallPrompt) return;
+        if (document.body.classList.contains("order-modal-open")) return;
+        if (document.querySelector(".payment-modal.show")) return;
+        showInstallBanner();
+      }, 30 * 1000);
+    }
+
     function hideInstallBanner() {
+      if (showTimer) window.clearTimeout(showTimer);
       banner.hidden = true;
       document.body.classList.remove("install-prompt-open");
       localStorage.setItem(STORAGE_KEYS.installDismissed, String(Date.now()));
@@ -4299,7 +4311,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener("beforeinstallprompt", (event) => {
       event.preventDefault();
       state.deferredInstallPrompt = event;
-      showInstallBanner();
+      scheduleInstallBanner();
     });
 
     action.addEventListener("click", async (event) => {
