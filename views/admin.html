@@ -667,8 +667,119 @@
         margin-bottom: 14px;
       }
 
-      .wallet-grant-form { align-items: end; }
-      .wallet-grant-form .field { display: grid; gap: 6px; }
+      .wallet-icon-svg {
+        width: 1.25em;
+        height: 1.25em;
+        display: block;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .wallet-hero {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 18px;
+        padding: 20px;
+        border: 1px solid var(--line-strong);
+        border-radius: 30px;
+        background: var(--ink);
+        color: var(--surface);
+        box-shadow: var(--shadow);
+      }
+
+      .wallet-hero-copy {
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .wallet-hero-icon {
+        width: 56px;
+        height: 56px;
+        flex: 0 0 56px;
+        display: grid;
+        place-items: center;
+        border: 1px solid color-mix(in srgb, var(--surface) 28%, transparent);
+        border-radius: 20px;
+        background: color-mix(in srgb, var(--surface) 12%, transparent);
+      }
+
+      .wallet-hero-icon .wallet-icon-svg {
+        width: 27px;
+        height: 27px;
+      }
+
+      .wallet-hero h1 {
+        font-size: clamp(24px, 4vw, 34px);
+        line-height: 1;
+        letter-spacing: -0.055em;
+      }
+
+      .wallet-hero p {
+        margin-top: 6px;
+        color: color-mix(in srgb, var(--surface) 68%, transparent);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .wallet-hero .section-badge {
+        flex: 0 0 auto;
+        border-color: color-mix(in srgb, var(--surface) 25%, transparent);
+        background: color-mix(in srgb, var(--surface) 12%, transparent);
+        color: var(--surface);
+      }
+
+      .wallet-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.45fr) minmax(300px, 0.75fr);
+        gap: 18px;
+        align-items: start;
+      }
+
+      .wallet-grid > .card {
+        margin-bottom: 0;
+      }
+
+      .wallet-filter-toolbar {
+        display: grid;
+        grid-template-columns: minmax(180px, 1fr) auto;
+        align-items: end;
+      }
+
+      .wallet-filter-toolbar .field,
+      .wallet-grant-form .field {
+        display: grid;
+        gap: 6px;
+      }
+
+      .wallet-grant-form {
+        display: grid;
+        gap: 12px;
+        margin-bottom: 0;
+      }
+
+      .wallet-grant-form button {
+        width: 100%;
+        margin-top: 2px;
+      }
+
+      .wallet-note {
+        margin: -2px 0 14px;
+        padding: 11px 12px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: var(--surface-2);
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 750;
+        line-height: 1.5;
+      }
 
       .field,
       .field-wide,
@@ -1518,6 +1629,10 @@
         .stats {
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
+
+        .wallet-grid {
+          grid-template-columns: 1fr;
+        }
       }
 
       @media (max-width: 768px) {
@@ -1619,6 +1734,27 @@
 
         .card-title-wrap h2 {
           font-size: 20px;
+        }
+
+        .wallet-hero {
+          align-items: flex-start;
+          padding: 16px;
+          border-radius: 25px;
+        }
+
+        .wallet-hero-icon {
+          width: 48px;
+          height: 48px;
+          flex-basis: 48px;
+          border-radius: 17px;
+        }
+
+        .wallet-hero .section-badge {
+          display: none;
+        }
+
+        .wallet-filter-toolbar {
+          grid-template-columns: 1fr;
         }
 
         .toolbar,
@@ -1723,6 +1859,11 @@
           letter-spacing: 0.08em;
           text-align: left;
           text-transform: uppercase;
+        }
+
+        #walletTopupTableBody .empty {
+          justify-content: center;
+          text-align: center;
         }
 
         tbody td.action-cell::before,
@@ -2409,7 +2550,7 @@
           <span>Prestige Discount</span>
         </button>
         <button class="nav-btn" data-section="wallet" onclick="showSection('wallet', this)">
-          <span class="nav-ico" aria-hidden="true">ðŸ’³</span>
+          <span class="nav-ico" aria-hidden="true"><svg class="wallet-icon-svg" viewBox="0 0 24 24"><path d="M4 7.5h14.5A1.5 1.5 0 0 1 20 9v9H5.5A2.5 2.5 0 0 1 3 15.5V6a2 2 0 0 1 2-2h12"/><path d="M3 7.5h14M16 12h4"/></svg></span>
           <span>AE Credit</span>
         </button>
       </nav>
@@ -3599,18 +3740,31 @@
     </section>
 
     <section id="section-wallet" class="admin-section">
-      <div class="card delay-1">
-        <div class="card-header"><div class="card-title-wrap"><h2>AE Credit · Verifikasi QRIS</h2><p class="card-subtitle">Cek mutasi QRIS sebelum menyetujui saldo buyer.</p></div><div class="section-badge" id="walletPendingBadge">Pending</div></div>
-        <div class="toolbar"><div class="field"><select id="walletStatusFilter" onchange="loadWalletTopups()"><option value="pending">Menunggu</option><option value="approved">Disetujui</option><option value="rejected">Ditolak</option></select></div><button type="button" onclick="loadWalletTopups()">Refresh</button></div>
-        <div class="table-wrap"><table><thead><tr><th>Buyer</th><th>Nominal</th><th>Referensi</th><th>Dibuat</th><th>Aksi</th></tr></thead><tbody id="walletTopupTableBody"><tr><td colspan="5">Memuat...</td></tr></tbody></table></div>
+      <div class="wallet-hero delay-1">
+        <div class="wallet-hero-copy">
+          <div class="wallet-hero-icon" aria-hidden="true"><svg class="wallet-icon-svg" viewBox="0 0 24 24"><path d="M4 7.5h14.5A1.5 1.5 0 0 1 20 9v9H5.5A2.5 2.5 0 0 1 3 15.5V6a2 2 0 0 1 2-2h12"/><path d="M3 7.5h14M16 12h4"/></svg></div>
+          <div><h1>AE Credit</h1><p>Verifikasi top up dan kelola saldo buyer dari satu tempat.</p></div>
+        </div>
+        <div class="section-badge">Owner Wallet</div>
       </div>
-      <div class="card delay-2">
-        <div class="card-header"><div class="card-title-wrap"><h2>Owner Grant Credit</h2><p class="card-subtitle">Tambahkan saldo internal untuk bonus, kompensasi, atau akun owner.</p></div><div class="section-badge">Internal</div></div>
-        <div class="toolbar wallet-grant-form">
-          <div class="field"><label for="walletGrantUsername">Username buyer</label><input id="walletGrantUsername" type="text" maxlength="80" placeholder="Contoh: zahir"></div>
-          <div class="field"><label for="walletGrantAmount">Nominal</label><input id="walletGrantAmount" type="number" min="1000" max="2000000" step="1000" placeholder="Rp50.000"></div>
-          <div class="field"><label for="walletGrantReason">Alasan wajib</label><input id="walletGrantReason" type="text" maxlength="300" placeholder="Contoh: bonus owner"></div>
-          <button type="button" onclick="grantWalletCredit()">Tambah Saldo</button>
+      <div class="wallet-grid">
+        <div class="card delay-1">
+          <div class="card-header"><div class="card-title-wrap"><h2>Verifikasi QRIS</h2><p class="card-subtitle">Cocokkan mutasi QRIS sebelum saldo masuk ke akun buyer.</p></div><div class="section-badge" id="walletPendingBadge">0 menunggu</div></div>
+          <div class="toolbar wallet-filter-toolbar">
+            <div class="field"><label for="walletStatusFilter">Status request</label><select id="walletStatusFilter" onchange="loadWalletTopups()"><option value="pending">Menunggu verifikasi</option><option value="approved">Sudah disetujui</option><option value="rejected">Sudah ditolak</option></select></div>
+            <button type="button" onclick="loadWalletTopups()">Refresh Data</button>
+          </div>
+          <div class="table-wrap"><table><thead><tr><th>Buyer</th><th>Nominal</th><th>Referensi</th><th>Dibuat</th><th>Aksi</th></tr></thead><tbody id="walletTopupTableBody"><tr><td class="empty" colspan="5">Memuat...</td></tr></tbody></table></div>
+        </div>
+        <div class="card delay-2">
+          <div class="card-header"><div class="card-title-wrap"><h2>Grant Credit</h2><p class="card-subtitle">Tambahkan saldo internal langsung ke akun yang dipilih.</p></div><div class="section-badge">Owner Only</div></div>
+          <div class="wallet-note">Setiap grant tercatat di ledger beserta alasan dan akun admin.</div>
+          <div class="toolbar wallet-grant-form">
+            <div class="field"><label for="walletGrantUsername">Username buyer</label><input id="walletGrantUsername" type="text" maxlength="80" autocomplete="off" placeholder="Contoh: zahir"></div>
+            <div class="field"><label for="walletGrantAmount">Nominal credit</label><input id="walletGrantAmount" type="number" min="1000" max="2000000" step="1000" inputmode="numeric" placeholder="Contoh: 50000"></div>
+            <div class="field"><label for="walletGrantReason">Alasan grant</label><input id="walletGrantReason" type="text" maxlength="300" placeholder="Contoh: bonus owner"></div>
+            <button type="button" onclick="grantWalletCredit()">Tambah AE Credit</button>
+          </div>
         </div>
       </div>
     </section>
@@ -3700,7 +3854,7 @@
           class="admin-more-sheet-item"
           onclick="bottomNavGo('wallet'); closeMoreSheet();"
         >
-          <span class="ico">ðŸ’³</span>
+          <span class="ico" aria-hidden="true"><svg class="wallet-icon-svg" viewBox="0 0 24 24"><path d="M4 7.5h14.5A1.5 1.5 0 0 1 20 9v9H5.5A2.5 2.5 0 0 1 3 15.5V6a2 2 0 0 1 2-2h12"/><path d="M3 7.5h14M16 12h4"/></svg></span>
           <span>AE Credit</span>
         </button>
         <button
@@ -3828,16 +3982,22 @@
         const status = document.getElementById("walletStatusFilter")?.value || "pending";
         const body = document.getElementById("walletTopupTableBody");
         if (!body) return;
-        body.innerHTML = `<tr><td colspan="5">Memuat...</td></tr>`;
+        body.innerHTML = `<tr><td class="empty" colspan="5">Memuat...</td></tr>`;
         try {
           const res = await fetch(`/api/admin/wallet/topups?status=${encodeURIComponent(status)}`);
           const data = await res.json();
           if (!res.ok) throw new Error(data.message || "Gagal memuat");
           const rows = data.topups || [];
           const pendingBadge = document.getElementById("walletPendingBadge");
-          if (pendingBadge) pendingBadge.textContent = `${rows.length} ${status}`;
-          body.innerHTML = rows.length ? rows.map((row) => `<tr><td><strong>${escapeHtml(row.username || `User #${row.user_id}`)}</strong><br><small>${escapeHtml(row.buyer_note || "")}</small></td><td><strong>${formatRupiah(row.amount)}</strong><br><small>Saldo: ${formatRupiah(row.balance)}</small></td><td>${escapeHtml(row.payment_reference || "-")}</td><td>${formatTanggal(row.created_at)}</td><td>${status === "pending" ? `<button class="small-btn" onclick="approveWalletTopup('${row.id}')">Approve</button> <button class="small-btn danger" onclick="rejectWalletTopup('${row.id}')">Reject</button>` : escapeHtml(row.admin_note || row.reviewed_by || "-")}</td></tr>`).join("") : `<tr><td colspan="5">Tidak ada request ${status}.</td></tr>`;
-        } catch (err) { body.innerHTML = `<tr><td colspan="5">${escapeHtml(err.message)}</td></tr>`; }
+          if (pendingBadge) pendingBadge.textContent = `${rows.length} ${status === "pending" ? "menunggu" : status === "approved" ? "disetujui" : "ditolak"}`;
+          body.innerHTML = rows.length ? rows.map((row) => `<tr>
+            <td data-label="Buyer"><strong>${escapeHtml(row.username || `User #${row.user_id}`)}</strong><br><small>${escapeHtml(row.buyer_note || "Tanpa catatan")}</small></td>
+            <td data-label="Nominal"><strong>${formatRupiah(row.amount)}</strong><br><small>Saldo: ${formatRupiah(row.balance)}</small></td>
+            <td data-label="Referensi">${escapeHtml(row.payment_reference || "-")}</td>
+            <td data-label="Dibuat">${formatTanggal(row.created_at)}</td>
+            <td data-label="Aksi">${status === "pending" ? `<div class="row-action-group"><button class="small-btn" onclick="approveWalletTopup('${row.id}')">Setujui</button><button class="small-btn danger" onclick="rejectWalletTopup('${row.id}')">Tolak</button></div>` : escapeHtml(row.admin_note || row.reviewed_by || "-")}</td>
+          </tr>`).join("") : `<tr><td class="empty" colspan="5">Tidak ada request dengan status ini.</td></tr>`;
+        } catch (err) { body.innerHTML = `<tr><td class="empty" colspan="5">${escapeHtml(err.message)}</td></tr>`; }
       }
 
       async function approveWalletTopup(id) {
