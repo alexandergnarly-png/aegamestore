@@ -8298,5 +8298,25 @@
         return result;
       };
     </script>
+    <script>
+      (() => {
+        const select = document.getElementById("badgeOverrideSelect");
+        if (!select) return;
+        const current = select.value;
+        select.innerHTML = `
+          <option value="">Auto (berdasarkan aktivitas)</option>
+          <optgroup label="Tier otomatis">
+            <option value="entry">Rookie</option>
+            <option value="verified">Verified</option>
+            <option value="prime">Vanguard</option>
+            <option value="prestige">Prestige</option>
+            <option value="sovereign">Sovereign</option>
+          </optgroup>
+          <optgroup label="Badge spesial">
+            <option value="advocate">Advocate</option>
+          </optgroup>`;
+        select.value = current || "prestige";
+      })();
+    </script>
   </body>
 </html>

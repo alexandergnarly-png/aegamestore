@@ -492,6 +492,93 @@
         line-height: 1.5;
       }
 
+      .badge-tier-roadmap {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 5px;
+        padding: 8px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: var(--surface);
+      }
+
+      .badge-tier-step {
+        min-width: 0;
+        display: grid;
+        justify-items: center;
+        gap: 4px;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      .badge-tier-step-icon {
+        width: 25px;
+        height: 25px;
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--line);
+        border-radius: 50%;
+        background: var(--soft-2);
+        font-size: 11px;
+        filter: grayscale(1);
+      }
+
+      .badge-tier-step-label {
+        overflow: hidden;
+        width: 100%;
+        font-size: 8px;
+        font-weight: 900;
+        line-height: 1.15;
+        text-overflow: ellipsis;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+
+      .badge-tier-step.is-complete .badge-tier-step-icon,
+      .badge-tier-step.is-current .badge-tier-step-icon {
+        border-color: var(--ink);
+        background: var(--ink);
+        color: var(--paper);
+        filter: none;
+      }
+
+      .badge-tier-step.is-current .badge-tier-step-label {
+        color: var(--ink);
+      }
+
+      .badge-progress {
+        display: grid;
+        gap: 6px;
+      }
+
+      .badge-progress-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+
+      .badge-progress-head strong {
+        color: var(--ink);
+      }
+
+      .badge-progress-track {
+        height: 7px;
+        overflow: hidden;
+        border-radius: var(--radius-pill);
+        background: var(--soft);
+      }
+
+      .badge-progress-fill {
+        height: 100%;
+        border-radius: inherit;
+        background: var(--ink);
+        transition: width 0.25s ease;
+      }
+
       .buyer-badge.entry {
         background: var(--soft);
       }
@@ -1785,6 +1872,9 @@
           paidOrder: "order sukses",
           totalSpend: "total belanja",
           badgeBenefitsTitle: "Manfaat Badge",
+          badgeJourneyTitle: "Perjalanan Tier",
+          badgeProgressLabel: "Progress",
+          badgeHighestTitle: "Tier Tertinggi",
           badgeNextTitle: "Target Berikutnya",
           badgeBenefitFallback:
             "Benefit badge akan muncul setelah data akun dimuat.",
@@ -1883,6 +1973,9 @@
           paidOrder: "successful orders",
           totalSpend: "total spent",
           badgeBenefitsTitle: "Badge Benefits",
+          badgeJourneyTitle: "Tier Journey",
+          badgeProgressLabel: "Progress",
+          badgeHighestTitle: "Highest Tier",
           badgeNextTitle: "Next Target",
           badgeBenefitFallback:
             "Badge benefits will appear after account data is loaded.",
@@ -2082,7 +2175,7 @@
           badgeBox.innerHTML = `
             <span class="buyer-badge ${badge.code || "entry"}">
               <span aria-hidden="true">${badge.emoji || "◇"}</span>
-              <span>${escapeHtml(badge.label || "Entry")}</span>
+              <span>${escapeHtml(badge.label || "Rookie")}</span>
             </span>
           `;
         }
@@ -2100,6 +2193,19 @@
         const description = getLocalizedBadgeDescription(badge);
         const progressMessage = getLocalizedProgressMessage(progress);
         const nextLabel = progress?.nextBadge?.label || "";
+        const ladder = Array.isArray(data.badgeLadder) ? data.badgeLadder : [];
+        const currentProgressCode = String(
+          progress?.currentBadge?.code || badge.code || "entry",
+        ).toLowerCase();
+        const currentRank = Math.max(
+          ladder.findIndex((tier) => tier.code === currentProgressCode),
+          0,
+        );
+        const progressPercent = Math.max(
+          0,
+          Math.min(Number(progress?.progress_percent || 0), 100),
+        );
+        const highestTier = Boolean(progress?.is_highest_tier);
 
         if (!benefits.length && !description && !progressMessage) {
           benefitBox.hidden = true;
@@ -2109,17 +2215,44 @@
 
         benefitBox.hidden = false;
         benefitBox.innerHTML = `
-          <div class="badge-benefit-title">${tAccount("badgeBenefitsTitle")}</div>
+          <div class="badge-benefit-title">${escapeHtml(badge.label || "Rookie")} · ${tAccount("badgeBenefitsTitle")}</div>
           <div class="badge-benefit-desc">${escapeHtml(description || tAccount("badgeBenefitFallback"))}</div>
           <ul class="badge-benefit-list">
             ${benefits.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
           </ul>
           ${
-            progressMessage
+            ladder.length
+              ? `
+            <div class="badge-progress">
+              <div class="badge-benefit-title">${tAccount("badgeJourneyTitle")}</div>
+              <div class="badge-tier-roadmap" aria-label="${escapeHtml(tAccount("badgeJourneyTitle"))}">
+                ${ladder
+                  .map(
+                    (tier, index) => `
+                  <div class="badge-tier-step ${index < currentRank ? "is-complete" : ""} ${index === currentRank ? "is-current" : ""}">
+                    <span class="badge-tier-step-icon" aria-hidden="true">${escapeHtml(tier.emoji || "◇")}</span>
+                    <span class="badge-tier-step-label">${escapeHtml(tier.label || "")}</span>
+                  </div>
+                `,
+                  )
+                  .join("")}
+              </div>
+            </div>
+          `
+              : ""
+          }
+          ${
+            progressMessage || highestTier
               ? `
             <div class="badge-next-target">
-              <strong>${tAccount("badgeNextTitle")}${nextLabel ? `: ${escapeHtml(nextLabel)}` : ""}</strong><br />
-              ${escapeHtml(progressMessage)}
+              <div class="badge-progress-head">
+                <strong>${highestTier ? tAccount("badgeHighestTitle") : `${tAccount("badgeNextTitle")}: ${escapeHtml(nextLabel)}`}</strong>
+                <span>${progressPercent}%</span>
+              </div>
+              <div class="badge-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progressPercent}">
+                <span class="badge-progress-fill" style="width: ${progressPercent}%"></span>
+              </div>
+              <div>${escapeHtml(highestTier ? getLocalizedProgressMessage(progress) : progressMessage)}</div>
             </div>
           `
               : ""
