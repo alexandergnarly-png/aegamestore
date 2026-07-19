@@ -192,9 +192,9 @@ const translations = {
     adminChatHistoryDesc: "Status & riwayat",
     adminChatGuideTitle: "Cara Beli",
     adminChatGuideDesc: "Panduan singkat",
-    adminChatStatusTitle: "Status: Admin Online",
-    adminChatStatusDesc: "Auto delivery & payment gateway aktif.",
-    adminChatQuestionTitle: "Ask a question",
+    adminChatStatusTitle: "Support tersedia",
+    adminChatStatusDesc: "Biasanya membalas dalam 1–5 menit.",
+    adminChatQuestionTitle: "Tanya Admin",
     adminChatQuestionDesc: "Chat admin via Telegram untuk bantuan cepat.",
     adminChatTermsTitle: "Terms",
     adminChatTermsDesc: "Refund & ketentuan",
@@ -387,8 +387,8 @@ const translations = {
     adminChatHistoryDesc: "Status & history",
     adminChatGuideTitle: "How to Buy",
     adminChatGuideDesc: "Quick guide",
-    adminChatStatusTitle: "Status: Admin Online",
-    adminChatStatusDesc: "Auto delivery & payment gateway active.",
+    adminChatStatusTitle: "Support available",
+    adminChatStatusDesc: "Usually replies within 1–5 minutes.",
     adminChatQuestionTitle: "Ask a question",
     adminChatQuestionDesc: "Chat admin via Telegram for quick support.",
     adminChatTermsTitle: "Terms",
@@ -4634,8 +4634,18 @@ function setupAdminChatPopup() {
 
   if (!btn || !sheet) return;
   sheet.setAttribute("inert", "");
+  let lastAdminChatTrigger = null;
+
+  function getAdminChatFocusable() {
+    return Array.from(
+      sheet.querySelectorAll(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ),
+    ).filter((element) => element.offsetParent !== null);
+  }
 
   function openAdminChat() {
+    lastAdminChatTrigger = document.activeElement;
     sheet.classList.add("show");
     sheet.removeAttribute("inert");
     sheet.setAttribute("aria-hidden", "false");
@@ -4657,7 +4667,12 @@ function setupAdminChatPopup() {
     document.body.classList.remove("admin-chat-open");
 
     setTimeout(() => {
-      btn?.focus();
+      if (lastAdminChatTrigger?.isConnected) {
+        lastAdminChatTrigger.focus();
+      } else {
+        btn?.focus();
+      }
+      lastAdminChatTrigger = null;
     }, 50);
   }
 
@@ -4686,8 +4701,26 @@ function setupAdminChatPopup() {
   });
 
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && sheet.classList.contains("show")) {
+    if (!sheet.classList.contains("show")) return;
+
+    if (event.key === "Escape") {
+      event.preventDefault();
       closeAdminChat();
+      return;
+    }
+
+    if (event.key !== "Tab") return;
+    const focusable = getAdminChatFocusable();
+    if (!focusable.length) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
     }
   });
 }

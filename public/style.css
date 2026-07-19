@@ -13657,3 +13657,25 @@ body.dark-theme .quantity-stepper output {
     min-height: 58px !important;
   }
 }
+
+/* AE Help Center polish v1: lock the page and keep the support menu compact. */
+body.admin-chat-open {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+.ae-help-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 768px) {
+  .ae-help-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 380px) {
+  .ae-help-grid {
+    grid-template-columns: 1fr;
+  }
+}
