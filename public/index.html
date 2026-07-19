@@ -78,7 +78,7 @@
       href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/style.css?v=20260718-stock-summary-v6" />
+    <link rel="stylesheet" href="/style.css?v=20260718-bulk-key-v7" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#f4f3ee" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -891,6 +891,29 @@
               aria-label="Pilih nominal atau durasi"
             ></div>
           </div>
+
+          <div class="field order-choice-field bulk-quantity-field">
+            <div class="bulk-quantity-head">
+              <label for="orderQuantity" data-i18n="quantityLabel">Jumlah Key</label>
+              <small data-i18n="quantityLimit">Maks. 5 per order</small>
+            </div>
+            <div class="quantity-stepper" role="group" aria-label="Jumlah key">
+              <button
+                type="button"
+                id="quantityDecrease"
+                onclick="changeOrderQuantity(-1)"
+                aria-label="Kurangi jumlah key"
+              >&minus;</button>
+              <output id="orderQuantity" aria-live="polite">1</output>
+              <button
+                type="button"
+                id="quantityIncrease"
+                onclick="changeOrderQuantity(1)"
+                aria-label="Tambah jumlah key"
+              >+</button>
+            </div>
+            <small id="quantityStockHint" class="quantity-stock-hint">1 key dipilih</small>
+          </div>
         </div>
 
         <div class="form-grid">
@@ -976,6 +999,10 @@
           <div>
             <small data-i18n="summaryProduct">Produk</small>
             <strong id="previewProduct">Menunggu pilihan...</strong>
+          </div>
+          <div>
+            <small data-i18n="summaryQuantity">Jumlah</small>
+            <strong id="previewQuantity">1 key</strong>
           </div>
           <div>
             <small data-i18n="summaryTotalPayment">Total Pembayaran</small>
@@ -1555,6 +1582,6 @@
       })();
     </script>
 
-    <script src="/script.js?v=20260718-mobile-conversion-v5" defer></script>
+    <script src="/script.js?v=20260718-bulk-key-v7" defer></script>
   </body>
 </html>

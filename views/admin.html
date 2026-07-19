@@ -2931,6 +2931,7 @@
                   <th>Kontak</th>
                   <th>Game</th>
                   <th>Produk</th>
+                  <th>Jumlah</th>
                   <th>Total Bayar</th>
                   <th>Voucher</th>
                   <th>Diskon</th>
@@ -5104,6 +5105,7 @@
                 <td data-label="Kontak">${escapeHtml(item.contact || "-")}</td>
                 <td data-label="Game">${escapeHtml(item.game || "-")}</td>
                 <td data-label="Produk">${escapeHtml(item.product || "-")}</td>
+                <td data-label="Jumlah">${Math.max(Number(item.quantity || 1), 1)} key</td>
                 <td data-label="Total Bayar">${formatRupiah(item.price)}</td>
                 <td data-label="Voucher">${escapeHtml(item.voucher_code || "-")}</td>
                 <td data-label="Diskon">${formatRupiah(item.discount_amount || 0)}</td>
@@ -5378,6 +5380,14 @@
               <span class="value">${escapeHtml(order.product || "-")}</span>
             </div>
             <div class="order-drawer-field">
+              <span class="label">Jumlah Key</span>
+              <span class="value">${Math.max(Number(order.quantity || 1), 1)} key</span>
+            </div>
+            <div class="order-drawer-field">
+              <span class="label">Harga Satuan</span>
+              <span class="value">${formatRupiah(order.unit_price || order.original_price || order.price || 0)}</span>
+            </div>
+            <div class="order-drawer-field">
               <span class="label">Harga Asli</span>
               <span class="value">${formatRupiah(order.original_price || order.price || 0)}</span>
             </div>
@@ -5467,7 +5477,7 @@
         const buttons = [];
         const safeId = JSON.stringify(orderId);
 
-        const copyText = `Order ID : ${order.id || "-"}\nNama     : ${order.name || "-"}\nKontak   : ${order.contact || "-"}\nGame     : ${order.game || "-"}\nProduk   : ${order.product || "-"}\nHarga    : ${formatRupiah(order.price || 0)}\nVoucher  : ${order.voucher_code || "-"}\nDiskon   : ${formatRupiah(order.discount_amount || 0)}\nStatus   : ${order.payment_status || "-"} / ${order.delivery_status || "-"}\nGame Key : ${gameKey || "-"}`;
+        const copyText = `Order ID : ${order.id || "-"}\nNama     : ${order.name || "-"}\nKontak   : ${order.contact || "-"}\nGame     : ${order.game || "-"}\nProduk   : ${order.product || "-"}\nJumlah   : ${Math.max(Number(order.quantity || 1), 1)} key\nHarga    : ${formatRupiah(order.price || 0)}\nVoucher  : ${order.voucher_code || "-"}\nDiskon   : ${formatRupiah(order.discount_amount || 0)}\nStatus   : ${order.payment_status || "-"} / ${order.delivery_status || "-"}\nGame Key : ${gameKey || "-"}`;
         const safeCopyText = JSON.stringify(copyText);
 
         buttons.push(

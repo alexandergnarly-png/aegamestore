@@ -971,6 +971,36 @@
         overflow-wrap: anywhere;
       }
 
+      .key-code-list {
+        display: grid;
+        gap: 7px;
+      }
+
+      .key-code-item {
+        min-width: 0;
+        display: grid;
+        grid-template-columns: 26px minmax(0, 1fr);
+        align-items: center;
+        gap: 8px;
+      }
+
+      .key-code-item > span {
+        width: 26px;
+        height: 26px;
+        display: grid;
+        place-items: center;
+        border-radius: 9px;
+        background: var(--ink);
+        color: var(--inverse);
+        font-size: 10px;
+        font-weight: 950;
+      }
+
+      .key-code-item .key-code {
+        min-width: 0;
+        padding: 9px;
+      }
+
       .order-actions {
         margin-top: 12px;
         display: flex;
@@ -1769,6 +1799,8 @@
           time: "Waktu",
           key: "Key",
           copyKey: "Copy Key",
+          copyAllKeys: "Copy Semua Key",
+          quantity: "Jumlah",
           viewOrderDetail: "Lihat Detail Order",
           resumePayment: "Lanjut Bayar",
           resumePaymentLoading: "Memuat order…",
@@ -1865,6 +1897,8 @@
           time: "Time",
           key: "Key",
           copyKey: "Copy Key",
+          copyAllKeys: "Copy All Keys",
+          quantity: "Quantity",
           viewOrderDetail: "View Order Detail",
           resumePayment: "Resume Payment",
           resumePaymentLoading: "Loading order…",
@@ -2431,7 +2465,12 @@
             <div class="order-list">
               ${list
                 .map((item) => {
-                  const gameKey = item.gamekey || item.gameKey || "";
+                  const fallbackKey = item.gamekey || item.gameKey || "";
+                  const gameKeys = Array.isArray(item.gameKeys)
+                    ? item.gameKeys.map((key) => String(key || "").trim()).filter(Boolean)
+                    : String(fallbackKey).split(/\r?\n/).map((key) => key.trim()).filter(Boolean);
+                  const gameKey = gameKeys.join("\n");
+                  const quantity = Math.max(Number(item.quantity || gameKeys.length || 1), 1);
                   const voucherCode = item.voucher_code || "";
                   const discountAmount = Number(item.discount_amount || 0);
                   const orderId = item.id || item.order_id || "";
@@ -2457,6 +2496,11 @@
                             </div>`
                           : ""
                       }
+
+                      <div class="order-row">
+                        <span>${tAccount("quantity")}</span>
+                        <b>${quantity} key</b>
+                      </div>
 
                       <div class="order-row">
                         <span>${tAccount("totalPayment")}</span>
@@ -2514,10 +2558,17 @@
                                   )}, "Game key")'
                                 >
                                   <iconify-icon icon="mdi:content-copy" aria-hidden="true"></iconify-icon>
-                                  ${tAccount("copyKey")}
+                                  ${gameKeys.length > 1 ? tAccount("copyAllKeys") : tAccount("copyKey")}
                                 </button>
                               </div>
-                              <code class="key-code">${escapeHtml(gameKey)}</code>
+                              <div class="key-code-list">
+                                ${gameKeys.map((key, index) => `
+                                  <div class="key-code-item">
+                                    <span>${index + 1}</span>
+                                    <code class="key-code">${escapeHtml(key)}</code>
+                                  </div>
+                                `).join("")}
+                              </div>
                             </div>`
                           : ""
                       }

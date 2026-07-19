@@ -10,6 +10,13 @@ const helmet = require("helmet");
 require("dotenv").config();
 const rateLimit = require("express-rate-limit");
 const jwt = require("jsonwebtoken");
+const {
+  MAX_ORDER_QUANTITY,
+  calculateBulkTotals,
+  getOrderQuantity,
+  parseOrderQuantity,
+  splitOrderKeys,
+} = require("./order-utils");
 
 const app = express();
 app.disable("x-powered-by");
@@ -205,6 +212,29 @@ db.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS snap_redirect_url TEXT`);
 db.query(
   `ALTER TABLE orders ADD COLUMN IF NOT EXISTS snap_token_created_at TEXT`,
 );
+db.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS quantity INTEGER DEFAULT 1`);
+db.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS unit_price INTEGER DEFAULT 0`);
+db.query(`ALTER TABLE keys ADD COLUMN IF NOT EXISTS reserved_order_id TEXT`);
+db.query(`ALTER TABLE keys ADD COLUMN IF NOT EXISTS reserved_until TEXT`);
+db.query(
+  `CREATE INDEX IF NOT EXISTS idx_keys_product_reservation
+   ON keys(product_id, used, reserved_order_id, reserved_until)`,
+);
+db.query(
+  `
+  CREATE TABLE IF NOT EXISTS order_keys (
+    id SERIAL PRIMARY KEY,
+    order_id TEXT NOT NULL,
+    key_id INTEGER,
+    key_value TEXT NOT NULL,
+    source TEXT NOT NULL DEFAULT 'local',
+    position INTEGER NOT NULL,
+    created_at TEXT NOT NULL,
+    UNIQUE(order_id, position)
+  )
+`,
+);
+db.query(`CREATE INDEX IF NOT EXISTS idx_order_keys_order_id ON order_keys(order_id)`);
 db.query(
   `CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at)`,
 );
@@ -406,6 +436,155 @@ function normalizeProductDeliveryType(deliveryType) {
 
   // Existing AE Game Store auto/local key flow uses local keys table.
   return "auto";
+}
+
+const ORDER_RESERVATION_MS = 2 * 60 * 60 * 1000;
+
+function getReservationExpiryIso(now = new Date()) {
+  return new Date(now.getTime() + ORDER_RESERVATION_MS).toISOString();
+}
+
+async function releaseReservedKeysForOrder(dbClient, orderId) {
+  if (!orderId) return;
+
+  await dbClient.query(
+    `UPDATE keys
+     SET reserved_order_id = NULL, reserved_until = NULL
+     WHERE reserved_order_id = $1 AND used = 0`,
+    [orderId],
+  );
+}
+
+async function reserveLocalKeysForOrder(
+  dbClient,
+  { productId, orderId, quantity, reservedUntil },
+) {
+  const nowIso = new Date().toISOString();
+
+  await dbClient.query(
+    `UPDATE keys
+     SET reserved_order_id = NULL, reserved_until = NULL
+     WHERE product_id = $1
+       AND used = 0
+       AND reserved_order_id IS NOT NULL
+       AND reserved_until IS NOT NULL
+       AND reserved_until <= $2`,
+    [productId, nowIso],
+  );
+
+  const keyResult = await dbClient.query(
+    `SELECT id
+     FROM keys
+     WHERE product_id = $1
+       AND used = 0
+       AND reserved_order_id IS NULL
+     ORDER BY id ASC
+     LIMIT $2
+     FOR UPDATE SKIP LOCKED`,
+    [productId, quantity],
+  );
+
+  if (keyResult.rows.length !== quantity) return false;
+
+  const keyIds = keyResult.rows.map((row) => Number(row.id));
+  const reservationResult = await dbClient.query(
+    `UPDATE keys
+     SET reserved_order_id = $1, reserved_until = $2
+     WHERE id = ANY($3::int[])
+       AND used = 0
+       AND reserved_order_id IS NULL
+     RETURNING id`,
+    [orderId, reservedUntil, keyIds],
+  );
+
+  return reservationResult.rows.length === quantity;
+}
+
+async function persistOrderKeys(
+  dbClient,
+  { orderId, keys, keyIds = [], source },
+) {
+  const createdAt = new Date().toISOString();
+
+  for (let index = 0; index < keys.length; index += 1) {
+    await dbClient.query(
+      `INSERT INTO order_keys
+       (order_id, key_id, key_value, source, position, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       ON CONFLICT (order_id, position) DO NOTHING`,
+      [
+        orderId,
+        keyIds[index] || null,
+        String(keys[index]),
+        source,
+        index + 1,
+        createdAt,
+      ],
+    );
+  }
+}
+
+async function allocateLocalKeysForOrder(dbClient, order) {
+  const quantity = getOrderQuantity(order.quantity);
+  const nowIso = new Date().toISOString();
+
+  const keyResult = await dbClient.query(
+    `SELECT id, key
+     FROM keys
+     WHERE product_id = $1
+       AND used = 0
+       AND (
+         reserved_order_id = $2
+         OR reserved_order_id IS NULL
+         OR reserved_until IS NULL
+         OR reserved_until <= $3
+       )
+     ORDER BY CASE WHEN reserved_order_id = $2 THEN 0 ELSE 1 END, id ASC
+     LIMIT $4
+     FOR UPDATE SKIP LOCKED`,
+    [order.product_id, order.id, nowIso, quantity],
+  );
+
+  if (keyResult.rows.length !== quantity) {
+    await releaseReservedKeysForOrder(dbClient, order.id);
+    return null;
+  }
+
+  const keyIds = keyResult.rows.map((row) => Number(row.id));
+  const keys = keyResult.rows.map((row) => String(row.key));
+  const lockResult = await dbClient.query(
+    `UPDATE keys
+     SET used = 1, reserved_order_id = NULL, reserved_until = NULL
+     WHERE id = ANY($1::int[]) AND used = 0
+     RETURNING id`,
+    [keyIds],
+  );
+
+  if (lockResult.rows.length !== quantity) {
+    throw new Error("Sebagian key gagal dikunci");
+  }
+
+  await persistOrderKeys(dbClient, {
+    orderId: order.id,
+    keys,
+    keyIds,
+    source: "local",
+  });
+
+  return keys;
+}
+
+async function getStoredOrderKeys(orderId, fallbackValue = "") {
+  const stored = await query(
+    `SELECT key_value
+     FROM order_keys
+     WHERE order_id = $1
+     ORDER BY position ASC, id ASC`,
+    [orderId],
+  ).catch(() => ({ rows: [] }));
+
+  const keys = stored.rows.map((row) => String(row.key_value || "").trim()).filter(Boolean);
+  return keys.length ? keys : splitOrderKeys(fallbackValue);
 }
 
 function normalizeSupplierProductId(value) {
@@ -1000,6 +1179,7 @@ async function claimVipStoreKeyForOrder(order, options = {}) {
   const source = String(options.source || "auto").trim() || "auto";
   const orderId = String(order.id || order.order_id || "");
   const productId = Number(order.product_id || 0) || null;
+  const quantity = getOrderQuantity(order.quantity);
 
   if (!supplierProductId) {
     const message = "Produk belum punya VIP Store Product ID";
@@ -1015,7 +1195,7 @@ async function claimVipStoreKeyForOrder(order, options = {}) {
   }
 
   try {
-    const claimResult = await claimVipStoreKey(supplierProductId, 1);
+    const claimResult = await claimVipStoreKey(supplierProductId, quantity);
     const claimData = claimResult.data || {};
     const responseSummary = summarizeVipStoreClaimResponse(claimData);
 
@@ -1041,8 +1221,8 @@ async function claimVipStoreKeyForOrder(order, options = {}) {
 
     const claimedKeys = extractVipStoreClaimKeys(claimData);
 
-    if (!claimedKeys.length) {
-      const message = "VIP Store tidak mengembalikan key pada response claim";
+    if (claimedKeys.length < quantity) {
+      const message = `VIP Store hanya mengembalikan ${claimedKeys.length} dari ${quantity} key`;
 
       await logVipStoreClaimAttempt({
         orderId,
@@ -1058,22 +1238,24 @@ async function claimVipStoreKeyForOrder(order, options = {}) {
       throw new Error(message);
     }
 
+    const deliveredKeys = claimedKeys.slice(0, quantity);
+
     await logVipStoreClaimAttempt({
       orderId,
       productId,
       supplierProductId,
       source,
       status: "success",
-      message: `Claim success, ${claimedKeys.length} key diterima`,
+      message: `Claim success, ${deliveredKeys.length} key diterima`,
       httpCode: claimResult.http_code,
-      keyCount: claimedKeys.length,
+      keyCount: deliveredKeys.length,
       responseSummary,
     });
 
     return {
       supplier_product_id: supplierProductId,
-      key: claimedKeys.join("\n"),
-      keys: claimedKeys,
+      key: deliveredKeys.join("\n"),
+      keys: deliveredKeys,
       http_code: claimResult.http_code,
     };
   } catch (err) {
@@ -3237,6 +3419,12 @@ app.post(
         });
         const deliveredAt = new Date().toISOString();
 
+        await persistOrderKeys(db, {
+          orderId,
+          keys: claim.keys,
+          source: "vipstore",
+        });
+
         await query(
           `UPDATE orders
            SET delivery_status = $1,
@@ -3257,11 +3445,11 @@ app.post(
 
         await query(
           `UPDATE products
-           SET supplier_stock = GREATEST(COALESCE(supplier_stock, 0) - 1, 0),
-               supplier_last_sync = $1
-           WHERE id = $2
-             AND LOWER(COALESCE(delivery_type, 'auto')) = 'vipstore_api'`,
-          [deliveredAt, order.product_id],
+           SET supplier_stock = GREATEST(COALESCE(supplier_stock, 0) - $1, 0),
+               supplier_last_sync = $2
+            WHERE id = $3
+              AND LOWER(COALESCE(delivery_type, 'auto')) = 'vipstore_api'`,
+          [getOrderQuantity(order.quantity), deliveredAt, order.product_id],
         );
 
         return res.json({
@@ -3893,9 +4081,15 @@ app.post("/voucher-preview", voucherPreviewLimiter, async (req, res) => {
 
   const cleanProductId = Number(req.body.product_id);
   const cleanVoucherCode = normalizeVoucherCode(req.body.voucher_code);
+  const cleanQuantity = parseOrderQuantity(req.body.quantity);
 
   if (!Number.isInteger(cleanProductId) || cleanProductId <= 0) {
     return res.status(400).json({ message: "Produk tidak valid" });
+  }
+  if (!cleanQuantity) {
+    return res.status(400).json({
+      message: `Jumlah key harus 1 sampai ${MAX_ORDER_QUANTITY}`,
+    });
   }
 
   try {
@@ -3912,7 +4106,7 @@ app.post("/voucher-preview", voucherPreviewLimiter, async (req, res) => {
       });
     }
 
-    const originalPrice = Number(productRow.price);
+    const unitPrice = Number(productRow.price);
 
     const discountCheck = await getBestCheckoutDiscount({
       userId: loggedInUser.id,
@@ -3925,8 +4119,14 @@ app.post("/voucher-preview", voucherPreviewLimiter, async (req, res) => {
       return res.status(400).json({ message: discountCheck.message });
     }
 
-    const discountAmount = discountCheck.discountAmount;
-    const netPrice = Math.max(originalPrice - discountAmount, 1000);
+    const bulkTotals = calculateBulkTotals({
+      unitPrice,
+      quantity: cleanQuantity,
+      discountAmount: discountCheck.discountAmount,
+    });
+    const originalPrice = bulkTotals.originalPrice;
+    const discountAmount = bulkTotals.discountAmount;
+    const netPrice = bulkTotals.netPrice;
     const finalPrice = calculateQrisGrossPrice(netPrice);
     const paymentFee = finalPrice - netPrice;
 
@@ -3934,6 +4134,8 @@ app.post("/voucher-preview", voucherPreviewLimiter, async (req, res) => {
       message: discountCheck.message || "Preview harga berhasil",
       voucher_code: discountCheck.code,
       discount_type: discountCheck.discountType,
+      quantity: cleanQuantity,
+      unit_price: unitPrice,
       original_price: originalPrice,
       discount_amount: discountAmount,
       net_price: netPrice,
@@ -3955,14 +4157,22 @@ app.post("/create-order", orderLimiter, async (req, res) => {
       redirectUrl: "/auth",
     });
   }
-  const { product_id, name, voucher_code } = req.body;
+  const { product_id, name, voucher_code, quantity } = req.body;
 
   const cleanProductId = Number(product_id);
+  const cleanQuantity = parseOrderQuantity(quantity);
   let cleanName = String(name || "").trim();
   let cleanContact = "";
+  let createdOrderId = "";
 
   if (!Number.isInteger(cleanProductId) || cleanProductId <= 0) {
     return res.status(400).json({ message: "Produk tidak valid" });
+  }
+
+  if (!cleanQuantity) {
+    return res.status(400).json({
+      message: `Jumlah key harus 1 sampai ${MAX_ORDER_QUANTITY}`,
+    });
   }
 
   try {
@@ -4045,31 +4255,48 @@ app.post("/create-order", orderLimiter, async (req, res) => {
         });
       }
 
-      if (supplierStock <= 0) {
+      if (supplierStock < cleanQuantity) {
         return res.status(400).json({
-          message: "Stok supplier habis. Coba lagi nanti.",
+          message: `Stok supplier tidak cukup untuk ${cleanQuantity} key.`,
         });
       }
     } else if (productDeliveryType === "auto") {
       const keyCheck = await query(
-        "SELECT id FROM keys WHERE product_id = $1 AND used = 0 LIMIT 1",
-        [cleanProductId],
+        `SELECT id
+         FROM keys
+         WHERE product_id = $1
+           AND used = 0
+           AND (
+             reserved_order_id IS NULL
+             OR reserved_until IS NULL
+             OR reserved_until <= $2
+           )
+         LIMIT $3`,
+        [cleanProductId, new Date().toISOString(), cleanQuantity],
       );
 
-      if (keyCheck.rows.length === 0) {
+      if (keyCheck.rows.length < cleanQuantity) {
         return res.status(400).json({
-          message: "Stok key habis",
+          message: `Stok tidak cukup untuk ${cleanQuantity} key`,
         });
       }
+    } else if (productDeliveryType === "manual" && cleanQuantity > 1) {
+      return res.status(400).json({
+        message: "Bulk key belum tersedia untuk produk manual",
+      });
     }
 
     const orderId = "ORDER-" + crypto.randomUUID();
+    createdOrderId = orderId;
     const accessToken = crypto.randomBytes(24).toString("hex");
     const createdAt = new Date().toISOString();
     const productPlatformLabel = getPlatformLabel(productRow.platform);
     const productName = `${productPlatformLabel} • ${productRow.brand} - ${productRow.duration}`;
     const game = productRow.game;
-    const originalPrice = Number(productRow.price);
+    const orderProductName = cleanQuantity > 1
+      ? `${productName} (${cleanQuantity} key)`
+      : productName;
+    const unitPrice = Number(productRow.price);
 
     const discountCheck = await getBestCheckoutDiscount({
       userId: loggedInUser.id,
@@ -4084,14 +4311,75 @@ app.post("/create-order", orderLimiter, async (req, res) => {
       });
     }
 
-    const discountAmount = discountCheck.discountAmount;
-    const netPrice = Math.max(originalPrice - discountAmount, 1000);
+    const bulkTotals = calculateBulkTotals({
+      unitPrice,
+      quantity: cleanQuantity,
+      discountAmount: discountCheck.discountAmount,
+    });
+    const originalPrice = bulkTotals.originalPrice;
+    const discountAmount = bulkTotals.discountAmount;
+    const netPrice = bulkTotals.netPrice;
     const price = calculateQrisGrossPrice(netPrice);
     const paymentFee = price - netPrice;
     const appliedVoucherCode = discountCheck.code || null;
 
     const baseUrl = getAppBaseUrl(req);
     const userId = loggedInUser.id;
+
+    const client = await db.connect();
+
+    try {
+      await client.query("BEGIN");
+
+      if (productDeliveryType === "auto") {
+        const reservedKeys = await reserveLocalKeysForOrder(client, {
+          productId: cleanProductId,
+          orderId,
+          quantity: cleanQuantity,
+          reservedUntil: getReservationExpiryIso(),
+        });
+
+        if (!reservedKeys) {
+          const stockError = new Error(`Stok tidak cukup untuk ${cleanQuantity} key`);
+          stockError.statusCode = 409;
+          throw stockError;
+        }
+      }
+
+      await client.query(
+        `INSERT INTO orders
+        (id, product_id, user_id, access_token, name, contact, game, product, price, unit_price, quantity, original_price, discount_amount, payment_fee, voucher_code, payment_status, delivery_status, created_at)
+        VALUES
+        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
+        [
+          orderId,
+          cleanProductId,
+          userId,
+          accessToken,
+          cleanName,
+          cleanContact,
+          game,
+          orderProductName,
+          price,
+          unitPrice,
+          cleanQuantity,
+          originalPrice,
+          discountAmount,
+          paymentFee,
+          appliedVoucherCode,
+          "pending",
+          "waiting_payment",
+          createdAt,
+        ],
+      );
+
+      await client.query("COMMIT");
+    } catch (transactionErr) {
+      await client.query("ROLLBACK");
+      throw transactionErr;
+    } finally {
+      client.release();
+    }
 
     res.cookie(`order_token_${orderId}`, accessToken, {
       httpOnly: true,
@@ -4100,31 +4388,6 @@ app.post("/create-order", orderLimiter, async (req, res) => {
       maxAge: 1000 * 60 * 60 * 2,
       path: "/",
     });
-
-    await query(
-      `INSERT INTO orders
-      (id, product_id, user_id, access_token, name, contact, game, product, price, original_price, discount_amount, payment_fee, voucher_code, payment_status, delivery_status, created_at)
-      VALUES
-      ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
-      [
-        orderId,
-        cleanProductId,
-        userId,
-        accessToken,
-        cleanName,
-        cleanContact,
-        game,
-        productName,
-        price,
-        originalPrice,
-        discountAmount,
-        paymentFee,
-        appliedVoucherCode,
-        "pending",
-        "waiting_payment",
-        createdAt,
-      ],
-    );
 
     const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanContact);
     const transaction = await snap.createTransaction({
@@ -4142,9 +4405,10 @@ app.post("/create-order", orderLimiter, async (req, res) => {
           id: String(cleanProductId),
           price: price,
           quantity: 1,
-          name: `${game} - ${productName}`,
+          name: `${game} - ${orderProductName}`,
         },
       ],
+      custom_field1: `quantity:${cleanQuantity}`,
       callbacks: {
         finish: `${baseUrl}/result?order_id=${orderId}`,
         error: `${baseUrl}/result?order_id=${orderId}`,
@@ -4171,6 +4435,7 @@ app.post("/create-order", orderLimiter, async (req, res) => {
     return res.json({
       message: "Transaksi Midtrans berhasil dibuat",
       orderId: orderId,
+      quantity: cleanQuantity,
       snapToken: transaction.token,
       paymentUrl: transaction.redirect_url,
       resultUrl: `${baseUrl}/result?order_id=${orderId}`,
@@ -4182,8 +4447,25 @@ app.post("/create-order", orderLimiter, async (req, res) => {
       "ERROR CREATE MIDTRANS ORDER:",
       err.response?.data || err.message || err,
     );
-    return res.status(500).json({
-      message: "Gagal membuat pembayaran Midtrans",
+
+    if (createdOrderId) {
+      try {
+        await releaseReservedKeysForOrder(db, createdOrderId);
+        await query(
+          `UPDATE orders
+           SET payment_status = 'failed', delivery_status = 'cancelled'
+           WHERE id = $1 AND payment_status = 'pending'`,
+          [createdOrderId],
+        );
+      } catch (cleanupErr) {
+        console.error("WARN CLEANUP ORDER GAGAL:", cleanupErr.message);
+      }
+    }
+
+    return res.status(err.statusCode || 500).json({
+      message: err.statusCode
+        ? err.message
+        : "Gagal membuat pembayaran Midtrans",
     });
   }
 });
@@ -4274,6 +4556,12 @@ app.post("/midtrans-notification", webhookLimiter, async (req, res) => {
             const claim = await claimVipStoreKeyForOrder(order, { source: "midtrans_webhook" });
             const deliveredAt = new Date().toISOString();
 
+            await persistOrderKeys(db, {
+              orderId,
+              keys: claim.keys,
+              source: "vipstore",
+            });
+
             await query(
               `UPDATE orders
                SET delivery_status = $1,
@@ -4294,11 +4582,11 @@ app.post("/midtrans-notification", webhookLimiter, async (req, res) => {
 
             await query(
               `UPDATE products
-               SET supplier_stock = GREATEST(COALESCE(supplier_stock, 0) - 1, 0),
-                   supplier_last_sync = $1
-               WHERE id = $2
-                 AND LOWER(COALESCE(delivery_type, 'auto')) = 'vipstore_api'`,
-              [deliveredAt, order.product_id],
+               SET supplier_stock = GREATEST(COALESCE(supplier_stock, 0) - $1, 0),
+                    supplier_last_sync = $2
+               WHERE id = $3
+                  AND LOWER(COALESCE(delivery_type, 'auto')) = 'vipstore_api'`,
+              [getOrderQuantity(order.quantity), deliveredAt, order.product_id],
             );
           } catch (claimErr) {
             console.error("VIPSTORE CLAIM ERROR:", claimErr.message);
@@ -4344,43 +4632,33 @@ app.post("/midtrans-notification", webhookLimiter, async (req, res) => {
           return res.status(200).send("OK");
         }
 
-        const keyResult = await client.query(
-          `SELECT * FROM keys
-   WHERE product_id = $1 AND used = 0
-   ORDER BY id ASC
-   LIMIT 1
-   FOR UPDATE SKIP LOCKED`,
-          [order.product_id],
-        );
+        const deliveredKeys = await allocateLocalKeysForOrder(client, order);
 
-        const keyRow = keyResult.rows[0];
-
-        if (!keyRow) {
+        if (!deliveredKeys) {
           await client.query(
             `UPDATE orders
-     SET payment_status = $1, delivery_status = $2, gameKey = $3
-     WHERE id = $4`,
-            ["paid", "problem", "STOK HABIS - HUBUNGI ADMIN", orderId],
+             SET payment_status = $1, delivery_status = $2, gameKey = $3
+             WHERE id = $4`,
+            [
+              "paid",
+              "problem",
+              `STOK TIDAK CUKUP UNTUK ${getOrderQuantity(order.quantity)} KEY - HUBUNGI ADMIN`,
+              orderId,
+            ],
           );
 
           await client.query("COMMIT");
           return res.status(200).send("OK");
         }
 
-        const lockResult = await client.query(
-          "UPDATE keys SET used = 1 WHERE id = $1 AND used = 0 RETURNING id",
-          [keyRow.id],
-        );
-
-        if (lockResult.rows.length === 0) {
-          throw new Error("Key gagal dikunci");
-        }
-
         await client.query(
           `UPDATE orders
-                     SET payment_status = $1, delivery_status = $2, gameKey = $3
-                     WHERE id = $4`,
-          ["paid", "delivered", keyRow.key, orderId],
+           SET payment_status = $1,
+               delivery_status = $2,
+               gameKey = $3,
+               delivered_at = $4
+           WHERE id = $5`,
+          ["paid", "delivered", deliveredKeys.join("\n"), new Date().toISOString(), orderId],
         );
 
         await client.query("COMMIT");
@@ -4404,6 +4682,7 @@ app.post("/midtrans-notification", webhookLimiter, async (req, res) => {
                  WHERE id = $3 AND payment_status <> $4`,
         ["expired", "cancelled", orderId, "paid"],
       );
+      await releaseReservedKeysForOrder(db, orderId);
     }
 
     return res.status(200).send("OK");
@@ -4437,15 +4716,20 @@ app.get("/order/:id", orderCheckLimiter, async (req, res) => {
       });
     }
 
+    const gameKeys = await getStoredOrderKeys(order.id, order.gamekey);
+
     return res.json({
       id: order.id,
       name: order.name,
       game: order.game,
       product: order.product,
       price: order.price,
+      unit_price: Number(order.unit_price || order.original_price || order.price || 0),
+      quantity: getOrderQuantity(order.quantity),
       payment_status: order.payment_status,
       delivery_status: order.delivery_status,
-      gameKey: order.gamekey,
+      gameKey: gameKeys.join("\n"),
+      gameKeys,
       created_at: order.created_at,
     });
   } catch (err) {
@@ -4535,6 +4819,7 @@ app.get("/order/:id/resume", orderCheckLimiter, async (req, res) => {
               name: `${order.game} - ${order.product}`,
             },
           ],
+          custom_field1: `quantity:${getOrderQuantity(order.quantity)}`,
           callbacks: {
             finish: `${baseUrl}/result?order_id=${orderId}`,
             error: `${baseUrl}/result?order_id=${orderId}`,
@@ -4574,6 +4859,8 @@ app.get("/order/:id/resume", orderCheckLimiter, async (req, res) => {
       game: order.game,
       product: order.product,
       price: order.price,
+      unit_price: Number(order.unit_price || order.original_price || order.price || 0),
+      quantity: getOrderQuantity(order.quantity),
       created_at: order.created_at,
     });
   } catch (err) {
@@ -4651,6 +4938,12 @@ app.post(
           const claim = await claimVipStoreKeyForOrder(order, { source: "admin_confirm" });
           const deliveredAt = new Date().toISOString();
 
+          await persistOrderKeys(db, {
+            orderId,
+            keys: claim.keys,
+            source: "vipstore",
+          });
+
           await query(
             `UPDATE orders
              SET delivery_status = $1,
@@ -4671,11 +4964,11 @@ app.post(
 
           await query(
             `UPDATE products
-             SET supplier_stock = GREATEST(COALESCE(supplier_stock, 0) - 1, 0),
-                 supplier_last_sync = $1
-             WHERE id = $2
-               AND LOWER(COALESCE(delivery_type, 'auto')) = 'vipstore_api'`,
-            [deliveredAt, order.product_id],
+             SET supplier_stock = GREATEST(COALESCE(supplier_stock, 0) - $1, 0),
+                 supplier_last_sync = $2
+              WHERE id = $3
+                AND LOWER(COALESCE(delivery_type, 'auto')) = 'vipstore_api'`,
+            [getOrderQuantity(order.quantity), deliveredAt, order.product_id],
           );
 
           return res.json({
@@ -4731,48 +5024,29 @@ app.post(
         });
       }
 
-      const keyResult = await client.query(
-        `SELECT * FROM keys
-   WHERE product_id = $1 AND used = 0
-   ORDER BY id ASC
-   LIMIT 1
-   FOR UPDATE SKIP LOCKED`,
-        [order.product_id],
-      );
+      const deliveredKeys = await allocateLocalKeysForOrder(client, order);
 
-      const keyRow = keyResult.rows[0];
-
-      if (!keyRow) {
+      if (!deliveredKeys) {
         await client.query("ROLLBACK");
         return res.status(400).json({
-          message:
-            "Stok key habis. Tambahkan key dulu sebelum konfirmasi pembayaran.",
-        });
-      }
-
-      const lockResult = await client.query(
-        "UPDATE keys SET used = 1 WHERE id = $1 AND used = 0 RETURNING id",
-        [keyRow.id],
-      );
-
-      if (lockResult.rows.length === 0) {
-        await client.query("ROLLBACK");
-        return res.status(409).json({
-          message: "Key sudah dipakai oleh proses lain, coba lagi",
+          message: `Stok tidak cukup untuk ${getOrderQuantity(order.quantity)} key. Tambahkan key dulu sebelum konfirmasi pembayaran.`,
         });
       }
 
       await client.query(
         `UPDATE orders
-             SET payment_status = $1, delivery_status = $2, gameKey = $3
-             WHERE id = $4`,
-        ["paid", "delivered", keyRow.key, orderId],
+         SET payment_status = $1,
+             delivery_status = $2,
+             gameKey = $3,
+             delivered_at = $4
+         WHERE id = $5`,
+        ["paid", "delivered", deliveredKeys.join("\n"), new Date().toISOString(), orderId],
       );
 
       await client.query("COMMIT");
 
       return res.json({
-        message: "Pembayaran dikonfirmasi dan key berhasil dikirim",
+        message: `Pembayaran dikonfirmasi dan ${deliveredKeys.length} key berhasil dikirim`,
       });
     } catch (err) {
       try {
@@ -5179,7 +5453,7 @@ app.get("/admin-orders/export", requireAdminAuth, async (req, res) => {
 
   try {
     const result = await query(
-      `SELECT id, name, contact, game, product, price, original_price, discount_amount, payment_fee, voucher_code, payment_status, delivery_status, gameKey, created_at, delivered_at, cancelled_at, cancel_reason FROM orders ${where} ORDER BY created_at DESC, id DESC LIMIT 5000`,
+      `SELECT id, name, contact, game, product, quantity, unit_price, price, original_price, discount_amount, payment_fee, voucher_code, payment_status, delivery_status, gameKey, created_at, delivered_at, cancelled_at, cancel_reason FROM orders ${where} ORDER BY created_at DESC, id DESC LIMIT 5000`,
       params,
     );
 
@@ -5189,6 +5463,8 @@ app.get("/admin-orders/export", requireAdminAuth, async (req, res) => {
       "Kontak",
       "Game",
       "Produk",
+      "Jumlah Key",
+      "Harga Satuan",
       "Harga",
       "Harga Asli",
       "Diskon",
@@ -5221,6 +5497,8 @@ app.get("/admin-orders/export", requireAdminAuth, async (req, res) => {
           row.contact,
           row.game,
           row.product,
+          getOrderQuantity(row.quantity),
+          row.unit_price,
           row.price,
           row.original_price,
           row.discount_amount,
@@ -5435,6 +5713,7 @@ app.post(
          WHERE id = $5`,
         ["cancelled", "cancelled", reason, new Date().toISOString(), orderId],
       );
+      await releaseReservedKeysForOrder(db, orderId);
 
       return res.json({
         message: "Order berhasil dibatalkan",
@@ -5456,7 +5735,17 @@ app.get("/stock-summary", requireAdminAuth, async (req, res) => {
                 p.game,
                 p.brand,
                 p.duration,
-                COUNT(k.id) FILTER (WHERE k.used = 0) AS available_keys
+                COUNT(k.id) FILTER (
+                  WHERE k.used = 0
+                    AND (
+                      k.reserved_order_id IS NULL
+                      OR k.reserved_until IS NULL
+                      OR k.reserved_until <= TO_CHAR(
+                        CURRENT_TIMESTAMP AT TIME ZONE 'UTC',
+                        'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'
+                      )
+                    )
+                ) AS available_keys
             FROM products p
             LEFT JOIN keys k ON p.id = k.product_id
             GROUP BY p.id
@@ -5508,6 +5797,7 @@ app.delete(
         });
       }
 
+      await releaseReservedKeysForOrder(db, orderId);
       await query("DELETE FROM orders WHERE id = $1", [orderId]);
 
       return res.json({
@@ -6082,7 +6372,12 @@ app.get("/public-products", async (req, res) => {
   try {
     const result = await query(`
   SELECT
-    p.*,
+    p.id,
+    p.game,
+    p.brand,
+    p.duration,
+    p.price,
+    p.active,
     COALESCE(NULLIF(p.platform, ''), 'android') AS platform,
     COALESCE(p.delivery_type, 'auto') AS delivery_type,
     COALESCE(p.play_status, 'safe') AS play_status,
@@ -6101,7 +6396,17 @@ app.get("/public-products", async (req, res) => {
           ) THEN 0
           ELSE GREATEST(COALESCE(p.supplier_stock, 0), 0)
         END
-      ELSE COUNT(k.id) FILTER (WHERE k.used = 0)::int
+      ELSE COUNT(k.id) FILTER (
+        WHERE k.used = 0
+          AND (
+            k.reserved_order_id IS NULL
+            OR k.reserved_until IS NULL
+            OR k.reserved_until <= TO_CHAR(
+              CURRENT_TIMESTAMP AT TIME ZONE 'UTC',
+              'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'
+            )
+          )
+      )::int
     END AS available_keys,
     CASE
       WHEN LOWER(p.duration) LIKE '%jam%' THEN
@@ -6399,14 +6704,29 @@ app.get("/user/orders", async (req, res) => {
 
   try {
     const result = await query(
-      `SELECT id, game, product, price, payment_status, delivery_status, gameKey, created_at
+      `SELECT id, game, product, price, unit_price, quantity, original_price,
+              discount_amount, payment_fee, voucher_code, payment_status,
+              delivery_status, gameKey, created_at
        FROM orders
        WHERE user_id = $1
        ORDER BY created_at DESC, id DESC`,
       [loggedInUser.id],
     );
 
-    return res.json(result.rows);
+    const orders = await Promise.all(
+      result.rows.map(async (order) => {
+        const gameKeys = await getStoredOrderKeys(order.id, order.gamekey);
+        return {
+          ...order,
+          quantity: getOrderQuantity(order.quantity),
+          unit_price: Number(order.unit_price || order.original_price || order.price || 0),
+          gameKey: gameKeys.join("\n"),
+          gameKeys,
+        };
+      }),
+    );
+
+    return res.json(orders);
   } catch (err) {
     console.error("ERROR GET USER ORDERS:", err);
     return res.status(500).json({ message: "Gagal mengambil riwayat order" });

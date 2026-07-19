@@ -43,6 +43,8 @@ const translations = {
     platformLabel: "Platform",
     brandLabel: "Brand",
     durationLabel: "Nominal / Durasi",
+    quantityLabel: "Jumlah Key",
+    quantityLimit: "Maks. 5 per order",
     playerNameLabel: "Nama Player",
     contactLabel: "Kontak",
     voucherCodeLabel: "Kode Voucher",
@@ -52,6 +54,7 @@ const translations = {
     checkVoucherBtn: "Cek",
     summaryGame: "Game",
     summaryProduct: "Produk",
+    summaryQuantity: "Jumlah",
     summaryTotalPayment: "Total Pembayaran",
     trustText: "Pembayaran aman via QRIS GoPay Merchant • Pengiriman instan",
     originalPriceLabel: "Harga Produk",
@@ -234,6 +237,8 @@ const translations = {
     platformLabel: "Platform",
     brandLabel: "Brand",
     durationLabel: "Nominal / Duration",
+    quantityLabel: "Key Quantity",
+    quantityLimit: "Max. 5 per order",
     playerNameLabel: "Player Name",
     contactLabel: "Contact",
     voucherCodeLabel: "Voucher Code",
@@ -243,6 +248,7 @@ const translations = {
     checkVoucherBtn: "Check",
     summaryGame: "Game",
     summaryProduct: "Product",
+    summaryQuantity: "Quantity",
     summaryTotalPayment: "Total Payment",
     trustText: "Secure payment via QRIS GoPay Merchant • Instant delivery",
     originalPriceLabel: "Product Price",
@@ -501,6 +507,8 @@ let currentCategory = "all";
 let selectedProductId = null;
 let appliedVoucherCode = "";
 let selectedProductBasePrice = 0;
+const MAX_ORDER_QUANTITY = 5;
+let selectedOrderQuantity = 1;
 let selectedReviewRating = 5;
 let currentSort = localStorage.getItem("ae_sort") || "default";
 
@@ -1333,6 +1341,8 @@ function updateOrderModalBanner(game) {
 }
 
 async function openOrderModal(game) {
+  selectedOrderQuantity = 1;
+  updateOrderQuantityUI(null);
   const voucherInput = document.getElementById("voucherCodeInput");
   if (voucherInput) voucherInput.value = "";
   const voucherPanel = document.getElementById("voucherPanel");
@@ -1740,6 +1750,59 @@ function loadDurations() {
   updatePreview();
 }
 
+function getOrderQuantityLimit(product) {
+  if (!product) return 1;
+  if (String(product.delivery_type || "auto").toLowerCase() === "manual") {
+    return 1;
+  }
+
+  const availableKeys = Math.max(Math.floor(Number(product.available_keys || 0)), 0);
+  return Math.max(1, Math.min(MAX_ORDER_QUANTITY, availableKeys));
+}
+
+function updateOrderQuantityUI(product) {
+  const quantityOutput = document.getElementById("orderQuantity");
+  const decreaseButton = document.getElementById("quantityDecrease");
+  const increaseButton = document.getElementById("quantityIncrease");
+  const stockHint = document.getElementById("quantityStockHint");
+  const previewQuantity = document.getElementById("previewQuantity");
+  const limit = getOrderQuantityLimit(product);
+  const isManual = String(product?.delivery_type || "auto").toLowerCase() === "manual";
+
+  selectedOrderQuantity = Math.max(1, Math.min(selectedOrderQuantity, limit));
+
+  if (quantityOutput) quantityOutput.textContent = String(selectedOrderQuantity);
+  if (previewQuantity) previewQuantity.textContent = `${selectedOrderQuantity} key`;
+  if (decreaseButton) decreaseButton.disabled = selectedOrderQuantity <= 1;
+  if (increaseButton) increaseButton.disabled = !product || selectedOrderQuantity >= limit;
+
+  if (stockHint) {
+    if (!product) {
+      stockHint.textContent = "Pilih produk terlebih dahulu";
+    } else if (isManual) {
+      stockHint.textContent = "Produk manual hanya tersedia 1 key per order";
+    } else {
+      stockHint.textContent = `${selectedOrderQuantity} key dipilih | tersedia ${Number(product.available_keys || 0)}`;
+    }
+  }
+}
+
+function changeOrderQuantity(delta) {
+  const selectedProduct = allProducts.find(
+    (item) => String(item.id) === String(productSelect.value),
+  );
+  const nextQuantity = selectedOrderQuantity + Number(delta || 0);
+  const limit = getOrderQuantityLimit(selectedProduct);
+  const clampedQuantity = Math.max(1, Math.min(nextQuantity, limit));
+
+  if (clampedQuantity === selectedOrderQuantity) return;
+
+  selectedOrderQuantity = clampedQuantity;
+  updateOrderQuantityUI(selectedProduct);
+  resetVoucherPreview();
+  refreshCheckoutDiscountPreview();
+}
+
 function updatePreview() {
   const selectedProduct = allProducts.find(
     (item) => String(item.id) === String(productSelect.value),
@@ -1754,6 +1817,7 @@ function updatePreview() {
     document.getElementById("previewProduct").innerText =
       translations[currentLanguage].previewWait;
     document.getElementById("previewPrice").innerText = "Rp 0";
+    updateOrderQuantityUI(null);
     resetVoucherPreview();
     return;
   }
@@ -1766,6 +1830,7 @@ function updatePreview() {
   const playMeta = getPlayStatusMeta(selectedProduct.play_status);
   const isMaintenance = playMeta.value === "maintenance";
   const isOutOfStock = availableKeys <= 0;
+  updateOrderQuantityUI(selectedProduct);
   const statusHint = document.getElementById("productStatusHint");
   if (statusHint) {
     statusHint.className = `product-status-hint product-status-${playMeta.value}`;
@@ -1775,7 +1840,7 @@ function updatePreview() {
   document.getElementById("previewGame").innerText = selectedProduct.game;
   document.getElementById("previewProduct").innerText =
     `${getPlatformLabel(getProductPlatform(selectedProduct))} • ${selectedProduct.brand} - ${selectedProduct.duration}`;
-  showDefaultPriceBreakdown(selectedProduct.price);
+  showDefaultPriceBreakdown(selectedProduct.price, selectedOrderQuantity);
 
   buyBtn.disabled = Boolean(isOutOfStock || isMaintenance);
   buyBtn.innerText = isMaintenance
@@ -1832,14 +1897,14 @@ async function buy() {
     return;
   }
 
-  if (availableKeys <= 0) {
+  if (availableKeys < selectedOrderQuantity) {
     closeOrderModal();
     loadAllProducts();
 
     Swal.fire({
       icon: "error",
       title: translations[currentLanguage].outOfStockTitle,
-      text: translations[currentLanguage].outOfStockText,
+      text: `Stok tidak cukup untuk ${selectedOrderQuantity} key. Silakan kurangi jumlah atau pilih produk lain.`,
       confirmButtonColor: "#ffe135",
     });
 
@@ -1858,6 +1923,7 @@ async function buy() {
         product_id: selectedProduct.id,
         name,
         contact,
+        quantity: selectedOrderQuantity,
         voucher_code:
           appliedVoucherCode ||
           document.getElementById("voucherCodeInput")?.value ||
@@ -1897,6 +1963,9 @@ async function buy() {
       const productNameForModal =
         document.getElementById("previewProduct")?.innerText ||
         `${selectedProduct?.brand || ""} - ${selectedProduct?.duration || ""}`.trim();
+      const bulkProductName = selectedOrderQuantity > 1
+        ? `${productNameForModal} (${selectedOrderQuantity} key)`
+        : productNameForModal;
 
       closeOrderModal();
       setLoading(false);
@@ -1910,7 +1979,7 @@ async function buy() {
           paymentUrl: data.paymentUrl,
           resultUrl: data.resultUrl,
           gameName: gameNameForModal,
-          productName: productNameForModal,
+          productName: bulkProductName,
           totalPrice: totalPrice,
         });
       } catch (snapErr) {
@@ -1959,7 +2028,11 @@ async function buy() {
     }
 
     const errorMessage = data.message || "Gagal membuat pembayaran";
-    const isOutOfStock = errorMessage.toLowerCase().includes("stok key habis");
+    const normalizedError = errorMessage.toLowerCase();
+    const isOutOfStock =
+      normalizedError.includes("stok key habis") ||
+      normalizedError.includes("stok tidak cukup") ||
+      normalizedError.includes("stok supplier tidak cukup");
 
     if (isOutOfStock) {
       closeOrderModal();
@@ -2264,9 +2337,10 @@ function showPriceBreakdown({
   priceBreakdown.style.display = "block";
 }
 
-function showDefaultPriceBreakdown(productPrice) {
-  const originalPrice = Number(productPrice || 0);
-  const netPrice = Math.max(originalPrice, 1000);
+function showDefaultPriceBreakdown(productPrice, quantity = selectedOrderQuantity) {
+  const cleanQuantity = Math.max(1, Math.min(Number(quantity || 1), MAX_ORDER_QUANTITY));
+  const originalPrice = Number(productPrice || 0) * cleanQuantity;
+  const netPrice = Math.max(originalPrice, 1000 * cleanQuantity);
   const finalPrice = calculateQrisGrossPrice(netPrice);
   const paymentFee = finalPrice - netPrice;
 
@@ -2293,6 +2367,7 @@ async function refreshCheckoutDiscountPreview() {
       },
       body: JSON.stringify({
         product_id: selectedProductId,
+        quantity: selectedOrderQuantity,
         voucher_code: voucherCode,
       }),
     });
@@ -2345,7 +2420,7 @@ function resetVoucherPreview() {
   }
 
   if (selectedProductBasePrice > 0) {
-    showDefaultPriceBreakdown(selectedProductBasePrice);
+    showDefaultPriceBreakdown(selectedProductBasePrice, selectedOrderQuantity);
   } else if (priceBreakdown) {
     priceBreakdown.style.display = "none";
   }
@@ -2380,6 +2455,7 @@ async function checkVoucher() {
       },
       body: JSON.stringify({
         product_id: selectedProductId,
+        quantity: selectedOrderQuantity,
         voucher_code: voucherCode,
       }),
     });

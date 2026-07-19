@@ -13566,3 +13566,94 @@ body.dark-theme .install-prompt-close {
     font-size: 8px !important;
   }
 }
+
+/* Bulk key checkout (1-5 key per order) */
+.bulk-quantity-field {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--nb-line, #deded8);
+  border-radius: 18px;
+  background: var(--nb-surface-2, #f7f7f4);
+}
+
+.bulk-quantity-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bulk-quantity-head label {
+  margin: 0;
+}
+
+.bulk-quantity-head small,
+.quantity-stock-hint {
+  color: var(--text-muted, #73736d);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.quantity-stepper {
+  display: grid;
+  grid-template-columns: 48px minmax(72px, 1fr) 48px;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.quantity-stepper button,
+.quantity-stepper output {
+  min-height: 48px;
+  border: 1px solid var(--nb-line, #d8d8d2);
+  border-radius: 14px;
+}
+
+.quantity-stepper button {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  background: var(--nb-ink, #101010);
+  color: #fff;
+  font-size: 24px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.quantity-stepper button:disabled {
+  cursor: not-allowed;
+  opacity: 0.28;
+}
+
+.quantity-stepper output {
+  display: grid;
+  place-items: center;
+  background: var(--nb-surface, #fff);
+  color: var(--nb-ink, #101010);
+  font-size: 22px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+body.dark-theme .bulk-quantity-field,
+body.dark-theme .quantity-stepper output {
+  background: #191919;
+  color: #fff;
+}
+
+@media (max-width: 640px) {
+  .bulk-quantity-field {
+    padding: 12px !important;
+    border-radius: 16px !important;
+  }
+
+  .bulk-quantity-head {
+    align-items: flex-start;
+  }
+
+  .modal-summary > div:nth-child(3) {
+    grid-column: 1 / -1 !important;
+    min-height: 58px !important;
+  }
+}

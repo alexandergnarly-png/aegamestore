@@ -721,6 +721,35 @@
         letter-spacing: .02em;
         word-break: break-word;
       }
+      .license-list {
+        display: grid;
+        gap: 8px;
+      }
+      .license-item {
+        min-width: 0;
+        display: grid;
+        grid-template-columns: 28px minmax(0, 1fr);
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--surface);
+      }
+      .license-item > span {
+        width: 28px;
+        height: 28px;
+        display: grid;
+        place-items: center;
+        border-radius: 10px;
+        background: var(--ink);
+        color: var(--surface);
+        font-size: 11px;
+        font-weight: 900;
+      }
+      .license-item .license-code {
+        font-size: clamp(13px, 3.8vw, 18px);
+      }
       .security-note {
         margin: 0 0 14px;
         padding: 14px 16px;
@@ -1181,6 +1210,16 @@ const resultTranslations = {
           .replace(/'/g, "&#39;");
       }
 
+      function normalizeOrderKeys(data) {
+        if (Array.isArray(data?.gameKeys)) {
+          return data.gameKeys.map((key) => String(key || "").trim()).filter(Boolean);
+        }
+        return String(data?.gameKey || "")
+          .split(/\r?\n/)
+          .map((key) => key.trim())
+          .filter(Boolean);
+      }
+
       function badge(status) {
         const safeStatus = String(status || "-").toLowerCase();
         return `<span class="badge ${escapeHtml(safeStatus)}">${escapeHtml(
@@ -1476,6 +1515,7 @@ const resultTranslations = {
 
         const paymentStatus = String(data.payment_status || "").toLowerCase();
         const deliveryStatus = String(data.delivery_status || "").toLowerCase();
+        const orderKeys = normalizeOrderKeys(data);
 
         statusRow.innerHTML =
           badge(data.payment_status) + badge(data.delivery_status);
@@ -1487,14 +1527,21 @@ const resultTranslations = {
         statusText.removeAttribute("data-result-i18n");
         keyBox.removeAttribute("data-result-i18n");
 
-        if (deliveryStatus === "delivered" && data.gameKey) {
-          latestGameKey = data.gameKey;
+        if (deliveryStatus === "delivered" && orderKeys.length) {
+          latestGameKey = orderKeys.join("\n");
           stopPendingAutoRefresh();
           copyBtn.style.display = "flex";
           keyBox.innerHTML = `
             <div class="license-card">
-              <span class="license-kicker">LICENSE KEY</span>
-              <code class="license-code">${escapeHtml(data.gameKey)}</code>
+              <span class="license-kicker">${orderKeys.length} LICENSE KEY${orderKeys.length > 1 ? "S" : ""}</span>
+              <div class="license-list">
+                ${orderKeys.map((key, index) => `
+                  <div class="license-item">
+                    <span>${index + 1}</span>
+                    <code class="license-code">${escapeHtml(key)}</code>
+                  </div>
+                `).join("")}
+              </div>
             </div>
           `;
           if (keyWrapper) keyWrapper.className = "key-box delivered";
