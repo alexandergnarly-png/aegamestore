@@ -663,11 +663,33 @@
       .wallet-qr-card { display:grid; grid-template-columns:minmax(0,1fr) 116px; align-items:center; gap:12px; }
       .wallet-qr-card small { display:block; color:var(--muted); font-size:11px; font-weight:800; line-height:1.45; }
       .wallet-qr { width:100%; max-width:116px; border:1px solid var(--line); border-radius:14px; background:#fff; padding:8px; }
-      .wallet-topup-form { display:grid; gap:10px; }
+      .wallet-topup-form { display:grid; gap:12px; }
+      .wallet-topup-form label { display:grid; gap:7px; }
       .wallet-topup-form input { width:100%; box-sizing:border-box; }
+      .wallet-amount-wrap { position:relative; }
+      .wallet-amount-prefix { position:absolute; left:18px; top:50%; transform:translateY(-50%); color:var(--muted); font-weight:900; pointer-events:none; }
+      .wallet-amount-wrap input { padding-left:44px; font-size:18px; font-weight:900; }
+      .wallet-quick-amounts { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:7px; }
+      .wallet-amount-chip { min-height:38px; padding:7px 5px; border:1px solid var(--line); border-radius:12px; background:var(--soft); color:var(--ink); font-size:11px; font-weight:900; }
+      .wallet-amount-chip.active { border-color:var(--ink); background:var(--ink); color:var(--inverse); }
+      .wallet-optional { border:1px solid var(--line); border-radius:16px; background:var(--soft); overflow:hidden; }
+      .wallet-optional summary { padding:12px 14px; color:var(--muted); cursor:pointer; font-size:12px; font-weight:900; list-style:none; }
+      .wallet-optional summary::-webkit-details-marker { display:none; }
+      .wallet-optional summary::after { content:"+"; float:right; color:var(--ink); font-size:16px; line-height:1; }
+      .wallet-optional[open] summary::after { content:"−"; }
+      .wallet-optional-fields { display:grid; gap:10px; padding:0 12px 12px; }
+      .wallet-history-title { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:9px; }
+      .wallet-history-title small { color:var(--muted); font-size:10px; font-weight:800; }
       .wallet-history { display:grid; gap:8px; }
-      .wallet-history-row { display:flex; justify-content:space-between; gap:10px; padding:10px 12px; border:1px solid var(--line); border-radius:12px; font-size:12px; }
-      .wallet-history-row small { color:var(--muted); }
+      .wallet-history-row { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:12px; padding:12px; border:1px solid var(--line); border-radius:14px; background:var(--surface-solid); font-size:12px; }
+      .wallet-history-row strong { display:block; font-size:13px; }
+      .wallet-history-row small, .wallet-history-row time { display:block; margin-top:3px; color:var(--muted); font-size:10px; line-height:1.4; }
+      .wallet-history-amount.credit { color:#15803d; }
+      .wallet-history-amount.debit { color:#b91c1c; }
+      .wallet-status { display:inline-flex; align-items:center; min-height:27px; padding:5px 8px; border:1px solid var(--line); border-radius:999px; background:var(--soft); color:var(--muted); font-size:9px; font-weight:950; text-align:center; }
+      .wallet-status.pending { background:#fff7df; color:#8a5a00; border-color:#ead29b; }
+      .wallet-status.rejected { background:#fff0f0; color:#a32020; border-color:#e7b8b8; }
+      .wallet-status.completed { background:#eaf8ee; color:#166534; border-color:#b9ddc2; }
 
       .tab-btn {
         min-width: 0;
@@ -1445,10 +1467,8 @@
         .wallet-balance-card strong { font-size: 25px; }
         .wallet-qr-card { grid-template-columns: minmax(0,1fr) 124px; padding:14px; }
         .wallet-qr { max-width: 124px; align-self: center; }
-        .wallet-history-row { grid-template-columns: minmax(0, 1fr) auto; display: grid; align-items: start; }
-        .wallet-history-row > span { min-width: 0; overflow-wrap: anywhere; }
-        .wallet-history-row > span small { display: block; margin-top: 3px; line-height: 1.35; }
-        .wallet-history-row > strong { max-width: 120px; text-align: right; white-space: normal; line-height: 1.3; }
+        .wallet-history-row { align-items: start; }
+        .wallet-history-row > div { min-width: 0; overflow-wrap: anywhere; }
 
         .badge-benefit-card { padding: 14px; border-radius: 18px; }
         .badge-benefit-list { gap: 7px; }
@@ -1628,13 +1648,23 @@
               <div class="wallet-qr-card"><div><strong data-account-i18n="walletQrTitle">Bayar via QRIS</strong><small data-account-i18n="walletQrDesc">Scan QRIS, bayar sesuai nominal, lalu kirim request top up.</small></div><img class="wallet-qr" src="/qris.png" alt="QRIS AE Game Store"></div>
             </div>
             <div class="wallet-topup-form">
-              <label><span data-account-i18n="walletAmountLabel">Nominal top up</span><input id="walletTopupAmount" type="number" min="10000" step="1000" placeholder="Minimal Rp10.000"></label>
-              <label><span data-account-i18n="walletReferenceLabel">Referensi pembayaran (opsional)</span><input id="walletPaymentReference" type="text" maxlength="120" placeholder="Contoh: jam transfer / nama pengirim"></label>
-              <label><span data-account-i18n="walletNoteLabel">Catatan (opsional)</span><input id="walletBuyerNote" type="text" maxlength="300" placeholder="Catatan untuk admin"></label>
-              <button class="btn btn-primary" data-account-i18n="walletSubmit" type="button" onclick="createWalletTopup()">Saya sudah bayar QRIS</button>
+              <label><span data-account-i18n="walletAmountLabel">Nominal top up</span><span class="wallet-amount-wrap"><span class="wallet-amount-prefix">Rp</span><input id="walletTopupAmount" type="text" inputmode="numeric" autocomplete="off" placeholder="Minimal 10.000" data-account-placeholder="walletAmountPlaceholder" oninput="formatWalletTopupInput(this)"></span></label>
+              <div class="wallet-quick-amounts" aria-label="Pilihan nominal cepat">
+                <button class="wallet-amount-chip" type="button" data-amount="10000" onclick="setWalletTopupAmount(10000)">Rp10k</button>
+                <button class="wallet-amount-chip" type="button" data-amount="25000" onclick="setWalletTopupAmount(25000)">Rp25k</button>
+                <button class="wallet-amount-chip" type="button" data-amount="50000" onclick="setWalletTopupAmount(50000)">Rp50k</button>
+                <button class="wallet-amount-chip" type="button" data-amount="100000" onclick="setWalletTopupAmount(100000)">Rp100k</button>
+              </div>
+              <details class="wallet-optional">
+                <summary data-account-i18n="walletOptionalDetails">Tambahkan detail pembayaran (opsional)</summary>
+                <div class="wallet-optional-fields">
+                  <label><span data-account-i18n="walletReferenceLabel">Referensi pembayaran</span><input id="walletPaymentReference" type="text" maxlength="120" placeholder="Contoh: jam transfer / nama pengirim" data-account-placeholder="walletReferencePlaceholder"></label>
+                  <label><span data-account-i18n="walletNoteLabel">Catatan</span><input id="walletBuyerNote" type="text" maxlength="300" placeholder="Catatan untuk admin" data-account-placeholder="walletNotePlaceholder"></label>
+                </div>
+              </details>
+              <button class="btn btn-primary" id="walletSubmitButton" type="button" onclick="createWalletTopup()">Saya sudah bayar QRIS</button>
             </div>
-            <div><strong data-account-i18n="walletTopupHistoryTitle">Riwayat top up</strong><div class="wallet-history" id="walletTopupHistory"><small data-account-i18n="walletEmpty">Belum ada request.</small></div></div>
-            <div><strong data-account-i18n="walletLedgerTitle">Aktivitas saldo</strong><div class="wallet-history" id="walletLedgerHistory"><small data-account-i18n="walletEmpty">Belum ada aktivitas.</small></div></div>
+            <div><div class="wallet-history-title"><strong data-account-i18n="walletActivityTitle">Aktivitas AE Credit</strong><small data-account-i18n="walletActivityHint">Terbaru</small></div><div class="wallet-history" id="walletActivityHistory"><small data-account-i18n="walletEmpty">Belum ada aktivitas.</small></div></div>
           </div>
         </div>
         <!-- Orders panel -->
@@ -1959,9 +1989,20 @@
           walletQrTitle: "Bayar via QRIS",
           walletQrDesc: "Scan QRIS, bayar sesuai nominal, lalu kirim request top up.",
           walletAmountLabel: "Nominal top up",
-          walletReferenceLabel: "Referensi pembayaran (opsional)",
-          walletNoteLabel: "Catatan (opsional)",
+          walletAmountPlaceholder: "Minimal 10.000",
+          walletReferenceLabel: "Referensi pembayaran",
+          walletReferencePlaceholder: "Contoh: jam transfer / nama pengirim",
+          walletNoteLabel: "Catatan",
+          walletNotePlaceholder: "Catatan untuk admin",
           walletSubmit: "Saya sudah bayar QRIS",
+          walletSubmitAmount: "Kirim top up {amount}",
+          walletPendingSubmit: "Menunggu verifikasi admin",
+          walletOptionalDetails: "Tambahkan detail pembayaran (opsional)",
+          walletActivityTitle: "Aktivitas AE Credit",
+          walletActivityHint: "Terbaru",
+          walletTopupRequest: "Request top up QRIS",
+          walletCreditIn: "Saldo masuk",
+          walletCreditOut: "Saldo terpakai",
           walletTopupHistoryTitle: "Riwayat top up",
           walletLedgerTitle: "Aktivitas saldo",
           walletEmpty: "Belum ada aktivitas.",
@@ -2072,9 +2113,20 @@
           walletQrTitle: "Pay via QRIS",
           walletQrDesc: "Scan the QRIS, pay the exact amount, then submit a top up request.",
           walletAmountLabel: "Top up amount",
-          walletReferenceLabel: "Payment reference (optional)",
-          walletNoteLabel: "Note (optional)",
+          walletAmountPlaceholder: "Minimum 10,000",
+          walletReferenceLabel: "Payment reference",
+          walletReferencePlaceholder: "Example: transfer time / sender name",
+          walletNoteLabel: "Note",
+          walletNotePlaceholder: "Note for admin",
           walletSubmit: "I have paid via QRIS",
+          walletSubmitAmount: "Submit {amount} top up",
+          walletPendingSubmit: "Awaiting admin review",
+          walletOptionalDetails: "Add payment details (optional)",
+          walletActivityTitle: "AE Credit activity",
+          walletActivityHint: "Latest",
+          walletTopupRequest: "QRIS top up request",
+          walletCreditIn: "Credit added",
+          walletCreditOut: "Credit used",
           walletTopupHistoryTitle: "Top up history",
           walletLedgerTitle: "Balance activity",
           walletEmpty: "No activity yet.",
@@ -2228,6 +2280,43 @@
         return labels[status] || status;
       }
 
+      function walletDateTime(value) {
+        return new Intl.DateTimeFormat(getAccountLanguage() === "en" ? "en-US" : "id-ID", {
+          dateStyle: "medium",
+          timeStyle: "short",
+        }).format(new Date(value));
+      }
+
+      function getWalletTopupAmount() {
+        return Number(document.getElementById("walletTopupAmount")?.value.replace(/\D/g, "") || 0);
+      }
+
+      function updateWalletTopupButton() {
+        const amount = getWalletTopupAmount();
+        const button = document.getElementById("walletSubmitButton");
+        if (button) button.textContent = button.dataset.pending === "true"
+          ? tAccount("walletPendingSubmit")
+          : amount
+            ? tAccount("walletSubmitAmount").replace("{amount}", formatWalletRupiah(amount))
+            : tAccount("walletSubmit");
+        document.querySelectorAll(".wallet-amount-chip").forEach((chip) => {
+          chip.classList.toggle("active", Number(chip.dataset.amount) === amount);
+        });
+      }
+
+      function formatWalletTopupInput(input) {
+        const amount = Number(input.value.replace(/\D/g, "") || 0);
+        input.value = amount ? amount.toLocaleString("id-ID") : "";
+        updateWalletTopupButton();
+      }
+
+      function setWalletTopupAmount(amount) {
+        const input = document.getElementById("walletTopupAmount");
+        if (!input) return;
+        input.value = Number(amount).toLocaleString("id-ID");
+        updateWalletTopupButton();
+      }
+
       async function loadWallet() {
         try {
           const res = await fetch("/api/wallet", { cache: "no-store" });
@@ -2235,23 +2324,30 @@
           const data = await res.json();
           const balance = document.getElementById("walletBalance");
           if (balance) balance.textContent = formatWalletRupiah(data.balance);
-          const topups = document.getElementById("walletTopupHistory");
-          if (topups) {
-            topups.innerHTML = (data.topups || []).length
-              ? data.topups.map((row) => `<div class="wallet-history-row"><span>${formatWalletRupiah(row.amount)}<small>${row.payment_reference ? ` · ${escapeHtml(row.payment_reference)}` : ""}</small></span><strong>${walletStatusLabel(row.status)}</strong></div>`).join("")
-              : `<small>${escapeHtml(tAccount("walletEmpty"))}</small>`;
+          const submitButton = document.getElementById("walletSubmitButton");
+          if (submitButton) {
+            submitButton.dataset.pending = String((data.topups || []).some((row) => row.status === "pending"));
+            submitButton.disabled = submitButton.dataset.pending === "true";
+            updateWalletTopupButton();
           }
-          const ledger = document.getElementById("walletLedgerHistory");
-          if (ledger) {
-            ledger.innerHTML = (data.ledger || []).length
-              ? data.ledger.map((row) => `<div class="wallet-history-row"><span>${row.direction === "credit" ? "+" : "-"}${formatWalletRupiah(row.amount)}<small>${escapeHtml(row.description || row.entry_type)}</small></span><strong>${new Date(row.created_at).toLocaleDateString(getAccountLanguage() === "en" ? "en-US" : "id-ID")}</strong></div>`).join("")
+          const activity = document.getElementById("walletActivityHistory");
+          if (activity) {
+            const requests = (data.topups || [])
+              .filter((row) => row.status !== "approved")
+              .map((row) => ({ ...row, kind: "request", date: row.reviewed_at || row.created_at }));
+            const entries = (data.ledger || []).map((row) => ({ ...row, kind: "ledger", date: row.created_at }));
+            const rows = [...requests, ...entries].sort((a, b) => new Date(b.date) - new Date(a.date));
+            activity.innerHTML = rows.length
+              ? rows.map((row) => row.kind === "request"
+                ? `<div class="wallet-history-row"><div><strong>${formatWalletRupiah(row.amount)}</strong><small>${escapeHtml(row.payment_reference || tAccount("walletTopupRequest"))}</small><time>${walletDateTime(row.date)}</time></div><span class="wallet-status ${escapeHtml(row.status)}">${escapeHtml(walletStatusLabel(row.status))}</span></div>`
+                : `<div class="wallet-history-row"><div><strong class="wallet-history-amount ${row.direction === "credit" ? "credit" : "debit"}">${row.direction === "credit" ? "+" : "−"}${formatWalletRupiah(row.amount)}</strong><small>${escapeHtml(row.description || row.entry_type)}</small><time>${walletDateTime(row.date)}</time></div><span class="wallet-status completed">${tAccount(row.direction === "credit" ? "walletCreditIn" : "walletCreditOut")}</span></div>`).join("")
               : `<small>${escapeHtml(tAccount("walletEmpty"))}</small>`;
           }
         } catch (_) {}
       }
 
       async function createWalletTopup() {
-        const amount = document.getElementById("walletTopupAmount")?.value;
+        const amount = getWalletTopupAmount();
         const payment_reference = document.getElementById("walletPaymentReference")?.value.trim();
         const buyer_note = document.getElementById("walletBuyerNote")?.value.trim();
         try {
@@ -2262,6 +2358,8 @@
           document.getElementById("walletTopupAmount").value = "";
           document.getElementById("walletPaymentReference").value = "";
           document.getElementById("walletBuyerNote").value = "";
+          document.querySelector(".wallet-optional")?.removeAttribute("open");
+          updateWalletTopupButton();
           loadWallet();
         } catch (err) { Swal.fire({ icon: "error", title: "Top up gagal", text: err.message }); }
       }
