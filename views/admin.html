@@ -667,6 +667,9 @@
         margin-bottom: 14px;
       }
 
+      .wallet-grant-form { align-items: end; }
+      .wallet-grant-form .field { display: grid; gap: 6px; }
+
       .field,
       .field-wide,
       .user-search-field {
@@ -3601,6 +3604,15 @@
         <div class="toolbar"><div class="field"><select id="walletStatusFilter" onchange="loadWalletTopups()"><option value="pending">Menunggu</option><option value="approved">Disetujui</option><option value="rejected">Ditolak</option></select></div><button type="button" onclick="loadWalletTopups()">Refresh</button></div>
         <div class="table-wrap"><table><thead><tr><th>Buyer</th><th>Nominal</th><th>Referensi</th><th>Dibuat</th><th>Aksi</th></tr></thead><tbody id="walletTopupTableBody"><tr><td colspan="5">Memuat...</td></tr></tbody></table></div>
       </div>
+      <div class="card delay-2">
+        <div class="card-header"><div class="card-title-wrap"><h2>Owner Grant Credit</h2><p class="card-subtitle">Tambahkan saldo internal untuk bonus, kompensasi, atau akun owner.</p></div><div class="section-badge">Internal</div></div>
+        <div class="toolbar wallet-grant-form">
+          <div class="field"><label for="walletGrantUsername">Username buyer</label><input id="walletGrantUsername" type="text" maxlength="80" placeholder="Contoh: zahir"></div>
+          <div class="field"><label for="walletGrantAmount">Nominal</label><input id="walletGrantAmount" type="number" min="1000" max="2000000" step="1000" placeholder="Rp50.000"></div>
+          <div class="field"><label for="walletGrantReason">Alasan wajib</label><input id="walletGrantReason" type="text" maxlength="300" placeholder="Contoh: bonus owner"></div>
+          <button type="button" onclick="grantWalletCredit()">Tambah Saldo</button>
+        </div>
+      </div>
     </section>
 
     <!-- ===== ADMIN UPGRADE: Bottom navigation (mobile) ===== -->
@@ -3845,6 +3857,24 @@
         const data = await res.json();
         if (!res.ok) return Swal.fire("Gagal", data.message || "Reject gagal", "error");
         loadWalletTopups();
+      }
+
+      async function grantWalletCredit() {
+        const username = document.getElementById("walletGrantUsername")?.value.trim();
+        const amount = document.getElementById("walletGrantAmount")?.value;
+        const reason = document.getElementById("walletGrantReason")?.value.trim();
+        if (!username || !amount || !reason) return Swal.fire("Data belum lengkap", "Username, nominal, dan alasan wajib diisi.", "warning");
+        const confirm = await Swal.fire({ title: "Tambah saldo buyer?", html: `<p>Username: <strong>${escapeHtml(username)}</strong></p><p>Nominal: <strong>${formatRupiah(amount)}</strong></p><p>Alasan: ${escapeHtml(reason)}</p>`, icon: "warning", showCancelButton: true, confirmButtonText: "Ya, tambahkan", cancelButtonText: "Batal" });
+        if (!confirm.isConfirmed) return;
+        try {
+          const res = await fetch("/api/admin/wallet/grant", { method: "POST", headers: { "Content-Type": "application/json", "x-csrf-token": getCsrfToken() }, body: JSON.stringify({ username, amount, reason }) });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.message || "Grant gagal");
+          await Swal.fire("Berhasil", `${data.message}. Saldo sekarang ${formatRupiah(data.balance)}.`, "success");
+          document.getElementById("walletGrantUsername").value = "";
+          document.getElementById("walletGrantAmount").value = "";
+          document.getElementById("walletGrantReason").value = "";
+        } catch (err) { Swal.fire("Gagal", err.message, "error"); }
       }
 
       function showSection(sectionName, buttonEl = null) {

@@ -1652,6 +1652,10 @@ function parseWalletAmount(value) {
   return amount;
 }
 
+function formatWalletAmountForMessage(value) {
+  return `Rp${Number(value || 0).toLocaleString("id-ID")}`;
+}
+
 async function ensureWalletAccount(dbClient, userId) {
   const now = new Date().toISOString();
   await dbClient.query(
@@ -7409,6 +7413,42 @@ app.post("/api/admin/wallet/topups/:id/reject", requireAdminAuth, requireAdminCs
     console.error("ERROR REJECT WALLET TOPUP:", err);
     return res.status(500).json({ message: "Gagal menolak top up" });
   }
+});
+
+app.post("/api/admin/wallet/grant", requireAdminAuth, requireAdminCsrf, async (req, res) => {
+  const username = String(req.body?.username || "").trim();
+  const amount = parseWalletAmount(req.body?.amount);
+  const reason = String(req.body?.reason || "").trim().slice(0, 300);
+  if (!username || username.length > 80) return res.status(400).json({ message: "Username buyer tidak valid" });
+  if (amount < 1000 || amount > WALLET_MAX_TOPUP) return res.status(400).json({ message: "Nominal grant harus Rp1.000 sampai Rp2.000.000" });
+  if (!reason) return res.status(400).json({ message: "Alasan grant wajib diisi" });
+
+  const adminUsername = await getAdminSessionUsername(req).catch(() => "admin");
+  const client = await db.connect();
+  try {
+    await client.query("BEGIN");
+    const userResult = await client.query(`SELECT id, username FROM users WHERE LOWER(username) = LOWER($1) LIMIT 1 FOR UPDATE`, [username]);
+    const targetUser = userResult.rows[0];
+    if (!targetUser) { await client.query("ROLLBACK"); return res.status(404).json({ message: "Buyer tidak ditemukan" }); }
+    await ensureWalletAccount(client, targetUser.id);
+    const wallet = (await client.query(`SELECT balance FROM wallet_accounts WHERE user_id = $1 FOR UPDATE`, [targetUser.id])).rows[0];
+    const before = Number(wallet?.balance || 0);
+    const after = before + amount;
+    if (after > WALLET_MAX_BALANCE) { await client.query("ROLLBACK"); return res.status(400).json({ message: "Saldo buyer melewati batas maksimum" }); }
+    const now = new Date().toISOString();
+    const grantId = `GRANT-${crypto.randomUUID()}`;
+    await client.query(`UPDATE wallet_accounts SET balance = $1, updated_at = $2 WHERE user_id = $3`, [after, now, targetUser.id]);
+    await client.query(`INSERT INTO wallet_ledger
+      (user_id, entry_type, direction, amount, balance_before, balance_after, reference_type, reference_id, description, admin_username, created_at)
+      VALUES ($1, 'admin_adjustment', 'credit', $2, $3, $4, 'admin_grant', $5, $6, $7, $8)`,
+      [targetUser.id, amount, before, after, grantId, reason, adminUsername, now]);
+    await client.query("COMMIT");
+    return res.json({ message: `Saldo ${targetUser.username} bertambah ${formatWalletAmountForMessage(amount)}`, username: targetUser.username, balance: after });
+  } catch (err) {
+    await client.query("ROLLBACK").catch(() => {});
+    console.error("ERROR ADMIN WALLET GRANT:", err);
+    return res.status(500).json({ message: "Gagal menambahkan saldo" });
+  } finally { client.release(); }
 });
 // ----------------------------------------------
 app.get("/reviews", async (req, res) => {
