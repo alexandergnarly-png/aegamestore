@@ -1411,6 +1411,48 @@
           height: 104px;
           animation: none;
         }
+
+        /* Mobile account polish: keep navigation readable and prevent sticky overlap. */
+        .tab-card {
+          position: relative;
+          top: auto;
+          display: flex;
+          overflow-x: auto;
+          justify-content: flex-start;
+          scrollbar-width: none;
+          scroll-snap-type: x proximity;
+        }
+
+        .tab-card::-webkit-scrollbar { display: none; }
+
+        .tab-btn {
+          flex: 0 0 92px;
+          min-height: 58px;
+          white-space: normal;
+          scroll-snap-align: start;
+        }
+
+        .tab-btn span {
+          overflow: visible;
+          white-space: normal;
+          text-align: center;
+        }
+
+        .wallet-balance-card {
+          align-items: stretch;
+          padding: 14px;
+        }
+
+        .wallet-balance-card strong { font-size: 25px; }
+        .wallet-qr { width: 124px; max-width: 100%; align-self: center; }
+        .wallet-history-row { grid-template-columns: minmax(0, 1fr) auto; display: grid; align-items: start; }
+        .wallet-history-row > span { min-width: 0; overflow-wrap: anywhere; }
+        .wallet-history-row > span small { display: block; margin-top: 3px; line-height: 1.35; }
+        .wallet-history-row > strong { max-width: 120px; text-align: right; white-space: normal; line-height: 1.3; }
+
+        .badge-benefit-card { padding: 14px; border-radius: 18px; }
+        .badge-benefit-list { gap: 7px; }
+        .badge-next-target { font-size: 10px; }
       }
     </style>
   </head>
@@ -1578,18 +1620,18 @@
           </button>
         </nav>
         <div class="panel" id="panel-wallet" role="tabpanel">
-          <div class="section-title">AE Credit</div>
-          <p class="section-desc">Top up manual via QRIS, lalu gunakan saldo untuk checkout tanpa biaya QRIS.</p>
+          <div class="section-title" data-account-i18n="walletTitle">AE Credit</div>
+          <p class="section-desc" data-account-i18n="walletDesc">Top up manual via QRIS, lalu gunakan saldo untuk checkout tanpa biaya QRIS.</p>
           <div class="wallet-panel">
-            <div class="wallet-balance-card"><div><small>Saldo tersedia</small><strong id="walletBalance">Rp0</strong></div><img class="wallet-qr" src="/qris.png" alt="QRIS AE Game Store"></div>
+            <div class="wallet-balance-card"><div><small data-account-i18n="walletBalanceLabel">Saldo tersedia</small><strong id="walletBalance">Rp0</strong></div><img class="wallet-qr" src="/qris.png" alt="QRIS AE Game Store"></div>
             <div class="wallet-topup-form">
-              <label>Nominal top up<input id="walletTopupAmount" type="number" min="10000" step="1000" placeholder="Minimal Rp10.000"></label>
-              <label>Referensi pembayaran (opsional)<input id="walletPaymentReference" type="text" maxlength="120" placeholder="Contoh: jam transfer / nama pengirim"></label>
-              <label>Catatan (opsional)<input id="walletBuyerNote" type="text" maxlength="300" placeholder="Catatan untuk admin"></label>
-              <button class="btn btn-primary" type="button" onclick="createWalletTopup()">Saya sudah bayar QRIS</button>
+              <label><span data-account-i18n="walletAmountLabel">Nominal top up</span><input id="walletTopupAmount" type="number" min="10000" step="1000" placeholder="Minimal Rp10.000"></label>
+              <label><span data-account-i18n="walletReferenceLabel">Referensi pembayaran (opsional)</span><input id="walletPaymentReference" type="text" maxlength="120" placeholder="Contoh: jam transfer / nama pengirim"></label>
+              <label><span data-account-i18n="walletNoteLabel">Catatan (opsional)</span><input id="walletBuyerNote" type="text" maxlength="300" placeholder="Catatan untuk admin"></label>
+              <button class="btn btn-primary" data-account-i18n="walletSubmit" type="button" onclick="createWalletTopup()">Saya sudah bayar QRIS</button>
             </div>
-            <div><strong>Riwayat top up</strong><div class="wallet-history" id="walletTopupHistory"><small>Belum ada request.</small></div></div>
-            <div><strong>Aktivitas saldo</strong><div class="wallet-history" id="walletLedgerHistory"><small>Belum ada aktivitas.</small></div></div>
+            <div><strong data-account-i18n="walletTopupHistoryTitle">Riwayat top up</strong><div class="wallet-history" id="walletTopupHistory"><small data-account-i18n="walletEmpty">Belum ada request.</small></div></div>
+            <div><strong data-account-i18n="walletLedgerTitle">Aktivitas saldo</strong><div class="wallet-history" id="walletLedgerHistory"><small data-account-i18n="walletEmpty">Belum ada aktivitas.</small></div></div>
           </div>
         </div>
         <!-- Orders panel -->
@@ -1908,6 +1950,16 @@
           badgeNextTitle: "Target Berikutnya",
           badgeBenefitFallback:
             "Benefit badge akan muncul setelah data akun dimuat.",
+          walletTitle: "AE Credit",
+          walletDesc: "Top up manual via QRIS, lalu gunakan saldo untuk checkout tanpa biaya QRIS.",
+          walletBalanceLabel: "Saldo tersedia",
+          walletAmountLabel: "Nominal top up",
+          walletReferenceLabel: "Referensi pembayaran (opsional)",
+          walletNoteLabel: "Catatan (opsional)",
+          walletSubmit: "Saya sudah bayar QRIS",
+          walletTopupHistoryTitle: "Riwayat top up",
+          walletLedgerTitle: "Aktivitas saldo",
+          walletEmpty: "Belum ada aktivitas.",
           noOrders: "Belum ada order yang terhubung ke akun ini.",
           failedLoadOrders: "Gagal memuat riwayat order.",
           product: "Produk",
@@ -2009,6 +2061,16 @@
           badgeNextTitle: "Next Target",
           badgeBenefitFallback:
             "Badge benefits will appear after account data is loaded.",
+          walletTitle: "AE Credit",
+          walletDesc: "Top up manually via QRIS, then use your balance at checkout without QRIS fees.",
+          walletBalanceLabel: "Available balance",
+          walletAmountLabel: "Top up amount",
+          walletReferenceLabel: "Payment reference (optional)",
+          walletNoteLabel: "Note (optional)",
+          walletSubmit: "I have paid via QRIS",
+          walletTopupHistoryTitle: "Top up history",
+          walletLedgerTitle: "Balance activity",
+          walletEmpty: "No activity yet.",
           noOrders: "No orders are connected to this account yet.",
           failedLoadOrders: "Failed to load order history.",
           product: "Product",
@@ -2118,6 +2180,7 @@
         if (buyerStats && buyerStats.dataset.paid && buyerStats.dataset.spend) {
           buyerStats.innerText = `${buyerStats.dataset.paid} ${tAccount("paidOrder")} • ${buyerStats.dataset.spend} ${tAccount("totalSpend")}`;
         }
+        if (document.getElementById("panel-wallet")) loadWallet();
       }
 
       function applyAccountTheme() {
@@ -2140,6 +2203,9 @@
           const isActive = btn.getAttribute("data-tab") === name;
           btn.classList.toggle("active", isActive);
           btn.setAttribute("aria-selected", isActive ? "true" : "false");
+          if (isActive && window.matchMedia("(max-width: 640px)").matches) {
+            btn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+          }
         });
         document.querySelectorAll(".panel").forEach((panel) => {
           panel.classList.toggle("active", panel.id === "panel-" + name);
@@ -2152,7 +2218,10 @@
       }
 
       function walletStatusLabel(status) {
-        return ({ pending: "Menunggu verifikasi", approved: "Disetujui", rejected: "Ditolak" })[status] || status;
+        const labels = getAccountLanguage() === "en"
+          ? { pending: "Awaiting review", approved: "Approved", rejected: "Rejected" }
+          : { pending: "Menunggu verifikasi", approved: "Disetujui", rejected: "Ditolak" };
+        return labels[status] || status;
       }
 
       async function loadWallet() {
@@ -2163,9 +2232,17 @@
           const balance = document.getElementById("walletBalance");
           if (balance) balance.textContent = formatWalletRupiah(data.balance);
           const topups = document.getElementById("walletTopupHistory");
-          if (topups) topups.innerHTML = (data.topups || []).length ? data.topups.map((row) => `<div class="wallet-history-row"><span>${formatWalletRupiah(row.amount)}<small>${row.payment_reference ? ` · ${escapeHtml(row.payment_reference)}` : ""}</small></span><strong>${walletStatusLabel(row.status)}</strong></div>`).join("") : "<small>Belum ada request.</small>";
+          if (topups) {
+            topups.innerHTML = (data.topups || []).length
+              ? data.topups.map((row) => `<div class="wallet-history-row"><span>${formatWalletRupiah(row.amount)}<small>${row.payment_reference ? ` · ${escapeHtml(row.payment_reference)}` : ""}</small></span><strong>${walletStatusLabel(row.status)}</strong></div>`).join("")
+              : `<small>${escapeHtml(tAccount("walletEmpty"))}</small>`;
+          }
           const ledger = document.getElementById("walletLedgerHistory");
-          if (ledger) ledger.innerHTML = (data.ledger || []).length ? data.ledger.map((row) => `<div class="wallet-history-row"><span>${row.direction === "credit" ? "+" : "-"}${formatWalletRupiah(row.amount)}<small>${escapeHtml(row.description || row.entry_type)}</small></span><strong>${new Date(row.created_at).toLocaleDateString("id-ID")}</strong></div>`).join("") : "<small>Belum ada aktivitas.</small>";
+          if (ledger) {
+            ledger.innerHTML = (data.ledger || []).length
+              ? data.ledger.map((row) => `<div class="wallet-history-row"><span>${row.direction === "credit" ? "+" : "-"}${formatWalletRupiah(row.amount)}<small>${escapeHtml(row.description || row.entry_type)}</small></span><strong>${new Date(row.created_at).toLocaleDateString(getAccountLanguage() === "en" ? "en-US" : "id-ID")}</strong></div>`).join("")
+              : `<small>${escapeHtml(tAccount("walletEmpty"))}</small>`;
+          }
         } catch (_) {}
       }
 
