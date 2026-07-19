@@ -13,6 +13,7 @@ const jwt = require("jsonwebtoken");
 const {
   MAX_ORDER_QUANTITY,
   calculateBulkTotals,
+  calculateVipOrderDiscount,
   getOrderQuantity,
   parseOrderQuantity,
   splitOrderKeys,
@@ -2261,6 +2262,7 @@ async function getBestCheckoutDiscount({
   productId,
   productRow,
   voucherCode,
+  quantity = 1,
 }) {
   const originalPrice = Number(productRow.price || 0);
   const cleanVoucherCode = normalizeVoucherCode(voucherCode);
@@ -2298,14 +2300,18 @@ async function getBestCheckoutDiscount({
   }
 
   const voucherDiscount = Number(voucherCheck.discountAmount || 0);
-  const vipDiscount = Number(vipCheck.discountAmount || 0);
+  const vipDiscountPerKey = Number(vipCheck.discountAmount || 0);
+  const vipDiscount = vipCheck.valid
+    ? calculateVipOrderDiscount(vipDiscountPerKey, quantity)
+    : 0;
 
   if (vipCheck.valid && vipDiscount > voucherDiscount) {
     return {
       valid: true,
       code: vipCheck.code,
       discountAmount: vipDiscount,
-      message: vipCheck.message,
+      discountPerKey: vipDiscountPerKey,
+      message: `${vipCheck.message} (${getOrderQuantity(quantity)} key)`,
       discountType: "vip",
     };
   }
@@ -4086,6 +4092,7 @@ app.post("/voucher-preview", voucherPreviewLimiter, async (req, res) => {
       productId: cleanProductId,
       productRow,
       voucherCode: cleanVoucherCode,
+      quantity: cleanQuantity,
     });
 
     if (!discountCheck.valid) {
@@ -4107,6 +4114,10 @@ app.post("/voucher-preview", voucherPreviewLimiter, async (req, res) => {
       message: discountCheck.message || "Preview harga berhasil",
       voucher_code: discountCheck.code,
       discount_type: discountCheck.discountType,
+      discount_per_key:
+        discountCheck.discountType === "vip"
+          ? Number(discountCheck.discountPerKey || 0)
+          : 0,
       quantity: cleanQuantity,
       unit_price: unitPrice,
       original_price: originalPrice,
@@ -4276,6 +4287,7 @@ app.post("/create-order", orderLimiter, async (req, res) => {
       productId: cleanProductId,
       productRow,
       voucherCode: voucher_code,
+      quantity: cleanQuantity,
     });
 
     if (!discountCheck.valid) {

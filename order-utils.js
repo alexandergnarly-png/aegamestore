@@ -14,6 +14,21 @@ function getOrderQuantity(value) {
   return parseOrderQuantity(value) || 1;
 }
 
+function calculateVipOrderDiscount(perKeyDiscount, quantity) {
+  const cleanQuantity = parseOrderQuantity(quantity);
+  const cleanPerKeyDiscount = Number(perKeyDiscount || 0);
+
+  if (!cleanQuantity) {
+    throw new Error("Jumlah key VIP tidak valid");
+  }
+
+  if (!Number.isFinite(cleanPerKeyDiscount) || cleanPerKeyDiscount <= 0) {
+    return 0;
+  }
+
+  return Math.floor(cleanPerKeyDiscount) * cleanQuantity;
+}
+
 function calculateBulkTotals({ unitPrice, quantity, discountAmount = 0 }) {
   const cleanUnitPrice = Number(unitPrice || 0);
   const cleanQuantity = parseOrderQuantity(quantity);
@@ -50,6 +65,7 @@ function splitOrderKeys(value) {
 module.exports = {
   MAX_ORDER_QUANTITY,
   calculateBulkTotals,
+  calculateVipOrderDiscount,
   getOrderQuantity,
   parseOrderQuantity,
   splitOrderKeys,

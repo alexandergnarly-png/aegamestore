@@ -2352,6 +2352,22 @@ function showDefaultPriceBreakdown(productPrice, quantity = selectedOrderQuantit
   });
 }
 
+function getCheckoutDiscountMessage(data) {
+  if (data?.discount_type !== "vip") {
+    return data?.message || translations[currentLanguage].voucherSuccessMsg;
+  }
+
+  const quantity = Math.max(Number(data.quantity || selectedOrderQuantity || 1), 1);
+  const perKeyDiscount = Number(data.discount_per_key || 0);
+  const totalDiscount = Number(data.discount_amount || 0);
+
+  if (currentLanguage === "en") {
+    return `VIP discount ${formatRupiah(perKeyDiscount)}/key x ${quantity} = ${formatRupiah(totalDiscount)}`;
+  }
+
+  return `Diskon VIP ${formatRupiah(perKeyDiscount)}/key x ${quantity} = ${formatRupiah(totalDiscount)}`;
+}
+
 async function refreshCheckoutDiscountPreview() {
   if (!selectedProductId) return;
 
@@ -2395,10 +2411,7 @@ async function refreshCheckoutDiscountPreview() {
 
     if (voucherMessage) {
       if (Number(data.discount_amount || 0) > 0) {
-        voucherMessage.innerText =
-          data.discount_type === "vip"
-            ? "Diskon VIP digunakan"
-            : data.message || translations[currentLanguage].voucherSuccessMsg;
+        voucherMessage.innerText = getCheckoutDiscountMessage(data);
         voucherMessage.className = "voucher-message success";
       } else {
         voucherMessage.innerText = "";
@@ -2481,8 +2494,7 @@ async function checkVoucher() {
       finalPrice: data.final_price,
     });
 
-    voucherMessage.innerText =
-      data.message || translations[currentLanguage].voucherSuccessMsg;
+    voucherMessage.innerText = getCheckoutDiscountMessage(data);
     voucherMessage.className = "voucher-message success";
   } catch (err) {
     appliedVoucherCode = "";
