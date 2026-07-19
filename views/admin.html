@@ -2250,6 +2250,76 @@
         }
       }
 
+      /* Admin shell polish: persistent header and safer modal behavior. */
+      body.admin-more-open,
+      body.admin-dialog-open {
+        overflow: hidden;
+        overscroll-behavior: none;
+      }
+
+      @media (max-width: 768px) {
+        .page {
+          width: 100%;
+          max-width: 100vw;
+        }
+
+        .top-nav {
+          flex-direction: row;
+          align-items: center;
+          gap: 8px;
+          padding: 8px 56px 8px 8px;
+          border-radius: 20px;
+        }
+
+        .top-nav-left {
+          width: auto;
+          flex: 1 1 auto;
+          min-width: 0;
+          max-width: calc(100% - 48px);
+        }
+
+        .nav-actions {
+          position: absolute;
+          top: 8px;
+          right: 8px;
+          width: 40px;
+          display: flex;
+          flex: 0 0 40px;
+        }
+
+        .admin-role-chip {
+          display: none;
+        }
+
+        .top-nav .ghost-btn {
+          display: none;
+        }
+
+        .nav-kicker,
+        .nav-title {
+          overflow: hidden;
+          max-width: 190px;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .admin-bottom-nav-btn {
+          width: 20%;
+          min-width: 0;
+          flex: 0 0 20%;
+          padding-right: 2px;
+          padding-left: 2px;
+        }
+
+        .admin-bottom-nav-btn .label {
+          overflow: hidden;
+          max-width: 100%;
+          font-size: 9px;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+      }
+
 
     </style>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -2267,8 +2337,10 @@
         </div>
         <button
           class="sidebar-toggle"
+          id="sidebarToggle"
           onclick="toggleSidebar()"
           aria-label="Toggle sidebar"
+          aria-expanded="true"
           title="Toggle sidebar"
         >
           ☰
@@ -3446,6 +3518,7 @@
       id="orderDrawer"
       role="dialog"
       aria-modal="true"
+      aria-hidden="true"
       aria-labelledby="orderDrawerTitle"
     >
       <div class="order-drawer-head">
@@ -3481,6 +3554,7 @@
       id="supplierPickerModal"
       role="dialog"
       aria-modal="true"
+      aria-hidden="true"
       aria-labelledby="supplierPickerTitle"
     >
       <div class="supplier-picker-head">
@@ -3581,6 +3655,7 @@
       id="adminMoreSheet"
       role="dialog"
       aria-modal="true"
+      aria-hidden="true"
       aria-labelledby="adminMoreSheetTitle"
     >
       <div class="admin-more-sheet-handle" aria-hidden="true"></div>
@@ -3673,8 +3748,22 @@
       let vipStorePickerLoadedAt = null;
 
       function toggleSidebar() {
-        document.body.classList.toggle("sidebar-collapsed");
+        const isCollapsed = document.body.classList.toggle("sidebar-collapsed");
+        localStorage.setItem("ae_admin_sidebar_collapsed", isCollapsed ? "1" : "0");
+        document
+          .getElementById("sidebarToggle")
+          ?.setAttribute("aria-expanded", isCollapsed ? "false" : "true");
       }
+
+      function applySidebarState() {
+        const isCollapsed = localStorage.getItem("ae_admin_sidebar_collapsed") === "1";
+        document.body.classList.toggle("sidebar-collapsed", isCollapsed);
+        document
+          .getElementById("sidebarToggle")
+          ?.setAttribute("aria-expanded", isCollapsed ? "false" : "true");
+      }
+
+      applySidebarState();
 
       function applyAdminTheme() {
         const stored = localStorage.getItem("ae_theme");
@@ -3693,13 +3782,49 @@
 
       applyAdminTheme();
 
+      function mountPersistentAdminTopNav() {
+        const page = document.querySelector(".page");
+        const topNav = document.querySelector(".top-nav");
+        if (page && topNav && topNav.parentElement !== page) {
+          page.prepend(topNav);
+        }
+      }
+
+      mountPersistentAdminTopNav();
+
       function showSection(sectionName, buttonEl = null) {
+        const previousSection = document.querySelector(".admin-section.active");
         const sections = document.querySelectorAll(".admin-section");
         sections.forEach((section) => section.classList.remove("active"));
 
         const target = document.getElementById(`section-${sectionName}`);
         if (target) {
           target.classList.add("active");
+        }
+
+        const sectionLabels = {
+          dashboard: "Dashboard",
+          products: "Produk",
+          orders: "Order",
+          users: "User Buyer",
+          keys: "Game Key",
+          vouchers: "Voucher",
+          "vip-discounts": "Prestige Discount",
+        };
+        const activeLabel = sectionLabels[sectionName] || "Admin Panel";
+        document.title = `${activeLabel} - AE Game Store Admin`;
+        try {
+          localStorage.setItem("ae_admin_section", sectionName);
+          history.replaceState(null, "", `#${sectionName}`);
+        } catch (_) {}
+
+        if (previousSection?.id !== `section-${sectionName}`) {
+          window.scrollTo({
+            top: 0,
+            behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+              ? "auto"
+              : "smooth",
+          });
         }
 
         const navButtons = document.querySelectorAll(".nav-btn");
@@ -3985,8 +4110,13 @@
         const backdrop = document.getElementById("supplierPickerBackdrop");
         const searchInput = document.getElementById("supplierPickerSearch");
 
-        if (modal) modal.classList.add("show");
+        window.adminSupplierPickerTrigger = document.activeElement;
+        if (modal) {
+          modal.classList.add("show");
+          modal.setAttribute("aria-hidden", "false");
+        }
         if (backdrop) backdrop.classList.add("show");
+        document.body.classList.add("admin-dialog-open");
 
         if (searchInput && !searchInput.value.trim()) {
           searchInput.value = getSupplierPickerSearchSeed();
@@ -4001,8 +4131,16 @@
       }
 
       function closeVipStoreProductPicker() {
-        document.getElementById("supplierPickerModal")?.classList.remove("show");
+        const modal = document.getElementById("supplierPickerModal");
+        const wasOpen = modal?.classList.contains("show");
+        modal?.classList.remove("show");
+        modal?.setAttribute("aria-hidden", "true");
         document.getElementById("supplierPickerBackdrop")?.classList.remove("show");
+        document.body.classList.remove("admin-dialog-open");
+        if (wasOpen && window.adminSupplierPickerTrigger?.isConnected) {
+          window.adminSupplierPickerTrigger.focus();
+        }
+        window.adminSupplierPickerTrigger = null;
       }
 
       function renderVipStoreProductPicker() {
@@ -4762,9 +4900,14 @@
 
       async function applyBadgeOverride(userId) {
         const badgeCode =
-          document.getElementById("badgeOverrideSelect")?.value || "vip";
+          document.getElementById("badgeOverrideSelect")?.value || "";
         const expiresMode =
           document.getElementById("badgeOverrideExpires")?.value || "1d";
+
+        if (!badgeCode) {
+          await resetBadgeOverride(userId);
+          return;
+        }
 
         try {
           const res = await fetch(`/users/${userId}/badge-override`, {
@@ -5281,9 +5424,12 @@
         `;
         actions.innerHTML = "";
 
+        window.adminOrderDrawerTrigger = document.activeElement;
         drawer.classList.add("show");
+        drawer.setAttribute("aria-hidden", "false");
         backdrop.classList.add("show");
-        document.body.style.overflow = "hidden";
+        document.body.classList.add("admin-dialog-open");
+        setTimeout(() => drawer.querySelector(".order-drawer-close")?.focus(), 50);
         hapticTap();
 
         try {
@@ -5304,9 +5450,15 @@
       function closeOrderDrawer() {
         const drawer = document.getElementById("orderDrawer");
         const backdrop = document.getElementById("orderDrawerBackdrop");
+        const wasOpen = drawer?.classList.contains("show");
         if (drawer) drawer.classList.remove("show");
+        drawer?.setAttribute("aria-hidden", "true");
         if (backdrop) backdrop.classList.remove("show");
-        document.body.style.overflow = "";
+        document.body.classList.remove("admin-dialog-open");
+        if (wasOpen && window.adminOrderDrawerTrigger?.isConnected) {
+          window.adminOrderDrawerTrigger.focus();
+        }
+        window.adminOrderDrawerTrigger = null;
       }
 
       function renderOrderDrawerContent(order) {
@@ -8058,7 +8210,23 @@
         }
         loadAdminSessions();
         setInterval(loadAdminSessions, 60000);
-        showSection("dashboard");
+        const validAdminSections = new Set([
+          "dashboard",
+          "products",
+          "orders",
+          "users",
+          "keys",
+          "vouchers",
+          "vip-discounts",
+        ]);
+        const hashSection = location.hash.replace(/^#/, "");
+        const savedSection = localStorage.getItem("ae_admin_section") || "";
+        const initialSection = validAdminSections.has(hashSection)
+          ? hashSection
+          : validAdminSections.has(savedSection)
+            ? savedSection
+            : "dashboard";
+        showSection(initialSection);
       });
     </script>
     <script>
@@ -8137,6 +8305,23 @@
         } catch (_) {}
       }
 
+      function setAdminBottomNavActive(sectionName) {
+        document
+          .querySelectorAll(".admin-bottom-nav-btn")
+          .forEach((button) => button.classList.remove("active"));
+
+        const directSection = ["dashboard", "products", "orders", "users"].includes(
+          sectionName,
+        )
+          ? sectionName
+          : "more";
+        document
+          .querySelector(
+            `.admin-bottom-nav-btn[data-section="${directSection}"]`,
+          )
+          ?.classList.add("active");
+      }
+
       function bottomNavGo(sectionName, btnEl) {
         const navBtn =
           btnEl ||
@@ -8144,22 +8329,7 @@
             `.admin-bottom-nav-btn[data-section="${sectionName}"]`,
           );
 
-        document
-          .querySelectorAll(".admin-bottom-nav-btn")
-          .forEach((b) => b.classList.remove("active"));
-
-        if (navBtn) {
-          navBtn.classList.add("active");
-        } else if (
-          sectionName === "keys" ||
-          sectionName === "vouchers" ||
-          sectionName === "vip-discounts"
-        ) {
-          const moreBtn = document.querySelector(
-            '.admin-bottom-nav-btn[data-section="more"]',
-          );
-          if (moreBtn) moreBtn.classList.add("active");
-        }
+        setAdminBottomNavActive(navBtn?.dataset.section || sectionName);
 
         if (sectionName === "more") return;
 
@@ -8171,13 +8341,7 @@
         const sheet = document.getElementById("adminMoreSheet");
         const backdrop = document.getElementById("adminMoreSheetBackdrop");
         if (!sheet || !backdrop) return;
-        document
-          .querySelectorAll(".admin-bottom-nav-btn")
-          .forEach((b) => b.classList.remove("active"));
-        const moreBtn = document.querySelector(
-          '.admin-bottom-nav-btn[data-section="more"]',
-        );
-        if (moreBtn) moreBtn.classList.add("active");
+        setAdminBottomNavActive("more");
 
         const moreThemeIco = document.getElementById("moreSheetThemeIco");
         if (moreThemeIco) {
@@ -8188,18 +8352,31 @@
             : "🌙";
         }
 
+        window.adminMoreSheetTrigger = document.activeElement;
         sheet.classList.add("show");
+        sheet.setAttribute("aria-hidden", "false");
         backdrop.classList.add("show");
         document.body.classList.add("admin-more-open");
+        setTimeout(() => sheet.querySelector(".admin-more-sheet-close")?.focus(), 50);
         hapticTap();
       }
 
       function closeMoreSheet() {
         const sheet = document.getElementById("adminMoreSheet");
         const backdrop = document.getElementById("adminMoreSheetBackdrop");
+        const wasOpen = sheet?.classList.contains("show");
         if (sheet) sheet.classList.remove("show");
+        sheet?.setAttribute("aria-hidden", "true");
         if (backdrop) backdrop.classList.remove("show");
         document.body.classList.remove("admin-more-open");
+        const activeSection = document
+          .querySelector(".admin-section.active")
+          ?.id.replace("section-", "");
+        setAdminBottomNavActive(activeSection || "dashboard");
+        if (wasOpen && window.adminMoreSheetTrigger?.isConnected) {
+          window.adminMoreSheetTrigger.focus();
+        }
+        window.adminMoreSheetTrigger = null;
       }
       // Auto data-label for all tables → enables mobile card layout
       function attachAutoDataLabel() {
@@ -8256,11 +8433,54 @@
         update();
       }
 
-      // ESC closes drawer / sheet
+      function getOpenAdminDialog() {
+        const candidates = [
+          document.getElementById("adminMoreSheet"),
+          document.getElementById("supplierPickerModal"),
+          document.getElementById("orderDrawer"),
+        ];
+        return candidates.find((element) => element?.classList.contains("show"));
+      }
+
+      function getAdminDialogFocusable(dialog) {
+        if (!dialog) return [];
+        return Array.from(
+          dialog.querySelectorAll(
+            'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+          ),
+        ).filter((element) => element.offsetParent !== null);
+      }
+
+      // Escape closes the top-most dialog; Tab stays inside it.
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
-          closeOrderDrawer();
-          closeMoreSheet();
+          const openDialog = getOpenAdminDialog();
+          if (!openDialog) return;
+          e.preventDefault();
+          if (openDialog.id === "adminMoreSheet") closeMoreSheet();
+          else if (openDialog.id === "supplierPickerModal") {
+            closeVipStoreProductPicker();
+          } else if (openDialog.id === "orderDrawer") closeOrderDrawer();
+          return;
+        }
+
+        if (e.key !== "Tab") return;
+        const openDialog = getOpenAdminDialog();
+        if (!openDialog) return;
+        const focusable = getAdminDialogFocusable(openDialog);
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (!openDialog.contains(document.activeElement)) {
+          e.preventDefault();
+          first.focus();
+        } else if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
         }
       });
 
@@ -8270,31 +8490,7 @@
       const _origShowSection = showSection;
       window.showSection = function (sectionName, buttonEl) {
         const result = _origShowSection(sectionName, buttonEl);
-        document
-          .querySelectorAll(".admin-bottom-nav-btn")
-          .forEach((b) => b.classList.remove("active"));
-        const map = {
-          dashboard: "dashboard",
-          products: "products",
-          orders: "orders",
-          users: "users",
-        };
-        const matched = map[sectionName];
-        if (matched) {
-          const navBtn = document.querySelector(
-            `.admin-bottom-nav-btn[data-section="${matched}"]`,
-          );
-          if (navBtn) navBtn.classList.add("active");
-        } else if (
-          sectionName === "keys" ||
-          sectionName === "vouchers" ||
-          sectionName === "vip-discounts"
-        ) {
-          const moreBtn = document.querySelector(
-            '.admin-bottom-nav-btn[data-section="more"]',
-          );
-          if (moreBtn) moreBtn.classList.add("active");
-        }
+        setAdminBottomNavActive(sectionName);
         return result;
       };
     </script>
