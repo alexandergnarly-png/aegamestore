@@ -655,10 +655,14 @@
       }
 
       .wallet-panel { display: grid; gap: 14px; }
-      .wallet-balance-card { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:18px; border:1px solid var(--line); border-radius:18px; background:var(--soft); }
+      .wallet-balance-layout { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:12px; }
+      .wallet-balance-card, .wallet-qr-card { min-width:0; padding:18px; border:1px solid var(--line); border-radius:18px; background:var(--soft); }
+      .wallet-balance-card { display:flex; align-items:center; }
       .wallet-balance-card small { display:block; color:var(--muted); font-weight:800; text-transform:uppercase; letter-spacing:.08em; }
       .wallet-balance-card strong { display:block; margin-top:5px; font-size:28px; }
-      .wallet-qr { width:150px; max-width:42vw; border:1px solid var(--line); border-radius:14px; background:#fff; padding:8px; }
+      .wallet-qr-card { display:grid; grid-template-columns:minmax(0,1fr) 116px; align-items:center; gap:12px; }
+      .wallet-qr-card small { display:block; color:var(--muted); font-size:11px; font-weight:800; line-height:1.45; }
+      .wallet-qr { width:100%; max-width:116px; border:1px solid var(--line); border-radius:14px; background:#fff; padding:8px; }
       .wallet-topup-form { display:grid; gap:10px; }
       .wallet-topup-form input { width:100%; box-sizing:border-box; }
       .wallet-history { display:grid; gap:8px; }
@@ -1432,13 +1436,15 @@
           text-align: center;
         }
 
+        .wallet-balance-layout { grid-template-columns: 1fr; }
         .wallet-balance-card {
           align-items: stretch;
           padding: 14px;
         }
 
         .wallet-balance-card strong { font-size: 25px; }
-        .wallet-qr { width: 124px; max-width: 100%; align-self: center; }
+        .wallet-qr-card { grid-template-columns: minmax(0,1fr) 124px; padding:14px; }
+        .wallet-qr { max-width: 124px; align-self: center; }
         .wallet-history-row { grid-template-columns: minmax(0, 1fr) auto; display: grid; align-items: start; }
         .wallet-history-row > span { min-width: 0; overflow-wrap: anywhere; }
         .wallet-history-row > span small { display: block; margin-top: 3px; line-height: 1.35; }
@@ -1617,7 +1623,10 @@
           <div class="section-title" data-account-i18n="walletTitle">AE Credit</div>
           <p class="section-desc" data-account-i18n="walletDesc">Top up manual via QRIS, lalu gunakan saldo untuk checkout tanpa biaya QRIS.</p>
           <div class="wallet-panel">
-            <div class="wallet-balance-card"><div><small data-account-i18n="walletBalanceLabel">Saldo tersedia</small><strong id="walletBalance">Rp0</strong></div><img class="wallet-qr" src="/qris.png" alt="QRIS AE Game Store"></div>
+            <div class="wallet-balance-layout">
+              <div class="wallet-balance-card"><div><small data-account-i18n="walletBalanceLabel">Saldo tersedia</small><strong id="walletBalance">Rp0</strong></div></div>
+              <div class="wallet-qr-card"><div><strong data-account-i18n="walletQrTitle">Bayar via QRIS</strong><small data-account-i18n="walletQrDesc">Scan QRIS, bayar sesuai nominal, lalu kirim request top up.</small></div><img class="wallet-qr" src="/qris.png" alt="QRIS AE Game Store"></div>
+            </div>
             <div class="wallet-topup-form">
               <label><span data-account-i18n="walletAmountLabel">Nominal top up</span><input id="walletTopupAmount" type="number" min="10000" step="1000" placeholder="Minimal Rp10.000"></label>
               <label><span data-account-i18n="walletReferenceLabel">Referensi pembayaran (opsional)</span><input id="walletPaymentReference" type="text" maxlength="120" placeholder="Contoh: jam transfer / nama pengirim"></label>
@@ -1947,6 +1956,8 @@
           walletTitle: "AE Credit",
           walletDesc: "Top up manual via QRIS, lalu gunakan saldo untuk checkout tanpa biaya QRIS.",
           walletBalanceLabel: "Saldo tersedia",
+          walletQrTitle: "Bayar via QRIS",
+          walletQrDesc: "Scan QRIS, bayar sesuai nominal, lalu kirim request top up.",
           walletAmountLabel: "Nominal top up",
           walletReferenceLabel: "Referensi pembayaran (opsional)",
           walletNoteLabel: "Catatan (opsional)",
@@ -2058,6 +2069,8 @@
           walletTitle: "AE Credit",
           walletDesc: "Top up manually via QRIS, then use your balance at checkout without QRIS fees.",
           walletBalanceLabel: "Available balance",
+          walletQrTitle: "Pay via QRIS",
+          walletQrDesc: "Scan the QRIS, pay the exact amount, then submit a top up request.",
           walletAmountLabel: "Top up amount",
           walletReferenceLabel: "Payment reference (optional)",
           walletNoteLabel: "Note (optional)",
