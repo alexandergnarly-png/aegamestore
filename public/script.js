@@ -1922,6 +1922,7 @@ async function buy() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "x-user-csrf-token": getCookie("user_csrf"),
       },
       body: JSON.stringify({
         product_id: selectedProduct.id,

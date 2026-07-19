@@ -1607,18 +1607,20 @@ const emailVerificationLimiter = rateLimit({
 
 async function isAdminLoggedIn(req) {
   const sessionToken = String(req.cookies.admin_auth || "").trim();
+  const userAgent = String(req.headers["user-agent"] || "").slice(0, 255);
 
-  if (!sessionToken) {
+  if (!sessionToken || !userAgent) {
     return false;
   }
 
   try {
     const result = await query(
-      `SELECT * FROM admin_sessions
+      `SELECT id FROM admin_sessions
              WHERE session_token = $1
              AND expires_at > $2
+             AND user_agent = $3
              LIMIT 1`,
-      [sessionToken, new Date().toISOString()],
+      [sessionToken, new Date().toISOString(), userAgent],
     );
 
     return result.rows.length > 0;
@@ -2710,6 +2712,14 @@ app.use((req, res, next) => {
     "camera=(), microphone=(), geolocation=(), payment=()",
   );
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Download-Options", "noopen");
+  res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+  res.setHeader("Cross-Origin-Resource-Policy", "same-site");
+  res.setHeader("Origin-Agent-Cluster", "?1");
+  if (process.env.NODE_ENV === "production") {
+    res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+  }
   next();
 });
 
@@ -4212,7 +4222,7 @@ app.post("/voucher-preview", voucherPreviewLimiter, async (req, res) => {
   }
 });
 // buat order + pembayaran Midtrans
-app.post("/create-order", orderLimiter, async (req, res) => {
+app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
   const loggedInUser = getLoggedInUserFromRequest(req);
 
   if (!loggedInUser) {
@@ -6762,7 +6772,7 @@ app.post("/register", registerLimiter, async (req, res) => {
 
   try {
     // Enkripsi password biar aman kalau database bocor
-    const salt = await bcrypt.genSalt(10);
+    const salt = await bcrypt.genSalt(12);
     const hashedPassword = await bcrypt.hash(cleanPassword, salt);
 
     await query("INSERT INTO users (username, password) VALUES ($1, $2)", [
@@ -6913,7 +6923,7 @@ app.post(
         return res.status(400).json({ message: "Password lama salah" });
       }
 
-      const hashedPassword = await bcrypt.hash(cleanNewPassword, 10);
+      const hashedPassword = await bcrypt.hash(cleanNewPassword, 12);
 
       await query("UPDATE users SET password = $1 WHERE id = $2", [
         hashedPassword,
