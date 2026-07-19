@@ -186,8 +186,6 @@ const translations = {
     adminChatHelpDesc: "Support cepat untuk order, pembayaran, dan key.",
     adminChatOnline: "Online sekarang",
     adminChatEstimate: "Estimasi balasan 1–5 menit",
-    adminChatTelegramTitle: "Chat Telegram",
-    adminChatTelegramDesc: "Order / komplain cepat",
     adminChatHistoryTitle: "Cek Order",
     adminChatHistoryDesc: "Status & riwayat",
     adminChatGuideTitle: "Cara Beli",
@@ -381,8 +379,6 @@ const translations = {
     adminChatHelpDesc: "Fast support for orders, payments, and keys.",
     adminChatOnline: "Online now",
     adminChatEstimate: "Estimated reply 1–5 minutes",
-    adminChatTelegramTitle: "Chat Telegram",
-    adminChatTelegramDesc: "Orders / quick support",
     adminChatHistoryTitle: "Check Order",
     adminChatHistoryDesc: "Status & history",
     adminChatGuideTitle: "How to Buy",
@@ -3308,7 +3304,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     navigator.serviceWorker
-      .register("/service-worker.js?v=6", {
+      .register("/service-worker.js?v=20260719-support-popup-v1", {
         updateViaCache: "none",
       })
       .then((registration) => {
