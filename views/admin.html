@@ -2405,6 +2405,10 @@
           <span class="nav-ico" aria-hidden="true">👑</span>
           <span>Prestige Discount</span>
         </button>
+        <button class="nav-btn" data-section="wallet" onclick="showSection('wallet', this)">
+          <span class="nav-ico" aria-hidden="true">ðŸ’³</span>
+          <span>AE Credit</span>
+        </button>
       </nav>
 
       <div class="sidebar-footer">
@@ -3591,6 +3595,14 @@
       </div>
     </section>
 
+    <section id="section-wallet" class="admin-section">
+      <div class="card delay-1">
+        <div class="card-header"><div class="card-title-wrap"><h2>AE Credit · Verifikasi QRIS</h2><p class="card-subtitle">Cek mutasi QRIS sebelum menyetujui saldo buyer.</p></div><div class="section-badge" id="walletPendingBadge">Pending</div></div>
+        <div class="toolbar"><div class="field"><select id="walletStatusFilter" onchange="loadWalletTopups()"><option value="pending">Menunggu</option><option value="approved">Disetujui</option><option value="rejected">Ditolak</option></select></div><button type="button" onclick="loadWalletTopups()">Refresh</button></div>
+        <div class="table-wrap"><table><thead><tr><th>Buyer</th><th>Nominal</th><th>Referensi</th><th>Dibuat</th><th>Aksi</th></tr></thead><tbody id="walletTopupTableBody"><tr><td colspan="5">Memuat...</td></tr></tbody></table></div>
+      </div>
+    </section>
+
     <!-- ===== ADMIN UPGRADE: Bottom navigation (mobile) ===== -->
     <nav
       class="admin-bottom-nav"
@@ -3671,6 +3683,14 @@
         </button>
       </div>
       <div class="admin-more-sheet-grid">
+        <button
+          type="button"
+          class="admin-more-sheet-item"
+          onclick="bottomNavGo('wallet'); closeMoreSheet();"
+        >
+          <span class="ico">ðŸ’³</span>
+          <span>AE Credit</span>
+        </button>
         <button
           type="button"
           class="admin-more-sheet-item"
@@ -3792,6 +3812,41 @@
 
       mountPersistentAdminTopNav();
 
+      async function loadWalletTopups() {
+        const status = document.getElementById("walletStatusFilter")?.value || "pending";
+        const body = document.getElementById("walletTopupTableBody");
+        if (!body) return;
+        body.innerHTML = `<tr><td colspan="5">Memuat...</td></tr>`;
+        try {
+          const res = await fetch(`/api/admin/wallet/topups?status=${encodeURIComponent(status)}`);
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.message || "Gagal memuat");
+          const rows = data.topups || [];
+          const pendingBadge = document.getElementById("walletPendingBadge");
+          if (pendingBadge) pendingBadge.textContent = `${rows.length} ${status}`;
+          body.innerHTML = rows.length ? rows.map((row) => `<tr><td><strong>${escapeHtml(row.username || `User #${row.user_id}`)}</strong><br><small>${escapeHtml(row.buyer_note || "")}</small></td><td><strong>${formatRupiah(row.amount)}</strong><br><small>Saldo: ${formatRupiah(row.balance)}</small></td><td>${escapeHtml(row.payment_reference || "-")}</td><td>${formatTanggal(row.created_at)}</td><td>${status === "pending" ? `<button class="small-btn" onclick="approveWalletTopup('${row.id}')">Approve</button> <button class="small-btn danger" onclick="rejectWalletTopup('${row.id}')">Reject</button>` : escapeHtml(row.admin_note || row.reviewed_by || "-")}</td></tr>`).join("") : `<tr><td colspan="5">Tidak ada request ${status}.</td></tr>`;
+        } catch (err) { body.innerHTML = `<tr><td colspan="5">${escapeHtml(err.message)}</td></tr>`; }
+      }
+
+      async function approveWalletTopup(id) {
+        const result = await Swal.fire({ title: "Approve top up?", text: "Pastikan mutasi QRIS sudah cocok.", icon: "question", showCancelButton: true, confirmButtonText: "Approve", cancelButtonText: "Batal" });
+        if (!result.isConfirmed) return;
+        const res = await fetch(`/api/admin/wallet/topups/${encodeURIComponent(id)}/approve`, { method: "POST", headers: { "x-csrf-token": getCsrfToken() } });
+        const data = await res.json();
+        if (!res.ok) return Swal.fire("Gagal", data.message || "Approve gagal", "error");
+        await Swal.fire("Berhasil", data.message, "success");
+        loadWalletTopups();
+      }
+
+      async function rejectWalletTopup(id) {
+        const result = await Swal.fire({ title: "Tolak top up", input: "text", inputPlaceholder: "Alasan (opsional)", showCancelButton: true, confirmButtonText: "Tolak", cancelButtonText: "Batal" });
+        if (!result.isConfirmed) return;
+        const res = await fetch(`/api/admin/wallet/topups/${encodeURIComponent(id)}/reject`, { method: "POST", headers: { "Content-Type": "application/json", "x-csrf-token": getCsrfToken() }, body: JSON.stringify({ admin_note: result.value || "" }) });
+        const data = await res.json();
+        if (!res.ok) return Swal.fire("Gagal", data.message || "Reject gagal", "error");
+        loadWalletTopups();
+      }
+
       function showSection(sectionName, buttonEl = null) {
         const previousSection = document.querySelector(".admin-section.active");
         const sections = document.querySelectorAll(".admin-section");
@@ -3810,6 +3865,7 @@
           keys: "Game Key",
           vouchers: "Voucher",
           "vip-discounts": "Prestige Discount",
+          wallet: "AE Credit",
         };
         const activeLabel = sectionLabels[sectionName] || "Admin Panel";
         document.title = `${activeLabel} - AE Game Store Admin`;
@@ -3863,6 +3919,8 @@
           loadVipDiscountProductOptions();
           loadVipDiscounts();
         }
+
+        if (sectionName === "wallet") loadWalletTopups();
 
         if (sectionName === "dashboard") {
           loadStockSummary();
@@ -8218,6 +8276,7 @@
           "keys",
           "vouchers",
           "vip-discounts",
+          "wallet",
         ]);
         const hashSection = location.hash.replace(/^#/, "");
         const savedSection = localStorage.getItem("ae_admin_section") || "";

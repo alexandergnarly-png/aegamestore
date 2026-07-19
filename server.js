@@ -18,7 +18,7 @@ const {
   parseOrderQuantity,
   splitOrderKeys,
 } = require("./order-utils");
-const { ensureBulkOrderSchema } = require("./database-migrations");
+const { ensureBulkOrderSchema, ensureWalletSchema } = require("./database-migrations");
 
 const app = express();
 app.disable("x-powered-by");
@@ -27,6 +27,9 @@ const port = process.env.PORT || 3000;
 const isMidtransProduction = process.env.MIDTRANS_IS_PRODUCTION === "true";
 const jwtSecret = String(process.env.JWT_SECRET || "").trim();
 let isShuttingDown = false;
+const WALLET_MIN_TOPUP = 10000;
+const WALLET_MAX_TOPUP = 2000000;
+const WALLET_MAX_BALANCE = 10000000;
 
 if (!jwtSecret || jwtSecret.length < 32) {
   throw new Error("JWT_SECRET wajib diisi minimal 32 karakter");
@@ -206,8 +209,9 @@ db.query(
 );
 const bulkOrderSchemaReady = Promise.all([ordersTableReady, keysTableReady])
   .then(() => ensureBulkOrderSchema(db))
+  .then(() => ensureWalletSchema(db))
   .then(() => {
-    console.log("Bulk order schema ready");
+    console.log("Bulk order and wallet schema ready");
   });
 db.query(
   `CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at)`,
@@ -1640,6 +1644,49 @@ function calculateQrisGrossPrice(netPrice) {
   const totalFeeRate = qrisFeeRate * (1 + ppnRate);
 
   return Math.ceil(Number(netPrice) / (1 - totalFeeRate));
+}
+
+function parseWalletAmount(value) {
+  const amount = Number(String(value ?? "").replace(/[^0-9]/g, ""));
+  if (!Number.isSafeInteger(amount)) return 0;
+  return amount;
+}
+
+async function ensureWalletAccount(dbClient, userId) {
+  const now = new Date().toISOString();
+  await dbClient.query(
+    `INSERT INTO wallet_accounts (user_id, balance, created_at, updated_at)
+     VALUES ($1, 0, $2, $2)
+     ON CONFLICT (user_id) DO NOTHING`,
+    [userId, now],
+  );
+}
+
+async function getAdminSessionUsername(req) {
+  const sessionToken = String(req.cookies.admin_auth || "").trim();
+  if (!sessionToken) return "admin";
+  const result = await query(
+    `SELECT username FROM admin_sessions
+     WHERE session_token = $1 AND expires_at > $2 LIMIT 1`,
+    [sessionToken, new Date().toISOString()],
+  );
+  return String(result.rows[0]?.username || "admin").slice(0, 120);
+}
+
+async function settleWalletVipOrder(orderId) {
+  try {
+    const result = await query(`SELECT o.*, p.supplier_product_id FROM orders o LEFT JOIN products p ON p.id = o.product_id WHERE o.id = $1 LIMIT 1`, [orderId]);
+    const order = result.rows[0];
+    if (!order || order.delivery_status !== "processing_supplier") return;
+    const claim = await claimVipStoreKeyForOrder(order, { source: "ae_credit" });
+    const deliveredAt = new Date().toISOString();
+    await persistOrderKeys(db, { orderId, keys: claim.keys, source: "vipstore" });
+    await query(`UPDATE orders SET delivery_status = 'delivered', gameKey = $1, delivered_at = $2, admin_note = $3 WHERE id = $4 AND delivery_status = 'processing_supplier'`, [claim.key, deliveredAt, `VIP Store claim success. Supplier product #${claim.supplier_product_id}.`, orderId]);
+    await query(`UPDATE products SET supplier_stock = GREATEST(COALESCE(supplier_stock, 0) - $1, 0), supplier_last_sync = $2 WHERE id = $3 AND LOWER(COALESCE(delivery_type, 'auto')) = 'vipstore_api'`, [getOrderQuantity(order.quantity), deliveredAt, order.product_id]);
+  } catch (err) {
+    console.error("AE CREDIT VIPSTORE CLAIM ERROR:", err.message);
+    await query(`UPDATE orders SET delivery_status = 'problem', gameKey = $1, admin_note = $2 WHERE id = $3 AND delivery_status = 'processing_supplier'`, ["VIP STORE CLAIM FAILED - HUBUNGI ADMIN", `VIP Store claim failed: ${String(err.message || "Unknown error").slice(0, 500)}`, orderId]).catch(() => {});
+  }
 }
 
 function maskPublicUsername(username) {
@@ -4171,6 +4218,10 @@ app.post("/create-order", orderLimiter, async (req, res) => {
     });
   }
   const { product_id, name, voucher_code, quantity } = req.body;
+  const paymentMethod = String(req.body?.payment_method || "midtrans").trim().toLowerCase();
+  if (!["midtrans", "ae_credit"].includes(paymentMethod)) {
+    return res.status(400).json({ message: "Metode pembayaran tidak valid" });
+  }
 
   const cleanProductId = Number(product_id);
   const cleanQuantity = parseOrderQuantity(quantity);
@@ -4333,7 +4384,7 @@ app.post("/create-order", orderLimiter, async (req, res) => {
     const originalPrice = bulkTotals.originalPrice;
     const discountAmount = bulkTotals.discountAmount;
     const netPrice = bulkTotals.netPrice;
-    const price = calculateQrisGrossPrice(netPrice);
+    const price = paymentMethod === "ae_credit" ? netPrice : calculateQrisGrossPrice(netPrice);
     const paymentFee = price - netPrice;
     const appliedVoucherCode = discountCheck.code || null;
 
@@ -4360,11 +4411,54 @@ app.post("/create-order", orderLimiter, async (req, res) => {
         }
       }
 
-      await client.query(
-        `INSERT INTO orders
-        (id, product_id, user_id, access_token, name, contact, game, product, price, unit_price, quantity, original_price, discount_amount, payment_fee, voucher_code, payment_status, delivery_status, created_at)
-        VALUES
-        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
+      if (paymentMethod === "ae_credit") {
+        await ensureWalletAccount(client, userId);
+        const walletResult = await client.query(
+          `SELECT balance FROM wallet_accounts WHERE user_id = $1 FOR UPDATE`,
+          [userId],
+        );
+        const balanceBefore = Number(walletResult.rows[0]?.balance || 0);
+        if (balanceBefore < netPrice) {
+          const balanceError = new Error(`Saldo AE Credit tidak cukup. Dibutuhkan Rp${netPrice.toLocaleString("id-ID")}.`);
+          balanceError.statusCode = 400;
+          throw balanceError;
+        }
+        const balanceAfter = balanceBefore - netPrice;
+        const paidDeliveryStatus = productDeliveryType === "vipstore_api" ? "processing_supplier" : productDeliveryType === "manual" ? "manual" : "waiting_delivery";
+        await client.query(
+          `INSERT INTO orders
+          (id, product_id, user_id, access_token, name, contact, game, product, price, unit_price, quantity, original_price, discount_amount, payment_fee, voucher_code, payment_method, payment_status, delivery_status, created_at)
+          VALUES
+          ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)`,
+          [orderId, cleanProductId, userId, accessToken, cleanName, cleanContact, game, orderProductName, price, unitPrice, cleanQuantity, originalPrice, discountAmount, paymentFee, appliedVoucherCode, paymentMethod, "paid", paidDeliveryStatus, createdAt],
+        );
+        await client.query(`UPDATE wallet_accounts SET balance = $1, updated_at = $2 WHERE user_id = $3`, [balanceAfter, createdAt, userId]);
+        await client.query(
+          `INSERT INTO wallet_ledger
+           (user_id, entry_type, direction, amount, balance_before, balance_after, reference_type, reference_id, description, created_at)
+           VALUES ($1, 'purchase', 'debit', $2, $3, $4, 'order', $5, $6, $7)`,
+          [userId, netPrice, balanceBefore, balanceAfter, orderId, `Pembelian ${orderProductName}`, createdAt],
+        );
+
+        if (productDeliveryType === "auto") {
+          const deliveredKeys = await allocateLocalKeysForOrder(client, { id: orderId, product_id: cleanProductId, quantity: cleanQuantity });
+          if (!deliveredKeys) {
+            const deliveryError = new Error("Stok tidak cukup untuk menyelesaikan order");
+            deliveryError.statusCode = 409;
+            throw deliveryError;
+          }
+          await client.query(`UPDATE orders SET delivery_status = 'delivered', gameKey = $1, delivered_at = $2 WHERE id = $3`, [deliveredKeys.join("\n"), createdAt, orderId]);
+        } else if (productDeliveryType === "manual") {
+          await client.query(`UPDATE orders SET gameKey = $1, admin_note = $2 WHERE id = $3`, ["MANUAL DELIVERY - HUBUNGI ADMIN", "Saldo AE Credit diterima; key diproses manual.", orderId]);
+        } else if (productDeliveryType === "vipstore_api") {
+          await client.query(`UPDATE orders SET admin_note = $1 WHERE id = $2`, ["AE Credit diterima; VIP Store claim sedang diproses otomatis", orderId]);
+        }
+      } else {
+        await client.query(
+          `INSERT INTO orders
+          (id, product_id, user_id, access_token, name, contact, game, product, price, unit_price, quantity, original_price, discount_amount, payment_fee, voucher_code, payment_method, payment_status, delivery_status, created_at)
+          VALUES
+          ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)`,
         [
           orderId,
           cleanProductId,
@@ -4381,11 +4475,13 @@ app.post("/create-order", orderLimiter, async (req, res) => {
           discountAmount,
           paymentFee,
           appliedVoucherCode,
+          paymentMethod,
           "pending",
           "waiting_payment",
           createdAt,
         ],
-      );
+        );
+      }
 
       await client.query("COMMIT");
     } catch (transactionErr) {
@@ -4402,6 +4498,26 @@ app.post("/create-order", orderLimiter, async (req, res) => {
       maxAge: 1000 * 60 * 60 * 2,
       path: "/",
     });
+
+    if (paymentMethod === "ae_credit") {
+      res.cookie(`order_token_${orderId}`, accessToken, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 1000 * 60 * 60 * 2,
+        path: "/",
+      });
+      if (productDeliveryType === "vipstore_api") {
+        settleWalletVipOrder(orderId);
+      }
+      return res.json({
+        message: "Pembayaran dengan AE Credit berhasil",
+        orderId,
+        quantity: cleanQuantity,
+        paidWithBalance: true,
+        resultUrl: `${baseUrl}/result?order_id=${orderId}`,
+      });
+    }
 
     const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanContact);
     const transaction = await snap.createTransaction({
@@ -7109,6 +7225,12 @@ app.get("/api/user/me", async (req, res) => {
     const paidOrderCount = Number(statsResult.rows[0]?.paid_order_count || 0);
     const totalSpend = Number(statsResult.rows[0]?.total_spend || 0);
     const hasReview = reviewResult.rows.length > 0;
+    await ensureWalletAccount(db, user.id);
+    const walletResult = await query(
+      `SELECT balance FROM wallet_accounts WHERE user_id = $1 LIMIT 1`,
+      [user.id],
+    );
+    const walletBalance = Number(walletResult.rows[0]?.balance || 0);
 
     const overrideBadge =
       user.badge_override &&
@@ -7151,10 +7273,141 @@ app.get("/api/user/me", async (req, res) => {
         total_spend: totalSpend,
         has_review: hasReview,
       },
+      wallet: {
+        balance: walletBalance,
+        min_topup: WALLET_MIN_TOPUP,
+        max_topup: WALLET_MAX_TOPUP,
+      },
     });
   } catch (err) {
     console.error("ERROR GET USER ME:", err);
     return res.json({ loggedIn: false });
+  }
+});
+
+app.get("/api/wallet", async (req, res) => {
+  const user = getLoggedInUserFromRequest(req);
+  if (!user) return res.status(401).json({ message: "Kamu harus login dulu" });
+
+  try {
+    await ensureWalletAccount(db, user.id);
+    const [account, topups, ledger] = await Promise.all([
+      query(`SELECT balance, updated_at FROM wallet_accounts WHERE user_id = $1`, [user.id]),
+      query(`SELECT id, amount, status, buyer_note, payment_reference, admin_note, created_at, reviewed_at
+             FROM wallet_topup_requests WHERE user_id = $1 ORDER BY created_at DESC LIMIT 10`, [user.id]),
+      query(`SELECT entry_type, direction, amount, balance_before, balance_after, description, created_at
+             FROM wallet_ledger WHERE user_id = $1 ORDER BY created_at DESC, id DESC LIMIT 15`, [user.id]),
+    ]);
+    return res.json({
+      balance: Number(account.rows[0]?.balance || 0),
+      updatedAt: account.rows[0]?.updated_at || null,
+      topups: topups.rows.map((row) => ({ ...row, amount: Number(row.amount || 0) })),
+      ledger: ledger.rows.map((row) => ({
+        ...row,
+        amount: Number(row.amount || 0),
+        balance_before: Number(row.balance_before || 0),
+        balance_after: Number(row.balance_after || 0),
+      })),
+      limits: { minTopup: WALLET_MIN_TOPUP, maxTopup: WALLET_MAX_TOPUP },
+    });
+  } catch (err) {
+    console.error("ERROR GET WALLET:", err);
+    return res.status(500).json({ message: "Gagal memuat saldo AE Credit" });
+  }
+});
+
+const walletTopupLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 8,
+  message: { message: "Terlalu banyak request top up, coba lagi nanti" },
+});
+
+app.post("/api/wallet/topups", walletTopupLimiter, requireUserCsrf, async (req, res) => {
+  const user = getLoggedInUserFromRequest(req);
+  if (!user) return res.status(401).json({ message: "Kamu harus login dulu" });
+
+  const amount = parseWalletAmount(req.body?.amount);
+  const buyerNote = String(req.body?.buyer_note || "").trim().slice(0, 300);
+  const paymentReference = String(req.body?.payment_reference || "").trim().slice(0, 120);
+  if (amount < WALLET_MIN_TOPUP || amount > WALLET_MAX_TOPUP) {
+    return res.status(400).json({ message: `Nominal top up harus Rp${WALLET_MIN_TOPUP.toLocaleString("id-ID")} sampai Rp${WALLET_MAX_TOPUP.toLocaleString("id-ID")}` });
+  }
+
+  try {
+    const pending = await query(`SELECT id FROM wallet_topup_requests WHERE user_id = $1 AND status = 'pending' LIMIT 1`, [user.id]);
+    if (pending.rows.length) return res.status(409).json({ message: "Masih ada request top up yang menunggu verifikasi admin" });
+    const id = `TOPUP-${crypto.randomUUID()}`;
+    await query(`INSERT INTO wallet_topup_requests
+      (id, user_id, amount, status, buyer_note, payment_reference, created_at)
+      VALUES ($1, $2, $3, 'pending', $4, $5, $6)`,
+      [id, user.id, amount, buyerNote || null, paymentReference || null, new Date().toISOString()]);
+    return res.status(201).json({ message: "Request top up terkirim. Tunggu verifikasi admin.", id });
+  } catch (err) {
+    console.error("ERROR CREATE WALLET TOPUP:", err);
+    return res.status(500).json({ message: "Gagal membuat request top up" });
+  }
+});
+
+app.get("/api/admin/wallet/topups", requireAdminAuth, async (req, res) => {
+  const status = ["pending", "approved", "rejected"].includes(String(req.query.status || "")) ? String(req.query.status) : "pending";
+  try {
+    const result = await query(`SELECT t.id, t.user_id, u.username, t.amount, t.status, t.buyer_note,
+      t.payment_reference, t.admin_note, t.reviewed_by, t.created_at, t.reviewed_at,
+      COALESCE(w.balance, 0) AS balance
+      FROM wallet_topup_requests t LEFT JOIN users u ON u.id = t.user_id
+      LEFT JOIN wallet_accounts w ON w.user_id = t.user_id
+      WHERE t.status = $1 ORDER BY t.created_at ASC LIMIT 100`, [status]);
+    return res.json({ status, topups: result.rows.map((row) => ({ ...row, amount: Number(row.amount || 0), balance: Number(row.balance || 0) })) });
+  } catch (err) {
+    console.error("ERROR ADMIN WALLET TOPUPS:", err);
+    return res.status(500).json({ message: "Gagal memuat request top up" });
+  }
+});
+
+app.post("/api/admin/wallet/topups/:id/approve", requireAdminAuth, requireAdminCsrf, async (req, res) => {
+  const topupId = String(req.params.id || "").trim();
+  const adminUsername = await getAdminSessionUsername(req).catch(() => "admin");
+  const client = await db.connect();
+  try {
+    await client.query("BEGIN");
+    const requestResult = await client.query(`SELECT * FROM wallet_topup_requests WHERE id = $1 FOR UPDATE`, [topupId]);
+    const request = requestResult.rows[0];
+    if (!request) { await client.query("ROLLBACK"); return res.status(404).json({ message: "Request top up tidak ditemukan" }); }
+    if (request.status !== "pending") { await client.query("ROLLBACK"); return res.status(409).json({ message: `Request sudah ${request.status}` }); }
+    await ensureWalletAccount(client, request.user_id);
+    const wallet = (await client.query(`SELECT balance FROM wallet_accounts WHERE user_id = $1 FOR UPDATE`, [request.user_id])).rows[0];
+    const before = Number(wallet?.balance || 0);
+    const amount = Number(request.amount || 0);
+    const after = before + amount;
+    if (after > WALLET_MAX_BALANCE) { await client.query("ROLLBACK"); return res.status(400).json({ message: "Saldo user melewati batas maksimum" }); }
+    const now = new Date().toISOString();
+    await client.query(`UPDATE wallet_accounts SET balance = $1, updated_at = $2 WHERE user_id = $3`, [after, now, request.user_id]);
+    await client.query(`INSERT INTO wallet_ledger
+      (user_id, entry_type, direction, amount, balance_before, balance_after, reference_type, reference_id, description, admin_username, created_at)
+      VALUES ($1, 'topup', 'credit', $2, $3, $4, 'topup', $5, $6, $7, $8)
+      ON CONFLICT (reference_type, reference_id, direction) DO NOTHING`,
+      [request.user_id, amount, before, after, topupId, "Top up QRIS diverifikasi admin", adminUsername, now]);
+    await client.query(`UPDATE wallet_topup_requests SET status = 'approved', reviewed_by = $1, reviewed_at = $2 WHERE id = $3`, [adminUsername, now, topupId]);
+    await client.query("COMMIT");
+    return res.json({ message: "Top up disetujui", balance: after });
+  } catch (err) {
+    await client.query("ROLLBACK").catch(() => {});
+    console.error("ERROR APPROVE WALLET TOPUP:", err);
+    return res.status(500).json({ message: "Gagal menyetujui top up" });
+  } finally { client.release(); }
+});
+
+app.post("/api/admin/wallet/topups/:id/reject", requireAdminAuth, requireAdminCsrf, async (req, res) => {
+  const topupId = String(req.params.id || "").trim();
+  const adminUsername = await getAdminSessionUsername(req).catch(() => "admin");
+  const note = String(req.body?.admin_note || "").trim().slice(0, 300) || "Pembayaran belum dapat diverifikasi";
+  try {
+    const result = await query(`UPDATE wallet_topup_requests SET status = 'rejected', admin_note = $1, reviewed_by = $2, reviewed_at = $3 WHERE id = $4 AND status = 'pending' RETURNING id`, [note, adminUsername, new Date().toISOString(), topupId]);
+    if (!result.rowCount) return res.status(409).json({ message: "Request tidak ditemukan atau sudah diproses" });
+    return res.json({ message: "Top up ditolak" });
+  } catch (err) {
+    console.error("ERROR REJECT WALLET TOPUP:", err);
+    return res.status(500).json({ message: "Gagal menolak top up" });
   }
 });
 // ----------------------------------------------

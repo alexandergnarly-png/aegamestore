@@ -78,7 +78,7 @@
       href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/style.css?v=20260719-support-popup-v1" />
+    <link rel="stylesheet" href="/style.css?v=20260719-ae-credit-v1" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#f4f3ee" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -1010,6 +1010,15 @@
           </div>
         </div>
 
+        <div class="checkout-payment-choice" aria-label="Pilih metode pembayaran">
+          <button type="button" class="checkout-payment-option active" data-payment-method="midtrans" onclick="selectCheckoutPaymentMethod('midtrans', this)">
+            <strong>QRIS / E-wallet</strong><small>Biaya gateway berlaku</small>
+          </button>
+          <button type="button" class="checkout-payment-option" data-payment-method="ae_credit" onclick="selectCheckoutPaymentMethod('ae_credit', this)">
+            <strong>AE Credit</strong><small id="checkoutWalletBalance">Saldo: Rp0</small>
+          </button>
+        </div>
+
         <div
           class="delivery-estimate"
           id="deliveryEstimate"
@@ -1571,6 +1580,6 @@
       })();
     </script>
 
-    <script src="/script.js?v=20260719-support-popup-v1" defer></script>
+    <script src="/script.js?v=20260719-ae-credit-v1" defer></script>
   </body>
 </html>

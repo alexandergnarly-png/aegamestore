@@ -13638,3 +13638,29 @@ body.admin-chat-open {
   overflow: hidden;
   overscroll-behavior: none;
 }
+.checkout-payment-choice {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.checkout-payment-option {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--line, #dedbd4);
+  border-radius: 16px;
+  background: var(--paper, #fff);
+  color: var(--ink, #111);
+  text-align: left;
+  cursor: pointer;
+}
+
+.checkout-payment-option small { color: var(--muted, #777); font-size: 11px; }
+.checkout-payment-option.active { border-color: #111; background: #111; color: #fff; }
+.checkout-payment-option.active small { color: #d7d7d7; }
+
+@media (max-width: 520px) {
+  .checkout-payment-choice { grid-template-columns: 1fr; }
+}

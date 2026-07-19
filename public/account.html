@@ -647,12 +647,23 @@
         margin-bottom: 16px;
         padding: 5px;
         display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 6px;
         border: 1px solid var(--line);
         border-radius: 22px;
         background: var(--soft);
       }
+
+      .wallet-panel { display: grid; gap: 14px; }
+      .wallet-balance-card { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:18px; border:1px solid var(--line); border-radius:18px; background:var(--soft); }
+      .wallet-balance-card small { display:block; color:var(--muted); font-weight:800; text-transform:uppercase; letter-spacing:.08em; }
+      .wallet-balance-card strong { display:block; margin-top:5px; font-size:28px; }
+      .wallet-qr { width:150px; max-width:42vw; border:1px solid var(--line); border-radius:14px; background:#fff; padding:8px; }
+      .wallet-topup-form { display:grid; gap:10px; }
+      .wallet-topup-form input { width:100%; box-sizing:border-box; }
+      .wallet-history { display:grid; gap:8px; }
+      .wallet-history-row { display:flex; justify-content:space-between; gap:10px; padding:10px 12px; border:1px solid var(--line); border-radius:12px; font-size:12px; }
+      .wallet-history-row small { color:var(--muted); }
 
       .tab-btn {
         min-width: 0;
@@ -1300,7 +1311,7 @@
           position: sticky;
           top: 72px;
           z-index: 10;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
+          grid-template-columns: repeat(4, minmax(0, 1fr));
           padding: 5px;
           gap: 5px;
           border-radius: 20px;
@@ -1561,7 +1572,26 @@
             ></iconify-icon>
             <span data-account-i18n="changePasswordTitle">Keamanan</span>
           </button>
+          <button aria-selected="false" class="tab-btn" data-tab="wallet" onclick="switchTab('wallet')" role="tab" type="button">
+            <iconify-icon aria-hidden="true" icon="mdi:wallet-outline"></iconify-icon>
+            <span>AE Credit</span>
+          </button>
         </nav>
+        <div class="panel" id="panel-wallet" role="tabpanel">
+          <div class="section-title">AE Credit</div>
+          <p class="section-desc">Top up manual via QRIS, lalu gunakan saldo untuk checkout tanpa biaya QRIS.</p>
+          <div class="wallet-panel">
+            <div class="wallet-balance-card"><div><small>Saldo tersedia</small><strong id="walletBalance">Rp0</strong></div><img class="wallet-qr" src="/qris.png" alt="QRIS AE Game Store"></div>
+            <div class="wallet-topup-form">
+              <label>Nominal top up<input id="walletTopupAmount" type="number" min="10000" step="1000" placeholder="Minimal Rp10.000"></label>
+              <label>Referensi pembayaran (opsional)<input id="walletPaymentReference" type="text" maxlength="120" placeholder="Contoh: jam transfer / nama pengirim"></label>
+              <label>Catatan (opsional)<input id="walletBuyerNote" type="text" maxlength="300" placeholder="Catatan untuk admin"></label>
+              <button class="btn btn-primary" type="button" onclick="createWalletTopup()">Saya sudah bayar QRIS</button>
+            </div>
+            <div><strong>Riwayat top up</strong><div class="wallet-history" id="walletTopupHistory"><small>Belum ada request.</small></div></div>
+            <div><strong>Aktivitas saldo</strong><div class="wallet-history" id="walletLedgerHistory"><small>Belum ada aktivitas.</small></div></div>
+          </div>
+        </div>
         <!-- Orders panel -->
         <div
           aria-labelledby="tab-orders"
@@ -2114,6 +2144,45 @@
         document.querySelectorAll(".panel").forEach((panel) => {
           panel.classList.toggle("active", panel.id === "panel-" + name);
         });
+        if (name === "wallet") loadWallet();
+      }
+
+      function formatWalletRupiah(value) {
+        return `Rp${Number(value || 0).toLocaleString("id-ID")}`;
+      }
+
+      function walletStatusLabel(status) {
+        return ({ pending: "Menunggu verifikasi", approved: "Disetujui", rejected: "Ditolak" })[status] || status;
+      }
+
+      async function loadWallet() {
+        try {
+          const res = await fetch("/api/wallet", { cache: "no-store" });
+          if (!res.ok) return;
+          const data = await res.json();
+          const balance = document.getElementById("walletBalance");
+          if (balance) balance.textContent = formatWalletRupiah(data.balance);
+          const topups = document.getElementById("walletTopupHistory");
+          if (topups) topups.innerHTML = (data.topups || []).length ? data.topups.map((row) => `<div class="wallet-history-row"><span>${formatWalletRupiah(row.amount)}<small>${row.payment_reference ? ` · ${escapeHtml(row.payment_reference)}` : ""}</small></span><strong>${walletStatusLabel(row.status)}</strong></div>`).join("") : "<small>Belum ada request.</small>";
+          const ledger = document.getElementById("walletLedgerHistory");
+          if (ledger) ledger.innerHTML = (data.ledger || []).length ? data.ledger.map((row) => `<div class="wallet-history-row"><span>${row.direction === "credit" ? "+" : "-"}${formatWalletRupiah(row.amount)}<small>${escapeHtml(row.description || row.entry_type)}</small></span><strong>${new Date(row.created_at).toLocaleDateString("id-ID")}</strong></div>`).join("") : "<small>Belum ada aktivitas.</small>";
+        } catch (_) {}
+      }
+
+      async function createWalletTopup() {
+        const amount = document.getElementById("walletTopupAmount")?.value;
+        const payment_reference = document.getElementById("walletPaymentReference")?.value.trim();
+        const buyer_note = document.getElementById("walletBuyerNote")?.value.trim();
+        try {
+          const res = await fetch("/api/wallet/topups", { method: "POST", headers: { "Content-Type": "application/json", "x-user-csrf-token": getCookie("user_csrf") }, body: JSON.stringify({ amount, payment_reference, buyer_note }) });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.message || "Top up gagal");
+          await Swal.fire({ icon: "success", title: "Request terkirim", text: data.message, confirmButtonColor: "#0ea5e9" });
+          document.getElementById("walletTopupAmount").value = "";
+          document.getElementById("walletPaymentReference").value = "";
+          document.getElementById("walletBuyerNote").value = "";
+          loadWallet();
+        } catch (err) { Swal.fire({ icon: "error", title: "Top up gagal", text: err.message }); }
       }
 
       function togglePassword(inputId, btn) {
@@ -2301,6 +2370,7 @@
           renderBuyerBadgeSection(data);
 
           loadOrderHistory();
+          loadWallet();
         } catch (err) {
           window.location.href = "/auth";
         }

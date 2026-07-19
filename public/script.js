@@ -505,6 +505,9 @@ let appliedVoucherCode = "";
 let selectedProductBasePrice = 0;
 const MAX_ORDER_QUANTITY = 5;
 let selectedOrderQuantity = 1;
+let selectedCheckoutPaymentMethod = "midtrans";
+let checkoutWalletBalance = 0;
+let lastCheckoutPricing = null;
 let selectedReviewRating = 5;
 let currentSort = localStorage.getItem("ae_sort") || "default";
 
@@ -1338,6 +1341,7 @@ function updateOrderModalBanner(game) {
 
 async function openOrderModal(game) {
   selectedOrderQuantity = 1;
+  selectedCheckoutPaymentMethod = "midtrans";
   updateOrderQuantityUI(null);
   const voucherInput = document.getElementById("voucherCodeInput");
   if (voucherInput) voucherInput.value = "";
@@ -1376,6 +1380,10 @@ async function openOrderModal(game) {
     if (contactInput && data.contact && !contactInput.value.trim()) {
       contactInput.value = data.contact;
     }
+    checkoutWalletBalance = Number(data.wallet?.balance || 0);
+    const walletBalance = document.getElementById("checkoutWalletBalance");
+    if (walletBalance) walletBalance.innerText = `Saldo: ${formatRupiah(checkoutWalletBalance)}`;
+    document.querySelectorAll(".checkout-payment-option").forEach((btn) => btn.classList.toggle("active", btn.dataset.paymentMethod === "midtrans"));
   } catch (err) {
     Swal.fire({
       icon: "error",
@@ -1924,6 +1932,7 @@ async function buy() {
           appliedVoucherCode ||
           document.getElementById("voucherCodeInput")?.value ||
           "",
+        payment_method: selectedCheckoutPaymentMethod,
       }),
     });
 
@@ -1999,6 +2008,14 @@ async function buy() {
           }
         });
       }
+      return;
+    }
+
+    if (data.paidWithBalance) {
+      closeOrderModal();
+      setLoading(false);
+      await Swal.fire({ icon: "success", title: "Pembayaran berhasil", text: "Saldo AE Credit sudah terpakai. Order kamu sedang diproses.", confirmButtonColor: "#0a0a0a" });
+      window.location.href = data.resultUrl || `/result?order_id=${encodeURIComponent(data.orderId || "")}`;
       return;
     }
 
@@ -2311,6 +2328,12 @@ function showPriceBreakdown({
   paymentFee = 0,
   finalPrice = 0,
 }) {
+  const netPrice = Math.max(0, Number(finalPrice || 0) - Number(paymentFee || 0));
+  lastCheckoutPricing = { originalPrice, discountAmount, paymentFee, finalPrice, netPrice };
+  if (selectedCheckoutPaymentMethod === "ae_credit") {
+    paymentFee = 0;
+    finalPrice = netPrice;
+  }
   const priceBreakdown = document.getElementById("priceBreakdown");
   const originalPriceText = document.getElementById("originalPriceText");
   const discountText = document.getElementById("discountText");
@@ -2331,6 +2354,16 @@ function showPriceBreakdown({
   if (previewPrice) previewPrice.innerText = formatRupiah(finalPrice);
 
   priceBreakdown.style.display = "block";
+}
+
+function selectCheckoutPaymentMethod(method, button) {
+  selectedCheckoutPaymentMethod = method === "ae_credit" ? "ae_credit" : "midtrans";
+  document.querySelectorAll(".checkout-payment-option").forEach((item) => item.classList.toggle("active", item === button || item.dataset.paymentMethod === selectedCheckoutPaymentMethod));
+  if (lastCheckoutPricing) {
+    showPriceBreakdown(lastCheckoutPricing);
+  } else if (selectedProductBasePrice > 0) {
+    showDefaultPriceBreakdown(selectedProductBasePrice, selectedOrderQuantity);
+  }
 }
 
 function showDefaultPriceBreakdown(productPrice, quantity = selectedOrderQuantity) {
