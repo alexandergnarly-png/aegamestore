@@ -17,6 +17,7 @@ const {
   parseOrderQuantity,
   splitOrderKeys,
 } = require("./order-utils");
+const { ensureBulkOrderSchema } = require("./database-migrations");
 
 const app = express();
 app.disable("x-powered-by");
@@ -83,7 +84,7 @@ db.query(
   },
 );
 
-db.query(
+const ordersTableReady = db.query(
   `
   CREATE TABLE IF NOT EXISTS orders (
     id TEXT PRIMARY KEY,
@@ -100,16 +101,11 @@ db.query(
     created_at TEXT
   )
 `,
-  (err) => {
-    if (err) {
-      console.error("CREATE TABLE orders ERROR:", err);
-    } else {
-      console.log("Table orders ready");
-    }
-  },
-);
+).then(() => {
+  console.log("Table orders ready");
+});
 
-db.query(
+const keysTableReady = db.query(
   `
   CREATE TABLE IF NOT EXISTS keys (
     id SERIAL PRIMARY KEY,
@@ -118,14 +114,9 @@ db.query(
     used INTEGER DEFAULT 0
   )
 `,
-  (err) => {
-    if (err) {
-      console.error("CREATE TABLE keys ERROR:", err);
-    } else {
-      console.log("Table keys ready");
-    }
-  },
-);
+).then(() => {
+  console.log("Table keys ready");
+});
 
 db.query(
   `
@@ -212,29 +203,11 @@ db.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS snap_redirect_url TEXT`);
 db.query(
   `ALTER TABLE orders ADD COLUMN IF NOT EXISTS snap_token_created_at TEXT`,
 );
-db.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS quantity INTEGER DEFAULT 1`);
-db.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS unit_price INTEGER DEFAULT 0`);
-db.query(`ALTER TABLE keys ADD COLUMN IF NOT EXISTS reserved_order_id TEXT`);
-db.query(`ALTER TABLE keys ADD COLUMN IF NOT EXISTS reserved_until TEXT`);
-db.query(
-  `CREATE INDEX IF NOT EXISTS idx_keys_product_reservation
-   ON keys(product_id, used, reserved_order_id, reserved_until)`,
-);
-db.query(
-  `
-  CREATE TABLE IF NOT EXISTS order_keys (
-    id SERIAL PRIMARY KEY,
-    order_id TEXT NOT NULL,
-    key_id INTEGER,
-    key_value TEXT NOT NULL,
-    source TEXT NOT NULL DEFAULT 'local',
-    position INTEGER NOT NULL,
-    created_at TEXT NOT NULL,
-    UNIQUE(order_id, position)
-  )
-`,
-);
-db.query(`CREATE INDEX IF NOT EXISTS idx_order_keys_order_id ON order_keys(order_id)`);
+const bulkOrderSchemaReady = Promise.all([ordersTableReady, keysTableReady])
+  .then(() => ensureBulkOrderSchema(db))
+  .then(() => {
+    console.log("Bulk order schema ready");
+  });
 db.query(
   `CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at)`,
 );
@@ -7469,9 +7442,29 @@ app.get("/admin-sessions", requireAdminAuth, async (req, res) => {
   }
 });
 
-const server = app.listen(port, () => {
-  console.log("Server jalan di port", port);
-  startVipStoreAutoSync();
+let server = null;
+
+async function startApplication() {
+  await bulkOrderSchemaReady;
+
+  if (isShuttingDown) return;
+
+  server = app.listen(port, () => {
+    console.log("Server jalan di port", port);
+    startVipStoreAutoSync();
+  });
+}
+
+startApplication().catch(async (err) => {
+  console.error("STARTUP DATABASE MIGRATION ERROR:", err);
+
+  try {
+    await db.end();
+  } catch (closeErr) {
+    console.error("ERROR CLOSE DATABASE AFTER STARTUP FAILURE:", closeErr);
+  }
+
+  process.exit(1);
 });
 
 async function shutdown(signal) {
@@ -7487,6 +7480,18 @@ async function shutdown(signal) {
   }, 25 * 1000);
   if (typeof forceShutdownTimer.unref === "function") {
     forceShutdownTimer.unref();
+  }
+
+  if (!server) {
+    try {
+      await db.end();
+      clearTimeout(forceShutdownTimer);
+      process.exit(0);
+    } catch (dbError) {
+      console.error("ERROR CLOSE DATABASE POOL:", dbError);
+      process.exit(1);
+    }
+    return;
   }
 
   server.close(async (serverError) => {
