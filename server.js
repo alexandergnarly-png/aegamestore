@@ -1,4 +1,4 @@
-const db = require("./database");
+const db = require("./server/database");
 const express = require("express");
 const midtransClient = require("midtrans-client");
 const path = require("path");
@@ -17,8 +17,8 @@ const {
   getOrderQuantity,
   parseOrderQuantity,
   splitOrderKeys,
-} = require("./order-utils");
-const { ensureBulkOrderSchema, ensureWalletSchema } = require("./database-migrations");
+} = require("./server/order-utils");
+const { ensureBulkOrderSchema, ensureWalletSchema } = require("./server/database-migrations");
 
 const app = express();
 app.disable("x-powered-by");
