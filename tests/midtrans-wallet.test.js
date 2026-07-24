@@ -40,6 +40,20 @@ const admin = fs.readFileSync("views/admin.html", "utf8");
 ].forEach((marker) => assert.ok(admin.includes(marker), `Missing admin wallet history marker: ${marker}`));
 
 [
+  'class="skip-link" href="#admin-main"',
+  'id="adminLiveRegion"',
+  'id="icon-dashboard"',
+  'aria-current="page"',
+  "Promise.allSettled",
+  'id="refreshAllButton"',
+].forEach((marker) => assert.ok(admin.includes(marker), `Missing admin UX marker: ${marker}`));
+
+const sidebarNav = admin.match(/<nav class="sidebar-nav"[\s\S]*?<\/nav>/)?.[0] || "";
+const bottomNav = admin.match(/<nav\s+class="admin-bottom-nav"[\s\S]*?<\/nav>/)?.[0] || "";
+assert.ok(sidebarNav && bottomNav, "Admin navigation markup is missing");
+assert.doesNotMatch(sidebarNav + bottomNav, /[📊📦🧾👥🔑🎟👑]/u, "Admin navigation must use SVG icons");
+
+[
   `app.delete("/api/admin/wallet/topups/:id", requireAdminAuth, requireAdminCsrf`,
   `WHERE id = $1 AND status = 'rejected'`,
 ].forEach((marker) => assert.ok(server.includes(marker), `Missing failed-history delete guard: ${marker}`));

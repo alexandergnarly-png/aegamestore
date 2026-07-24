@@ -145,6 +145,56 @@
         text-decoration: none;
       }
 
+      .skip-link {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 1000;
+        padding: 10px 14px;
+        border-radius: 14px;
+        background: var(--ink);
+        color: var(--surface);
+        font-size: 13px;
+        font-weight: 850;
+        transform: translateY(-160%);
+        transition: transform 0.18s var(--ease);
+      }
+
+      .skip-link:focus {
+        transform: translateY(0);
+      }
+
+      .sr-only {
+        position: absolute !important;
+        width: 1px !important;
+        height: 1px !important;
+        padding: 0 !important;
+        margin: -1px !important;
+        overflow: hidden !important;
+        clip: rect(0, 0, 0, 0) !important;
+        white-space: nowrap !important;
+        border: 0 !important;
+      }
+
+      .icon-sprite {
+        position: absolute;
+        width: 0;
+        height: 0;
+        overflow: hidden;
+      }
+
+      .ui-icon {
+        width: 20px;
+        height: 20px;
+        display: block;
+        flex: 0 0 auto;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
       button,
       input,
       select,
@@ -326,7 +376,6 @@
         width: 22px;
         min-width: 22px;
         text-align: center;
-        filter: grayscale(1);
         opacity: 0.9;
       }
 
@@ -389,6 +438,10 @@
 
       .admin-section {
         display: none;
+      }
+
+      .admin-section:focus {
+        outline: none;
       }
 
       .admin-section.active {
@@ -603,7 +656,11 @@
         border-radius: 16px;
         background: var(--surface-2);
         color: var(--ink);
-        filter: grayscale(1);
+      }
+
+      .stat-icon .ui-icon {
+        width: 22px;
+        height: 22px;
       }
 
       .stat-value {
@@ -667,17 +724,6 @@
         margin-bottom: 14px;
       }
 
-      .wallet-icon-svg {
-        width: 1.25em;
-        height: 1.25em;
-        display: block;
-        fill: none;
-        stroke: currentColor;
-        stroke-width: 1.8;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-      }
-
       .wallet-hero {
         display: flex;
         align-items: center;
@@ -710,7 +756,7 @@
         background: color-mix(in srgb, var(--surface) 12%, transparent);
       }
 
-      .wallet-hero-icon .wallet-icon-svg {
+      .wallet-hero-icon .ui-icon {
         width: 27px;
         height: 27px;
       }
@@ -894,6 +940,10 @@
       }
 
       .logout-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
         min-height: 44px;
       }
 
@@ -1401,8 +1451,8 @@
       }
 
       .admin-bottom-nav-btn .ico {
-        font-size: 19px;
-        filter: grayscale(1);
+        display: grid;
+        place-items: center;
       }
 
       .admin-bottom-nav-btn .label {
@@ -1461,12 +1511,16 @@
       }
 
       .admin-more-sheet-item .ico {
-        font-size: 22px;
-        filter: grayscale(1);
+        display: grid;
+        place-items: center;
       }
 
       .admin-more-sheet-logout {
         width: 100%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
         margin-top: 12px;
       }
 
@@ -1709,24 +1763,32 @@
         }
 
         .stats {
-          display: flex;
-          overflow-x: auto;
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: 10px;
-          padding-bottom: 5px;
-          scroll-snap-type: x mandatory;
-          -webkit-overflow-scrolling: touch;
+          overflow: visible;
         }
 
         .stat-card {
-          flex: 0 0 76%;
+          min-width: 0;
           min-height: 126px;
           padding: 14px;
           border-radius: 24px;
-          scroll-snap-align: start;
         }
 
         .stat-value {
-          font-size: 24px;
+          font-size: clamp(19px, 6vw, 24px);
+          overflow-wrap: anywhere;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="number"],
+        input[type="email"],
+        input[type="date"],
+        select,
+        textarea {
+          font-size: 16px;
         }
 
         .card {
@@ -1951,10 +2013,6 @@
 
         .btn-group button {
           flex-basis: 100%;
-        }
-
-        .stat-card {
-          flex-basis: 86%;
         }
 
         .admin-more-sheet-grid {
@@ -2472,6 +2530,28 @@
   </head>
 
   <body>
+    <a class="skip-link" href="#admin-main">Lewati navigasi</a>
+    <div id="adminLiveRegion" class="sr-only" aria-live="polite"></div>
+    <svg class="icon-sprite" aria-hidden="true">
+      <symbol id="icon-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+      <symbol id="icon-dashboard" viewBox="0 0 24 24"><path d="M4 13h6V4H4v9Zm0 7h6v-4H4v4Zm10 0h6v-9h-6v9Zm0-16v4h6V4h-6Z"/></symbol>
+      <symbol id="icon-product" viewBox="0 0 24 24"><path d="m4 7 8-4 8 4-8 4-8-4Z"/><path d="M4 7v10l8 4 8-4V7M12 11v10"/></symbol>
+      <symbol id="icon-receipt" viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z"/><path d="M9 8h6M9 12h6"/></symbol>
+      <symbol id="icon-users" viewBox="0 0 24 24"><path d="M16 20v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 20v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+      <symbol id="icon-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M17 3h3v3M15 8l2 2"/></symbol>
+      <symbol id="icon-ticket" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-3a2 2 0 0 0 0-4V7Z"/><path d="M13 5v2M13 17v2M13 11v2"/></symbol>
+      <symbol id="icon-crown" viewBox="0 0 24 24"><path d="m3 7 4 4 5-7 5 7 4-4-2 11H5L3 7Z"/><path d="M5 21h14"/></symbol>
+      <symbol id="icon-wallet" viewBox="0 0 24 24"><path d="M4 7.5h14.5A1.5 1.5 0 0 1 20 9v9H5.5A2.5 2.5 0 0 1 3 15.5V6a2 2 0 0 1 2-2h12"/><path d="M3 7.5h14M16 12h4"/></symbol>
+      <symbol id="icon-logout" viewBox="0 0 24 24"><path d="M10 17l5-5-5-5M15 12H3"/><path d="M14 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-5"/></symbol>
+      <symbol id="icon-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/></symbol>
+      <symbol id="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"/></symbol>
+      <symbol id="icon-refresh" viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M6.1 9a7 7 0 0 1 11.4-2.6L20 9M4 15l2.5 2.6A7 7 0 0 0 17.9 15"/></symbol>
+      <symbol id="icon-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+      <symbol id="icon-money" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M7 9H6v1M17 15h1v-1"/></symbol>
+      <symbol id="icon-trend" viewBox="0 0 24 24"><path d="m3 17 6-6 4 4 8-8"/><path d="M15 7h6v6"/></symbol>
+      <symbol id="icon-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+      <symbol id="icon-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></symbol>
+    </svg>
     <aside class="sidebar" aria-label="Sidebar navigation">
       <div class="sidebar-brand">
         <div class="sidebar-brand-left">
@@ -2489,7 +2569,7 @@
           aria-expanded="true"
           title="Toggle sidebar"
         >
-          ☰
+          <svg class="ui-icon" aria-hidden="true"><use href="#icon-menu"></use></svg>
         </button>
       </div>
 
@@ -2499,8 +2579,9 @@
           class="nav-btn active"
           data-section="dashboard"
           onclick="showSection('dashboard', this)"
+          aria-current="page"
         >
-          <span class="nav-ico" aria-hidden="true">📊</span>
+          <span class="nav-ico" aria-hidden="true"><svg class="ui-icon"><use href="#icon-dashboard"></use></svg></span>
           <span>Dashboard</span>
         </button>
         <button
@@ -2508,7 +2589,7 @@
           data-section="products"
           onclick="showSection('products', this)"
         >
-          <span class="nav-ico" aria-hidden="true">📦</span>
+          <span class="nav-ico" aria-hidden="true"><svg class="ui-icon"><use href="#icon-product"></use></svg></span>
           <span>Produk</span>
         </button>
         <button
@@ -2516,7 +2597,7 @@
           data-section="orders"
           onclick="showSection('orders', this)"
         >
-          <span class="nav-ico" aria-hidden="true">🧾</span>
+          <span class="nav-ico" aria-hidden="true"><svg class="ui-icon"><use href="#icon-receipt"></use></svg></span>
           <span>Order</span>
         </button>
         <button
@@ -2524,7 +2605,7 @@
           data-section="users"
           onclick="showSection('users', this)"
         >
-          <span class="nav-ico" aria-hidden="true">👥</span>
+          <span class="nav-ico" aria-hidden="true"><svg class="ui-icon"><use href="#icon-users"></use></svg></span>
           <span>User Buyer</span>
         </button>
         <button
@@ -2532,7 +2613,7 @@
           data-section="keys"
           onclick="showSection('keys', this)"
         >
-          <span class="nav-ico" aria-hidden="true">🔑</span>
+          <span class="nav-ico" aria-hidden="true"><svg class="ui-icon"><use href="#icon-key"></use></svg></span>
           <span>Game Key</span>
         </button>
         <button
@@ -2540,7 +2621,7 @@
           data-section="vouchers"
           onclick="showSection('vouchers', this)"
         >
-          <span class="nav-ico" aria-hidden="true">🎟️</span>
+          <span class="nav-ico" aria-hidden="true"><svg class="ui-icon"><use href="#icon-ticket"></use></svg></span>
           <span>Voucher</span>
         </button>
         <button
@@ -2548,24 +2629,24 @@
           data-section="vip-discounts"
           onclick="showSection('vip-discounts', this)"
         >
-          <span class="nav-ico" aria-hidden="true">👑</span>
+          <span class="nav-ico" aria-hidden="true"><svg class="ui-icon"><use href="#icon-crown"></use></svg></span>
           <span>Prestige Discount</span>
         </button>
         <button class="nav-btn" data-section="wallet" onclick="showSection('wallet', this)">
-          <span class="nav-ico" aria-hidden="true"><svg class="wallet-icon-svg" viewBox="0 0 24 24"><path d="M4 7.5h14.5A1.5 1.5 0 0 1 20 9v9H5.5A2.5 2.5 0 0 1 3 15.5V6a2 2 0 0 1 2-2h12"/><path d="M3 7.5h14M16 12h4"/></svg></span>
+          <span class="nav-ico" aria-hidden="true"><svg class="ui-icon"><use href="#icon-wallet"></use></svg></span>
           <span>AE Credit</span>
         </button>
       </nav>
 
       <div class="sidebar-footer">
         <button class="sidebar-logout" onclick="logoutAdmin()">
-          <span aria-hidden="true">🚪</span>
+          <svg class="ui-icon" aria-hidden="true"><use href="#icon-logout"></use></svg>
           <span>Logout</span>
         </button>
       </div>
     </aside>
 
-    <main class="page">
+    <main class="page" id="admin-main" tabindex="-1">
       <section id="section-dashboard" class="admin-section active">
         <div class="top-nav">
           <div class="top-nav-left">
@@ -2587,10 +2668,10 @@
               id="theme-toggle"
               type="button"
               onclick="toggleAdminTheme()"
-              aria-label="Toggle theme"
-              title="Toggle theme"
+              aria-label="Aktifkan tema gelap"
+              title="Aktifkan tema gelap"
             >
-              🌙
+              <svg class="ui-icon" aria-hidden="true"><use href="#icon-moon"></use></svg>
             </button>
             <button
               class="ghost-btn"
@@ -2613,8 +2694,9 @@
               </p>
             </div>
             <div>
-              <button class="logout-btn" onclick="refreshAllData()">
-                Refresh Semua Data
+              <button class="logout-btn" id="refreshAllButton" onclick="refreshAllData(this)">
+                <svg class="ui-icon" aria-hidden="true"><use href="#icon-refresh"></use></svg>
+                <span>Refresh Semua Data</span>
               </button>
             </div>
           </div>
@@ -2643,7 +2725,7 @@
           <div class="stat-card">
             <div class="stat-top">
               <div class="stat-label">Total Key</div>
-              <div class="stat-icon">🔑</div>
+              <div class="stat-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-key"></use></svg></div>
             </div>
             <div class="stat-value" id="totalKeyStat">0</div>
             <div class="stat-note">Seluruh key di database.</div>
@@ -2652,7 +2734,7 @@
           <div class="stat-card">
             <div class="stat-top">
               <div class="stat-label">Key Available</div>
-              <div class="stat-icon">✅</div>
+              <div class="stat-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-check"></use></svg></div>
             </div>
             <div class="stat-value" id="availableKeyStat">0</div>
             <div class="stat-note">Stok key yang belum dipakai.</div>
@@ -2661,7 +2743,7 @@
           <div class="stat-card">
             <div class="stat-top">
               <div class="stat-label">Total Order</div>
-              <div class="stat-icon">🧾</div>
+              <div class="stat-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-receipt"></use></svg></div>
             </div>
             <div class="stat-value" id="totalOrderStat">0</div>
             <div class="stat-note">Jumlah order yang tercatat.</div>
@@ -2670,7 +2752,7 @@
           <div class="stat-card">
             <div class="stat-top">
               <div class="stat-label">Total Produk</div>
-              <div class="stat-icon">📦</div>
+              <div class="stat-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-product"></use></svg></div>
             </div>
             <div class="stat-value" id="totalProductStat">0</div>
             <div class="stat-note">Produk tersedia di panel.</div>
@@ -2679,7 +2761,7 @@
           <div class="stat-card">
             <div class="stat-top">
               <div class="stat-label">Revenue Hari Ini</div>
-              <div class="stat-icon">💰</div>
+              <div class="stat-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-money"></use></svg></div>
             </div>
             <div class="stat-value" id="revenueTodayStat">Rp 0</div>
             <div class="stat-note">Total order paid hari ini.</div>
@@ -2688,7 +2770,7 @@
           <div class="stat-card">
             <div class="stat-top">
               <div class="stat-label">Revenue Bulan Ini</div>
-              <div class="stat-icon">📈</div>
+              <div class="stat-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-trend"></use></svg></div>
             </div>
             <div class="stat-value" id="revenueMonthStat">Rp 0</div>
             <div class="stat-note">Total order paid bulan ini.</div>
@@ -2697,7 +2779,7 @@
           <div class="stat-card">
             <div class="stat-top">
               <div class="stat-label">Paid Hari Ini</div>
-              <div class="stat-icon">✅</div>
+              <div class="stat-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-check"></use></svg></div>
             </div>
             <div class="stat-value" id="paidTodayStat">0</div>
             <div class="stat-note">Order berhasil dibayar hari ini.</div>
@@ -2706,7 +2788,7 @@
           <div class="stat-card">
             <div class="stat-top">
               <div class="stat-label">Order Pending</div>
-              <div class="stat-icon">⏳</div>
+              <div class="stat-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-clock"></use></svg></div>
             </div>
             <div class="stat-value" id="pendingOrderStat">0</div>
             <div class="stat-note">Order belum dibayar.</div>
@@ -3744,7 +3826,7 @@
     <section id="section-wallet" class="admin-section">
       <div class="wallet-hero delay-1">
         <div class="wallet-hero-copy">
-          <div class="wallet-hero-icon" aria-hidden="true"><svg class="wallet-icon-svg" viewBox="0 0 24 24"><path d="M4 7.5h14.5A1.5 1.5 0 0 1 20 9v9H5.5A2.5 2.5 0 0 1 3 15.5V6a2 2 0 0 1 2-2h12"/><path d="M3 7.5h14M16 12h4"/></svg></div>
+          <div class="wallet-hero-icon" aria-hidden="true"><svg class="ui-icon"><use href="#icon-wallet"></use></svg></div>
           <div><h1>AE Credit</h1><p>Verifikasi top up dan kelola saldo buyer dari satu tempat.</p></div>
         </div>
         <div class="section-badge">Owner Wallet</div>
@@ -3783,8 +3865,9 @@
         class="admin-bottom-nav-btn active"
         data-section="dashboard"
         onclick="bottomNavGo('dashboard', this)"
+        aria-current="page"
       >
-        <span class="ico">📊</span>
+        <span class="ico" aria-hidden="true"><svg class="ui-icon"><use href="#icon-dashboard"></use></svg></span>
         <span class="label">Dashboard</span>
       </button>
       <button
@@ -3793,7 +3876,7 @@
         data-section="products"
         onclick="bottomNavGo('products', this)"
       >
-        <span class="ico">📦</span>
+        <span class="ico" aria-hidden="true"><svg class="ui-icon"><use href="#icon-product"></use></svg></span>
         <span class="label">Produk</span>
       </button>
       <button
@@ -3802,7 +3885,7 @@
         data-section="orders"
         onclick="bottomNavGo('orders', this)"
       >
-        <span class="ico">🧾</span>
+        <span class="ico" aria-hidden="true"><svg class="ui-icon"><use href="#icon-receipt"></use></svg></span>
         <span class="label">Order</span>
       </button>
       <button
@@ -3811,7 +3894,7 @@
         data-section="users"
         onclick="bottomNavGo('users', this)"
       >
-        <span class="ico">👥</span>
+        <span class="ico" aria-hidden="true"><svg class="ui-icon"><use href="#icon-users"></use></svg></span>
         <span class="label">User</span>
       </button>
       <button
@@ -3820,7 +3903,7 @@
         data-section="more"
         onclick="openMoreSheet()"
       >
-        <span class="ico">⋯</span>
+        <span class="ico" aria-hidden="true"><svg class="ui-icon"><use href="#icon-more"></use></svg></span>
         <span class="label">More</span>
       </button>
     </nav>
@@ -3857,7 +3940,7 @@
           class="admin-more-sheet-item"
           onclick="bottomNavGo('wallet'); closeMoreSheet();"
         >
-          <span class="ico" aria-hidden="true"><svg class="wallet-icon-svg" viewBox="0 0 24 24"><path d="M4 7.5h14.5A1.5 1.5 0 0 1 20 9v9H5.5A2.5 2.5 0 0 1 3 15.5V6a2 2 0 0 1 2-2h12"/><path d="M3 7.5h14M16 12h4"/></svg></span>
+          <span class="ico" aria-hidden="true"><svg class="ui-icon"><use href="#icon-wallet"></use></svg></span>
           <span>AE Credit</span>
         </button>
         <button
@@ -3868,7 +3951,7 @@
             closeMoreSheet();
           "
         >
-          <span class="ico">🔑</span>
+          <span class="ico" aria-hidden="true"><svg class="ui-icon"><use href="#icon-key"></use></svg></span>
           <span>Game Key</span>
         </button>
         <button
@@ -3879,7 +3962,7 @@
             closeMoreSheet();
           "
         >
-          <span class="ico">🎟️</span>
+          <span class="ico" aria-hidden="true"><svg class="ui-icon"><use href="#icon-ticket"></use></svg></span>
           <span>Voucher</span>
         </button>
         <button
@@ -3890,7 +3973,7 @@
             closeMoreSheet();
           "
         >
-          <span class="ico">👑</span>
+          <span class="ico" aria-hidden="true"><svg class="ui-icon"><use href="#icon-crown"></use></svg></span>
           <span>Prestige Discount</span>
         </button>
         <button
@@ -3901,7 +3984,7 @@
             closeMoreSheet();
           "
         >
-          <span class="ico">🔄</span>
+          <span class="ico" aria-hidden="true"><svg class="ui-icon"><use href="#icon-refresh"></use></svg></span>
           <span>Refresh Semua</span>
         </button>
         <button
@@ -3912,7 +3995,7 @@
             closeMoreSheet();
           "
         >
-          <span class="ico" id="moreSheetThemeIco">🌙</span>
+          <span class="ico" id="moreSheetThemeIco" aria-hidden="true"><svg class="ui-icon"><use href="#icon-moon"></use></svg></span>
           <span>Toggle Tema</span>
         </button>
       </div>
@@ -3921,7 +4004,8 @@
         class="admin-more-sheet-logout"
         onclick="logoutAdmin()"
       >
-        🚪 Logout Admin
+        <svg class="ui-icon" aria-hidden="true"><use href="#icon-logout"></use></svg>
+        <span>Logout Admin</span>
       </button>
     </div>
 
@@ -3939,34 +4023,59 @@
       function toggleSidebar() {
         const isCollapsed = document.body.classList.toggle("sidebar-collapsed");
         localStorage.setItem("ae_admin_sidebar_collapsed", isCollapsed ? "1" : "0");
-        document
-          .getElementById("sidebarToggle")
-          ?.setAttribute("aria-expanded", isCollapsed ? "false" : "true");
+        const toggle = document.getElementById("sidebarToggle");
+        toggle?.setAttribute("aria-expanded", isCollapsed ? "false" : "true");
+        toggle?.setAttribute("aria-label", isCollapsed ? "Buka sidebar" : "Tutup sidebar");
+        toggle?.setAttribute("title", isCollapsed ? "Buka sidebar" : "Tutup sidebar");
       }
 
       function applySidebarState() {
         const isCollapsed = localStorage.getItem("ae_admin_sidebar_collapsed") === "1";
         document.body.classList.toggle("sidebar-collapsed", isCollapsed);
-        document
-          .getElementById("sidebarToggle")
-          ?.setAttribute("aria-expanded", isCollapsed ? "false" : "true");
+        const toggle = document.getElementById("sidebarToggle");
+        toggle?.setAttribute("aria-expanded", isCollapsed ? "false" : "true");
+        toggle?.setAttribute("aria-label", isCollapsed ? "Buka sidebar" : "Tutup sidebar");
+        toggle?.setAttribute("title", isCollapsed ? "Buka sidebar" : "Tutup sidebar");
       }
 
       applySidebarState();
+
+      function adminIcon(name) {
+        return `<svg class="ui-icon" aria-hidden="true"><use href="#icon-${name}"></use></svg>`;
+      }
+
+      function announceAdmin(message) {
+        const live = document.getElementById("adminLiveRegion");
+        if (!live) return;
+        live.textContent = "";
+        requestAnimationFrame(() => { live.textContent = message; });
+      }
+
+      function updateAdminThemeControls(isDark) {
+        const icon = isDark ? "sun" : "moon";
+        const label = isDark ? "Aktifkan tema terang" : "Aktifkan tema gelap";
+        const button = document.getElementById("theme-toggle");
+        if (button) {
+          button.innerHTML = adminIcon(icon);
+          button.setAttribute("aria-label", label);
+          button.setAttribute("title", label);
+        }
+        const moreIcon = document.getElementById("moreSheetThemeIco");
+        if (moreIcon) moreIcon.innerHTML = adminIcon(icon);
+      }
 
       function applyAdminTheme() {
         const stored = localStorage.getItem("ae_theme");
         const isDark = stored === "dark";
         document.body.classList.toggle("dark-theme", isDark);
-        const btn = document.getElementById("theme-toggle");
-        if (btn) btn.innerText = isDark ? "☀️" : "🌙";
+        updateAdminThemeControls(isDark);
       }
 
       function toggleAdminTheme() {
         const isDark = document.body.classList.toggle("dark-theme");
         localStorage.setItem("ae_theme", isDark ? "dark" : "light");
-        const btn = document.getElementById("theme-toggle");
-        if (btn) btn.innerText = isDark ? "☀️" : "🌙";
+        updateAdminThemeControls(isDark);
+        announceAdmin(isDark ? "Tema gelap aktif" : "Tema terang aktif");
       }
 
       applyAdminTheme();
@@ -4071,6 +4180,7 @@
         const target = document.getElementById(`section-${sectionName}`);
         if (target) {
           target.classList.add("active");
+          target.setAttribute("tabindex", "-1");
         }
 
         const sectionLabels = {
@@ -4100,15 +4210,26 @@
         }
 
         const navButtons = document.querySelectorAll(".nav-btn");
-        navButtons.forEach((btn) => btn.classList.remove("active"));
+        navButtons.forEach((btn) => {
+          btn.classList.remove("active");
+          btn.removeAttribute("aria-current");
+        });
 
+        let activeNavButton = buttonEl;
         if (buttonEl) {
           buttonEl.classList.add("active");
         } else {
-          const autoBtn = document.querySelector(
+          activeNavButton = document.querySelector(
             `.nav-btn[data-section="${sectionName}"]`,
           );
-          if (autoBtn) autoBtn.classList.add("active");
+          if (activeNavButton) activeNavButton.classList.add("active");
+        }
+        activeNavButton?.setAttribute("aria-current", "page");
+        setAdminBottomNavActive(sectionName);
+        announceAdmin(`${activeLabel} dibuka`);
+
+        if (target && previousSection?.id !== target.id) {
+          setTimeout(() => target.focus({ preventScroll: true }), 0);
         }
 
         if (sectionName === "products") {
@@ -4145,17 +4266,37 @@
         }
       }
 
-      function refreshAllData() {
-        loadProducts();
-        updateProductSupplierUi();
-        loadKeyProductOptions();
-        loadKeys();
-        loadOrders();
-        loadStockSummary();
-        loadAdminStats();
-        loadAdminAlerts();
-        loadVipStoreSafetyAlerts();
-        loadAdminSessions();
+      async function refreshAllData(button = document.getElementById("refreshAllButton")) {
+        if (button?.disabled) return;
+        if (button) {
+          button.disabled = true;
+          button.setAttribute("aria-busy", "true");
+          button.innerHTML = `${adminIcon("refresh")}<span>Memperbarui...</span>`;
+        }
+        announceAdmin("Memperbarui seluruh data admin");
+        try {
+          updateProductSupplierUi();
+          const results = await Promise.allSettled([
+            loadProducts(),
+            loadKeyProductOptions(),
+            loadKeys(),
+            loadOrders(),
+            loadStockSummary(),
+            loadAdminStats(),
+            loadAdminAlerts(),
+            loadVipStoreSafetyAlerts(),
+            loadAdminSessions(),
+          ]);
+          announceAdmin(results.some((result) => result.status === "rejected")
+            ? "Sebagian data gagal diperbarui"
+            : "Seluruh data admin berhasil diperbarui");
+        } finally {
+          if (button) {
+            button.disabled = false;
+            button.removeAttribute("aria-busy");
+            button.innerHTML = `${adminIcon("refresh")}<span>Refresh Semua Data</span>`;
+          }
+        }
       }
 
       function formatRupiah(num) {
@@ -8539,11 +8680,11 @@
       function updateClock() {
         const now = new Date();
         const hours = now.getHours();
-        let greeting = "Selamat Malam 🌙";
+        let greeting = "Selamat Malam";
 
-        if (hours >= 5 && hours < 11) greeting = "Selamat Pagi 🌅";
-        else if (hours >= 11 && hours < 15) greeting = "Selamat Siang ☀️";
-        else if (hours >= 15 && hours < 18) greeting = "Selamat Sore 🌇";
+        if (hours >= 5 && hours < 11) greeting = "Selamat Pagi";
+        else if (hours >= 11 && hours < 15) greeting = "Selamat Siang";
+        else if (hours >= 15 && hours < 18) greeting = "Selamat Sore";
 
         const timeString = now.toLocaleTimeString("id-ID", {
           hour: "2-digit",
@@ -8583,18 +8724,22 @@
       function setAdminBottomNavActive(sectionName) {
         document
           .querySelectorAll(".admin-bottom-nav-btn")
-          .forEach((button) => button.classList.remove("active"));
+          .forEach((button) => {
+            button.classList.remove("active");
+            button.removeAttribute("aria-current");
+          });
 
         const directSection = ["dashboard", "products", "orders", "users"].includes(
           sectionName,
         )
           ? sectionName
           : "more";
-        document
+        const activeButton = document
           .querySelector(
             `.admin-bottom-nav-btn[data-section="${directSection}"]`,
-          )
-          ?.classList.add("active");
+          );
+        activeButton?.classList.add("active");
+        activeButton?.setAttribute("aria-current", "page");
       }
 
       function bottomNavGo(sectionName, btnEl) {
@@ -8618,14 +8763,7 @@
         if (!sheet || !backdrop) return;
         setAdminBottomNavActive("more");
 
-        const moreThemeIco = document.getElementById("moreSheetThemeIco");
-        if (moreThemeIco) {
-          moreThemeIco.innerText = document.body.classList.contains(
-            "dark-theme",
-          )
-            ? "☀️"
-            : "🌙";
-        }
+        updateAdminThemeControls(document.body.classList.contains("dark-theme"));
 
         window.adminMoreSheetTrigger = document.activeElement;
         sheet.classList.add("show");
