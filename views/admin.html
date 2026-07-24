@@ -748,7 +748,7 @@
 
       .wallet-filter-toolbar {
         display: grid;
-        grid-template-columns: minmax(180px, 1fr) auto;
+        grid-template-columns: repeat(2, minmax(160px, 1fr)) auto;
         align-items: end;
       }
 
@@ -1020,6 +1020,7 @@
       }
 
       .badge.paid,
+      .badge.approved,
       .badge.delivered,
       .badge.available,
       .badge.verified,
@@ -1031,6 +1032,7 @@
       }
 
       .badge.expired,
+      .badge.rejected,
       .badge.cancelled,
       .badge.used {
         background: var(--danger-bg);
@@ -3749,12 +3751,13 @@
       </div>
       <div class="wallet-grid">
         <div class="card delay-1">
-          <div class="card-header"><div class="card-title-wrap"><h2>Verifikasi QRIS</h2><p class="card-subtitle">Cocokkan mutasi QRIS sebelum saldo masuk ke akun buyer.</p></div><div class="section-badge" id="walletPendingBadge">0 menunggu</div></div>
+          <div class="card-header"><div class="card-title-wrap"><h2>Top Up & Riwayat</h2><p class="card-subtitle">Pantau pembayaran Midtrans otomatis dan verifikasi QRIS manual.</p></div><div class="section-badge" id="walletPendingBadge">0 data</div></div>
           <div class="toolbar wallet-filter-toolbar">
-            <div class="field"><label for="walletStatusFilter">Status request</label><select id="walletStatusFilter" onchange="loadWalletTopups()"><option value="pending">Menunggu verifikasi</option><option value="approved">Sudah disetujui</option><option value="rejected">Sudah ditolak</option></select></div>
+            <div class="field"><label for="walletStatusFilter">Status</label><select id="walletStatusFilter" onchange="loadWalletTopups()"><option value="all">Semua status</option><option value="pending">Menunggu pembayaran/verifikasi</option><option value="approved">Berhasil</option><option value="rejected">Gagal / ditolak</option></select></div>
+            <div class="field"><label for="walletProviderFilter">Metode</label><select id="walletProviderFilter" onchange="loadWalletTopups()"><option value="all">Semua metode</option><option value="midtrans">Midtrans otomatis</option><option value="manual_qris">QRIS manual</option></select></div>
             <button type="button" onclick="loadWalletTopups()">Refresh Data</button>
           </div>
-          <div class="table-wrap"><table><thead><tr><th>Buyer</th><th>Nominal</th><th>Referensi</th><th>Dibuat</th><th>Aksi</th></tr></thead><tbody id="walletTopupTableBody"><tr><td class="empty" colspan="5">Memuat...</td></tr></tbody></table></div>
+          <div class="table-wrap"><table><thead><tr><th>Buyer</th><th>Nominal</th><th>Metode</th><th>Status</th><th>Waktu</th><th>Detail</th></tr></thead><tbody id="walletTopupTableBody"><tr><td class="empty" colspan="6">Memuat...</td></tr></tbody></table></div>
         </div>
         <div class="card delay-2">
           <div class="card-header"><div class="card-title-wrap"><h2>Grant Credit</h2><p class="card-subtitle">Tambahkan saldo internal langsung ke akun yang dipilih.</p></div><div class="section-badge">Owner Only</div></div>
@@ -3979,25 +3982,36 @@
       mountPersistentAdminTopNav();
 
       async function loadWalletTopups() {
-        const status = document.getElementById("walletStatusFilter")?.value || "pending";
+        const status = document.getElementById("walletStatusFilter")?.value || "all";
+        const provider = document.getElementById("walletProviderFilter")?.value || "all";
         const body = document.getElementById("walletTopupTableBody");
         if (!body) return;
-        body.innerHTML = `<tr><td class="empty" colspan="5">Memuat...</td></tr>`;
+        body.innerHTML = `<tr><td class="empty" colspan="6">Memuat...</td></tr>`;
         try {
-          const res = await fetch(`/api/admin/wallet/topups?status=${encodeURIComponent(status)}`);
+          const res = await fetch(`/api/admin/wallet/topups?status=${encodeURIComponent(status)}&provider=${encodeURIComponent(provider)}`);
           const data = await res.json();
           if (!res.ok) throw new Error(data.message || "Gagal memuat");
           const rows = data.topups || [];
           const pendingBadge = document.getElementById("walletPendingBadge");
-          if (pendingBadge) pendingBadge.textContent = `${rows.length} ${status === "pending" ? "menunggu" : status === "approved" ? "disetujui" : "ditolak"}`;
-          body.innerHTML = rows.length ? rows.map((row) => `<tr>
-            <td data-label="Buyer"><strong>${escapeHtml(row.username || `User #${row.user_id}`)}</strong><br><small>${row.provider === "midtrans" ? "Midtrans otomatis" : escapeHtml(row.buyer_note || "QRIS manual")}</small></td>
-            <td data-label="Nominal"><strong>${formatRupiah(row.amount)}</strong><br><small>Saldo: ${formatRupiah(row.balance)}</small></td>
-            <td data-label="Referensi">${escapeHtml(row.provider_order_id || row.payment_reference || "-")}</td>
-            <td data-label="Dibuat">${formatTanggal(row.created_at)}</td>
-            <td data-label="Aksi">${status === "pending" && row.provider !== "midtrans" ? `<div class="row-action-group"><button class="small-btn" onclick="approveWalletTopup('${row.id}')">Setujui</button><button class="small-btn danger" onclick="rejectWalletTopup('${row.id}')">Tolak</button></div>` : status === "pending" ? "Menunggu webhook Midtrans" : escapeHtml(row.admin_note || row.reviewed_by || "-")}</td>
-          </tr>`).join("") : `<tr><td class="empty" colspan="5">Tidak ada request dengan status ini.</td></tr>`;
-        } catch (err) { body.innerHTML = `<tr><td class="empty" colspan="5">${escapeHtml(err.message)}</td></tr>`; }
+          if (pendingBadge) pendingBadge.textContent = `${rows.length} data`;
+          const statusLabel = { pending: "Menunggu", approved: "Berhasil", rejected: "Gagal" };
+          body.innerHTML = rows.length ? rows.map((row) => {
+            const isMidtrans = row.provider === "midtrans";
+            const reference = isMidtrans ? row.provider_order_id : row.payment_reference;
+            const transaction = isMidtrans ? row.provider_transaction_id : "";
+            const action = row.status === "pending" && !isMidtrans
+              ? `<div class="row-action-group"><button class="small-btn" onclick="approveWalletTopup('${row.id}')">Setujui</button><button class="small-btn danger" onclick="rejectWalletTopup('${row.id}')">Tolak</button></div>`
+              : escapeHtml(row.admin_note || (row.status === "pending" ? "Menunggu webhook Midtrans" : row.reviewed_by || "-"));
+            return `<tr>
+              <td data-label="Buyer"><strong>${escapeHtml(row.username || `User #${row.user_id}`)}</strong><br><small>User #${escapeHtml(row.user_id)}</small></td>
+              <td data-label="Nominal"><strong>${formatRupiah(row.amount)}</strong><br><small>Saldo kini: ${formatRupiah(row.balance)}</small></td>
+              <td data-label="Metode"><strong>${isMidtrans ? "Midtrans otomatis" : "QRIS manual"}</strong><br><small>${escapeHtml(reference || "-")}</small></td>
+              <td data-label="Status"><span class="badge ${escapeHtml(row.status)}">${escapeHtml(statusLabel[row.status] || row.status)}</span></td>
+              <td data-label="Waktu">${formatTanggal(row.paid_at || row.reviewed_at || row.created_at)}<br><small>Dibuat ${formatTanggal(row.created_at)}</small></td>
+              <td data-label="Detail">${transaction ? `<small>Transaksi: ${escapeHtml(transaction)}</small><br>` : ""}${action}</td>
+            </tr>`;
+          }).join("") : `<tr><td class="empty" colspan="6">Tidak ada riwayat yang cocok.</td></tr>`;
+        } catch (err) { body.innerHTML = `<tr><td class="empty" colspan="6">${escapeHtml(err.message)}</td></tr>`; }
       }
 
       async function approveWalletTopup(id) {

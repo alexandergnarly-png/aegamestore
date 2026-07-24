@@ -28,4 +28,14 @@ const server = fs.readFileSync("server.js", "utf8");
   `ON CONFLICT (reference_type, reference_id, direction) DO NOTHING`,
 ].forEach((marker) => assert.ok(server.includes(marker), `Missing wallet webhook guard: ${marker}`));
 
+const admin = fs.readFileSync("views/admin.html", "utf8");
+[...admin.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)]
+  .forEach(([, source]) => assert.doesNotThrow(() => new Function(source)));
+[
+  'id="walletProviderFilter"',
+  "Midtrans otomatis",
+  "row.provider_transaction_id",
+  "row.paid_at || row.reviewed_at || row.created_at",
+].forEach((marker) => assert.ok(admin.includes(marker), `Missing admin wallet history marker: ${marker}`));
+
 console.log("Midtrans wallet security check passed.");

@@ -7626,16 +7626,30 @@ app.post("/api/wallet/topups/midtrans", walletTopupLimiter, requireUserCsrf, asy
 });
 
 app.get("/api/admin/wallet/topups", requireAdminAuth, async (req, res) => {
-  const status = ["pending", "approved", "rejected"].includes(String(req.query.status || "")) ? String(req.query.status) : "pending";
+  const status = ["all", "pending", "approved", "rejected"].includes(String(req.query.status || "")) ? String(req.query.status) : "all";
+  const provider = ["all", "midtrans", "manual_qris"].includes(String(req.query.provider || "")) ? String(req.query.provider) : "all";
   try {
     const result = await query(`SELECT t.id, t.user_id, u.username, t.amount, t.status, t.buyer_note,
       t.payment_reference, t.admin_note, t.reviewed_by, t.created_at, t.reviewed_at,
-      t.provider, t.provider_order_id, t.payment_amount,
+      t.provider, t.provider_order_id, t.provider_transaction_id, t.payment_amount, t.paid_at,
       COALESCE(w.balance, 0) AS balance
       FROM wallet_topup_requests t LEFT JOIN users u ON u.id = t.user_id
       LEFT JOIN wallet_accounts w ON w.user_id = t.user_id
-      WHERE t.status = $1 ORDER BY t.created_at ASC LIMIT 100`, [status]);
-    return res.json({ status, topups: result.rows.map((row) => ({ ...row, amount: Number(row.amount || 0), balance: Number(row.balance || 0) })) });
+      WHERE ($1 = 'all' OR t.status = $1)
+        AND ($2 = 'all' OR t.provider = $2)
+      ORDER BY CASE WHEN t.status = 'pending' THEN 0 ELSE 1 END,
+        COALESCE(t.paid_at, t.reviewed_at, t.created_at) DESC
+      LIMIT 100`, [status, provider]);
+    return res.json({
+      status,
+      provider,
+      topups: result.rows.map((row) => ({
+        ...row,
+        amount: Number(row.amount || 0),
+        payment_amount: Number(row.payment_amount || row.amount || 0),
+        balance: Number(row.balance || 0),
+      })),
+    });
   } catch (err) {
     console.error("ERROR ADMIN WALLET TOPUPS:", err);
     return res.status(500).json({ message: "Gagal memuat request top up" });
