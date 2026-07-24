@@ -13744,3 +13744,88 @@ body.admin-chat-open {
 .promo-dot.active::after {
   display: none !important;
 }
+
+/* Order modal UX pass: one scroll surface, clear selection, safe mobile CTA. */
+.order-modal-card {
+  scroll-padding-bottom: 156px;
+}
+
+.order-platform-pill,
+.order-brand-pill,
+.order-product-card,
+.checkout-payment-option,
+.quantity-stepper button,
+.voucher-check-btn,
+#buyBtn,
+.modal-close-btn {
+  min-height: 44px;
+  touch-action: manipulation;
+}
+
+.order-platform-pill:focus-visible,
+.order-brand-pill:focus-visible,
+.order-product-card:focus-visible,
+.checkout-payment-option:focus-visible,
+#buyBtn:focus-visible,
+.modal-close-btn:focus-visible {
+  outline: 3px solid var(--nb-ink, #111);
+  outline-offset: 3px;
+}
+
+.order-product-card:not(:disabled) {
+  transition:
+    transform 160ms var(--ease-out),
+    border-color 160ms var(--ease-out),
+    background 160ms var(--ease-out);
+}
+
+.order-product-card:not(:disabled):active {
+  transform: scale(0.985);
+}
+
+.checkout-payment-option {
+  align-content: center;
+  min-height: 64px;
+}
+
+@media (max-width: 640px) {
+  .order-modal {
+    align-items: stretch !important;
+    padding: 0 !important;
+  }
+
+  .order-modal-card {
+    width: 100% !important;
+    max-width: none !important;
+    max-height: 100dvh !important;
+    height: 100dvh !important;
+    padding: calc(14px + env(safe-area-inset-top, 0px)) 14px
+      calc(24px + env(safe-area-inset-bottom, 0px)) !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  .modal-close-btn {
+    top: calc(12px + env(safe-area-inset-top, 0px)) !important;
+    right: 14px !important;
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 999px !important;
+  }
+
+  .order-product-cards {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .checkout-sticky-bar {
+    grid-template-columns: 1fr !important;
+    margin-bottom: 8px !important;
+    padding: 12px !important;
+    background: color-mix(in srgb, var(--nb-surface) 98%, transparent) !important;
+  }
+
+  .checkout-sticky-total {
+    min-height: 44px;
+  }
+}

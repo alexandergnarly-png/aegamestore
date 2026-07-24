@@ -786,6 +786,7 @@
       role="dialog"
       aria-modal="true"
       aria-labelledby="modalGameTitle"
+      aria-describedby="modalOrderDescription"
     >
       <div class="order-modal-backdrop" onclick="closeOrderModal()"></div>
 
@@ -823,7 +824,7 @@
               ORDER GAME
             </span>
             <h2 id="modalGameTitle">Pilih Game</h2>
-            <p data-i18n="modalOrderDesc">
+            <p id="modalOrderDescription" data-i18n="modalOrderDesc">
               Lengkapi data order kamu di bawah ini.
             </p>
           </div>
