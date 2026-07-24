@@ -7704,6 +7704,28 @@ app.post("/api/admin/wallet/topups/:id/reject", requireAdminAuth, requireAdminCs
   }
 });
 
+app.delete("/api/admin/wallet/topups/:id", requireAdminAuth, requireAdminCsrf, async (req, res) => {
+  const topupId = String(req.params.id || "").trim();
+  if (!topupId || topupId.length > 80) {
+    return res.status(400).json({ message: "ID riwayat tidak valid" });
+  }
+  try {
+    const result = await query(
+      `DELETE FROM wallet_topup_requests
+       WHERE id = $1 AND status = 'rejected'
+       RETURNING id`,
+      [topupId],
+    );
+    if (!result.rowCount) {
+      return res.status(409).json({ message: "Hanya riwayat gagal yang dapat dihapus" });
+    }
+    return res.json({ message: "Riwayat gagal berhasil dihapus" });
+  } catch (err) {
+    console.error("ERROR DELETE WALLET TOPUP:", err);
+    return res.status(500).json({ message: "Gagal menghapus riwayat top up" });
+  }
+});
+
 app.post("/api/admin/wallet/grant", requireAdminAuth, requireAdminCsrf, async (req, res) => {
   const username = String(req.body?.username || "").trim();
   const amount = parseWalletAmount(req.body?.amount);

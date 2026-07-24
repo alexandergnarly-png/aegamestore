@@ -36,6 +36,12 @@ const admin = fs.readFileSync("views/admin.html", "utf8");
   "Midtrans otomatis",
   "row.provider_transaction_id",
   "row.paid_at || row.reviewed_at || row.created_at",
+  "deleteWalletTopup",
 ].forEach((marker) => assert.ok(admin.includes(marker), `Missing admin wallet history marker: ${marker}`));
+
+[
+  `app.delete("/api/admin/wallet/topups/:id", requireAdminAuth, requireAdminCsrf`,
+  `WHERE id = $1 AND status = 'rejected'`,
+].forEach((marker) => assert.ok(server.includes(marker), `Missing failed-history delete guard: ${marker}`));
 
 console.log("Midtrans wallet security check passed.");

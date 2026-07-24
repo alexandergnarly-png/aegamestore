@@ -4001,7 +4001,9 @@
             const transaction = isMidtrans ? row.provider_transaction_id : "";
             const action = row.status === "pending" && !isMidtrans
               ? `<div class="row-action-group"><button class="small-btn" onclick="approveWalletTopup('${row.id}')">Setujui</button><button class="small-btn danger" onclick="rejectWalletTopup('${row.id}')">Tolak</button></div>`
-              : escapeHtml(row.admin_note || (row.status === "pending" ? "Menunggu webhook Midtrans" : row.reviewed_by || "-"));
+              : row.status === "rejected"
+                ? `<div class="row-action-group"><small>${escapeHtml(row.admin_note || row.reviewed_by || "Gagal")}</small><button class="danger-btn" onclick="deleteWalletTopup('${row.id}')">Hapus</button></div>`
+                : escapeHtml(row.admin_note || (row.status === "pending" ? "Menunggu webhook Midtrans" : row.reviewed_by || "-"));
             return `<tr>
               <td data-label="Buyer"><strong>${escapeHtml(row.username || `User #${row.user_id}`)}</strong><br><small>User #${escapeHtml(row.user_id)}</small></td>
               <td data-label="Nominal"><strong>${formatRupiah(row.amount)}</strong><br><small>Saldo kini: ${formatRupiah(row.balance)}</small></td>
@@ -4030,6 +4032,16 @@
         const res = await fetch(`/api/admin/wallet/topups/${encodeURIComponent(id)}/reject`, { method: "POST", headers: { "Content-Type": "application/json", "x-csrf-token": getCsrfToken() }, body: JSON.stringify({ admin_note: result.value || "" }) });
         const data = await res.json();
         if (!res.ok) return Swal.fire("Gagal", data.message || "Reject gagal", "error");
+        loadWalletTopups();
+      }
+
+      async function deleteWalletTopup(id) {
+        const result = await Swal.fire({ title: "Hapus riwayat gagal?", text: "Riwayat yang dihapus tidak dapat dikembalikan.", icon: "warning", showCancelButton: true, confirmButtonText: "Ya, hapus", cancelButtonText: "Batal", confirmButtonColor: "#8f1d1d" });
+        if (!result.isConfirmed) return;
+        const res = await fetch(`/api/admin/wallet/topups/${encodeURIComponent(id)}`, { method: "DELETE", headers: { "x-csrf-token": getCsrfToken() } });
+        const data = await res.json();
+        if (!res.ok) return Swal.fire("Gagal", data.message || "Riwayat gagal dihapus", "error");
+        await Swal.fire("Terhapus", data.message, "success");
         loadWalletTopups();
       }
 
