@@ -640,7 +640,7 @@ function normalizeVipStoreEndpoint(endpoint) {
     .replace(/^\/+/, "");
 
   if (!cleanEndpoint) {
-    throw new Error("VIP Store endpoint kosong");
+    throw new Error("Endpoint supplier kosong");
   }
 
   return cleanEndpoint;
@@ -651,7 +651,7 @@ async function vipStoreRequest(endpoint, options = {}) {
 
   if (!isVipStoreConfigured()) {
     const error = new Error(
-      "VIP Store API belum dikonfigurasi. Isi VIPSTORE_API_KEY dan VIPSTORE_API_SECRET di env.",
+      "Supplier API belum dikonfigurasi. Isi kredensial supplier di environment.",
     );
     error.code = "VIPSTORE_NOT_CONFIGURED";
     throw error;
@@ -681,7 +681,7 @@ async function vipStoreRequest(endpoint, options = {}) {
     } catch (parseErr) {
       data = {
         success: false,
-        message: "VIP Store mengembalikan response non-JSON",
+        message: "Supplier API mengembalikan respons non-JSON",
         raw_response: rawResponse,
       };
     }
@@ -695,8 +695,8 @@ async function vipStoreRequest(endpoint, options = {}) {
     const isTimeout = err && err.name === "AbortError";
     const error = new Error(
       isTimeout
-        ? "Request VIP Store timeout"
-        : `Gagal menghubungi VIP Store: ${err.message}`,
+        ? "Request supplier timeout"
+        : `Gagal menghubungi supplier: ${err.message}`,
     );
     error.code = isTimeout ? "VIPSTORE_TIMEOUT" : "VIPSTORE_REQUEST_FAILED";
     throw error;
@@ -718,11 +718,11 @@ async function claimVipStoreKey(productId, quantity = 1) {
   const cleanQuantity = Math.max(Number(quantity || 1), 1);
 
   if (!Number.isInteger(cleanProductId) || cleanProductId <= 0) {
-    throw new Error("VIP Store product_id tidak valid");
+    throw new Error("Supplier Product ID tidak valid");
   }
 
   if (!Number.isInteger(cleanQuantity) || cleanQuantity <= 0) {
-    throw new Error("VIP Store quantity tidak valid");
+    throw new Error("Jumlah claim supplier tidak valid");
   }
 
   return vipStoreRequest("claim.php", {
@@ -740,11 +740,11 @@ async function resetVipStoreKey(productId, key) {
   const cleanKey = String(key || "").trim();
 
   if (!Number.isInteger(cleanProductId) || cleanProductId <= 0) {
-    throw new Error("VIP Store reset product_id tidak valid");
+    throw new Error("Supplier Product ID untuk reset tidak valid");
   }
 
   if (!cleanKey || cleanKey.length > 500) {
-    throw new Error("VIP Store reset key tidak valid");
+    throw new Error("Key supplier untuk reset tidak valid");
   }
 
   return vipStoreRequest("reset-key.php", {
@@ -1183,7 +1183,7 @@ async function claimVipStoreKeyForOrder(order, options = {}) {
   const quantity = getOrderQuantity(order.quantity);
 
   if (!supplierProductId) {
-    const message = "Produk belum punya VIP Store Product ID";
+    const message = "Produk belum punya Supplier Product ID";
     await logVipStoreClaimAttempt({
       orderId,
       productId,
@@ -1204,7 +1204,7 @@ async function claimVipStoreKeyForOrder(order, options = {}) {
       const message =
         claimData.message ||
         claimData.error ||
-        `VIP Store claim gagal. HTTP ${claimResult.http_code || "-"}`;
+        `Claim supplier gagal. HTTP ${claimResult.http_code || "-"}`;
 
       await logVipStoreClaimAttempt({
         orderId,
@@ -1223,7 +1223,7 @@ async function claimVipStoreKeyForOrder(order, options = {}) {
     const claimedKeys = extractVipStoreClaimKeys(claimData);
 
     if (claimedKeys.length < quantity) {
-      const message = `VIP Store hanya mengembalikan ${claimedKeys.length} dari ${quantity} key`;
+      const message = `Supplier hanya mengembalikan ${claimedKeys.length} dari ${quantity} key`;
 
       await logVipStoreClaimAttempt({
         orderId,
@@ -1272,7 +1272,7 @@ async function claimVipStoreKeyForOrder(order, options = {}) {
         supplierProductId,
         source,
         status: "failed",
-        message: err.message || "VIP Store claim gagal",
+        message: err.message || "Claim supplier gagal",
       });
     }
 
@@ -1329,8 +1329,8 @@ async function syncVipStoreMappedProducts(options = {}) {
       not_found: 0,
       failed: 0,
       message: productIds.length
-        ? "Produk ini belum dimapping ke VIP Store API."
-        : "Belum ada produk yang dimapping ke VIP Store API.",
+        ? "Produk ini belum dipetakan ke Supplier API."
+        : "Belum ada produk yang dipetakan ke Supplier API.",
     };
   }
 
@@ -1373,7 +1373,7 @@ async function syncVipStoreMappedProducts(options = {}) {
               supplier_stock = 0,
               supplier_status = 'not_found',
               supplier_maintenance = 1,
-              supplier_maintenance_reason = 'Product ID tidak ditemukan di catalog VIP Store',
+              supplier_maintenance_reason = 'Product ID tidak ditemukan di katalog supplier',
               supplier_last_sync = $1
           WHERE id = $2
           `,
@@ -1437,7 +1437,7 @@ async function syncVipStoreMappedProducts(options = {}) {
     }
   }
 
-  summary.message = `Sync VIP Store selesai: ${summary.synced}/${summary.total_mapped} produk diproses.`;
+  summary.message = `Sync supplier selesai: ${summary.synced}/${summary.total_mapped} produk diproses.`;
   return summary;
 }
 
@@ -1893,11 +1893,11 @@ async function settleWalletVipOrder(orderId) {
     const claim = await claimVipStoreKeyForOrder(order, { source: "ae_credit" });
     const deliveredAt = new Date().toISOString();
     await persistOrderKeys(db, { orderId, keys: claim.keys, source: "vipstore" });
-    await query(`UPDATE orders SET delivery_status = 'delivered', gameKey = $1, delivered_at = $2, admin_note = $3 WHERE id = $4 AND delivery_status = 'processing_supplier'`, [claim.key, deliveredAt, `VIP Store claim success. Supplier product #${claim.supplier_product_id}.`, orderId]);
+    await query(`UPDATE orders SET delivery_status = 'delivered', gameKey = $1, delivered_at = $2, admin_note = $3 WHERE id = $4 AND delivery_status = 'processing_supplier'`, [claim.key, deliveredAt, `Supplier claim success. Product #${claim.supplier_product_id}.`, orderId]);
     await query(`UPDATE products SET supplier_stock = GREATEST(COALESCE(supplier_stock, 0) - $1, 0), supplier_last_sync = $2 WHERE id = $3 AND LOWER(COALESCE(delivery_type, 'auto')) = 'vipstore_api'`, [getOrderQuantity(order.quantity), deliveredAt, order.product_id]);
   } catch (err) {
     console.error("AE CREDIT VIPSTORE CLAIM ERROR:", err.message);
-    await query(`UPDATE orders SET delivery_status = 'problem', gameKey = $1, admin_note = $2 WHERE id = $3 AND delivery_status = 'processing_supplier'`, ["VIP STORE CLAIM FAILED - HUBUNGI ADMIN", `VIP Store claim failed: ${String(err.message || "Unknown error").slice(0, 500)}`, orderId]).catch(() => {});
+    await query(`UPDATE orders SET delivery_status = 'problem', gameKey = $1, admin_note = $2 WHERE id = $3 AND delivery_status = 'processing_supplier'`, ["KEY BELUM TERSEDIA - HUBUNGI ADMIN", `Supplier claim failed: ${String(err.message || "Unknown error").slice(0, 500)}`, orderId]).catch(() => {});
   }
 }
 
@@ -3286,7 +3286,7 @@ app.get("/api/admin/vipstore/catalog", requireAdminAuth, async (req, res) => {
     return res.status(statusCode).json({
       ok: false,
       code: err.code || "VIPSTORE_ERROR",
-      message: err.message || "Gagal mengambil catalog VIP Store",
+      message: err.message || "Gagal mengambil katalog supplier",
     });
   }
 });
@@ -3308,7 +3308,7 @@ app.get("/api/admin/vipstore/reset-products", requireAdminAuth, async (req, res)
     return res.status(statusCode).json({
       ok: false,
       code: err.code || "VIPSTORE_ERROR",
-      message: err.message || "Gagal mengambil produk reset VIP Store",
+      message: err.message || "Gagal mengambil produk reset supplier",
       items: [],
     });
   }
@@ -3339,7 +3339,7 @@ app.post(
       return res.status(statusCode).json({
         ok: false,
         code: err.code || "VIPSTORE_RESET_ERROR",
-        message: err.message || "Gagal reset key di VIP Store",
+        message: err.message || "Gagal reset key melalui supplier",
       });
     }
   },
@@ -3356,7 +3356,7 @@ app.get("/api/admin/vipstore/product/:productId", requireAdminAuth, async (req, 
         found: false,
         http_code: lookup.http_code || 404,
         total_detected_items: lookup.total_detected_items || 0,
-        message: "Produk supplier tidak ditemukan. Cek lagi VIP Store Product ID.",
+        message: "Produk supplier tidak ditemukan. Cek kembali Supplier Product ID.",
       });
     }
 
@@ -3375,7 +3375,7 @@ app.get("/api/admin/vipstore/product/:productId", requireAdminAuth, async (req, 
       ok: false,
       found: false,
       code: err.code || "VIPSTORE_ERROR",
-      message: err.message || "Gagal cek produk VIP Store",
+      message: err.message || "Gagal mengecek produk supplier",
     });
   }
 });
@@ -3431,7 +3431,7 @@ app.get("/api/admin/vipstore/catalog-normalized", requireAdminAuth, async (req, 
     return res.status(statusCode).json({
       ok: false,
       code: err.code || "VIPSTORE_ERROR",
-      message: err.message || "Gagal mengambil catalog normal VIP Store",
+      message: err.message || "Gagal mengambil katalog supplier",
       items: [],
     });
   }
@@ -3452,7 +3452,7 @@ app.get("/api/admin/vipstore/balance", requireAdminAuth, async (req, res) => {
     return res.status(statusCode).json({
       ok: false,
       code: err.code || "VIPSTORE_ERROR",
-      message: err.message || "Gagal mengambil balance VIP Store",
+      message: err.message || "Gagal mengambil saldo supplier",
     });
   }
 });
@@ -3480,7 +3480,7 @@ app.post("/api/admin/vipstore/sync-products", requireAdminAuth, requireAdminCsrf
     return res.status(statusCode).json({
       ok: false,
       code: err.code || "VIPSTORE_SYNC_ERROR",
-      message: err.message || "Gagal sync stok VIP Store",
+      message: err.message || "Gagal sync stok supplier",
     });
   }
 });
@@ -3509,7 +3509,7 @@ app.post("/api/admin/vipstore/sync-products/:productId", requireAdminAuth, requi
     return res.status(statusCode).json({
       ok: false,
       code: err.code || "VIPSTORE_SYNC_ERROR",
-      message: err.message || "Gagal sync stok produk VIP Store",
+      message: err.message || "Gagal sync stok produk supplier",
     });
   }
 });
@@ -3531,12 +3531,18 @@ app.get("/api/admin/vipstore/safety", requireAdminAuth, async (req, res) => {
           COUNT(*) FILTER (
             WHERE payment_status = 'paid'
               AND delivery_status IN ('problem', 'processing_supplier')
-              AND COALESCE(gameKey, '') ILIKE '%VIP STORE%'
+              AND (
+                COALESCE(gameKey, '') ILIKE '%VIP STORE%'
+                OR COALESCE(gameKey, '') ILIKE '%KEY BELUM TERSEDIA%'
+              )
           )::int AS attention_count,
           COUNT(*) FILTER (
             WHERE payment_status = 'paid'
               AND delivery_status = 'problem'
-              AND COALESCE(gameKey, '') ILIKE '%VIP STORE%'
+              AND (
+                COALESCE(gameKey, '') ILIKE '%VIP STORE%'
+                OR COALESCE(gameKey, '') ILIKE '%KEY BELUM TERSEDIA%'
+              )
           )::int AS problem_count,
           COUNT(*) FILTER (
             WHERE payment_status = 'paid'
@@ -3575,7 +3581,7 @@ app.get("/api/admin/vipstore/safety", requireAdminAuth, async (req, res) => {
     console.error("ERROR VIPSTORE SAFETY:", err);
     return res.status(500).json({
       ok: false,
-      message: "Gagal mengambil status safety VIP Store",
+      message: "Gagal mengambil status safety supplier",
     });
   }
 });
@@ -3614,7 +3620,7 @@ app.get("/api/admin/vipstore/claim-logs", requireAdminAuth, async (req, res) => 
     console.error("ERROR VIPSTORE CLAIM LOGS:", err);
     return res.status(500).json({
       ok: false,
-      message: "Gagal mengambil claim logs VIP Store",
+      message: "Gagal mengambil claim log supplier",
     });
   }
 });
@@ -3675,7 +3681,7 @@ app.post(
         await client.query("ROLLBACK");
         return res.status(400).json({
           ok: false,
-          message: "Order ini bukan produk VIP Store API",
+          message: "Order ini bukan produk Supplier API",
         });
       }
 
@@ -3711,7 +3717,7 @@ app.post(
          WHERE id = $3`,
         [
           "processing_supplier",
-          "Retry claim VIP Store diproses dari admin",
+          "Retry claim supplier diproses dari admin",
           orderId,
         ],
       );
@@ -3742,7 +3748,7 @@ app.post(
             "delivered",
             claim.key,
             deliveredAt,
-            `VIP Store retry success. Supplier product #${claim.supplier_product_id}.`,
+            `Supplier retry success. Product #${claim.supplier_product_id}.`,
             orderId,
             "processing_supplier",
           ],
@@ -3759,7 +3765,7 @@ app.post(
 
         return res.json({
           ok: true,
-          message: "Retry claim berhasil. Key VIP Store sudah dikirim.",
+          message: "Retry claim berhasil. Key supplier sudah dikirim.",
         });
       } catch (claimErr) {
         console.error("VIPSTORE RETRY CLAIM ERROR:", claimErr.message);
@@ -3773,8 +3779,8 @@ app.post(
              AND delivery_status = $5`,
           [
             "problem",
-            "VIP STORE CLAIM FAILED - HUBUNGI ADMIN",
-            `VIP Store retry failed: ${String(claimErr.message || "Unknown error").slice(0, 500)}`,
+            "KEY BELUM TERSEDIA - HUBUNGI ADMIN",
+            `Supplier retry failed: ${String(claimErr.message || "Unknown error").slice(0, 500)}`,
             orderId,
             "processing_supplier",
           ],
@@ -3793,7 +3799,7 @@ app.post(
       console.error("ERROR VIPSTORE RETRY CLAIM:", err);
       return res.status(500).json({
         ok: false,
-        message: "Gagal retry claim VIP Store",
+        message: "Gagal retry claim supplier",
       });
     } finally {
       client.release();
@@ -4701,7 +4707,7 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
         } else if (productDeliveryType === "manual") {
           await client.query(`UPDATE orders SET gameKey = $1, admin_note = $2 WHERE id = $3`, ["MANUAL DELIVERY - HUBUNGI ADMIN", "Saldo AE Credit diterima; key diproses manual.", orderId]);
         } else if (productDeliveryType === "vipstore_api") {
-          await client.query(`UPDATE orders SET admin_note = $1 WHERE id = $2`, ["AE Credit diterima; VIP Store claim sedang diproses otomatis", orderId]);
+          await client.query(`UPDATE orders SET admin_note = $1 WHERE id = $2`, ["AE Credit diterima; claim supplier sedang diproses otomatis", orderId]);
         }
       } else {
         await client.query(
@@ -4947,7 +4953,7 @@ app.post("/midtrans-notification", webhookLimiter, async (req, res) => {
             [
               "paid",
               "processing_supplier",
-              "VIP Store claim sedang diproses otomatis",
+              "Claim supplier sedang diproses otomatis",
               orderId,
             ],
           );
@@ -4976,7 +4982,7 @@ app.post("/midtrans-notification", webhookLimiter, async (req, res) => {
                 "delivered",
                 claim.key,
                 deliveredAt,
-                `VIP Store claim success. Supplier product #${claim.supplier_product_id}.`,
+                `Supplier claim success. Product #${claim.supplier_product_id}.`,
                 orderId,
                 "processing_supplier",
               ],
@@ -5002,8 +5008,8 @@ app.post("/midtrans-notification", webhookLimiter, async (req, res) => {
                  AND delivery_status = $5`,
               [
                 "problem",
-                "VIP STORE CLAIM FAILED - HUBUNGI ADMIN",
-                `VIP Store claim failed: ${String(claimErr.message || "Unknown error").slice(0, 500)}`,
+                "KEY BELUM TERSEDIA - HUBUNGI ADMIN",
+                `Supplier claim failed: ${String(claimErr.message || "Unknown error").slice(0, 500)}`,
                 orderId,
                 "processing_supplier",
               ],
@@ -5329,7 +5335,7 @@ app.post(
           [
             "paid",
             "processing_supplier",
-            "VIP Store claim diproses dari admin confirm payment",
+            "Claim supplier diproses dari konfirmasi pembayaran admin",
             orderId,
           ],
         );
@@ -5358,7 +5364,7 @@ app.post(
               "delivered",
               claim.key,
               deliveredAt,
-              `VIP Store claim success via admin confirm. Supplier product #${claim.supplier_product_id}.`,
+              `Supplier claim success via admin confirm. Product #${claim.supplier_product_id}.`,
               orderId,
               "processing_supplier",
             ],
@@ -5374,7 +5380,7 @@ app.post(
           );
 
           return res.json({
-            message: "Pembayaran dikonfirmasi dan key VIP Store berhasil dikirim",
+            message: "Pembayaran dikonfirmasi dan key supplier berhasil dikirim",
           });
         } catch (claimErr) {
           console.error("VIPSTORE CLAIM ERROR VIA ADMIN CONFIRM:", claimErr.message);
@@ -5388,8 +5394,8 @@ app.post(
                AND delivery_status = $5`,
             [
               "problem",
-              "VIP STORE CLAIM FAILED - HUBUNGI ADMIN",
-              `VIP Store claim failed via admin confirm: ${String(claimErr.message || "Unknown error").slice(0, 500)}`,
+              "KEY BELUM TERSEDIA - HUBUNGI ADMIN",
+              `Supplier claim failed via admin confirm: ${String(claimErr.message || "Unknown error").slice(0, 500)}`,
               orderId,
               "processing_supplier",
             ],
@@ -5397,7 +5403,7 @@ app.post(
 
           return res.status(502).json({
             message:
-              "Pembayaran sudah dikonfirmasi, tapi claim VIP Store gagal. Order masuk problem.",
+              "Pembayaran sudah dikonfirmasi, tetapi claim supplier gagal. Order masuk problem.",
           });
         }
       }
@@ -6425,7 +6431,7 @@ app.post("/products", requireAdminAuth, requireAdminCsrf, async (req, res) => {
 
   if (cleanDeliveryType === "vipstore_api" && !cleanSupplierProductId) {
     return res.status(400).json({
-      message: "Supplier Product ID wajib diisi untuk VIP Store API",
+      message: "Supplier Product ID wajib diisi untuk Supplier API",
     });
   }
 
@@ -6562,7 +6568,7 @@ app.put(
 
     if (cleanDeliveryType === "vipstore_api" && !cleanSupplierProductId) {
       return res.status(400).json({
-        message: "Supplier Product ID wajib diisi untuk VIP Store API",
+        message: "Supplier Product ID wajib diisi untuk Supplier API",
       });
     }
 

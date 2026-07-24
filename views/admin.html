@@ -1651,9 +1651,91 @@
       .swal2-confirm,
       .swal2-cancel,
       .swal2-deny {
+        min-height: 48px !important;
         border-radius: 999px !important;
         box-shadow: none !important;
         font-weight: 850 !important;
+        touch-action: manipulation;
+      }
+
+      .admin-key-popup {
+        width: min(440px, calc(100vw - 24px)) !important;
+        padding: 24px !important;
+      }
+
+      .admin-key-popup .swal2-title {
+        padding: 0 !important;
+        font-size: clamp(26px, 7vw, 34px) !important;
+        line-height: 1.08 !important;
+        letter-spacing: -0.045em !important;
+      }
+
+      .admin-key-popup .swal2-actions {
+        width: 100% !important;
+        gap: 10px !important;
+        margin-top: 18px !important;
+      }
+
+      .admin-key-popup .swal2-confirm,
+      .admin-key-popup .swal2-cancel {
+        min-width: 132px !important;
+        margin: 0 !important;
+      }
+
+      .admin-key-value,
+      .admin-key-state {
+        display: block;
+        margin-top: 4px;
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: var(--surface-2);
+        color: var(--ink);
+        overflow-wrap: anywhere;
+      }
+
+      .admin-key-value {
+        font-family: "DM Mono", ui-monospace, monospace;
+        font-size: 15px;
+        font-weight: 850;
+        line-height: 1.5;
+        user-select: all;
+      }
+
+      .admin-key-state {
+        display: grid;
+        gap: 6px;
+        border-color: var(--danger-border);
+        background: var(--danger-bg);
+        color: var(--danger-text);
+        text-align: left;
+      }
+
+      .admin-key-state strong {
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      .admin-key-state span {
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1.5;
+      }
+
+      @media (max-width: 520px) {
+        .admin-key-popup {
+          padding: 20px !important;
+        }
+
+        .admin-key-popup .swal2-actions {
+          display: grid !important;
+          grid-template-columns: 1fr !important;
+        }
+
+        .admin-key-popup .swal2-confirm,
+        .admin-key-popup .swal2-cancel {
+          width: 100% !important;
+        }
       }
 
       @keyframes fadeUp {
@@ -2859,7 +2941,7 @@
               <select id="productDeliveryFilter" onchange="applyProductFilters()">
                 <option value="">Semua Source</option>
                 <option value="auto">Local Stock</option>
-                <option value="vipstore_api">VIP Store API</option>
+                <option value="vipstore_api">Supplier API</option>
                 <option value="manual">Manual</option>
               </select>
             </div>
@@ -2910,7 +2992,7 @@
             <div class="field">
               <select id="productDeliveryType" onchange="updateProductSupplierUi()">
                 <option value="auto">Local Stock</option>
-                <option value="vipstore_api">VIP Store API</option>
+                <option value="vipstore_api">Supplier API</option>
                 <option value="manual">Manual Delivery</option>
               </select>
             </div>
@@ -2918,7 +3000,7 @@
               <input
                 type="number"
                 id="productSupplierProductId"
-                placeholder="VIP Store Product ID"
+                placeholder="Supplier Product ID"
                 min="1"
                 inputmode="numeric"
               />
@@ -2935,7 +3017,7 @@
             </div>
             <div class="field field-wide">
               <div class="supplier-map-preview" id="supplierMapPreview">
-                Pilih VIP Store API lalu isi Product ID untuk mapping stok supplier.
+                Pilih Supplier API lalu isi Product ID untuk mapping stok.
               </div>
             </div>
             <div class="field">
@@ -3452,9 +3534,9 @@
 
           <div class="card-header" style="margin-top: 18px;">
             <div class="card-title-wrap">
-              <h3>Reset Key VIP Store</h3>
+              <h3>Reset Key Supplier</h3>
               <p class="card-subtitle">
-                Reset key supplier yang sudah dibeli lewat API VIP Store.
+                Reset key yang sudah dibeli melalui Supplier API.
                 API Secret tetap diproses di server.
               </p>
             </div>
@@ -3462,7 +3544,7 @@
           </div>
           <div class="toolbar">
             <div class="field-wide">
-              <select id="vipResetProductSelect" aria-label="Produk reset VIP Store">
+              <select id="vipResetProductSelect" aria-label="Produk reset supplier">
                 <option value="">Muat produk reset...</option>
               </select>
             </div>
@@ -3835,7 +3917,7 @@
     >
       <div class="supplier-picker-head">
         <div>
-          <h3 id="supplierPickerTitle">Cari Produk VIP Store</h3>
+          <h3 id="supplierPickerTitle">Cari Produk Supplier</h3>
           <p>Pilih produk supplier yang cocok. Product ID akan otomatis terisi.</p>
         </div>
         <button
@@ -4393,7 +4475,7 @@
       function deliverySourceBadge(deliveryType) {
         const value = normalizeAdminDeliveryType(deliveryType);
         if (value === "vipstore_api") {
-          return `<span class="badge vip">VIP Store</span>`;
+          return `<span class="badge vip">Supplier API</span>`;
         }
         if (value === "manual") {
           return `<span class="badge manual">Manual</span>`;
@@ -4526,7 +4608,7 @@
           return;
         }
 
-        if (statusEl) statusEl.innerText = "Memuat catalog VIP Store...";
+        if (statusEl) statusEl.innerText = "Memuat katalog supplier...";
         if (listEl) {
           listEl.innerHTML = `<div class="supplier-picker-empty">Loading catalog supplier...</div>`;
         }
@@ -4541,19 +4623,19 @@
           }
 
           if (!res.ok || data.ok === false) {
-            throw new Error(data.message || "Gagal memuat catalog VIP Store");
+            throw new Error(data.message || "Gagal memuat katalog supplier");
           }
 
           vipStorePickerItems = Array.isArray(data.items) ? data.items : [];
           vipStorePickerLoadedAt = new Date();
 
           if (statusEl) {
-            statusEl.innerText = `${vipStorePickerItems.length} produk dimuat dari ${data.total_detected_items || vipStorePickerItems.length} catalog VIP Store.`;
+            statusEl.innerText = `${vipStorePickerItems.length} produk dimuat dari ${data.total_detected_items || vipStorePickerItems.length} katalog supplier.`;
           }
 
           renderVipStoreProductPicker();
         } catch (err) {
-          if (statusEl) statusEl.innerText = err.message || "Gagal memuat catalog VIP Store.";
+          if (statusEl) statusEl.innerText = err.message || "Gagal memuat katalog supplier.";
           if (listEl) {
             listEl.innerHTML = `<div class="supplier-picker-empty">Gagal memuat catalog. Coba klik Refresh.</div>`;
           }
@@ -4761,7 +4843,7 @@
         }
 
         preview.className = "supplier-map-preview warn";
-        preview.innerText = "VIP Store API aktif. Klik Cari Supplier supaya tidak perlu cari ID manual, atau isi ID lalu Test Supplier.";
+        preview.innerText = "Supplier API aktif. Klik Cari Supplier agar tidak perlu mencari ID manual, atau isi ID lalu Test Supplier.";
       }
 
       async function testVipStoreProduct() {
@@ -4773,18 +4855,18 @@
         const supplierProductId = String(supplierInput?.value || "").trim();
 
         if (deliveryType !== "vipstore_api") {
-          Swal.fire("Pilih VIP Store API dulu untuk test supplier.");
+          Swal.fire("Pilih Supplier API dulu untuk test supplier.");
           return;
         }
 
         if (!supplierProductId) {
-          Swal.fire("Isi VIP Store Product ID dulu.");
+          Swal.fire("Isi Supplier Product ID dulu.");
           return;
         }
 
         if (preview) {
           preview.className = "supplier-map-preview warn";
-          preview.innerText = "Mengecek produk ke VIP Store...";
+          preview.innerText = "Mengecek produk ke supplier...";
         }
 
         try {
@@ -4899,29 +4981,25 @@
       }
 
       function showSecretKey(value) {
+        const rawKey = String(value || "-");
+        const claimFailed =
+          /VIP STORE CLAIM FAILED|SUPPLIER CLAIM FAILED|KEY BELUM TERSEDIA/i.test(
+            rawKey,
+          );
+
         Swal.fire({
-          title: "Game Key",
-          html: `
-      <code style="
-        display:block;
-        padding:14px;
-        border-radius:12px;
-        background:#f0f9ff;
-        border:1px solid #bae6fd;
-        color:#0c4a6e;
-        font-weight:800;
-        word-break:break-all;
-      ">
-        ${escapeHtml(value || "-")}
-      </code>
-    `,
-          confirmButtonText: "Copy Key",
-          showCancelButton: true,
+          title: claimFailed ? "Key Belum Tersedia" : "Game Key",
+          html: claimFailed
+            ? `<div class="admin-key-state" role="alert"><strong>Claim supplier gagal diproses</strong><span>Cek claim log atau jalankan Retry Claim Supplier dari detail order.</span></div>`
+            : `<code class="admin-key-value">${escapeHtml(rawKey)}</code>`,
+          confirmButtonText: claimFailed ? "Mengerti" : "Copy Key",
+          showCancelButton: !claimFailed,
           cancelButtonText: "Tutup",
-          confirmButtonColor: "#0ea5e9",
+          confirmButtonColor: "#111111",
+          customClass: { popup: "admin-key-popup" },
         }).then((result) => {
-          if (result.isConfirmed) {
-            copyToClipboard(value || "");
+          if (result.isConfirmed && !claimFailed) {
+            copyToClipboard(rawKey);
           }
         });
       }
@@ -4966,7 +5044,7 @@
         if (!select || !status) return;
 
         select.innerHTML = `<option value="">Memuat produk reset...</option>`;
-        status.innerText = "Mengambil produk reset dari VIP Store...";
+        status.innerText = "Mengambil produk reset dari supplier...";
 
         try {
           const res = await fetch("/api/admin/vipstore/reset-products");
@@ -5017,7 +5095,7 @@
         const confirmation = await Swal.fire({
           icon: "warning",
           title: "Reset key supplier?",
-          text: "Pastikan key ini memang milik akun supplier kamu. Proses reset dikirim ke VIP Store.",
+          text: "Pastikan key ini memang milik akun supplier kamu. Proses reset dikirim ke Supplier API.",
           showCancelButton: true,
           confirmButtonText: "Ya, Reset Key",
           cancelButtonText: "Batal",
@@ -5048,7 +5126,7 @@
           if (keyInput) keyInput.value = "";
           Swal.fire(
             "Reset berhasil",
-            data.data?.message || "Key berhasil di-reset di VIP Store.",
+            data.data?.message || "Key berhasil di-reset melalui Supplier API.",
             "success",
           );
         } catch (err) {
@@ -6168,7 +6246,7 @@
           ${
             Array.isArray(order.claim_logs) && order.claim_logs.length
               ? `<div class="order-drawer-section">
-                  <h4>VIP Store Claim Log</h4>
+                  <h4>Supplier Claim Log</h4>
                   ${order.claim_logs
                     .map(
                       (log) => `<div class="order-drawer-field" style="flex-direction: column; align-items: stretch;">
@@ -6201,7 +6279,7 @@
           normalizeAdminDeliveryType(order.delivery_type) === "vipstore_api";
         if (isVipStoreDrawerOrder && ps === "paid" && ds !== "delivered" && !isCancelled) {
           buttons.push(
-            `<button class="ghost-btn" onclick='retryVipStoreClaim(${safeId})'>Retry Claim VIP Store</button>`,
+            `<button class="ghost-btn" onclick='retryVipStoreClaim(${safeId})'>Retry Claim Supplier</button>`,
           );
         }
         if (ps === "paid" && ds !== "delivered" && !isCancelled) {
@@ -6225,7 +6303,7 @@
 
         const result = await Swal.fire({
           icon: "warning",
-          title: "Retry Claim VIP Store?",
+          title: "Retry Claim Supplier?",
           text: "Pastikan payment sudah paid dan balance supplier cukup. Sistem tidak akan claim ulang jika order sudah delivered.",
           showCancelButton: true,
           confirmButtonText: "Retry Claim",
@@ -6253,7 +6331,7 @@
           }
 
           if (!res.ok || data.ok === false) {
-            Swal.fire("Retry gagal", data.message || "Gagal retry claim VIP Store", "error");
+            Swal.fire("Retry gagal", data.message || "Gagal retry claim supplier", "error");
             loadOrders();
             loadVipStoreSafetyAlerts();
             openOrderDrawer(cleanOrderId);
@@ -6265,7 +6343,7 @@
           loadVipStoreSafetyAlerts();
           openOrderDrawer(cleanOrderId);
         } catch (err) {
-          Swal.fire("Retry gagal", "Terjadi error saat retry claim VIP Store.", "error");
+          Swal.fire("Retry gagal", "Terjadi error saat retry claim supplier.", "error");
         }
       }
 
@@ -6512,7 +6590,7 @@
             alerts.push(`
               <div class="admin-alert-item">
                 <span class="admin-alert-tag">LOW BALANCE</span><br>
-                <b>VIP Store balance rendah</b><br>
+                <b>Saldo supplier rendah</b><br>
                 Balance: ${data.balance ?? "-"}<br>
                 Threshold: ${data.low_balance_threshold ?? "-"}
               </div>
@@ -6547,7 +6625,7 @@
 
           box.innerHTML = `
             <div class="admin-alerts-head">
-              <strong>🛡️ VIP Store Safety</strong>
+              <strong>Supplier Safety</strong>
               <span>Balance: ${data.balance ?? "-"}</span>
             </div>
             <div class="admin-alert-list">
@@ -7199,7 +7277,7 @@
         );
 
         if (delivery_type === "vipstore_api" && !supplier_product_id) {
-          Swal.fire("Supplier Product ID wajib diisi untuk VIP Store API.");
+          Swal.fire("Supplier Product ID wajib diisi untuk Supplier API.");
           return;
         }
 
@@ -7348,7 +7426,7 @@
         const isSingle = Number(productId || 0) > 0;
         const confirmText = isSingle
           ? "Sync stok supplier untuk produk ini sekarang?"
-          : "Sync semua stok produk VIP Store sekarang?";
+          : "Sync semua stok produk supplier sekarang?";
 
         if (!confirm(confirmText)) return;
 
@@ -7374,7 +7452,7 @@
           }
 
           if (!res.ok || data.ok === false) {
-            Swal.fire("Sync gagal", data.message || "Gagal sync VIP Store", "error");
+            Swal.fire("Sync gagal", data.message || "Gagal sync supplier", "error");
             return;
           }
 
@@ -7386,7 +7464,7 @@
 
           loadProducts();
         } catch (err) {
-          Swal.fire("Sync gagal", "Terjadi error saat sync stok VIP Store.", "error");
+          Swal.fire("Sync gagal", "Terjadi error saat sync stok supplier.", "error");
         }
       }
 
