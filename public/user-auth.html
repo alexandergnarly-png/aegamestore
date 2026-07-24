@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
     <style>
       :root {
         color-scheme: light;
@@ -548,10 +549,67 @@
         *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
       }
 
+      /* Auth UX polish: comfortable touch targets, clear focus, consistent icons. */
+      .lang-btn,
+      .icon-btn,
+      .auth-tab,
+      .password-toggle-btn,
+      .link-action,
+      .terms-link {
+        min-height: 44px;
+        touch-action: manipulation;
+      }
+      .lang-btn { min-width: 44px; }
+      .icon-btn { width: 44px; }
+      .icon-btn iconify-icon,
+      .input-icon iconify-icon,
+      .caps-warning iconify-icon,
+      .back-link iconify-icon {
+        display: block;
+        font-size: 18px;
+        line-height: 1;
+      }
+      .password-toggle-btn {
+        min-width: 70px;
+        padding-inline: 14px;
+      }
+      .link-action,
+      .terms-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding-inline: 8px;
+      }
+      .input-hint,
+      .strength-label {
+        min-height: 18px;
+      }
+      .form-container[hidden] {
+        display: none;
+      }
+      .auth-card:focus,
+      .main:focus {
+        outline: none;
+      }
+      @media (max-width: 720px) {
+        .lang-btn,
+        .icon-btn {
+          min-height: 44px;
+          height: 44px;
+        }
+        .input-group input {
+          min-height: 52px;
+          font-size: 16px;
+        }
+        .password-toggle-btn {
+          min-height: 44px;
+        }
+      }
+
     </style>
   </head>
 <body onload="applyAuthLanguage()">
-    <a href="#auth-card" class="skip-link" data-auth-i18n="skipToForm"
+    <a href="#auth-main" class="skip-link" data-auth-i18n="skipToForm"
       >Lewati ke form</a
     >
 
@@ -597,16 +655,16 @@
               class="icon-btn"
               id="themeToggle"
               onclick="toggleAuthTheme()"
-              aria-label="Toggle theme"
-              title="Toggle theme"
+              aria-label="Aktifkan mode gelap"
+              title="Aktifkan mode gelap"
             >
-              🌙
+              <iconify-icon icon="ph:moon-stars-bold" aria-hidden="true"></iconify-icon>
             </button>
           </div>
         </div>
       </header>
 
-      <main class="main">
+      <main class="main" id="auth-main" tabindex="-1">
         <section class="hero" aria-label="Welcome panel">
           <span class="hero-eyebrow">
             <span class="pulse" aria-hidden="true"></span>
@@ -706,6 +764,7 @@
                 id="tabLogin"
                 role="tab"
                 aria-selected="true"
+                aria-controls="loginForm"
                 onclick="setAuthTab('login')"
               >
                 <span data-auth-i18n="tabLogin">Masuk</span>
@@ -716,6 +775,7 @@
                 id="tabRegister"
                 role="tab"
                 aria-selected="false"
+                aria-controls="registerForm"
                 onclick="setAuthTab('register')"
               >
                 <span data-auth-i18n="tabRegister">Daftar</span>
@@ -728,6 +788,7 @@
               class="form-container active"
               role="tabpanel"
               aria-labelledby="tabLogin"
+              aria-live="polite"
             >
               <div class="auth-head">
                 <div class="auth-emoji" aria-hidden="true">AE</div>
@@ -747,7 +808,9 @@
                   >Username</label
                 >
                 <div class="input-wrap">
-                  <span class="input-icon" aria-hidden="true">👤</span>
+                  <span class="input-icon" aria-hidden="true">
+                    <iconify-icon icon="ph:user-bold"></iconify-icon>
+                  </span>
                   <input
                     type="text"
                     id="loginUsername"
@@ -771,7 +834,9 @@
                   >Password</label
                 >
                 <div class="input-wrap">
-                  <span class="input-icon" aria-hidden="true">🔒</span>
+                  <span class="input-icon" aria-hidden="true">
+                    <iconify-icon icon="ph:lock-key-bold"></iconify-icon>
+                  </span>
                   <input
                     type="password"
                     id="loginPassword"
@@ -794,7 +859,7 @@
                   role="status"
                   aria-live="polite"
                 >
-                  <span aria-hidden="true">⚠️</span>
+                  <iconify-icon icon="ph:warning-circle-bold" aria-hidden="true"></iconify-icon>
                   <span data-auth-i18n="capsLock">Caps Lock aktif</span>
                 </div>
               </div>
@@ -833,12 +898,13 @@
 
               <div class="helper-row">
                 <span data-auth-i18n="switchToRegister">Belum punya akun?</span>
-                <span
+                <button
+                  type="button"
                   class="link-action"
                   onclick="setAuthTab('register')"
                   data-auth-i18n="registerLink"
-                  >Daftar sekarang</span
-                >
+                  >Daftar sekarang
+                </button>
               </div>
 
               <div class="auth-tip" data-auth-i18n="authTip">
@@ -853,6 +919,8 @@
               class="form-container"
               role="tabpanel"
               aria-labelledby="tabRegister"
+              aria-live="polite"
+              hidden
             >
               <div class="auth-head">
                 <div class="auth-emoji" aria-hidden="true">AE</div>
@@ -872,13 +940,16 @@
                   >Username</label
                 >
                 <div class="input-wrap">
-                  <span class="input-icon" aria-hidden="true">👤</span>
+                  <span class="input-icon" aria-hidden="true">
+                    <iconify-icon icon="ph:user-bold"></iconify-icon>
+                  </span>
                   <input
                     type="text"
                     id="regUsername"
                     placeholder="Pilih Username (Min. 3 Huruf)"
                     data-auth-placeholder="registerUsernamePlaceholder"
-                    autocomplete="off"
+                    autocomplete="username"
+                    aria-describedby="regUsernameHint"
                   />
                   <span
                     class="input-status-icon"
@@ -902,7 +973,9 @@
                   >Password</label
                 >
                 <div class="input-wrap">
-                  <span class="input-icon" aria-hidden="true">🔒</span>
+                  <span class="input-icon" aria-hidden="true">
+                    <iconify-icon icon="ph:lock-key-bold"></iconify-icon>
+                  </span>
                   <input
                     type="password"
                     id="regPassword"
@@ -941,7 +1014,7 @@
                   role="status"
                   aria-live="polite"
                 >
-                  <span aria-hidden="true">⚠️</span>
+                  <iconify-icon icon="ph:warning-circle-bold" aria-hidden="true"></iconify-icon>
                   <span data-auth-i18n="capsLock">Caps Lock aktif</span>
                 </div>
               </div>
@@ -981,12 +1054,13 @@
 
               <div class="helper-row">
                 <span data-auth-i18n="switchToLogin">Sudah punya akun?</span>
-                <span
+                <button
+                  type="button"
                   class="link-action"
                   onclick="setAuthTab('login')"
                   data-auth-i18n="loginLink"
-                  >Masuk</span
-                >
+                  >Masuk
+                </button>
               </div>
 
               <div class="auth-tip" data-auth-i18n="authTip">
@@ -1012,7 +1086,7 @@
 
             <div style="text-align: center">
               <a href="/" class="back-link">
-                <span aria-hidden="true">←</span>
+                <iconify-icon icon="ph:arrow-left-bold" aria-hidden="true"></iconify-icon>
                 <span data-auth-i18n="backHome">Kembali ke Beranda</span>
               </a>
             </div>
@@ -1037,7 +1111,12 @@
         const themeBtn = document.getElementById("themeToggle");
         if (savedTheme === "dark") {
           document.body.classList.add("dark-theme");
-          if (themeBtn) themeBtn.innerText = "☀️";
+          if (themeBtn) {
+            themeBtn.innerHTML =
+              '<iconify-icon icon="ph:sun-bold" aria-hidden="true"></iconify-icon>';
+            themeBtn.setAttribute("aria-label", "Aktifkan mode terang");
+            themeBtn.title = "Aktifkan mode terang";
+          }
         }
         // Prefill remembered username
         const remembered = localStorage.getItem("ae_remember_username");
@@ -1056,7 +1135,16 @@
         const isDark = document.body.classList.toggle("dark-theme");
         localStorage.setItem("ae_theme", isDark ? "dark" : "light");
         const themeBtn = document.getElementById("themeToggle");
-        if (themeBtn) themeBtn.innerText = isDark ? "☀️" : "🌙";
+        if (themeBtn) {
+          themeBtn.innerHTML = isDark
+            ? '<iconify-icon icon="ph:sun-bold" aria-hidden="true"></iconify-icon>'
+            : '<iconify-icon icon="ph:moon-stars-bold" aria-hidden="true"></iconify-icon>';
+          themeBtn.setAttribute(
+            "aria-label",
+            isDark ? "Aktifkan mode terang" : "Aktifkan mode gelap",
+          );
+          themeBtn.title = isDark ? "Aktifkan mode terang" : "Aktifkan mode gelap";
+        }
       }
 
       function setAuthLanguage(lang) {
@@ -1092,6 +1180,8 @@
           tabReg.setAttribute("aria-selected", "true");
           loginForm.classList.remove("active");
           registerForm.classList.add("active");
+          loginForm.hidden = true;
+          registerForm.hidden = false;
         } else {
           tabs.setAttribute("data-tab", "login");
           tabLogin.classList.add("active");
@@ -1100,7 +1190,12 @@
           tabReg.setAttribute("aria-selected", "false");
           loginForm.classList.add("active");
           registerForm.classList.remove("active");
+          loginForm.hidden = false;
+          registerForm.hidden = true;
         }
+        document
+          .querySelector(`#${target === "register" ? "register" : "login"}Form input`)
+          ?.focus({ preventScroll: true });
       }
 
       // Backward-compatible toggleForm() — kept so any legacy invocation still works
