@@ -1594,7 +1594,7 @@
             onclick="toggleAccountTheme()"
             type="button"
           >
-            🌙
+            <iconify-icon icon="ph:moon-stars-bold" aria-hidden="true"></iconify-icon>
           </button>
           <a aria-label="Kembali ke Beranda" class="header-back" href="/">
             <iconify-icon
@@ -2349,14 +2349,18 @@
         const isDark = stored === "dark";
         document.body.classList.toggle("dark-theme", isDark);
         const btn = document.getElementById("theme-toggle");
-        if (btn) btn.innerText = isDark ? "☀️" : "🌙";
+        if (btn) {
+          btn.innerHTML = `<iconify-icon icon="${isDark ? "ph:sun-bold" : "ph:moon-stars-bold"}" aria-hidden="true"></iconify-icon>`;
+        }
       }
 
       function toggleAccountTheme() {
         const isDark = document.body.classList.toggle("dark-theme");
         localStorage.setItem("ae_theme", isDark ? "dark" : "light");
         const btn = document.getElementById("theme-toggle");
-        if (btn) btn.innerText = isDark ? "☀️" : "🌙";
+        if (btn) {
+          btn.innerHTML = `<iconify-icon icon="${isDark ? "ph:sun-bold" : "ph:moon-stars-bold"}" aria-hidden="true"></iconify-icon>`;
+        }
       }
 
       function switchTab(name) {
