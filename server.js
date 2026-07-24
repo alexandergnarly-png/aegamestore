@@ -731,6 +731,28 @@ async function claimVipStoreKey(productId, quantity = 1) {
   });
 }
 
+async function getVipStoreResetProducts() {
+  return vipStoreRequest("reset-products.php", { method: "GET" });
+}
+
+async function resetVipStoreKey(productId, key) {
+  const cleanProductId = Number(productId);
+  const cleanKey = String(key || "").trim();
+
+  if (!Number.isInteger(cleanProductId) || cleanProductId <= 0) {
+    throw new Error("VIP Store reset product_id tidak valid");
+  }
+
+  if (!cleanKey || cleanKey.length > 500) {
+    throw new Error("VIP Store reset key tidak valid");
+  }
+
+  return vipStoreRequest("reset-key.php", {
+    method: "POST",
+    body: { product_id: cleanProductId, key: cleanKey },
+  });
+}
+
 function extractVipStoreCatalogItems(payload) {
   if (Array.isArray(payload)) return payload;
   if (!payload || typeof payload !== "object") return [];
@@ -3236,6 +3258,8 @@ app.get("/api/admin/vipstore/status", requireAdminAuth, async (req, res) => {
     apiSecretConfigured: Boolean(config.apiSecret),
     endpoints: {
       catalog: "/api/admin/vipstore/catalog",
+      reset_products: "/api/admin/vipstore/reset-products",
+      reset_key: "/api/admin/vipstore/reset-key",
       balance: "/api/admin/vipstore/balance",
       product_lookup: "/api/admin/vipstore/product/:productId",
       catalog_picker: "/api/admin/vipstore/catalog-normalized",
@@ -3266,6 +3290,60 @@ app.get("/api/admin/vipstore/catalog", requireAdminAuth, async (req, res) => {
     });
   }
 });
+
+app.get("/api/admin/vipstore/reset-products", requireAdminAuth, async (req, res) => {
+  try {
+    const result = await getVipStoreResetProducts();
+    const items = extractVipStoreCatalogItems(result.data);
+
+    return res.status(result.ok ? 200 : result.http_code || 502).json({
+      ok: result.ok,
+      http_code: result.http_code,
+      total_detected_items: items.length,
+      items,
+    });
+  } catch (err) {
+    console.error("ERROR VIPSTORE RESET PRODUCTS:", err);
+    const statusCode = err.code === "VIPSTORE_NOT_CONFIGURED" ? 503 : 502;
+    return res.status(statusCode).json({
+      ok: false,
+      code: err.code || "VIPSTORE_ERROR",
+      message: err.message || "Gagal mengambil produk reset VIP Store",
+      items: [],
+    });
+  }
+});
+
+app.post(
+  "/api/admin/vipstore/reset-key",
+  requireAdminAuth,
+  requireAdminCsrf,
+  async (req, res) => {
+    try {
+      const result = await resetVipStoreKey(
+        req.body?.product_id,
+        req.body?.key,
+      );
+
+      return res.status(result.ok ? 200 : result.http_code || 502).json({
+        ok: result.ok,
+        http_code: result.http_code,
+        data: result.data,
+      });
+    } catch (err) {
+      console.error("ERROR VIPSTORE RESET KEY:", {
+        code: err.code || "VIPSTORE_ERROR",
+        message: err.message,
+      });
+      const statusCode = err.code === "VIPSTORE_NOT_CONFIGURED" ? 503 : 502;
+      return res.status(statusCode).json({
+        ok: false,
+        code: err.code || "VIPSTORE_RESET_ERROR",
+        message: err.message || "Gagal reset key di VIP Store",
+      });
+    }
+  },
+);
 
 
 app.get("/api/admin/vipstore/product/:productId", requireAdminAuth, async (req, res) => {

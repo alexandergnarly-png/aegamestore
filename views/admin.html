@@ -3450,6 +3450,50 @@
             </div>
           </div>
 
+          <div class="card-header" style="margin-top: 18px;">
+            <div class="card-title-wrap">
+              <h3>Reset Key VIP Store</h3>
+              <p class="card-subtitle">
+                Reset key supplier yang sudah dibeli lewat API VIP Store.
+                API Secret tetap diproses di server.
+              </p>
+            </div>
+            <div class="section-badge">Supplier Tool</div>
+          </div>
+          <div class="toolbar">
+            <div class="field-wide">
+              <select id="vipResetProductSelect" aria-label="Produk reset VIP Store">
+                <option value="">Muat produk reset...</option>
+              </select>
+            </div>
+            <div class="btn-group">
+              <button class="ghost-btn" type="button" onclick="loadVipStoreResetProducts()">
+                Refresh Produk
+              </button>
+            </div>
+          </div>
+          <div class="toolbar">
+            <div class="field-wide">
+              <input
+                type="text"
+                id="vipResetKeyInput"
+                placeholder="Tempel key customer yang mau di-reset"
+                autocomplete="off"
+                maxlength="500"
+              />
+            </div>
+            <div class="btn-group">
+              <button type="button" onclick="resetVipStoreKeyFromAdmin()">
+                Reset Key
+              </button>
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info" id="vipResetStatus" aria-live="polite">
+              Produk reset supplier belum dimuat.
+            </div>
+          </div>
+
           <div class="info-row">
             <div class="info" id="keyStatusText">Memuat daftar key...</div>
           </div>
@@ -4246,6 +4290,7 @@
         if (sectionName === "keys") {
           loadKeys();
           loadKeyProductOptions();
+          loadVipStoreResetProducts();
         }
 
         if (sectionName === "vouchers") {
@@ -4280,6 +4325,7 @@
             loadProducts(),
             loadKeyProductOptions(),
             loadKeys(),
+            loadVipStoreResetProducts(),
             loadOrders(),
             loadStockSummary(),
             loadAdminStats(),
@@ -4912,6 +4958,102 @@
           .catch(() => {
             Swal.fire("Gagal copy.");
           });
+      }
+
+      async function loadVipStoreResetProducts() {
+        const select = document.getElementById("vipResetProductSelect");
+        const status = document.getElementById("vipResetStatus");
+        if (!select || !status) return;
+
+        select.innerHTML = `<option value="">Memuat produk reset...</option>`;
+        status.innerText = "Mengambil produk reset dari VIP Store...";
+
+        try {
+          const res = await fetch("/api/admin/vipstore/reset-products");
+          const data = await res.json().catch(() => ({}));
+
+          if (res.status === 401) {
+            window.location.href = "/ae-auth";
+            return;
+          }
+
+          if (!res.ok || data.ok === false) {
+            throw new Error(data.message || "Gagal memuat produk reset supplier.");
+          }
+
+          const items = Array.isArray(data.items) ? data.items : [];
+          select.innerHTML =
+            `<option value="">Pilih produk reset supplier</option>` +
+            items
+              .map((item) => {
+                const id = String(item.product_id ?? item.id ?? "").trim();
+                const name = String(
+                  item.name ?? item.product_name ?? item.product ?? `Produk #${id}`,
+                ).trim();
+                return id
+                  ? `<option value="${escapeHtml(id)}">${escapeHtml(name)} (#${escapeHtml(id)})</option>`
+                  : "";
+              })
+              .join("");
+          status.innerText = items.length
+            ? `${items.length} produk reset supplier tersedia.`
+            : "Belum ada produk reset supplier.";
+        } catch (err) {
+          select.innerHTML = `<option value="">Produk reset tidak tersedia</option>`;
+          status.innerText = err.message || "Gagal memuat produk reset supplier.";
+        }
+      }
+
+      async function resetVipStoreKeyFromAdmin() {
+        const productId = document.getElementById("vipResetProductSelect")?.value;
+        const keyInput = document.getElementById("vipResetKeyInput");
+        const key = String(keyInput?.value || "").trim();
+
+        if (!productId || !key) {
+          Swal.fire("Lengkapi produk reset dan key customer terlebih dahulu.");
+          return;
+        }
+
+        const confirmation = await Swal.fire({
+          icon: "warning",
+          title: "Reset key supplier?",
+          text: "Pastikan key ini memang milik akun supplier kamu. Proses reset dikirim ke VIP Store.",
+          showCancelButton: true,
+          confirmButtonText: "Ya, Reset Key",
+          cancelButtonText: "Batal",
+        });
+
+        if (!confirmation.isConfirmed) return;
+
+        try {
+          const res = await fetch("/api/admin/vipstore/reset-key", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-csrf-token": getCsrfToken(),
+            },
+            body: JSON.stringify({ product_id: Number(productId), key }),
+          });
+          const data = await res.json().catch(() => ({}));
+
+          if (res.status === 401) {
+            window.location.href = "/ae-auth";
+            return;
+          }
+
+          if (!res.ok || data.ok === false) {
+            throw new Error(data.message || "Reset key supplier gagal.");
+          }
+
+          if (keyInput) keyInput.value = "";
+          Swal.fire(
+            "Reset berhasil",
+            data.data?.message || "Key berhasil di-reset di VIP Store.",
+            "success",
+          );
+        } catch (err) {
+          Swal.fire("Reset gagal", err.message || "Gagal reset key supplier.", "error");
+        }
       }
 
       async function loadKeys() {
