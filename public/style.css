@@ -13664,3 +13664,83 @@ body.admin-chat-open {
 @media (max-width: 520px) {
   .checkout-payment-choice { grid-template-columns: 1fr; }
 }
+
+/* Homepage interaction polish: keep controls reachable on touch and keyboard. */
+.theme-toggle-btn,
+.nav-toggle {
+  width: 44px !important;
+  min-width: 44px !important;
+  height: 44px !important;
+  touch-action: manipulation;
+}
+
+.theme-toggle-btn iconify-icon,
+.promo-arrow iconify-icon,
+.open-review-btn iconify-icon,
+.search-icon iconify-icon,
+.back-to-top iconify-icon {
+  display: block;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.game-card {
+  touch-action: manipulation;
+}
+
+.game-card:focus-visible {
+  outline: 3px solid var(--nb-ink, #111);
+  outline-offset: 3px;
+}
+
+.game-card-fav {
+  width: 44px !important;
+  min-width: 44px !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  touch-action: manipulation;
+}
+
+.filter-pills .pill {
+  min-height: 44px;
+  touch-action: manipulation;
+}
+
+.promo-controls {
+  min-height: 44px;
+}
+
+.promo-dot,
+.promo-dot.active {
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px;
+  padding: 0;
+  display: inline-grid;
+  place-items: center;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  touch-action: manipulation;
+}
+
+.promo-dot::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--nb-line-strong, #d8d8d2);
+  transition:
+    width var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
+}
+
+.promo-dot.active::before {
+  width: 28px;
+  border-radius: 999px;
+  background: var(--nb-ink, #111);
+}
+
+.promo-dot.active::after {
+  display: none !important;
+}

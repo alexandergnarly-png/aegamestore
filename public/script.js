@@ -1205,6 +1205,9 @@ function renderGames() {
   const fav = isFavorite(game);
 
   card.className = `game-card game-card-status-${playSummary.value}`;
+  card.setAttribute("role", "button");
+  card.setAttribute("tabindex", "0");
+  card.setAttribute("aria-label", `${game} — ${t.cardChooseProduct}`);
   card.setAttribute("data-game", game);
 
     card.innerHTML = `
@@ -1286,6 +1289,11 @@ function renderGames() {
         card.style.pointerEvents = "auto";
       }
     });
+    card.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      card.click();
+    });
 
     gameGrid.appendChild(card);
   });
@@ -1294,10 +1302,9 @@ function renderGames() {
 function resetCatalogFilters() {
   currentCategory = "all";
   document.querySelectorAll(".filter-pills .pill").forEach((pill) => {
-    pill.classList.toggle(
-      "active",
-      pill.getAttribute("data-category") === "all",
-    );
+    const isActive = pill.getAttribute("data-category") === "all";
+    pill.classList.toggle("active", isActive);
+    pill.setAttribute("aria-selected", isActive ? "true" : "false");
   });
   const search = document.getElementById("gameSearch");
   if (search) search.value = "";
@@ -2296,16 +2303,23 @@ function filterCategory(cat, btnElement) {
 
   document
     .querySelectorAll(".filter-pills .pill")
-    .forEach((btn) => btn.classList.remove("active"));
+    .forEach((btn) => {
+      btn.classList.remove("active");
+      btn.setAttribute("aria-selected", "false");
+    });
 
   if (btnElement) {
     btnElement.classList.add("active");
+    btnElement.setAttribute("aria-selected", "true");
   } else {
     document
       .querySelectorAll(
         `.filter-pills .pill[data-category="${currentCategory}"]`,
       )
-      .forEach((btn) => btn.classList.add("active"));
+      .forEach((btn) => {
+        btn.classList.add("active");
+        btn.setAttribute("aria-selected", "true");
+      });
   }
 
   renderGames();
@@ -2578,10 +2592,18 @@ function toggleTheme() {
 
   if (body.classList.contains("dark-theme")) {
     localStorage.setItem("ae_theme", "dark");
-    if (themeBtn) themeBtn.innerText = "●"; // Ganti jadi cerah
+    if (themeBtn) {
+      themeBtn.innerHTML =
+        '<iconify-icon icon="ph:sun-bold" aria-hidden="true"></iconify-icon>';
+      themeBtn.setAttribute("aria-label", "Aktifkan mode terang");
+    }
   } else {
     localStorage.setItem("ae_theme", "light");
-    if (themeBtn) themeBtn.innerText = "◐"; // Kembali malam
+    if (themeBtn) {
+      themeBtn.innerHTML =
+        '<iconify-icon icon="ph:moon-stars-bold" aria-hidden="true"></iconify-icon>';
+      themeBtn.setAttribute("aria-label", "Aktifkan mode gelap");
+    }
   }
 }
 
@@ -2592,7 +2614,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (savedTheme === "dark") {
     document.body.classList.add("dark-theme");
-    if (themeToggleBtn) themeToggleBtn.innerText = "●";
+    if (themeToggleBtn) {
+      themeToggleBtn.innerHTML =
+        '<iconify-icon icon="ph:sun-bold" aria-hidden="true"></iconify-icon>';
+      themeToggleBtn.setAttribute("aria-label", "Aktifkan mode terang");
+    }
   }
 });
 
@@ -2959,7 +2985,9 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("DOMContentLoaded", () => {
   const themeBtn = document.getElementById("theme-toggle");
   if (document.body.classList.contains("dark-theme") && themeBtn) {
-    themeBtn.innerText = "●";
+    themeBtn.innerHTML =
+      '<iconify-icon icon="ph:sun-bold" aria-hidden="true"></iconify-icon>';
+    themeBtn.setAttribute("aria-label", "Aktifkan mode terang");
   }
 });
 setLanguage(currentLanguage);

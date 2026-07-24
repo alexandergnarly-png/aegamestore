@@ -89,7 +89,7 @@
   </head>
 
   <body>
-    <a href="#store-section" class="skip-link" data-i18n="skipToContent">
+    <a href="#main-content" class="skip-link" data-i18n="skipToContent">
       Lewati ke konten
     </a>
 
@@ -263,9 +263,9 @@
             onclick="toggleTheme()"
             class="lang-btn theme-toggle-btn"
             id="theme-toggle"
-            aria-label="Toggle dark mode"
+            aria-label="Aktifkan mode gelap"
           >
-            ◐
+            <iconify-icon icon="ph:moon-stars-bold" aria-hidden="true"></iconify-icon>
           </button>
 
           <div id="userMenu">
@@ -290,7 +290,7 @@
       </div>
     </header>
 
-    <main class="page">
+    <main class="page" id="main-content" tabindex="-1">
       <section class="hero" id="hero">
         <div class="hero-copy">
           <span class="hero-badge" data-i18n="heroBadge">
@@ -506,7 +506,7 @@
             id="promoPrevBtn"
             aria-label="Promo sebelumnya"
           >
-            ‹
+            <iconify-icon icon="ph:caret-left-bold" aria-hidden="true"></iconify-icon>
           </button>
           <div class="promo-dots" id="promoDots" role="tablist"></div>
           <button
@@ -515,7 +515,7 @@
             id="promoNextBtn"
             aria-label="Promo berikutnya"
           >
-            ›
+            <iconify-icon icon="ph:caret-right-bold" aria-hidden="true"></iconify-icon>
           </button>
         </div>
       </section>
@@ -540,7 +540,7 @@
             class="open-review-btn"
             onclick="openReviewPopup()"
           >
-            <span aria-hidden="true">⭐</span>
+            <iconify-icon icon="ph:star-four-fill" aria-hidden="true"></iconify-icon>
             <b data-i18n="giveReviewBtn">Kasih Review</b>
           </button>
           <p data-i18n="reviewNote">
@@ -659,15 +659,15 @@
               hidden
             ></div>
             <div class="filter-pills" role="tablist" aria-label="Kategori game">
-              <button type="button" class="pill active" data-category="all">
+              <button type="button" class="pill active" data-category="all" role="tab" aria-selected="true">
                 <span data-i18n="filterAll">Semua</span>
                 <span class="pill-count" data-count-for="all"></span>
               </button>
-              <button type="button" class="pill" data-category="Mobile">
+              <button type="button" class="pill" data-category="Mobile" role="tab" aria-selected="false">
                 <span data-i18n="filterMobile">Mobile</span>
                 <span class="pill-count" data-count-for="Mobile"></span>
               </button>
-              <button type="button" class="pill" data-category="Tools">
+              <button type="button" class="pill" data-category="Tools" role="tab" aria-selected="false">
                 <span data-i18n="filterTools">Tools / GBox</span>
                 <span class="pill-count" data-count-for="Tools"></span>
               </button>
@@ -676,8 +676,10 @@
                 class="pill pill-favorite"
                 data-category="Favorites"
                 aria-label="Filter favorit"
+                role="tab"
+                aria-selected="false"
               >
-                <span aria-hidden="true">♡</span>
+                <iconify-icon icon="ph:heart-bold" aria-hidden="true"></iconify-icon>
                 <span data-i18n="filterFavorites">Favorit</span>
                 <span class="pill-count" data-count-for="Favorites"></span>
               </button>
@@ -685,7 +687,9 @@
 
             <div class="catalog-toolbar-right">
               <div class="search-box">
-                <span class="search-icon" aria-hidden="true">⌕</span>
+                <span class="search-icon" aria-hidden="true">
+                  <iconify-icon icon="ph:magnifying-glass-bold"></iconify-icon>
+                </span>
                 <input
                   type="text"
                   id="gameSearch"
@@ -1450,7 +1454,7 @@
       id="backToTop"
       aria-label="Kembali ke atas"
     >
-      <span aria-hidden="true">↑</span>
+      <iconify-icon icon="ph:arrow-up-bold" aria-hidden="true"></iconify-icon>
     </button>
 
     <div id="social-proof" class="social-proof" aria-live="polite"></div>
