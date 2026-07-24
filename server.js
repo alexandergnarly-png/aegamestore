@@ -19,6 +19,7 @@ const {
   splitOrderKeys,
 } = require("./server/order-utils");
 const { ensureBulkOrderSchema, ensureWalletSchema } = require("./server/database-migrations");
+const { parseMidtransAmount, verifyMidtransSignature } = require("./server/midtrans-utils");
 
 const app = express();
 app.disable("x-powered-by");
@@ -1668,6 +1669,189 @@ async function ensureWalletAccount(dbClient, userId) {
   );
 }
 
+async function createPendingWalletTopup({
+  userId,
+  amount,
+  provider,
+  buyerNote = null,
+  paymentReference = null,
+  paymentAmount = null,
+  providerOrderId = null,
+}) {
+  const client = await db.connect();
+  const id = `TOPUP-${crypto.randomUUID()}`;
+
+  try {
+    await client.query("BEGIN");
+    const userResult = await client.query(
+      `SELECT id FROM users WHERE id = $1 LIMIT 1 FOR UPDATE`,
+      [userId],
+    );
+    if (!userResult.rows.length) {
+      const error = new Error("Akun buyer tidak ditemukan");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const pending = await client.query(
+      `SELECT id FROM wallet_topup_requests
+       WHERE user_id = $1 AND status = 'pending' LIMIT 1`,
+      [userId],
+    );
+    if (pending.rows.length) {
+      const error = new Error("Masih ada top up yang menunggu pembayaran atau verifikasi");
+      error.statusCode = 409;
+      throw error;
+    }
+
+    await ensureWalletAccount(client, userId);
+    const wallet = await client.query(
+      `SELECT balance FROM wallet_accounts WHERE user_id = $1 FOR UPDATE`,
+      [userId],
+    );
+    if (Number(wallet.rows[0]?.balance || 0) + amount > WALLET_MAX_BALANCE) {
+      const error = new Error("Nominal top up membuat saldo melewati batas maksimum");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    await client.query(
+      `INSERT INTO wallet_topup_requests
+       (id, user_id, amount, status, buyer_note, payment_reference, provider,
+        provider_order_id, payment_amount, created_at)
+       VALUES ($1, $2, $3, 'pending', $4, $5, $6, $7, $8, $9)`,
+      [
+        id,
+        userId,
+        amount,
+        buyerNote,
+        paymentReference,
+        provider,
+        providerOrderId,
+        paymentAmount,
+        new Date().toISOString(),
+      ],
+    );
+    await client.query("COMMIT");
+    return id;
+  } catch (error) {
+    await client.query("ROLLBACK").catch(() => {});
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+async function processMidtransWalletNotification(notification, isPaid, isExpiredOrFailed) {
+  const providerOrderId = String(notification.order_id || "").trim();
+  const paidAmount = parseMidtransAmount(notification.gross_amount);
+  const transactionId = String(notification.transaction_id || "").trim().slice(0, 160);
+  const client = await db.connect();
+
+  try {
+    await client.query("BEGIN");
+    const result = await client.query(
+      `SELECT * FROM wallet_topup_requests
+       WHERE provider = 'midtrans' AND provider_order_id = $1
+       LIMIT 1 FOR UPDATE`,
+      [providerOrderId],
+    );
+    const request = result.rows[0];
+    if (!request) {
+      await client.query("ROLLBACK");
+      return { status: 404, body: "WALLET TOP UP TIDAK DITEMUKAN" };
+    }
+
+    if (
+      paidAmount !== Number(request.payment_amount || request.amount) ||
+      (notification.currency && String(notification.currency).toUpperCase() !== "IDR")
+    ) {
+      await client.query("ROLLBACK");
+      console.error("MIDTRANS WALLET AMOUNT/CURRENCY MISMATCH:", providerOrderId);
+      return { status: 403, body: "PAYMENT DATA TIDAK COCOK" };
+    }
+
+    if (isPaid) {
+      if (request.status === "approved") {
+        await client.query("COMMIT");
+        return { status: 200, body: "OK" };
+      }
+      if (request.status !== "pending") {
+        await client.query("COMMIT");
+        return { status: 200, body: "IGNORED" };
+      }
+
+      await ensureWalletAccount(client, request.user_id);
+      const wallet = await client.query(
+        `SELECT balance FROM wallet_accounts WHERE user_id = $1 FOR UPDATE`,
+        [request.user_id],
+      );
+      const before = Number(wallet.rows[0]?.balance || 0);
+      const amount = Number(request.amount || 0);
+      const after = before + amount;
+      if (after > WALLET_MAX_BALANCE) {
+        await client.query(
+          `UPDATE wallet_topup_requests SET admin_note = $1 WHERE id = $2`,
+          ["Pembayaran diterima tetapi saldo melewati batas maksimum", request.id],
+        );
+        await client.query("COMMIT");
+        return { status: 500, body: "WALLET LIMIT" };
+      }
+
+      const now = new Date().toISOString();
+      const ledger = await client.query(
+        `INSERT INTO wallet_ledger
+         (user_id, entry_type, direction, amount, balance_before, balance_after,
+          reference_type, reference_id, description, created_at)
+         VALUES ($1, 'topup', 'credit', $2, $3, $4, 'midtrans_topup', $5, $6, $7)
+         ON CONFLICT (reference_type, reference_id, direction) DO NOTHING
+         RETURNING id`,
+        [request.user_id, amount, before, after, request.id, "Top up otomatis via Midtrans", now],
+      );
+
+      if (ledger.rowCount) {
+        await client.query(
+          `UPDATE wallet_accounts SET balance = $1, updated_at = $2 WHERE user_id = $3`,
+          [after, now, request.user_id],
+        );
+      }
+      await client.query(
+        `UPDATE wallet_topup_requests
+         SET status = 'approved', reviewed_by = 'midtrans', reviewed_at = $1,
+             paid_at = $1, provider_transaction_id = $2, admin_note = $3
+         WHERE id = $4`,
+        [now, transactionId || null, "Pembayaran terverifikasi otomatis", request.id],
+      );
+      await client.query("COMMIT");
+      return { status: 200, body: "OK" };
+    }
+
+    if (isExpiredOrFailed && request.status === "pending") {
+      const now = new Date().toISOString();
+      await client.query(
+        `UPDATE wallet_topup_requests
+         SET status = 'rejected', reviewed_by = 'midtrans', reviewed_at = $1,
+             provider_transaction_id = $2, admin_note = $3
+         WHERE id = $4`,
+        [
+          now,
+          transactionId || null,
+          `Pembayaran Midtrans ${String(notification.transaction_status || "gagal").slice(0, 60)}`,
+          request.id,
+        ],
+      );
+    }
+
+    await client.query("COMMIT");
+    return { status: 200, body: "OK" };
+  } catch (error) {
+    await client.query("ROLLBACK").catch(() => {});
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
 async function getAdminSessionUsername(req) {
   const sessionToken = String(req.cookies.admin_auth || "").trim();
   if (!sessionToken) return "admin";
@@ -1884,32 +2068,6 @@ async function sendVerificationEmail({ to, username, verificationUrl }) {
   }
 
   return { sent: true, provider: "resend" };
-}
-
-function verifyMidtransSignature(notification) {
-  const orderId = String(notification.order_id || "");
-  const statusCode = String(notification.status_code || "");
-  const grossAmount = String(notification.gross_amount || "");
-  const signatureKey = String(notification.signature_key || "");
-  const serverKey = String(process.env.MIDTRANS_SERVER_KEY || "");
-
-  if (!orderId || !statusCode || !grossAmount || !signatureKey || !serverKey) {
-    return false;
-  }
-
-  const expectedSignature = crypto
-    .createHash("sha512")
-    .update(orderId + statusCode + grossAmount + serverKey)
-    .digest("hex");
-
-  const actualBuffer = Buffer.from(signatureKey, "hex");
-  const expectedBuffer = Buffer.from(expectedSignature, "hex");
-
-  if (actualBuffer.length !== expectedBuffer.length) {
-    return false;
-  }
-
-  return crypto.timingSafeEqual(actualBuffer, expectedBuffer);
 }
 
 function createBuyerBadge({
@@ -4618,7 +4776,7 @@ app.post("/midtrans-notification", webhookLimiter, async (req, res) => {
   try {
     const notification = await snap.transaction.notification(req.body);
 
-    if (!verifyMidtransSignature(notification)) {
+    if (!verifyMidtransSignature(notification, process.env.MIDTRANS_SERVER_KEY)) {
       return res.status(403).send("INVALID SIGNATURE");
     }
 
@@ -4627,19 +4785,32 @@ app.post("/midtrans-notification", webhookLimiter, async (req, res) => {
       notification.transaction_status || "",
     ).toLowerCase();
     const fraudStatus = String(notification.fraud_status || "").toLowerCase();
+    const statusCode = String(notification.status_code || "");
 
     if (!orderId) {
       return res.status(400).send("ORDER ID TIDAK VALID");
     }
 
+    const fraudAccepted = !fraudStatus || fraudStatus === "accept";
     const isPaid =
-      transactionStatus === "settlement" ||
-      (transactionStatus === "capture" && fraudStatus === "accept");
+      statusCode === "200" &&
+      fraudAccepted &&
+      (transactionStatus === "settlement" ||
+        (transactionStatus === "capture" && fraudStatus === "accept"));
 
     const isExpiredOrFailed =
       transactionStatus === "expire" ||
       transactionStatus === "cancel" ||
       transactionStatus === "deny";
+
+    if (orderId.startsWith("WALLET-")) {
+      const result = await processMidtransWalletNotification(
+        notification,
+        isPaid,
+        isExpiredOrFailed,
+      );
+      return res.status(result.status).send(result.body);
+    }
 
     if (isPaid) {
       const client = await db.connect();
@@ -4670,6 +4841,15 @@ app.post("/midtrans-notification", webhookLimiter, async (req, res) => {
         if (!order) {
           await client.query("ROLLBACK");
           return res.status(404).send("ORDER TIDAK DITEMUKAN");
+        }
+
+        if (
+          parseMidtransAmount(notification.gross_amount) !== Number(order.price) ||
+          (notification.currency && String(notification.currency).toUpperCase() !== "IDR")
+        ) {
+          await client.query("ROLLBACK");
+          console.error("MIDTRANS ORDER AMOUNT/CURRENCY MISMATCH:", orderId);
+          return res.status(403).send("PAYMENT DATA TIDAK COCOK");
         }
 
         if (String(order.payment_status).toLowerCase() === "paid") {
@@ -7307,7 +7487,8 @@ app.get("/api/wallet", async (req, res) => {
     await ensureWalletAccount(db, user.id);
     const [account, topups, ledger] = await Promise.all([
       query(`SELECT balance, updated_at FROM wallet_accounts WHERE user_id = $1`, [user.id]),
-      query(`SELECT id, amount, status, buyer_note, payment_reference, admin_note, created_at, reviewed_at
+      query(`SELECT id, amount, status, buyer_note, payment_reference, admin_note,
+                    provider, payment_amount, snap_redirect_url, created_at, reviewed_at, paid_at
              FROM wallet_topup_requests WHERE user_id = $1 ORDER BY created_at DESC LIMIT 10`, [user.id]),
       query(`SELECT entry_type, direction, amount, balance_before, balance_after, description, created_at
              FROM wallet_ledger WHERE user_id = $1 ORDER BY created_at DESC, id DESC LIMIT 15`, [user.id]),
@@ -7348,17 +7529,99 @@ app.post("/api/wallet/topups", walletTopupLimiter, requireUserCsrf, async (req, 
   }
 
   try {
-    const pending = await query(`SELECT id FROM wallet_topup_requests WHERE user_id = $1 AND status = 'pending' LIMIT 1`, [user.id]);
-    if (pending.rows.length) return res.status(409).json({ message: "Masih ada request top up yang menunggu verifikasi admin" });
-    const id = `TOPUP-${crypto.randomUUID()}`;
-    await query(`INSERT INTO wallet_topup_requests
-      (id, user_id, amount, status, buyer_note, payment_reference, created_at)
-      VALUES ($1, $2, $3, 'pending', $4, $5, $6)`,
-      [id, user.id, amount, buyerNote || null, paymentReference || null, new Date().toISOString()]);
+    const id = await createPendingWalletTopup({
+      userId: user.id,
+      amount,
+      provider: "manual_qris",
+      buyerNote: buyerNote || null,
+      paymentReference: paymentReference || null,
+      paymentAmount: amount,
+    });
     return res.status(201).json({ message: "Request top up terkirim. Tunggu verifikasi admin.", id });
   } catch (err) {
     console.error("ERROR CREATE WALLET TOPUP:", err);
-    return res.status(500).json({ message: "Gagal membuat request top up" });
+    return res.status(err.statusCode || 500).json({ message: err.statusCode ? err.message : "Gagal membuat request top up" });
+  }
+});
+
+app.post("/api/wallet/topups/midtrans", walletTopupLimiter, requireUserCsrf, async (req, res) => {
+  const user = getLoggedInUserFromRequest(req);
+  if (!user) return res.status(401).json({ message: "Kamu harus login dulu" });
+
+  const amount = parseWalletAmount(req.body?.amount);
+  if (amount < WALLET_MIN_TOPUP || amount > WALLET_MAX_TOPUP) {
+    return res.status(400).json({ message: `Nominal top up harus Rp${WALLET_MIN_TOPUP.toLocaleString("id-ID")} sampai Rp${WALLET_MAX_TOPUP.toLocaleString("id-ID")}` });
+  }
+  if (!process.env.MIDTRANS_SERVER_KEY || !process.env.MIDTRANS_CLIENT_KEY) {
+    return res.status(503).json({ message: "Pembayaran Midtrans sedang tidak tersedia" });
+  }
+
+  const providerOrderId = `WALLET-${crypto.randomUUID()}`;
+  let topupId = "";
+
+  try {
+    const userResult = await query(
+      `SELECT username, default_name, default_contact, email FROM users WHERE id = $1 LIMIT 1`,
+      [user.id],
+    );
+    const buyer = userResult.rows[0];
+    if (!buyer) return res.status(404).json({ message: "Akun buyer tidak ditemukan" });
+
+    topupId = await createPendingWalletTopup({
+      userId: user.id,
+      amount,
+      provider: "midtrans",
+      paymentAmount: amount,
+      providerOrderId,
+    });
+
+    const name = String(buyer.default_name || buyer.username || "Buyer").slice(0, 60);
+    const contact = String(buyer.email || buyer.default_contact || "").trim();
+    const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact);
+    const baseUrl = getAppBaseUrl(req);
+    const accountUrl = `${baseUrl}/account?wallet_topup=${encodeURIComponent(topupId)}`;
+    const transaction = await snap.createTransaction({
+      transaction_details: { order_id: providerOrderId, gross_amount: amount },
+      customer_details: {
+        first_name: name,
+        email: isValidEmail ? contact : "customer@example.com",
+        phone: isValidEmail ? "" : contact.replace(/[^0-9+]/g, ""),
+      },
+      item_details: [{
+        id: "AE-CREDIT",
+        price: amount,
+        quantity: 1,
+        name: `AE Credit ${formatWalletAmountForMessage(amount)}`,
+      }],
+      custom_field1: `wallet_topup:${topupId}`,
+      callbacks: { finish: accountUrl, pending: accountUrl, error: accountUrl },
+    });
+
+    await query(
+      `UPDATE wallet_topup_requests
+       SET snap_token = $1, snap_redirect_url = $2
+       WHERE id = $3 AND user_id = $4 AND status = 'pending'`,
+      [transaction.token, transaction.redirect_url, topupId, user.id],
+    );
+
+    return res.status(201).json({
+      message: "Pembayaran Midtrans berhasil dibuat",
+      id: topupId,
+      creditAmount: amount,
+      paymentAmount: amount,
+      paymentUrl: transaction.redirect_url,
+    });
+  } catch (err) {
+    if (topupId) {
+      await query(
+        `UPDATE wallet_topup_requests
+         SET status = 'rejected', reviewed_by = 'system', reviewed_at = $1, admin_note = $2
+         WHERE id = $3 AND status = 'pending'`,
+        [new Date().toISOString(), "Gagal membuat pembayaran Midtrans", topupId],
+      ).catch(() => {});
+    }
+    console.error("ERROR CREATE MIDTRANS WALLET TOPUP:", err.response?.data || err.message || err);
+    return res.status(err.statusCode || 500).json({ message: err.statusCode ? err.message : "Gagal membuat pembayaran Midtrans" });
   }
 });
 
@@ -7367,6 +7630,7 @@ app.get("/api/admin/wallet/topups", requireAdminAuth, async (req, res) => {
   try {
     const result = await query(`SELECT t.id, t.user_id, u.username, t.amount, t.status, t.buyer_note,
       t.payment_reference, t.admin_note, t.reviewed_by, t.created_at, t.reviewed_at,
+      t.provider, t.provider_order_id, t.payment_amount,
       COALESCE(w.balance, 0) AS balance
       FROM wallet_topup_requests t LEFT JOIN users u ON u.id = t.user_id
       LEFT JOIN wallet_accounts w ON w.user_id = t.user_id
@@ -7388,6 +7652,7 @@ app.post("/api/admin/wallet/topups/:id/approve", requireAdminAuth, requireAdminC
     const request = requestResult.rows[0];
     if (!request) { await client.query("ROLLBACK"); return res.status(404).json({ message: "Request top up tidak ditemukan" }); }
     if (request.status !== "pending") { await client.query("ROLLBACK"); return res.status(409).json({ message: `Request sudah ${request.status}` }); }
+    if (String(request.provider || "manual_qris") !== "manual_qris") { await client.query("ROLLBACK"); return res.status(409).json({ message: "Top up Midtrans hanya dapat diproses otomatis oleh webhook" }); }
     await ensureWalletAccount(client, request.user_id);
     const wallet = (await client.query(`SELECT balance FROM wallet_accounts WHERE user_id = $1 FOR UPDATE`, [request.user_id])).rows[0];
     const before = Number(wallet?.balance || 0);
@@ -7416,7 +7681,7 @@ app.post("/api/admin/wallet/topups/:id/reject", requireAdminAuth, requireAdminCs
   const adminUsername = await getAdminSessionUsername(req).catch(() => "admin");
   const note = String(req.body?.admin_note || "").trim().slice(0, 300) || "Pembayaran belum dapat diverifikasi";
   try {
-    const result = await query(`UPDATE wallet_topup_requests SET status = 'rejected', admin_note = $1, reviewed_by = $2, reviewed_at = $3 WHERE id = $4 AND status = 'pending' RETURNING id`, [note, adminUsername, new Date().toISOString(), topupId]);
+    const result = await query(`UPDATE wallet_topup_requests SET status = 'rejected', admin_note = $1, reviewed_by = $2, reviewed_at = $3 WHERE id = $4 AND status = 'pending' AND provider = 'manual_qris' RETURNING id`, [note, adminUsername, new Date().toISOString(), topupId]);
     if (!result.rowCount) return res.status(409).json({ message: "Request tidak ditemukan atau sudah diproses" });
     return res.json({ message: "Top up ditolak" });
   } catch (err) {

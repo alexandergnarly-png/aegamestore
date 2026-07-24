@@ -656,13 +656,16 @@
 
       .wallet-panel { display: grid; gap: 14px; }
       .wallet-balance-layout { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:12px; }
-      .wallet-balance-card, .wallet-qr-card { min-width:0; padding:18px; border:1px solid var(--line); border-radius:18px; background:var(--soft); }
+      .wallet-balance-card, .wallet-qr-card, .wallet-auto-card { min-width:0; padding:18px; border:1px solid var(--line); border-radius:18px; background:var(--soft); }
       .wallet-balance-card { display:flex; align-items:center; }
       .wallet-balance-card small { display:block; color:var(--muted); font-weight:800; text-transform:uppercase; letter-spacing:.08em; }
       .wallet-balance-card strong { display:block; margin-top:5px; font-size:28px; }
       .wallet-qr-card { display:grid; grid-template-columns:minmax(0,1fr) 116px; align-items:center; gap:12px; }
       .wallet-qr-card small { display:block; color:var(--muted); font-size:11px; font-weight:800; line-height:1.45; }
       .wallet-qr { width:100%; max-width:116px; border:1px solid var(--line); border-radius:14px; background:#fff; padding:8px; }
+      .wallet-auto-card { display:flex; align-items:center; gap:12px; }
+      .wallet-auto-icon { width:46px; height:46px; flex:0 0 46px; display:grid; place-items:center; border-radius:15px; background:var(--ink); color:var(--inverse); font-size:23px; }
+      .wallet-auto-card small { display:block; margin-top:3px; color:var(--muted); font-size:11px; font-weight:800; line-height:1.45; }
       .wallet-topup-form { display:grid; gap:12px; }
       .wallet-topup-form label { display:grid; gap:7px; }
       .wallet-topup-form input { width:100%; box-sizing:border-box; }
@@ -678,6 +681,10 @@
       .wallet-optional summary::after { content:"+"; float:right; color:var(--ink); font-size:16px; line-height:1; }
       .wallet-optional[open] summary::after { content:"−"; }
       .wallet-optional-fields { display:grid; gap:10px; padding:0 12px 12px; }
+      .wallet-payment-note { margin-top:-4px; color:var(--muted); font-size:10px; font-weight:750; text-align:center; }
+      .wallet-manual-body { display:grid; gap:10px; padding:0 12px 12px; }
+      .wallet-manual-body .wallet-qr-card { padding:12px; background:var(--surface-solid); }
+      .wallet-manual-body .wallet-optional-fields { padding:0; }
       .wallet-history-title { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:9px; }
       .wallet-history-title small { color:var(--muted); font-size:10px; font-weight:800; }
       .wallet-history { display:grid; gap:8px; }
@@ -690,6 +697,8 @@
       .wallet-status.pending { background:#fff7df; color:#8a5a00; border-color:#ead29b; }
       .wallet-status.rejected { background:#fff0f0; color:#a32020; border-color:#e7b8b8; }
       .wallet-status.completed { background:#eaf8ee; color:#166534; border-color:#b9ddc2; }
+      .wallet-status-actions { display:grid; justify-items:end; gap:6px; }
+      .wallet-pay-link { display:inline-flex; align-items:center; justify-content:center; min-height:30px; padding:6px 10px; border-radius:10px; background:var(--ink); color:var(--inverse); font-size:9px; font-weight:950; }
 
       .tab-btn {
         min-width: 0;
@@ -1645,7 +1654,7 @@
           <div class="wallet-panel">
             <div class="wallet-balance-layout">
               <div class="wallet-balance-card"><div><small data-account-i18n="walletBalanceLabel">Saldo tersedia</small><strong id="walletBalance">Rp0</strong></div></div>
-              <div class="wallet-qr-card"><div><strong data-account-i18n="walletQrTitle">Bayar via QRIS</strong><small data-account-i18n="walletQrDesc">Scan QRIS, bayar sesuai nominal, lalu kirim request top up.</small></div><img class="wallet-qr" src="/qris.png" alt="QRIS AE Game Store"></div>
+              <div class="wallet-auto-card"><span class="wallet-auto-icon" aria-hidden="true"><iconify-icon icon="mdi:shield-check-outline"></iconify-icon></span><div><strong data-account-i18n="walletAutoTitle">Top up otomatis</strong><small data-account-i18n="walletAutoDesc">Pembayaran diverifikasi aman oleh Midtrans.</small></div></div>
             </div>
             <div class="wallet-topup-form">
               <label><span data-account-i18n="walletAmountLabel">Nominal top up</span><span class="wallet-amount-wrap"><span class="wallet-amount-prefix">Rp</span><input id="walletTopupAmount" type="text" inputmode="numeric" autocomplete="off" placeholder="Minimal 10.000" data-account-placeholder="walletAmountPlaceholder" oninput="formatWalletTopupInput(this)"></span></label>
@@ -1655,14 +1664,19 @@
                 <button class="wallet-amount-chip" type="button" data-amount="50000" onclick="setWalletTopupAmount(50000)">Rp50k</button>
                 <button class="wallet-amount-chip" type="button" data-amount="100000" onclick="setWalletTopupAmount(100000)">Rp100k</button>
               </div>
-              <details class="wallet-optional">
-                <summary data-account-i18n="walletOptionalDetails">Tambahkan detail pembayaran (opsional)</summary>
-                <div class="wallet-optional-fields">
+              <button class="btn btn-primary" id="walletSubmitButton" type="button" onclick="createWalletMidtransTopup()">Bayar otomatis via Midtrans</button>
+              <small class="wallet-payment-note" data-account-i18n="walletMidtransNote">Saldo masuk otomatis setelah pembayaran terverifikasi.</small>
+              <details class="wallet-optional wallet-manual-fallback">
+                <summary data-account-i18n="walletManualTitle">Pakai QRIS manual</summary>
+                <div class="wallet-manual-body">
+                  <div class="wallet-qr-card"><div><strong data-account-i18n="walletQrTitle">Bayar via QRIS</strong><small data-account-i18n="walletQrDesc">Scan QRIS, lalu kirim detail pembayaran untuk diverifikasi admin.</small></div><img class="wallet-qr" src="/qris.png" alt="QRIS AE Game Store"></div>
+                  <div class="wallet-optional-fields">
                   <label><span data-account-i18n="walletReferenceLabel">Referensi pembayaran</span><input id="walletPaymentReference" type="text" maxlength="120" placeholder="Contoh: jam transfer / nama pengirim" data-account-placeholder="walletReferencePlaceholder"></label>
                   <label><span data-account-i18n="walletNoteLabel">Catatan</span><input id="walletBuyerNote" type="text" maxlength="300" placeholder="Catatan untuk admin" data-account-placeholder="walletNotePlaceholder"></label>
+                  </div>
+                  <button class="btn btn-secondary" id="walletManualSubmitButton" type="button" onclick="createWalletTopup()" data-account-i18n="walletManualSubmit">Kirim request manual</button>
                 </div>
               </details>
-              <button class="btn btn-primary" id="walletSubmitButton" type="button" onclick="createWalletTopup()">Saya sudah bayar QRIS</button>
             </div>
             <div><div class="wallet-history-title"><strong data-account-i18n="walletActivityTitle">Aktivitas AE Credit</strong><small data-account-i18n="walletActivityHint">Terbaru</small></div><div class="wallet-history" id="walletActivityHistory"><small data-account-i18n="walletEmpty">Belum ada aktivitas.</small></div></div>
           </div>
@@ -1986,18 +2000,24 @@
           walletTitle: "AE Credit",
           walletDesc: "Top up manual via QRIS, lalu gunakan saldo untuk checkout tanpa biaya QRIS.",
           walletBalanceLabel: "Saldo tersedia",
+          walletAutoTitle: "Top up otomatis",
+          walletAutoDesc: "Pembayaran diverifikasi aman oleh Midtrans.",
           walletQrTitle: "Bayar via QRIS",
-          walletQrDesc: "Scan QRIS, bayar sesuai nominal, lalu kirim request top up.",
+          walletQrDesc: "Scan QRIS, lalu kirim detail pembayaran untuk diverifikasi admin.",
           walletAmountLabel: "Nominal top up",
           walletAmountPlaceholder: "Minimal 10.000",
           walletReferenceLabel: "Referensi pembayaran",
           walletReferencePlaceholder: "Contoh: jam transfer / nama pengirim",
           walletNoteLabel: "Catatan",
           walletNotePlaceholder: "Catatan untuk admin",
-          walletSubmit: "Saya sudah bayar QRIS",
-          walletSubmitAmount: "Kirim top up {amount}",
-          walletPendingSubmit: "Menunggu verifikasi admin",
-          walletOptionalDetails: "Tambahkan detail pembayaran (opsional)",
+          walletSubmit: "Bayar otomatis via Midtrans",
+          walletSubmitAmount: "Bayar {amount} via Midtrans",
+          walletSubmitLoading: "Membuka Midtrans...",
+          walletPendingSubmit: "Menunggu pembayaran/verifikasi",
+          walletMidtransNote: "Saldo masuk otomatis setelah pembayaran terverifikasi.",
+          walletManualTitle: "Pakai QRIS manual",
+          walletManualSubmit: "Kirim request manual",
+          walletPayNow: "Lanjut bayar",
           walletActivityTitle: "Aktivitas AE Credit",
           walletActivityHint: "Terbaru",
           walletTopupRequest: "Request top up QRIS",
@@ -2110,18 +2130,24 @@
           walletTitle: "AE Credit",
           walletDesc: "Top up manually via QRIS, then use your balance at checkout without QRIS fees.",
           walletBalanceLabel: "Available balance",
+          walletAutoTitle: "Automatic top up",
+          walletAutoDesc: "Payment is securely verified by Midtrans.",
           walletQrTitle: "Pay via QRIS",
-          walletQrDesc: "Scan the QRIS, pay the exact amount, then submit a top up request.",
+          walletQrDesc: "Scan the QRIS, then submit payment details for admin review.",
           walletAmountLabel: "Top up amount",
           walletAmountPlaceholder: "Minimum 10,000",
           walletReferenceLabel: "Payment reference",
           walletReferencePlaceholder: "Example: transfer time / sender name",
           walletNoteLabel: "Note",
           walletNotePlaceholder: "Note for admin",
-          walletSubmit: "I have paid via QRIS",
-          walletSubmitAmount: "Submit {amount} top up",
-          walletPendingSubmit: "Awaiting admin review",
-          walletOptionalDetails: "Add payment details (optional)",
+          walletSubmit: "Pay automatically via Midtrans",
+          walletSubmitAmount: "Pay {amount} via Midtrans",
+          walletSubmitLoading: "Opening Midtrans...",
+          walletPendingSubmit: "Awaiting payment/verification",
+          walletMidtransNote: "Credit is added automatically after payment verification.",
+          walletManualTitle: "Use manual QRIS",
+          walletManualSubmit: "Submit manual request",
+          walletPayNow: "Continue payment",
           walletActivityTitle: "AE Credit activity",
           walletActivityHint: "Latest",
           walletTopupRequest: "QRIS top up request",
@@ -2299,6 +2325,8 @@
           : amount
             ? tAccount("walletSubmitAmount").replace("{amount}", formatWalletRupiah(amount))
             : tAccount("walletSubmit");
+        const manualButton = document.getElementById("walletManualSubmitButton");
+        if (manualButton) manualButton.disabled = button?.dataset.pending === "true";
         document.querySelectorAll(".wallet-amount-chip").forEach((chip) => {
           chip.classList.toggle("active", Number(chip.dataset.amount) === amount);
         });
@@ -2315,6 +2343,17 @@
         if (!input) return;
         input.value = Number(amount).toLocaleString("id-ID");
         updateWalletTopupButton();
+      }
+
+      function safeMidtransPaymentUrl(value) {
+        try {
+          const url = new URL(String(value || ""));
+          return ["https://app.midtrans.com", "https://app.sandbox.midtrans.com"].includes(url.origin)
+            ? url.href
+            : "";
+        } catch (_) {
+          return "";
+        }
       }
 
       async function loadWallet() {
@@ -2338,12 +2377,44 @@
             const entries = (data.ledger || []).map((row) => ({ ...row, kind: "ledger", date: row.created_at }));
             const rows = [...requests, ...entries].sort((a, b) => new Date(b.date) - new Date(a.date));
             activity.innerHTML = rows.length
-              ? rows.map((row) => row.kind === "request"
-                ? `<div class="wallet-history-row"><div><strong>${formatWalletRupiah(row.amount)}</strong><small>${escapeHtml(row.payment_reference || tAccount("walletTopupRequest"))}</small><time>${walletDateTime(row.date)}</time></div><span class="wallet-status ${escapeHtml(row.status)}">${escapeHtml(walletStatusLabel(row.status))}</span></div>`
-                : `<div class="wallet-history-row"><div><strong class="wallet-history-amount ${row.direction === "credit" ? "credit" : "debit"}">${row.direction === "credit" ? "+" : "−"}${formatWalletRupiah(row.amount)}</strong><small>${escapeHtml(row.description || row.entry_type)}</small><time>${walletDateTime(row.date)}</time></div><span class="wallet-status completed">${tAccount(row.direction === "credit" ? "walletCreditIn" : "walletCreditOut")}</span></div>`).join("")
+              ? rows.map((row) => {
+                  if (row.kind === "request") {
+                    const paymentUrl = row.provider === "midtrans" && row.status === "pending"
+                      ? safeMidtransPaymentUrl(row.snap_redirect_url)
+                      : "";
+                    const action = `<div class="wallet-status-actions"><span class="wallet-status ${escapeHtml(row.status)}">${escapeHtml(walletStatusLabel(row.status))}</span>${paymentUrl ? `<a class="wallet-pay-link" href="${escapeHtml(paymentUrl)}">${escapeHtml(tAccount("walletPayNow"))}</a>` : ""}</div>`;
+                    return `<div class="wallet-history-row"><div><strong>${formatWalletRupiah(row.amount)}</strong><small>${escapeHtml(row.provider === "midtrans" ? "Midtrans" : row.payment_reference || tAccount("walletTopupRequest"))}</small><time>${walletDateTime(row.date)}</time></div>${action}</div>`;
+                  }
+                  return `<div class="wallet-history-row"><div><strong class="wallet-history-amount ${row.direction === "credit" ? "credit" : "debit"}">${row.direction === "credit" ? "+" : "−"}${formatWalletRupiah(row.amount)}</strong><small>${escapeHtml(row.description || row.entry_type)}</small><time>${walletDateTime(row.date)}</time></div><span class="wallet-status completed">${tAccount(row.direction === "credit" ? "walletCreditIn" : "walletCreditOut")}</span></div>`;
+                }).join("")
               : `<small>${escapeHtml(tAccount("walletEmpty"))}</small>`;
           }
         } catch (_) {}
+      }
+
+      async function createWalletMidtransTopup() {
+        const amount = getWalletTopupAmount();
+        const button = document.getElementById("walletSubmitButton");
+        if (button) {
+          button.disabled = true;
+          button.textContent = tAccount("walletSubmitLoading");
+        }
+        try {
+          const res = await fetch("/api/wallet/topups/midtrans", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "x-user-csrf-token": getCookie("user_csrf") },
+            body: JSON.stringify({ amount }),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.message || "Gagal membuat pembayaran Midtrans");
+          const paymentUrl = safeMidtransPaymentUrl(data.paymentUrl);
+          if (!paymentUrl) throw new Error("URL pembayaran Midtrans tidak valid");
+          window.location.assign(paymentUrl);
+        } catch (err) {
+          Swal.fire({ icon: "error", title: "Top up gagal", text: err.message });
+          if (button) button.disabled = button.dataset.pending === "true";
+          updateWalletTopupButton();
+        }
       }
 
       async function createWalletTopup() {

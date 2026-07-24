@@ -46,6 +46,13 @@ async function ensureWalletSchema(db) {
       created_at TEXT NOT NULL,
       reviewed_at TEXT
     )`,
+    `ALTER TABLE wallet_topup_requests ADD COLUMN IF NOT EXISTS provider TEXT NOT NULL DEFAULT 'manual_qris'`,
+    `ALTER TABLE wallet_topup_requests ADD COLUMN IF NOT EXISTS provider_order_id TEXT`,
+    `ALTER TABLE wallet_topup_requests ADD COLUMN IF NOT EXISTS payment_amount BIGINT`,
+    `ALTER TABLE wallet_topup_requests ADD COLUMN IF NOT EXISTS snap_token TEXT`,
+    `ALTER TABLE wallet_topup_requests ADD COLUMN IF NOT EXISTS snap_redirect_url TEXT`,
+    `ALTER TABLE wallet_topup_requests ADD COLUMN IF NOT EXISTS provider_transaction_id TEXT`,
+    `ALTER TABLE wallet_topup_requests ADD COLUMN IF NOT EXISTS paid_at TEXT`,
     `CREATE TABLE IF NOT EXISTS wallet_ledger (
       id BIGSERIAL PRIMARY KEY,
       user_id INTEGER NOT NULL,
@@ -65,6 +72,12 @@ async function ensureWalletSchema(db) {
      ON wallet_topup_requests(status, created_at DESC)`,
     `CREATE INDEX IF NOT EXISTS idx_wallet_topups_user_created
      ON wallet_topup_requests(user_id, created_at DESC)`,
+    `CREATE UNIQUE INDEX IF NOT EXISTS idx_wallet_topups_provider_order
+     ON wallet_topup_requests(provider_order_id)
+     WHERE provider_order_id IS NOT NULL`,
+    `CREATE UNIQUE INDEX IF NOT EXISTS idx_wallet_topups_provider_transaction
+     ON wallet_topup_requests(provider_transaction_id)
+     WHERE provider_transaction_id IS NOT NULL`,
     `CREATE INDEX IF NOT EXISTS idx_wallet_ledger_user_created
      ON wallet_ledger(user_id, created_at DESC)`,
   ];
