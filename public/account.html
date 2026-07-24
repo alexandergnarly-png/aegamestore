@@ -135,6 +135,25 @@
         box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.14);
       }
 
+      .skip-link {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 100;
+        padding: 10px 14px;
+        border-radius: 12px;
+        background: var(--ink);
+        color: var(--inverse);
+        font-size: 12px;
+        font-weight: 900;
+        transform: translateY(-160%);
+        transition: transform 0.18s ease;
+      }
+
+      .skip-link:focus-visible {
+        transform: translateY(0);
+      }
+
       body.dark-theme :focus-visible {
         box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.18);
       }
@@ -655,12 +674,13 @@
       }
 
       .wallet-panel { display: grid; gap: 14px; }
-      .wallet-balance-layout { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:12px; }
+      .wallet-balance-layout { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:16px; }
       .wallet-balance-card, .wallet-qr-card, .wallet-auto-card { min-width:0; padding:18px; border:1px solid var(--line); border-radius:18px; background:var(--soft); }
-      .wallet-balance-card { display:flex; align-items:center; }
+      .wallet-balance-card { display:flex; align-items:center; min-height:104px; }
       .wallet-balance-card small { display:block; color:var(--muted); font-weight:800; text-transform:uppercase; letter-spacing:.08em; }
-      .wallet-balance-card strong { display:block; margin-top:5px; font-size:28px; }
-      .wallet-qr-card { display:grid; grid-template-columns:minmax(0,1fr) 116px; align-items:center; gap:12px; }
+      .wallet-balance-card strong { display:block; margin-top:5px; font-size:28px; font-variant-numeric:tabular-nums; letter-spacing:-.04em; }
+      .wallet-auto-card { min-height:104px; }
+      .wallet-qr-card { display:grid; grid-template-columns:minmax(0,1fr) 116px; align-items:center; gap:16px; }
       .wallet-qr-card small { display:block; color:var(--muted); font-size:11px; font-weight:800; line-height:1.45; }
       .wallet-qr { width:100%; max-width:116px; border:1px solid var(--line); border-radius:14px; background:#fff; padding:8px; }
       .wallet-auto-card { display:flex; align-items:center; gap:12px; }
@@ -673,7 +693,7 @@
       .wallet-amount-prefix { position:absolute; left:18px; top:50%; transform:translateY(-50%); color:var(--muted); font-weight:900; pointer-events:none; }
       .wallet-amount-wrap input { padding-left:44px; font-size:18px; font-weight:900; }
       .wallet-quick-amounts { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:7px; }
-      .wallet-amount-chip { min-height:38px; padding:7px 5px; border:1px solid var(--line); border-radius:12px; background:var(--soft); color:var(--ink); font-size:11px; font-weight:900; }
+      .wallet-amount-chip { min-height:44px; padding:7px 5px; border:1px solid var(--line); border-radius:12px; background:var(--soft); color:var(--ink); font-size:11px; font-weight:900; touch-action:manipulation; }
       .wallet-amount-chip.active { border-color:var(--ink); background:var(--ink); color:var(--inverse); }
       .wallet-optional { border:1px solid var(--line); border-radius:16px; background:var(--soft); overflow:hidden; }
       .wallet-optional summary { padding:12px 14px; color:var(--muted); cursor:pointer; font-size:12px; font-weight:900; list-style:none; }
@@ -698,7 +718,7 @@
       .wallet-status.rejected { background:#fff0f0; color:#a32020; border-color:#e7b8b8; }
       .wallet-status.completed { background:#eaf8ee; color:#166534; border-color:#b9ddc2; }
       .wallet-status-actions { display:grid; justify-items:end; gap:6px; }
-      .wallet-pay-link { display:inline-flex; align-items:center; justify-content:center; min-height:30px; padding:6px 10px; border-radius:10px; background:var(--ink); color:var(--inverse); font-size:9px; font-weight:950; }
+      .wallet-pay-link { display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:6px 10px; border-radius:10px; background:var(--ink); color:var(--inverse); font-size:9px; font-weight:950; touch-action:manipulation; }
 
       .tab-btn {
         min-width: 0;
@@ -718,6 +738,7 @@
           background 0.18s ease,
           color 0.18s ease,
           transform 0.18s ease;
+        touch-action: manipulation;
       }
 
       .tab-btn iconify-icon {
@@ -744,6 +765,10 @@
 
       .panel {
         display: none;
+      }
+
+      .panel[hidden] {
+        display: none !important;
       }
 
       .panel.active {
@@ -1268,7 +1293,8 @@
 
         .lang-btn {
           min-width: 31px;
-          height: 29px;
+          min-height: 44px;
+          height: 44px;
           padding: 0 8px;
           font-size: 11px;
         }
@@ -1276,8 +1302,8 @@
         .icon-btn,
         .header-back {
           width: 38px;
-          height: 38px;
-          flex: 0 0 38px;
+          height: 44px;
+          flex: 0 0 44px;
           padding: 0;
           border-radius: 14px;
         }
@@ -1478,6 +1504,8 @@
         .wallet-qr { max-width: 124px; align-self: center; }
         .wallet-history-row { align-items: start; }
         .wallet-history-row > div { min-width: 0; overflow-wrap: anywhere; }
+        .wallet-balance-card,
+        .wallet-auto-card { min-height: 92px; }
 
         .badge-benefit-card { padding: 14px; border-radius: 18px; }
         .badge-benefit-list { gap: 7px; }
@@ -1494,6 +1522,7 @@
   >
     <span aria-hidden="true" class="blob blob-1"></span>
     <span aria-hidden="true" class="blob blob-2"></span>
+    <a class="skip-link" data-account-i18n="skipToContent" href="#account-main">Lewati ke konten</a>
     <header class="site-header">
       <div class="header-inner">
         <a aria-label="AE Game Store - Beranda" class="brand" href="/">
@@ -1543,7 +1572,7 @@
         </div>
       </div>
     </header>
-    <main class="page">
+    <main class="page" id="account-main" tabindex="-1">
       <!-- Profile column -->
       <aside aria-label="Profil pengguna" class="surface profile-card">
         <div class="profile-card-head">
@@ -1605,9 +1634,11 @@
       <section aria-label="Pengaturan akun" class="surface">
         <nav aria-label="Account section tabs" class="tab-card" role="tablist">
           <button
+            aria-controls="panel-orders"
             aria-selected="true"
             class="tab-btn active"
             data-tab="orders"
+            id="tab-orders"
             onclick="switchTab('orders')"
             role="tab"
             type="button"
@@ -1616,9 +1647,11 @@
             <span data-account-i18n="orderHistoryTitle">Riwayat Order</span>
           </button>
           <button
+            aria-controls="panel-default"
             aria-selected="false"
             class="tab-btn"
             data-tab="default"
+            id="tab-default"
             onclick="switchTab('default')"
             role="tab"
             type="button"
@@ -1630,9 +1663,11 @@
             <span data-account-i18n="defaultOrderTitle">Data Default</span>
           </button>
           <button
+            aria-controls="panel-security"
             aria-selected="false"
             class="tab-btn"
             data-tab="security"
+            id="tab-security"
             onclick="switchTab('security')"
             role="tab"
             type="button"
@@ -1643,12 +1678,12 @@
             ></iconify-icon>
             <span data-account-i18n="changePasswordTitle">Keamanan</span>
           </button>
-          <button aria-selected="false" class="tab-btn" data-tab="wallet" onclick="switchTab('wallet')" role="tab" type="button">
+          <button aria-controls="panel-wallet" aria-selected="false" class="tab-btn" data-tab="wallet" id="tab-wallet" onclick="switchTab('wallet')" role="tab" type="button">
             <iconify-icon aria-hidden="true" icon="mdi:wallet-outline"></iconify-icon>
             <span>AE Credit</span>
           </button>
         </nav>
-        <div class="panel" id="panel-wallet" role="tabpanel">
+        <div aria-labelledby="tab-wallet" class="panel" hidden id="panel-wallet" role="tabpanel" tabindex="0">
           <div class="section-title" data-account-i18n="walletTitle">AE Credit</div>
           <p class="section-desc" data-account-i18n="walletDesc">Top up manual via QRIS, lalu gunakan saldo untuk checkout tanpa biaya QRIS.</p>
           <div class="wallet-panel">
@@ -1659,10 +1694,10 @@
             <div class="wallet-topup-form">
               <label><span data-account-i18n="walletAmountLabel">Nominal top up</span><span class="wallet-amount-wrap"><span class="wallet-amount-prefix">Rp</span><input id="walletTopupAmount" type="text" inputmode="numeric" autocomplete="off" placeholder="Minimal 10.000" data-account-placeholder="walletAmountPlaceholder" oninput="formatWalletTopupInput(this)"></span></label>
               <div class="wallet-quick-amounts" aria-label="Pilihan nominal cepat">
-                <button class="wallet-amount-chip" type="button" data-amount="10000" onclick="setWalletTopupAmount(10000)">Rp10k</button>
-                <button class="wallet-amount-chip" type="button" data-amount="25000" onclick="setWalletTopupAmount(25000)">Rp25k</button>
-                <button class="wallet-amount-chip" type="button" data-amount="50000" onclick="setWalletTopupAmount(50000)">Rp50k</button>
-                <button class="wallet-amount-chip" type="button" data-amount="100000" onclick="setWalletTopupAmount(100000)">Rp100k</button>
+                <button aria-pressed="false" class="wallet-amount-chip" type="button" data-amount="10000" onclick="setWalletTopupAmount(10000)">Rp10k</button>
+                <button aria-pressed="false" class="wallet-amount-chip" type="button" data-amount="25000" onclick="setWalletTopupAmount(25000)">Rp25k</button>
+                <button aria-pressed="false" class="wallet-amount-chip" type="button" data-amount="50000" onclick="setWalletTopupAmount(50000)">Rp50k</button>
+                <button aria-pressed="false" class="wallet-amount-chip" type="button" data-amount="100000" onclick="setWalletTopupAmount(100000)">Rp100k</button>
               </div>
               <button class="btn btn-primary" id="walletSubmitButton" type="button" onclick="createWalletMidtransTopup()">Bayar otomatis via Midtrans</button>
               <small class="wallet-payment-note" data-account-i18n="walletMidtransNote">Saldo masuk otomatis setelah pembayaran terverifikasi.</small>
@@ -1687,6 +1722,7 @@
           class="panel active"
           id="panel-orders"
           role="tabpanel"
+          tabindex="0"
         >
           <div class="section-title" data-account-i18n="orderHistoryTitle">
             Riwayat Order
@@ -1757,8 +1793,10 @@
         <div
           aria-labelledby="tab-default"
           class="panel"
+          hidden
           id="panel-default"
           role="tabpanel"
+          tabindex="0"
         >
           <div class="section-title" data-account-i18n="defaultOrderTitle">
             Data Order Default
@@ -1816,8 +1854,10 @@
         <div
           aria-labelledby="tab-security"
           class="panel"
+          hidden
           id="panel-security"
           role="tabpanel"
+          tabindex="0"
         >
           <div class="section-title" data-account-i18n="changePasswordTitle">
             Ganti Password
@@ -1987,6 +2027,7 @@
             "Semua transaksi yang terhubung ke akunmu, lengkap dengan key game dan detail pembayaran.",
           loadingOrderHistory: "Memuat riwayat order...",
           backHome: "Kembali ke Home",
+          skipToContent: "Lewati ke konten",
           logout: "Logout",
           paidOrder: "order sukses",
           totalSpend: "total belanja",
@@ -2117,6 +2158,7 @@
             "All transactions linked to your account, complete with game keys and payment details.",
           loadingOrderHistory: "Loading order history...",
           backHome: "Back to Home",
+          skipToContent: "Skip to content",
           logout: "Logout",
           paidOrder: "successful orders",
           totalSpend: "total spent",
@@ -2290,7 +2332,9 @@
           btn.setAttribute("aria-selected", isActive ? "true" : "false");
         });
         document.querySelectorAll(".panel").forEach((panel) => {
-          panel.classList.toggle("active", panel.id === "panel-" + name);
+          const isActive = panel.id === "panel-" + name;
+          panel.classList.toggle("active", isActive);
+          panel.hidden = !isActive;
         });
         if (name === "wallet") loadWallet();
       }
@@ -2328,7 +2372,9 @@
         const manualButton = document.getElementById("walletManualSubmitButton");
         if (manualButton) manualButton.disabled = button?.dataset.pending === "true";
         document.querySelectorAll(".wallet-amount-chip").forEach((chip) => {
-          chip.classList.toggle("active", Number(chip.dataset.amount) === amount);
+          const isActive = Number(chip.dataset.amount) === amount;
+          chip.classList.toggle("active", isActive);
+          chip.setAttribute("aria-pressed", isActive ? "true" : "false");
         });
       }
 

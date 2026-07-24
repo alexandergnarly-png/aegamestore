@@ -13,6 +13,10 @@ scripts.forEach(([, source]) => assert.doesNotThrow(() => new Function(source)))
   'walletSubmitAmount: "Bayar {amount} via Midtrans"',
   'onclick="createWalletMidtransTopup()"',
   'class="wallet-optional wallet-manual-fallback"',
+  'class="skip-link" data-account-i18n="skipToContent" href="#account-main"',
+  'id="account-main" tabindex="-1"',
+  'aria-controls="panel-wallet"',
+  'aria-pressed="false" class="wallet-amount-chip"',
 ].forEach((marker) => assert.ok(html.includes(marker), `Missing wallet UI marker: ${marker}`));
 
 console.log("AE Credit account UI check passed.");
