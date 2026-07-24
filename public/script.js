@@ -2274,7 +2274,7 @@ function showPrivacyPolicy() {
     icon: "info",
     confirmButtonText: t.policyOk,
     confirmButtonColor: "#0a0a0a",
-    background: "#f0f9ff",
+    customClass: { popup: "ae-policy-popup" },
   });
 }
 
@@ -2287,7 +2287,7 @@ function showTermsPolicy() {
     icon: "info",
     confirmButtonText: t.policyOk,
     confirmButtonColor: "#0a0a0a",
-    background: "#f0f9ff",
+    customClass: { popup: "ae-policy-popup" },
   });
 }
 
@@ -2852,8 +2852,10 @@ async function openReviewPopup() {
             type="button"
             class="${rating <= popupRating ? "active" : ""}"
             data-popup-rating="${rating}"
+            aria-label="${rating} ${currentLanguage === "en" ? "stars" : "bintang"}"
+            aria-pressed="${rating <= popupRating ? "true" : "false"}"
           >
-            *
+            <iconify-icon aria-hidden="true" icon="mdi:star"></iconify-icon>
           </button>
         `,
       )
@@ -2866,6 +2868,7 @@ async function openReviewPopup() {
         ${renderPopupStars()}
       </div>
 
+      <label class="review-popup-label" for="reviewPopupComment">${currentLanguage === "en" ? "Your experience" : "Pengalaman kamu"}</label>
       <textarea
         id="reviewPopupComment"
         class="review-popup-textarea"
@@ -2894,6 +2897,10 @@ async function openReviewPopup() {
           starsBox.querySelectorAll("button").forEach((starButton) => {
             const rating = Number(starButton.dataset.popupRating || 0);
             starButton.classList.toggle("active", rating <= popupRating);
+            starButton.setAttribute(
+              "aria-pressed",
+              rating <= popupRating ? "true" : "false",
+            );
           });
         });
       });
@@ -3250,19 +3257,31 @@ function showGuide() {
   Swal.fire({
     title: t.guideTitle,
     html: `
-      <div style="text-align: left; font-size: 14px; line-height: 1.6; color: #334155;">
-        <b>1.</b> ${t.guideStep1}<br><br>
-        <b>2.</b> ${t.guideStep2}<br><br>
-        <b>3.</b> ${t.guideStep3}<br><br>
-        <b>4.</b> ${t.guideStep4}<br><br>
-        <b>5.</b> ${t.guideStep5}
-      </div>
+      <ol class="ae-guide-list">
+        ${[
+          t.guideStep1,
+          t.guideStep2,
+          t.guideStep3,
+          t.guideStep4,
+          t.guideStep5,
+        ]
+          .map(
+            (step, index) =>
+              `<li><span aria-hidden="true">${index + 1}</span><p>${escapeHtml(step)}</p></li>`,
+          )
+          .join("")}
+      </ol>
     `,
-    icon: "info",
+    showCloseButton: true,
     confirmButtonText: t.guideOk,
-    confirmButtonColor: "#0a0a0a",
-    background: "#f0f9ff",
-    backdrop: "rgba(12, 74, 110, 0.4)",
+    buttonsStyling: false,
+    customClass: {
+      popup: "ae-guide-popup",
+      title: "ae-guide-title",
+      htmlContainer: "ae-guide-content",
+      actions: "ae-guide-actions",
+      confirmButton: "ae-guide-confirm",
+    },
   });
 }
 

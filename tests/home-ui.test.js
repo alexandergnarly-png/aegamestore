@@ -17,5 +17,9 @@ assert.match(css, /\.promo-dot,[\s\S]*?min-width: 44px/);
 assert.match(html, /aria-describedby="modalOrderDescription"/);
 assert.match(css, /\.order-modal-card \{[\s\S]*?scroll-padding-bottom: 156px/);
 assert.match(css, /\.checkout-payment-option \{[\s\S]*?min-height: 64px/);
+assert.match(script, /class="ae-guide-list"/);
+assert.match(script, /popup: "ae-guide-popup"/);
+assert.match(css, /\.swal2-close \{[\s\S]*?width: 44px/);
+assert.match(css, /\.review-popup-stars button \{[\s\S]*?min-width: 44px/);
 
 console.log("Homepage UI/UX accessibility check passed.");
