@@ -2104,7 +2104,7 @@ async function checkLoginStatus() {
         <strong>${escapeHtml(data.username || "")}</strong>
       </span>
       <a href="/account.html" class="user-action-btn">
-        <iconify-icon icon="mdi:account-circle-outline" aria-hidden="true"></iconify-icon>
+        <iconify-icon class="account-orbit-icon" icon="mdi:account-circle-outline" aria-hidden="true"></iconify-icon>
         <span>${escapeHtml(accountLabel)}</span>
       </a>
       <button type="button" onclick="logoutUser()" class="user-action-btn user-action-danger">

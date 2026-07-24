@@ -172,6 +172,27 @@
           scroll-behavior: auto !important;
           transition-duration: 0.001ms !important;
         }
+
+        .account-orbit-icon {
+          animation: none !important;
+        }
+      }
+
+      .account-orbit-icon {
+        display: block;
+        transform-origin: center;
+        animation: accountIconFloat 3.8s ease-in-out infinite;
+        will-change: transform;
+      }
+
+      @keyframes accountIconFloat {
+        0%,
+        100% {
+          transform: translateY(0) rotate(0deg);
+        }
+        50% {
+          transform: translateY(-3px) rotate(6deg);
+        }
       }
 
       .blob {
@@ -1577,7 +1598,7 @@
       <aside aria-label="Profil pengguna" class="surface profile-card">
         <div class="profile-card-head">
           <div aria-hidden="true" class="avatar">
-            <iconify-icon icon="mdi:account-outline"></iconify-icon>
+            <iconify-icon class="account-orbit-icon" icon="mdi:account-outline"></iconify-icon>
           </div>
           <div class="profile-card-text">
             <h1 data-account-i18n="accountTitle">Akun Saya</h1>

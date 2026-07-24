@@ -17,6 +17,7 @@ scripts.forEach(([, source]) => assert.doesNotThrow(() => new Function(source)))
   'id="account-main" tabindex="-1"',
   'aria-controls="panel-wallet"',
   'aria-pressed="false" class="wallet-amount-chip"',
+  'class="account-orbit-icon" icon="mdi:account-outline"',
 ].forEach((marker) => assert.ok(html.includes(marker), `Missing wallet UI marker: ${marker}`));
 
 console.log("AE Credit account UI check passed.");

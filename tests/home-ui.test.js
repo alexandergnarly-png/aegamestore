@@ -21,5 +21,9 @@ assert.match(script, /class="ae-guide-list"/);
 assert.match(script, /popup: "ae-guide-popup"/);
 assert.match(css, /\.swal2-close \{[\s\S]*?width: 44px/);
 assert.match(css, /\.review-popup-stars button \{[\s\S]*?min-width: 44px/);
+assert.match(html, /class="account-orbit-icon"/);
+assert.match(script, /class="account-orbit-icon"/);
+assert.match(css, /@keyframes accountIconFloat/);
+assert.match(css, /prefers-reduced-motion: reduce[\s\S]*?account-orbit-icon/);
 
 console.log("Homepage UI/UX accessibility check passed.");

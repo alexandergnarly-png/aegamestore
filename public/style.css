@@ -14089,3 +14089,35 @@ body.admin-chat-open {
     min-height: 44px;
   }
 }
+
+/* One lightweight account icon animation; transform-only to keep it cheap. */
+.account-orbit-icon {
+  display: block;
+  flex: 0 0 auto;
+  font-size: 18px;
+  transform-origin: center;
+  animation: accountIconFloat 3.8s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes accountIconFloat {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-3px) rotate(6deg);
+  }
+}
+
+#userMenu .account-auth-btn::before,
+#userMenu .account-auth-btn::after {
+  display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .account-orbit-icon {
+    animation: none !important;
+    will-change: auto;
+  }
+}
