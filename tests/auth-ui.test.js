@@ -24,3 +24,26 @@ scripts.forEach(([, source]) => assert.doesNotThrow(() => new Function(source)))
 );
 
 console.log("Auth UI/UX accessibility check passed.");
+
+const admin = fs.readFileSync("public/admin-login.html", "utf8");
+const adminScripts = [
+  ...admin.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi),
+];
+
+adminScripts.forEach(([, source]) =>
+  assert.doesNotThrow(() => new Function(source)),
+);
+
+[
+  'id="loginForm"',
+  'aria-describedby="usernameError"',
+  'aria-describedby="passwordError capsWarning"',
+  'role="alert"',
+  'autocomplete="current-password"',
+  'prefers-reduced-motion: reduce',
+  'password: passwordInput.value',
+].forEach((marker) =>
+  assert.ok(admin.includes(marker), `Missing admin login UX marker: ${marker}`),
+);
+
+console.log("Admin login UI/UX accessibility check passed.");
