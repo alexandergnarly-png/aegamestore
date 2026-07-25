@@ -7,6 +7,13 @@ const css = fs.readFileSync("public/style.css", "utf8");
 
 assert.match(html, /href="#main-content"/);
 assert.match(html, /id="main-content"[^>]*tabindex="-1"/);
+assert.doesNotMatch(html, /id="preloader"/);
+assert.doesNotMatch(script, /showTelegramPopup/);
+assert.doesNotMatch(script, /Gagal memuat daftar produk dari server/);
+assert.ok(
+  html.indexOf('id="store-section"') < html.indexOf('id="review-section"'),
+  "Catalog should appear before buyer reviews",
+);
 assert.match(html, /role="tab" aria-selected="true"/);
 assert.match(html, /icon="ph:moon-stars-bold"/);
 assert.match(script, /card\.setAttribute\("role", "button"\)/);

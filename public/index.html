@@ -93,61 +93,6 @@
       Lewati ke konten
     </a>
 
-    <div id="preloader">
-      <div class="loader-content">
-        <div class="loader-logo">
-          <svg
-            width="36"
-            height="36"
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <rect x="2" y="5" width="20" height="2.5" rx="1.25" fill="white" />
-            <rect
-              x="1"
-              y="2"
-              width="22"
-              height="2"
-              rx="1"
-              fill="rgba(255,255,255,0.7)"
-            />
-            <rect
-              x="4"
-              y="7.5"
-              width="2.2"
-              height="14.5"
-              rx="1.1"
-              fill="white"
-            />
-            <rect
-              x="17.8"
-              y="7.5"
-              width="2.2"
-              height="14.5"
-              rx="1.1"
-              fill="white"
-            />
-            <rect
-              x="8"
-              y="13"
-              width="8"
-              height="2"
-              rx="1"
-              fill="rgba(255,255,255,0.6)"
-            />
-          </svg>
-        </div>
-        <div class="loader-text" data-i18n="loadingWebsite">
-          Memuat Website...
-        </div>
-        <div class="loader-bar">
-          <div class="loader-progress"></div>
-        </div>
-      </div>
-    </div>
-
     <div class="watercolor-blob blob-1" aria-hidden="true"></div>
     <div class="watercolor-blob blob-2" aria-hidden="true"></div>
 
@@ -525,52 +470,6 @@
         </div>
       </section>
 
-      <section class="testimonial-section" id="review-section">
-        <div class="section-head text-center review-section-head">
-          <h2 data-i18n="testiTitle">Kepercayaan Gamers</h2>
-          <p data-i18n="testiDesc">
-            Review asli dari buyer yang sudah pernah bertransaksi di AE Game
-            Store.
-          </p>
-        </div>
-
-        <div class="review-summary" id="reviewSummary">
-          <strong>⭐ 0.0</strong>
-          <span>Memuat review buyer...</span>
-        </div>
-
-        <div class="review-action-card">
-          <button
-            type="button"
-            class="open-review-btn"
-            onclick="openReviewPopup()"
-          >
-            <iconify-icon icon="ph:star-four-fill" aria-hidden="true"></iconify-icon>
-            <b data-i18n="giveReviewBtn">Kasih Review</b>
-          </button>
-          <p data-i18n="reviewNote">
-            Review hanya bisa dikirim oleh buyer yang sudah pernah berhasil
-            order.
-          </p>
-        </div>
-
-        <div class="testi-scroll-container">
-          <div class="testi-track" id="reviewTrack">
-            <div class="testi-card">
-              <div class="testi-header">
-                <div class="testi-avatar">AE</div>
-                <div>
-                  <strong>AE Game Store</strong>
-                  <span class="testi-game">Review Buyer</span>
-                </div>
-                <div class="testi-rating">⭐⭐⭐⭐⭐</div>
-              </div>
-              <p>Memuat review...</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <section class="store-layout game-only-layout" id="store-section">
         <div class="shop-card">
           <div class="section-head">
@@ -780,6 +679,52 @@
 
           <div class="block">
             <div class="game-grid compact-game-grid" id="gameGrid"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="testimonial-section" id="review-section">
+        <div class="section-head text-center review-section-head">
+          <h2 data-i18n="testiTitle">Kepercayaan Gamers</h2>
+          <p data-i18n="testiDesc">
+            Review asli dari buyer yang sudah pernah bertransaksi di AE Game
+            Store.
+          </p>
+        </div>
+
+        <div class="review-summary" id="reviewSummary">
+          <strong>⭐ 0.0</strong>
+          <span>Memuat review buyer...</span>
+        </div>
+
+        <div class="review-action-card">
+          <button
+            type="button"
+            class="open-review-btn"
+            onclick="openReviewPopup()"
+          >
+            <iconify-icon icon="ph:star-four-fill" aria-hidden="true"></iconify-icon>
+            <b data-i18n="giveReviewBtn">Kasih Review</b>
+          </button>
+          <p data-i18n="reviewNote">
+            Review hanya bisa dikirim oleh buyer yang sudah pernah berhasil
+            order.
+          </p>
+        </div>
+
+        <div class="testi-scroll-container">
+          <div class="testi-track" id="reviewTrack">
+            <div class="testi-card">
+              <div class="testi-header">
+                <div class="testi-avatar">AE</div>
+                <div>
+                  <strong>AE Game Store</strong>
+                  <span class="testi-game">Review Buyer</span>
+                </div>
+                <div class="testi-rating">⭐⭐⭐⭐⭐</div>
+              </div>
+              <p>Memuat review...</p>
+            </div>
           </div>
         </div>
       </section>
@@ -1572,23 +1517,6 @@
   &copy; 2026 AE Game Store. Top up game key cepat, aman, dan terpercaya.
 </div>
     </footer>
-
-    <script>
-      (() => {
-        const hidePreloader = () => {
-          document.getElementById("preloader")?.classList.add("fade-out");
-        };
-
-        window.addEventListener(
-          "load",
-          () => window.setTimeout(hidePreloader, 300),
-          { once: true },
-        );
-
-        // Fallback biar mobile tidak terasa nunggu lama kalau asset eksternal lambat
-        window.setTimeout(hidePreloader, 1600);
-      })();
-    </script>
 
     <script src="/script.js?v=20260719-security-v1" defer></script>
   </body>

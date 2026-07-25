@@ -698,12 +698,6 @@ async function loadAllProducts() {
     </div>
   `;
 
-      Swal.fire({
-        icon: "info",
-        title: "Stok Kosong",
-        text: "Produk belum tersedia saat ini.",
-        confirmButtonColor: "#0a0a0a",
-      });
       return;
     }
 
@@ -724,13 +718,6 @@ async function loadAllProducts() {
     <a href="https://t.me/aegamestore" target="_blank">Chat Admin</a>
   </div>
 `;
-
-    Swal.fire({
-      icon: "error",
-      title: "Oops...",
-      text: "Gagal memuat daftar produk dari server.",
-      confirmButtonColor: "#ffe135",
-    });
   }
 }
 
@@ -3285,95 +3272,8 @@ function showGuide() {
   });
 }
 
-function showTelegramPopup() {
-  const hideUntil = Number(localStorage.getItem("tg_popup_hide_until") || 0);
-  const now = Date.now();
-
-  if (hideUntil && !Number.isNaN(hideUntil) && now <= hideUntil) {
-    return;
-  }
-
-  setTimeout(() => {
-    Swal.fire({
-      html: `
-        <div style="text-align:center; padding: 10px 0;">
-          <div style="background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%); width: 90px; height: 90px; border-radius: 24px; display: flex; align-items: center; justify-content: center; margin: 0 auto 22px; box-shadow: 0 10px 20px rgba(14, 165, 233, 0.15);">
-            <iconify-icon icon="logos:telegram" width="54"></iconify-icon>
-          </div>
-          <h2 style="color: #0c4a6e; font-size: 22px; font-weight: 800; margin-bottom: 12px; letter-spacing: -0.5px;">Eksklusif Community </h2>
-          <p style="color: #475569; font-size: 14px; line-height: 1.6; margin-bottom: 5px;">
-            Dapatkan <b>voucher diskon harian</b> dan update stok tercepat hanya di Telegram.
-          </p>
-          <div style="font-size: 12px; color: #0ea5e9; font-weight: 700; margin-top: 18px; display: inline-flex; align-items: center; gap: 6px; background: #e0f2fe; padding: 6px 14px; border-radius: 99px;">
-            <span style="width: 8px; height: 8px; background: #0ea5e9; border-radius: 50%; display: inline-block; animation: bluePulse 2s infinite;"></span>
-            Join 2,400+ Gamers Lainnya
-          </div>
-        </div>
-      `,
-      showCancelButton: false,
-      showDenyButton: true,
-      confirmButtonText: "Gabung Sekarang! Go",
-      denyButtonText: "Sembunyikan",
-      buttonsStyling: false,
-      width: "520px",
-      padding: "0",
-      customClass: {
-        popup: "ae-telegram-popup",
-        htmlContainer: "ae-telegram-html",
-        actions: "ae-telegram-actions",
-        confirmButton: "ae-telegram-confirm",
-        denyButton: "ae-telegram-deny",
-      },
-      background: document.body.classList.contains("dark-theme")
-        ? "#1e293b"
-        : "#fffdf2",
-      color: document.body.classList.contains("dark-theme")
-        ? "#f8fafc"
-        : "#0c4a6e",
-      backdrop: "rgba(12, 74, 110, 0.4)",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        window.open(
-          "https://t.me/aegamestore",
-          "_blank",
-          "noopener,noreferrer",
-        );
-      }
-
-      if (result.isDenied) {
-        const hours = 24;
-        const hideDuration = hours * 60 * 60 * 1000;
-
-        localStorage.setItem("tg_popup_hide_until", now + hideDuration);
-
-        Swal.fire({
-          toast: true,
-          position: "top-end",
-          icon: "success",
-          title: `Pop-up disembunyikan selama ${hours} jam`,
-          showConfirmButton: false,
-          timer: 2600,
-          customClass: {
-            popup: "ae-toast-popup",
-            title: "ae-toast-title",
-          },
-        });
-      }
-    });
-  }, 700);
-}
-
 document.addEventListener("DOMContentLoaded", () => {
-  const preloader = document.getElementById("preloader");
-
-  setTimeout(() => {
-    if (preloader) {
-      preloader.classList.add("fade-out");
-    }
-  }, 700);
-
   if (window.innerWidth > 768) {
-    setTimeout(showTelegramPopup, 1200);
     setInterval(createSakura, 700);
   }
 
