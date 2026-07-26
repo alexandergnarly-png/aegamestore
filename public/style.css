@@ -14332,9 +14332,13 @@ body.dark-theme .game-card-fav > span {
   }
 
   .order-steps {
-    top: calc(-12px - env(safe-area-inset-top, 0px));
+    position: relative;
+    top: auto;
+    clear: both;
+    z-index: 1;
     margin-inline: -12px !important;
-    padding: 10px 68px 10px 12px !important;
+    padding: 10px 12px !important;
+    backdrop-filter: none;
   }
 
   .modal-close-btn {
