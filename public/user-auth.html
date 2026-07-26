@@ -606,6 +606,66 @@
         }
       }
 
+      .field-error {
+        display: none;
+        margin-top: 6px;
+        color: #b42318;
+        font-size: 11px;
+        font-weight: 750;
+        line-height: 1.4;
+      }
+      .field-error.show {
+        display: block;
+      }
+      .input-group input[aria-invalid="true"] {
+        border-color: #b42318;
+        box-shadow: 0 0 0 3px rgba(180, 35, 24, .1);
+      }
+      .input-group.has-toggle input {
+        padding-right: 58px;
+      }
+      .password-toggle-btn {
+        width: 44px;
+        min-width: 44px;
+        padding: 0;
+        border-radius: 12px;
+        font-size: 0;
+      }
+      .password-toggle-btn iconify-icon {
+        display: block;
+        font-size: 19px;
+      }
+
+      @media (max-width: 720px) and (max-height: 740px) {
+        .auth-head {
+          grid-template-columns: 38px 1fr;
+          justify-items: start;
+          gap: 2px 10px;
+          padding-bottom: 10px;
+          text-align: left;
+        }
+        .auth-emoji {
+          grid-row: 1 / 3;
+          width: 38px;
+          height: 38px;
+          border-radius: 12px;
+        }
+        .auth-title {
+          align-self: end;
+          font-size: 18px;
+        }
+        .auth-subtitle {
+          align-self: start;
+          font-size: 11px;
+        }
+        .form-container.active > .btn-primary {
+          position: sticky;
+          bottom: 10px;
+          z-index: 10;
+          box-shadow: 0 10px 28px rgba(0, 0, 0, .18);
+        }
+      }
+
     </style>
   </head>
 <body onload="applyAuthLanguage()">
@@ -817,6 +877,7 @@
                     placeholder="Username"
                     data-auth-placeholder="usernamePlaceholder"
                     autocomplete="username"
+                    aria-describedby="loginUsernameError"
                   />
                   <span
                     class="input-status-icon ok"
@@ -825,6 +886,7 @@
                     >✓</span
                   >
                 </div>
+                <small class="field-error" id="loginUsernameError" role="alert"></small>
               </div>
               <div class="input-group has-toggle">
                 <label
@@ -843,16 +905,19 @@
                     placeholder="Password"
                     data-auth-placeholder="passwordPlaceholder"
                     autocomplete="current-password"
+                    aria-describedby="loginPasswordError loginCapsWarn"
                   />
                   <button
                     type="button"
                     class="password-toggle-btn"
                     data-password-target="loginPassword"
                     onclick="togglePasswordVisibility('loginPassword', this)"
+                    aria-label="Tampilkan password"
                   >
-                    Lihat
+                    <iconify-icon icon="ph:eye-bold" aria-hidden="true"></iconify-icon>
                   </button>
                 </div>
+                <small class="field-error" id="loginPasswordError" role="alert"></small>
                 <div
                   class="caps-warning"
                   id="loginCapsWarn"
@@ -949,7 +1014,7 @@
                     placeholder="Pilih Username (Min. 3 Huruf)"
                     data-auth-placeholder="registerUsernamePlaceholder"
                     autocomplete="username"
-                    aria-describedby="regUsernameHint"
+                    aria-describedby="regUsernameHint regUsernameError"
                   />
                   <span
                     class="input-status-icon"
@@ -963,6 +1028,7 @@
                     >Min. 3 karakter, tanpa spasi.</span
                   >
                 </div>
+                <small class="field-error" id="regUsernameError" role="alert"></small>
               </div>
 
               <div class="input-group has-toggle">
@@ -982,16 +1048,19 @@
                     placeholder="Buat Password (Min. 6 Huruf)"
                     data-auth-placeholder="registerPasswordPlaceholder"
                     autocomplete="new-password"
+                    aria-describedby="regPasswordError regStrengthLabel regCapsWarn"
                   />
                   <button
                     type="button"
                     class="password-toggle-btn"
                     data-password-target="regPassword"
                     onclick="togglePasswordVisibility('regPassword', this)"
+                    aria-label="Tampilkan password"
                   >
-                    Lihat
+                    <iconify-icon icon="ph:eye-bold" aria-hidden="true"></iconify-icon>
                   </button>
                 </div>
+                <small class="field-error" id="regPasswordError" role="alert"></small>
                 <div
                   class="strength-meter"
                   id="regStrength"
@@ -1147,6 +1216,20 @@
         }
       }
 
+      function setAuthFieldError(inputId, errorId, message) {
+        const input = document.getElementById(inputId);
+        const error = document.getElementById(errorId);
+        if (!input || !error) return;
+        const text = String(message || "").trim();
+        input.setAttribute("aria-invalid", text ? "true" : "false");
+        error.innerText = text;
+        error.classList.toggle("show", Boolean(text));
+      }
+
+      function clearAuthFieldError(inputId, errorId) {
+        setAuthFieldError(inputId, errorId, "");
+      }
+
       function setAuthLanguage(lang) {
         localStorage.setItem("ae_language", lang);
         document
@@ -1215,7 +1298,10 @@
         const dict = authTranslations[lang] || authTranslations.id;
         const isPassword = input.type === "password";
         input.type = isPassword ? "text" : "password";
-        buttonEl.innerText = isPassword ? dict.hidePassword : dict.showPassword;
+        const label = isPassword ? dict.hidePassword : dict.showPassword;
+        buttonEl.innerHTML = `<iconify-icon icon="${isPassword ? "ph:eye-slash-bold" : "ph:eye-bold"}" aria-hidden="true"></iconify-icon>`;
+        buttonEl.setAttribute("aria-label", label);
+        buttonEl.title = label;
       }
 
       // Enter to submit
@@ -1237,19 +1323,29 @@
         const loginPass = document.getElementById("loginPassword");
 
         if (loginUser) {
-          loginUser.addEventListener("input", validateLoginUsername);
+          loginUser.addEventListener("input", () => {
+            validateLoginUsername();
+            clearAuthFieldError("loginUsername", "loginUsernameError");
+          });
         }
         if (regUser) {
           regUser.addEventListener("input", () => {
             validateRegUsername();
             updateRegisterButtonState();
+            clearAuthFieldError("regUsername", "regUsernameError");
           });
         }
         if (regPass) {
           regPass.addEventListener("input", () => {
             updatePasswordStrength();
             updateRegisterButtonState();
+            clearAuthFieldError("regPassword", "regPasswordError");
           });
+        }
+        if (loginPass) {
+          loginPass.addEventListener("input", () =>
+            clearAuthFieldError("loginPassword", "loginPasswordError"),
+          );
         }
         updateRegisterButtonState();
 
@@ -1452,12 +1548,19 @@
         const dict = authTranslations[lang] || authTranslations.id;
 
         if (!username || !password) {
-          Swal.fire({
-            icon: "warning",
-            title: dict.oopsTitle,
-            text: dict.fillUsernamePassword,
-            confirmButtonColor: "#111111",
-          });
+          setAuthFieldError(
+            "loginUsername",
+            "loginUsernameError",
+            username ? "" : dict.requiredField,
+          );
+          setAuthFieldError(
+            "loginPassword",
+            "loginPasswordError",
+            password ? "" : dict.requiredField,
+          );
+          document
+            .getElementById(username ? "loginPassword" : "loginUsername")
+            ?.focus();
           return;
         }
 
@@ -1472,12 +1575,12 @@
           const data = await res.json();
 
           if (!res.ok) {
-            Swal.fire({
-              icon: "error",
-              title: dict.failedLoginTitle,
-              text: data.message,
-              confirmButtonColor: "#111111",
-            });
+            setAuthFieldError(
+              "loginPassword",
+              "loginPasswordError",
+              data.message || dict.failedLoginTitle,
+            );
+            document.getElementById("loginPassword")?.focus();
             btnReset(btn);
             return;
           }
@@ -1500,12 +1603,11 @@
             window.location.href = getAuthRedirectTarget();
           }, 1500);
         } catch {
-          Swal.fire({
-            icon: "error",
-            title: dict.errorTitle,
-            text: dict.serverError,
-            confirmButtonColor: "#111111",
-          });
+          setAuthFieldError(
+            "loginPassword",
+            "loginPasswordError",
+            dict.serverError,
+          );
           btnReset(btn);
         }
       }
@@ -1520,12 +1622,19 @@
         const dict = authTranslations[lang] || authTranslations.id;
 
         if (username.length < 3 || password.length < 6) {
-          Swal.fire({
-            icon: "warning",
-            title: dict.invalidTitle,
-            text: dict.invalidUserPass,
-            confirmButtonColor: "#111111",
-          });
+          setAuthFieldError(
+            "regUsername",
+            "regUsernameError",
+            username.length >= 3 ? "" : dict.usernameTooShort,
+          );
+          setAuthFieldError(
+            "regPassword",
+            "regPasswordError",
+            password.length >= 6 ? "" : dict.passwordTooShort,
+          );
+          document
+            .getElementById(username.length < 3 ? "regUsername" : "regPassword")
+            ?.focus();
           return;
         }
         if (terms && !terms.checked) {
@@ -1549,12 +1658,12 @@
           const data = await res.json();
 
           if (!res.ok) {
-            Swal.fire({
-              icon: "error",
-              title: dict.failedRegisterTitle,
-              text: data.message,
-              confirmButtonColor: "#111111",
-            });
+            setAuthFieldError(
+              "regUsername",
+              "regUsernameError",
+              data.message || dict.failedRegisterTitle,
+            );
+            document.getElementById("regUsername")?.focus();
             btnReset(btn);
             return;
           }
@@ -1575,12 +1684,11 @@
           });
           btnReset(btn);
         } catch {
-          Swal.fire({
-            icon: "error",
-            title: dict.errorTitle,
-            text: dict.serverError,
-            confirmButtonColor: "#111111",
-          });
+          setAuthFieldError(
+            "regUsername",
+            "regUsernameError",
+            dict.serverError,
+          );
           btnReset(btn);
         }
       }
@@ -1641,6 +1749,8 @@
           strengthStrong: "Kuat",
           oopsTitle: "Oops!",
           fillUsernamePassword: "Isi username dan password dulu ya.",
+          requiredField: "Kolom ini wajib diisi.",
+          passwordTooShort: "Password minimal 6 karakter.",
           verifying: "Memverifikasi...",
           registering: "Mendaftarkan...",
           failedLoginTitle: "Gagal Masuk",
@@ -1739,6 +1849,8 @@
           strengthStrong: "Strong",
           oopsTitle: "Oops!",
           fillUsernamePassword: "Please enter username and password.",
+          requiredField: "This field is required.",
+          passwordTooShort: "Password must be at least 6 characters.",
           verifying: "Verifying...",
           registering: "Creating...",
           failedLoginTitle: "Login Failed",
@@ -1811,11 +1923,11 @@
         document.querySelectorAll(".password-toggle-btn").forEach((button) => {
           const inputId = button.getAttribute("data-password-target");
           const input = document.getElementById(inputId);
-          if (input && input.type === "text") {
-            button.innerText = dict.hidePassword;
-          } else {
-            button.innerText = dict.showPassword;
-          }
+          const visible = input && input.type === "text";
+          const label = visible ? dict.hidePassword : dict.showPassword;
+          button.innerHTML = `<iconify-icon icon="${visible ? "ph:eye-slash-bold" : "ph:eye-bold"}" aria-hidden="true"></iconify-icon>`;
+          button.setAttribute("aria-label", label);
+          button.title = label;
         });
 
         // Sync lang switch UI

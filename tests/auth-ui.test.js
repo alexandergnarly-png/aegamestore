@@ -17,6 +17,12 @@ scripts.forEach(([, source]) => assert.doesNotThrow(() => new Function(source)))
   'icon="ph:moon-stars-bold"',
   'autocomplete="username"',
   'id="regUsernameHint"',
+  'id="loginUsernameError" role="alert"',
+  'id="loginPasswordError" role="alert"',
+  'aria-describedby="regPasswordError regStrengthLabel regCapsWarn"',
+  'icon="ph:eye-bold"',
+  "function setAuthFieldError(",
+  "@media (max-width: 720px) and (max-height: 740px)",
   'loginForm.hidden = true',
   'registerForm.hidden = false',
 ].forEach((marker) =>
