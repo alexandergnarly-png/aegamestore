@@ -13870,7 +13870,29 @@ body.admin-chat-open {
   min-width: 44px !important;
   height: 44px !important;
   min-height: 44px !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
   touch-action: manipulation;
+}
+
+.game-card-fav > span {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--nb-line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.92);
+}
+
+body.dark-theme .game-card-fav > span {
+  background: rgba(24, 24, 24, 0.92);
+}
+
+.game-card-fav.is-active > span {
+  background: var(--nb-red-soft);
 }
 
 .filter-pills .pill {
