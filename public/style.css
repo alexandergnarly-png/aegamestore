@@ -14139,11 +14139,28 @@ body.dark-theme .game-card-fav > span {
   width: 44px !important;
   height: 44px !important;
   margin: 0 !important;
-  border: 1px solid var(--nb-line-strong, #ccc) !important;
-  border-radius: 50% !important;
-  background: rgba(255, 255, 255, 0.94) !important;
-  color: #111 !important;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12) !important;
+  display: grid !important;
+  place-items: center;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 12px !important;
+  background: transparent !important;
+  color: transparent !important;
+  box-shadow: none !important;
+}
+
+.modal-close-btn::before {
+  content: "×";
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--nb-line-strong, #ccc);
+  border-radius: 10px;
+  background: var(--nb-surface, #fff);
+  color: var(--nb-ink, #111);
+  font-size: 20px;
+  line-height: 1;
 }
 
 .order-steps {
@@ -14358,11 +14375,13 @@ body.dark-theme .game-card-fav > span {
   .checkout-sticky-bar {
     display: flex !important;
     align-items: center !important;
-    bottom: 0 !important;
+    bottom: 10px !important;
     min-height: 78px !important;
-    margin: 18px -12px 0 !important;
+    margin: 18px 2px 10px !important;
     padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px)) !important;
-    border-radius: 0 !important;
+    border: 1px solid var(--nb-line-strong, #ccc) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 12px 34px rgba(0, 0, 0, 0.14) !important;
   }
 
   .checkout-sticky-total {
