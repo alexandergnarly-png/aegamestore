@@ -14049,6 +14049,28 @@ body.dark-theme .game-card-fav > span {
   display: none !important;
 }
 
+@media (max-width: 768px) {
+  #userMenu .account-auth-btn {
+    width: 44px !important;
+    min-width: 44px !important;
+    height: 44px !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border-radius: 50% !important;
+    font-size: 0 !important;
+  }
+
+  #userMenu .account-auth-btn span[data-i18n="loginBtn"] {
+    display: none !important;
+  }
+
+  #userMenu .account-auth-btn iconify-icon {
+    display: block !important;
+    margin: 0 !important;
+    font-size: 20px !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .account-orbit-icon {
     animation: none !important;
