@@ -13957,11 +13957,19 @@ body.admin-chat-open {
     margin: 0 !important;
     padding: 0 !important;
     border-radius: 12px !important;
+    background: transparent !important;
     font-size: 0 !important;
   }
 
   .game-card-cta::after {
     content: "→";
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: var(--nb-ink, #111);
+    color: var(--nb-bg, #fff);
     font-size: 18px;
     line-height: 1;
   }
