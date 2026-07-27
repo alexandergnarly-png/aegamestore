@@ -34,6 +34,7 @@ assert.match(css, /\.checkout-sticky-bar\.is-visible \{/);
 assert.match(css, /Compact mobile game cards/);
 assert.match(css, /grid-template-areas:[\s\S]*?"meta cta"/);
 assert.match(css, /\.game-card-cta::after \{[\s\S]*?content: "→"/);
+assert.match(css, /\.game-card-body \{[\s\S]*?position: static !important/);
 assert.match(html, /class="account-orbit-icon"/);
 assert.match(script, /class="account-orbit-icon"/);
 assert.match(css, /@keyframes accountIconFloat/);

@@ -13906,17 +13906,19 @@ body.admin-chat-open {
     background: rgba(255, 255, 255, 0.94) !important;
     color: #111 !important;
     border-color: rgba(17, 17, 17, 0.18) !important;
+    box-shadow: none !important;
   }
 
   .game-card-body {
+    position: static !important;
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) 44px !important;
     grid-template-areas:
       "title title"
       "meta cta";
     align-items: end !important;
-    gap: 6px 8px !important;
-    padding: 10px !important;
+    gap: 6px !important;
+    padding: 8px !important;
   }
 
   .game-card-title {
@@ -13934,7 +13936,8 @@ body.admin-chat-open {
   }
 
   .game-card-price b {
-    font-size: 14px !important;
+    font-size: 13px !important;
+    letter-spacing: -0.04em !important;
   }
 
   .game-card .game-card-stock {
