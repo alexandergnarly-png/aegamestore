@@ -14416,6 +14416,22 @@ body.dark-theme .game-card-fav > span {
     border: 1px solid var(--nb-line-strong, #ccc) !important;
     border-radius: 20px !important;
     box-shadow: 0 12px 34px rgba(0, 0, 0, 0.14) !important;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(12px) !important;
+    transition:
+      opacity 180ms ease,
+      transform 180ms ease,
+      visibility 0s linear 180ms;
+  }
+
+  .checkout-sticky-bar.is-visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: none !important;
+    transition-delay: 0s;
   }
 
   .checkout-sticky-total {

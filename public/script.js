@@ -1334,6 +1334,7 @@ function updateOrderModalBanner(game) {
 }
 
 async function openOrderModal(game) {
+  document.getElementById("checkoutStickyBar")?.classList.remove("is-visible");
   selectedOrderQuantity = 1;
   selectedCheckoutPaymentMethod = "midtrans";
   updateOrderQuantityUI(null);
@@ -1410,8 +1411,21 @@ async function openOrderModal(game) {
 
   setTimeout(() => {
     const card = modal?.querySelector(".order-modal-card");
-    if (card) card.scrollTop = 0;
+    if (card) {
+      card.scrollTop = 0;
+      updateCheckoutStickyVisibility();
+    }
   }, 80);
+}
+
+function updateCheckoutStickyVisibility() {
+  const card = document.querySelector("#orderModal .order-modal-card");
+  const quantity = document.querySelector(".bulk-quantity-field");
+  const bar = document.getElementById("checkoutStickyBar");
+  if (!card || !quantity || !bar) return;
+
+  const revealAt = quantity.offsetTop + quantity.offsetHeight - 16;
+  bar.classList.toggle("is-visible", card.scrollTop >= revealAt);
 }
 
 function setOrderStep(step) {
@@ -2538,6 +2552,11 @@ async function checkVoucher() {
 document.addEventListener("DOMContentLoaded", () => {
   const closeBtn = document.getElementById("closeOrderModalBtn");
   const modal = document.getElementById("orderModal");
+  const modalCard = modal?.querySelector(".order-modal-card");
+
+  modalCard?.addEventListener("scroll", updateCheckoutStickyVisibility, {
+    passive: true,
+  });
 
   if (closeBtn) {
     closeBtn.addEventListener("click", (event) => {
