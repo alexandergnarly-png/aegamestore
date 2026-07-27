@@ -13948,7 +13948,9 @@ body.admin-chat-open {
     font-size: 8px !important;
   }
 
-  .game-card-cta {
+  .game-card .game-card-cta,
+  .game-card:hover .game-card-cta,
+  .game-card:active .game-card-cta {
     grid-area: cta;
     align-self: end;
     width: 44px !important;
@@ -13960,6 +13962,7 @@ body.admin-chat-open {
     border-radius: 12px !important;
     background: transparent !important;
     box-shadow: none !important;
+    transform: none !important;
     font-size: 0 !important;
   }
 
