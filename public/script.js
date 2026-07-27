@@ -1212,7 +1212,9 @@ function renderGames() {
         aria-pressed="${fav ? "true" : "false"}"
         aria-label="${escapeHtml(fav ? t.cardFavoriteRemove : t.cardFavoriteAdd)}"
       >
-        <span aria-hidden="true">${fav ? "\u2764\ufe0f" : "\ud83e\udd0d"}</span>
+        <span aria-hidden="true">
+          <iconify-icon icon="${fav ? "ph:heart-fill" : "ph:heart-bold"}"></iconify-icon>
+        </span>
       </button>
       <div class="game-card-body">
   <div class="game-card-status-row">

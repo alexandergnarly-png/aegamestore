@@ -13882,6 +13882,8 @@ body.admin-chat-open {
   .game-card,
   .game-card:hover,
   .game-card.active {
+    align-self: start !important;
+    height: auto !important;
     min-height: 0 !important;
     border-radius: 16px !important;
   }
@@ -13911,6 +13913,7 @@ body.admin-chat-open {
 
   .game-card-body {
     position: static !important;
+    flex: 0 0 auto !important;
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) 44px !important;
     grid-template-areas:
@@ -13923,7 +13926,7 @@ body.admin-chat-open {
 
   .game-card-title {
     grid-area: title;
-    min-height: 30px !important;
+    min-height: 0 !important;
   }
 
   .game-card-meta {
@@ -13933,6 +13936,14 @@ body.admin-chat-open {
 
   .game-card-price small {
     display: none !important;
+  }
+
+  .game-card .game-card-price {
+    padding: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
   }
 
   .game-card-price b {
@@ -13998,6 +14009,11 @@ body.dark-theme .game-card-fav > span {
   background: var(--nb-red-soft);
 }
 
+.game-card-fav iconify-icon {
+  display: block;
+  font-size: 16px;
+}
+
 @media (max-width: 640px) {
   .game-card .game-card-fav,
   .game-card .game-card-fav.is-active {
@@ -14012,12 +14028,24 @@ body.dark-theme .game-card-fav > span {
     box-shadow: none !important;
   }
 
-  .game-card-fav > span {
+  .game-card .game-card-fav > span,
+  .game-card .game-card-fav.is-active > span {
     width: 20px;
     height: 20px;
+    background: transparent !important;
+    border: 0 !important;
     border-radius: 6px;
+    box-shadow: none !important;
     font-size: 10px;
     transform: none;
+  }
+
+  .game-card-fav iconify-icon {
+    color: #fff;
+  }
+
+  .game-card-fav.is-active iconify-icon {
+    color: #ff315c;
   }
 }
 
