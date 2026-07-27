@@ -14419,7 +14419,10 @@ body.dark-theme .game-card-fav > span {
   }
 
   .checkout-sticky-total {
+    grid-column: 1 / -1 !important;
     min-width: 0;
+    align-items: center !important;
+    text-align: center !important;
   }
 
   .checkout-sticky-total strong {
