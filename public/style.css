@@ -13965,12 +13965,12 @@ body.admin-chat-open {
     content: "→";
     display: grid;
     place-items: center;
-    width: 34px;
-    height: 34px;
-    border-radius: 10px;
+    width: 24px;
+    height: 24px;
+    border-radius: 7px;
     background: var(--nb-ink, #111);
     color: var(--nb-bg, #fff);
-    font-size: 18px;
+    font-size: 14px;
     line-height: 1;
   }
 }
