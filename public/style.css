@@ -14156,11 +14156,12 @@ body.dark-theme .game-card-fav > span {
 .modal-close-btn {
   position: sticky !important;
   top: 0 !important;
-  float: right;
+  right: auto !important;
+  float: none;
   z-index: 30 !important;
   width: 44px !important;
   height: 44px !important;
-  margin: 0 !important;
+  margin: 0 0 -44px auto !important;
   display: grid !important;
   place-items: center;
   padding: 0 !important;
@@ -14365,7 +14366,7 @@ body.dark-theme .game-card-fav > span {
 
   .modal-close-btn {
     top: calc(8px + env(safe-area-inset-top, 0px)) !important;
-    right: 12px !important;
+    right: auto !important;
   }
 
   .order-step-label {
