@@ -13999,6 +13999,13 @@ body.dark-theme .game-card-fav > span {
 }
 
 @media (max-width: 640px) {
+  .game-card .game-card-fav,
+  .game-card .game-card-fav.is-active {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
   .game-card-fav > span {
     width: 20px;
     height: 20px;

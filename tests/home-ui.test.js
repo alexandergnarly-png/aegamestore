@@ -21,6 +21,7 @@ assert.match(script, /event\.key !== "Enter" && event\.key !== " "/);
 assert.match(script, /setAttribute\("aria-selected", "true"\)/);
 assert.match(css, /\.game-card-fav[\s\S]*?min-width: 44px/);
 assert.match(css, /\.game-card-fav > span \{[\s\S]*?width: 20px/);
+assert.match(css, /\.game-card \.game-card-fav\.is-active \{[\s\S]*?background: transparent !important/);
 assert.match(css, /\.promo-dot,[\s\S]*?min-width: 44px/);
 assert.match(html, /aria-describedby="modalOrderDescription"/);
 assert.match(css, /\.order-modal-card \{[\s\S]*?scroll-padding-bottom: 156px/);
