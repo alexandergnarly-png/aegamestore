@@ -13956,8 +13956,10 @@ body.admin-chat-open {
     min-height: 44px !important;
     margin: 0 !important;
     padding: 0 !important;
+    border: 0 !important;
     border-radius: 12px !important;
     background: transparent !important;
+    box-shadow: none !important;
     font-size: 0 !important;
   }
 
