@@ -14011,6 +14011,7 @@ body.dark-theme .game-card-fav > span {
     height: 20px;
     border-radius: 6px;
     font-size: 10px;
+    transform: translateY(-8px);
   }
 }
 
