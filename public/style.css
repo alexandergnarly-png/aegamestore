@@ -14390,6 +14390,11 @@ body.dark-theme .game-card-fav > span {
     grid-column: auto !important;
   }
 
+  .modal-summary > div:last-child {
+    grid-column: auto !important;
+    min-height: 68px !important;
+  }
+
   .checkout-payment-choice {
     grid-template-columns: 1fr 1fr !important;
   }
@@ -14400,8 +14405,10 @@ body.dark-theme .game-card-fav > span {
   }
 
   .checkout-sticky-bar {
-    display: flex !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr) !important;
     align-items: center !important;
+    gap: 10px !important;
     bottom: 10px !important;
     min-height: 78px !important;
     margin: 18px 2px 10px !important;
@@ -14412,20 +14419,21 @@ body.dark-theme .game-card-fav > span {
   }
 
   .checkout-sticky-total {
-    flex: 0 1 40%;
     min-width: 0;
   }
 
   .checkout-sticky-total strong {
     max-width: 100%;
-    overflow: hidden;
-    font-size: 18px !important;
-    text-overflow: ellipsis;
+    overflow: visible;
+    font-size: clamp(17px, 5.4vw, 20px) !important;
+    letter-spacing: -0.035em;
+    text-overflow: clip;
     white-space: nowrap;
   }
 
   #buyBtn {
-    flex: 1 1 auto;
+    grid-column: 2 !important;
+    width: 100% !important;
     min-width: 0;
     min-height: 50px !important;
   }
