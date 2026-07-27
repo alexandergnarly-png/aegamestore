@@ -13877,6 +13877,93 @@ body.admin-chat-open {
   touch-action: manipulation;
 }
 
+/* Compact mobile game cards: dense visuals, full-size touch targets. */
+@media (max-width: 640px) {
+  .game-card,
+  .game-card:hover,
+  .game-card.active {
+    min-height: 0 !important;
+    border-radius: 16px !important;
+  }
+
+  .game-card-top {
+    display: none !important;
+  }
+
+  .game-card-status-row {
+    position: absolute !important;
+    top: 8px;
+    left: 8px;
+    z-index: 4;
+    width: auto !important;
+    max-width: calc(100% - 60px);
+    min-height: 0 !important;
+    pointer-events: none;
+  }
+
+  .game-card .game-status-badge {
+    padding: 4px 7px !important;
+    background: rgba(255, 255, 255, 0.94) !important;
+    color: #111 !important;
+    border-color: rgba(17, 17, 17, 0.18) !important;
+  }
+
+  .game-card-body {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 44px !important;
+    grid-template-areas:
+      "title title"
+      "meta cta";
+    align-items: end !important;
+    gap: 6px 8px !important;
+    padding: 10px !important;
+  }
+
+  .game-card-title {
+    grid-area: title;
+    min-height: 30px !important;
+  }
+
+  .game-card-meta {
+    grid-area: meta;
+    gap: 4px !important;
+  }
+
+  .game-card-price small {
+    display: none !important;
+  }
+
+  .game-card-price b {
+    font-size: 14px !important;
+  }
+
+  .game-card .game-card-stock {
+    padding: 0 !important;
+    background: transparent !important;
+    color: var(--nb-muted, #6b6b66) !important;
+    border: 0 !important;
+    font-size: 8px !important;
+  }
+
+  .game-card-cta {
+    grid-area: cta;
+    align-self: end;
+    width: 44px !important;
+    min-width: 44px;
+    min-height: 44px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 12px !important;
+    font-size: 0 !important;
+  }
+
+  .game-card-cta::after {
+    content: "→";
+    font-size: 18px;
+    line-height: 1;
+  }
+}
+
 .game-card-fav > span {
   display: grid;
   place-items: center;
