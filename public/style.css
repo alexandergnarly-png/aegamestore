@@ -14419,11 +14419,11 @@ body.dark-theme .game-card-fav > span {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
-    transform: translateY(12px) !important;
+    transform: translateY(18px) scale(0.985) !important;
     transition:
-      opacity 180ms ease,
-      transform 180ms ease,
-      visibility 0s linear 180ms;
+      opacity 280ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+      visibility 0s linear 280ms;
   }
 
   .checkout-sticky-bar.is-visible {
