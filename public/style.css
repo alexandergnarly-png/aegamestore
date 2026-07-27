@@ -13998,6 +13998,15 @@ body.dark-theme .game-card-fav > span {
   background: var(--nb-red-soft);
 }
 
+@media (max-width: 640px) {
+  .game-card-fav > span {
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    font-size: 10px;
+  }
+}
+
 .filter-pills .pill {
   min-height: 44px;
   touch-action: manipulation;
