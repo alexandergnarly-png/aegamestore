@@ -185,7 +185,7 @@ const translations = {
     installAppBtn: "Install",
     detailRatingLabel: "Rating",
     detailViewBtn: "Lihat Detail",
-    adminChatHelpTitle: "Hi bro 👋 Butuh bantuan?",
+    adminChatHelpTitle: "Butuh bantuan?",
     adminChatHelpDesc: "Support cepat untuk order, pembayaran, dan key.",
     adminChatOnline: "Online sekarang",
     adminChatEstimate: "Estimasi balasan 1–5 menit",
@@ -381,7 +381,7 @@ const translations = {
     installAppBtn: "Install",
     detailRatingLabel: "Rating",
     detailViewBtn: "View Details",
-    adminChatHelpTitle: "Hi bro 👋 Need help?",
+    adminChatHelpTitle: "Need help?",
     adminChatHelpDesc: "Fast support for orders, payments, and keys.",
     adminChatOnline: "Online now",
     adminChatEstimate: "Estimated reply 1–5 minutes",
@@ -3161,12 +3161,14 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById("backToTop");
   if (!btn) return;
+  let lastScrollY = window.scrollY;
   const onScroll = () => {
-    if (window.scrollY > 480) {
-      btn.classList.add("show");
-    } else {
-      btn.classList.remove("show");
-    }
+    const currentScrollY = window.scrollY;
+    btn.classList.toggle(
+      "show",
+      currentScrollY > 700 && currentScrollY < lastScrollY,
+    );
+    lastScrollY = currentScrollY;
   };
   window.addEventListener("scroll", onScroll, { passive: true });
   onScroll();

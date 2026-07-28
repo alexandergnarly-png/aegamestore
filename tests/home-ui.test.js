@@ -4,6 +4,7 @@ const fs = require("node:fs");
 const html = fs.readFileSync("public/index.html", "utf8");
 const script = fs.readFileSync("public/script.js", "utf8");
 const css = fs.readFileSync("public/style.css", "utf8");
+const keysystemCss = fs.readFileSync("public/keysystem-ui.css", "utf8");
 
 assert.match(html, /href="#main-content"/);
 assert.match(html, /id="main-content"[^>]*tabindex="-1"/);
@@ -52,23 +53,30 @@ assert.match(script, /function updateKeysystemFeatured\(\)/);
 assert.match(script, /function restartKeysystemFeaturedRotation\(\)/);
 assert.match(script, /prefers-reduced-motion: reduce/);
 assert.match(script, /setInterval\([\s\S]*?3200/);
+assert.match(script, /currentScrollY > 700 && currentScrollY < lastScrollY/);
+assert.doesNotMatch(script, /Hi bro/);
 assert.match(css, /Compact mobile game cards/);
 assert.match(
-  fs.readFileSync("public/keysystem-ui.css", "utf8"),
+  keysystemCss,
   /body\.keysystem-ui \.game-grid/,
 );
 assert.match(
-  fs.readFileSync("public/keysystem-ui.css", "utf8"),
+  keysystemCss,
   /@keyframes keysystemFeatureSwap/,
 );
 assert.match(
-  fs.readFileSync("public/keysystem-ui.css", "utf8"),
+  keysystemCss,
   /hero-trust li \{[\s\S]*?grid-column: auto !important/,
 );
 assert.match(
-  fs.readFileSync("public/keysystem-ui.css", "utf8"),
+  keysystemCss,
   /html:has\(body\.keysystem-ui\) \{[\s\S]*?overflow-x: clip/,
 );
+assert.match(
+  keysystemCss,
+  /grid-template-columns: repeat\(3, minmax\(0, 1fr\)\) !important/,
+);
+assert.match(keysystemCss, /admin-chat-open \.back-to-top/);
 assert.match(script, /class="account-orbit-icon"/);
 assert.match(css, /@keyframes accountIconFloat/);
 assert.match(css, /prefers-reduced-motion: reduce[\s\S]*?account-orbit-icon/);
