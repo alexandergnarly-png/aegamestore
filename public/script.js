@@ -18,6 +18,9 @@ const translations = {
     searchGamePlaceholder: "Cari nama game (contoh: PUBG)...",
     processingOrder: "Memproses pesanan...",
     heroTitle: "Key game, simpel dan cepat.",
+    heroLine1: "DUNIA BARUMU",
+    heroLine2: "TINGGAL SATU",
+    heroLine3: "KEY LAGI.",
     heroDesc: "Pilih game, bayar aman, dan key dikirim otomatis.",
     totalPayment: "Total Pembayaran",
     previewEmpty: "Produk belum dipilih",
@@ -211,6 +214,9 @@ const translations = {
     searchGamePlaceholder: "Search game name (e.g. PUBG)...",
     processingOrder: "Processing order...",
     heroTitle: "Game keys, simple and fast.",
+    heroLine1: "YOUR NEXT WORLD",
+    heroLine2: "IS ONE KEY",
+    heroLine3: "AWAY.",
     heroDesc: "Choose a game, pay securely, and get your key automatically.",
     totalPayment: "Total Payment",
     previewEmpty: "No product selected",
@@ -498,6 +504,39 @@ function getGameImage(gameName) {
   return gameImages[normalizeGameImageKey(gameName)] || fallbackImage;
 }
 
+function updateKeysystemFeatured() {
+  const card = document.getElementById("keysystemFeatured");
+  if (!card || !allProducts.length) return;
+
+  const product =
+    allProducts.find((item) => Number(item.available_keys || 0) > 0) ||
+    allProducts[0];
+  const game = String(product.game || "");
+  const gameProducts = allProducts.filter((item) => item.game === game);
+  const stock = gameProducts.reduce(
+    (total, item) => total + Number(item.available_keys || 0),
+    0,
+  );
+  const minPrice = Math.min(
+    ...gameProducts.map((item) => Number(item.price || 0)).filter(Boolean),
+  );
+
+  card.dataset.game = game;
+  document.getElementById("keysystemFeaturedImage").src = getGameImage(game);
+  document.getElementById("keysystemFeaturedImage").alt = game;
+  document.getElementById("keysystemFeaturedName").textContent = game;
+  document.getElementById("keysystemFeaturedPrice").textContent =
+    Number.isFinite(minPrice) ? formatRupiah(minPrice) : "—";
+  document.getElementById("keysystemFeaturedStock").textContent =
+    `${stock.toLocaleString("id-ID")} KEYS READY`;
+  card.setAttribute("aria-label", `${game} — buka produk unggulan`);
+}
+
+document.getElementById("keysystemFeatured")?.addEventListener("click", () => {
+  const game = document.getElementById("keysystemFeatured")?.dataset.game;
+  if (game) openOrderModal(game);
+});
+
 let selectedGame = "";
 let currentCategory = "all";
 let selectedProductId = null;
@@ -706,6 +745,7 @@ async function loadAllProducts() {
     const uniqueGames = [...new Set(allProducts.map((item) => item.game))];
     selectedGame = uniqueGames[0] || "";
 
+    updateKeysystemFeatured();
     renderGames();
     loadBrands();
     await openOrderFromCheckoutQuery();

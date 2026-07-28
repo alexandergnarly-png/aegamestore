@@ -46,6 +46,9 @@ assert.match(css, /\.game-card \.game-card-price \{[\s\S]*?background: transpare
 assert.match(html, /class="account-orbit-icon"/);
 assert.match(html, /keysystem-ui\.css\?v=/);
 assert.match(html, /<body class="keysystem-ui dark-theme">/);
+assert.match(html, /id="keysystemFeatured"/);
+assert.match(html, /class="keysystem-marquee"/);
+assert.match(script, /function updateKeysystemFeatured\(\)/);
 assert.match(css, /Compact mobile game cards/);
 assert.match(
   fs.readFileSync("public/keysystem-ui.css", "utf8"),

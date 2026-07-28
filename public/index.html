@@ -79,7 +79,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/style.css?v=20260727-compact-card-polish" />
-    <link rel="stylesheet" href="/keysystem-ui.css?v=20260728-1" />
+    <link rel="stylesheet" href="/keysystem-ui.css?v=20260728-2" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#f4f3ee" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -243,12 +243,17 @@
 
     <main class="page" id="main-content" tabindex="-1">
       <section class="hero" id="hero">
+        <div class="hero-grid" aria-hidden="true"></div>
         <div class="hero-copy">
-          <span class="hero-badge" data-i18n="heroBadge">
-            MINIMAL DIGITAL COMMERCE
-          </span>
-          <h1 data-i18n="heroTitle">
-            Key game, simpel dan cepat.
+          <div class="keysystem-eyebrow">
+            <span class="keysystem-status-dot" aria-hidden="true"></span>
+            <span data-i18n="heroBadge">AE GAME STORE</span>
+            <b>SYS // 001</b>
+          </div>
+          <h1 class="keysystem-hero-title">
+            <span data-i18n="heroLine1">DUNIA BARUMU</span>
+            <span class="keysystem-outline" data-i18n="heroLine2">TINGGAL SATU</span>
+            <span data-i18n="heroLine3">KEY LAGI.</span>
           </h1>
           <p data-i18n="heroDesc">
             Pilih game, bayar aman, dan key dikirim otomatis.
@@ -300,6 +305,54 @@
               </div>
             </li>
           </ul>
+        </div>
+
+        <div class="keysystem-hero-visual" aria-live="polite">
+          <div class="keysystem-orbit keysystem-orbit-one" aria-hidden="true"></div>
+          <div class="keysystem-orbit keysystem-orbit-two" aria-hidden="true"></div>
+          <button
+            type="button"
+            class="keysystem-feature-card"
+            id="keysystemFeatured"
+            aria-label="Buka produk unggulan"
+          >
+            <span class="keysystem-feature-media">
+              <img
+                id="keysystemFeaturedImage"
+                src="/og-ae-game-store.jpg"
+                alt=""
+                decoding="async"
+              />
+              <span class="keysystem-feature-code" aria-hidden="true">AE // DROP 01</span>
+            </span>
+            <span class="keysystem-feature-info">
+              <span>
+                <small>FEATURED DROP</small>
+                <strong id="keysystemFeaturedName">Memuat katalog...</strong>
+              </span>
+              <span>
+                <small>STARTING FROM</small>
+                <strong id="keysystemFeaturedPrice">—</strong>
+              </span>
+            </span>
+          </button>
+          <span class="keysystem-floating-chip keysystem-stock-chip" id="keysystemFeaturedStock">
+            SYSTEM ONLINE
+          </span>
+          <span class="keysystem-floating-chip keysystem-delivery-chip">
+            INSTANT DELIVERY ↗
+          </span>
+          <span class="keysystem-scan-line" aria-hidden="true"></span>
+        </div>
+      </section>
+
+      <section class="keysystem-marquee" aria-label="Store features">
+        <div class="keysystem-marquee-track">
+          <span>ANDROID</span><i></i><span>IOS</span><i></i><span>QRIS</span><i></i>
+          <span>AE CREDIT</span><i></i><span>INSTANT DELIVERY</span><i></i><span>VERIFIED STOCK</span><i></i>
+          <span aria-hidden="true">ANDROID</span><i aria-hidden="true"></i><span aria-hidden="true">IOS</span><i aria-hidden="true"></i>
+          <span aria-hidden="true">QRIS</span><i aria-hidden="true"></i><span aria-hidden="true">AE CREDIT</span><i aria-hidden="true"></i>
+          <span aria-hidden="true">INSTANT DELIVERY</span><i aria-hidden="true"></i><span aria-hidden="true">VERIFIED STOCK</span>
         </div>
       </section>
 
@@ -1543,6 +1596,6 @@
 </div>
     </footer>
 
-    <script src="/script.js?v=20260727-card-favorite-icons" defer></script>
+    <script src="/script.js?v=20260728-keysystem-featured" defer></script>
   </body>
 </html>

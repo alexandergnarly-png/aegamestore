@@ -110,6 +110,8 @@ body.keysystem-ui .auth-btn {
 }
 
 body.keysystem-ui .page {
+  display: flex;
+  flex-direction: column;
   width: 100%;
   max-width: none;
   padding: 0;
@@ -117,11 +119,14 @@ body.keysystem-ui .page {
 
 body.keysystem-ui .hero {
   position: relative;
-  display: block;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(380px, .78fr);
+  align-items: center;
+  gap: 54px;
   width: var(--ks-shell);
-  min-height: 640px;
+  min-height: 820px;
   margin: 0 auto;
-  padding: 176px 0 96px;
+  padding: 142px 0 116px;
   border: 0;
   border-bottom: 1px solid var(--ks-line);
   border-radius: 0 !important;
@@ -130,7 +135,49 @@ body.keysystem-ui .hero {
 }
 
 body.keysystem-ui .hero-copy {
-  width: min(850px, 100%);
+  position: relative;
+  z-index: 2;
+  width: min(760px, 100%);
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.keysystem-ui .hero-grid {
+  position: absolute;
+  inset: 76px 0 0;
+  pointer-events: none;
+  opacity: .7;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--ks-text) 6%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--ks-text) 6%, transparent) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: linear-gradient(to bottom, #000 22%, transparent 92%);
+}
+
+body.keysystem-ui .keysystem-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ks-muted);
+  font: 600 11px/1 var(--ks-mono);
+  letter-spacing: .08em;
+}
+
+body.keysystem-ui .keysystem-eyebrow b {
+  color: color-mix(in srgb, var(--ks-muted) 60%, transparent);
+  font-weight: 500;
+}
+
+body.keysystem-ui .keysystem-status-dot {
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--ks-text);
+  border-radius: 50%;
+  background: var(--ks-text);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--ks-text) 9%, transparent);
 }
 
 body.keysystem-ui .hero-badge,
@@ -157,6 +204,15 @@ body.keysystem-ui .hero h1 {
   line-height: .82;
   letter-spacing: -.085em;
   text-transform: uppercase;
+}
+
+body.keysystem-ui .keysystem-hero-title > span {
+  display: block;
+}
+
+body.keysystem-ui .keysystem-hero-title .keysystem-outline {
+  color: transparent;
+  -webkit-text-stroke: 1px color-mix(in srgb, var(--ks-text) 78%, transparent);
 }
 
 body.keysystem-ui .hero p {
@@ -193,8 +249,9 @@ body.keysystem-ui .hero-cta:hover {
 }
 
 body.keysystem-ui .hero-trust {
+  position: static;
   width: min(720px, 100%);
-  margin-top: 70px;
+  margin: 58px 0 0;
   border-block: 1px solid var(--ks-line);
 }
 
@@ -220,6 +277,198 @@ body.keysystem-ui .hero-trust strong {
 
 body.keysystem-ui .hero-trust small {
   color: var(--ks-muted);
+}
+
+body.keysystem-ui .keysystem-hero-visual {
+  position: relative;
+  min-height: 600px;
+  display: grid;
+  place-items: center;
+}
+
+body.keysystem-ui .keysystem-feature-card {
+  position: relative;
+  z-index: 4;
+  width: min(380px, 82%);
+  padding: 10px;
+  border: 0;
+  border-radius: 2px;
+  background: #e5e5dc;
+  color: #0b0b0a;
+  box-shadow: 0 36px 90px rgba(0, 0, 0, .45);
+  cursor: pointer;
+  transform: rotate(2.5deg);
+  transition: transform .3s var(--ks-ease);
+}
+
+body.keysystem-ui .keysystem-feature-card:hover,
+body.keysystem-ui .keysystem-feature-card:focus-visible {
+  transform: rotate(0deg) translateY(-6px);
+}
+
+body.keysystem-ui .keysystem-feature-media {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  background: #111;
+}
+
+body.keysystem-ui .keysystem-feature-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, transparent 52%, rgba(0, 0, 0, .75)),
+    repeating-linear-gradient(90deg, transparent 0 28px, rgba(255, 255, 255, .045) 29px 30px);
+}
+
+body.keysystem-ui .keysystem-feature-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.04);
+  filter: saturate(.8) contrast(1.05);
+}
+
+body.keysystem-ui .keysystem-feature-code {
+  position: absolute;
+  z-index: 2;
+  top: 14px;
+  right: 12px;
+  color: rgba(255, 255, 255, .68);
+  font: 600 9px/1 var(--ks-mono);
+  letter-spacing: .13em;
+  writing-mode: vertical-rl;
+}
+
+body.keysystem-ui .keysystem-feature-info {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 12px;
+  padding: 14px 5px 4px;
+  text-align: left;
+}
+
+body.keysystem-ui .keysystem-feature-info > span:last-child {
+  text-align: right;
+}
+
+body.keysystem-ui .keysystem-feature-info small {
+  display: block;
+  margin-bottom: 6px;
+  color: #666;
+  font: 600 8px/1 var(--ks-mono);
+}
+
+body.keysystem-ui .keysystem-feature-info strong {
+  display: block;
+  font: 800 12px/1.25 var(--ks-mono);
+}
+
+body.keysystem-ui .keysystem-orbit {
+  position: absolute;
+  border: 1px solid color-mix(in srgb, var(--ks-text) 13%, transparent);
+  border-radius: 50%;
+}
+
+body.keysystem-ui .keysystem-orbit-one {
+  width: min(540px, 100%);
+  aspect-ratio: 1;
+}
+
+body.keysystem-ui .keysystem-orbit-two {
+  width: min(400px, 75%);
+  aspect-ratio: 1;
+  border-style: dashed;
+}
+
+body.keysystem-ui .keysystem-floating-chip {
+  position: absolute;
+  z-index: 5;
+  padding: 12px 14px;
+  border: 1px solid var(--ks-line);
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--ks-surface) 92%, transparent);
+  color: var(--ks-text);
+  font: 700 9px/1 var(--ks-mono);
+}
+
+body.keysystem-ui .keysystem-stock-chip {
+  top: 20%;
+  left: 0;
+}
+
+body.keysystem-ui .keysystem-delivery-chip {
+  right: 0;
+  bottom: 22%;
+}
+
+body.keysystem-ui .keysystem-scan-line {
+  position: absolute;
+  z-index: 6;
+  right: 12%;
+  left: 12%;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--ks-text), transparent);
+  animation: keysystemScan 4s ease-in-out infinite;
+}
+
+@keyframes keysystemScan {
+  0%, 100% { top: 22%; opacity: 0; }
+  20%, 80% { opacity: .7; }
+  50% { top: 76%; }
+}
+
+body.keysystem-ui .keysystem-marquee {
+  order: 2;
+  overflow: hidden;
+  width: 100%;
+  border-block: 1px solid var(--ks-line);
+  background: var(--ks-surface);
+}
+
+body.keysystem-ui .keysystem-marquee-track {
+  display: flex;
+  width: max-content;
+  align-items: center;
+  gap: 34px;
+  padding: 20px 0;
+  animation: keysystemMarquee 30s linear infinite;
+}
+
+body.keysystem-ui .keysystem-marquee span {
+  color: var(--ks-muted);
+  font: 800 11px/1 var(--ks-mono);
+  letter-spacing: .08em;
+}
+
+body.keysystem-ui .keysystem-marquee i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--ks-text);
+}
+
+@keyframes keysystemMarquee {
+  to { transform: translateX(-50%); }
+}
+
+body.keysystem-ui .hero {
+  order: 1;
+}
+
+body.keysystem-ui .store-layout {
+  order: 3;
+}
+
+body.keysystem-ui .promo-container {
+  order: 4;
+}
+
+body.keysystem-ui .testimonial-section {
+  order: 5;
 }
 
 body.keysystem-ui .promo-container,
@@ -468,7 +717,9 @@ body.keysystem-ui .footer-links button {
 
   body.keysystem-ui .hero {
     min-height: auto;
-    padding-top: 136px;
+    grid-template-columns: 1fr 360px;
+    gap: 20px;
+    padding-top: 118px;
   }
 
   body.keysystem-ui .game-grid {
@@ -526,7 +777,45 @@ body.keysystem-ui .footer-links button {
   }
 
   body.keysystem-ui .hero {
-    padding: 120px 0 54px;
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+    padding: 98px 0 0;
+  }
+
+  body.keysystem-ui .hero-copy {
+    order: 2;
+  }
+
+  body.keysystem-ui .keysystem-hero-visual {
+    order: 1;
+    width: 100%;
+    min-height: 470px;
+  }
+
+  body.keysystem-ui .keysystem-feature-card {
+    width: min(286px, 74vw);
+  }
+
+  body.keysystem-ui .keysystem-orbit-one {
+    width: min(410px, 110vw);
+  }
+
+  body.keysystem-ui .keysystem-orbit-two {
+    width: min(310px, 84vw);
+  }
+
+  body.keysystem-ui .keysystem-floating-chip {
+    padding: 10px;
+    font-size: 8px;
+  }
+
+  body.keysystem-ui .keysystem-stock-chip {
+    left: 2px;
+  }
+
+  body.keysystem-ui .keysystem-delivery-chip {
+    right: 2px;
   }
 
   body.keysystem-ui .hero h1 {
