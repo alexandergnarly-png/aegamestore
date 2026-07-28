@@ -51,7 +51,7 @@ assert.match(html, /class="keysystem-marquee"/);
 assert.match(script, /function updateKeysystemFeatured\(\)/);
 assert.match(script, /function restartKeysystemFeaturedRotation\(\)/);
 assert.match(script, /prefers-reduced-motion: reduce/);
-assert.match(script, /setInterval\([\s\S]*?5200/);
+assert.match(script, /setInterval\([\s\S]*?3200/);
 assert.match(css, /Compact mobile game cards/);
 assert.match(
   fs.readFileSync("public/keysystem-ui.css", "utf8"),

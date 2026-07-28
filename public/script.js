@@ -557,7 +557,7 @@ function restartKeysystemFeaturedRotation() {
     card.classList.add("is-switching");
     setTimeout(() => renderKeysystemFeatured(nextIndex), 260);
     setTimeout(() => card.classList.remove("is-switching"), 580);
-  }, 5200);
+  }, 3200);
 }
 
 function updateKeysystemFeatured() {
