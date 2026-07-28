@@ -8,6 +8,8 @@ const keysystemCss = fs.readFileSync("public/keysystem-ui.css", "utf8");
 
 assert.match(html, /href="#main-content"/);
 assert.match(html, /id="main-content"[^>]*tabindex="-1"/);
+assert.match(keysystemCss, /\.skip-link:focus:not\(:focus-visible\)[\s\S]*?top:\s*-100px/);
+assert.match(keysystemCss, /\.skip-link:focus-visible[\s\S]*?top:\s*12px/);
 assert.doesNotMatch(html, /id="preloader"/);
 assert.doesNotMatch(script, /showTelegramPopup/);
 assert.doesNotMatch(script, /Gagal memuat daftar produk dari server/);

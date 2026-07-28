@@ -15,6 +15,14 @@ body.keysystem-ui {
   color: var(--ks-text);
 }
 
+body.keysystem-ui .skip-link:focus:not(:focus-visible) {
+  top: -100px;
+}
+
+body.keysystem-ui .skip-link:focus-visible {
+  top: 12px;
+}
+
 html:has(body.keysystem-ui) {
   max-width: 100%;
   overflow-x: clip;
