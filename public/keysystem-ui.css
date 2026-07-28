@@ -1126,11 +1126,47 @@ body.keysystem-ui .ae-payment-info-confirm.swal2-confirm {
   }
 
   body.keysystem-ui .game-card-body {
-    padding: 9px 0 0 !important;
+    padding: 9px 8px 12px !important;
   }
 
   body.keysystem-ui .game-card-title {
+    display: -webkit-box;
+    min-height: 32px !important;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
     font-size: 14px;
+    line-height: 1.15;
+  }
+
+  body.keysystem-ui .game-card .game-status-badge {
+    border-color: rgba(17, 17, 17, .22) !important;
+    background: rgba(255, 255, 255, .94) !important;
+    color: #111 !important;
+  }
+
+  body.keysystem-ui .game-card.is-out-of-stock .game-card-cta::after {
+    content: attr(data-label);
+    width: auto;
+    min-width: 38px;
+    padding-inline: 5px;
+    border: 1px solid var(--ks-line);
+    background: var(--ks-surface-2);
+    color: var(--ks-muted);
+    font: 700 7px/1 var(--ks-mono);
+  }
+
+  body.keysystem-ui .game-card.is-out-of-stock {
+    cursor: not-allowed;
+  }
+
+  body.keysystem-ui .game-card.is-out-of-stock .game-card-fav {
+    cursor: pointer;
+  }
+
+  body.keysystem-ui .game-card .game-card-fav > span,
+  body.keysystem-ui .game-card .game-card-fav.is-active > span {
+    background: rgba(10, 10, 10, .72) !important;
   }
 
   body.keysystem-ui .game-card .game-card-fav,
@@ -1144,7 +1180,7 @@ body.keysystem-ui .ae-payment-info-confirm.swal2-confirm {
   }
 
   body.keysystem-ui .game-card-fav.is-active iconify-icon {
-    color: #fff;
+    color: #ff315c;
     fill: currentColor;
   }
 

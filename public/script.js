@@ -1351,7 +1351,10 @@ function renderGames() {
   card.className = `game-card game-card-status-${playSummary.value}`;
   card.setAttribute("role", "button");
   card.setAttribute("tabindex", "0");
-  card.setAttribute("aria-label", `${game} — ${t.cardChooseProduct}`);
+  card.setAttribute(
+    "aria-label",
+    `${game} — ${stockReady ? t.cardChooseProduct : t.outOfStockLabel}`,
+  );
   card.setAttribute("data-game", game);
 
     card.innerHTML = `
@@ -1398,8 +1401,11 @@ function renderGames() {
     </span>
   </div>
 
-  <span class="game-card-cta">
-    ${escapeHtml(t.cardChooseProduct)} →
+  <span
+    class="game-card-cta ${stockReady ? "" : "is-disabled"}"
+    data-label="${escapeHtml(stockReady ? "" : t.outOfStockLabel)}"
+  >
+    ${escapeHtml(stockReady ? `${t.cardChooseProduct} →` : t.outOfStockLabel)}
   </span>
 </div>
     `;
@@ -1410,6 +1416,7 @@ function renderGames() {
 
     if (!stockReady) {
       card.classList.add("is-out-of-stock");
+      card.setAttribute("aria-disabled", "true");
     }
 
     const favButton = card.querySelector(".game-card-fav");
@@ -1428,6 +1435,7 @@ function renderGames() {
     }
 
     card.addEventListener("click", async () => {
+      if (!stockReady) return;
       card.style.pointerEvents = "none";
       try {
         await openOrderModal(game);
@@ -1436,6 +1444,7 @@ function renderGames() {
       }
     });
     card.addEventListener("keydown", (event) => {
+      if (!stockReady) return;
       if (event.key !== "Enter" && event.key !== " ") return;
       event.preventDefault();
       card.click();
