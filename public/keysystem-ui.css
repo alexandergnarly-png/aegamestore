@@ -313,13 +313,28 @@ body.keysystem-ui .keysystem-feature-card:focus-visible {
 
 body.keysystem-ui .keysystem-feature-card.is-switching {
   pointer-events: none;
-  animation: keysystemFeatureSwap .58s var(--ks-ease);
 }
 
-@keyframes keysystemFeatureSwap {
-  0% { opacity: 1; transform: rotate(2.5deg) translateY(0); }
-  42%, 56% { opacity: 0; transform: rotate(-1deg) translateY(14px); }
-  100% { opacity: 1; transform: rotate(2.5deg) translateY(0); }
+body.keysystem-ui .keysystem-feature-card.is-switching .keysystem-feature-media img {
+  animation: keysystemFeatureMediaSwap .58s var(--ks-ease) both;
+}
+
+body.keysystem-ui .keysystem-feature-card.is-switching .keysystem-feature-info {
+  animation: keysystemFeatureInfoSwap .58s var(--ks-ease) both;
+}
+
+@keyframes keysystemFeatureMediaSwap {
+  0% { opacity: 1; transform: translate3d(0, 0, 0) scale(1.04); }
+  44% { opacity: 0; transform: translate3d(-8px, 0, 0) scale(1.06); }
+  45% { opacity: 0; transform: translate3d(8px, 0, 0) scale(1.06); }
+  100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1.04); }
+}
+
+@keyframes keysystemFeatureInfoSwap {
+  0% { opacity: 1; transform: translate3d(0, 0, 0); }
+  44% { opacity: 0; transform: translate3d(0, 4px, 0); }
+  45% { opacity: 0; transform: translate3d(0, -4px, 0); }
+  100% { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 
 body.keysystem-ui .keysystem-feature-media {

@@ -62,7 +62,12 @@ assert.match(
 );
 assert.match(
   keysystemCss,
-  /@keyframes keysystemFeatureSwap/,
+  /@keyframes keysystemFeatureMediaSwap/,
+);
+assert.match(keysystemCss, /@keyframes keysystemFeatureInfoSwap/);
+assert.doesNotMatch(
+  keysystemCss,
+  /\.keysystem-feature-card\.is-switching \{[^}]*animation:/,
 );
 assert.match(
   keysystemCss,
