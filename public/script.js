@@ -504,14 +504,18 @@ function getGameImage(gameName) {
   return gameImages[normalizeGameImageKey(gameName)] || fallbackImage;
 }
 
-function updateKeysystemFeatured() {
-  const card = document.getElementById("keysystemFeatured");
-  if (!card || !allProducts.length) return;
+let keysystemFeaturedGames = [];
+let keysystemFeaturedIndex = 0;
+let keysystemFeaturedTimer = null;
 
-  const product =
-    allProducts.find((item) => Number(item.available_keys || 0) > 0) ||
-    allProducts[0];
-  const game = String(product.game || "");
+function renderKeysystemFeatured(index) {
+  const card = document.getElementById("keysystemFeatured");
+  if (!card || !keysystemFeaturedGames.length) return;
+
+  keysystemFeaturedIndex =
+    ((index % keysystemFeaturedGames.length) + keysystemFeaturedGames.length) %
+    keysystemFeaturedGames.length;
+  const game = keysystemFeaturedGames[keysystemFeaturedIndex];
   const gameProducts = allProducts.filter((item) => item.game === game);
   const stock = gameProducts.reduce(
     (total, item) => total + Number(item.available_keys || 0),
@@ -529,13 +533,73 @@ function updateKeysystemFeatured() {
     Number.isFinite(minPrice) ? formatRupiah(minPrice) : "—";
   document.getElementById("keysystemFeaturedStock").textContent =
     `${stock.toLocaleString("id-ID")} KEYS READY`;
+  document.getElementById("keysystemFeaturedCode").textContent =
+    `AE // DROP ${String(keysystemFeaturedIndex + 1).padStart(2, "0")}`;
   card.setAttribute("aria-label", `${game} — buka produk unggulan`);
 }
 
-document.getElementById("keysystemFeatured")?.addEventListener("click", () => {
-  const game = document.getElementById("keysystemFeatured")?.dataset.game;
+function restartKeysystemFeaturedRotation() {
+  clearInterval(keysystemFeaturedTimer);
+  if (
+    keysystemFeaturedGames.length < 2 ||
+    document.hidden ||
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  )
+    return;
+
+  keysystemFeaturedTimer = setInterval(() => {
+    const card = document.getElementById("keysystemFeatured");
+    if (!card) return;
+    const nextIndex =
+      (keysystemFeaturedIndex + 1) % keysystemFeaturedGames.length;
+    const nextImage = new Image();
+    nextImage.src = getGameImage(keysystemFeaturedGames[nextIndex]);
+    card.classList.add("is-switching");
+    setTimeout(() => renderKeysystemFeatured(nextIndex), 260);
+    setTimeout(() => card.classList.remove("is-switching"), 580);
+  }, 5200);
+}
+
+function updateKeysystemFeatured() {
+  keysystemFeaturedGames = [
+    ...new Set(
+      allProducts
+        .filter((item) => Number(item.available_keys || 0) > 0)
+        .map((item) => String(item.game || ""))
+        .filter(Boolean),
+    ),
+  ];
+  if (!keysystemFeaturedGames.length) {
+    keysystemFeaturedGames = [
+      ...new Set(
+        allProducts.map((item) => String(item.game || "")).filter(Boolean),
+      ),
+    ];
+  }
+  renderKeysystemFeatured(0);
+  restartKeysystemFeaturedRotation();
+}
+
+const keysystemFeaturedCard = document.getElementById("keysystemFeatured");
+keysystemFeaturedCard?.addEventListener("click", () => {
+  const game = keysystemFeaturedCard.dataset.game;
   if (game) openOrderModal(game);
 });
+keysystemFeaturedCard?.addEventListener("mouseenter", () =>
+  clearInterval(keysystemFeaturedTimer),
+);
+keysystemFeaturedCard?.addEventListener(
+  "mouseleave",
+  restartKeysystemFeaturedRotation,
+);
+keysystemFeaturedCard?.addEventListener("focusin", () =>
+  clearInterval(keysystemFeaturedTimer),
+);
+keysystemFeaturedCard?.addEventListener(
+  "focusout",
+  restartKeysystemFeaturedRotation,
+);
+document.addEventListener("visibilitychange", restartKeysystemFeaturedRotation);
 
 let selectedGame = "";
 let currentCategory = "all";

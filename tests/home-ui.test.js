@@ -49,10 +49,17 @@ assert.match(html, /<body class="keysystem-ui dark-theme">/);
 assert.match(html, /id="keysystemFeatured"/);
 assert.match(html, /class="keysystem-marquee"/);
 assert.match(script, /function updateKeysystemFeatured\(\)/);
+assert.match(script, /function restartKeysystemFeaturedRotation\(\)/);
+assert.match(script, /prefers-reduced-motion: reduce/);
+assert.match(script, /setInterval\([\s\S]*?5200/);
 assert.match(css, /Compact mobile game cards/);
 assert.match(
   fs.readFileSync("public/keysystem-ui.css", "utf8"),
   /body\.keysystem-ui \.game-grid/,
+);
+assert.match(
+  fs.readFileSync("public/keysystem-ui.css", "utf8"),
+  /@keyframes keysystemFeatureSwap/,
 );
 assert.match(
   fs.readFileSync("public/keysystem-ui.css", "utf8"),

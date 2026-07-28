@@ -311,6 +311,17 @@ body.keysystem-ui .keysystem-feature-card:focus-visible {
   transform: rotate(0deg) translateY(-6px);
 }
 
+body.keysystem-ui .keysystem-feature-card.is-switching {
+  pointer-events: none;
+  animation: keysystemFeatureSwap .58s var(--ks-ease);
+}
+
+@keyframes keysystemFeatureSwap {
+  0% { opacity: 1; transform: rotate(2.5deg) translateY(0); }
+  42%, 56% { opacity: 0; transform: rotate(-1deg) translateY(14px); }
+  100% { opacity: 1; transform: rotate(2.5deg) translateY(0); }
+}
+
 body.keysystem-ui .keysystem-feature-media {
   position: relative;
   display: block;

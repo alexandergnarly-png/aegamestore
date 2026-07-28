@@ -79,7 +79,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/style.css?v=20260728-mobile-overflow-fix" />
-    <link rel="stylesheet" href="/keysystem-ui.css?v=20260728-mobile-1" />
+    <link rel="stylesheet" href="/keysystem-ui.css?v=20260728-carousel-1" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#f4f3ee" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -307,7 +307,7 @@
           </ul>
         </div>
 
-        <div class="keysystem-hero-visual" aria-live="polite">
+        <div class="keysystem-hero-visual" aria-live="off">
           <div class="keysystem-orbit keysystem-orbit-one" aria-hidden="true"></div>
           <div class="keysystem-orbit keysystem-orbit-two" aria-hidden="true"></div>
           <button
@@ -323,7 +323,7 @@
                 alt=""
                 decoding="async"
               />
-              <span class="keysystem-feature-code" aria-hidden="true">AE // DROP 01</span>
+              <span class="keysystem-feature-code" id="keysystemFeaturedCode" aria-hidden="true">AE // DROP 01</span>
             </span>
             <span class="keysystem-feature-info">
               <span>
@@ -1596,6 +1596,6 @@
 </div>
     </footer>
 
-    <script src="/script.js?v=20260728-keysystem-featured" defer></script>
+    <script src="/script.js?v=20260728-featured-carousel" defer></script>
   </body>
 </html>
