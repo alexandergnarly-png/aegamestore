@@ -759,6 +759,11 @@ body.keysystem-ui .footer-links button {
 }
 
 @media (max-width: 640px) {
+  body.keysystem-ui .keysystem-marquee-track {
+    animation: keysystemMarquee 24s linear infinite !important;
+    will-change: transform;
+  }
+
   body.keysystem-ui {
     --ks-shell: calc(100% - 24px);
   }
@@ -1019,6 +1024,12 @@ body.keysystem-ui.admin-chat-open .ae-help-fab {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  body.keysystem-ui .keysystem-marquee-track {
+    animation: none !important;
+    transform: none !important;
+    will-change: auto;
+  }
+
   body.keysystem-ui *,
   body.keysystem-ui *::before,
   body.keysystem-ui *::after {

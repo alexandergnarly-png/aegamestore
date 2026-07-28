@@ -82,6 +82,14 @@ assert.match(
   /grid-template-columns: repeat\(3, minmax\(0, 1fr\)\) !important/,
 );
 assert.match(keysystemCss, /admin-chat-open \.back-to-top/);
+assert.match(
+  keysystemCss,
+  /\.keysystem-marquee-track \{[\s\S]*?keysystemMarquee 24s linear infinite !important/,
+);
+assert.match(
+  keysystemCss,
+  /prefers-reduced-motion: reduce[\s\S]*?\.keysystem-marquee-track \{[\s\S]*?animation: none !important/,
+);
 assert.match(script, /class="account-orbit-icon"/);
 assert.match(css, /@keyframes accountIconFloat/);
 assert.match(css, /prefers-reduced-motion: reduce[\s\S]*?account-orbit-icon/);
