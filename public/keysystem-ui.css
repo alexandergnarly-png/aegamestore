@@ -92,7 +92,8 @@ body.keysystem-ui .brand-copy strong {
 }
 
 body.keysystem-ui .brand-copy span,
-body.keysystem-ui .main-nav a {
+body.keysystem-ui .main-nav a,
+body.keysystem-ui .main-nav .music-toggle {
   color: var(--ks-muted);
   font-family: var(--ks-mono);
   font-size: 10px;
@@ -101,8 +102,38 @@ body.keysystem-ui .main-nav a {
 }
 
 body.keysystem-ui .main-nav a:hover,
-body.keysystem-ui .main-nav a:focus-visible {
+body.keysystem-ui .main-nav a:focus-visible,
+body.keysystem-ui .main-nav .music-toggle:hover,
+body.keysystem-ui .main-nav .music-toggle:focus-visible,
+body.keysystem-ui .main-nav .music-toggle.is-playing {
   color: var(--ks-text);
+}
+
+body.keysystem-ui .music-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+body.keysystem-ui .music-toggle svg {
+  width: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+body.keysystem-ui .music-toggle .music-wave {
+  opacity: .18;
+  transition: opacity 180ms ease;
+}
+
+body.keysystem-ui .music-toggle.is-playing .music-wave {
+  opacity: 1;
 }
 
 body.keysystem-ui .lang-switch,

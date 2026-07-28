@@ -79,7 +79,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/style.css?v=20260728-mobile-overflow-fix" />
-    <link rel="stylesheet" href="/keysystem-ui.css?v=20260729-trust-strip-1" />
+    <link rel="stylesheet" href="/keysystem-ui.css?v=20260729-background-music-1" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#f4f3ee" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -180,6 +180,20 @@
           >
             How it works
           </a>
+          <button
+            type="button"
+            class="nav-link music-toggle"
+            id="musicToggle"
+            aria-label="Nyalakan musik"
+            aria-pressed="false"
+            aria-controls="backgroundMusic"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M11 5 6 9H3v6h3l5 4V5Z" />
+              <path class="music-wave" d="M15 9a4 4 0 0 1 0 6m3-9a8 8 0 0 1 0 12" />
+            </svg>
+            <span>MUSIC</span>
+          </button>
         </nav>
 
         <div class="header-actions">
@@ -1613,6 +1627,12 @@
 </div>
     </footer>
 
-    <script src="/script.js?v=20260729-payment-info-1" defer></script>
+    <audio
+      id="backgroundMusic"
+      src="/assets/audio/romance.m4a"
+      preload="none"
+      loop
+    ></audio>
+    <script src="/script.js?v=20260729-background-music-1" defer></script>
   </body>
 </html>
