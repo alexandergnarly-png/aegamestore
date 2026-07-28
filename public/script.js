@@ -2398,6 +2398,64 @@ function showTermsPolicy() {
   });
 }
 
+const footerPaymentDetails = {
+  QRIS: {
+    icon: "mdi:qrcode-scan",
+    id: "Scan satu kode QR dari aplikasi bank atau e-wallet yang mendukung QRIS.",
+    en: "Scan one QR code from any supported banking or e-wallet app.",
+  },
+  GoPay: {
+    icon: "mdi:wallet",
+    id: "Bayar langsung menggunakan saldo atau metode pembayaran di aplikasi GoPay.",
+    en: "Pay directly with your balance or payment method in the GoPay app.",
+  },
+  OVO: {
+    icon: "mdi:credit-card-outline",
+    id: "Selesaikan pembayaran dengan saldo OVO melalui halaman pembayaran aman.",
+    en: "Complete payment with your OVO balance through the secure payment page.",
+  },
+  DANA: {
+    icon: "mdi:cash-fast",
+    id: "Gunakan saldo DANA untuk pembayaran cepat melalui gateway resmi.",
+    en: "Use your DANA balance for a fast payment through the official gateway.",
+  },
+  ShopeePay: {
+    icon: "mdi:shopping-outline",
+    id: "Bayar memakai saldo ShopeePay melalui alur pembayaran yang terenkripsi.",
+    en: "Pay with your ShopeePay balance through the encrypted checkout flow.",
+  },
+};
+
+function showPaymentMethodInfo(method) {
+  const detail = footerPaymentDetails[method];
+  if (!detail) return;
+
+  Swal.fire({
+    html: `
+      <div class="ae-payment-info">
+        <span class="ae-payment-info-icon" aria-hidden="true">
+          <iconify-icon icon="${detail.icon}"></iconify-icon>
+        </span>
+        <small>SECURE PAYMENT</small>
+        <h3>${method}</h3>
+        <p>${detail[currentLanguage] || detail.id}</p>
+      </div>
+    `,
+    confirmButtonText: currentLanguage === "en" ? "Got it" : "Mengerti",
+    showCloseButton: true,
+    customClass: {
+      popup: "ae-payment-info-popup",
+      htmlContainer: "ae-payment-info-content",
+      confirmButton: "ae-payment-info-confirm",
+    },
+  });
+}
+
+document.querySelector(".footer-payments")?.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-payment-info]");
+  if (button) showPaymentMethodInfo(button.dataset.paymentInfo);
+});
+
 loadRecentPurchases();
 setInterval(loadRecentPurchases, 60000);
 if (window.innerWidth > 768) {

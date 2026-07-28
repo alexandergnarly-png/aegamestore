@@ -79,7 +79,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/style.css?v=20260728-mobile-overflow-fix" />
-    <link rel="stylesheet" href="/keysystem-ui.css?v=20260729-mobile-marquee-1" />
+    <link rel="stylesheet" href="/keysystem-ui.css?v=20260729-payment-info-1" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#f4f3ee" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -1551,26 +1551,26 @@
         <div class="footer-payments">
           <p data-i18n="safePaymentTitle">Metode Pembayaran Aman</p>
           <div class="payment-icons">
-            <span>
+            <button type="button" data-payment-info="QRIS" aria-label="Lihat informasi QRIS">
               <iconify-icon icon="mdi:qrcode-scan"></iconify-icon>
               QRIS
-            </span>
-            <span>
+            </button>
+            <button type="button" data-payment-info="GoPay" aria-label="Lihat informasi GoPay">
               <iconify-icon icon="mdi:wallet"></iconify-icon>
               GoPay
-            </span>
-            <span>
+            </button>
+            <button type="button" data-payment-info="OVO" aria-label="Lihat informasi OVO">
               <iconify-icon icon="mdi:credit-card-outline"></iconify-icon>
               OVO
-            </span>
-            <span>
+            </button>
+            <button type="button" data-payment-info="DANA" aria-label="Lihat informasi DANA">
               <iconify-icon icon="mdi:cash-fast"></iconify-icon>
               DANA
-            </span>
-            <span>
+            </button>
+            <button type="button" data-payment-info="ShopeePay" aria-label="Lihat informasi ShopeePay">
               <iconify-icon icon="mdi:shopping-outline"></iconify-icon>
               ShopeePay
-            </span>
+            </button>
           </div>
 
           <div class="footer-links">
@@ -1596,6 +1596,6 @@
 </div>
     </footer>
 
-    <script src="/script.js?v=20260728-mobile-polish-2" defer></script>
+    <script src="/script.js?v=20260729-payment-info-1" defer></script>
   </body>
 </html>

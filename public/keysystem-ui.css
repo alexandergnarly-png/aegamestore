@@ -734,11 +734,101 @@ body.keysystem-ui .footer-inner {
 }
 
 body.keysystem-ui .footer-payments span,
+body.keysystem-ui .payment-icons button,
 body.keysystem-ui .footer-links button {
   border-color: var(--ks-line);
   border-radius: 3px;
   background: transparent;
   color: var(--ks-text);
+}
+
+body.keysystem-ui .payment-icons button {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 12px;
+  border: 1px solid var(--ks-line);
+  font: 700 12px/1 var(--ks-mono);
+  cursor: pointer;
+  transition: background-color .18s ease, color .18s ease, border-color .18s ease;
+}
+
+body.keysystem-ui .payment-icons button:hover {
+  border-color: var(--ks-text);
+  background: var(--ks-text);
+  color: var(--ks-inverse);
+}
+
+body.keysystem-ui .payment-icons button:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--ks-text) 28%, transparent);
+  outline-offset: 3px;
+}
+
+body.keysystem-ui .ae-payment-info-popup.swal2-popup {
+  width: min(360px, calc(100vw - 24px)) !important;
+  border: 1px solid var(--ks-line) !important;
+  border-radius: 4px !important;
+  background: var(--ks-surface) !important;
+  color: var(--ks-text) !important;
+}
+
+body.keysystem-ui .ae-payment-info-content {
+  margin: 0 !important;
+  padding: 4px 0 0 !important;
+}
+
+body.keysystem-ui .ae-payment-info {
+  text-align: center;
+}
+
+body.keysystem-ui .ae-payment-info-icon {
+  display: grid;
+  width: 92px;
+  height: 92px;
+  margin: 0 auto 18px;
+  place-items: center;
+  border: 1px solid var(--ks-line);
+  border-radius: 50%;
+  background: var(--ks-text);
+  color: var(--ks-inverse);
+  animation: keysystemPaymentIconIn .28s var(--ks-ease) both !important;
+}
+
+body.keysystem-ui .ae-payment-info-icon iconify-icon {
+  font-size: 44px;
+}
+
+body.keysystem-ui .ae-payment-info small {
+  color: var(--ks-muted);
+  font: 700 9px/1 var(--ks-mono);
+  letter-spacing: .12em;
+}
+
+body.keysystem-ui .ae-payment-info h3 {
+  margin: 8px 0;
+  color: var(--ks-text);
+  font: 800 30px/1 var(--ks-mono);
+}
+
+body.keysystem-ui .ae-payment-info p {
+  max-width: 290px;
+  margin: 0 auto;
+  color: var(--ks-muted);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+body.keysystem-ui .ae-payment-info-confirm.swal2-confirm {
+  min-height: 44px;
+  border-radius: 3px !important;
+  background: var(--ks-text) !important;
+  color: var(--ks-inverse) !important;
+}
+
+@keyframes keysystemPaymentIconIn {
+  from { opacity: 0; transform: translateY(10px) scale(.88) rotate(-6deg); }
+  to { opacity: 1; transform: translateY(0) scale(1) rotate(0); }
 }
 
 @media (max-width: 900px) {
@@ -1024,6 +1114,10 @@ body.keysystem-ui.admin-chat-open .ae-help-fab {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  body.keysystem-ui .ae-payment-info-icon {
+    animation: none !important;
+  }
+
   body.keysystem-ui .keysystem-marquee-track {
     animation: none !important;
     transform: none !important;

@@ -90,6 +90,15 @@ assert.match(
   keysystemCss,
   /prefers-reduced-motion: reduce[\s\S]*?\.keysystem-marquee-track \{[\s\S]*?animation: none !important/,
 );
+assert.match(html, /data-payment-info="QRIS"/);
+assert.match(html, /data-payment-info="ShopeePay"/);
+assert.match(script, /function showPaymentMethodInfo\(method\)/);
+assert.match(script, /footerPaymentDetails\[method\]/);
+assert.match(keysystemCss, /@keyframes keysystemPaymentIconIn/);
+assert.match(
+  keysystemCss,
+  /prefers-reduced-motion: reduce[\s\S]*?\.ae-payment-info-icon \{[\s\S]*?animation: none !important/,
+);
 assert.match(script, /class="account-orbit-icon"/);
 assert.match(css, /@keyframes accountIconFloat/);
 assert.match(css, /prefers-reduced-motion: reduce[\s\S]*?account-orbit-icon/);
