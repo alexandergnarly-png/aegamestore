@@ -2620,7 +2620,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const savedTheme = localStorage.getItem("ae_theme");
   const themeToggleBtn = document.getElementById("theme-toggle");
 
-  if (savedTheme === "dark") {
+  if (savedTheme === "light") {
+    document.body.classList.remove("dark-theme");
+  } else {
     document.body.classList.add("dark-theme");
     if (themeToggleBtn) {
       themeToggleBtn.innerHTML =

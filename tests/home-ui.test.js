@@ -44,6 +44,13 @@ assert.match(css, /\.game-card-body \{[\s\S]*?position: static !important/);
 assert.match(css, /\.game-card-body \{[\s\S]*?flex: 0 0 auto !important/);
 assert.match(css, /\.game-card \.game-card-price \{[\s\S]*?background: transparent !important/);
 assert.match(html, /class="account-orbit-icon"/);
+assert.match(html, /keysystem-ui\.css\?v=/);
+assert.match(html, /<body class="keysystem-ui dark-theme">/);
+assert.match(css, /Compact mobile game cards/);
+assert.match(
+  fs.readFileSync("public/keysystem-ui.css", "utf8"),
+  /body\.keysystem-ui \.game-grid/,
+);
 assert.match(script, /class="account-orbit-icon"/);
 assert.match(css, /@keyframes accountIconFloat/);
 assert.match(css, /prefers-reduced-motion: reduce[\s\S]*?account-orbit-icon/);

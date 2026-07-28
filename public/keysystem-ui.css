@@ -1,0 +1,645 @@
+/* KEY//SYSTEM visual layer. Existing DOM and business flows stay untouched. */
+body.keysystem-ui {
+  --ks-bg: #ecece4;
+  --ks-surface: #f7f7f1;
+  --ks-surface-2: #deded7;
+  --ks-text: #0b0b0a;
+  --ks-muted: #666661;
+  --ks-line: #c6c6be;
+  --ks-inverse: #f4f4ef;
+  --ks-shell: min(1420px, calc(100% - 48px));
+  --ks-mono: "DM Mono", Consolas, monospace;
+  --ks-ease: cubic-bezier(.2, .8, .2, 1);
+  overflow-x: hidden;
+  background: var(--ks-bg);
+  color: var(--ks-text);
+}
+
+body.keysystem-ui.dark-theme {
+  --ks-bg: #080808;
+  --ks-surface: #101010;
+  --ks-surface-2: #181818;
+  --ks-text: #f4f4ef;
+  --ks-muted: #a2a29c;
+  --ks-line: #2a2a27;
+  --ks-inverse: #0b0b0a;
+}
+
+body.keysystem-ui::before {
+  content: "";
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+  opacity: .42;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--ks-text) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--ks-text) 5%, transparent) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: linear-gradient(to bottom, #000 15%, transparent 88%);
+}
+
+body.keysystem-ui .watercolor-blob {
+  display: none;
+}
+
+body.keysystem-ui .site-header {
+  inset: 0 0 auto;
+  border: 0;
+  border-bottom: 1px solid var(--ks-line);
+  border-radius: 0;
+  background: color-mix(in srgb, var(--ks-bg) 88%, transparent);
+  box-shadow: none;
+  backdrop-filter: blur(16px);
+}
+
+body.keysystem-ui .header-inner {
+  width: var(--ks-shell);
+  min-height: 76px;
+  margin-inline: auto;
+  padding: 0;
+}
+
+body.keysystem-ui .brand {
+  gap: 12px;
+  color: var(--ks-text);
+  font-family: var(--ks-mono);
+}
+
+body.keysystem-ui .brand-logo {
+  border: 1px solid var(--ks-text);
+  border-radius: 3px;
+  background: var(--ks-text);
+  box-shadow: none;
+}
+
+body.keysystem-ui .brand-copy strong {
+  font-size: 14px;
+  letter-spacing: -.04em;
+}
+
+body.keysystem-ui .brand-copy span,
+body.keysystem-ui .main-nav a {
+  color: var(--ks-muted);
+  font-family: var(--ks-mono);
+  font-size: 10px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+body.keysystem-ui .main-nav a:hover,
+body.keysystem-ui .main-nav a:focus-visible {
+  color: var(--ks-text);
+}
+
+body.keysystem-ui .lang-switch,
+body.keysystem-ui .lang-btn,
+body.keysystem-ui .auth-btn,
+body.keysystem-ui .nav-toggle {
+  border-color: var(--ks-line);
+  border-radius: 3px;
+  background: var(--ks-surface);
+  color: var(--ks-text);
+  box-shadow: none;
+}
+
+body.keysystem-ui .lang-btn.active,
+body.keysystem-ui .auth-btn {
+  background: var(--ks-text);
+  color: var(--ks-inverse);
+}
+
+body.keysystem-ui .page {
+  width: 100%;
+  max-width: none;
+  padding: 0;
+}
+
+body.keysystem-ui .hero {
+  position: relative;
+  display: block;
+  width: var(--ks-shell);
+  min-height: 640px;
+  margin: 0 auto;
+  padding: 176px 0 96px;
+  border: 0;
+  border-bottom: 1px solid var(--ks-line);
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body.keysystem-ui .hero-copy {
+  width: min(850px, 100%);
+}
+
+body.keysystem-ui .hero-badge,
+body.keysystem-ui .catalog-kicker {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  padding: 0 11px;
+  border: 1px solid var(--ks-line);
+  border-radius: 2px;
+  background: var(--ks-surface);
+  color: var(--ks-muted);
+  font: 600 10px/1 var(--ks-mono);
+  letter-spacing: .1em;
+}
+
+body.keysystem-ui .hero h1 {
+  max-width: 900px;
+  margin: 30px 0 24px;
+  color: var(--ks-text);
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(64px, 8.6vw, 132px);
+  font-weight: 800;
+  line-height: .82;
+  letter-spacing: -.085em;
+  text-transform: uppercase;
+}
+
+body.keysystem-ui .hero p {
+  max-width: 610px;
+  color: var(--ks-muted);
+  font-size: 17px;
+  line-height: 1.65;
+}
+
+body.keysystem-ui .hero-cta-row {
+  margin-top: 34px;
+}
+
+body.keysystem-ui .hero-cta {
+  min-height: 50px;
+  border: 1px solid var(--ks-text);
+  border-radius: 3px;
+  background: var(--ks-text);
+  color: var(--ks-inverse);
+  box-shadow: none;
+  font: 700 11px/1 var(--ks-mono);
+  text-transform: uppercase;
+}
+
+body.keysystem-ui .hero-cta-ghost {
+  border-color: var(--ks-line);
+  background: transparent;
+  color: var(--ks-text);
+}
+
+body.keysystem-ui .hero-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: none;
+}
+
+body.keysystem-ui .hero-trust {
+  width: min(720px, 100%);
+  margin-top: 70px;
+  border-block: 1px solid var(--ks-line);
+}
+
+body.keysystem-ui .hero-trust li {
+  min-width: 0;
+  padding: 20px;
+  border: 0;
+  border-right: 1px solid var(--ks-line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+body.keysystem-ui .hero-trust li:last-child {
+  border-right: 0;
+}
+
+body.keysystem-ui .hero-trust-icon,
+body.keysystem-ui .hero-trust strong {
+  color: var(--ks-text);
+  font-family: var(--ks-mono);
+}
+
+body.keysystem-ui .hero-trust small {
+  color: var(--ks-muted);
+}
+
+body.keysystem-ui .promo-container,
+body.keysystem-ui .store-layout,
+body.keysystem-ui .testimonial-section {
+  width: var(--ks-shell);
+  margin-inline: auto;
+}
+
+body.keysystem-ui .promo-container {
+  margin-top: 48px;
+  border: 1px solid var(--ks-line);
+  border-radius: 3px;
+  background: var(--ks-surface);
+  box-shadow: none;
+}
+
+body.keysystem-ui .promo-slider,
+body.keysystem-ui .promo-slide {
+  border-radius: 0;
+}
+
+body.keysystem-ui .promo-slide {
+  background: var(--ks-surface-2) !important;
+  color: var(--ks-text) !important;
+}
+
+body.keysystem-ui .promo-content > span,
+body.keysystem-ui .promo-content h3,
+body.keysystem-ui .promo-content p,
+body.keysystem-ui .promo-countdown {
+  color: var(--ks-text) !important;
+}
+
+body.keysystem-ui .promo-content > span,
+body.keysystem-ui .promo-countdown {
+  border-radius: 2px;
+  font-family: var(--ks-mono);
+}
+
+body.keysystem-ui .promo-controls {
+  border-top: 1px solid var(--ks-line);
+  background: var(--ks-surface);
+}
+
+body.keysystem-ui .promo-arrow,
+body.keysystem-ui .promo-dot {
+  border-color: var(--ks-line);
+  background: transparent;
+  color: var(--ks-text);
+}
+
+body.keysystem-ui .promo-dot.active {
+  background: var(--ks-text);
+}
+
+body.keysystem-ui .store-layout {
+  padding: 132px 0 110px;
+}
+
+body.keysystem-ui .shop-card {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+body.keysystem-ui .shop-card .section-head {
+  align-items: end;
+  margin-bottom: 44px;
+  padding: 0 0 28px;
+  border-bottom: 1px solid var(--ks-line);
+  background: transparent;
+}
+
+body.keysystem-ui .section-head h2 {
+  margin-top: 18px;
+  color: var(--ks-text);
+  font-size: clamp(44px, 6vw, 76px);
+  line-height: .92;
+  letter-spacing: -.07em;
+  text-transform: uppercase;
+}
+
+body.keysystem-ui .section-head h2::after {
+  display: none;
+}
+
+body.keysystem-ui .section-head p,
+body.keysystem-ui .catalog-meta-label {
+  color: var(--ks-muted);
+}
+
+body.keysystem-ui .catalog-meta,
+body.keysystem-ui .catalog-toolbar {
+  border: 1px solid var(--ks-line);
+  border-radius: 3px;
+  background: var(--ks-surface);
+  box-shadow: none;
+}
+
+body.keysystem-ui .catalog-toolbar {
+  padding: 14px;
+}
+
+body.keysystem-ui .pill,
+body.keysystem-ui .sort-chip,
+body.keysystem-ui .search-box {
+  border-color: var(--ks-line);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--ks-muted);
+  box-shadow: none;
+}
+
+body.keysystem-ui .pill.active,
+body.keysystem-ui .sort-chip.active {
+  background: var(--ks-text);
+  color: var(--ks-inverse);
+}
+
+body.keysystem-ui .search-box input {
+  color: var(--ks-text);
+}
+
+body.keysystem-ui .game-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 36px 16px;
+}
+
+body.keysystem-ui .game-card,
+body.keysystem-ui .game-card:hover,
+body.keysystem-ui .game-card.active {
+  overflow: visible;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+}
+
+body.keysystem-ui .game-card-thumb {
+  overflow: hidden;
+  aspect-ratio: 16 / 10;
+  border: 1px solid var(--ks-line);
+  border-radius: 3px;
+  background: var(--ks-surface-2);
+  transition: transform .28s var(--ks-ease), border-color .2s;
+}
+
+body.keysystem-ui .game-card:hover .game-card-thumb {
+  border-color: var(--ks-muted);
+  transform: translateY(-4px);
+}
+
+body.keysystem-ui .game-card-body {
+  padding: 14px 0 0;
+  color: var(--ks-text);
+}
+
+body.keysystem-ui .game-card-title {
+  min-height: 0;
+  color: var(--ks-text);
+  font-size: 17px;
+}
+
+body.keysystem-ui .game-card-status-row {
+  color: var(--ks-muted);
+}
+
+body.keysystem-ui .game-card .game-status-badge,
+body.keysystem-ui .game-card .game-card-brand-count,
+body.keysystem-ui .game-card .game-card-stock {
+  border-color: var(--ks-line) !important;
+  background: transparent !important;
+  color: var(--ks-muted) !important;
+}
+
+body.keysystem-ui .game-card .game-card-price {
+  background: transparent !important;
+  color: var(--ks-text) !important;
+}
+
+body.keysystem-ui .game-card .game-card-price b {
+  color: var(--ks-text) !important;
+}
+
+body.keysystem-ui .game-card-cta::after {
+  border-radius: 3px;
+  background: var(--ks-text);
+  color: var(--ks-inverse);
+}
+
+body.keysystem-ui .game-card-fav iconify-icon,
+body.keysystem-ui .game-card-fav.is-active iconify-icon {
+  color: var(--ks-inverse);
+}
+
+body.keysystem-ui .testimonial-section {
+  padding: 100px 0;
+  border-top: 1px solid var(--ks-line);
+  background: transparent;
+}
+
+body.keysystem-ui .review-summary,
+body.keysystem-ui .review-action-card,
+body.keysystem-ui .testi-card {
+  border-color: var(--ks-line);
+  border-radius: 3px;
+  background: var(--ks-surface);
+  color: var(--ks-text);
+  box-shadow: none;
+}
+
+body.keysystem-ui .open-review-btn {
+  border-radius: 3px;
+  background: var(--ks-text);
+  color: var(--ks-inverse);
+}
+
+body.keysystem-ui .site-footer {
+  border-top: 1px solid var(--ks-line);
+  background: var(--ks-surface);
+  color: var(--ks-text);
+}
+
+body.keysystem-ui .footer-inner {
+  width: var(--ks-shell);
+  margin-inline: auto;
+}
+
+body.keysystem-ui .footer-payments span,
+body.keysystem-ui .footer-links button {
+  border-color: var(--ks-line);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--ks-text);
+}
+
+@media (max-width: 900px) {
+  body.keysystem-ui {
+    --ks-shell: min(100% - 28px, 720px);
+  }
+
+  body.keysystem-ui .hero {
+    min-height: auto;
+    padding-top: 136px;
+  }
+
+  body.keysystem-ui .game-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  body.keysystem-ui {
+    --ks-shell: calc(100% - 24px);
+  }
+
+  body.keysystem-ui .site-header {
+    border-radius: 0;
+  }
+
+  body.keysystem-ui .header-inner {
+    display: flex !important;
+    width: 100%;
+    min-height: 72px;
+    padding-inline: 12px;
+    gap: 6px;
+    justify-content: space-between !important;
+    overflow: hidden;
+  }
+
+  body.keysystem-ui .brand {
+    flex: 0 0 auto;
+  }
+
+  body.keysystem-ui .brand-copy,
+  body.keysystem-ui .account-auth-btn span {
+    display: none;
+  }
+
+  body.keysystem-ui .header-actions {
+    flex: 0 0 auto;
+    gap: 4px;
+    margin-left: auto;
+  }
+
+  body.keysystem-ui .lang-switch {
+    flex: 0 0 auto;
+  }
+
+  body.keysystem-ui .lang-btn,
+  body.keysystem-ui .theme-toggle-btn,
+  body.keysystem-ui .account-auth-btn,
+  body.keysystem-ui .nav-toggle {
+    width: 38px !important;
+    min-width: 38px !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    padding: 0 !important;
+  }
+
+  body.keysystem-ui .hero {
+    padding: 120px 0 54px;
+  }
+
+  body.keysystem-ui .hero h1 {
+    max-width: 100%;
+    margin-top: 22px;
+    font-size: clamp(44px, 13.5vw, 64px);
+    overflow-wrap: anywhere;
+    white-space: normal !important;
+  }
+
+  body.keysystem-ui .hero p {
+    font-size: 15px;
+  }
+
+  body.keysystem-ui .hero-cta-row {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  body.keysystem-ui .hero-trust {
+    display: grid !important;
+    width: 100% !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: 42px;
+    overflow: hidden;
+  }
+
+  body.keysystem-ui .hero-trust li {
+    display: block;
+    width: auto !important;
+    min-width: 0 !important;
+    padding: 14px 8px;
+  }
+
+  body.keysystem-ui .hero-trust small {
+    display: none;
+  }
+
+  body.keysystem-ui .promo-container {
+    margin-top: 24px;
+  }
+
+  body.keysystem-ui .store-layout {
+    padding: 78px 0 70px;
+  }
+
+  body.keysystem-ui .shop-card .section-head {
+    display: block;
+    margin-bottom: 20px;
+  }
+
+  body.keysystem-ui .section-head h2 {
+    font-size: 44px;
+  }
+
+  body.keysystem-ui .catalog-meta {
+    margin-top: 20px;
+  }
+
+  body.keysystem-ui .catalog-toolbar {
+    padding: 10px;
+  }
+
+  body.keysystem-ui .game-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  body.keysystem-ui .game-card,
+  body.keysystem-ui .game-card:hover,
+  body.keysystem-ui .game-card.active {
+    align-self: start !important;
+  }
+
+  body.keysystem-ui .game-card-thumb {
+    border-radius: 2px;
+  }
+
+  body.keysystem-ui .game-card-body {
+    padding: 9px 0 0 !important;
+  }
+
+  body.keysystem-ui .game-card-title {
+    font-size: 14px;
+  }
+
+  body.keysystem-ui .game-card .game-card-fav,
+  body.keysystem-ui .game-card .game-card-fav.is-active {
+    top: 6px !important;
+    right: 6px !important;
+  }
+
+  body.keysystem-ui .game-card-fav iconify-icon {
+    color: #fff;
+  }
+
+  body.keysystem-ui .game-card-fav.is-active iconify-icon {
+    color: #fff;
+    fill: currentColor;
+  }
+
+  body.keysystem-ui .testimonial-section {
+    padding: 70px 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.keysystem-ui *,
+  body.keysystem-ui *::before,
+  body.keysystem-ui *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
