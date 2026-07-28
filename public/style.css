@@ -12850,6 +12850,7 @@ body.dark-theme .install-prompt-close {
     scroll-padding-top: 76px;
   }
 
+  html,
   body {
     overflow-x: clip;
   }

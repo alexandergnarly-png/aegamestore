@@ -54,6 +54,14 @@ assert.match(
   fs.readFileSync("public/keysystem-ui.css", "utf8"),
   /body\.keysystem-ui \.game-grid/,
 );
+assert.match(
+  fs.readFileSync("public/keysystem-ui.css", "utf8"),
+  /hero-trust li \{[\s\S]*?grid-column: auto !important/,
+);
+assert.match(
+  fs.readFileSync("public/keysystem-ui.css", "utf8"),
+  /html:has\(body\.keysystem-ui\) \{[\s\S]*?overflow-x: clip/,
+);
 assert.match(script, /class="account-orbit-icon"/);
 assert.match(css, /@keyframes accountIconFloat/);
 assert.match(css, /prefers-reduced-motion: reduce[\s\S]*?account-orbit-icon/);

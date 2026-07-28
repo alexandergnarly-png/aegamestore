@@ -15,6 +15,11 @@ body.keysystem-ui {
   color: var(--ks-text);
 }
 
+html:has(body.keysystem-ui) {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
 body.keysystem-ui.dark-theme {
   --ks-bg: #080808;
   --ks-surface: #101010;
@@ -780,6 +785,7 @@ body.keysystem-ui .footer-links button {
     display: flex;
     flex-direction: column;
     gap: 26px;
+    overflow: hidden;
     padding: 98px 0 0;
   }
 
@@ -790,7 +796,8 @@ body.keysystem-ui .footer-links button {
   body.keysystem-ui .keysystem-hero-visual {
     order: 1;
     width: 100%;
-    min-height: 470px;
+    min-height: 420px;
+    overflow: hidden;
   }
 
   body.keysystem-ui .keysystem-feature-card {
@@ -798,7 +805,7 @@ body.keysystem-ui .footer-links button {
   }
 
   body.keysystem-ui .keysystem-orbit-one {
-    width: min(410px, 110vw);
+    width: min(410px, 100%);
   }
 
   body.keysystem-ui .keysystem-orbit-two {
@@ -845,6 +852,7 @@ body.keysystem-ui .footer-links button {
 
   body.keysystem-ui .hero-trust li {
     display: block;
+    grid-column: auto !important;
     width: auto !important;
     min-width: 0 !important;
     padding: 14px 8px;
@@ -859,7 +867,7 @@ body.keysystem-ui .footer-links button {
   }
 
   body.keysystem-ui .store-layout {
-    padding: 78px 0 70px;
+    padding: 36px 0 70px;
   }
 
   body.keysystem-ui .shop-card .section-head {
@@ -919,6 +927,42 @@ body.keysystem-ui .footer-links button {
 
   body.keysystem-ui .testimonial-section {
     padding: 70px 0;
+  }
+}
+
+@media (max-width: 360px) {
+  body.keysystem-ui {
+    --ks-shell: calc(100% - 20px);
+  }
+
+  body.keysystem-ui .keysystem-hero-visual {
+    min-height: 350px;
+  }
+
+  body.keysystem-ui .keysystem-feature-card {
+    width: min(220px, 72vw);
+  }
+
+  body.keysystem-ui .hero {
+    gap: 18px;
+    padding-top: 86px;
+  }
+
+  body.keysystem-ui .hero h1 {
+    margin-top: 16px;
+    font-size: clamp(38px, 13vw, 48px) !important;
+  }
+
+  body.keysystem-ui .hero-trust {
+    margin-top: 26px;
+  }
+
+  body.keysystem-ui .hero-trust li {
+    padding: 11px 4px;
+  }
+
+  body.keysystem-ui .hero-trust strong {
+    font-size: 8px;
   }
 }
 
