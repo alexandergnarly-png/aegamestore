@@ -1181,6 +1181,18 @@ async function claimVipStoreKeyForOrder(order, options = {}) {
   const orderId = String(order.id || order.order_id || "");
   const productId = Number(order.product_id || 0) || null;
   const quantity = getOrderQuantity(order.quantity);
+  const storedKeysResult = await query(
+    `SELECT key_value
+     FROM order_keys
+     WHERE order_id = $1
+     ORDER BY position ASC, id ASC`,
+    [orderId],
+  );
+  const claimedKeys = storedKeysResult.rows
+    .map((row) => String(row.key_value || "").trim())
+    .filter(Boolean)
+    .slice(0, quantity);
+  const seenKeys = new Set(claimedKeys);
 
   if (!supplierProductId) {
     const message = "Produk belum punya Supplier Product ID";
@@ -1196,50 +1208,70 @@ async function claimVipStoreKeyForOrder(order, options = {}) {
   }
 
   try {
-    const claimResult = await claimVipStoreKey(supplierProductId, quantity);
-    const claimData = claimResult.data || {};
-    const responseSummary = summarizeVipStoreClaimResponse(claimData);
+    let lastHttpCode = null;
+    let lastResponseSummary = "";
 
-    if (!claimResult.ok || claimData.success === false) {
-      const message =
-        claimData.message ||
-        claimData.error ||
-        `Claim supplier gagal. HTTP ${claimResult.http_code || "-"}`;
+    while (claimedKeys.length < quantity) {
+      const claimResult = await claimVipStoreKey(supplierProductId, 1);
+      const claimData = claimResult.data || {};
+      lastHttpCode = claimResult.http_code;
+      lastResponseSummary = summarizeVipStoreClaimResponse(claimData);
 
-      await logVipStoreClaimAttempt({
+      if (!claimResult.ok || claimData.success === false) {
+        const message =
+          claimData.message ||
+          claimData.error ||
+          `Claim supplier gagal. HTTP ${claimResult.http_code || "-"}`;
+
+        await logVipStoreClaimAttempt({
+          orderId,
+          productId,
+          supplierProductId,
+          source,
+          status: "failed",
+          message,
+          httpCode: claimResult.http_code,
+          keyCount: claimedKeys.length,
+          responseSummary: lastResponseSummary,
+        });
+
+        throw new Error(message);
+      }
+
+      const responseKeys = extractVipStoreClaimKeys(claimData).filter(
+        (key) => !seenKeys.has(key),
+      );
+
+      if (!responseKeys.length) {
+        const message = `Supplier tidak mengembalikan key untuk unit ${claimedKeys.length + 1} dari ${quantity}`;
+
+        await logVipStoreClaimAttempt({
+          orderId,
+          productId,
+          supplierProductId,
+          source,
+          status: "failed",
+          message,
+          httpCode: claimResult.http_code,
+          keyCount: claimedKeys.length,
+          responseSummary: lastResponseSummary,
+        });
+
+        throw new Error(message);
+      }
+
+      for (const key of responseKeys) {
+        if (claimedKeys.length >= quantity) break;
+        seenKeys.add(key);
+        claimedKeys.push(key);
+      }
+
+      await persistOrderKeys(db, {
         orderId,
-        productId,
-        supplierProductId,
-        source,
-        status: "failed",
-        message,
-        httpCode: claimResult.http_code,
-        responseSummary,
+        keys: claimedKeys,
+        source: "vipstore",
       });
-
-      throw new Error(message);
     }
-
-    const claimedKeys = extractVipStoreClaimKeys(claimData);
-
-    if (claimedKeys.length < quantity) {
-      const message = `Supplier hanya mengembalikan ${claimedKeys.length} dari ${quantity} key`;
-
-      await logVipStoreClaimAttempt({
-        orderId,
-        productId,
-        supplierProductId,
-        source,
-        status: "failed",
-        message,
-        httpCode: claimResult.http_code,
-        responseSummary,
-      });
-
-      throw new Error(message);
-    }
-
-    const deliveredKeys = claimedKeys.slice(0, quantity);
 
     await logVipStoreClaimAttempt({
       orderId,
@@ -1247,17 +1279,17 @@ async function claimVipStoreKeyForOrder(order, options = {}) {
       supplierProductId,
       source,
       status: "success",
-      message: `Claim success, ${deliveredKeys.length} key diterima`,
-      httpCode: claimResult.http_code,
-      keyCount: deliveredKeys.length,
-      responseSummary,
+      message: `Claim success, ${claimedKeys.length} key diterima`,
+      httpCode: lastHttpCode,
+      keyCount: claimedKeys.length,
+      responseSummary: lastResponseSummary,
     });
 
     return {
       supplier_product_id: supplierProductId,
-      key: deliveredKeys.join("\n"),
-      keys: deliveredKeys,
-      http_code: claimResult.http_code,
+      key: claimedKeys.join("\n"),
+      keys: claimedKeys,
+      http_code: lastHttpCode,
     };
   } catch (err) {
     if (
@@ -1273,6 +1305,7 @@ async function claimVipStoreKeyForOrder(order, options = {}) {
         source,
         status: "failed",
         message: err.message || "Claim supplier gagal",
+        keyCount: claimedKeys.length,
       });
     }
 

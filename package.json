@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon server.js",
     "start": "node server.js",
-    "test": "node tests/account-wallet-ui.test.js && node tests/midtrans-wallet.test.js && node tests/home-ui.test.js && node tests/auth-ui.test.js && node tests/admin-popup-ui.test.js"
+    "test": "node tests/account-wallet-ui.test.js && node tests/midtrans-wallet.test.js && node tests/home-ui.test.js && node tests/auth-ui.test.js && node tests/admin-popup-ui.test.js && node tests/vipstore-claim.test.js"
   },
   "engines": {
     "node": "20.x"
