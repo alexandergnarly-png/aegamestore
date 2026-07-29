@@ -17,6 +17,8 @@ scripts.forEach(([, source]) =>
   'claimFailed ? "Mengerti" : "Copy Key"',
   "Supplier Claim Log",
   "Retry Claim Supplier",
+  "Tandai Selesai",
+  "completeManualOrder",
 ].forEach((marker) =>
   assert.ok(admin.includes(marker), `Missing admin popup marker: ${marker}`),
 );
@@ -29,6 +31,14 @@ assert.ok(
   server.includes("ILIKE '%VIP STORE%'") &&
     server.includes("ILIKE '%KEY BELUM TERSEDIA%'"),
   "Safety query must support old and new failure placeholders",
+);
+[
+  '"/admin-orders/:id/complete-manual"',
+  "KEY SUDAH DIKIRIM MANUAL OLEH ADMIN",
+  "gameKeys.length !== quantity",
+  "Order ditandai selesai tanpa mengirim ulang key",
+].forEach((marker) =>
+  assert.ok(server.includes(marker), `Missing manual completion marker: ${marker}`),
 );
 
 console.log("Admin key popup UI check passed.");

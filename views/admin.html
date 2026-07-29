@@ -5864,6 +5864,10 @@
               ps === "paid" && ds !== "delivered" && !isCancelled
                 ? `<button class="ghost-btn" onclick='openManualDeliverModal(${safeId})'>Kirim Manual</button>`
                 : "";
+            const completeBtn =
+              ps === "paid" && ["manual", "problem"].includes(ds)
+                ? `<button class="ghost-btn" onclick='completeManualOrder(${safeId})'>Tandai Selesai</button>`
+                : "";
             const cancelBtn =
               !isProtected && !isCancelled
                 ? `<button class="ghost-btn" onclick='openCancelOrderModal(${safeId})'>Batalkan</button>`
@@ -5904,6 +5908,7 @@
                     ${confirmBtn}
                     ${retryClaimBtn}
                     ${manualBtn}
+                    ${completeBtn}
                     ${cancelBtn}
                     ${deleteBtn}
                   </div>
@@ -6287,6 +6292,11 @@
             `<button class="ghost-btn" onclick='openManualDeliverModal(${safeId})'>Kirim Manual</button>`,
           );
         }
+        if (ps === "paid" && ["manual", "problem"].includes(ds)) {
+          buttons.push(
+            `<button class="ghost-btn" onclick='completeManualOrder(${safeId})'>Tandai Selesai</button>`,
+          );
+        }
         if (!isCancelled && ds !== "delivered") {
           buttons.push(
             `<button class="ghost-btn" onclick='openCancelOrderModal(${safeId})' style="color:#ef4444;border-color:#fecaca;">Batalkan</button>`,
@@ -6354,7 +6364,7 @@
           html: `
             <div class="modal-field">
               <label for="manualKeyInput">Game Key</label>
-              <input id="manualKeyInput" placeholder="Tempel game key di sini" />
+              <textarea id="manualKeyInput" placeholder="Satu game key per baris"></textarea>
               <div class="modal-field-hint">Pastikan key sudah benar — buyer akan langsung melihat ini.</div>
             </div>
             <div class="modal-field">
@@ -6435,6 +6445,39 @@
             text: "Gagal kirim manual: " + err.message,
             confirmButtonColor: "#0ea5e9",
           });
+        }
+      }
+
+      async function completeManualOrder(orderId) {
+        const result = await Swal.fire({
+          icon: "warning",
+          title: "Tandai Order Selesai?",
+          text: "Gunakan hanya jika semua key sudah kamu kirim di luar website. Sistem tidak akan mengirim ulang key.",
+          showCancelButton: true,
+          confirmButtonText: "Ya, Sudah Dikirim",
+          cancelButtonText: "Batal",
+        });
+        if (!result.isConfirmed) return;
+
+        try {
+          const res = await fetch(
+            "/admin-orders/" + encodeURIComponent(orderId) + "/complete-manual",
+            {
+              method: "POST",
+              headers: { "x-csrf-token": getCsrfToken() },
+            },
+          );
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            Swal.fire("Gagal", data.message || "Order gagal ditandai selesai", "error");
+            return;
+          }
+          await Swal.fire("Selesai", data.message, "success");
+          closeOrderDrawer();
+          loadOrders();
+          loadAdminStats();
+        } catch (err) {
+          Swal.fire("Error", "Gagal menandai order selesai", "error");
         }
       }
 

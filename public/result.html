@@ -983,6 +983,9 @@ const resultTranslations = {
           manualKeyFallback: "Akan dikirim manual oleh admin.",
           manualMessage:
             "Pembayaran sudah dicek, tapi order ini perlu dikirim manual oleh admin. Hubungi admin jika belum diproses.",
+          manualCompletedKey: "Key sudah dikirim manual oleh admin.",
+          manualCompletedMessage:
+            "Order selesai. Admin sudah mengirim seluruh key melalui kontakmu.",
           manualToast: "Order perlu diproses manual 🌊",
           processingKey: "Key sedang diproses otomatis...",
           processingMessage:
@@ -1074,6 +1077,9 @@ const resultTranslations = {
           manualKeyFallback: "Will be delivered manually by admin.",
           manualMessage:
             "Payment was confirmed, but this order needs manual delivery by admin. Contact admin if it hasn't been processed.",
+          manualCompletedKey: "Keys were sent manually by the admin.",
+          manualCompletedMessage:
+            "Order completed. The admin sent all keys through your contact.",
           manualToast: "Order needs manual processing 🌊",
           processingKey: "Key is being processed automatically...",
           processingMessage:
@@ -1526,6 +1532,23 @@ const resultTranslations = {
         // Detach static i18n binding once we render dynamic content
         statusText.removeAttribute("data-result-i18n");
         keyBox.removeAttribute("data-result-i18n");
+
+        if (deliveryStatus === "delivered" && data.manual_completed) {
+          latestGameKey = "";
+          stopPendingAutoRefresh();
+          copyBtn.style.display = "none";
+          keyBox.innerText = tResult("manualCompletedKey");
+          if (keyWrapper) keyWrapper.className = "key-box delivered";
+          statusText.innerHTML = `
+            <div class="status-message-card success">
+              <iconify-icon icon="mdi:check-circle" aria-hidden="true"></iconify-icon>
+              <span>${tResult("manualCompletedMessage")}</span>
+            </div>
+          `;
+          setProgress("delivered");
+          renderTimeline(data, "delivered");
+          return "deliveredToast";
+        }
 
         if (deliveryStatus === "delivered" && orderKeys.length) {
           latestGameKey = orderKeys.join("\n");

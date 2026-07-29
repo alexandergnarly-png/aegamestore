@@ -31,6 +31,7 @@ let isShuttingDown = false;
 const WALLET_MIN_TOPUP = 10000;
 const WALLET_MAX_TOPUP = 2000000;
 const WALLET_MAX_BALANCE = 10000000;
+const MANUAL_COMPLETION_MARKER = "KEY SUDAH DIKIRIM MANUAL OLEH ADMIN";
 
 if (!jwtSecret || jwtSecret.length < 32) {
   throw new Error("JWT_SECRET wajib diisi minimal 32 karakter");
@@ -5157,7 +5158,10 @@ app.get("/order/:id", orderCheckLimiter, async (req, res) => {
       });
     }
 
-    const gameKeys = await getStoredOrderKeys(order.id, order.gamekey);
+    const manualCompleted = order.gamekey === MANUAL_COMPLETION_MARKER;
+    const gameKeys = manualCompleted
+      ? []
+      : await getStoredOrderKeys(order.id, order.gamekey);
 
     return res.json({
       id: order.id,
@@ -5171,6 +5175,7 @@ app.get("/order/:id", orderCheckLimiter, async (req, res) => {
       delivery_status: order.delivery_status,
       gameKey: gameKeys.join("\n"),
       gameKeys,
+      manual_completed: manualCompleted,
       created_at: order.created_at,
     });
   } catch (err) {
@@ -6033,32 +6038,33 @@ app.post(
   requireAdminAuth,
   requireAdminCsrf,
   async (req, res) => {
-    return res.status(410).json({
-      message:
-        "Manual delivery dinonaktifkan. Tambahkan stok key agar order bisa otomatis delivered.",
-    });
     const orderId = String(req.params.id || "").trim();
     const gameKey = String(req.body?.game_key || "").trim();
     const note = String(req.body?.note || "").trim();
+    const gameKeys = splitOrderKeys(gameKey);
 
     if (!orderId) {
       return res.status(400).json({ message: "ID order tidak valid" });
     }
-    if (!gameKey) {
+    if (!gameKeys.length) {
       return res.status(400).json({ message: "Game key wajib diisi" });
     }
     if (gameKey.length > 500) {
       return res.status(400).json({ message: "Game key terlalu panjang" });
     }
 
+    const client = await db.connect();
     try {
-      const orderResult = await query(
-        "SELECT id, payment_status, delivery_status FROM orders WHERE id = $1 LIMIT 1",
+      await client.query("BEGIN");
+      const orderResult = await client.query(
+        `SELECT id, quantity, payment_status, delivery_status
+         FROM orders WHERE id = $1 LIMIT 1 FOR UPDATE`,
         [orderId],
       );
       const order = orderResult.rows[0];
 
       if (!order) {
+        await client.query("ROLLBACK");
         return res.status(404).json({ message: "Order tidak ditemukan" });
       }
 
@@ -6066,6 +6072,7 @@ app.post(
       const ds = String(order.delivery_status || "").toLowerCase();
 
       if (ps !== "paid") {
+        await client.query("ROLLBACK");
         return res.status(400).json({
           message:
             "Manual fulfillment hanya untuk order yang sudah berstatus paid",
@@ -6073,31 +6080,97 @@ app.post(
       }
 
       if (ds === "delivered") {
+        await client.query("ROLLBACK");
         return res.status(400).json({ message: "Order ini sudah delivered" });
       }
 
       if (ds === "cancelled") {
+        await client.query("ROLLBACK");
         return res.status(400).json({ message: "Order ini sudah dibatalkan" });
       }
 
-      await query(
+      const quantity = getOrderQuantity(order.quantity);
+      if (gameKeys.length !== quantity) {
+        await client.query("ROLLBACK");
+        return res.status(400).json({
+          message: `Masukkan tepat ${quantity} key, satu key per baris`,
+        });
+      }
+
+      await client.query("DELETE FROM order_keys WHERE order_id = $1", [orderId]);
+      await persistOrderKeys(client, {
+        orderId,
+        keys: gameKeys,
+        source: "manual",
+      });
+      await client.query(
         `UPDATE orders
          SET gameKey = $1,
              delivery_status = $2,
              delivered_at = $3,
              admin_note = COALESCE(NULLIF($4, ''), admin_note)
          WHERE id = $5`,
-        [gameKey, "delivered", new Date().toISOString(), note, orderId],
+        [gameKeys.join("\n"), "delivered", new Date().toISOString(), note, orderId],
       );
+      await client.query("COMMIT");
 
       return res.json({
-        message: "Game key berhasil dikirim manual ke buyer",
+        message: `${gameKeys.length} game key berhasil dikirim manual ke buyer`,
       });
     } catch (err) {
+      await client.query("ROLLBACK").catch(() => {});
       console.error("ERROR MANUAL DELIVER:", err);
       return res.status(500).json({
         message: "Gagal manual deliver: " + err.message,
       });
+    } finally {
+      client.release();
+    }
+  },
+);
+
+// Mark an externally fulfilled order complete without exposing or sending another key.
+app.post(
+  "/admin-orders/:id/complete-manual",
+  requireAdminAuth,
+  requireAdminCsrf,
+  async (req, res) => {
+    const orderId = String(req.params.id || "").trim();
+    if (!orderId) {
+      return res.status(400).json({ message: "ID order tidak valid" });
+    }
+
+    try {
+      const result = await query(
+        `UPDATE orders
+         SET gameKey = $1,
+             delivery_status = 'delivered',
+             delivered_at = $2,
+             admin_note = COALESCE(admin_note || E'\n', '') || $3
+         WHERE id = $4
+           AND LOWER(COALESCE(payment_status, '')) = 'paid'
+           AND LOWER(COALESCE(delivery_status, '')) IN ('manual', 'problem')
+         RETURNING id`,
+        [
+          MANUAL_COMPLETION_MARKER,
+          new Date().toISOString(),
+          "Key dikirim manual di luar website",
+          orderId,
+        ],
+      );
+
+      if (!result.rows.length) {
+        return res.status(409).json({
+          message: "Order harus paid dan berstatus manual/problem",
+        });
+      }
+
+      return res.json({
+        message: "Order ditandai selesai tanpa mengirim ulang key",
+      });
+    } catch (err) {
+      console.error("ERROR COMPLETE MANUAL ORDER:", err);
+      return res.status(500).json({ message: "Gagal menandai order selesai" });
     }
   },
 );
@@ -7159,13 +7232,17 @@ app.get("/user/orders", async (req, res) => {
 
     const orders = await Promise.all(
       result.rows.map(async (order) => {
-        const gameKeys = await getStoredOrderKeys(order.id, order.gamekey);
+        const manualCompleted = order.gamekey === MANUAL_COMPLETION_MARKER;
+        const gameKeys = manualCompleted
+          ? []
+          : await getStoredOrderKeys(order.id, order.gamekey);
         return {
           ...order,
           quantity: getOrderQuantity(order.quantity),
           unit_price: Number(order.unit_price || order.original_price || order.price || 0),
           gameKey: gameKeys.join("\n"),
           gameKeys,
+          manual_completed: manualCompleted,
         };
       }),
     );
