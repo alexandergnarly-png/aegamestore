@@ -1,40 +1,43 @@
 # AE Game Store
 
-AE Game Store adalah toko digital key berbasis Express, PostgreSQL, dan Midtrans.
-Render menjalankan entrypoint `server.js` dari root repository.
+Toko digital key berbasis Express, PostgreSQL, dan Midtrans. Render menjalankan
+`server.js` dari root repository.
 
-## Struktur utama
+## Struktur
 
 ```text
 .
-├─ server.js                 # Entry point Express dan route API
-├─ server/                   # Modul backend pendukung
-│  ├─ database.js            # PostgreSQL pool
-│  ├─ database-migrations.js # Migrasi schema saat startup
-│  └─ order-utils.js          # Kalkulasi quantity, bulk, dan harga order
-├─ public/                   # Halaman dan asset yang disajikan Express
-│  ├─ index.html              # Storefront
-│  ├─ account.html            # Akun, badge, dan AE Credit
-│  ├─ user-auth.html          # Login/register buyer
-│  ├─ admin-login.html        # Login admin
-│  ├─ script.js               # Interaksi storefront dan checkout
-│  ├─ style.css               # Style storefront
-│  ├─ images/games/           # Cover game
-│  └─ qris.png                # QRIS top up AE Credit
-├─ views/
-│  └─ admin.html               # Admin Panel
-├─ frontend/                  # Prototype Next.js terpisah; belum dipakai Render production
-├─ package.json               # Dependency dan command backend
-└─ .env                       # Secret lokal (tidak boleh di-commit)
+|-- server.js                     # Entry point Express dan route API
+|-- server/                       # Database, migrasi, dan utilitas backend
+|-- public/                       # Frontend production yang disajikan Express
+|-- views/                        # Halaman admin
+|-- tests/                        # Test backend
+|-- docs/integrations/            # Dokumentasi layanan pihak ketiga
+|-- prototypes/next-storefront/   # Eksperimen Next.js, tidak dipakai Render
+|-- private/                      # Credential/data lokal, diabaikan Git
+|-- package.json                  # Dependency dan command production
+`-- .env                          # Environment lokal, diabaikan Git
 ```
 
-## Alur kerja singkat
+## Menjalankan production
 
-- Backend: `npm start` atau `node server.js`
-- Frontend production saat ini: Express menyajikan folder `public/`
-- Database: PostgreSQL melalui `DATABASE_URL`
-- Deploy: push ke branch `main`, lalu Render melakukan deploy otomatis
+```bash
+npm install
+npm start
+```
 
-## Catatan keamanan
+Frontend production berada di `public/`. Database memakai `DATABASE_URL`, dan
+push ke branch `main` memicu deploy Render.
 
-Secret seperti `.env`, backup code, API key, dan credential database harus tetap berada di environment lokal/Render dan tidak dimasukkan ke Git.
+## Prototype Next.js
+
+```bash
+cd prototypes/next-storefront
+npm install
+npm run dev
+```
+
+## Keamanan
+
+Jangan commit `.env`, backup code, API key, database lokal, atau private key.
+File lokal tersebut disimpan di `private/` yang diabaikan Git.
