@@ -542,6 +542,7 @@ const gameImages = {
 
   deltaforce: "/images/games/delta-force.webp",
   arenabreakout: "/images/games/arena-breakout.webp",
+  goldandglory: "/images/games/gold-and-glory.webp",
   valorant: "/images/games/valorant.webp",
 };
 
