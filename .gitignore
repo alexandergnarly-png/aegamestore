@@ -9,3 +9,9 @@ backup_codes*.csv
 *.exe
 *.key
 *.pem
+.tmp-*
+/home-before-*.png
+/home-continued-*.png
+/home-current-*.png
+/home-final-*.png
+/home-upgraded-*.png
