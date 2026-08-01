@@ -2754,13 +2754,12 @@
             return;
           }
 
-          Swal.fire(
+          await Swal.fire(
             tAccount("successTitle"),
             tAccount("passwordChanged"),
             "success",
           );
-          document.getElementById("oldPassword").value = "";
-          document.getElementById("newPassword").value = "";
+          window.location.href = "/auth";
         } catch (err) {
           Swal.fire(tAccount("errorTitle"), tAccount("serverError"), "error");
         }

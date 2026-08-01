@@ -155,6 +155,7 @@ db.query(
     id SERIAL PRIMARY KEY,
     username TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
+    token_version INTEGER NOT NULL DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )
 `,
@@ -173,6 +174,9 @@ db.query(
 db.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS default_name TEXT`);
 db.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS default_contact TEXT`);
 db.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS email TEXT`);
+db.query(
+  `ALTER TABLE users ADD COLUMN IF NOT EXISTS token_version INTEGER NOT NULL DEFAULT 0`,
+);
 db.query(
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified INTEGER DEFAULT 0`,
 );
@@ -1686,13 +1690,28 @@ async function isAdminLoggedIn(req) {
     return false;
   }
 }
-function getLoggedInUserFromRequest(req) {
+async function getLoggedInUserFromRequest(req) {
   const token = req.cookies.user_auth;
 
   if (!token) return null;
 
   try {
-    return jwt.verify(token, jwtSecret);
+    const decoded = jwt.verify(token, jwtSecret);
+    const result = await query(
+      `SELECT id, username, token_version FROM users WHERE id = $1 LIMIT 1`,
+      [decoded.id],
+    );
+    const user = result.rows[0];
+
+    if (
+      !user ||
+      !Number.isInteger(decoded.token_version) ||
+      decoded.token_version !== Number(user.token_version || 0)
+    ) {
+      return null;
+    }
+
+    return user;
   } catch (err) {
     return null;
   }
@@ -4416,7 +4435,7 @@ app.delete(
 );
 
 app.post("/voucher-preview", voucherPreviewLimiter, async (req, res) => {
-  const loggedInUser = getLoggedInUserFromRequest(req);
+  const loggedInUser = await getLoggedInUserFromRequest(req);
 
   if (!loggedInUser) {
     return res.status(401).json({
@@ -4499,7 +4518,7 @@ app.post("/voucher-preview", voucherPreviewLimiter, async (req, res) => {
 });
 // buat order + pembayaran Midtrans
 app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
-  const loggedInUser = getLoggedInUserFromRequest(req);
+  const loggedInUser = await getLoggedInUserFromRequest(req);
 
   if (!loggedInUser) {
     return res.status(401).json({
@@ -5187,7 +5206,7 @@ app.get("/order/:id", orderCheckLimiter, async (req, res) => {
 });
 
 app.get("/order/:id/resume", orderCheckLimiter, async (req, res) => {
-  const loggedInUser = getLoggedInUserFromRequest(req);
+  const loggedInUser = await getLoggedInUserFromRequest(req);
   if (!loggedInUser) {
     return res
       .status(401)
@@ -5712,7 +5731,10 @@ app.post(
 
     try {
       const result = await query(
-        "UPDATE users SET password = $1 WHERE id = $2 RETURNING id, username",
+        `UPDATE users
+         SET password = $1, token_version = token_version + 1
+         WHERE id = $2
+         RETURNING id, username`,
         [hashedPassword, userId],
       );
 
@@ -7183,7 +7205,11 @@ app.post("/user-login", userAuthLimiter, async (req, res) => {
 
     // Buat "tiket masuk" (Token) untuk user
     const token = jwt.sign(
-      { id: user.id, username: user.username },
+      {
+        id: user.id,
+        username: user.username,
+        token_version: Number(user.token_version || 0),
+      },
       jwtSecret,
       { expiresIn: "7d" },
     );
@@ -7213,7 +7239,7 @@ app.post("/user-login", userAuthLimiter, async (req, res) => {
 });
 
 app.get("/user/orders", async (req, res) => {
-  const loggedInUser = getLoggedInUserFromRequest(req);
+  const loggedInUser = await getLoggedInUserFromRequest(req);
 
   if (!loggedInUser) {
     return res.status(401).json({ message: "Kamu harus login dulu" });
@@ -7259,10 +7285,10 @@ app.post(
   changePasswordLimiter,
   requireUserCsrf,
   async (req, res) => {
-    const token = req.cookies.user_auth;
     const { oldPassword, newPassword } = req.body;
+    const loggedInUser = await getLoggedInUserFromRequest(req);
 
-    if (!token) {
+    if (!loggedInUser) {
       return res.status(401).json({ message: "Kamu harus login dulu" });
     }
 
@@ -7276,10 +7302,8 @@ app.post(
     }
 
     try {
-      const decoded = jwt.verify(token, jwtSecret);
-
       const result = await query("SELECT * FROM users WHERE id = $1 LIMIT 1", [
-        decoded.id,
+        loggedInUser.id,
       ]);
 
       const user = result.rows[0];
@@ -7299,12 +7323,16 @@ app.post(
 
       const hashedPassword = await bcrypt.hash(cleanNewPassword, 12);
 
-      await query("UPDATE users SET password = $1 WHERE id = $2", [
-        hashedPassword,
-        decoded.id,
-      ]);
+      await query(
+        "UPDATE users SET password = $1, token_version = token_version + 1 WHERE id = $2",
+        [hashedPassword, loggedInUser.id],
+      );
 
-      return res.json({ message: "Password berhasil diganti" });
+      res.clearCookie("user_auth", { path: "/" });
+      res.clearCookie("user_csrf", { path: "/" });
+      return res.json({
+        message: "Password berhasil diganti. Silakan login ulang.",
+      });
     } catch (err) {
       return res
         .status(401)
@@ -7313,7 +7341,16 @@ app.post(
   },
 );
 
-app.post("/user-logout", requireUserCsrf, (req, res) => {
+app.post("/user-logout", requireUserCsrf, async (req, res) => {
+  const loggedInUser = await getLoggedInUserFromRequest(req);
+
+  if (loggedInUser) {
+    await query(
+      "UPDATE users SET token_version = token_version + 1 WHERE id = $1",
+      [loggedInUser.id],
+    ).catch((err) => console.error("ERROR REVOKE USER SESSION:", err));
+  }
+
   res.clearCookie("user_auth", { path: "/" });
   res.clearCookie("user_csrf", { path: "/" });
   return res.json({ message: "Logout berhasil" });
@@ -7325,7 +7362,7 @@ app.post(
   userProfileLimiter,
   requireUserCsrf,
   async (req, res) => {
-    const loggedInUser = getLoggedInUserFromRequest(req);
+    const loggedInUser = await getLoggedInUserFromRequest(req);
 
     if (!loggedInUser) {
       return res.status(401).json({ message: "Kamu harus login dulu" });
@@ -7396,7 +7433,7 @@ app.post(
   emailVerificationLimiter,
   requireUserCsrf,
   async (req, res) => {
-    const loggedInUser = getLoggedInUserFromRequest(req);
+    const loggedInUser = await getLoggedInUserFromRequest(req);
 
     if (!loggedInUser) {
       return res.status(401).json({ message: "Kamu harus login dulu" });
@@ -7564,13 +7601,10 @@ app.get("/verify-email", async (req, res) => {
 
 // --- FITUR BARU: Cek User yang sedang Login ---
 app.get("/api/user/me", async (req, res) => {
-  const token = req.cookies.user_auth;
-
-  if (!token) return res.json({ loggedIn: false });
+  const loggedInUser = await getLoggedInUserFromRequest(req);
+  if (!loggedInUser) return res.json({ loggedIn: false });
 
   try {
-    const decoded = jwt.verify(token, jwtSecret);
-
     const userResult = await query(
       `
       SELECT id, username, default_name, default_contact, email, email_verified,
@@ -7579,7 +7613,7 @@ app.get("/api/user/me", async (req, res) => {
       WHERE id = $1
       LIMIT 1
       `,
-      [decoded.id],
+      [loggedInUser.id],
     );
 
     const user = userResult.rows[0];
@@ -7674,7 +7708,7 @@ app.get("/api/user/me", async (req, res) => {
 });
 
 app.get("/api/wallet", async (req, res) => {
-  const user = getLoggedInUserFromRequest(req);
+  const user = await getLoggedInUserFromRequest(req);
   if (!user) return res.status(401).json({ message: "Kamu harus login dulu" });
 
   try {
@@ -7712,7 +7746,7 @@ const walletTopupLimiter = rateLimit({
 });
 
 app.post("/api/wallet/topups", walletTopupLimiter, requireUserCsrf, async (req, res) => {
-  const user = getLoggedInUserFromRequest(req);
+  const user = await getLoggedInUserFromRequest(req);
   if (!user) return res.status(401).json({ message: "Kamu harus login dulu" });
 
   const amount = parseWalletAmount(req.body?.amount);
@@ -7739,7 +7773,7 @@ app.post("/api/wallet/topups", walletTopupLimiter, requireUserCsrf, async (req, 
 });
 
 app.post("/api/wallet/topups/midtrans", walletTopupLimiter, requireUserCsrf, async (req, res) => {
-  const user = getLoggedInUserFromRequest(req);
+  const user = await getLoggedInUserFromRequest(req);
   if (!user) return res.status(401).json({ message: "Kamu harus login dulu" });
 
   const amount = parseWalletAmount(req.body?.amount);
@@ -8010,7 +8044,7 @@ LIMIT 12
 });
 
 app.get("/reviews/me", async (req, res) => {
-  const loggedInUser = getLoggedInUserFromRequest(req);
+  const loggedInUser = await getLoggedInUserFromRequest(req);
 
   if (!loggedInUser) {
     return res.status(401).json({
@@ -8043,7 +8077,7 @@ app.get("/reviews/me", async (req, res) => {
 });
 
 app.post("/reviews", reviewLimiter, requireUserCsrf, async (req, res) => {
-  const loggedInUser = getLoggedInUserFromRequest(req);
+  const loggedInUser = await getLoggedInUserFromRequest(req);
 
   if (!loggedInUser) {
     return res.status(401).json({
