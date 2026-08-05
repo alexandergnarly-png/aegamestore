@@ -5,52 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Admin Portal | AE Game Store</title>
     <meta name="description" content="Portal admin AE Game Store dengan akses terbatas." />
-    <meta name="theme-color" content="#101713" />
+    <meta name="theme-color" content="#ecece4" />
     <meta name="robots" content="noindex, nofollow" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <style>
       :root {
         color-scheme: light;
-        --page: #f1f2e9;
-        --panel: #101713;
-        --surface: #fffef8;
-        --surface-soft: #f6f6ef;
-        --text: #142019;
-        --muted: #667068;
-        --line: #d9ddd5;
-        --accent: #c7f36b;
-        --accent-ink: #101713;
-        --danger: #b42318;
-        --danger-soft: #fff0ed;
-        --warning: #775a00;
-        --warning-soft: #fff7d6;
-        --success: #218754;
-        --shadow: 0 28px 80px rgba(25, 35, 28, 0.14);
-        --radius-xl: 32px;
-        --radius-lg: 22px;
-        --radius-md: 14px;
-        --ease: cubic-bezier(0.22, 1, 0.36, 1);
+        --page: #ecece4;
+        --panel: #0b0b0a;
+        --surface: #f7f7f1;
+        --surface-soft: #deded7;
+        --text: #0b0b0a;
+        --muted: #666661;
+        --line: #c6c6be;
+        --accent: #f4f4ef;
+        --accent-ink: #0b0b0a;
+        --danger: #a32626;
+        --danger-soft: #f1dada;
+        --warning: #725b19;
+        --warning-soft: #eee5c8;
+        --success: #4f6f52;
+        --shadow: none;
+        --radius-xl: 3px;
+        --radius-lg: 3px;
+        --radius-md: 3px;
+        --mono: "DM Mono", Consolas, monospace;
+        --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
       }
 
       html[data-theme="dark"] {
         color-scheme: dark;
-        --page: #0a0e0c;
-        --panel: #c7f36b;
-        --surface: #121815;
-        --surface-soft: #19211c;
-        --text: #f3f6ed;
-        --muted: #a8b1aa;
-        --line: #354039;
-        --accent: #c7f36b;
-        --accent-ink: #101713;
+        --page: #080808;
+        --panel: #f4f4ef;
+        --surface: #101010;
+        --surface-soft: #181818;
+        --text: #f4f4ef;
+        --muted: #a2a29c;
+        --line: #2a2a27;
+        --accent: #0b0b0a;
+        --accent-ink: #f4f4ef;
         --danger: #ffb4a8;
         --danger-soft: #351b18;
         --warning: #f1d46e;
         --warning-soft: #302a17;
         --success: #75d7a0;
-        --shadow: 0 30px 90px rgba(0, 0, 0, 0.45);
+        --shadow: none;
       }
 
       *, *::before, *::after { box-sizing: border-box; }
@@ -66,11 +67,13 @@
         min-height: 100dvh;
         padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
         overflow-x: hidden;
-        background:
-          radial-gradient(circle at 85% 8%, rgba(199, 243, 107, 0.55), transparent 25rem),
-          var(--page);
+        background-color: var(--page);
+        background-image:
+          linear-gradient(color-mix(in srgb, var(--text) 5%, transparent) 1px, transparent 1px),
+          linear-gradient(90deg, color-mix(in srgb, var(--text) 5%, transparent) 1px, transparent 1px);
+        background-size: 48px 48px;
         color: var(--text);
-        font-family: "Manrope", sans-serif;
+        font-family: "Space Grotesk", sans-serif;
         line-height: 1.5;
         -webkit-font-smoothing: antialiased;
       }
@@ -95,7 +98,7 @@
         display: grid;
         grid-template-columns: minmax(0, 1.05fr) minmax(390px, 0.95fr);
         overflow: hidden;
-        border: 1px solid color-mix(in srgb, var(--line) 75%, transparent);
+        border: 1px solid var(--line);
         border-radius: var(--radius-xl);
         background: var(--surface);
         box-shadow: var(--shadow);
@@ -113,18 +116,22 @@
         color: #f8faef;
         isolation: isolate;
       }
-      html[data-theme="dark"] .brand-panel { color: #101713; }
+      html[data-theme="dark"] .brand-panel { color: #0b0b0a; }
       .brand-panel::before,
       .brand-panel::after {
         content: "";
         position: absolute;
         z-index: -1;
-        border: 1px solid currentColor;
-        border-radius: 50%;
-        opacity: 0.16;
+        border: 0;
+        border-radius: 0;
+        opacity: 0.08;
       }
-      .brand-panel::before { width: 430px; height: 430px; right: -210px; top: 80px; }
-      .brand-panel::after { width: 230px; height: 230px; right: -52px; top: 180px; }
+      .brand-panel::before {
+        width: 100%; height: 100%; inset: 0;
+        background-image: radial-gradient(circle, currentColor 1px, transparent 1px);
+        background-size: 18px 18px;
+      }
+      .brand-panel::after { content: "AE"; width: auto; height: auto; right: -16px; bottom: -68px; font: 700 220px/1 var(--mono); letter-spacing: -0.15em; }
 
       .brand {
         display: inline-flex;
@@ -142,13 +149,13 @@
         height: 42px;
         display: grid;
         place-items: center;
-        border-radius: 13px;
+        border-radius: 3px;
         background: var(--accent);
         color: var(--accent-ink);
-        font-size: 13px;
+        font: 500 13px/1 var(--mono);
         letter-spacing: 0.06em;
       }
-      html[data-theme="dark"] .brand-mark { background: #101713; color: #f8faef; }
+      html[data-theme="dark"] .brand-mark { background: #0b0b0a; color: #f4f4ef; }
 
       .brand-copy { max-width: 520px; }
       .eyebrow {
@@ -156,22 +163,29 @@
         align-items: center;
         gap: 8px;
         margin-bottom: 20px;
-        font-size: 12px;
+        font: 500 11px/1 var(--mono);
         font-weight: 800;
         letter-spacing: 0.11em;
         text-transform: uppercase;
       }
       .eyebrow::before { content: ""; width: 28px; height: 2px; background: currentColor; }
       .brand-title {
-        max-width: 9ch;
+        max-width: 8ch;
         font-family: "Space Grotesk", sans-serif;
         font-size: clamp(48px, 6vw, 78px);
         font-weight: 700;
         line-height: 0.94;
-        letter-spacing: -0.065em;
+        letter-spacing: -0.075em;
       }
-      .brand-text { max-width: 43ch; margin-top: 24px; color: rgba(248, 250, 239, 0.7); font-size: 15px; }
+      .brand-text { max-width: 43ch; margin-top: 24px; color: rgba(248, 250, 239, 0.66); font-size: 15px; }
       html[data-theme="dark"] .brand-text { color: rgba(16, 23, 19, 0.68); }
+
+      .bento-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 32px; }
+      .bento-item { min-height: 92px; padding: 14px; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid rgba(244, 244, 239, 0.2); background: rgba(244, 244, 239, 0.05); }
+      .bento-item span { color: rgba(244, 244, 239, 0.58); font: 500 9px/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; }
+      .bento-item strong { color: inherit; font: 500 13px/1.2 var(--mono); }
+      html[data-theme="dark"] .bento-item { border-color: rgba(11, 11, 10, 0.2); background: rgba(11, 11, 10, 0.05); }
+      html[data-theme="dark"] .bento-item span { color: rgba(11, 11, 10, 0.56); }
 
       .security-note {
         display: flex;
@@ -179,13 +193,11 @@
         gap: 12px;
         padding-top: 24px;
         border-top: 1px solid rgba(248, 250, 239, 0.2);
-        font-size: 12px;
-        font-weight: 700;
+        font: 500 10px/1.4 var(--mono);
         letter-spacing: 0.03em;
       }
       html[data-theme="dark"] .security-note { border-color: rgba(16, 23, 19, 0.2); }
-      .pulse { width: 9px; height: 9px; flex: 0 0 auto; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 5px rgba(199, 243, 107, 0.15); }
-      html[data-theme="dark"] .pulse { background: #101713; box-shadow: 0 0 0 5px rgba(16, 23, 19, 0.12); }
+      .pulse { width: 7px; height: 7px; flex: 0 0 auto; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 4px color-mix(in srgb, currentColor 12%, transparent); }
 
       .login-panel {
         min-width: 0;
@@ -194,16 +206,15 @@
         flex-direction: column;
       }
       .top-actions { display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
-      .lang-group { display: flex; padding: 4px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface-soft); }
+      .lang-group { display: flex; padding: 4px; border: 1px solid var(--line); border-radius: 3px; background: var(--surface-soft); }
       .lang-btn, .icon-btn {
         min-width: 44px;
         min-height: 44px;
         border: 0;
-        border-radius: 999px;
+        border-radius: 2px;
         background: transparent;
         color: var(--muted);
-        font-size: 12px;
-        font-weight: 800;
+        font: 500 11px/1 var(--mono);
         transition: background 180ms var(--ease), color 180ms var(--ease), transform 180ms var(--ease);
       }
       .lang-btn[aria-pressed="true"] { background: var(--text); color: var(--surface); }
@@ -215,7 +226,7 @@
 
       .form-wrap { width: min(420px, 100%); margin: auto; padding: 48px 0 24px; }
       .mobile-brand { display: none; }
-      .form-kicker { color: var(--success); font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
+      .form-kicker { color: var(--muted); font: 500 10px/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; }
       h1 {
         margin-top: 10px;
         font-family: "Space Grotesk", sans-serif;
@@ -228,7 +239,7 @@
       form { margin-top: 36px; }
       .field { margin-bottom: 20px; }
       .field-head { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
-      label { font-size: 13px; font-weight: 800; }
+      label { font: 500 11px/1.4 var(--mono); letter-spacing: 0.04em; text-transform: uppercase; }
       .required { color: var(--danger); }
       .field-error { min-height: 18px; margin-top: 7px; color: var(--danger); font-size: 12px; font-weight: 700; }
       .input-wrap { position: relative; }
@@ -249,7 +260,7 @@
       input::placeholder { color: color-mix(in srgb, var(--muted) 72%, transparent); }
       input:focus { border-color: var(--text); background: var(--surface); box-shadow: 0 0 0 4px color-mix(in srgb, var(--text) 10%, transparent); }
       input[aria-invalid="true"] { border-color: var(--danger); background: var(--danger-soft); box-shadow: 0 0 0 4px color-mix(in srgb, var(--danger) 10%, transparent); }
-      .toggle-pass { position: absolute; right: 6px; top: 6px; width: 44px; height: 44px; display: grid; place-items: center; border: 0; border-radius: 11px; background: transparent; color: var(--muted); }
+      .toggle-pass { position: absolute; right: 6px; top: 6px; width: 44px; height: 44px; display: grid; place-items: center; border: 0; border-radius: 2px; background: transparent; color: var(--muted); }
       .toggle-pass svg { width: 20px; height: 20px; }
       .eye-off { display: none; }
       .toggle-pass.is-visible .eye-on { display: none; }
@@ -260,9 +271,9 @@
       .caps-warning svg { width: 16px; height: 16px; }
 
       .form-options { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 4px 0 24px; }
-      .remember { display: inline-flex; align-items: center; gap: 9px; color: var(--muted); font-size: 13px; font-weight: 700; cursor: pointer; }
+      .remember { display: inline-flex; align-items: center; gap: 9px; color: var(--muted); font: 500 11px/1 var(--mono); cursor: pointer; text-transform: none; }
       .remember input { width: 18px; height: 18px; accent-color: var(--text); }
-      .text-button { min-height: 44px; padding: 0; border: 0; background: transparent; color: var(--text); font-size: 13px; font-weight: 800; text-decoration: underline; text-underline-offset: 4px; }
+      .text-button { min-height: 44px; padding: 0; border: 0; background: transparent; color: var(--text); font: 500 11px/1 var(--mono); text-decoration: underline; text-underline-offset: 4px; }
 
       .form-status { min-height: 22px; margin-bottom: 10px; color: var(--danger); font-size: 13px; font-weight: 700; }
       .submit-btn {
@@ -276,8 +287,9 @@
         border-radius: var(--radius-md);
         background: var(--text);
         color: var(--surface);
-        font-size: 14px;
-        font-weight: 800;
+        font: 500 12px/1 var(--mono);
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
         transition: transform 180ms var(--ease), opacity 180ms var(--ease), box-shadow 180ms var(--ease);
       }
       .submit-btn svg { width: 20px; height: 20px; }
@@ -304,9 +316,9 @@
       .dialog-icon svg { width: 23px; height: 23px; }
       .dialog-body h2 { margin: 20px 0 10px; font-family: "Space Grotesk", sans-serif; font-size: 24px; letter-spacing: -0.04em; }
       .dialog-body p { color: var(--muted); font-size: 14px; }
-      .dialog-close { width: 100%; min-height: 48px; margin-top: 24px; border: 0; border-radius: 12px; background: var(--text); color: var(--surface); font-weight: 800; }
+      .dialog-close { width: 100%; min-height: 48px; margin-top: 24px; border: 0; border-radius: 2px; background: var(--text); color: var(--surface); font-weight: 800; }
 
-      :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+      :focus-visible { outline: 3px solid var(--text); outline-offset: 3px; }
       @media (hover: hover) {
         .lang-btn:hover, .icon-btn:hover, .toggle-pass:hover { color: var(--text); background: color-mix(in srgb, var(--text) 8%, transparent); }
         .submit-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 12px 24px color-mix(in srgb, var(--text) 22%, transparent); }
@@ -326,7 +338,7 @@
         .form-wrap { width: 100%; min-width: 0; order: 2; margin: auto; padding: 36px 0; }
         .back-link { order: 3; }
         .mobile-brand { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 32px; color: var(--text); font-family: "Space Grotesk", sans-serif; font-size: 14px; font-weight: 700; }
-        .mobile-brand .brand-mark { width: 38px; height: 38px; border-radius: 12px; background: var(--text); color: var(--surface); }
+        .mobile-brand .brand-mark { width: 38px; height: 38px; border-radius: 3px; background: var(--text); color: var(--surface); }
       }
 
       @media (max-width: 420px) {
@@ -362,6 +374,11 @@
           <p class="eyebrow" data-i18n="workspace">Admin workspace</p>
           <p class="brand-title" data-i18n="brandTitle">Control the store.</p>
           <p class="brand-text" data-i18n="brandText">Kelola pesanan, katalog, dan operasional toko dari satu ruang kerja yang aman.</p>
+          <div class="bento-grid" aria-label="Ruang kerja admin">
+            <div class="bento-item"><span data-i18n="moduleLabel">Module 01</span><strong data-i18n="orders">Orders</strong></div>
+            <div class="bento-item"><span data-i18n="moduleLabel2">Module 02</span><strong data-i18n="catalog">Catalog</strong></div>
+            <div class="bento-item"><span data-i18n="moduleLabel3">Module 03</span><strong data-i18n="operations">Operations</strong></div>
+          </div>
         </div>
         <p class="security-note"><span class="pulse" aria-hidden="true"></span><span data-i18n="securityNote">Akses dipantau dan dibatasi rate limit</span></p>
       </section>
@@ -444,6 +461,12 @@
           workspace: "Admin workspace",
           brandTitle: "Kendalikan toko.",
           brandText: "Kelola pesanan, katalog, dan operasional toko dari satu ruang kerja yang aman.",
+          moduleLabel: "Modul 01",
+          moduleLabel2: "Modul 02",
+          moduleLabel3: "Modul 03",
+          orders: "Pesanan",
+          catalog: "Katalog",
+          operations: "Operasional",
           securityNote: "Akses dipantau dan dibatasi rate limit",
           restricted: "Akses terbatas",
           title: "Selamat datang kembali.",
@@ -477,6 +500,12 @@
           workspace: "Admin workspace",
           brandTitle: "Control the store.",
           brandText: "Manage orders, catalog, and store operations from one secure workspace.",
+          moduleLabel: "Module 01",
+          moduleLabel2: "Module 02",
+          moduleLabel3: "Module 03",
+          orders: "Orders",
+          catalog: "Catalog",
+          operations: "Operations",
           securityNote: "Access is monitored and rate-limited",
           restricted: "Restricted access",
           title: "Welcome back.",
@@ -546,7 +575,7 @@
       function applyTheme(theme) {
         root.dataset.theme = theme;
         themeToggle.setAttribute("aria-label", t(theme === "dark" ? "lightMode" : "darkMode"));
-        document.querySelector('meta[name="theme-color"]').content = theme === "dark" ? "#0a0e0c" : "#f1f2e9";
+        document.querySelector('meta[name="theme-color"]').content = theme === "dark" ? "#080808" : "#ecece4";
       }
 
       const savedTheme = localStorage.getItem("ae_theme");
