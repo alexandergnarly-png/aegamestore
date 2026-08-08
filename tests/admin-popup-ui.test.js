@@ -23,6 +23,9 @@ scripts.forEach(([, source]) =>
   'didOpen: () => Swal.showLoading()',
   'isEditMode ? "Mengupdate produk..." : "Menambahkan produk..."',
   'isSingle ? "Sync stok produk..." : "Sync semua stok supplier..."',
+  'class="product-compare-btn"',
+  '#section-products th:last-child',
+  'data-label="Aksi" class="action-cell"',
 ].forEach((marker) =>
   assert.ok(admin.includes(marker), `Missing admin popup marker: ${marker}`),
 );

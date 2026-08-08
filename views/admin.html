@@ -1001,6 +1001,50 @@
         box-shadow: none;
       }
 
+      #section-products .table-wrap {
+        scrollbar-gutter: stable;
+      }
+
+      #section-products th:last-child,
+      #section-products td:last-child {
+        position: sticky;
+        right: 0;
+        z-index: 3;
+        width: 244px;
+        min-width: 244px;
+        background: var(--surface);
+        border-left: 1px solid var(--line);
+        box-shadow: -12px 0 20px -20px rgba(0, 0, 0, 0.55);
+      }
+
+      #section-products th:last-child {
+        z-index: 4;
+        background: var(--surface-2);
+      }
+
+      .product-action-group {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 7px;
+      }
+
+      .product-action-group button {
+        min-width: 0;
+        min-height: 44px;
+        margin: 0;
+        padding: 9px 10px;
+        border-radius: 3px;
+        font-size: 12px;
+        line-height: 1.15;
+      }
+
+      .product-compare-btn {
+        grid-column: 1 / -1;
+        background: var(--ink);
+        color: var(--surface);
+        border-color: var(--ink);
+      }
+
       table {
         width: 100%;
         min-width: 980px;
@@ -1943,6 +1987,19 @@
           background: transparent;
           box-shadow: none;
           overflow: visible;
+        }
+
+        #section-products th:last-child,
+        #section-products td:last-child {
+          position: static;
+          width: 100%;
+          min-width: 0;
+          border-left: 0;
+          box-shadow: none;
+        }
+
+        .product-action-group {
+          width: 100%;
         }
 
         table,
@@ -3125,7 +3182,7 @@
                 Refresh Produk
               </button>
               <button class="ghost-btn" onclick="syncVipStoreProducts()">
-                Sync VIP Stock
+                Sync Semua Supplier
               </button>
             </div>
           </div>
@@ -3150,7 +3207,7 @@
                   <th>Source</th>
                   <th>Supplier</th>
                   <th>Status</th>
-                  <th style="width: 240px">Aksi</th>
+                  <th>Aksi Cepat</th>
                 </tr>
               </thead>
               <tbody id="productTableBody"></tbody>
@@ -7991,24 +8048,26 @@
 
             return `
                                 <tr>
-                                  <td>${item.id}</td>
-                                  <td>${escapeHtml(item.game)}</td>
-                                  <td>${platformBadge(item.platform)}</td>
-                                  <td>${escapeHtml(item.brand)}</td>
-                                  <td>${escapeHtml(item.duration)}</td>
-                                  <td>${formatRupiah(item.price)}</td>
-<td>${playStatusBadge(item.play_status)}</td>
-<td>${deliverySourceBadge(item.delivery_type)}</td>
-<td>${supplierProductText(item)}</td>
-<td>${activeBadge(item.active)}</td>
-<td>
-  <button onclick='editProduct(${item.id}, ${safeGame}, ${safePlatform}, ${safeBrand}, ${safeDuration}, ${Number(item.price || 0)}, ${safePlayStatus}, ${safeDeliveryType}, ${safeSupplierProductId})'>Edit</button>
-                                    <button class="ghost-btn" onclick="openSupplierComparison(${item.id}, this)">Bandingkan</button>
-                                    ${isAdminSupplierDelivery(item.delivery_type) ? `<button class="ghost-btn" onclick="syncVipStoreProducts(${item.id})">Sync</button>` : ""}
-                                    <button class="ghost-btn" onclick="toggleProductActive(${item.id}, ${Number(item.active) === 1 ? 0 : 1})">
-                                      ${Number(item.active) === 1 ? "Nonaktifkan" : "Aktifkan"}
-                                    </button>
-                                    <button class="danger-btn" onclick="deleteProduct(${item.id})">Hapus</button>
+                                  <td data-label="ID">${item.id}</td>
+                                  <td data-label="Game">${escapeHtml(item.game)}</td>
+                                  <td data-label="Platform">${platformBadge(item.platform)}</td>
+                                  <td data-label="Brand">${escapeHtml(item.brand)}</td>
+                                  <td data-label="Durasi">${escapeHtml(item.duration)}</td>
+                                  <td data-label="Harga">${formatRupiah(item.price)}</td>
+                                  <td data-label="Play Status">${playStatusBadge(item.play_status)}</td>
+                                  <td data-label="Source">${deliverySourceBadge(item.delivery_type)}</td>
+                                  <td data-label="Supplier">${supplierProductText(item)}</td>
+                                  <td data-label="Status">${activeBadge(item.active)}</td>
+                                  <td data-label="Aksi" class="action-cell">
+                                    <div class="product-action-group">
+                                      <button class="product-compare-btn" onclick="openSupplierComparison(${item.id}, this)">Bandingkan Harga</button>
+                                      <button class="ghost-btn" onclick='editProduct(${item.id}, ${safeGame}, ${safePlatform}, ${safeBrand}, ${safeDuration}, ${Number(item.price || 0)}, ${safePlayStatus}, ${safeDeliveryType}, ${safeSupplierProductId})'>Edit</button>
+                                      ${isAdminSupplierDelivery(item.delivery_type) ? `<button class="ghost-btn" onclick="syncVipStoreProducts(${item.id})">Sync</button>` : ""}
+                                      <button class="ghost-btn" onclick="toggleProductActive(${item.id}, ${Number(item.active) === 1 ? 0 : 1})">
+                                        ${Number(item.active) === 1 ? "Nonaktifkan" : "Aktifkan"}
+                                      </button>
+                                      <button class="danger-btn" onclick="deleteProduct(${item.id})">Hapus</button>
+                                    </div>
                                   </td>
                                 </tr>
                               `;
