@@ -6668,7 +6668,15 @@ app.get("/admin-orders", requireAdminAuth, async (req, res) => {
 
   try {
     const countResult = await query(
-      `SELECT COUNT(*)::int AS total, COALESCE(SUM(price) FILTER (WHERE payment_status = 'paid'), 0)::int AS revenue, COUNT(*) FILTER (WHERE payment_status = 'paid')::int AS paid_count FROM orders ${where}`,
+      `SELECT
+         COUNT(*)::int AS total,
+         COALESCE(SUM(price) FILTER (WHERE payment_status = 'paid'), 0)::int AS revenue,
+         COUNT(*) FILTER (WHERE payment_status = 'paid')::int AS paid_count,
+         COUNT(*) FILTER (WHERE payment_status = 'pending')::int AS pending_count,
+         COUNT(*) FILTER (
+           WHERE payment_status = 'paid' AND delivery_status = 'manual'
+         )::int AS manual_count
+       FROM orders ${where}`,
       params,
     );
 
@@ -6676,6 +6684,8 @@ app.get("/admin-orders", requireAdminAuth, async (req, res) => {
       total: 0,
       revenue: 0,
       paid_count: 0,
+      pending_count: 0,
+      manual_count: 0,
     };
 
     const rowsResult = await query(
@@ -6698,6 +6708,8 @@ app.get("/admin-orders", requireAdminAuth, async (req, res) => {
       total: summary.total,
       revenue: summary.revenue,
       paid_count: summary.paid_count,
+      pending_count: summary.pending_count,
+      manual_count: summary.manual_count,
       limit,
       offset,
     });

@@ -6226,6 +6226,8 @@
         total: 0,
         revenue: 0,
         paidCount: 0,
+        pendingCount: 0,
+        manualCount: 0,
         loading: false,
       };
 
@@ -6294,9 +6296,11 @@
           ORDERS_STATE.total = Number(data?.total) || 0;
           ORDERS_STATE.revenue = Number(data?.revenue) || 0;
           ORDERS_STATE.paidCount = Number(data?.paid_count) || 0;
+          ORDERS_STATE.pendingCount = Number(data?.pending_count) || 0;
+          ORDERS_STATE.manualCount = Number(data?.manual_count) || 0;
 
           allOrders = rows;
-          updateOrderMobileOps(rows);
+          updateOrderMobileOps();
           syncOrderSearchInputsFromDesktop();
 
           if (rows.length === 0 && ORDERS_STATE.page === 0) {
@@ -6329,7 +6333,10 @@
         } catch (err) {
           console.error("loadOrders error", err);
           statusText.innerText = "Gagal memuat daftar order.";
-          updateOrderMobileOps([]);
+          ORDERS_STATE.manualCount = 0;
+          ORDERS_STATE.pendingCount = 0;
+          ORDERS_STATE.paidCount = 0;
+          updateOrderMobileOps();
           tableBody.innerHTML = `
             <tr>
               <td colspan="14" class="empty">Terjadi error saat mengambil order.</td>
@@ -7311,28 +7318,15 @@
         applyOrderFilters();
       }
 
-      function updateOrderMobileOps(rows = []) {
+      function updateOrderMobileOps() {
         const manualEl = document.getElementById("opsManualCount");
         const pendingEl = document.getElementById("opsPendingCount");
         const paidEl = document.getElementById("opsPaidCount");
         if (!manualEl || !pendingEl || !paidEl) return;
 
-        const counts = rows.reduce(
-          (acc, item) => {
-            const ps = String(item.payment_status || "").toLowerCase();
-            const ds = String(item.delivery_status || "").toLowerCase();
-            if (ps === "pending" || ps === "waiting_payment") acc.pending += 1;
-            if (ps === "paid") acc.paid += 1;
-            if (ps === "paid" && ds !== "delivered" && ds !== "cancelled")
-              acc.manual += 1;
-            return acc;
-          },
-          { manual: 0, pending: 0, paid: 0 },
-        );
-
-        manualEl.innerText = counts.manual;
-        pendingEl.innerText = counts.pending;
-        paidEl.innerText = counts.paid;
+        manualEl.innerText = ORDERS_STATE.manualCount;
+        pendingEl.innerText = ORDERS_STATE.pendingCount;
+        paidEl.innerText = ORDERS_STATE.paidCount;
       }
 
       function copyOrderDetail(id) {

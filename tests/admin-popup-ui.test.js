@@ -29,8 +29,15 @@ scripts.forEach(([, source]) =>
   'id="productFilterPanel" open',
   'id="productEditorPanel" open',
   'document.querySelectorAll(".product-control-panel")',
+  "ORDERS_STATE.manualCount",
+  "ORDERS_STATE.pendingCount",
+  "paidEl.innerText = ORDERS_STATE.paidCount",
 ].forEach((marker) =>
   assert.ok(admin.includes(marker), `Missing admin popup marker: ${marker}`),
+);
+assert.ok(
+  server.includes("AS pending_count") && server.includes("AS manual_count"),
+  "Order control counts must come from the full filtered query",
 );
 
 assert.ok(
