@@ -2941,7 +2941,8 @@
               <select id="productDeliveryFilter" onchange="applyProductFilters()">
                 <option value="">Semua Source</option>
                 <option value="auto">Local Stock</option>
-                <option value="vipstore_api">Supplier API</option>
+                <option value="vipstore_api">VIP Store API</option>
+                <option value="cheatgame_api">CHEATGAME API</option>
                 <option value="manual">Manual</option>
               </select>
             </div>
@@ -2992,7 +2993,8 @@
             <div class="field">
               <select id="productDeliveryType" onchange="updateProductSupplierUi()">
                 <option value="auto">Local Stock</option>
-                <option value="vipstore_api">Supplier API</option>
+                <option value="vipstore_api">VIP Store API</option>
+                <option value="cheatgame_api">CHEATGAME API</option>
                 <option value="manual">Manual Delivery</option>
               </select>
             </div>
@@ -4145,6 +4147,7 @@
       let allKeys = [];
       let vipStorePickerItems = [];
       let vipStorePickerLoadedAt = null;
+      let vipStorePickerSource = "";
 
       function toggleSidebar() {
         const isCollapsed = document.body.classList.toggle("sidebar-collapsed");
@@ -4465,6 +4468,9 @@
 
       function normalizeAdminDeliveryType(deliveryType) {
         const value = String(deliveryType || "auto").trim().toLowerCase();
+        if (value === "cheatgame_api" || value === "cheatgame" || value === "cgo_api") {
+          return "cheatgame_api";
+        }
         if (value === "vipstore_api" || value === "vipstore" || value === "supplier") {
           return "vipstore_api";
         }
@@ -4472,10 +4478,17 @@
         return "auto";
       }
 
+      function isAdminSupplierDelivery(deliveryType) {
+        return ["vipstore_api", "cheatgame_api"].includes(normalizeAdminDeliveryType(deliveryType));
+      }
+
       function deliverySourceBadge(deliveryType) {
         const value = normalizeAdminDeliveryType(deliveryType);
         if (value === "vipstore_api") {
-          return `<span class="badge vip">Supplier API</span>`;
+          return `<span class="badge vip">VIP Store</span>`;
+        }
+        if (value === "cheatgame_api") {
+          return `<span class="badge paid">CHEATGAME</span>`;
         }
         if (value === "manual") {
           return `<span class="badge manual">Manual</span>`;
@@ -4488,7 +4501,7 @@
         const stock = Number(item?.supplier_stock || 0);
         const delivery = normalizeAdminDeliveryType(item?.delivery_type);
 
-        if (delivery !== "vipstore_api") return `<span class="badge entry">-</span>`;
+        if (!isAdminSupplierDelivery(delivery)) return `<span class="badge entry">-</span>`;
         if (status === "ready") return `<span class="badge available">${stock} Ready</span>`;
         if (status === "out_of_stock") return `<span class="badge stock_empty">0 Stock</span>`;
         if (status === "maintenance") return `<span class="badge used">Maintenance</span>`;
@@ -4500,7 +4513,7 @@
       }
 
       function supplierProductText(item) {
-        if (normalizeAdminDeliveryType(item?.delivery_type) !== "vipstore_api") return "-";
+        if (!isAdminSupplierDelivery(item?.delivery_type)) return "-";
         const id = String(item?.supplier_product_id || "").trim();
         const name = String(item?.supplier_product_name || "").trim();
         const status = supplierStatusBadge(item);
@@ -4602,8 +4615,12 @@
       async function loadVipStorePickerCatalog(force = false) {
         const statusEl = document.getElementById("supplierPickerStatus");
         const listEl = document.getElementById("supplierPickerList");
+        const deliveryType = normalizeAdminDeliveryType(
+          document.getElementById("productDeliveryType")?.value || "vipstore_api",
+        );
+        const source = deliveryType === "cheatgame_api" ? "cheatgame" : "vipstore";
 
-        if (vipStorePickerItems.length && !force) {
+        if (vipStorePickerItems.length && vipStorePickerSource === source && !force) {
           renderVipStoreProductPicker();
           return;
         }
@@ -4614,7 +4631,7 @@
         }
 
         try {
-          const res = await fetch("/api/admin/vipstore/catalog-normalized?limit=800");
+          const res = await fetch(`/api/admin/${source}/catalog-normalized?limit=800`);
           const data = await res.json();
 
           if (res.status === 401) {
@@ -4628,6 +4645,7 @@
 
           vipStorePickerItems = Array.isArray(data.items) ? data.items : [];
           vipStorePickerLoadedAt = new Date();
+          vipStorePickerSource = source;
 
           if (statusEl) {
             statusEl.innerText = `${vipStorePickerItems.length} produk dimuat dari ${data.total_detected_items || vipStorePickerItems.length} katalog supplier.`;
@@ -4644,7 +4662,7 @@
 
       function openVipStoreProductPicker() {
         const deliveryInput = document.getElementById("productDeliveryType");
-        if (deliveryInput && normalizeAdminDeliveryType(deliveryInput.value) !== "vipstore_api") {
+        if (deliveryInput && !isAdminSupplierDelivery(deliveryInput.value)) {
           deliveryInput.value = "vipstore_api";
           updateProductSupplierUi();
         }
@@ -4802,7 +4820,7 @@
         const deliveryInput = document.getElementById("productDeliveryType");
         const supplierInput = document.getElementById("productSupplierProductId");
 
-        if (deliveryInput) deliveryInput.value = "vipstore_api";
+        if (deliveryInput && !isAdminSupplierDelivery(deliveryInput.value)) deliveryInput.value = "vipstore_api";
         if (supplierInput) {
           supplierInput.disabled = false;
           supplierInput.value = item.product_id;
@@ -4830,10 +4848,10 @@
 
         if (!supplierInput || !preview) return;
 
-        const isVipStore = deliveryType === "vipstore_api";
-        supplierInput.disabled = !isVipStore;
+        const isSupplier = isAdminSupplierDelivery(deliveryType);
+        supplierInput.disabled = !isSupplier;
 
-        if (!isVipStore) {
+        if (!isSupplier) {
           supplierInput.value = "";
           preview.className = "supplier-map-preview";
           preview.innerText = deliveryType === "manual"
@@ -4854,7 +4872,7 @@
         const preview = document.getElementById("supplierMapPreview");
         const supplierProductId = String(supplierInput?.value || "").trim();
 
-        if (deliveryType !== "vipstore_api") {
+        if (!isAdminSupplierDelivery(deliveryType)) {
           Swal.fire("Pilih Supplier API dulu untuk test supplier.");
           return;
         }
@@ -4870,7 +4888,8 @@
         }
 
         try {
-          const res = await fetch(`/api/admin/vipstore/product/${encodeURIComponent(supplierProductId)}`);
+          const source = deliveryType === "cheatgame_api" ? "cheatgame" : "vipstore";
+          const res = await fetch(`/api/admin/${source}/product/${encodeURIComponent(supplierProductId)}`);
           const data = await res.json();
 
           if (res.status === 401) {
@@ -5837,8 +5856,7 @@
               ps !== "paid" && !isCancelled
                 ? `<button class="ghost-btn" onclick='confirmPayment(${safeId})'>Konfirmasi Bayar</button>`
                 : "";
-            const isVipStoreOrder =
-              normalizeAdminDeliveryType(item.delivery_type) === "vipstore_api";
+            const isVipStoreOrder = isAdminSupplierDelivery(item.delivery_type);
             const retryClaimBtn =
               isVipStoreOrder && ps === "paid" && ds !== "delivered" && !isCancelled
                 ? `<button class="ghost-btn" onclick='retryVipStoreClaim(${safeId})'>Retry Claim</button>`
@@ -6266,8 +6284,7 @@
             `<button class="ghost-btn" onclick='confirmPayment(${safeId})'>Konfirmasi Bayar</button>`,
           );
         }
-        const isVipStoreDrawerOrder =
-          normalizeAdminDeliveryType(order.delivery_type) === "vipstore_api";
+        const isVipStoreDrawerOrder = isAdminSupplierDelivery(order.delivery_type);
         if (isVipStoreDrawerOrder && ps === "paid" && ds !== "delivered" && !isCancelled) {
           buttons.push(
             `<button class="ghost-btn" onclick='retryVipStoreClaim(${safeId})'>Retry Claim Supplier</button>`,
@@ -7295,7 +7312,7 @@
           document.getElementById("productSyncBrandStatus")?.checked,
         );
 
-        if (delivery_type === "vipstore_api" && !supplier_product_id) {
+        if (isAdminSupplierDelivery(delivery_type) && !supplier_product_id) {
           Swal.fire("Supplier Product ID wajib diisi untuk Supplier API.");
           return;
         }
@@ -7311,7 +7328,7 @@
 
         showAdminLoading(
           isEditMode ? "Mengupdate produk..." : "Menambahkan produk...",
-          delivery_type === "vipstore_api"
+          isAdminSupplierDelivery(delivery_type)
             ? "Mengecek dan menyimpan data supplier."
             : "Menyimpan data produk.",
         );
@@ -7679,7 +7696,7 @@
 <td>${activeBadge(item.active)}</td>
 <td>
   <button onclick='editProduct(${item.id}, ${safeGame}, ${safePlatform}, ${safeBrand}, ${safeDuration}, ${Number(item.price || 0)}, ${safePlayStatus}, ${safeDeliveryType}, ${safeSupplierProductId})'>Edit</button>
-                                    ${normalizeAdminDeliveryType(item.delivery_type) === "vipstore_api" ? `<button class="ghost-btn" onclick="syncVipStoreProducts(${item.id})">Sync</button>` : ""}
+                                    ${isAdminSupplierDelivery(item.delivery_type) ? `<button class="ghost-btn" onclick="syncVipStoreProducts(${item.id})">Sync</button>` : ""}
                                     <button class="ghost-btn" onclick="toggleProductActive(${item.id}, ${Number(item.active) === 1 ? 0 : 1})">
                                       ${Number(item.active) === 1 ? "Nonaktifkan" : "Aktifkan"}
                                     </button>

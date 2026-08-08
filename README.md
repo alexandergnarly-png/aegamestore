@@ -53,3 +53,17 @@ File lokal tersebut disimpan di `private/` yang diabaikan Git.
 - Pertahankan `APP_BASE_URL=https://aegamestore.com`.
 - Gunakan Internal Database URL Render. Untuk URL eksternal, jangan set `DATABASE_SSL_REJECT_UNAUTHORIZED=false`.
 - Jangan rotasi `JWT_SECRET` tanpa migrasi key game; secret itu juga menurunkan kunci enkripsi data game key.
+
+### Supplier CHEATGAME
+
+Tambahkan ke environment lokal dan Render:
+
+```text
+CHEATGAME_API_KEY=key_baru_yang_tidak_pernah_dikirim_ke_chat
+CHEATGAME_WEBHOOK_SECRET=secret_webhook_dari_dashboard
+CHEATGAME_CUSTOMER_EMAIL=email_fallback_jika_kontak_buyer_bukan_email
+```
+
+Atur Webhook URL ke `https://aegamestore.com/api/webhooks/cheatgame`, aktifkan event
+`order.success`, lalu gunakan **Send Test**. API key yang pernah terkirim melalui chat
+harus di-revoke dan tidak boleh dipakai kembali.

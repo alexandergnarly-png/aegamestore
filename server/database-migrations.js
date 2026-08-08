@@ -18,6 +18,18 @@ async function ensureBulkOrderSchema(db) {
      ON keys(product_id, used, reserved_order_id, reserved_until)`,
     `CREATE INDEX IF NOT EXISTS idx_order_keys_order_id
      ON order_keys(order_id)`,
+    `ALTER TABLE orders ADD COLUMN IF NOT EXISTS supplier_order_id TEXT`,
+    `CREATE INDEX IF NOT EXISTS idx_orders_supplier_order_id
+     ON orders(supplier_order_id)
+     WHERE supplier_order_id IS NOT NULL`,
+    `CREATE TABLE IF NOT EXISTS cheatgame_webhook_events (
+      event_id TEXT PRIMARY KEY,
+      event_type TEXT NOT NULL,
+      supplier_order_id TEXT,
+      local_order_id TEXT,
+      created_at TEXT NOT NULL,
+      processed_at TEXT
+    )`,
   ];
 
   for (const statement of statements) {
