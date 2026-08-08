@@ -23,6 +23,7 @@ const { ensureBulkOrderSchema, ensureWalletSchema } = require("./server/database
 const { parseMidtransAmount, verifyMidtransSignature } = require("./server/midtrans-utils");
 const { normalizeCatalogLabel, verifyCheatGameWebhook } = require("./server/cheatgame-utils");
 const { buildSupplierComparison, convertUsdToIdr, extractIdrRate } = require("./server/supplier-compare-utils");
+const { BUYER_BADGE_TIERS, getBuyerBadgeCode } = require("./server/buyer-policy");
 const {
   decryptSecret,
   encryptSecret,
@@ -1998,6 +1999,60 @@ function stopVipStoreAutoSync() {
   }
 }
 
+let dormantAccountCleanupTimer = null;
+
+async function deleteDormantNewUsers() {
+  const result = await query(`
+    WITH candidates AS MATERIALIZED (
+      SELECT u.id
+      FROM users u
+      WHERE u.created_at <= NOW() - INTERVAL '7 days'
+        AND COALESCE(NULLIF(u.badge_override, ''), '') = ''
+        AND NOT EXISTS (SELECT 1 FROM orders o WHERE o.user_id = u.id)
+        AND NOT EXISTS (SELECT 1 FROM reviews r WHERE r.user_id = u.id)
+        AND NOT EXISTS (SELECT 1 FROM wallet_topup_requests t WHERE t.user_id = u.id)
+        AND NOT EXISTS (SELECT 1 FROM wallet_ledger l WHERE l.user_id = u.id)
+        AND NOT EXISTS (
+          SELECT 1 FROM wallet_accounts w
+          WHERE w.user_id = u.id AND w.balance <> 0
+        )
+    ),
+    deleted_wallets AS (
+      DELETE FROM wallet_accounts w
+      USING candidates c
+      WHERE w.user_id = c.id
+    ),
+    deleted_users AS (
+      DELETE FROM users u
+      USING candidates c
+      WHERE u.id = c.id
+      RETURNING u.id
+    )
+    SELECT COUNT(*)::int AS deleted_count FROM deleted_users
+  `);
+  const deletedCount = Number(result.rows[0]?.deleted_count || 0);
+  if (deletedCount > 0) console.log(`DORMANT ACCOUNT CLEANUP: ${deletedCount} akun dihapus`);
+  return deletedCount;
+}
+
+function startDormantAccountCleanup() {
+  const run = () => deleteDormantNewUsers().catch((error) => {
+    console.error("DORMANT ACCOUNT CLEANUP ERROR:", error.message);
+  });
+  const schedule = () => {
+    run();
+    dormantAccountCleanupTimer = setTimeout(schedule, 24 * 60 * 60 * 1000);
+    if (typeof dormantAccountCleanupTimer.unref === "function") dormantAccountCleanupTimer.unref();
+  };
+  dormantAccountCleanupTimer = setTimeout(schedule, 60 * 1000);
+  if (typeof dormantAccountCleanupTimer.unref === "function") dormantAccountCleanupTimer.unref();
+}
+
+function stopDormantAccountCleanup() {
+  if (dormantAccountCleanupTimer) clearTimeout(dormantAccountCleanupTimer);
+  dormantAccountCleanupTimer = null;
+}
+
 
 db.query(
   `
@@ -2689,8 +2744,8 @@ function getBadgeByCode(code) {
       emoji: "✦",
       description: "Repeat buyer yang aktif dan konsisten",
       descriptionEn: "An active and consistent repeat buyer",
-      requirement: "3 order berhasil atau total belanja Rp150.000+",
-      requirementEn: "3 successful orders or Rp150,000+ total spend",
+      requirement: "5 order berhasil atau total belanja Rp300.000+",
+      requirementEn: "5 successful orders or Rp300,000+ total spend",
       benefitsId: [
         "Semua benefit Verified",
         "Badge repeat buyer di profil dan review",
@@ -2708,8 +2763,8 @@ function getBadgeByCode(code) {
       emoji: "✧",
       description: "High-value buyer dengan benefit VIP",
       descriptionEn: "High-value buyer with VIP benefits",
-      requirement: "10 order berhasil atau total belanja Rp500.000+",
-      requirementEn: "10 successful orders or Rp500,000+ total spend",
+      requirement: "15 order berhasil atau total belanja Rp1.000.000+",
+      requirementEn: "15 successful orders or Rp1,000,000+ total spend",
       benefitsId: [
         "Semua benefit Vanguard",
         "Diskon VIP per key pada produk yang sudah dikonfigurasi",
@@ -2727,8 +2782,8 @@ function getBadgeByCode(code) {
       emoji: "♛",
       description: "Tier tertinggi untuk buyer paling loyal",
       descriptionEn: "The highest tier for the most loyal buyers",
-      requirement: "20 order berhasil atau total belanja Rp1.000.000+",
-      requirementEn: "20 successful orders or Rp1,000,000+ total spend",
+      requirement: "30 order berhasil atau total belanja Rp2.500.000+",
+      requirementEn: "30 successful orders or Rp2,500,000+ total spend",
       benefitsId: [
         "Semua benefit Prestige",
         "Badge buyer tertinggi di AE Game Store",
@@ -2771,14 +2826,6 @@ function getBadgeByCode(code) {
   return badges[cleanCode] || badges[aliases[cleanCode]] || null;
 }
 
-const BUYER_BADGE_TIERS = [
-  { code: "entry", minOrders: 0, minSpend: 0 },
-  { code: "verified", minOrders: 1, minSpend: 0 },
-  { code: "prime", minOrders: 3, minSpend: 150000 },
-  { code: "prestige", minOrders: 10, minSpend: 500000 },
-  { code: "sovereign", minOrders: 20, minSpend: 1000000 },
-];
-
 function getBuyerBadgeLadder() {
   return BUYER_BADGE_TIERS.map((tier, rank) => {
     const badge = getBadgeByCode(tier.code);
@@ -2797,26 +2844,7 @@ function getBuyerBadge({
   paidOrderCount = 0,
   totalSpend = 0,
 }) {
-  const paidOrders = Number(paidOrderCount || 0);
-  const spend = Number(totalSpend || 0);
-
-  if (paidOrders >= 20 || spend >= 1000000) {
-    return getBadgeByCode("sovereign");
-  }
-
-  if (paidOrders >= 10 || spend >= 500000) {
-    return getBadgeByCode("prestige");
-  }
-
-  if (paidOrders >= 3 || spend >= 150000) {
-    return getBadgeByCode("prime");
-  }
-
-  if (paidOrders >= 1) {
-    return getBadgeByCode("verified");
-  }
-
-  return getBadgeByCode("entry");
+  return getBadgeByCode(getBuyerBadgeCode(paidOrderCount, totalSpend));
 }
 
 function getBuyerBadgeProgress({
@@ -2968,9 +2996,8 @@ async function isVipBuyer(userId) {
 
   const stats = await getBuyerStats(userId);
 
-  return (
-    Number(stats.paidOrderCount || 0) >= 10 ||
-    Number(stats.totalSpend || 0) >= 500000
+  return ["prestige", "sovereign"].includes(
+    getBuyerBadge(stats).code,
   );
 }
 
@@ -9091,6 +9118,7 @@ async function startApplication() {
   server = app.listen(port, () => {
     console.log("Server jalan di port", port);
     startVipStoreAutoSync();
+    startDormantAccountCleanup();
   });
 }
 
@@ -9111,6 +9139,7 @@ async function shutdown(signal) {
 
   isShuttingDown = true;
   stopVipStoreAutoSync();
+  stopDormantAccountCleanup();
   console.log(`${signal} diterima, memulai graceful shutdown`);
 
   const forceShutdownTimer = setTimeout(() => {
