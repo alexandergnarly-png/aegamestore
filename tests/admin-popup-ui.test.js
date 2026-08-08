@@ -26,6 +26,9 @@ scripts.forEach(([, source]) =>
   'class="product-compare-btn"',
   '#section-products th:last-child',
   'data-label="Aksi" class="action-cell"',
+  'id="productFilterPanel" open',
+  'id="productEditorPanel" open',
+  'document.querySelectorAll(".product-control-panel")',
 ].forEach((marker) =>
   assert.ok(admin.includes(marker), `Missing admin popup marker: ${marker}`),
 );

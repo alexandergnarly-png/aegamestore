@@ -1028,6 +1028,36 @@
         gap: 7px;
       }
 
+      .product-control-panel {
+        margin: 0;
+        border: 0;
+      }
+
+      .product-control-panel > summary {
+        display: none;
+      }
+
+      .product-control-panel > .product-panel-content {
+        display: flex;
+      }
+
+      .product-panel-content .field {
+        display: grid;
+        gap: 6px;
+      }
+
+      .product-search-toolbar .field {
+        max-width: 480px;
+      }
+
+      #section-products input[type="text"],
+      #section-products input[type="number"],
+      #section-products select,
+      #section-products .supplier-map-preview,
+      #section-products .product-sync-toggle {
+        border-radius: 3px;
+      }
+
       .product-action-group button {
         min-width: 0;
         min-height: 44px;
@@ -2000,6 +2030,91 @@
 
         .product-action-group {
           width: 100%;
+        }
+
+        #section-products .card-header {
+          margin-bottom: 12px;
+        }
+
+        #section-products .card-subtitle,
+        #section-products .section-badge {
+          display: none;
+        }
+
+        #section-products .product-search-toolbar {
+          margin-bottom: 8px;
+        }
+
+        .product-control-panel {
+          margin-bottom: 8px;
+          border: 1px solid var(--line-strong);
+          border-radius: 3px;
+          background: var(--surface-2);
+        }
+
+        .product-control-panel > summary {
+          min-height: 52px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          padding: 10px 12px;
+          color: var(--ink);
+          cursor: pointer;
+          font-size: 13px;
+          font-weight: 900;
+          list-style: none;
+        }
+
+        .product-control-panel > summary::-webkit-details-marker {
+          display: none;
+        }
+
+        .product-control-panel > summary::after {
+          content: "+";
+          font-family: "DM Mono", monospace;
+          font-size: 20px;
+          font-weight: 500;
+        }
+
+        .product-control-panel[open] > summary::after {
+          content: "−";
+        }
+
+        .product-control-panel > summary small {
+          display: block;
+          margin-top: 2px;
+          color: var(--muted);
+          font-size: 10px;
+          font-weight: 750;
+        }
+
+        .product-control-panel > .product-panel-content {
+          margin: 0;
+          padding: 12px;
+          border-top: 1px solid var(--line);
+        }
+
+        .product-control-panel:not([open]) > .product-panel-content {
+          display: none;
+        }
+
+        .product-search-toolbar .field {
+          max-width: none;
+        }
+
+        #section-products tbody tr {
+          border-radius: 3px;
+          box-shadow: none;
+        }
+
+        .product-editor-actions .btn-group {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .product-editor-actions #saveProductBtn {
+          grid-column: 1 / -1;
         }
 
         table,
@@ -3027,28 +3142,36 @@
             </div>
             <div class="section-badge">Product Manager</div>
           </div>
-          <div class="toolbar">
+          <div class="toolbar product-search-toolbar">
             <div class="field">
+              <label for="productSearchInput">Cari produk</label>
               <input
                 type="text"
                 id="productSearchInput"
                 placeholder="Cari game / brand / durasi"
               />
             </div>
+          </div>
 
+          <details class="product-control-panel" id="productFilterPanel" open>
+            <summary><span>Filter Produk<small>Game, brand, platform, status, dan source</small></span></summary>
+            <div class="toolbar product-panel-content">
             <div class="field">
+              <label for="productGameFilter">Game</label>
               <select id="productGameFilter" onchange="applyProductFilters()">
                 <option value="">Semua Game</option>
               </select>
             </div>
 
             <div class="field">
+              <label for="productBrandFilter">Brand</label>
               <select id="productBrandFilter" onchange="applyProductFilters()">
                 <option value="">Semua Brand</option>
               </select>
             </div>
 
             <div class="field">
+              <label for="productPlatformFilter">Platform</label>
               <select id="productPlatformFilter" onchange="applyProductFilters()">
                 <option value="">Semua Platform</option>
                 <option value="android">Android</option>
@@ -3057,6 +3180,7 @@
             </div>
 
             <div class="field">
+              <label for="productStatusFilter">Status produk</label>
               <select id="productStatusFilter" onchange="applyProductFilters()">
                 <option value="">Semua Status</option>
                 <option value="1">Active</option>
@@ -3064,6 +3188,7 @@
               </select>
             </div>
             <div class="field">
+              <label for="productPlayStatusFilter">Play status</label>
               <select
                 id="productPlayStatusFilter"
                 onchange="applyProductFilters()"
@@ -3075,6 +3200,7 @@
               </select>
             </div>
             <div class="field">
+              <label for="productDeliveryFilter">Source</label>
               <select id="productDeliveryFilter" onchange="applyProductFilters()">
                 <option value="">Semua Source</option>
                 <option value="auto">Local Stock</option>
@@ -3083,10 +3209,15 @@
                 <option value="manual">Manual</option>
               </select>
             </div>
-          </div>
-          <div class="toolbar">
+            </div>
+          </details>
+
+          <details class="product-control-panel" id="productEditorPanel" open>
+            <summary><span>Tambah / Edit Produk<small>Form produk dan mapping supplier</small></span></summary>
+            <div class="toolbar product-panel-content">
             <input type="hidden" id="editingProductId" />
             <div class="field">
+              <label for="productGame">Game</label>
               <input
                 type="text"
                 id="productGame"
@@ -3094,12 +3225,14 @@
               />
             </div>
             <div class="field">
-              <select id="productPlatform" aria-label="Platform produk">
+              <label for="productPlatform">Platform</label>
+              <select id="productPlatform">
                 <option value="android">Android</option>
                 <option value="ios">iOS</option>
               </select>
             </div>
             <div class="field">
+              <label for="productBrand">Brand</label>
               <input
                 type="text"
                 id="productBrand"
@@ -3107,6 +3240,7 @@
               />
             </div>
             <div class="field">
+              <label for="productDuration">Durasi</label>
               <input
                 type="text"
                 id="productDuration"
@@ -3114,13 +3248,16 @@
               />
             </div>
             <div class="field">
+              <label for="productPrice">Harga jual</label>
               <input
                 type="text"
                 id="productPrice"
                 placeholder="Harga, contoh: 30000"
+                inputmode="numeric"
               />
             </div>
             <div class="field">
+              <label for="productPlayStatus">Play status</label>
               <select id="productPlayStatus">
                 <option value="safe">Safe to Play</option>
                 <option value="risk">Use at Your Own Risk</option>
@@ -3128,6 +3265,7 @@
               </select>
             </div>
             <div class="field">
+              <label for="productDeliveryType">Source pengiriman</label>
               <select id="productDeliveryType" onchange="updateProductSupplierUi()">
                 <option value="auto">Local Stock</option>
                 <option value="vipstore_api">VIP Store API</option>
@@ -3136,6 +3274,7 @@
               </select>
             </div>
             <div class="field">
+              <label for="productSupplierProductId">Supplier Product ID</label>
               <input
                 type="number"
                 id="productSupplierProductId"
@@ -3168,9 +3307,9 @@
                 </span>
               </label>
             </div>
-          </div>
+            </div>
 
-          <div class="toolbar">
+            <div class="toolbar product-panel-content product-editor-actions">
             <div class="btn-group">
               <button id="saveProductBtn" onclick="saveProduct()">
                 Tambah Produk
@@ -3185,7 +3324,8 @@
                 Sync Semua Supplier
               </button>
             </div>
-          </div>
+            </div>
+          </details>
 
           <div class="info-row">
             <div class="info" id="productStatusText">
@@ -7732,6 +7872,9 @@
 
           Swal.fire("Berhasil", data.message || "Produk berhasil disimpan", "success");
           resetProductForm();
+          if (window.matchMedia("(max-width: 768px)").matches) {
+            document.getElementById("productEditorPanel")?.removeAttribute("open");
+          }
           loadProducts();
           loadKeyProductOptions();
         } catch (err) {
@@ -8546,9 +8689,11 @@
         if (syncBrandStatusInput) syncBrandStatusInput.checked = true;
         document.getElementById("saveProductBtn").innerText = "Update Produk";
 
-        window.scrollTo({
-          top: 0,
-          behavior: "smooth",
+        const editorPanel = document.getElementById("productEditorPanel");
+        if (editorPanel) editorPanel.open = true;
+        (editorPanel || document.documentElement).scrollIntoView({
+          block: "start",
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
         });
       }
 
@@ -9239,6 +9384,9 @@
 
       document.addEventListener("DOMContentLoaded", () => {
         applyAdminTheme();
+        if (window.matchMedia("(max-width: 768px)").matches) {
+          document.querySelectorAll(".product-control-panel").forEach((panel) => panel.removeAttribute("open"));
+        }
         loadAdminAlerts();
         loadVoucherProductOptions();
         loadVipDiscountProductOptions();
