@@ -2858,6 +2858,228 @@
         }
       }
 
+      /* Mobile order control: one primary search, compact stats, advanced on demand. */
+      .order-advanced-panel {
+        margin: 0;
+        border: 0;
+      }
+
+      .order-advanced-panel > summary {
+        display: none;
+      }
+
+      .order-advanced-content {
+        display: contents;
+      }
+
+      @media (max-width: 768px) {
+        #section-orders .card {
+          padding-bottom: calc(96px + var(--safe-bottom));
+          scroll-padding-bottom: calc(96px + var(--safe-bottom));
+        }
+
+        .admin-order-mobile-ops {
+          margin-bottom: 10px;
+          padding: 12px;
+          border: 1px solid var(--line);
+          border-radius: 22px;
+          background: var(--surface);
+        }
+
+        .admin-order-ops-grid {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 6px;
+        }
+
+        .admin-ops-card {
+          min-height: 64px;
+          padding: 9px;
+          border-radius: 16px;
+        }
+
+        .ops-num {
+          font-size: 22px;
+        }
+
+        .admin-order-quick-chips {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 6px;
+          margin: 0;
+          padding: 2px;
+          overflow: visible;
+        }
+
+        .admin-order-chip {
+          width: 100%;
+          min-width: 0;
+          min-height: 44px;
+          padding-inline: 8px;
+          font-size: 11px;
+        }
+
+        .admin-order-sticky-search {
+          position: sticky;
+          top: 8px;
+          z-index: 20;
+          margin-bottom: 10px;
+          padding: 6px;
+          border: 1px solid var(--line);
+          border-radius: 20px;
+          background: color-mix(in srgb, var(--surface) 94%, transparent);
+          box-shadow: var(--shadow-sm);
+          backdrop-filter: blur(12px);
+        }
+
+        .admin-order-sticky-search input,
+        .admin-order-sticky-search button {
+          min-height: 46px;
+        }
+
+        .admin-order-sticky-search input {
+          min-width: 0;
+          border: 0;
+          background: transparent;
+        }
+
+        .admin-order-sticky-search button {
+          min-width: 64px;
+          border-radius: 15px;
+        }
+
+        .order-advanced-panel {
+          margin-bottom: 14px;
+          overflow: hidden;
+          border: 1px solid var(--line);
+          border-radius: 22px;
+          background: var(--surface-2);
+        }
+
+        .order-advanced-panel > summary {
+          min-height: 56px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          padding: 10px 14px;
+          color: var(--ink);
+          cursor: pointer;
+          list-style: none;
+        }
+
+        .order-advanced-panel > summary::-webkit-details-marker {
+          display: none;
+        }
+
+        .order-advanced-panel > summary::after {
+          content: "+";
+          font-family: "DM Mono", monospace;
+          font-size: 22px;
+        }
+
+        .order-advanced-panel[open] > summary::after {
+          content: "−";
+        }
+
+        .order-advanced-panel > summary strong,
+        .order-advanced-panel > summary small {
+          display: block;
+        }
+
+        .order-advanced-panel > summary strong {
+          font-size: 13px;
+          font-weight: 900;
+        }
+
+        .order-advanced-panel > summary small {
+          margin-top: 2px;
+          color: var(--muted);
+          font-size: 10px;
+          font-weight: 750;
+        }
+
+        .order-advanced-content {
+          display: none;
+        }
+
+        .order-advanced-panel[open] > .order-advanced-content {
+          display: grid;
+          gap: 10px;
+          padding: 12px;
+          border-top: 1px solid var(--line);
+        }
+
+        .order-filter-toolbar {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 8px;
+        }
+
+        .order-filter-toolbar .order-desktop-search {
+          display: none;
+        }
+
+        .order-filter-toolbar .field,
+        .order-filter-toolbar select {
+          width: 100%;
+          min-width: 0;
+        }
+
+        .order-filter-toolbar .btn-group {
+          grid-column: 1 / -1;
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 8px;
+        }
+
+        .order-filter-toolbar .btn-group button {
+          width: 100%;
+          min-width: 0;
+          min-height: 44px;
+          margin: 0;
+        }
+
+        .order-filter-toolbar .btn-group button:last-child {
+          grid-column: 1 / -1;
+        }
+
+        .order-advanced-content > .toolbar:last-child {
+          margin: 0;
+        }
+
+        .order-advanced-content .date-range-row {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 8px;
+        }
+
+        .order-advanced-content .date-quick-chips {
+          grid-column: 1 / -1;
+          display: flex;
+          overflow-x: auto;
+          padding-bottom: 2px !important;
+          scrollbar-width: none;
+        }
+      }
+
+      @media (min-width: 769px) {
+        .order-advanced-panel:not([open]) > .order-advanced-content {
+          display: contents;
+        }
+      }
+
+      @media (max-width: 380px) {
+        .order-filter-toolbar,
+        .order-advanced-content .date-range-row {
+          grid-template-columns: 1fr;
+        }
+
+        .order-filter-toolbar .btn-group,
+        .order-advanced-content .date-quick-chips {
+          grid-column: 1;
+        }
+      }
+
 
     </style>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -3378,8 +3600,9 @@
                 type="button"
                 class="admin-ops-refresh"
                 onclick="loadOrders()"
+                aria-label="Refresh order"
               >
-                ↻
+                <svg class="icon" aria-hidden="true"><use href="#icon-refresh"></use></svg>
               </button>
             </div>
             <div class="admin-order-ops-grid">
@@ -3460,22 +3683,32 @@
               type="text"
               id="orderMobileSearchInput"
               placeholder="Cari ID / user / kontak..."
+              aria-label="Cari order berdasarkan ID, user, atau kontak"
               oninput="syncMobileOrderSearch(this.value)"
             />
             <button type="button" onclick="loadOrders()">Cari</button>
           </div>
 
-          <div class="toolbar">
-            <div class="field-wide">
-              <input
-                type="text"
-                id="orderSearchInput"
-                placeholder="Cari order id / nama / kontak / game / produk"
-              />
-            </div>
+          <details class="order-advanced-panel">
+            <summary>
+              <span>
+                <strong>Filter &amp; aksi lanjutan</strong>
+                <small>Tanggal, status, export, dan pilihan massal</small>
+              </span>
+            </summary>
+            <div class="order-advanced-content">
+              <div class="toolbar order-filter-toolbar">
+                <div class="field-wide order-desktop-search">
+                  <input
+                  type="text"
+                  id="orderSearchInput"
+                  placeholder="Cari order id / nama / kontak / game / produk"
+                  aria-label="Cari order berdasarkan ID, nama, kontak, game, atau produk"
+                  />
+                </div>
 
             <div class="field">
-              <select id="paymentFilter" onchange="applyOrderFilters()">
+              <select id="paymentFilter" aria-label="Filter pembayaran" onchange="applyOrderFilters()">
                 <option value="">Semua Pembayaran</option>
                 <option value="pending">Pending</option>
                 <option value="paid">Paid</option>
@@ -3484,7 +3717,7 @@
             </div>
 
             <div class="field">
-              <select id="deliveryFilter" onchange="applyOrderFilters()">
+              <select id="deliveryFilter" aria-label="Filter pengiriman" onchange="applyOrderFilters()">
                 <option value="">Semua Pengiriman</option>
                 <option value="waiting_payment">Waiting Payment</option>
                 <option value="delivered">Delivered</option>
@@ -3508,9 +3741,9 @@
                 Batal Pilih
               </button>
             </div>
-          </div>
+              </div>
 
-          <div class="toolbar">
+              <div class="toolbar">
             <div class="date-range-row" style="width: 100%">
               <div class="field">
                 <label
@@ -3580,7 +3813,9 @@
                 </button>
               </div>
             </div>
-          </div>
+              </div>
+            </div>
+          </details>
 
           <div class="info-row">
             <div class="info" id="orderStatusText">Memuat daftar order...</div>

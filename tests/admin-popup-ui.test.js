@@ -32,6 +32,9 @@ scripts.forEach(([, source]) =>
   "ORDERS_STATE.manualCount",
   "ORDERS_STATE.pendingCount",
   "paidEl.innerText = ORDERS_STATE.paidCount",
+  'class="order-advanced-panel"',
+  "Mobile order control: one primary search, compact stats, advanced on demand.",
+  ".order-filter-toolbar .order-desktop-search",
 ].forEach((marker) =>
   assert.ok(admin.includes(marker), `Missing admin popup marker: ${marker}`),
 );
