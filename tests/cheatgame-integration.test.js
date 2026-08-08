@@ -1,7 +1,10 @@
 const assert = require("node:assert/strict");
 const crypto = require("node:crypto");
 const fs = require("node:fs");
-const { verifyCheatGameWebhook } = require("../server/cheatgame-utils");
+const { normalizeCatalogLabel, verifyCheatGameWebhook } = require("../server/cheatgame-utils");
+
+assert.equal(normalizeCatalogLabel({ name: "Delta Force" }), "Delta Force");
+assert.equal(normalizeCatalogLabel(["Android", { label: "1 Day" }]), "Android / 1 Day");
 
 const timestamp = "1786172400";
 const eventId = "wh_test_123";

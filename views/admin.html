@@ -3920,7 +3920,7 @@
       <div class="supplier-picker-head">
         <div>
           <h3 id="supplierPickerTitle">Cari Produk Supplier</h3>
-          <p>Pilih produk supplier yang cocok. Product ID akan otomatis terisi.</p>
+          <p>Bandingkan nama game, varian, dan Product ID. Product ID akan otomatis terisi.</p>
         </div>
         <button
           type="button"
@@ -4725,6 +4725,7 @@
                 item.name,
                 item.category,
                 item.duration,
+                item.description,
                 item.status,
                 item.stock,
                 item.price,
@@ -4755,7 +4756,10 @@
           const loadedText = vipStorePickerLoadedAt
             ? `Loaded ${vipStorePickerLoadedAt.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}`
             : "Catalog belum dimuat";
-          statusEl.innerText = `${visibleItems.length} hasil tampil dari ${items.length} hasil cocok. ${loadedText}.`;
+          const missingGameNames = vipStorePickerSource === "cheatgame" && items.length && items.every((item) => !item.category);
+          statusEl.innerText = missingGameNames
+            ? `${visibleItems.length} dari ${items.length} hasil. CHEATGAME tidak mengirim nama game; cocokkan lewat Product ID. ${loadedText}.`
+            : `${visibleItems.length} hasil tampil dari ${items.length} hasil cocok. ${loadedText}.`;
         }
 
         if (!visibleItems.length) {
@@ -4767,6 +4771,11 @@
           .map((item) => {
             const supplierPlatform = detectSupplierPlatform(item);
             const warning = getSupplierPickerMismatchWarning(item);
+            const sourceLabel = vipStorePickerSource === "cheatgame" ? "CHEATGAME" : "VIP Store";
+            const productTitle = [item.category, item.name].filter(Boolean).join(" — ") || "Produk tanpa nama";
+            const detailText = [sourceLabel, `Product ID #${item.product_id}`, item.duration, item.description]
+              .filter(Boolean)
+              .join(" • ");
             const statusText = String(item.status || "-").replace(/_/g, " ");
             const statusClass =
               item.status === "ready"
@@ -4780,10 +4789,8 @@
             return `
               <article class="supplier-picker-item">
                 <div>
-                  <strong>#${escapeHtml(item.product_id)} • ${escapeHtml(item.name || "-")}</strong>
-                  <small>
-                    ${escapeHtml(item.category || "-")} • ${escapeHtml(item.duration || "-")}
-                  </small>
+                  <strong>${escapeHtml(productTitle)}</strong>
+                  <small>${escapeHtml(detailText)}</small>
                   <div class="supplier-picker-meta">
                     <span class="badge ${statusClass}">${escapeHtml(statusText)}</span>
                     <span class="badge available">${Number(item.stock || 0)} stock</span>

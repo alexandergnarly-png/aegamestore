@@ -21,7 +21,7 @@ const {
 } = require("./server/order-utils");
 const { ensureBulkOrderSchema, ensureWalletSchema } = require("./server/database-migrations");
 const { parseMidtransAmount, verifyMidtransSignature } = require("./server/midtrans-utils");
-const { verifyCheatGameWebhook } = require("./server/cheatgame-utils");
+const { normalizeCatalogLabel, verifyCheatGameWebhook } = require("./server/cheatgame-utils");
 const {
   decryptSecret,
   encryptSecret,
@@ -1006,9 +1006,9 @@ function normalizeVipStoreCatalogProduct(item) {
     getFirstDefinedValue(item, ["id", "product_id", "productId"]) || "",
   ).trim();
 
-  const name = String(
-    getFirstDefinedValue(item, ["name", "product_name", "title"]) || "",
-  ).trim();
+  const name = normalizeCatalogLabel(
+    getFirstDefinedValue(item, ["name", "product_name", "title", "variant_name", "package_name"]),
+  );
 
   const stock = Math.max(
     0,
@@ -1060,8 +1060,15 @@ function normalizeVipStoreCatalogProduct(item) {
     price_usd: parseApiNumber(getFirstDefinedValue(item, ["price_usd", "price"]), null),
     stock,
     status,
-    category: String(getFirstDefinedValue(item, ["category", "category_name"]) || "").trim(),
-    duration: String(getFirstDefinedValue(item, ["duration", "variant_label", "variantLabel"]) || "").trim(),
+    category: normalizeCatalogLabel(getFirstDefinedValue(item, [
+      "category", "category_name", "game", "game_name", "game_title", "cheat_name",
+      "software", "software_name", "app", "app_name", "brand", "brand_name",
+      "group", "group_name", "parent", "parent_name",
+    ])),
+    duration: normalizeCatalogLabel(getFirstDefinedValue(item, [
+      "duration", "variant_label", "variantLabel", "variant", "period", "validity", "plan",
+    ])),
+    description: normalizeCatalogLabel(getFirstDefinedValue(item, ["description", "details", "note", "slug"])),
     is_hidden: isHidden,
     is_maintenance: isMaintenance || rawStatus.includes("maintenance"),
     maintenance_reason: maintenanceReason,
