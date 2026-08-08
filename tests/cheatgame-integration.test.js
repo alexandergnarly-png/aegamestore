@@ -18,7 +18,8 @@ const admin = fs.readFileSync("views/admin.html", "utf8");
 for (const marker of [
   'const CHEATGAME_API_URL = "https://cheatgame.online/reseller_api.php"',
   'app.post("/api/webhooks/cheatgame"',
-  'eventType !== "order.success"',
+  '["order.success", "webhook.test"].includes(eventType)',
+  'eventType === "webhook.test"',
   "ON CONFLICT (event_id) DO NOTHING",
   'source: "cheatgame"',
   'value="cheatgame_api">CHEATGAME API',

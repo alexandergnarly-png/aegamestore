@@ -3434,7 +3434,7 @@ app.post("/api/webhooks/cheatgame", webhookLimiter, async (req, res) => {
   const signature = String(req.headers["x-cgo-signature"] || "").trim();
 
   if (!config.webhookSecret) return res.status(503).json({ ok: false, message: "Webhook belum dikonfigurasi" });
-  if (eventType !== "order.success" || !verifyCheatGameWebhook({
+  if (!["order.success", "webhook.test"].includes(eventType) || !verifyCheatGameWebhook({
     timestamp,
     eventId,
     rawBody: req.rawBody,
@@ -3443,6 +3443,7 @@ app.post("/api/webhooks/cheatgame", webhookLimiter, async (req, res) => {
   })) {
     return res.status(403).json({ ok: false, message: "Invalid webhook signature" });
   }
+  if (eventType === "webhook.test") return res.json({ ok: true, test: true });
 
   try {
     const inserted = await query(
