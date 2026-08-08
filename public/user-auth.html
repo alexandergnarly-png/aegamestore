@@ -1047,7 +1047,7 @@
                   <input
                     type="password"
                     id="regPassword"
-                    placeholder="Buat Password (Min. 6 Huruf)"
+                    placeholder="Buat Password (Min. 12 Karakter)"
                     data-auth-placeholder="registerPasswordPlaceholder"
                     autocomplete="new-password"
                     aria-describedby="regPasswordError regStrengthLabel regCapsWarn"
@@ -1623,7 +1623,7 @@
         const lang = getSavedAuthLanguage();
         const dict = authTranslations[lang] || authTranslations.id;
 
-        if (username.length < 3 || password.length < 6) {
+        if (username.length < 3 || password.length < 12) {
           setAuthFieldError(
             "regUsername",
             "regUsernameError",
@@ -1736,7 +1736,7 @@
           usernamePlaceholder: "Username",
           passwordPlaceholder: "Password",
           registerUsernamePlaceholder: "Pilih Username (Min. 3 Huruf)",
-          registerPasswordPlaceholder: "Buat Password (Min. 6 Huruf)",
+          registerPasswordPlaceholder: "Buat Password (Min. 12 Karakter)",
           rememberMe: "Ingat saya",
           acceptTerms: "Saya setuju ke Syarat & Kebijakan",
           orDivider: "atau",
@@ -1752,7 +1752,7 @@
           oopsTitle: "Oops!",
           fillUsernamePassword: "Isi username dan password dulu ya.",
           requiredField: "Kolom ini wajib diisi.",
-          passwordTooShort: "Password minimal 6 karakter.",
+          passwordTooShort: "Password minimal 12 karakter.",
           verifying: "Memverifikasi...",
           registering: "Mendaftarkan...",
           failedLoginTitle: "Gagal Masuk",
@@ -1761,7 +1761,7 @@
           welcomeBack: "Selamat datang kembali!",
           invalidTitle: "Tidak Valid",
           invalidUserPass:
-            "Username min. 3 karakter & Password min. 6 karakter.",
+            "Username min. 3 karakter & Password min. 12 karakter.",
           termsTitle: "Setujui dulu",
           termsText: "Centang Syarat & Kebijakan untuk lanjut.",
           accountCreatedTitle: "Akun Dibuat! 🎉",
@@ -1790,7 +1790,7 @@
           saveBtn: "Simpan",
           cancelBtn: "Batal",
           changePasswordValidation:
-            "Isi password lama dan password baru minimal 6 karakter",
+            "Isi password lama dan password baru minimal 12 karakter",
           changePasswordFailed: "Gagal ganti password",
           changePasswordSuccess:
             "Password berhasil diganti. Silakan pakai password baru untuk login berikutnya.",
@@ -1836,7 +1836,7 @@
           usernamePlaceholder: "Username",
           passwordPlaceholder: "Password",
           registerUsernamePlaceholder: "Choose Username (Min. 3 characters)",
-          registerPasswordPlaceholder: "Create Password (Min. 6 characters)",
+          registerPasswordPlaceholder: "Create Password (Min. 12 characters)",
           rememberMe: "Remember me",
           acceptTerms: "I agree to the Terms & Policy",
           orDivider: "or",
@@ -1852,7 +1852,7 @@
           oopsTitle: "Oops!",
           fillUsernamePassword: "Please enter username and password.",
           requiredField: "This field is required.",
-          passwordTooShort: "Password must be at least 6 characters.",
+          passwordTooShort: "Password must be at least 12 characters.",
           verifying: "Verifying...",
           registering: "Creating...",
           failedLoginTitle: "Login Failed",
@@ -1860,7 +1860,7 @@
           successTitle: "Success!",
           welcomeBack: "Welcome back!",
           invalidTitle: "Invalid",
-          invalidUserPass: "Username min. 3 chars & Password min. 6 chars.",
+          invalidUserPass: "Username min. 3 chars & Password min. 12 chars.",
           termsTitle: "Please accept",
           termsText: "Check Terms & Policy to continue.",
           accountCreatedTitle: "Account Created! 🎉",

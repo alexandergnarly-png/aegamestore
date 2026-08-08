@@ -1951,7 +1951,7 @@
                 autocomplete="new-password"
                 data-account-placeholder="newPasswordPlaceholder"
                 id="newPassword"
-                placeholder="Password baru minimal 6 karakter"
+                placeholder="Password baru minimal 12 karakter"
                 type="password"
               />
               <button
@@ -2043,7 +2043,7 @@
           oldPasswordLabel: "Password Lama",
           newPasswordLabel: "Password Baru",
           oldPasswordPlaceholder: "Password lama / password random",
-          newPasswordPlaceholder: "Password baru minimal 6 karakter",
+          newPasswordPlaceholder: "Password baru minimal 12 karakter",
           saveNewPassword: "Simpan Password Baru",
           changePasswordNote:
             "Kalau password kamu hasil reset admin, isi password random itu sebagai password lama.",
@@ -2133,7 +2133,7 @@
           copyFailedTitle: "Gagal copy",
           copyFailedText: "Coba copy manual.",
           passwordValidation:
-            "Password lama wajib diisi dan password baru minimal 6 karakter",
+            "Password lama wajib diisi dan password baru minimal 12 karakter",
           failedTitle: "Gagal",
           changePasswordFailed: "Gagal ganti password",
           successTitle: "Berhasil",
@@ -2174,7 +2174,7 @@
           oldPasswordLabel: "Old Password",
           newPasswordLabel: "New Password",
           oldPasswordPlaceholder: "Old password / random password",
-          newPasswordPlaceholder: "New password, minimum 6 characters",
+          newPasswordPlaceholder: "New password, minimum 12 characters",
           saveNewPassword: "Save New Password",
           changePasswordNote:
             "If your password was reset by admin, use the random password as your old password.",
@@ -2723,7 +2723,7 @@
         const oldPassword = document.getElementById("oldPassword").value.trim();
         const newPassword = document.getElementById("newPassword").value.trim();
 
-        if (!oldPassword || newPassword.length < 6) {
+        if (!oldPassword || newPassword.length < 12) {
           Swal.fire({
             icon: "warning",
             title: tAccount("failedTitle"),

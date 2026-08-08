@@ -425,6 +425,15 @@
               <p class="field-error" id="passwordError" aria-live="polite"></p>
             </div>
 
+            <div class="field" id="otpField" hidden>
+              <div class="field-head"><label for="otp"><span data-i18n="otpLabel">Kode autentikator</span> <span class="required" aria-hidden="true">*</span></label></div>
+              <div class="input-wrap">
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="3" /><path d="M8 8h8M8 12h8M10 16h4" /></svg>
+                <input id="otp" name="otp" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" placeholder="6 digit" aria-describedby="otpError" />
+              </div>
+              <p class="field-error" id="otpError" aria-live="polite"></p>
+            </div>
+
             <div class="form-options">
               <label class="remember"><input id="rememberMe" type="checkbox" /><span data-i18n="remember">Ingat username</span></label>
               <button class="text-button" id="forgotPass" type="button" data-i18n="forgotPass">Lupa password?</button>
@@ -484,6 +493,8 @@
           backHome: "Kembali ke beranda",
           requiredUser: "Masukkan username admin.",
           requiredPass: "Masukkan password admin.",
+          otpLabel: "Kode autentikator",
+          requiredOtp: "Masukkan 6 digit kode autentikator.",
           wrongCred: "Username atau password salah. Periksa kembali lalu coba lagi.",
           tooMany: "Terlalu banyak percobaan. Tunggu sekitar 1 menit lalu coba lagi.",
           timeout: "Permintaan terlalu lama. Periksa koneksi lalu coba lagi.",
@@ -523,6 +534,8 @@
           backHome: "Back to homepage",
           requiredUser: "Enter your admin username.",
           requiredPass: "Enter your admin password.",
+          otpLabel: "Authenticator code",
+          requiredOtp: "Enter the 6-digit authenticator code.",
           wrongCred: "Incorrect username or password. Check the details and try again.",
           tooMany: "Too many attempts. Wait about 1 minute and try again.",
           timeout: "The request timed out. Check your connection and try again.",
@@ -541,6 +554,8 @@
       const form = document.getElementById("loginForm");
       const usernameInput = document.getElementById("username");
       const passwordInput = document.getElementById("password");
+      const otpField = document.getElementById("otpField");
+      const otpInput = document.getElementById("otp");
       const rememberInput = document.getElementById("rememberMe");
       const loginBtn = document.getElementById("loginBtn");
       const buttonLabel = loginBtn.querySelector(".btn-label");
@@ -567,7 +582,7 @@
         });
         togglePass.setAttribute("aria-label", t(passwordInput.type === "password" ? "showPass" : "hidePass"));
         themeToggle.setAttribute("aria-label", t(root.dataset.theme === "dark" ? "lightMode" : "darkMode"));
-        [usernameInput, passwordInput].forEach((input) => {
+        [usernameInput, passwordInput, otpInput].forEach((input) => {
           if (document.getElementById(`${input.id}Error`).textContent) validateField(input);
         });
       }
@@ -612,9 +627,10 @@
       }
 
       function validateField(input, announce = true) {
-        const isEmpty = input === usernameInput ? !input.value.trim() : !input.value;
+        const isOtp = input === otpInput;
+        const isEmpty = isOtp ? !/^\d{6}$/.test(input.value) : input === usernameInput ? !input.value.trim() : !input.value;
         const error = document.getElementById(`${input.id}Error`);
-        const message = isEmpty ? t(input === usernameInput ? "requiredUser" : "requiredPass") : "";
+        const message = isEmpty ? t(isOtp ? "requiredOtp" : input === usernameInput ? "requiredUser" : "requiredPass") : "";
         input.setAttribute("aria-invalid", String(isEmpty));
         error.textContent = announce ? message : "";
         return !isEmpty;
@@ -626,6 +642,12 @@
           if (input.getAttribute("aria-invalid") === "true") validateField(input);
           formStatus.textContent = "";
         });
+      });
+      otpInput.addEventListener("input", () => {
+        otpInput.value = otpInput.value.replace(/\D/g, "").slice(0, 6);
+        otpInput.setAttribute("aria-invalid", "false");
+        document.getElementById("otpError").textContent = "";
+        formStatus.textContent = "";
       });
 
       try {
@@ -651,8 +673,11 @@
         event.preventDefault();
         const usernameValid = validateField(usernameInput);
         const passwordValid = validateField(passwordInput);
-        if (!usernameValid || !passwordValid) {
-          (usernameValid ? passwordInput : usernameInput).focus();
+        const otpValid = otpField.hidden || /^\d{6}$/.test(otpInput.value);
+        otpInput.setAttribute("aria-invalid", String(!otpValid));
+        document.getElementById("otpError").textContent = otpValid ? "" : t("requiredOtp");
+        if (!usernameValid || !passwordValid || !otpValid) {
+          (!usernameValid ? usernameInput : !passwordValid ? passwordInput : otpInput).focus();
           return;
         }
 
@@ -673,13 +698,20 @@
           const response = await fetch("/admin-login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username: usernameInput.value.trim(), password: passwordInput.value }),
+            body: JSON.stringify({ username: usernameInput.value.trim(), password: passwordInput.value, otp: otpInput.value }),
             signal: controller.signal,
           });
           let data = {};
           try { data = await response.json(); } catch (_) {}
 
           if (!response.ok) {
+            if (data.code === "MFA_REQUIRED") {
+              otpField.hidden = false;
+              otpInput.setAttribute("aria-invalid", "true");
+              document.getElementById("otpError").textContent = data.message || t("requiredOtp");
+              otpInput.focus();
+              return;
+            }
             usernameInput.setAttribute("aria-invalid", "true");
             passwordInput.setAttribute("aria-invalid", "true");
             formStatus.textContent = data.message || t(response.status === 429 ? "tooMany" : "wrongCred");

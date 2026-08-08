@@ -5823,23 +5823,6 @@
         tableBody.innerHTML = rows
           .map((item) => {
             const safeId = JSON.stringify(String(item.id || ""));
-            const safeName = JSON.stringify(String(item.name || ""));
-            const safeContact = JSON.stringify(String(item.contact || ""));
-            const safeGame = JSON.stringify(String(item.game || ""));
-            const safeProduct = JSON.stringify(String(item.product || ""));
-            const safePayment = JSON.stringify(
-              String(item.payment_status || ""),
-            );
-            const safeDelivery = JSON.stringify(
-              String(item.delivery_status || ""),
-            );
-            const safeGameKey = JSON.stringify(
-              String(item.gameKey || item.gamekey || ""),
-            );
-            const safeVoucherCode = JSON.stringify(
-              String(item.voucher_code || "-"),
-            );
-            const safeDiscount = Number(item.discount_amount || 0);
             const ps = String(item.payment_status || "").toLowerCase();
             const ds = String(item.delivery_status || "").toLowerCase();
             const isProtected = ps === "paid" || ds === "delivered";
@@ -5849,7 +5832,7 @@
               : "";
 
             const detailBtn = `<button class="ghost-btn" onclick='openOrderDrawer(${safeId})'>Detail</button>`;
-            const copyBtn = `<button class="ghost-btn" onclick='copyOrderDetail(${safeId}, ${safeName}, ${safeContact}, ${safeGame}, ${safeProduct}, ${Number(item.price || 0)}, ${safePayment}, ${safeDelivery}, ${safeGameKey}, ${safeVoucherCode}, ${safeDiscount})'>Copy</button>`;
+            const copyBtn = `<button class="ghost-btn" type="button" data-copy-order="${escapeHtml(item.id)}">Copy</button>`;
             const confirmBtn =
               ps !== "paid" && !isCancelled
                 ? `<button class="ghost-btn" onclick='confirmPayment(${safeId})'>Konfirmasi Bayar</button>`
@@ -5917,6 +5900,9 @@
             `;
           })
           .join("");
+        tableBody.querySelectorAll("[data-copy-order]").forEach((button) => {
+          button.addEventListener("click", () => copyOrderDetail(button.dataset.copyOrder));
+        });
       }
 
       function renderOrderPagination() {
@@ -6828,33 +6814,23 @@
         paidEl.innerText = counts.paid;
       }
 
-      function copyOrderDetail(
-        id,
-        name,
-        contact,
-        game,
-        product,
-        price,
-        payment,
-        delivery,
-        key,
-        voucher = "-",
-        discount = 0,
-      ) {
+      function copyOrderDetail(id) {
+        const item = allOrders.find((order) => String(order.id) === String(id));
+        if (!item) return;
         const text = `
                         Order ID : ${id}
-                        Nama     : ${name}
-                        Kontak   : ${contact}
-                        Game     : ${game}
-                        Produk   : ${product}
-                        Harga    : ${formatRupiah(price)}
-                        Voucher  : ${voucher || "-"}
-                        Diskon   : ${formatRupiah(discount || 0)}
+                        Nama     : ${item.name || "-"}
+                        Kontak   : ${item.contact || "-"}
+                        Game     : ${item.game || "-"}
+                        Produk   : ${item.product || "-"}
+                        Harga    : ${formatRupiah(item.price)}
+                        Voucher  : ${item.voucher_code || "-"}
+                        Diskon   : ${formatRupiah(item.discount_amount || 0)}
 
-                        Status Pembayaran : ${payment}
-                        Status Pengiriman : ${delivery}
+                        Status Pembayaran : ${item.payment_status || "-"}
+                        Status Pengiriman : ${item.delivery_status || "-"}
 
-                        Game Key : ${key || "-"}
+                        Game Key : ${item.gameKey || item.gamekey || "-"}
                           `.trim();
 
         copyToClipboard(text);

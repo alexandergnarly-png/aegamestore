@@ -41,3 +41,15 @@ npm run dev
 
 Jangan commit `.env`, backup code, API key, database lokal, atau private key.
 File lokal tersebut disimpan di `private/` yang diabaikan Git.
+
+### Wajib di Render
+
+- Isi `ADMIN_TOTP_SECRET` dengan secret Base32, lalu tambahkan secret yang sama ke Google/Microsoft Authenticator. Buat secret dengan:
+
+  ```bash
+  node -e "let b=require('crypto').randomBytes(20),a='ABCDEFGHIJKLMNOPQRSTUVWXYZ234567',x=0,n=0,o='';for(const c of b){x=x*256+c;n+=8;while(n>=5){n-=5;o+=a[(x>>n)&31];x&=(1<<n)-1}}if(n)o+=a[(x<<(5-n))&31];console.log(o)"
+  ```
+
+- Pertahankan `APP_BASE_URL=https://aegamestore.com`.
+- Gunakan Internal Database URL Render. Untuk URL eksternal, jangan set `DATABASE_SSL_REJECT_UNAUTHORIZED=false`.
+- Jangan rotasi `JWT_SECRET` tanpa migrasi key game; secret itu juga menurunkan kunci enkripsi data game key.

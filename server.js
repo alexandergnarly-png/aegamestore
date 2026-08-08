@@ -1,6 +1,7 @@
 const db = require("./server/database");
 const express = require("express");
 const midtransClient = require("midtrans-client");
+const fs = require("fs");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const compression = require("compression");
@@ -20,6 +21,13 @@ const {
 } = require("./server/order-utils");
 const { ensureBulkOrderSchema, ensureWalletSchema } = require("./server/database-migrations");
 const { parseMidtransAmount, verifyMidtransSignature } = require("./server/midtrans-utils");
+const {
+  decryptSecret,
+  encryptSecret,
+  escapeCsvFormula,
+  totp,
+  verifyTotp,
+} = require("./server/security-utils");
 
 const app = express();
 app.disable("x-powered-by");
@@ -27,14 +35,38 @@ app.set("trust proxy", 1);
 const port = process.env.PORT || 3000;
 const isMidtransProduction = process.env.MIDTRANS_IS_PRODUCTION === "true";
 const jwtSecret = String(process.env.JWT_SECRET || "").trim();
+const adminTotpSecret = String(process.env.ADMIN_TOTP_SECRET || "").trim();
+const gameKeyEncryptionKey = Buffer.from(
+  crypto.hkdfSync("sha256", Buffer.from(jwtSecret), Buffer.alloc(0), "aegamestore-game-keys", 32),
+);
 let isShuttingDown = false;
 const WALLET_MIN_TOPUP = 10000;
 const WALLET_MAX_TOPUP = 2000000;
 const WALLET_MAX_BALANCE = 10000000;
 const MANUAL_COMPLETION_MARKER = "KEY SUDAH DIKIRIM MANUAL OLEH ADMIN";
 
+function getInlineScriptHashes() {
+  const files = fs.readdirSync(path.join(__dirname, "public"))
+    .filter((name) => name.endsWith(".html"))
+    .map((name) => path.join(__dirname, "public", name))
+    .concat(path.join(__dirname, "views", "admin.html"));
+  const hashes = new Set();
+  for (const file of files) {
+    const html = fs.readFileSync(file, "utf8");
+    for (const match of html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)) {
+      hashes.add(`'sha256-${crypto.createHash("sha256").update(match[1]).digest("base64")}'`);
+    }
+  }
+  return [...hashes];
+}
+
+const inlineScriptHashes = getInlineScriptHashes();
+
 if (!jwtSecret || jwtSecret.length < 32) {
   throw new Error("JWT_SECRET wajib diisi minimal 32 karakter");
+}
+if (adminTotpSecret && !totp(adminTotpSecret)) {
+  throw new Error("ADMIN_TOTP_SECRET harus berupa Base32 yang valid");
 }
 
 const snap = new midtransClient.Snap({
@@ -499,7 +531,7 @@ async function persistOrderKeys(
       [
         orderId,
         keyIds[index] || null,
-        String(keys[index]),
+        encryptSecret(String(keys[index]), gameKeyEncryptionKey),
         source,
         index + 1,
         createdAt,
@@ -535,7 +567,7 @@ async function allocateLocalKeysForOrder(dbClient, order) {
   }
 
   const keyIds = keyResult.rows.map((row) => Number(row.id));
-  const keys = keyResult.rows.map((row) => String(row.key));
+  const keys = keyResult.rows.map((row) => decryptSecret(row.key, gameKeyEncryptionKey));
   const lockResult = await dbClient.query(
     `UPDATE keys
      SET used = 1, reserved_order_id = NULL, reserved_until = NULL
@@ -567,8 +599,56 @@ async function getStoredOrderKeys(orderId, fallbackValue = "") {
     [orderId],
   ).catch(() => ({ rows: [] }));
 
-  const keys = stored.rows.map((row) => String(row.key_value || "").trim()).filter(Boolean);
-  return keys.length ? keys : splitOrderKeys(fallbackValue);
+  const keys = stored.rows
+    .map((row) => decryptSecret(row.key_value, gameKeyEncryptionKey).trim())
+    .filter(Boolean);
+  return keys.length ? keys : splitOrderKeys(decryptSecret(fallbackValue, gameKeyEncryptionKey));
+}
+
+function decryptOrderRow(row) {
+  const gameKey = decryptSecret(row?.gamekey ?? row?.gameKey ?? "", gameKeyEncryptionKey);
+  return { ...row, gamekey: gameKey, gameKey };
+}
+
+async function migrateEncryptedGameKeys() {
+  const client = await db.connect();
+  try {
+    await client.query("BEGIN");
+    for (const table of ["keys", "order_keys"]) {
+      const column = table === "keys" ? "key" : "key_value";
+      const rows = await client.query(
+        `SELECT id, ${column} AS value FROM ${table} WHERE ${column} NOT LIKE 'enc:v1:%' FOR UPDATE`,
+      );
+      for (const row of rows.rows) {
+        await client.query(`UPDATE ${table} SET ${column} = $1 WHERE id = $2`, [
+          encryptSecret(row.value, gameKeyEncryptionKey),
+          row.id,
+        ]);
+      }
+    }
+
+    const orders = await client.query(
+      `SELECT id, gameKey AS value FROM orders
+       WHERE LOWER(COALESCE(delivery_status, '')) = 'delivered'
+         AND COALESCE(gameKey, '') <> ''
+         AND gameKey <> $1
+         AND gameKey NOT LIKE 'enc:v1:%'
+       FOR UPDATE`,
+      [MANUAL_COMPLETION_MARKER],
+    );
+    for (const order of orders.rows) {
+      await client.query("UPDATE orders SET gameKey = $1 WHERE id = $2", [
+        encryptSecret(order.value, gameKeyEncryptionKey),
+        order.id,
+      ]);
+    }
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK").catch(() => {});
+    throw error;
+  } finally {
+    client.release();
+  }
 }
 
 function normalizeSupplierProductId(value) {
@@ -1194,7 +1274,7 @@ async function claimVipStoreKeyForOrder(order, options = {}) {
     [orderId],
   );
   const claimedKeys = storedKeysResult.rows
-    .map((row) => String(row.key_value || "").trim())
+    .map((row) => decryptSecret(row.key_value, gameKeyEncryptionKey).trim())
     .filter(Boolean)
     .slice(0, quantity);
   const seenKeys = new Set(claimedKeys);
@@ -1946,7 +2026,7 @@ async function settleWalletVipOrder(orderId) {
     const claim = await claimVipStoreKeyForOrder(order, { source: "ae_credit" });
     const deliveredAt = new Date().toISOString();
     await persistOrderKeys(db, { orderId, keys: claim.keys, source: "vipstore" });
-    await query(`UPDATE orders SET delivery_status = 'delivered', gameKey = $1, delivered_at = $2, admin_note = $3 WHERE id = $4 AND delivery_status = 'processing_supplier'`, [claim.key, deliveredAt, `Supplier claim success. Product #${claim.supplier_product_id}.`, orderId]);
+    await query(`UPDATE orders SET delivery_status = 'delivered', gameKey = $1, delivered_at = $2, admin_note = $3 WHERE id = $4 AND delivery_status = 'processing_supplier'`, [encryptSecret(claim.key, gameKeyEncryptionKey), deliveredAt, `Supplier claim success. Product #${claim.supplier_product_id}.`, orderId]);
     await query(`UPDATE products SET supplier_stock = GREATEST(COALESCE(supplier_stock, 0) - $1, 0), supplier_last_sync = $2 WHERE id = $3 AND LOWER(COALESCE(delivery_type, 'auto')) = 'vipstore_api'`, [getOrderQuantity(order.quantity), deliveredAt, order.product_id]);
   } catch (err) {
     console.error("AE CREDIT VIPSTORE CLAIM ERROR:", err.message);
@@ -2061,7 +2141,8 @@ function normalizeEmail(email) {
 }
 
 function isValidEmail(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || "").trim());
+  const value = String(email || "").trim();
+  return value.length <= 254 && /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/.test(value);
 }
 
 function isValidOrderContact(contact) {
@@ -2093,6 +2174,12 @@ function hashToken(token) {
 function getAppBaseUrl(req) {
   const configured = String(process.env.APP_BASE_URL || "").trim();
   if (configured) return configured.replace(/\/$/, "");
+
+  const renderUrl = String(process.env.RENDER_EXTERNAL_URL || "").trim();
+  if (renderUrl) return renderUrl.replace(/\/$/, "");
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("APP_BASE_URL wajib diisi di production");
+  }
 
   const proto = req.headers["x-forwarded-proto"] || req.protocol || "http";
   const host = req.headers["x-forwarded-host"] || req.headers.host;
@@ -2885,7 +2972,7 @@ app.use(
         "default-src": ["'self'"],
         "script-src": [
           "'self'",
-          "'unsafe-inline'",
+          ...inlineScriptHashes,
           "https://cdn.jsdelivr.net",
           "https://code.iconify.design",
           "https://app.midtrans.com",
@@ -3092,7 +3179,7 @@ app.get("/ae-auth", (req, res) => {
 });
 
 app.post("/admin-login", loginLimiter, async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, otp } = req.body;
 
   const envUsername = String(process.env.ADMIN_USERNAME || "").trim();
   const envPasswordHash = String(process.env.ADMIN_PASSWORD_HASH || "").trim();
@@ -3120,6 +3207,12 @@ app.post("/admin-login", loginLimiter, async (req, res) => {
     );
 
     if (isUsernameMatch && isPasswordMatch) {
+      if (adminTotpSecret && !verifyTotp(adminTotpSecret, otp)) {
+        return res.status(401).json({
+          code: "MFA_REQUIRED",
+          message: otp ? "Kode autentikator salah atau kedaluwarsa" : "Masukkan kode autentikator",
+        });
+      }
       const sessionToken = crypto.randomBytes(48).toString("hex");
       const createdAt = new Date();
       const expiresAt = new Date(createdAt.getTime() + 1000 * 60 * 60 * 8);
@@ -3799,7 +3892,7 @@ app.post(
              AND delivery_status = $6`,
           [
             "delivered",
-            claim.key,
+            encryptSecret(claim.key, gameKeyEncryptionKey),
             deliveredAt,
             `Supplier retry success. Product #${claim.supplier_product_id}.`,
             orderId,
@@ -4756,7 +4849,7 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
             deliveryError.statusCode = 409;
             throw deliveryError;
           }
-          await client.query(`UPDATE orders SET delivery_status = 'delivered', gameKey = $1, delivered_at = $2 WHERE id = $3`, [deliveredKeys.join("\n"), createdAt, orderId]);
+          await client.query(`UPDATE orders SET delivery_status = 'delivered', gameKey = $1, delivered_at = $2 WHERE id = $3`, [encryptSecret(deliveredKeys.join("\n"), gameKeyEncryptionKey), createdAt, orderId]);
         } else if (productDeliveryType === "manual") {
           await client.query(`UPDATE orders SET gameKey = $1, admin_note = $2 WHERE id = $3`, ["MANUAL DELIVERY - HUBUNGI ADMIN", "Saldo AE Credit diterima; key diproses manual.", orderId]);
         } else if (productDeliveryType === "vipstore_api") {
@@ -5033,7 +5126,7 @@ app.post("/midtrans-notification", webhookLimiter, async (req, res) => {
                  AND delivery_status = $6`,
               [
                 "delivered",
-                claim.key,
+                encryptSecret(claim.key, gameKeyEncryptionKey),
                 deliveredAt,
                 `Supplier claim success. Product #${claim.supplier_product_id}.`,
                 orderId,
@@ -5119,7 +5212,7 @@ app.post("/midtrans-notification", webhookLimiter, async (req, res) => {
                gameKey = $3,
                delivered_at = $4
            WHERE id = $5`,
-          ["paid", "delivered", deliveredKeys.join("\n"), new Date().toISOString(), orderId],
+          ["paid", "delivered", encryptSecret(deliveredKeys.join("\n"), gameKeyEncryptionKey), new Date().toISOString(), orderId],
         );
 
         await client.query("COMMIT");
@@ -5419,7 +5512,7 @@ app.post(
                AND delivery_status = $6`,
             [
               "delivered",
-              claim.key,
+              encryptSecret(claim.key, gameKeyEncryptionKey),
               deliveredAt,
               `Supplier claim success via admin confirm. Product #${claim.supplier_product_id}.`,
               orderId,
@@ -5505,7 +5598,7 @@ app.post(
              gameKey = $3,
              delivered_at = $4
          WHERE id = $5`,
-        ["paid", "delivered", deliveredKeys.join("\n"), new Date().toISOString(), orderId],
+        ["paid", "delivered", encryptSecret(deliveredKeys.join("\n"), gameKeyEncryptionKey), new Date().toISOString(), orderId],
       );
 
       await client.query("COMMIT");
@@ -5811,7 +5904,7 @@ app.get("/orders", requireAdminAuth, async (req, res) => {
       "SELECT * FROM orders ORDER BY created_at DESC, id DESC",
     );
 
-    return res.json(result.rows);
+    return res.json(result.rows.map(decryptOrderRow));
   } catch (err) {
     console.error("ERROR GET ORDERS:", err);
     return res.status(500).json({
@@ -5903,7 +5996,7 @@ app.get("/admin-orders", requireAdminAuth, async (req, res) => {
     );
 
     return res.json({
-      rows: rowsResult.rows,
+      rows: rowsResult.rows.map(decryptOrderRow),
       total: summary.total,
       revenue: summary.revenue,
       paid_count: summary.paid_count,
@@ -5950,17 +6043,9 @@ app.get("/admin-orders/export", requireAdminAuth, async (req, res) => {
       "Alasan Batal",
     ];
 
-    const escapeCsv = (val) => {
-      if (val === null || val === undefined) return "";
-      const s = String(val);
-      if (s.includes(",") || s.includes('"') || s.includes("\n")) {
-        return `"${s.replace(/"/g, '""')}"`;
-      }
-      return s;
-    };
-
     const lines = [headers.join(",")];
-    for (const row of result.rows) {
+    for (const encryptedRow of result.rows) {
+      const row = decryptOrderRow(encryptedRow);
       lines.push(
         [
           row.id,
@@ -5983,7 +6068,7 @@ app.get("/admin-orders/export", requireAdminAuth, async (req, res) => {
           row.cancelled_at,
           row.cancel_reason,
         ]
-          .map(escapeCsv)
+          .map(escapeCsvFormula)
           .join(","),
       );
     }
@@ -6043,7 +6128,7 @@ app.get("/admin-orders/:id", requireAdminAuth, async (req, res) => {
     ).catch(() => ({ rows: [] }));
 
     return res.json({
-      ...order,
+      ...decryptOrderRow(order),
       claim_logs: claimLogs.rows || [],
     });
   } catch (err) {
@@ -6132,7 +6217,7 @@ app.post(
              delivered_at = $3,
              admin_note = COALESCE(NULLIF($4, ''), admin_note)
          WHERE id = $5`,
-        [gameKeys.join("\n"), "delivered", new Date().toISOString(), note, orderId],
+        [encryptSecret(gameKeys.join("\n"), gameKeyEncryptionKey), "delivered", new Date().toISOString(), note, orderId],
       );
       await client.query("COMMIT");
 
@@ -6365,7 +6450,10 @@ app.get("/keys", requireAdminAuth, async (req, res) => {
             ORDER BY keys.id DESC
         `);
 
-    return res.json(result.rows);
+    return res.json(result.rows.map((row) => ({
+      ...row,
+      key: decryptSecret(row.key, gameKeyEncryptionKey),
+    })));
   } catch (err) {
     console.error("ERROR GET KEYS:", err);
     return res.status(500).json({
@@ -6404,7 +6492,7 @@ app.post("/keys", requireAdminAuth, requireAdminCsrf, async (req, res) => {
 
     const result = await query(
       "INSERT INTO keys (product_id, key, used) VALUES ($1, $2, 0) RETURNING id",
-      [cleanProductId, cleanKey],
+      [cleanProductId, encryptSecret(cleanKey, gameKeyEncryptionKey)],
     );
 
     return res.json({
@@ -6469,7 +6557,7 @@ app.post("/keys/bulk", requireAdminAuth, requireAdminCsrf, async (req, res) => {
     const placeholders = cleanKeys
       .map((key, index) => {
         const base = index * 2;
-        values.push(cleanProductId, key);
+        values.push(cleanProductId, encryptSecret(key, gameKeyEncryptionKey));
         return `($${base + 1}, $${base + 2}, 0)`;
       })
       .join(", ");
@@ -7156,9 +7244,9 @@ app.post("/register", registerLimiter, async (req, res) => {
     });
   }
 
-  if (cleanPassword.length < 6 || cleanPassword.length > 72) {
+  if (cleanPassword.length < 12 || cleanPassword.length > 72) {
     return res.status(400).json({
-      message: "Password harus 6 sampai 72 karakter",
+      message: "Password harus 12 sampai 72 karakter",
     });
   }
 
@@ -7295,10 +7383,10 @@ app.post(
     const cleanOldPassword = String(oldPassword || "").trim();
     const cleanNewPassword = String(newPassword || "").trim();
 
-    if (cleanNewPassword.length < 6) {
+    if (cleanNewPassword.length < 12 || cleanNewPassword.length > 72) {
       return res
         .status(400)
-        .json({ message: "Password baru minimal 6 karakter" });
+        .json({ message: "Password baru harus 12 sampai 72 karakter" });
     }
 
     try {
@@ -8195,6 +8283,8 @@ app.get("/security-audit", requireAdminAuth, async (req, res) => {
     csrf_admin_actions: true,
     rate_limit: true,
     password_hashing: true,
+    admin_mfa_configured: Boolean(adminTotpSecret),
+    game_keys_encrypted: true,
     jwt_secret_configured: Boolean(jwtSecret && jwtSecret.length >= 32),
     midtrans_production: isMidtransProduction,
     notes: [
@@ -8323,6 +8413,7 @@ let server = null;
 
 async function startApplication() {
   await bulkOrderSchemaReady;
+  await migrateEncryptedGameKeys();
 
   if (isShuttingDown) return;
 
