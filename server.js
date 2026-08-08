@@ -2035,7 +2035,7 @@ async function isAdminLoggedIn(req) {
     return result.rows.length > 0;
   } catch (err) {
     console.error("ERROR CHECK ADMIN SESSION:", err);
-    return false;
+    throw err;
   }
 }
 async function getLoggedInUserFromRequest(req) {
@@ -3219,7 +3219,18 @@ function requireSafeAdminAction(req, res, next) {
 }
 
 async function requireAdminAuth(req, res, next) {
-  const isLoggedIn = await isAdminLoggedIn(req);
+  let isLoggedIn;
+  try {
+    isLoggedIn = await isAdminLoggedIn(req);
+  } catch (_) {
+    if (req.headers.accept?.includes("text/html")) {
+      return res.status(503).send("Admin authentication temporarily unavailable");
+    }
+    return res.status(503).json({
+      code: "ADMIN_AUTH_UNAVAILABLE",
+      message: "Admin authentication temporarily unavailable",
+    });
+  }
 
   if (!isLoggedIn) {
     // kalau akses dari browser
@@ -3229,6 +3240,7 @@ async function requireAdminAuth(req, res, next) {
 
     // kalau akses dari API (fetch)
     return res.status(401).json({
+      code: "ADMIN_AUTH_REQUIRED",
       message: "Unauthorized",
     });
   }
@@ -3764,7 +3776,7 @@ app.get("/api/admin/vipstore/catalog", requireAdminAuth, async (req, res) => {
     const result = await getVipStoreCatalog();
     const items = extractVipStoreCatalogItems(result.data);
 
-    return res.status(result.ok ? 200 : result.http_code || 502).json({
+    return res.status(result.ok ? 200 : 502).json({
       ok: result.ok,
       http_code: result.http_code,
       total_detected_items: items.length,
@@ -3786,7 +3798,7 @@ app.get("/api/admin/vipstore/reset-products", requireAdminAuth, async (req, res)
     const result = await getVipStoreResetProducts();
     const items = extractVipStoreCatalogItems(result.data);
 
-    return res.status(result.ok ? 200 : result.http_code || 502).json({
+    return res.status(result.ok ? 200 : 502).json({
       ok: result.ok,
       http_code: result.http_code,
       total_detected_items: items.length,
@@ -3815,7 +3827,7 @@ app.post(
         req.body?.key,
       );
 
-      return res.status(result.ok ? 200 : result.http_code || 502).json({
+      return res.status(result.ok ? 200 : 502).json({
         ok: result.ok,
         http_code: result.http_code,
         data: result.data,
@@ -3908,7 +3920,7 @@ app.get("/api/admin/vipstore/catalog-normalized", requireAdminAuth, async (req, 
       })
       .slice(0, limit);
 
-    return res.status(result.ok ? 200 : result.http_code || 502).json({
+    return res.status(result.ok ? 200 : 502).json({
       ok: result.ok,
       http_code: result.http_code,
       total_detected_items: items.length,
@@ -3931,7 +3943,7 @@ app.get("/api/admin/vipstore/balance", requireAdminAuth, async (req, res) => {
   try {
     const result = await getVipStoreBalance();
 
-    return res.status(result.ok ? 200 : result.http_code || 502).json({
+    return res.status(result.ok ? 200 : 502).json({
       ok: result.ok,
       http_code: result.http_code,
       data: result.data,
@@ -3962,7 +3974,7 @@ app.get("/api/admin/cheatgame/catalog-normalized", requireAdminAuth, async (req,
     const result = await getCheatGameCatalog();
     const items = extractVipStoreCatalogItems(result.data);
     const products = items.map(normalizeCheatGameCatalogProduct).filter((item) => item.product_id).slice(0, limit);
-    return res.status(result.ok ? 200 : result.http_code || 502).json({
+    return res.status(result.ok ? 200 : 502).json({
       ok: result.ok,
       http_code: result.http_code,
       total_detected_items: items.length,
@@ -3992,7 +4004,7 @@ app.get("/api/admin/cheatgame/product/:productId", requireAdminAuth, async (req,
 app.get("/api/admin/cheatgame/balance", requireAdminAuth, async (req, res) => {
   try {
     const result = await getCheatGameBalance();
-    return res.status(result.ok ? 200 : result.http_code || 502).json({ ok: result.ok, data: result.data });
+    return res.status(result.ok ? 200 : 502).json({ ok: result.ok, data: result.data });
   } catch (err) {
     return res.status(err.code === "CHEATGAME_NOT_CONFIGURED" ? 503 : 502).json({ ok: false, message: err.message });
   }
@@ -4001,7 +4013,7 @@ app.get("/api/admin/cheatgame/balance", requireAdminAuth, async (req, res) => {
 app.get("/api/admin/cheatgame/exchange-rate", requireAdminAuth, async (req, res) => {
   try {
     const result = await getCheatGameExchangeRate();
-    return res.status(result.ok ? 200 : result.http_code || 502).json({ ok: result.ok, data: result.data });
+    return res.status(result.ok ? 200 : 502).json({ ok: result.ok, data: result.data });
   } catch (err) {
     return res.status(err.code === "CHEATGAME_NOT_CONFIGURED" ? 503 : 502).json({ ok: false, message: err.message });
   }
