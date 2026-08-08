@@ -30,6 +30,23 @@ async function ensureBulkOrderSchema(db) {
       created_at TEXT NOT NULL,
       processed_at TEXT
     )`,
+    `CREATE TABLE IF NOT EXISTS product_supplier_offers (
+      id SERIAL PRIMARY KEY,
+      product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+      supplier_source TEXT NOT NULL,
+      supplier_product_id TEXT NOT NULL,
+      supplier_product_name TEXT NOT NULL DEFAULT '',
+      price_idr NUMERIC(12,2),
+      stock INTEGER NOT NULL DEFAULT 0,
+      status TEXT NOT NULL DEFAULT 'mapped_pending',
+      maintenance_reason TEXT NOT NULL DEFAULT '',
+      last_sync TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      UNIQUE(product_id, supplier_source)
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_product_supplier_offers_product
+     ON product_supplier_offers(product_id)`,
   ];
 
   for (const statement of statements) {

@@ -22,6 +22,7 @@ const {
 const { ensureBulkOrderSchema, ensureWalletSchema } = require("./server/database-migrations");
 const { parseMidtransAmount, verifyMidtransSignature } = require("./server/midtrans-utils");
 const { normalizeCatalogLabel, verifyCheatGameWebhook } = require("./server/cheatgame-utils");
+const { buildSupplierComparison } = require("./server/supplier-compare-utils");
 const {
   decryptSecret,
   encryptSecret,
@@ -102,7 +103,7 @@ async function deleteExpiredAdminSessions() {
   }
 }
 
-db.query(
+const productsTableReady = db.query(
   `
   CREATE TABLE IF NOT EXISTS products (
     id SERIAL PRIMARY KEY,
@@ -113,15 +114,10 @@ db.query(
     active INTEGER DEFAULT 1,
     created_at TEXT
   )
-`,
-  (err) => {
-    if (err) {
-      console.error("CREATE TABLE products ERROR:", err);
-    } else {
-      console.log("Table products ready");
-    }
-  },
-);
+  `,
+).then(() => {
+  console.log("Table products ready");
+});
 
 const ordersTableReady = db.query(
   `
@@ -246,7 +242,7 @@ db.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS snap_redirect_url TEXT`);
 db.query(
   `ALTER TABLE orders ADD COLUMN IF NOT EXISTS snap_token_created_at TEXT`,
 );
-const bulkOrderSchemaReady = Promise.all([ordersTableReady, keysTableReady])
+const bulkOrderSchemaReady = Promise.all([productsTableReady, ordersTableReady, keysTableReady])
   .then(() => ensureBulkOrderSchema(db))
   .then(() => ensureWalletSchema(db))
   .then(() => {
@@ -1182,6 +1178,100 @@ async function buildSupplierProductSnapshot(deliveryType, supplierProductId) {
       supplier_last_sync: new Date().toISOString(),
     };
   }
+}
+
+function normalizeOfferSupplierSource(value) {
+  const source = String(value || "").trim().toLowerCase();
+  return ["vipstore", "cheatgame"].includes(source) ? source : "";
+}
+
+function offerDeliveryType(source) {
+  return source === "cheatgame" ? "cheatgame_api" : "vipstore_api";
+}
+
+async function upsertProductSupplierOffer(productId, source, supplierProductId) {
+  const cleanSource = normalizeOfferSupplierSource(source);
+  const cleanSupplierProductId = normalizeSupplierProductId(supplierProductId);
+  if (!cleanSource || !cleanSupplierProductId) throw new Error("Mapping supplier tidak valid");
+  const snapshot = await buildSupplierProductSnapshot(offerDeliveryType(cleanSource), cleanSupplierProductId);
+  const now = new Date().toISOString();
+  await query(
+    `INSERT INTO product_supplier_offers (
+       product_id, supplier_source, supplier_product_id, supplier_product_name,
+       price_idr, stock, status, maintenance_reason, last_sync, created_at, updated_at
+     ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$10)
+     ON CONFLICT (product_id, supplier_source) DO UPDATE SET
+       supplier_product_id = EXCLUDED.supplier_product_id,
+       supplier_product_name = EXCLUDED.supplier_product_name,
+       price_idr = EXCLUDED.price_idr,
+       stock = EXCLUDED.stock,
+       status = EXCLUDED.status,
+       maintenance_reason = EXCLUDED.maintenance_reason,
+       last_sync = EXCLUDED.last_sync,
+       updated_at = EXCLUDED.updated_at`,
+    [
+      productId,
+      cleanSource,
+      cleanSupplierProductId,
+      snapshot.supplier_product_name,
+      snapshot.supplier_price,
+      snapshot.supplier_stock,
+      snapshot.supplier_status,
+      snapshot.supplier_maintenance_reason,
+      snapshot.supplier_last_sync,
+      now,
+    ],
+  );
+}
+
+async function getProductSupplierComparison(productId) {
+  const productResult = await query(
+    `SELECT id, game, brand, duration, price, supplier_source, supplier_product_id,
+            supplier_product_name, supplier_price, supplier_stock, supplier_status,
+            supplier_maintenance_reason, supplier_last_sync
+     FROM products WHERE id = $1 LIMIT 1`,
+    [productId],
+  );
+  const product = productResult.rows[0];
+  if (!product) return null;
+  const primarySource = normalizeOfferSupplierSource(product.supplier_source);
+  if (primarySource && product.supplier_product_id) {
+    const now = new Date().toISOString();
+    await query(
+      `INSERT INTO product_supplier_offers (
+         product_id, supplier_source, supplier_product_id, supplier_product_name,
+         price_idr, stock, status, maintenance_reason, last_sync, created_at, updated_at
+       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$10)
+       ON CONFLICT (product_id, supplier_source) DO NOTHING`,
+      [
+        productId, primarySource, product.supplier_product_id, product.supplier_product_name || "",
+        product.supplier_price, product.supplier_stock || 0, product.supplier_status || "mapped_pending",
+        product.supplier_maintenance_reason || "", product.supplier_last_sync, now,
+      ],
+    );
+  }
+  const offersResult = await query(
+    `SELECT supplier_source, supplier_product_id, supplier_product_name,
+            price_idr, stock, status, maintenance_reason, last_sync,
+            (supplier_source = $2 AND supplier_product_id = $3) AS is_primary
+     FROM product_supplier_offers
+     WHERE product_id = $1
+     ORDER BY supplier_source ASC`,
+    [productId, String(product.supplier_source || ""), String(product.supplier_product_id || "")],
+  );
+  return { product, offers: buildSupplierComparison(product.price, offersResult.rows) };
+}
+
+async function syncProductSupplierOffers(productId) {
+  const result = await query(
+    `SELECT supplier_source, supplier_product_id
+     FROM product_supplier_offers WHERE product_id = $1`,
+    [productId],
+  );
+  await Promise.all(result.rows.map((offer) => (
+    upsertProductSupplierOffer(productId, offer.supplier_source, offer.supplier_product_id)
+  )));
+  return getProductSupplierComparison(productId);
 }
 
 
@@ -4016,6 +4106,96 @@ app.get("/api/admin/cheatgame/exchange-rate", requireAdminAuth, async (req, res)
     return res.status(result.ok ? 200 : 502).json({ ok: result.ok, data: result.data });
   } catch (err) {
     return res.status(err.code === "CHEATGAME_NOT_CONFIGURED" ? 503 : 502).json({ ok: false, message: err.message });
+  }
+});
+
+app.get("/api/admin/products/:productId/supplier-offers", requireAdminAuth, async (req, res) => {
+  const productId = Number(req.params.productId);
+  if (!Number.isInteger(productId) || productId <= 0) return res.status(400).json({ message: "ID produk tidak valid" });
+  try {
+    const comparison = await getProductSupplierComparison(productId);
+    if (!comparison) return res.status(404).json({ message: "Produk tidak ditemukan" });
+    return res.json(comparison);
+  } catch (error) {
+    console.error("ERROR SUPPLIER COMPARISON:", error.message);
+    return res.status(500).json({ message: "Gagal mengambil perbandingan supplier" });
+  }
+});
+
+app.post("/api/admin/products/:productId/supplier-offers", requireAdminAuth, requireAdminCsrf, async (req, res) => {
+  const productId = Number(req.params.productId);
+  const source = normalizeOfferSupplierSource(req.body?.supplier_source);
+  const supplierProductId = normalizeSupplierProductId(req.body?.supplier_product_id);
+  if (!Number.isInteger(productId) || productId <= 0 || !source || !supplierProductId) {
+    return res.status(400).json({ message: "Mapping supplier tidak valid" });
+  }
+  try {
+    if (!await getProductSupplierComparison(productId)) return res.status(404).json({ message: "Produk tidak ditemukan" });
+    await upsertProductSupplierOffer(productId, source, supplierProductId);
+    return res.json(await getProductSupplierComparison(productId));
+  } catch (error) {
+    console.error("ERROR MAP SUPPLIER OFFER:", error.message);
+    return res.status(502).json({ message: error.message || "Gagal memetakan supplier" });
+  }
+});
+
+app.post("/api/admin/products/:productId/supplier-offers/sync", requireAdminAuth, requireAdminCsrf, async (req, res) => {
+  const productId = Number(req.params.productId);
+  if (!Number.isInteger(productId) || productId <= 0) return res.status(400).json({ message: "ID produk tidak valid" });
+  try {
+    const comparison = await syncProductSupplierOffers(productId);
+    if (!comparison) return res.status(404).json({ message: "Produk tidak ditemukan" });
+    return res.json(comparison);
+  } catch (error) {
+    console.error("ERROR SYNC SUPPLIER OFFERS:", error.message);
+    return res.status(502).json({ message: "Gagal sinkronisasi perbandingan supplier" });
+  }
+});
+
+app.post("/api/admin/products/:productId/supplier-offers/:source/select", requireAdminAuth, requireAdminCsrf, async (req, res) => {
+  const productId = Number(req.params.productId);
+  const source = normalizeOfferSupplierSource(req.params.source);
+  if (!Number.isInteger(productId) || productId <= 0 || !source) return res.status(400).json({ message: "Supplier tidak valid" });
+  try {
+    const comparison = await getProductSupplierComparison(productId);
+    if (!comparison) return res.status(404).json({ message: "Produk tidak ditemukan" });
+    const offer = comparison.offers.find((item) => item.supplier_source === source);
+    if (!offer) return res.status(404).json({ message: "Mapping supplier belum dibuat" });
+    if (!offer.eligible) return res.status(409).json({ message: "Supplier harus Ready, punya stok, harga IDR, dan data sync terbaru" });
+    await query(
+      `UPDATE products SET
+         delivery_type = $1, supplier_source = $2, supplier_product_id = $3,
+         supplier_product_name = $4, supplier_price = $5, supplier_stock = $6,
+         supplier_status = $7, supplier_maintenance = 0,
+         supplier_maintenance_reason = $8, supplier_last_sync = $9
+       WHERE id = $10`,
+      [
+        offerDeliveryType(source), source, offer.supplier_product_id, offer.supplier_product_name,
+        offer.price_idr, offer.stock, offer.status, offer.maintenance_reason || "", offer.last_sync, productId,
+      ],
+    );
+    return res.json(await getProductSupplierComparison(productId));
+  } catch (error) {
+    console.error("ERROR SELECT PRIMARY SUPPLIER:", error.message);
+    return res.status(500).json({ message: "Gagal memilih supplier utama" });
+  }
+});
+
+app.delete("/api/admin/products/:productId/supplier-offers/:source", requireAdminAuth, requireAdminCsrf, async (req, res) => {
+  const productId = Number(req.params.productId);
+  const source = normalizeOfferSupplierSource(req.params.source);
+  if (!Number.isInteger(productId) || productId <= 0 || !source) return res.status(400).json({ message: "Supplier tidak valid" });
+  try {
+    const comparison = await getProductSupplierComparison(productId);
+    if (!comparison) return res.status(404).json({ message: "Produk tidak ditemukan" });
+    const offer = comparison.offers.find((item) => item.supplier_source === source);
+    if (!offer) return res.status(404).json({ message: "Mapping supplier belum dibuat" });
+    if (offer.is_primary) return res.status(409).json({ message: "Pilih supplier utama lain sebelum menghapus mapping ini" });
+    await query("DELETE FROM product_supplier_offers WHERE product_id = $1 AND supplier_source = $2", [productId, source]);
+    return res.json(await getProductSupplierComparison(productId));
+  } catch (error) {
+    console.error("ERROR DELETE SUPPLIER OFFER:", error.message);
+    return res.status(500).json({ message: "Gagal menghapus mapping supplier" });
   }
 });
 

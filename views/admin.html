@@ -2518,6 +2518,85 @@
         font-weight: 800;
       }
 
+      .supplier-compare-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .supplier-compare-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        overflow: auto;
+      }
+
+      .supplier-compare-card {
+        display: grid;
+        gap: 12px;
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 22px;
+        background: var(--surface-2);
+      }
+
+      .supplier-compare-card.is-cheapest {
+        border-color: var(--success-border);
+        background: var(--success-bg);
+      }
+
+      .supplier-compare-card-head,
+      .supplier-compare-actions,
+      .supplier-compare-metrics {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .supplier-compare-card-head {
+        justify-content: space-between;
+      }
+
+      .supplier-compare-card h4 {
+        color: var(--ink-2);
+        font-size: 15px;
+        font-weight: 950;
+      }
+
+      .supplier-compare-product {
+        min-height: 46px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 750;
+        line-height: 1.5;
+      }
+
+      .supplier-compare-metric {
+        flex: 1 1 120px;
+        padding: 10px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: var(--surface);
+      }
+
+      .supplier-compare-metric small {
+        display: block;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 850;
+        text-transform: uppercase;
+      }
+
+      .supplier-compare-metric strong {
+        display: block;
+        margin-top: 4px;
+        color: var(--ink-2);
+        font-size: 14px;
+        font-weight: 950;
+      }
+
       @media (max-width: 720px) {
         .supplier-picker-modal {
           inset: auto 10px 10px;
@@ -2527,7 +2606,8 @@
         }
 
         .supplier-picker-search-row,
-        .supplier-picker-item {
+        .supplier-picker-item,
+        .supplier-compare-grid {
           grid-template-columns: 1fr;
         }
 
@@ -3951,6 +4031,35 @@
       </div>
     </section>
 
+    <div
+      class="supplier-picker-backdrop"
+      id="supplierCompareBackdrop"
+      onclick="closeSupplierComparison()"
+    ></div>
+    <section
+      class="supplier-picker-modal"
+      id="supplierCompareModal"
+      role="dialog"
+      aria-modal="true"
+      aria-hidden="true"
+      aria-labelledby="supplierCompareTitle"
+    >
+      <div class="supplier-picker-head">
+        <div>
+          <h3 id="supplierCompareTitle">Bandingkan Supplier</h3>
+          <p id="supplierCompareSubtitle">Bandingkan modal, stok, status, dan keuntungan.</p>
+        </div>
+        <button type="button" class="supplier-picker-close ghost-btn" onclick="closeSupplierComparison()" aria-label="Tutup perbandingan supplier">×</button>
+      </div>
+      <div class="supplier-picker-body">
+        <div class="supplier-compare-toolbar">
+          <div class="supplier-picker-status" id="supplierCompareStatus">Pilih produk untuk membandingkan supplier.</div>
+          <button type="button" class="ghost-btn" onclick="syncSupplierComparison()">Sync Harga &amp; Stok</button>
+        </div>
+        <div class="supplier-compare-grid" id="supplierCompareGrid"></div>
+      </div>
+    </section>
+
     <section id="section-wallet" class="admin-section">
       <div class="wallet-hero delay-1">
         <div class="wallet-hero-copy">
@@ -4148,6 +4257,10 @@
       let vipStorePickerItems = [];
       let vipStorePickerLoadedAt = null;
       let vipStorePickerSource = "";
+      let supplierPickerCompareSource = "";
+      let supplierCompareProductId = null;
+      let supplierCompareData = null;
+      let supplierCompareTrigger = null;
 
       function toggleSidebar() {
         const isCollapsed = document.body.classList.toggle("sidebar-collapsed");
@@ -4612,13 +4725,176 @@
         `;
       }
 
+      function supplierCompareSourceLabel(source) {
+        return source === "cheatgame" ? "CHEATGAME" : "VIP Store";
+      }
+
+      function showSupplierCompareModal() {
+        document.getElementById("supplierCompareModal")?.classList.add("show");
+        document.getElementById("supplierCompareModal")?.setAttribute("aria-hidden", "false");
+        document.getElementById("supplierCompareBackdrop")?.classList.add("show");
+        document.body.classList.add("admin-dialog-open");
+      }
+
+      async function openSupplierComparison(productId, trigger = null) {
+        supplierCompareProductId = Number(productId);
+        supplierCompareTrigger = trigger || document.activeElement;
+        showSupplierCompareModal();
+        const grid = document.getElementById("supplierCompareGrid");
+        const status = document.getElementById("supplierCompareStatus");
+        if (grid) grid.innerHTML = `<div class="supplier-picker-empty">Memuat perbandingan supplier...</div>`;
+        if (status) status.innerText = "Mengambil mapping, harga, dan stok terbaru yang tersimpan...";
+        try {
+          const res = await fetch(`/api/admin/products/${supplierCompareProductId}/supplier-offers`);
+          const data = await res.json().catch(() => ({}));
+          if (res.status === 401) return void (window.location.href = "/ae-auth");
+          if (!res.ok) throw new Error(data.message || "Gagal memuat perbandingan supplier");
+          supplierCompareData = data;
+          renderSupplierComparison();
+        } catch (error) {
+          if (status) status.innerText = error.message;
+          if (grid) grid.innerHTML = `<div class="supplier-picker-empty">Perbandingan gagal dimuat. Coba tutup lalu buka lagi.</div>`;
+        }
+      }
+
+      function closeSupplierComparison(preserveTrigger = false) {
+        const modal = document.getElementById("supplierCompareModal");
+        const wasOpen = modal?.classList.contains("show");
+        modal?.classList.remove("show");
+        modal?.setAttribute("aria-hidden", "true");
+        document.getElementById("supplierCompareBackdrop")?.classList.remove("show");
+        document.body.classList.remove("admin-dialog-open");
+        if (wasOpen && !preserveTrigger && supplierCompareTrigger?.isConnected) supplierCompareTrigger.focus();
+        if (!preserveTrigger) supplierCompareTrigger = null;
+      }
+
+      function renderSupplierComparison() {
+        const grid = document.getElementById("supplierCompareGrid");
+        const status = document.getElementById("supplierCompareStatus");
+        const subtitle = document.getElementById("supplierCompareSubtitle");
+        if (!grid || !supplierCompareData?.product) return;
+        const product = supplierCompareData.product;
+        const offers = Array.isArray(supplierCompareData.offers) ? supplierCompareData.offers : [];
+        if (subtitle) subtitle.innerText = `${product.game} • ${product.brand} • ${product.duration} • Harga jual ${formatRupiah(product.price)}`;
+        const eligibleCount = offers.filter((offer) => offer.eligible).length;
+        if (status) status.innerText = eligibleCount
+          ? `${eligibleCount} supplier siap dibandingkan. Supplier termurah ditandai otomatis.`
+          : "Belum ada supplier yang memenuhi syarat: Ready, stok tersedia, harga IDR, dan sync maksimal 15 menit.";
+
+        grid.innerHTML = ["vipstore", "cheatgame"].map((source) => {
+          const label = supplierCompareSourceLabel(source);
+          const offer = offers.find((item) => item.supplier_source === source);
+          if (!offer) {
+            return `<article class="supplier-compare-card">
+              <div class="supplier-compare-card-head"><h4>${label}</h4><span class="badge pending">Belum mapping</span></div>
+              <div class="supplier-compare-product">Hubungkan produk supplier yang setara untuk mulai membandingkan modal.</div>
+              <div class="supplier-compare-actions"><button type="button" onclick="mapSupplierOffer('${source}')">Pilih Produk ${label}</button></div>
+            </article>`;
+          }
+          const syncText = offer.last_sync ? formatTanggal(offer.last_sync) : "Belum sync";
+          const profitText = offer.profit === null ? "-" : formatRupiah(offer.profit);
+          const differenceText = offer.difference_from_cheapest === null ? "-" : `+${formatRupiah(offer.difference_from_cheapest)}`;
+          return `<article class="supplier-compare-card ${offer.cheapest ? "is-cheapest" : ""}">
+            <div class="supplier-compare-card-head">
+              <h4>${label}</h4>
+              <div class="supplier-compare-actions">
+                ${offer.is_primary ? `<span class="badge paid">Supplier Utama</span>` : ""}
+                ${offer.cheapest ? `<span class="badge available">Termurah</span>` : ""}
+                ${!offer.fresh ? `<span class="badge used">Data lama</span>` : ""}
+              </div>
+            </div>
+            <div class="supplier-compare-product"><strong>${escapeHtml(offer.supplier_product_name || "Produk tanpa nama")}</strong><br>Product ID #${escapeHtml(offer.supplier_product_id)} • Sync ${escapeHtml(syncText)}</div>
+            <div class="supplier-compare-metrics">
+              <div class="supplier-compare-metric"><small>Modal</small><strong>${offer.price_idr === null ? "-" : formatRupiah(offer.price_idr)}</strong></div>
+              <div class="supplier-compare-metric"><small>Stok / Status</small><strong>${Number(offer.stock || 0)} • ${escapeHtml(String(offer.status || "-").replace(/_/g, " "))}</strong></div>
+              <div class="supplier-compare-metric"><small>Profit</small><strong>${profitText}</strong></div>
+              <div class="supplier-compare-metric"><small>Selisih</small><strong>${differenceText}</strong></div>
+            </div>
+            ${offer.maintenance_reason ? `<div class="supplier-picker-warning">${escapeHtml(offer.maintenance_reason)}</div>` : ""}
+            <div class="supplier-compare-actions">
+              <button type="button" class="ghost-btn" onclick="mapSupplierOffer('${source}')">Ganti Mapping</button>
+              ${!offer.is_primary ? `<button type="button" ${offer.eligible ? "" : "disabled"} onclick="selectPrimarySupplier('${source}')">Jadikan Utama</button>` : ""}
+              ${!offer.is_primary ? `<button type="button" class="danger-btn" onclick="deleteSupplierOffer('${source}')">Hapus</button>` : ""}
+            </div>
+          </article>`;
+        }).join("");
+      }
+
+      function mapSupplierOffer(source) {
+        supplierPickerCompareSource = source;
+        const searchInput = document.getElementById("supplierPickerSearch");
+        const product = supplierCompareData?.product || {};
+        if (searchInput) searchInput.value = [product.game, product.brand, product.duration].filter(Boolean).join(" ");
+        closeSupplierComparison(true);
+        openVipStoreProductPicker();
+      }
+
+      async function supplierComparisonAction(url, options, loadingTitle) {
+        showAdminLoading(loadingTitle, "Mohon tunggu, data supplier sedang diproses.");
+        try {
+          const res = await fetch(url, options);
+          const data = await res.json().catch(() => ({}));
+          if (res.status === 401) return void (window.location.href = "/ae-auth");
+          if (!res.ok) throw new Error(data.message || "Aksi supplier gagal");
+          Swal.close();
+          supplierCompareData = data;
+          showSupplierCompareModal();
+          renderSupplierComparison();
+          loadProducts();
+        } catch (error) {
+          Swal.fire("Gagal", error.message || "Aksi supplier gagal", "error");
+        }
+      }
+
+      function syncSupplierComparison() {
+        if (!supplierCompareProductId) return;
+        supplierComparisonAction(
+          `/api/admin/products/${supplierCompareProductId}/supplier-offers/sync`,
+          { method: "POST", headers: { "x-csrf-token": getCsrfToken() } },
+          "Sync harga dan stok",
+        );
+      }
+
+      async function selectPrimarySupplier(source) {
+        const confirm = await Swal.fire({
+          title: `Jadikan ${supplierCompareSourceLabel(source)} supplier utama?`,
+          text: "Order berikutnya akan diproses melalui supplier ini.",
+          icon: "question",
+          showCancelButton: true,
+          confirmButtonText: "Ya, jadikan utama",
+          cancelButtonText: "Batal",
+        });
+        if (!confirm.isConfirmed) return;
+        supplierComparisonAction(
+          `/api/admin/products/${supplierCompareProductId}/supplier-offers/${source}/select`,
+          { method: "POST", headers: { "x-csrf-token": getCsrfToken() } },
+          "Mengganti supplier utama",
+        );
+      }
+
+      async function deleteSupplierOffer(source) {
+        const confirm = await Swal.fire({
+          title: `Hapus mapping ${supplierCompareSourceLabel(source)}?`,
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "Hapus mapping",
+          cancelButtonText: "Batal",
+        });
+        if (!confirm.isConfirmed) return;
+        supplierComparisonAction(
+          `/api/admin/products/${supplierCompareProductId}/supplier-offers/${source}`,
+          { method: "DELETE", headers: { "x-csrf-token": getCsrfToken() } },
+          "Menghapus mapping",
+        );
+      }
+
       async function loadVipStorePickerCatalog(force = false) {
         const statusEl = document.getElementById("supplierPickerStatus");
         const listEl = document.getElementById("supplierPickerList");
         const deliveryType = normalizeAdminDeliveryType(
           document.getElementById("productDeliveryType")?.value || "vipstore_api",
         );
-        const source = deliveryType === "cheatgame_api" ? "cheatgame" : "vipstore";
+        const source = supplierPickerCompareSource || (deliveryType === "cheatgame_api" ? "cheatgame" : "vipstore");
 
         if (vipStorePickerItems.length && vipStorePickerSource === source && !force) {
           renderVipStoreProductPicker();
@@ -4662,7 +4938,7 @@
 
       function openVipStoreProductPicker() {
         const deliveryInput = document.getElementById("productDeliveryType");
-        if (deliveryInput && !isAdminSupplierDelivery(deliveryInput.value)) {
+        if (deliveryInput && !supplierPickerCompareSource && !isAdminSupplierDelivery(deliveryInput.value)) {
           deliveryInput.value = "vipstore_api";
           updateProductSupplierUi();
         }
@@ -4691,17 +4967,22 @@
         }, 80);
       }
 
-      function closeVipStoreProductPicker() {
+      function closeVipStoreProductPicker(resumeComparison = true) {
         const modal = document.getElementById("supplierPickerModal");
         const wasOpen = modal?.classList.contains("show");
+        const shouldResumeComparison = resumeComparison && supplierPickerCompareSource && supplierCompareProductId;
         modal?.classList.remove("show");
         modal?.setAttribute("aria-hidden", "true");
         document.getElementById("supplierPickerBackdrop")?.classList.remove("show");
         document.body.classList.remove("admin-dialog-open");
-        if (wasOpen && window.adminSupplierPickerTrigger?.isConnected) {
+        if (wasOpen && !shouldResumeComparison && window.adminSupplierPickerTrigger?.isConnected) {
           window.adminSupplierPickerTrigger.focus();
         }
         window.adminSupplierPickerTrigger = null;
+        if (shouldResumeComparison) {
+          supplierPickerCompareSource = "";
+          openSupplierComparison(supplierCompareProductId, supplierCompareTrigger);
+        }
       }
 
       function renderVipStoreProductPicker() {
@@ -4814,13 +5095,29 @@
         });
       }
 
-      function chooseVipStoreProduct(productId) {
+      async function chooseVipStoreProduct(productId) {
         const item = vipStorePickerItems.find(
           (product) => String(product.product_id) === String(productId),
         );
 
         if (!item) {
           Swal.fire("Produk supplier tidak ditemukan di list.");
+          return;
+        }
+
+        if (supplierPickerCompareSource && supplierCompareProductId) {
+          const source = supplierPickerCompareSource;
+          supplierPickerCompareSource = "";
+          closeVipStoreProductPicker(false);
+          await supplierComparisonAction(
+            `/api/admin/products/${supplierCompareProductId}/supplier-offers`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json", "x-csrf-token": getCsrfToken() },
+              body: JSON.stringify({ supplier_source: source, supplier_product_id: item.product_id }),
+            },
+            `Menyimpan mapping ${supplierCompareSourceLabel(source)}`,
+          );
           return;
         }
 
@@ -7703,6 +8000,7 @@
 <td>${activeBadge(item.active)}</td>
 <td>
   <button onclick='editProduct(${item.id}, ${safeGame}, ${safePlatform}, ${safeBrand}, ${safeDuration}, ${Number(item.price || 0)}, ${safePlayStatus}, ${safeDeliveryType}, ${safeSupplierProductId})'>Edit</button>
+                                    <button class="ghost-btn" onclick="openSupplierComparison(${item.id}, this)">Bandingkan</button>
                                     ${isAdminSupplierDelivery(item.delivery_type) ? `<button class="ghost-btn" onclick="syncVipStoreProducts(${item.id})">Sync</button>` : ""}
                                     <button class="ghost-btn" onclick="toggleProductActive(${item.id}, ${Number(item.active) === 1 ? 0 : 1})">
                                       ${Number(item.active) === 1 ? "Nonaktifkan" : "Aktifkan"}
@@ -9138,6 +9436,7 @@
         const candidates = [
           document.getElementById("adminMoreSheet"),
           document.getElementById("supplierPickerModal"),
+          document.getElementById("supplierCompareModal"),
           document.getElementById("orderDrawer"),
         ];
         return candidates.find((element) => element?.classList.contains("show"));
@@ -9161,6 +9460,8 @@
           if (openDialog.id === "adminMoreSheet") closeMoreSheet();
           else if (openDialog.id === "supplierPickerModal") {
             closeVipStoreProductPicker();
+          } else if (openDialog.id === "supplierCompareModal") {
+            closeSupplierComparison();
           } else if (openDialog.id === "orderDrawer") closeOrderDrawer();
           return;
         }
