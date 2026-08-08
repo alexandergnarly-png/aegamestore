@@ -7309,6 +7309,13 @@
         const url = isEditMode ? `/products/${editingId}` : "/products";
         const method = isEditMode ? "PUT" : "POST";
 
+        showAdminLoading(
+          isEditMode ? "Mengupdate produk..." : "Menambahkan produk...",
+          delivery_type === "vipstore_api"
+            ? "Mengecek dan menyimpan data supplier."
+            : "Menyimpan data produk.",
+        );
+
         try {
           const res = await fetch(url, {
             method,
@@ -7332,16 +7339,17 @@
           const data = await res.json();
 
           if (res.status === 401) {
+            Swal.close();
             window.location.href = "/ae-auth";
             return;
           }
 
           if (!res.ok) {
-            alert(data.message || "Gagal menyimpan produk");
+            Swal.fire("Gagal", data.message || "Gagal menyimpan produk", "error");
             return;
           }
 
-          alert(data.message || "Produk berhasil disimpan");
+          Swal.fire("Berhasil", data.message || "Produk berhasil disimpan", "success");
           resetProductForm();
           loadProducts();
           loadKeyProductOptions();
@@ -7449,6 +7457,11 @@
 
         if (!confirm(confirmText)) return;
 
+        showAdminLoading(
+          isSingle ? "Sync stok produk..." : "Sync semua stok supplier...",
+          "Mengambil stok terbaru dari supplier.",
+        );
+
         try {
           const url = isSingle
             ? `/api/admin/vipstore/sync-products/${Number(productId)}`
@@ -7466,6 +7479,7 @@
           const data = await res.json();
 
           if (res.status === 401) {
+            Swal.close();
             window.location.href = "/ae-auth";
             return;
           }
@@ -7485,6 +7499,17 @@
         } catch (err) {
           Swal.fire("Sync gagal", "Terjadi error saat sync stok supplier.", "error");
         }
+      }
+
+      function showAdminLoading(title, text) {
+        Swal.fire({
+          title,
+          text,
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          showConfirmButton: false,
+          didOpen: () => Swal.showLoading(),
+        });
       }
 
       function populateProductFilters(products) {

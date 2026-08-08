@@ -19,6 +19,10 @@ scripts.forEach(([, source]) =>
   "Retry Claim Supplier",
   "Tandai Selesai",
   "completeManualOrder",
+  "function showAdminLoading(title, text)",
+  'didOpen: () => Swal.showLoading()',
+  'isEditMode ? "Mengupdate produk..." : "Menambahkan produk..."',
+  'isSingle ? "Sync stok produk..." : "Sync semua stok supplier..."',
 ].forEach((marker) =>
   assert.ok(admin.includes(marker), `Missing admin popup marker: ${marker}`),
 );
