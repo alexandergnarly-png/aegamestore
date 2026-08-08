@@ -5075,7 +5075,10 @@
                   <div class="supplier-picker-meta">
                     <span class="badge ${statusClass}">${escapeHtml(statusText)}</span>
                     <span class="badge available">${Number(item.stock || 0)} stock</span>
-                    <span class="badge entry">Price ${item.price ?? "-"}</span>
+                    <span class="badge entry">${vipStorePickerSource === "cheatgame"
+                      ? (item.price == null ? "Modal -" : `Modal ${formatRupiah(item.price)}`)
+                      : (item.price_usd == null ? "Modal -" : `$${Number(item.price_usd).toLocaleString("en-US", { maximumFractionDigits: 2 })} ≈ ${formatRupiah(item.price)}`)
+                    }</span>
                     ${supplierPlatform ? `<span class="badge ${supplierPlatform === "ios" ? "paid" : "available"}">${getAdminPlatformLabel(supplierPlatform)}</span>` : ""}
                   </div>
                   ${warning ? `<div class="supplier-picker-warning">${escapeHtml(warning)}</div>` : ""}

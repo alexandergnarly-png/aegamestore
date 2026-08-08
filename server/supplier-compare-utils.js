@@ -1,5 +1,21 @@
 const MAX_OFFER_AGE_MS = 15 * 60 * 1000;
 
+function extractIdrRate(payload) {
+  const data = payload?.data || payload || {};
+  const exchangeRate = data.exchange_rate || {};
+  const candidates = [data.rate, exchangeRate.rate, data.exchange_rate, payload?.rate];
+  const rate = candidates.map(Number).find((value) => Number.isFinite(value) && value > 0);
+  return rate || null;
+}
+
+function convertUsdToIdr(usd, rate) {
+  const amount = Number(usd);
+  const idrRate = Number(rate);
+  return Number.isFinite(amount) && amount >= 0 && Number.isFinite(idrRate) && idrRate > 0
+    ? Math.round(amount * idrRate)
+    : null;
+}
+
 function buildSupplierComparison(salePrice, offers, now = Date.now()) {
   const cleanSalePrice = Number(salePrice || 0);
   const normalized = offers.map((offer) => {
@@ -31,4 +47,4 @@ function buildSupplierComparison(salePrice, offers, now = Date.now()) {
   }));
 }
 
-module.exports = { buildSupplierComparison, MAX_OFFER_AGE_MS };
+module.exports = { buildSupplierComparison, convertUsdToIdr, extractIdrRate, MAX_OFFER_AGE_MS };

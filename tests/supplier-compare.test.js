@@ -1,6 +1,11 @@
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
-const { buildSupplierComparison } = require("../server/supplier-compare-utils");
+const { buildSupplierComparison, convertUsdToIdr, extractIdrRate } = require("../server/supplier-compare-utils");
+
+assert.equal(convertUsdToIdr(1.5, 16000), 24000);
+assert.equal(convertUsdToIdr(1.5, null), null);
+assert.equal(extractIdrRate({ data: { rate: 16000 } }), 16000);
+assert.equal(extractIdrRate({ exchange_rate: { rate: "16100" } }), 16100);
 
 const now = Date.parse("2026-08-08T08:00:00.000Z");
 const offers = buildSupplierComparison(100000, [

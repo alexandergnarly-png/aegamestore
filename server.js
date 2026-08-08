@@ -22,7 +22,7 @@ const {
 const { ensureBulkOrderSchema, ensureWalletSchema } = require("./server/database-migrations");
 const { parseMidtransAmount, verifyMidtransSignature } = require("./server/midtrans-utils");
 const { normalizeCatalogLabel, verifyCheatGameWebhook } = require("./server/cheatgame-utils");
-const { buildSupplierComparison } = require("./server/supplier-compare-utils");
+const { buildSupplierComparison, convertUsdToIdr, extractIdrRate } = require("./server/supplier-compare-utils");
 const {
   decryptSecret,
   encryptSecret,
@@ -925,6 +925,20 @@ function getCheatGameExchangeRate() {
   return cheatGameRequest("exchange_rate");
 }
 
+async function getVipStoreIdrRate() {
+  const configuredRate = Number(process.env.VIPSTORE_USD_IDR_RATE || 0);
+  if (Number.isFinite(configuredRate) && configuredRate > 0) return configuredRate;
+
+  const result = await getCheatGameExchangeRate();
+  const rate = extractIdrRate(result.data);
+  if (!result.ok || !rate) {
+    const error = new Error("Rate USD/IDR belum tersedia; harga VIP Store tidak dapat dibandingkan.");
+    error.code = "VIPSTORE_EXCHANGE_RATE_UNAVAILABLE";
+    throw error;
+  }
+  return rate;
+}
+
 function getCheatGameOrderStatus(orderId) {
   return cheatGameRequest("order_status", { params: { order_id: orderId } });
 }
@@ -997,7 +1011,7 @@ function parseApiNumber(value, fallback = 0) {
   return Number.isFinite(numberValue) ? numberValue : fallback;
 }
 
-function normalizeVipStoreCatalogProduct(item) {
+function normalizeVipStoreCatalogProduct(item, usdToIdrRate = null) {
   const productId = String(
     getFirstDefinedValue(item, ["id", "product_id", "productId"]) || "",
   ).trim();
@@ -1049,11 +1063,14 @@ function normalizeVipStoreCatalogProduct(item) {
   else if (isMaintenance || rawStatus.includes("maintenance")) status = "maintenance";
   else if (stock <= 0) status = "out_of_stock";
 
+  const priceIdr = parseApiNumber(getFirstDefinedValue(item, ["price_idr", "reseller_price_idr"]), null);
+  const priceUsd = parseApiNumber(getFirstDefinedValue(item, ["price_usd", "price", "reseller_price"]), null);
+
   return {
     product_id: productId,
     name,
-    price: parseApiNumber(getFirstDefinedValue(item, ["price_idr", "reseller_price_idr", "price", "reseller_price"]), null),
-    price_usd: parseApiNumber(getFirstDefinedValue(item, ["price_usd", "price"]), null),
+    price: priceIdr ?? convertUsdToIdr(priceUsd, usdToIdrRate),
+    price_usd: priceUsd,
     stock,
     status,
     category: normalizeCatalogLabel(getFirstDefinedValue(item, [
@@ -1117,8 +1134,9 @@ async function findSupplierProductById(productId, getCatalog, normalizeProduct =
   };
 }
 
-function findVipStoreProductById(productId) {
-  return findSupplierProductById(productId, getVipStoreCatalog);
+async function findVipStoreProductById(productId) {
+  const rate = await getVipStoreIdrRate();
+  return findSupplierProductById(productId, getVipStoreCatalog, (item) => normalizeVipStoreCatalogProduct(item, rate));
 }
 
 function findCheatGameProductById(productId) {
@@ -1725,9 +1743,6 @@ async function syncSupplierMappedProducts(deliveryType, options = {}) {
   const getCatalog = cleanDeliveryType === "cheatgame_api"
     ? getCheatGameCatalog
     : getVipStoreCatalog;
-  const normalizeCatalogProduct = cleanDeliveryType === "cheatgame_api"
-    ? normalizeCheatGameCatalogProduct
-    : normalizeVipStoreCatalogProduct;
   const rawProductIds = Array.isArray(options.productIds)
     ? options.productIds
     : options.productId
@@ -1780,6 +1795,10 @@ async function syncSupplierMappedProducts(deliveryType, options = {}) {
     };
   }
 
+  const vipStoreIdrRate = cleanDeliveryType === "vipstore_api" ? await getVipStoreIdrRate() : null;
+  const normalizeCatalogProduct = cleanDeliveryType === "cheatgame_api"
+    ? normalizeCheatGameCatalogProduct
+    : (item) => normalizeVipStoreCatalogProduct(item, vipStoreIdrRate);
   const catalogResult = await getCatalog();
   const rawCatalogItems = extractVipStoreCatalogItems(catalogResult.data);
   const normalizedCatalog = rawCatalogItems
@@ -3979,7 +3998,8 @@ app.get("/api/admin/vipstore/catalog-normalized", requireAdminAuth, async (req, 
     const limit = Math.min(Math.max(Number(req.query.limit || 500), 1), 800);
     const result = await getVipStoreCatalog();
     const items = extractVipStoreCatalogItems(result.data);
-    let products = items.map(normalizeVipStoreCatalogProduct);
+    const exchangeRate = await getVipStoreIdrRate();
+    let products = items.map((item) => normalizeVipStoreCatalogProduct(item, exchangeRate));
 
     if (q) {
       const terms = q.split(/\s+/).filter(Boolean);
@@ -4015,6 +4035,7 @@ app.get("/api/admin/vipstore/catalog-normalized", requireAdminAuth, async (req, 
       http_code: result.http_code,
       total_detected_items: items.length,
       total_returned_items: products.length,
+      exchange_rate: exchangeRate,
       items: products,
     });
   } catch (err) {
