@@ -13992,6 +13992,74 @@ body.admin-chat-open {
   }
 }
 
+/* Mobile promo: keep copy, countdown, and carousel controls in separate lanes. */
+@media (max-width: 640px) {
+  .promo-container {
+    position: relative;
+    gap: 0 !important;
+  }
+
+  .promo-slider {
+    height: 172px !important;
+    border-radius: 24px !important;
+  }
+
+  .promo-slide {
+    align-items: center !important;
+    padding: 16px 16px 54px !important;
+  }
+
+  .promo-content {
+    width: 100%;
+    max-width: 100% !important;
+    gap: 5px !important;
+  }
+
+  .promo-content h3 {
+    max-width: 100% !important;
+    font-size: clamp(23px, 7.5vw, 27px) !important;
+    line-height: 1 !important;
+  }
+
+  .promo-content p {
+    display: none !important;
+  }
+
+  .promo-countdown {
+    display: inline-flex !important;
+    min-height: 26px;
+    margin-top: 1px !important;
+    padding: 4px 8px !important;
+    font-size: 9.5px !important;
+  }
+
+  .promo-deco-icon {
+    display: none !important;
+  }
+
+  .promo-controls {
+    position: absolute;
+    z-index: 10;
+    right: 12px;
+    bottom: 4px;
+    left: 12px;
+    min-height: 44px;
+    margin: 0 !important;
+    pointer-events: none;
+  }
+
+  .promo-dots {
+    pointer-events: auto;
+  }
+
+  body.review-section-visible .back-to-top,
+  body.review-section-visible .ae-help-fab {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+}
+
 .game-card-fav > span {
   display: grid;
   place-items: center;

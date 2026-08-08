@@ -3298,6 +3298,16 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+// Keep floating actions from covering the mobile review controls.
+document.addEventListener("DOMContentLoaded", () => {
+  const reviewSection = document.getElementById("review-section");
+  if (!reviewSection || !("IntersectionObserver" in window)) return;
+
+  new IntersectionObserver(([entry]) => {
+    document.body.classList.toggle("review-section-visible", entry.isIntersecting);
+  }, { threshold: 0.05 }).observe(reviewSection);
+});
+
 // --- ACTIVE NAV LINK HIGHLIGHT ---
 document.addEventListener("DOMContentLoaded", () => {
   const links = document.querySelectorAll('.main-nav .nav-link[href^="#"]');

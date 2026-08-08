@@ -42,6 +42,10 @@ assert.match(css, /\.game-card \.game-card-fav\.is-active \{[\s\S]*?background: 
 assert.match(script, /ph:heart-fill/);
 assert.match(script, /ph:heart-bold/);
 assert.match(css, /\.promo-dot,[\s\S]*?min-width: 44px/);
+assert.match(css, /Mobile promo: keep copy, countdown, and carousel controls in separate lanes/);
+assert.match(css, /\.promo-slider \{[\s\S]*?height: 172px !important/);
+assert.match(css, /body\.review-section-visible \.back-to-top,[\s\S]*?pointer-events: none !important/);
+assert.match(script, /IntersectionObserver[\s\S]*?review-section-visible/);
 assert.match(html, /aria-describedby="modalOrderDescription"/);
 assert.match(css, /\.order-modal-card \{[\s\S]*?scroll-padding-bottom: 156px/);
 assert.match(css, /\.checkout-payment-option \{[\s\S]*?min-height: 64px/);
