@@ -27,7 +27,7 @@ for (const marker of [
   'app.get("/api/admin/products/:productId/supplier-offers"',
   'app.post("/api/admin/products/:productId/supplier-offers/:source/select"',
   'id="supplierCompareModal"',
-  "openSupplierComparison(${item.id}, this)",
+  "openSupplierComparison(this.dataset.id, this)",
 ]) {
   assert.ok(server.includes(marker) || admin.includes(marker) || migrations.includes(marker), `Missing supplier comparison marker: ${marker}`);
 }

@@ -56,6 +56,15 @@ assert.ok(server.includes("hashToken(sessionToken)"));
 assert.ok(server.includes('persistentRateLimit("admin-login"'));
 assert.ok(!admin.includes("copyOrderDetail(${safeId}, ${safeName}"));
 assert.ok(admin.includes('data-copy-order="${escapeHtml(item.id)}"'));
+for (const match of admin.matchAll(/\bon(?:click|change|input)=(['"])(.*?)\1/gs)) {
+  assert.ok(!match[2].includes("${"), `Dynamic inline handler: ${match[0]}`);
+}
+const adminSessionCheck = server.slice(
+  server.indexOf("async function isAdminLoggedIn"),
+  server.indexOf("async function getLoggedInUserFromRequest"),
+);
+assert.ok(!adminSessionCheck.includes("user_agent = $3"));
+assert.ok(server.includes("ip_address, user_agent"));
 
 (async () => {
   const calls = [];

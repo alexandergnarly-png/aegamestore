@@ -4957,9 +4957,9 @@
             const reference = isMidtrans ? row.provider_order_id : row.payment_reference;
             const transaction = isMidtrans ? row.provider_transaction_id : "";
             const action = row.status === "pending" && !isMidtrans
-              ? `<div class="row-action-group"><button class="small-btn" onclick="approveWalletTopup('${row.id}')">Setujui</button><button class="small-btn danger" onclick="rejectWalletTopup('${row.id}')">Tolak</button></div>`
+              ? `<div class="row-action-group"><button class="small-btn" data-id="${escapeHtml(row.id)}" onclick="approveWalletTopup(this.dataset.id)">Setujui</button><button class="small-btn danger" data-id="${escapeHtml(row.id)}" onclick="rejectWalletTopup(this.dataset.id)">Tolak</button></div>`
               : row.status === "rejected"
-                ? `<div class="row-action-group"><small>${escapeHtml(row.admin_note || row.reviewed_by || "Gagal")}</small><button class="danger-btn" onclick="deleteWalletTopup('${row.id}')">Hapus</button></div>`
+                ? `<div class="row-action-group"><small>${escapeHtml(row.admin_note || row.reviewed_by || "Gagal")}</small><button class="danger-btn" data-id="${escapeHtml(row.id)}" onclick="deleteWalletTopup(this.dataset.id)">Hapus</button></div>`
                 : escapeHtml(row.admin_note || (row.status === "pending" ? "Menunggu webhook Midtrans" : row.reviewed_by || "-"));
             return `<tr>
               <td data-label="Buyer"><strong>${escapeHtml(row.username || `User #${row.user_id}`)}</strong><br><small>User #${escapeHtml(row.user_id)}</small></td>
@@ -5394,7 +5394,7 @@
             return `<article class="supplier-compare-card">
               <div class="supplier-compare-card-head"><h4>${label}</h4><span class="badge pending">Belum mapping</span></div>
               <div class="supplier-compare-product">Hubungkan produk supplier yang setara untuk mulai membandingkan modal.</div>
-              <div class="supplier-compare-actions"><button type="button" onclick="mapSupplierOffer('${source}')">Pilih Produk ${label}</button></div>
+              <div class="supplier-compare-actions"><button type="button" data-source="${source}" onclick="mapSupplierOffer(this.dataset.source)">Pilih Produk ${label}</button></div>
             </article>`;
           }
           const syncText = offer.last_sync ? formatTanggal(offer.last_sync) : "Belum sync";
@@ -5418,9 +5418,9 @@
             </div>
             ${offer.maintenance_reason ? `<div class="supplier-picker-warning">${escapeHtml(offer.maintenance_reason)}</div>` : ""}
             <div class="supplier-compare-actions">
-              <button type="button" class="ghost-btn" onclick="mapSupplierOffer('${source}')">Ganti Mapping</button>
-              ${!offer.is_primary ? `<button type="button" ${offer.eligible ? "" : "disabled"} onclick="selectPrimarySupplier('${source}')">Jadikan Utama</button>` : ""}
-              ${!offer.is_primary ? `<button type="button" class="danger-btn" onclick="deleteSupplierOffer('${source}')">Hapus</button>` : ""}
+              <button type="button" class="ghost-btn" data-source="${source}" onclick="mapSupplierOffer(this.dataset.source)">Ganti Mapping</button>
+              ${!offer.is_primary ? `<button type="button" data-source="${source}" ${offer.eligible ? "" : "disabled"} onclick="selectPrimarySupplier(this.dataset.source)">Jadikan Utama</button>` : ""}
+              ${!offer.is_primary ? `<button type="button" class="danger-btn" data-source="${source}" onclick="deleteSupplierOffer(this.dataset.source)">Hapus</button>` : ""}
             </div>
           </article>`;
         }).join("");
@@ -5938,15 +5938,16 @@
 
       function renderMaskedKey(value) {
         const rawKey = String(value || "");
+        const safeKey = escapeHtml(rawKey);
 
         return `
     <div>
       <code class="key-mask">${escapeHtml(maskSecretKey(rawKey))}</code>
       <div class="key-action-row">
-        <button class="ghost-btn" onclick='copyToClipboard(${JSON.stringify(rawKey)})'>
+        <button class="ghost-btn" data-value="${safeKey}" onclick="copyToClipboard(this.dataset.value)">
           Copy
         </button>
-        <button class="ghost-btn" onclick='showSecretKey(${JSON.stringify(rawKey)})'>
+        <button class="ghost-btn" data-value="${safeKey}" onclick="showSecretKey(this.dataset.value)">
           Show
         </button>
       </div>
@@ -6170,7 +6171,7 @@
           <td>${renderMaskedKey(item.key)}</td>
           <td>${keyBadge(item.used)}</td>
           <td>
-            <button class="danger-btn" onclick="deleteKey(${item.id})">Hapus</button>
+            <button class="danger-btn" data-id="${escapeHtml(item.id)}" onclick="deleteKey(this.dataset.id)">Hapus</button>
           </td>
         </tr>
       `,
@@ -6390,10 +6391,10 @@
   <td data-label="Total Belanja">${formatRupiah(item.total_spend || 0)}</td>
   <td data-label="Daftar">${formatTanggal(item.created_at)}</td>
   <td data-label="Aksi" class="action-cell">
-            <button class="ghost-btn" onclick="resetUserPassword(${item.id})">
+            <button class="ghost-btn" data-id="${escapeHtml(item.id)}" onclick="resetUserPassword(this.dataset.id)">
               Reset Password
             </button>
-            <button class="danger-btn" onclick="deleteUser(${item.id})">
+            <button class="danger-btn" data-id="${escapeHtml(item.id)}" onclick="deleteUser(this.dataset.id)">
               Hapus
             </button>
           </td>
@@ -6452,10 +6453,10 @@
           <td data-label="Badge Sekarang">${buyerBadge(item.badge)}</td>
           <td data-label="Override">${overrideText}</td>
           <td data-label="Aksi" class="action-cell">
-            <button class="ghost-btn" onclick="applyBadgeOverride(${item.id})">
+            <button class="ghost-btn" data-id="${escapeHtml(item.id)}" onclick="applyBadgeOverride(this.dataset.id)">
               Apply
             </button>
-            <button class="danger-btn" onclick="resetBadgeOverride(${item.id})">
+            <button class="danger-btn" data-id="${escapeHtml(item.id)}" onclick="resetBadgeOverride(this.dataset.id)">
               Reset
             </button>
           </td>
@@ -6761,7 +6762,7 @@
         if (!tableBody) return;
         tableBody.innerHTML = rows
           .map((item) => {
-            const safeId = JSON.stringify(String(item.id || ""));
+            const safeId = escapeHtml(item.id || "");
             const ps = String(item.payment_status || "").toLowerCase();
             const ds = String(item.delivery_status || "").toLowerCase();
             const isProtected = ps === "paid" || ds === "delivered";
@@ -6770,38 +6771,39 @@
               ? "checked"
               : "";
 
-            const detailBtn = `<button class="ghost-btn" onclick='openOrderDrawer(${safeId})'>Detail</button>`;
+            const detailBtn = `<button class="ghost-btn" data-id="${safeId}" onclick="openOrderDrawer(this.dataset.id)">Detail</button>`;
             const copyBtn = `<button class="ghost-btn" type="button" data-copy-order="${escapeHtml(item.id)}">Copy</button>`;
             const confirmBtn =
               ps !== "paid" && !isCancelled
-                ? `<button class="ghost-btn" onclick='confirmPayment(${safeId})'>Konfirmasi Bayar</button>`
+                ? `<button class="ghost-btn" data-id="${safeId}" onclick="confirmPayment(this.dataset.id)">Konfirmasi Bayar</button>`
                 : "";
             const isVipStoreOrder = isAdminSupplierDelivery(item.delivery_type);
             const retryClaimBtn =
               isVipStoreOrder && ps === "paid" && ds !== "delivered" && !isCancelled
-                ? `<button class="ghost-btn" onclick='retryVipStoreClaim(${safeId})'>Retry Claim</button>`
+                ? `<button class="ghost-btn" data-id="${safeId}" onclick="retryVipStoreClaim(this.dataset.id)">Retry Claim</button>`
                 : "";
             const manualBtn =
               ps === "paid" && ds !== "delivered" && !isCancelled
-                ? `<button class="ghost-btn" onclick='openManualDeliverModal(${safeId})'>Kirim Manual</button>`
+                ? `<button class="ghost-btn" data-id="${safeId}" onclick="openManualDeliverModal(this.dataset.id)">Kirim Manual</button>`
                 : "";
             const completeBtn =
               ps === "paid" && ["manual", "problem"].includes(ds)
-                ? `<button class="ghost-btn" onclick='completeManualOrder(${safeId})'>Tandai Selesai</button>`
+                ? `<button class="ghost-btn" data-id="${safeId}" onclick="completeManualOrder(this.dataset.id)">Tandai Selesai</button>`
                 : "";
             const cancelBtn =
               !isProtected && !isCancelled
-                ? `<button class="ghost-btn" onclick='openCancelOrderModal(${safeId})'>Batalkan</button>`
+                ? `<button class="ghost-btn" data-id="${safeId}" onclick="openCancelOrderModal(this.dataset.id)">Batalkan</button>`
                 : "";
-            const deleteBtn = `<button class="danger-btn" onclick='deleteOrder(${safeId})' ${isProtected ? "disabled" : ""}>Hapus</button>`;
+            const deleteBtn = `<button class="danger-btn" data-id="${safeId}" onclick="deleteOrder(this.dataset.id)" ${isProtected ? "disabled" : ""}>Hapus</button>`;
 
             return `
               <tr>
                 <td data-label="Pilih">
                   <input type="checkbox"
+                    data-id="${safeId}"
                     ${checked}
                     ${isProtected ? "disabled" : ""}
-                    onchange="toggleOrderSelection('${escapeHtml(item.id || "")}', this.checked)">
+                    onchange="toggleOrderSelection(this.dataset.id, this.checked)">
                 </td>
                 <td data-label="Order ID">${escapeHtml(item.id || "-")}</td>
                 <td data-label="Nama">${escapeHtml(item.name || "-")}</td>
@@ -7191,38 +7193,38 @@
         `;
 
         const buttons = [];
-        const safeId = JSON.stringify(orderId);
+        const safeId = escapeHtml(orderId);
 
         const copyText = `Order ID : ${order.id || "-"}\nNama     : ${order.name || "-"}\nKontak   : ${order.contact || "-"}\nGame     : ${order.game || "-"}\nProduk   : ${order.product || "-"}\nJumlah   : ${Math.max(Number(order.quantity || 1), 1)} key\nHarga    : ${formatRupiah(order.price || 0)}\nVoucher  : ${order.voucher_code || "-"}\nDiskon   : ${formatRupiah(order.discount_amount || 0)}\nStatus   : ${order.payment_status || "-"} / ${order.delivery_status || "-"}\nGame Key : ${gameKey || "-"}`;
-        const safeCopyText = JSON.stringify(copyText);
+        const safeCopyText = escapeHtml(copyText);
 
         buttons.push(
-          `<button class="ghost-btn" onclick='copyToClipboard(${safeCopyText})'>Copy Detail</button>`,
+          `<button class="ghost-btn" data-value="${safeCopyText}" onclick="copyToClipboard(this.dataset.value)">Copy Detail</button>`,
         );
         if (ps !== "paid" && !isCancelled) {
           buttons.push(
-            `<button class="ghost-btn" onclick='confirmPayment(${safeId})'>Konfirmasi Bayar</button>`,
+            `<button class="ghost-btn" data-id="${safeId}" onclick="confirmPayment(this.dataset.id)">Konfirmasi Bayar</button>`,
           );
         }
         const isVipStoreDrawerOrder = isAdminSupplierDelivery(order.delivery_type);
         if (isVipStoreDrawerOrder && ps === "paid" && ds !== "delivered" && !isCancelled) {
           buttons.push(
-            `<button class="ghost-btn" onclick='retryVipStoreClaim(${safeId})'>Retry Claim Supplier</button>`,
+            `<button class="ghost-btn" data-id="${safeId}" onclick="retryVipStoreClaim(this.dataset.id)">Retry Claim Supplier</button>`,
           );
         }
         if (ps === "paid" && ds !== "delivered" && !isCancelled) {
           buttons.push(
-            `<button class="ghost-btn" onclick='openManualDeliverModal(${safeId})'>Kirim Manual</button>`,
+            `<button class="ghost-btn" data-id="${safeId}" onclick="openManualDeliverModal(this.dataset.id)">Kirim Manual</button>`,
           );
         }
         if (ps === "paid" && ["manual", "problem"].includes(ds)) {
           buttons.push(
-            `<button class="ghost-btn" onclick='completeManualOrder(${safeId})'>Tandai Selesai</button>`,
+            `<button class="ghost-btn" data-id="${safeId}" onclick="completeManualOrder(this.dataset.id)">Tandai Selesai</button>`,
           );
         }
         if (!isCancelled && ds !== "delivered") {
           buttons.push(
-            `<button class="ghost-btn" onclick='openCancelOrderModal(${safeId})' style="color:#ef4444;border-color:#fecaca;">Batalkan</button>`,
+            `<button class="ghost-btn" data-id="${safeId}" onclick="openCancelOrderModal(this.dataset.id)" style="color:#ef4444;border-color:#fecaca;">Batalkan</button>`,
           );
         }
 
@@ -8576,21 +8578,18 @@
 
         tableBody.innerHTML = filteredProducts
           .map((item) => {
-            const safeGame = JSON.stringify(String(item.game || ""));
-            const safePlatform = JSON.stringify(
+            const editArgs = escapeHtml(encodeURIComponent(JSON.stringify([
+              item.id,
+              String(item.game || ""),
               normalizeAdminPlatform(item.platform),
-            );
-            const safeBrand = JSON.stringify(String(item.brand || ""));
-            const safeDuration = JSON.stringify(String(item.duration || ""));
-            const safePlayStatus = JSON.stringify(
+              String(item.brand || ""),
+              String(item.duration || ""),
+              Number(item.price || 0),
               String(item.play_status || "safe"),
-            );
-            const safeDeliveryType = JSON.stringify(
               normalizeAdminDeliveryType(item.delivery_type),
-            );
-            const safeSupplierProductId = JSON.stringify(
               String(item.supplier_product_id || ""),
-            );
+            ])));
+            const itemId = escapeHtml(item.id);
 
             return `
                                 <tr>
@@ -8606,13 +8605,13 @@
                                   <td data-label="Status">${activeBadge(item.active)}</td>
                                   <td data-label="Aksi" class="action-cell">
                                     <div class="product-action-group">
-                                      <button class="product-compare-btn" onclick="openSupplierComparison(${item.id}, this)">Bandingkan Harga</button>
-                                      <button class="ghost-btn" onclick='editProduct(${item.id}, ${safeGame}, ${safePlatform}, ${safeBrand}, ${safeDuration}, ${Number(item.price || 0)}, ${safePlayStatus}, ${safeDeliveryType}, ${safeSupplierProductId})'>Edit</button>
-                                      ${isAdminSupplierDelivery(item.delivery_type) ? `<button class="ghost-btn" onclick="syncVipStoreProducts(${item.id})">Sync</button>` : ""}
-                                      <button class="ghost-btn" onclick="toggleProductActive(${item.id}, ${Number(item.active) === 1 ? 0 : 1})">
+                                      <button class="product-compare-btn" data-id="${itemId}" onclick="openSupplierComparison(this.dataset.id, this)">Bandingkan Harga</button>
+                                      <button class="ghost-btn" data-args="${editArgs}" onclick="editProduct(...JSON.parse(decodeURIComponent(this.dataset.args)))">Edit</button>
+                                      ${isAdminSupplierDelivery(item.delivery_type) ? `<button class="ghost-btn" data-id="${itemId}" onclick="syncVipStoreProducts(this.dataset.id)">Sync</button>` : ""}
+                                      <button class="ghost-btn" data-id="${itemId}" data-active="${Number(item.active) === 1 ? 0 : 1}" onclick="toggleProductActive(this.dataset.id, Number(this.dataset.active))">
                                         ${Number(item.active) === 1 ? "Nonaktifkan" : "Aktifkan"}
                                       </button>
-                                      <button class="danger-btn" onclick="deleteProduct(${item.id})">Hapus</button>
+                                      <button class="danger-btn" data-id="${itemId}" onclick="deleteProduct(this.dataset.id)">Hapus</button>
                                     </div>
                                   </td>
                                 </tr>
@@ -8735,14 +8734,11 @@
         tableBody.innerHTML = filtered
           .map((item) => {
             const active = Number(item.active) === 1;
-            const safeCode = JSON.stringify(String(item.code || ""));
-            const safeProductId = Number(item.product_id || 0);
             const productIds = Array.isArray(item.product_ids)
               ? item.product_ids
                   .map((entry) => Number(entry))
                   .filter((entry) => Number.isInteger(entry) && entry > 0)
               : [];
-            const safeProductIds = JSON.stringify(productIds);
             const productCount = Number(
               item.product_count || productIds.length || 0,
             );
@@ -8762,19 +8758,20 @@
                   ? productScope || "1 produk dipilih"
                   : legacyScope;
             const targetTooltip = productScope || targetDetail;
-            const safeGameName = JSON.stringify(String(item.game_name || ""));
-            const safeBrandName = JSON.stringify(String(item.brand_name || ""));
-            const safeDurationName = JSON.stringify(
+            const editArgs = escapeHtml(encodeURIComponent(JSON.stringify([
+              item.id,
+              String(item.code || ""),
+              Number(item.product_id || 0),
+              productIds,
+              String(item.game_name || ""),
+              String(item.brand_name || ""),
               String(item.duration_name || ""),
-            );
-            const safeDiscount = Number(item.discount_amount || 0);
-            const safeExpiresAt = JSON.stringify(String(item.expires_at || ""));
-            const safeVisibility = JSON.stringify(
+              Number(item.discount_amount || 0),
+              String(item.expires_at || ""),
               String(item.visibility || "public"),
-            );
-            const safeTargetUsername = JSON.stringify(
               String(item.target_username || ""),
-            );
+            ])));
+            const itemId = escapeHtml(item.id);
             return `
         <tr>
           <td>${item.id}</td>
@@ -8804,11 +8801,11 @@
 </td>
 <td>${escapeHtml(item.expires_at || "-")}</td>
           <td>
-            <button onclick='editVoucher(${item.id}, ${safeCode}, ${safeProductId}, ${safeProductIds}, ${safeGameName}, ${safeBrandName}, ${safeDurationName}, ${safeDiscount}, ${safeExpiresAt}, ${safeVisibility}, ${safeTargetUsername})'>Edit</button>
-            <button class="ghost-btn" onclick="toggleVoucherActive(${item.id}, ${active ? 0 : 1})">
+            <button data-args="${editArgs}" onclick="editVoucher(...JSON.parse(decodeURIComponent(this.dataset.args)))">Edit</button>
+            <button class="ghost-btn" data-id="${itemId}" data-active="${active ? 0 : 1}" onclick="toggleVoucherActive(this.dataset.id, Number(this.dataset.active))">
               ${active ? "Nonaktifkan" : "Aktifkan"}
             </button>
-            <button class="danger-btn" onclick="deleteVoucher(${item.id})">Hapus</button>
+            <button class="danger-btn" data-id="${itemId}" onclick="deleteVoucher(this.dataset.id)">Hapus</button>
           </td>
         </tr>
       `;
@@ -9214,10 +9211,10 @@
               </span>
             </td>
             <td data-label="Aksi" class="action-cell">
-              <button class="ghost-btn" onclick="toggleVipDiscount(${item.id}, ${active ? 0 : 1})">
+              <button class="ghost-btn" data-id="${escapeHtml(item.id)}" data-active="${active ? 0 : 1}" onclick="toggleVipDiscount(this.dataset.id, Number(this.dataset.active))">
                 ${active ? "Nonaktifkan" : "Aktifkan"}
               </button>
-              <button class="danger-btn" onclick="deleteVipDiscount(${item.id})">
+              <button class="danger-btn" data-id="${escapeHtml(item.id)}" onclick="deleteVipDiscount(this.dataset.id)">
                 Hapus
               </button>
             </td>
@@ -9458,8 +9455,9 @@
                 <input
                   type="checkbox"
                   value="${id}"
+                  data-id="${id}"
                   ${checked}
-                  onchange="toggleVoucherProductSelection(${id}, this.checked)"
+                  onchange="toggleVoucherProductSelection(Number(this.dataset.id), this.checked)"
                 />
                 <span>
                   <strong>${escapeHtml(item.game || "-")} · ${escapeHtml(getAdminPlatformLabel(item.platform))}</strong>
@@ -9663,10 +9661,10 @@
               </span>
             </td>
             <td data-label="Aksi" class="action-cell">
-              <button class="ghost-btn" onclick="toggleVipDiscount(${item.id}, ${active ? 0 : 1})">
+              <button class="ghost-btn" data-id="${escapeHtml(item.id)}" data-active="${active ? 0 : 1}" onclick="toggleVipDiscount(this.dataset.id, Number(this.dataset.active))">
                 ${active ? "Nonaktifkan" : "Aktifkan"}
               </button>
-              <button class="danger-btn" onclick="deleteVipDiscount(${item.id})">
+              <button class="danger-btn" data-id="${escapeHtml(item.id)}" onclick="deleteVipDiscount(this.dataset.id)">
                 Hapus
               </button>
             </td>

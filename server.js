@@ -2304,9 +2304,8 @@ const aiAssistantLimiter = persistentRateLimit("ai-assistant", {
 async function isAdminLoggedIn(req) {
   const sessionToken = String(req.cookies.admin_auth || "").trim();
   const sessionTokenHash = sessionToken ? hashToken(sessionToken) : "";
-  const userAgent = String(req.headers["user-agent"] || "").slice(0, 255);
 
-  if (!sessionToken || !userAgent) {
+  if (!sessionToken) {
     return false;
   }
 
@@ -2315,9 +2314,8 @@ async function isAdminLoggedIn(req) {
       `SELECT id FROM admin_sessions
              WHERE session_token = $1
              AND expires_at > $2
-             AND user_agent = $3
              LIMIT 1`,
-      [sessionTokenHash, new Date().toISOString(), userAgent],
+      [sessionTokenHash, new Date().toISOString()],
     );
 
     return result.rows.length > 0;
