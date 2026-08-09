@@ -585,21 +585,75 @@ body.keysystem-ui .testimonial-section {
 }
 
 body.keysystem-ui .promo-container {
+  display: grid;
+  grid-template-rows: auto 48px;
+  gap: 0 !important;
   margin-top: 48px;
+  overflow: hidden;
   border: 1px solid var(--ks-line);
   border-radius: 3px;
   background: var(--ks-surface);
   box-shadow: none;
 }
 
-body.keysystem-ui .promo-slider,
-body.keysystem-ui .promo-slide {
-  border-radius: 0;
+body.keysystem-ui .promo-slider {
+  height: 190px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: var(--ks-surface-2) !important;
+  box-shadow: none !important;
 }
 
 body.keysystem-ui .promo-slide {
+  padding: 24px 28px !important;
+  border-radius: 0 !important;
   background: var(--ks-surface-2) !important;
   color: var(--ks-text) !important;
+}
+
+body.keysystem-ui .promo-slide::before {
+  display: block !important;
+  background:
+    linear-gradient(90deg, transparent 0 72%, var(--ks-line) 72% calc(72% + 1px), transparent calc(72% + 1px)),
+    repeating-linear-gradient(90deg, color-mix(in srgb, var(--ks-text) 5%, transparent) 0 1px, transparent 1px 24px),
+    repeating-linear-gradient(0deg, color-mix(in srgb, var(--ks-text) 5%, transparent) 0 1px, transparent 1px 24px) !important;
+}
+
+body.keysystem-ui .promo-slide::after {
+  display: none !important;
+  content: none !important;
+}
+
+body.keysystem-ui .promo-deco {
+  z-index: 3;
+  opacity: 1 !important;
+}
+
+body.keysystem-ui .promo-deco-circles {
+  display: none;
+}
+
+body.keysystem-ui .promo-deco-icon {
+  display: inline-grid !important;
+  top: 20px;
+  right: 20px;
+  width: 52px;
+  height: 52px;
+  border: 1px solid var(--ks-text) !important;
+  border-radius: 2px !important;
+  background: var(--ks-text) !important;
+  color: var(--ks-inverse) !important;
+  box-shadow: none !important;
+  filter: none !important;
+  font-family: var(--ks-mono) !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  letter-spacing: .08em;
+}
+
+body.keysystem-ui .promo-content {
+  max-width: min(620px, calc(100% - 86px)) !important;
+  gap: 7px !important;
 }
 
 body.keysystem-ui .promo-content > span,
@@ -609,15 +663,94 @@ body.keysystem-ui .promo-countdown {
   color: var(--ks-text) !important;
 }
 
-body.keysystem-ui .promo-content > span,
-body.keysystem-ui .promo-countdown {
+body.keysystem-ui .promo-content > span {
+  padding: 5px 8px !important;
+  border: 1px solid var(--ks-line) !important;
   border-radius: 2px;
+  background: var(--ks-surface) !important;
+  box-shadow: none !important;
+  font-family: var(--ks-mono);
+  font-size: 10px !important;
+  letter-spacing: .1em !important;
+}
+
+body.keysystem-ui .promo-content h3 {
+  max-width: 100% !important;
+  font-family: "Space Grotesk", system-ui, sans-serif !important;
+  font-size: clamp(30px, 4vw, 44px) !important;
+  line-height: .98 !important;
+  letter-spacing: -.055em !important;
+  text-transform: none !important;
+  text-shadow: none !important;
+}
+
+body.keysystem-ui .promo-content p {
+  max-width: 560px;
+  color: var(--ks-muted) !important;
+  font-size: 12px;
+}
+
+body.keysystem-ui .promo-countdown {
+  min-height: 28px;
+  padding: 5px 8px !important;
+  border: 1px solid var(--ks-line) !important;
+  border-radius: 2px;
+  background: var(--ks-surface) !important;
+  box-shadow: none !important;
+  font-family: var(--ks-mono);
+  font-size: 10px !important;
+}
+
+body.keysystem-ui .promo-countdown > span {
+  width: auto;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: inherit !important;
+}
+
+body.keysystem-ui .promo-countdown-time {
   font-family: var(--ks-mono);
 }
 
 body.keysystem-ui .promo-controls {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  min-height: 48px;
+  margin: 0 !important;
+  padding-inline: 14px;
   border-top: 1px solid var(--ks-line);
   background: var(--ks-surface);
+}
+
+body.keysystem-ui .promo-controls::before,
+body.keysystem-ui .promo-controls::after {
+  color: var(--ks-muted);
+  font-family: var(--ks-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .12em;
+}
+
+body.keysystem-ui .promo-controls::before {
+  content: "PROMO // FEED";
+  grid-column: 1;
+  justify-self: start;
+}
+
+body.keysystem-ui .promo-controls::after {
+  content: "SWIPE";
+  grid-column: 3;
+  justify-self: end;
+}
+
+body.keysystem-ui .promo-dots {
+  grid-column: 2;
+  grid-row: 1;
+  align-items: center;
+  gap: 0;
 }
 
 body.keysystem-ui .promo-arrow,
@@ -627,8 +760,21 @@ body.keysystem-ui .promo-dot {
   color: var(--ks-text);
 }
 
-body.keysystem-ui .promo-dot.active {
+body.keysystem-ui .promo-dot::before {
+  width: 8px;
+  height: 8px;
+  background: var(--ks-line);
+}
+
+body.keysystem-ui .promo-dot.active::before {
+  width: 24px;
+  border-radius: 2px;
   background: var(--ks-text);
+}
+
+body.keysystem-ui .promo-dot:focus-visible {
+  outline: 2px solid var(--ks-text);
+  outline-offset: -5px;
 }
 
 body.keysystem-ui .store-layout {
@@ -1086,7 +1232,69 @@ body.keysystem-ui .ae-payment-info-confirm.swal2-confirm {
   }
 
   body.keysystem-ui .promo-container {
+    grid-template-rows: auto 44px;
     margin-top: 0;
+  }
+
+  body.keysystem-ui .promo-slider {
+    height: 154px !important;
+  }
+
+  body.keysystem-ui .promo-slide {
+    align-items: center !important;
+    padding: 14px !important;
+  }
+
+  body.keysystem-ui .promo-slide::before {
+    background:
+      linear-gradient(90deg, transparent 0 calc(100% - 58px), var(--ks-line) calc(100% - 58px) calc(100% - 57px), transparent calc(100% - 57px)),
+      repeating-linear-gradient(90deg, color-mix(in srgb, var(--ks-text) 5%, transparent) 0 1px, transparent 1px 20px),
+      repeating-linear-gradient(0deg, color-mix(in srgb, var(--ks-text) 5%, transparent) 0 1px, transparent 1px 20px) !important;
+  }
+
+  body.keysystem-ui .promo-deco-icon {
+    top: 12px;
+    right: 12px;
+    width: 40px;
+    height: 40px;
+    font-size: 11px !important;
+  }
+
+  body.keysystem-ui .promo-content {
+    width: 100%;
+    max-width: calc(100% - 52px) !important;
+    gap: 5px !important;
+  }
+
+  body.keysystem-ui .promo-content h3 {
+    font-size: clamp(22px, 7.4vw, 27px) !important;
+    line-height: 1 !important;
+  }
+
+  body.keysystem-ui .promo-content p {
+    display: none !important;
+  }
+
+  body.keysystem-ui .promo-countdown {
+    min-height: 24px;
+    margin-top: 1px !important;
+    padding: 3px 6px !important;
+    font-size: 8.5px !important;
+  }
+
+  body.keysystem-ui .promo-controls {
+    position: static;
+    min-height: 44px;
+    padding-inline: 10px;
+    pointer-events: auto;
+  }
+
+  body.keysystem-ui .promo-controls::before {
+    content: "PROMO";
+  }
+
+  body.keysystem-ui .promo-controls::after {
+    content: "DRAG";
   }
 
   body.keysystem-ui .store-layout {

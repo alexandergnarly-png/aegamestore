@@ -3,12 +3,13 @@
 // always return a valid Response object so the browser doesn't fall back
 // to the offline page on transient sub-resource fails.
 
-const CACHE_VERSION = "20260719-midtrans-wallet-v1";
+const CACHE_VERSION = "20260809-promo-system-card-v1";
 const CACHE_NAME = `ae-game-store-auto-${CACHE_VERSION}`;
 
 const STATIC_ASSETS = [
   "/",
   "/style.css",
+  "/keysystem-ui.css",
   "/script.js",
   "/manifest.json",
   "/offline.html",
@@ -113,9 +114,9 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // 3. Versioned static assets (script.js?v=..., style.css?v=...) -> network first
+  // 3. Versioned static assets -> network first
   if (
-    (pathname === "/script.js" || pathname === "/style.css") &&
+    ["/script.js", "/style.css", "/keysystem-ui.css"].includes(pathname) &&
     requestUrl.search
   ) {
     event.respondWith(

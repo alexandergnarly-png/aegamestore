@@ -42,8 +42,11 @@ assert.match(css, /\.game-card \.game-card-fav\.is-active \{[\s\S]*?background: 
 assert.match(script, /ph:heart-fill/);
 assert.match(script, /ph:heart-bold/);
 assert.match(css, /\.promo-dot,[\s\S]*?min-width: 44px/);
-assert.match(css, /Mobile promo: keep copy, countdown, and carousel controls in separate lanes/);
-assert.match(css, /\.promo-slider \{[\s\S]*?height: 172px !important/);
+assert.match(keysystemCss, /grid-template-rows: auto 48px/);
+assert.match(keysystemCss, /body\.keysystem-ui \.promo-slider \{[\s\S]*?height: 190px !important/);
+assert.match(keysystemCss, /body\.keysystem-ui \.promo-deco-icon \{[\s\S]*?font-family: var\(--ks-mono\)/);
+assert.match(keysystemCss, /content: "PROMO \/\/ FEED"/);
+assert.match(keysystemCss, /body\.keysystem-ui \.promo-slider \{[\s\S]*?height: 154px !important/);
 assert.match(css, /body\.review-section-visible \.back-to-top,[\s\S]*?pointer-events: none !important/);
 assert.match(script, /IntersectionObserver[\s\S]*?review-section-visible/);
 assert.match(html, /aria-describedby="modalOrderDescription"/);
