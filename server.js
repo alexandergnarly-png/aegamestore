@@ -7896,6 +7896,53 @@ app.get("/public-products", async (req, res) => {
   }
 });
 
+function buildLocalCatalogReply(message, catalog) {
+  const text = String(message || "").toLowerCase();
+  const english = /\b(recommend|cheapest|available|which|show me|best value)\b/.test(text);
+  const asksOrder = /\b(order|pesanan|transaksi)\b/.test(text) && /\b(saya|my|status|cek|check)\b/.test(text);
+  if (asksOrder) {
+    return english
+      ? "For a specific order, open Account → Order History or contact the Telegram admin with your Order ID."
+      : "Untuk pesanan tertentu, buka Akun → Riwayat Order atau hubungi admin Telegram dengan menyertakan Order ID.";
+  }
+
+  const budgetMatch = text.match(/(?:budget|max|di bawah|dibawah|under|harga)[^0-9]{0,12}([0-9]+(?:[.,][0-9]+)?)\s*(k|rb|ribu)?/i);
+  const budget = budgetMatch
+    ? Number(budgetMatch[1].replace(",", ".")) * (budgetMatch[2] ? 1000 : 1)
+    : 0;
+  const tokens = text.split(/[^a-z0-9]+/).filter((token) => token.length >= 3);
+  const generic = /rekomendasi|recommend|murah|cheapest|hemat|best|stok|stock|ready|tersedia|budget/.test(text);
+  let matches = catalog
+    .map((product) => {
+      const searchable = `${product.game} ${product.brand} ${product.duration} ${product.platform}`.toLowerCase();
+      let score = tokens.reduce((total, token) => total + (searchable.includes(token) ? 1 : 0), 0);
+      if (text.includes(String(product.game).toLowerCase())) score += 8;
+      if (text.includes(String(product.brand).toLowerCase())) score += 5;
+      if (text.includes(String(product.platform).toLowerCase())) score += 3;
+      return { ...product, score };
+    })
+    .filter((product) => product.stock > 0 && (!budget || product.price_idr <= budget));
+
+  if (!generic && !matches.some((product) => product.score > 0)) {
+    return english
+      ? "Tell me the game, platform, duration, or budget you need. Example: cheapest Android product under 50k."
+      : "Sebutkan game, platform, durasi, atau budget yang kamu cari. Contoh: produk Android termurah di bawah 50 ribu.";
+  }
+
+  matches.sort((a, b) => b.score - a.score || a.price_idr - b.price_idr || b.stock - a.stock);
+  matches = matches.slice(0, 3);
+  if (!matches.length) {
+    return english
+      ? "No ready-stock product matches that request right now. Try another game or budget."
+      : "Belum ada produk ready yang cocok dengan permintaan itu. Coba game atau budget lain.";
+  }
+
+  const list = matches.map((product, index) =>
+    `${index + 1}. ${product.game} — ${product.brand}, ${product.duration} (${product.platform}) · Rp${Number(product.price_idr).toLocaleString("id-ID")} · stok ${product.stock}`,
+  );
+  return `${english ? "Best current options:" : "Pilihan terbaik saat ini:"}\n${list.join("\n")}`;
+}
+
 app.post("/api/ai-assistant", aiAssistantLimiter, async (req, res) => {
   const apiKey = String(process.env.OPENAI_API_KEY || "").trim();
   const model = String(process.env.OPENAI_MODEL || "gpt-5.6-luna").trim();
@@ -7914,10 +7961,7 @@ app.post("/api/ai-assistant", aiAssistantLimiter, async (req, res) => {
     return res.status(400).json({ message: "Tulis pertanyaan terlebih dahulu." });
   }
 
-  if (!apiKey) {
-    return res.status(503).json({ message: "AE AI belum tersedia. Silakan hubungi admin lewat Telegram." });
-  }
-
+  let localAnswer = "";
   try {
     const productResult = await query(`
       SELECT p.game, p.brand, p.duration, p.price,
@@ -7954,6 +7998,9 @@ app.post("/api/ai-assistant", aiAssistantLimiter, async (req, res) => {
       play_status: product.play_status,
       stock: Number(product.available_keys || 0),
     }));
+    localAnswer = buildLocalCatalogReply(message, catalog);
+    if (!apiKey) return res.json({ answer: localAnswer, mode: "catalog" });
+
     const transcript = history
       .map((item) => `${item.role === "assistant" ? "AE AI" : "Customer"}: ${item.content}`)
       .join("\n");
@@ -7986,7 +8033,7 @@ Keep the answer concise and easy to scan.`;
 
     if (!response.ok) {
       console.error("AE AI provider error:", response.status);
-      return res.status(502).json({ message: "AE AI sedang tidak tersedia. Coba lagi atau hubungi admin lewat Telegram." });
+      return res.json({ answer: localAnswer, mode: "catalog" });
     }
 
     const answer = (payload.output || [])
@@ -8003,6 +8050,7 @@ Keep the answer concise and easy to scan.`;
     return res.json({ answer });
   } catch (err) {
     console.error("AE AI request failed:", err?.name || "unknown_error");
+    if (localAnswer) return res.json({ answer: localAnswer, mode: "catalog" });
     return res.status(502).json({ message: "AE AI sedang tidak tersedia. Coba lagi atau hubungi admin lewat Telegram." });
   }
 });
