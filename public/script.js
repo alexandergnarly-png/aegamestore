@@ -4044,7 +4044,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const res = await fetch("/public-vouchers");
       if (!res.ok) return;
       const data = await res.json();
-      if (Array.isArray(data)) state.publicVouchers = data;
+      if (Array.isArray(data)) {
+        state.publicVouchers = data;
+        const modal = document.getElementById("orderModal");
+        if (modal?.classList.contains("show")) onProductChange();
+      }
     } catch (err) { }
   }
 
@@ -4914,6 +4918,7 @@ document.addEventListener("DOMContentLoaded", () => {
       window.openOrderModal = async function patchedOpenOrderModal(game) {
         const result = await orig.call(this, game);
         try {
+          if (!state.publicVouchers.length) await loadPublicVouchers();
           attachContactSmartFill();
           const productSel = document.getElementById("product");
           if (productSel) {

@@ -146,5 +146,7 @@ assert.match(html, /script\.js\?v=20260809-home-i18n-1/);
 assert.match(serviceWorker, /CACHE_VERSION = "20260809-home-i18n-v1"/);
 assert.match(script, /new CustomEvent\("ae:languagechange"\)/);
 assert.match(script, /els\.modal\?\.querySelectorAll\("\[data-i18n\]"\)/);
+assert.match(script, /if \(modal\?\.classList\.contains\("show"\)\) onProductChange\(\)/);
+assert.match(script, /if \(!state\.publicVouchers\.length\) await loadPublicVouchers\(\)/);
 
 console.log("Homepage UI/UX accessibility check passed.");
