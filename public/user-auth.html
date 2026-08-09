@@ -1050,6 +1050,9 @@
                     placeholder="Buat Password (Min. 12 Karakter)"
                     data-auth-placeholder="registerPasswordPlaceholder"
                     autocomplete="new-password"
+                    minlength="12"
+                    maxlength="72"
+                    required
                     aria-describedby="regPasswordError regStrengthLabel regCapsWarn"
                   />
                   <button
@@ -1495,7 +1498,7 @@
 
         return {
           usernameOk: username.length >= 3 && !/\s/.test(username),
-          passwordOk: password.length >= 6,
+          passwordOk: password.length >= 12 && password.length <= 72,
           termsOk: terms ? terms.checked : true,
         };
       }
@@ -1623,7 +1626,7 @@
         const lang = getSavedAuthLanguage();
         const dict = authTranslations[lang] || authTranslations.id;
 
-        if (username.length < 3 || password.length < 12) {
+        if (username.length < 3 || password.length < 12 || password.length > 72) {
           setAuthFieldError(
             "regUsername",
             "regUsernameError",
@@ -1632,7 +1635,11 @@
           setAuthFieldError(
             "regPassword",
             "regPasswordError",
-            password.length >= 6 ? "" : dict.passwordTooShort,
+            password.length < 12
+              ? dict.passwordTooShort
+              : password.length > 72
+                ? dict.passwordTooLong
+                : "",
           );
           document
             .getElementById(username.length < 3 ? "regUsername" : "regPassword")
@@ -1753,6 +1760,7 @@
           fillUsernamePassword: "Isi username dan password dulu ya.",
           requiredField: "Kolom ini wajib diisi.",
           passwordTooShort: "Password minimal 12 karakter.",
+          passwordTooLong: "Password maksimal 72 karakter.",
           verifying: "Memverifikasi...",
           registering: "Mendaftarkan...",
           failedLoginTitle: "Gagal Masuk",
@@ -1853,6 +1861,7 @@
           fillUsernamePassword: "Please enter username and password.",
           requiredField: "This field is required.",
           passwordTooShort: "Password must be at least 12 characters.",
+          passwordTooLong: "Password must not exceed 72 characters.",
           verifying: "Verifying...",
           registering: "Creating...",
           failedLoginTitle: "Login Failed",
