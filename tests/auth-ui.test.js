@@ -47,6 +47,9 @@ adminScripts.forEach(([, source]) =>
   'role="alert"',
   'autocomplete="current-password"',
   'prefers-reduced-motion: reduce',
+  '@media (max-width: 820px) and (max-height: 620px)',
+  '.field-error:empty, .form-status:empty',
+  'matchMedia("(min-width: 821px)").matches',
   'password: passwordInput.value',
 ].forEach((marker) =>
   assert.ok(admin.includes(marker), `Missing admin login UX marker: ${marker}`),
