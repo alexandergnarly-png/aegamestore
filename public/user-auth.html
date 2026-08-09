@@ -785,17 +785,26 @@
       .skip-link { border-radius: 2px; font-family: "DM Mono", monospace; }
       .top-bar,
       body.dark-theme .top-bar {
-        position: relative;
-        background: color-mix(in srgb, var(--bg-2) 94%, transparent);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
+        position: sticky;
+        background: rgba(255, 255, 252, .88);
+        box-shadow: 0 10px 32px rgba(17, 17, 17, .055);
+        backdrop-filter: blur(18px) saturate(140%);
+        -webkit-backdrop-filter: blur(18px) saturate(140%);
       }
+      body.dark-theme .top-bar { background: rgba(15, 15, 15, .88); }
       .top-bar-inner { min-height: 66px; padding-block: 10px; }
       .brand-mark {
-        border-radius: 3px;
+        border: 1px solid rgba(17, 17, 17, .16);
+        border-radius: 18px;
         font-family: "DM Mono", monospace;
         font-weight: 500;
       }
+      .brand-mark svg { width: 22px; height: 22px; fill: var(--surface); }
+      body.dark-theme .brand-mark {
+        background: var(--ink);
+        border-color: rgba(255, 255, 255, .16);
+      }
+      body.dark-theme .brand-mark svg { fill: var(--surface); }
       .brand-name { font-size: 16px; letter-spacing: -.04em; }
       .brand-sub,
       .hero-eyebrow,
@@ -807,9 +816,12 @@
         font-weight: 500;
       }
       .lang-switch,
-      .icon-btn { border-radius: 3px; }
+      .icon-btn {
+        border-radius: 999px;
+        box-shadow: 0 8px 22px rgba(17, 17, 17, .055);
+      }
       .lang-btn,
-      .icon-btn { border-radius: 2px; }
+      .icon-btn { border-radius: 999px; }
       .lang-btn:hover,
       .icon-btn:hover { transform: none; }
       .main {
@@ -976,7 +988,7 @@
       @media (max-width: 720px) {
         .top-bar-inner { min-height: 60px; padding: 8px 10px; }
         .brand { gap: 8px; }
-        .brand-mark { width: 42px; height: 42px; flex-basis: 42px; border-radius: 3px; }
+        .brand-mark { width: 42px; height: 42px; flex-basis: 42px; border-radius: 17px; }
         .top-actions { gap: 5px; }
         .lang-switch { padding: 2px; }
         .lang-btn,
@@ -1025,7 +1037,21 @@
       <header class="top-bar">
         <div class="top-bar-inner">
           <a href="/" class="brand" aria-label="AE Game Store home">
-            <div class="brand-mark" aria-hidden="true">AE</div>
+            <div class="brand-mark" aria-hidden="true">
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <rect x="2" y="5" width="20" height="2.5" rx="1.25" />
+                <rect x="1" y="2" width="22" height="2" rx="1" opacity=".7" />
+                <rect x="4" y="7.5" width="2.2" height="14.5" rx="1.1" />
+                <rect x="17.8" y="7.5" width="2.2" height="14.5" rx="1.1" />
+                <rect x="8" y="13" width="8" height="2" rx="1" opacity=".6" />
+              </svg>
+            </div>
             <div class="brand-text">
               <div class="brand-name">AE Game Store</div>
               <div class="brand-sub" data-auth-i18n="brandSub">
