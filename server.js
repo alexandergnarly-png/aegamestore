@@ -24,10 +24,12 @@ const { parseMidtransAmount, verifyMidtransSignature } = require("./server/midtr
 const { normalizeCatalogLabel, verifyCheatGameWebhook } = require("./server/cheatgame-utils");
 const { buildSupplierComparison, convertUsdToIdr, extractIdrRate } = require("./server/supplier-compare-utils");
 const { BUYER_BADGE_TIERS, getBuyerBadgeCode } = require("./server/buyer-policy");
+const { PostgresRateLimitStore } = require("./server/postgres-rate-limit-store");
 const {
-  decryptSecret,
+  decryptSecretWithKeys,
   encryptSecret,
   escapeCsvFormula,
+  rotateEncryptedSecret,
   totp,
   verifyTotp,
 } = require("./server/security-utils");
@@ -39,10 +41,28 @@ const port = process.env.PORT || 3000;
 const isMidtransProduction = process.env.MIDTRANS_IS_PRODUCTION === "true";
 const jwtSecret = String(process.env.JWT_SECRET || "").trim();
 const adminTotpSecret = String(process.env.ADMIN_TOTP_SECRET || "").trim();
-const gameKeyEncryptionKey = Buffer.from(
+const gameKeyEncryptionSecret = String(
+  process.env.GAME_KEY_ENCRYPTION_SECRET || "",
+).trim();
+const legacyGameKeyEncryptionKey = Buffer.from(
   crypto.hkdfSync("sha256", Buffer.from(jwtSecret), Buffer.alloc(0), "aegamestore-game-keys", 32),
 );
+const gameKeyEncryptionKey = gameKeyEncryptionSecret
+  ? Buffer.from(
+      crypto.hkdfSync(
+        "sha256",
+        Buffer.from(gameKeyEncryptionSecret),
+        Buffer.alloc(0),
+        "aegamestore-game-keys-v2",
+        32,
+      ),
+    )
+  : legacyGameKeyEncryptionKey;
+const gameKeyDecryptionKeys = gameKeyEncryptionSecret
+  ? [gameKeyEncryptionKey, legacyGameKeyEncryptionKey]
+  : [legacyGameKeyEncryptionKey];
 let isShuttingDown = false;
+let rateLimitCleanupTimer = null;
 const WALLET_MIN_TOPUP = 10000;
 const WALLET_MAX_TOPUP = 2000000;
 const WALLET_MAX_BALANCE = 10000000;
@@ -63,13 +83,48 @@ function getInlineScriptHashes() {
   return [...hashes];
 }
 
+function getInlineEventHandlerHashes() {
+  const files = fs.readdirSync(path.join(__dirname, "public"))
+    .filter((name) => name.endsWith(".html") || name.endsWith(".js"))
+    .map((name) => path.join(__dirname, "public", name))
+    .concat(path.join(__dirname, "views", "admin.html"));
+  const hashes = new Set();
+  for (const file of files) {
+    const html = fs.readFileSync(file, "utf8");
+    for (const match of html.matchAll(/\son[a-z]+\s*=\s*(["'])(.*?)\1/gis)) {
+      hashes.add(`'sha256-${crypto.createHash("sha256").update(match[2]).digest("base64")}'`);
+    }
+  }
+  return [...hashes];
+}
+
 const inlineScriptHashes = getInlineScriptHashes();
+const inlineEventHandlerHashes = getInlineEventHandlerHashes();
 
 if (!jwtSecret || jwtSecret.length < 32) {
   throw new Error("JWT_SECRET wajib diisi minimal 32 karakter");
 }
 if (adminTotpSecret && !totp(adminTotpSecret)) {
   throw new Error("ADMIN_TOTP_SECRET harus berupa Base32 yang valid");
+}
+if (gameKeyEncryptionSecret && gameKeyEncryptionSecret.length < 32) {
+  throw new Error("GAME_KEY_ENCRYPTION_SECRET wajib minimal 32 karakter");
+}
+
+function encryptGameKey(value) {
+  return encryptSecret(value, gameKeyEncryptionKey);
+}
+
+function decryptGameKey(value) {
+  return decryptSecretWithKeys(value, gameKeyDecryptionKeys);
+}
+
+function rotateGameKeyEncryption(value) {
+  return rotateEncryptedSecret(
+    value,
+    gameKeyEncryptionKey,
+    gameKeyDecryptionKeys.slice(1),
+  );
 }
 
 const snap = new midtransClient.Snap({
@@ -101,6 +156,20 @@ async function deleteExpiredAdminSessions() {
     ]);
   } catch (err) {
     console.error("ERROR DELETE EXPIRED ADMIN SESSIONS:", err);
+  }
+}
+
+async function migrateAdminSessionTokens() {
+  await adminSessionsTableReady;
+  const result = await query(
+    `SELECT id, session_token FROM admin_sessions
+     WHERE session_token !~ '^[a-f0-9]{64}$'`,
+  );
+  for (const row of result.rows) {
+    await query("UPDATE admin_sessions SET session_token = $1 WHERE id = $2", [
+      hashToken(row.session_token),
+      row.id,
+    ]);
   }
 }
 
@@ -154,7 +223,7 @@ const keysTableReady = db.query(
   console.log("Table keys ready");
 });
 
-db.query(
+const adminSessionsTableReady = db.query(
   `
   CREATE TABLE IF NOT EXISTS admin_sessions (
     id SERIAL PRIMARY KEY,
@@ -166,18 +235,47 @@ db.query(
 
   
     
-`,
-  (err) => {
-    if (err) {
-      console.error("CREATE TABLE admin_sessions ERROR:", err);
-    } else {
-      console.log("Table admin_sessions ready");
-    }
-  },
-);
+  `,
+).then(async () => {
+  await Promise.all([
+    db.query(`ALTER TABLE admin_sessions ADD COLUMN IF NOT EXISTS ip_address TEXT`),
+    db.query(`ALTER TABLE admin_sessions ADD COLUMN IF NOT EXISTS user_agent TEXT`),
+  ]);
+  console.log("Table admin_sessions ready");
+});
 
-db.query(`ALTER TABLE admin_sessions ADD COLUMN IF NOT EXISTS ip_address TEXT`);
-db.query(`ALTER TABLE admin_sessions ADD COLUMN IF NOT EXISTS user_agent TEXT`);
+const rateLimitBucketsReady = db.query(`
+  CREATE TABLE IF NOT EXISTS rate_limit_buckets (
+    bucket_key TEXT PRIMARY KEY,
+    hit_count INTEGER NOT NULL DEFAULT 0,
+    reset_at TIMESTAMPTZ NOT NULL
+  )
+`).then(() => db.query(
+  "CREATE INDEX IF NOT EXISTS idx_rate_limit_buckets_reset_at ON rate_limit_buckets(reset_at)",
+));
+
+async function cleanupExpiredRateLimits() {
+  await rateLimitBucketsReady;
+  await query(
+    "DELETE FROM rate_limit_buckets WHERE reset_at < NOW() - INTERVAL '1 day'",
+  );
+}
+
+function startRateLimitCleanup() {
+  rateLimitCleanupTimer = setInterval(() => {
+    cleanupExpiredRateLimits().catch((error) =>
+      console.error("RATE LIMIT CLEANUP ERROR:", error.message),
+    );
+  }, 6 * 60 * 60 * 1000);
+  if (typeof rateLimitCleanupTimer.unref === "function") {
+    rateLimitCleanupTimer.unref();
+  }
+}
+
+function stopRateLimitCleanup() {
+  if (rateLimitCleanupTimer) clearInterval(rateLimitCleanupTimer);
+  rateLimitCleanupTimer = null;
+}
 
 db.query(
   `
@@ -543,7 +641,7 @@ async function persistOrderKeys(
       [
         orderId,
         keyIds[index] || null,
-        encryptSecret(String(keys[index]), gameKeyEncryptionKey),
+        encryptGameKey(String(keys[index])),
         source,
         index + 1,
         createdAt,
@@ -579,7 +677,7 @@ async function allocateLocalKeysForOrder(dbClient, order) {
   }
 
   const keyIds = keyResult.rows.map((row) => Number(row.id));
-  const keys = keyResult.rows.map((row) => decryptSecret(row.key, gameKeyEncryptionKey));
+  const keys = keyResult.rows.map((row) => decryptGameKey(row.key));
   const lockResult = await dbClient.query(
     `UPDATE keys
      SET used = 1, reserved_order_id = NULL, reserved_until = NULL
@@ -612,13 +710,13 @@ async function getStoredOrderKeys(orderId, fallbackValue = "") {
   ).catch(() => ({ rows: [] }));
 
   const keys = stored.rows
-    .map((row) => decryptSecret(row.key_value, gameKeyEncryptionKey).trim())
+    .map((row) => decryptGameKey(row.key_value).trim())
     .filter(Boolean);
-  return keys.length ? keys : splitOrderKeys(decryptSecret(fallbackValue, gameKeyEncryptionKey));
+  return keys.length ? keys : splitOrderKeys(decryptGameKey(fallbackValue));
 }
 
 function decryptOrderRow(row) {
-  const gameKey = decryptSecret(row?.gamekey ?? row?.gameKey ?? "", gameKeyEncryptionKey);
+  const gameKey = decryptGameKey(row?.gamekey ?? row?.gameKey ?? "");
   return { ...row, gamekey: gameKey, gameKey };
 }
 
@@ -629,13 +727,16 @@ async function migrateEncryptedGameKeys() {
     for (const table of ["keys", "order_keys"]) {
       const column = table === "keys" ? "key" : "key_value";
       const rows = await client.query(
-        `SELECT id, ${column} AS value FROM ${table} WHERE ${column} NOT LIKE 'enc:v1:%' FOR UPDATE`,
+        `SELECT id, ${column} AS value FROM ${table} WHERE COALESCE(${column}, '') <> '' FOR UPDATE`,
       );
       for (const row of rows.rows) {
-        await client.query(`UPDATE ${table} SET ${column} = $1 WHERE id = $2`, [
-          encryptSecret(row.value, gameKeyEncryptionKey),
-          row.id,
-        ]);
+        const encrypted = rotateGameKeyEncryption(row.value);
+        if (encrypted !== row.value) {
+          await client.query(`UPDATE ${table} SET ${column} = $1 WHERE id = $2`, [
+            encrypted,
+            row.id,
+          ]);
+        }
       }
     }
 
@@ -644,15 +745,17 @@ async function migrateEncryptedGameKeys() {
        WHERE LOWER(COALESCE(delivery_status, '')) = 'delivered'
          AND COALESCE(gameKey, '') <> ''
          AND gameKey <> $1
-         AND gameKey NOT LIKE 'enc:v1:%'
        FOR UPDATE`,
       [MANUAL_COMPLETION_MARKER],
     );
     for (const order of orders.rows) {
-      await client.query("UPDATE orders SET gameKey = $1 WHERE id = $2", [
-        encryptSecret(order.value, gameKeyEncryptionKey),
-        order.id,
-      ]);
+      const encrypted = rotateGameKeyEncryption(order.value);
+      if (encrypted !== order.value) {
+        await client.query("UPDATE orders SET gameKey = $1 WHERE id = $2", [
+          encrypted,
+          order.id,
+        ]);
+      }
     }
     await client.query("COMMIT");
   } catch (error) {
@@ -1529,7 +1632,7 @@ async function claimVipStoreKeyForOrder(order, options = {}) {
     [orderId],
   );
   const claimedKeys = storedKeysResult.rows
-    .map((row) => decryptSecret(row.key_value, gameKeyEncryptionKey).trim())
+    .map((row) => decryptGameKey(row.key_value).trim())
     .filter(Boolean)
     .slice(0, quantity);
   const seenKeys = new Set(claimedKeys);
@@ -1723,7 +1826,7 @@ async function fulfillCheatGameOrder(order, source = "auto", payload = null) {
          supplier_order_id = COALESCE(NULLIF($3, ''), supplier_order_id), admin_note = $4
      WHERE id = $5 AND delivery_status IN ('processing_supplier', 'problem')`,
     [
-      encryptSecret(deliveredKeys.join("\n"), gameKeyEncryptionKey),
+      encryptGameKey(deliveredKeys.join("\n")),
       deliveredAt,
       supplierOrderId,
       `CHEATGAME delivery success (${source}).`,
@@ -2077,8 +2180,20 @@ db.query(
 );
 
 db.query(`CREATE INDEX IF NOT EXISTS idx_reviews_active ON reviews(active)`);
+
+function persistentRateLimit(prefix, options) {
+  return rateLimit({
+    ...options,
+    store: new PostgresRateLimitStore({
+      pool: db,
+      prefix,
+      ready: rateLimitBucketsReady,
+    }),
+  });
+}
+
 // limit umum (global)
-const globalLimiter = rateLimit({
+const globalLimiter = persistentRateLimit("global", {
   windowMs: 60 * 1000, // 1 menit
   max: 100, // max 100 request per menit per IP
   message: {
@@ -2087,7 +2202,7 @@ const globalLimiter = rateLimit({
 });
 
 // limit login admin (ketat)
-const loginLimiter = rateLimit({
+const loginLimiter = persistentRateLimit("admin-login", {
   windowMs: 60 * 1000,
   max: 5,
   handler: (req, res) => {
@@ -2099,7 +2214,7 @@ const loginLimiter = rateLimit({
 });
 
 // limit create order
-const orderLimiter = rateLimit({
+const orderLimiter = persistentRateLimit("create-order", {
   windowMs: 60 * 1000,
   max: 10, // max 10 order per menit
   message: {
@@ -2107,7 +2222,7 @@ const orderLimiter = rateLimit({
   },
 });
 
-const orderCheckLimiter = rateLimit({
+const orderCheckLimiter = persistentRateLimit("order-check", {
   windowMs: 60 * 1000,
   max: 30,
   message: {
@@ -2115,13 +2230,13 @@ const orderCheckLimiter = rateLimit({
   },
 });
 
-const webhookLimiter = rateLimit({
+const webhookLimiter = persistentRateLimit("webhook", {
   windowMs: 60 * 1000,
   max: 60,
   message: "Too many webhook requests",
 });
 
-const userAuthLimiter = rateLimit({
+const userAuthLimiter = persistentRateLimit("user-login", {
   windowMs: 15 * 60 * 1000,
   max: 20,
   message: {
@@ -2129,7 +2244,7 @@ const userAuthLimiter = rateLimit({
   },
 });
 
-const registerLimiter = rateLimit({
+const registerLimiter = persistentRateLimit("register", {
   windowMs: 60 * 60 * 1000,
   max: 5,
   message: {
@@ -2137,7 +2252,7 @@ const registerLimiter = rateLimit({
   },
 });
 
-const reviewLimiter = rateLimit({
+const reviewLimiter = persistentRateLimit("review", {
   windowMs: 60 * 1000,
   max: 5,
   message: {
@@ -2145,7 +2260,7 @@ const reviewLimiter = rateLimit({
   },
 });
 
-const changePasswordLimiter = rateLimit({
+const changePasswordLimiter = persistentRateLimit("change-password", {
   windowMs: 15 * 60 * 1000,
   max: 5,
   message: {
@@ -2154,7 +2269,7 @@ const changePasswordLimiter = rateLimit({
   },
 });
 
-const voucherPreviewLimiter = rateLimit({
+const voucherPreviewLimiter = persistentRateLimit("voucher-preview", {
   windowMs: 60 * 1000,
   max: 20,
   message: {
@@ -2162,7 +2277,7 @@ const voucherPreviewLimiter = rateLimit({
   },
 });
 
-const userProfileLimiter = rateLimit({
+const userProfileLimiter = persistentRateLimit("user-profile", {
   windowMs: 60 * 1000,
   max: 20,
   message: {
@@ -2170,7 +2285,7 @@ const userProfileLimiter = rateLimit({
   },
 });
 
-const emailVerificationLimiter = rateLimit({
+const emailVerificationLimiter = persistentRateLimit("email-verification", {
   windowMs: 15 * 60 * 1000,
   max: 5,
   message: {
@@ -2180,6 +2295,7 @@ const emailVerificationLimiter = rateLimit({
 
 async function isAdminLoggedIn(req) {
   const sessionToken = String(req.cookies.admin_auth || "").trim();
+  const sessionTokenHash = sessionToken ? hashToken(sessionToken) : "";
   const userAgent = String(req.headers["user-agent"] || "").slice(0, 255);
 
   if (!sessionToken || !userAgent) {
@@ -2193,7 +2309,7 @@ async function isAdminLoggedIn(req) {
              AND expires_at > $2
              AND user_agent = $3
              LIMIT 1`,
-      [sessionToken, new Date().toISOString(), userAgent],
+      [sessionTokenHash, new Date().toISOString(), userAgent],
     );
 
     return result.rows.length > 0;
@@ -2445,7 +2561,7 @@ async function getAdminSessionUsername(req) {
   const result = await query(
     `SELECT username FROM admin_sessions
      WHERE session_token = $1 AND expires_at > $2 LIMIT 1`,
-    [sessionToken, new Date().toISOString()],
+    [hashToken(sessionToken), new Date().toISOString()],
   );
   return String(result.rows[0]?.username || "admin").slice(0, 120);
 }
@@ -2462,7 +2578,7 @@ async function settleWalletVipOrder(orderId) {
     const claim = await claimVipStoreKeyForOrder(order, { source: "ae_credit" });
     const deliveredAt = new Date().toISOString();
     await persistOrderKeys(db, { orderId, keys: claim.keys, source: "vipstore" });
-    await query(`UPDATE orders SET delivery_status = 'delivered', gameKey = $1, delivered_at = $2, admin_note = $3 WHERE id = $4 AND delivery_status = 'processing_supplier'`, [encryptSecret(claim.key, gameKeyEncryptionKey), deliveredAt, `Supplier claim success. Product #${claim.supplier_product_id}.`, orderId]);
+    await query(`UPDATE orders SET delivery_status = 'delivered', gameKey = $1, delivered_at = $2, admin_note = $3 WHERE id = $4 AND delivery_status = 'processing_supplier'`, [encryptGameKey(claim.key), deliveredAt, `Supplier claim success. Product #${claim.supplier_product_id}.`, orderId]);
     await query(`UPDATE products SET supplier_stock = GREATEST(COALESCE(supplier_stock, 0) - $1, 0), supplier_last_sync = $2 WHERE id = $3 AND LOWER(COALESCE(delivery_type, 'auto')) = 'vipstore_api'`, [getOrderQuantity(order.quantity), deliveredAt, order.product_id]);
   } catch (err) {
     console.error("AE CREDIT VIPSTORE CLAIM ERROR:", err.message);
@@ -3398,7 +3514,7 @@ app.use(
           "https://app.midtrans.com",
           "https://app.sandbox.midtrans.com",
         ],
-        "script-src-attr": ["'unsafe-inline'"],
+        "script-src-attr": ["'unsafe-hashes'", ...inlineEventHandlerHashes],
         "style-src": [
           "'self'",
           "'unsafe-inline'",
@@ -3431,7 +3547,8 @@ app.use(
         "font-src": ["'self'", "data:", "https://fonts.gstatic.com"],
         "object-src": ["'none'"],
         "base-uri": ["'self'"],
-        "frame-ancestors": ["'self'"],
+        "frame-ancestors": ["'none'"],
+        "form-action": ["'self'"],
       },
     },
   }),
@@ -3721,7 +3838,7 @@ app.post("/admin-login", loginLimiter, async (req, res) => {
     (session_token, username, created_at, expires_at, ip_address, user_agent)
    VALUES ($1, $2, $3, $4, $5, $6)`,
         [
-          sessionToken,
+          hashToken(sessionToken),
           cleanUsername,
           createdAt.toISOString(),
           expiresAt.toISOString(),
@@ -3774,7 +3891,7 @@ app.post(
     try {
       if (sessionToken) {
         await query("DELETE FROM admin_sessions WHERE session_token = $1", [
-          sessionToken,
+          hashToken(sessionToken),
         ]);
       }
 
@@ -3815,7 +3932,7 @@ app.post(
         WHERE session_token <> $1
         RETURNING id
         `,
-        [currentToken],
+        [hashToken(currentToken)],
       );
 
       return res.json({
@@ -3853,7 +3970,7 @@ app.get("/api/admin/me", requireAdminAuth, async (req, res) => {
         AND expires_at > $2
       LIMIT 1
       `,
-      [sessionToken, new Date().toISOString()],
+      [hashToken(sessionToken), new Date().toISOString()],
     );
 
     const session = result.rows[0];
@@ -4551,7 +4668,7 @@ app.post(
              AND delivery_status = $6`,
           [
             "delivered",
-            encryptSecret(claim.key, gameKeyEncryptionKey),
+            encryptGameKey(claim.key),
             deliveredAt,
             `Supplier retry success. Product #${claim.supplier_product_id}.`,
             orderId,
@@ -5508,7 +5625,7 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
             deliveryError.statusCode = 409;
             throw deliveryError;
           }
-          await client.query(`UPDATE orders SET delivery_status = 'delivered', gameKey = $1, delivered_at = $2 WHERE id = $3`, [encryptSecret(deliveredKeys.join("\n"), gameKeyEncryptionKey), createdAt, orderId]);
+          await client.query(`UPDATE orders SET delivery_status = 'delivered', gameKey = $1, delivered_at = $2 WHERE id = $3`, [encryptGameKey(deliveredKeys.join("\n")), createdAt, orderId]);
         } else if (productDeliveryType === "manual") {
           await client.query(`UPDATE orders SET gameKey = $1, admin_note = $2 WHERE id = $3`, ["MANUAL DELIVERY - HUBUNGI ADMIN", "Saldo AE Credit diterima; key diproses manual.", orderId]);
         } else if (isSupplierDeliveryType(productDeliveryType)) {
@@ -5802,7 +5919,7 @@ app.post("/midtrans-notification", webhookLimiter, async (req, res) => {
                  AND delivery_status = $6`,
               [
                 "delivered",
-                encryptSecret(claim.key, gameKeyEncryptionKey),
+                encryptGameKey(claim.key),
                 deliveredAt,
                 `Supplier claim success. Product #${claim.supplier_product_id}.`,
                 orderId,
@@ -5888,7 +6005,7 @@ app.post("/midtrans-notification", webhookLimiter, async (req, res) => {
                gameKey = $3,
                delivered_at = $4
            WHERE id = $5`,
-          ["paid", "delivered", encryptSecret(deliveredKeys.join("\n"), gameKeyEncryptionKey), new Date().toISOString(), orderId],
+          ["paid", "delivered", encryptGameKey(deliveredKeys.join("\n")), new Date().toISOString(), orderId],
         );
 
         await client.query("COMMIT");
@@ -6210,7 +6327,7 @@ app.post(
                AND delivery_status = $6`,
             [
               "delivered",
-              encryptSecret(claim.key, gameKeyEncryptionKey),
+              encryptGameKey(claim.key),
               deliveredAt,
               `Supplier claim success via admin confirm. Product #${claim.supplier_product_id}.`,
               orderId,
@@ -6296,7 +6413,7 @@ app.post(
              gameKey = $3,
              delivered_at = $4
          WHERE id = $5`,
-        ["paid", "delivered", encryptSecret(deliveredKeys.join("\n"), gameKeyEncryptionKey), new Date().toISOString(), orderId],
+        ["paid", "delivered", encryptGameKey(deliveredKeys.join("\n")), new Date().toISOString(), orderId],
       );
 
       await client.query("COMMIT");
@@ -6927,7 +7044,7 @@ app.post(
              delivered_at = $3,
              admin_note = COALESCE(NULLIF($4, ''), admin_note)
          WHERE id = $5`,
-        [encryptSecret(gameKeys.join("\n"), gameKeyEncryptionKey), "delivered", new Date().toISOString(), note, orderId],
+        [encryptGameKey(gameKeys.join("\n")), "delivered", new Date().toISOString(), note, orderId],
       );
       await client.query("COMMIT");
 
@@ -7162,7 +7279,7 @@ app.get("/keys", requireAdminAuth, async (req, res) => {
 
     return res.json(result.rows.map((row) => ({
       ...row,
-      key: decryptSecret(row.key, gameKeyEncryptionKey),
+      key: decryptGameKey(row.key),
     })));
   } catch (err) {
     console.error("ERROR GET KEYS:", err);
@@ -7202,7 +7319,7 @@ app.post("/keys", requireAdminAuth, requireAdminCsrf, async (req, res) => {
 
     const result = await query(
       "INSERT INTO keys (product_id, key, used) VALUES ($1, $2, 0) RETURNING id",
-      [cleanProductId, encryptSecret(cleanKey, gameKeyEncryptionKey)],
+      [cleanProductId, encryptGameKey(cleanKey)],
     );
 
     return res.json({
@@ -7267,7 +7384,7 @@ app.post("/keys/bulk", requireAdminAuth, requireAdminCsrf, async (req, res) => {
     const placeholders = cleanKeys
       .map((key, index) => {
         const base = index * 2;
-        values.push(cleanProductId, encryptSecret(key, gameKeyEncryptionKey));
+        values.push(cleanProductId, encryptGameKey(key));
         return `($${base + 1}, $${base + 2}, 0)`;
       })
       .join(", ");
@@ -8537,7 +8654,7 @@ app.get("/api/wallet", async (req, res) => {
   }
 });
 
-const walletTopupLimiter = rateLimit({
+const walletTopupLimiter = persistentRateLimit("wallet-topup", {
   windowMs: 15 * 60 * 1000,
   max: 8,
   message: { message: "Terlalu banyak request top up, coba lagi nanti" },
@@ -8992,9 +9109,13 @@ app.get("/security-audit", requireAdminAuth, async (req, res) => {
     helmet: true,
     csrf_admin_actions: true,
     rate_limit: true,
+    rate_limit_store: "postgresql",
     password_hashing: true,
     admin_mfa_configured: Boolean(adminTotpSecret),
     game_keys_encrypted: true,
+    dedicated_game_key_secret: Boolean(gameKeyEncryptionSecret),
+    admin_session_tokens_hashed: true,
+    csp_inline_handlers_hashed: true,
     jwt_secret_configured: Boolean(jwtSecret && jwtSecret.length >= 32),
     midtrans_production: isMidtransProduction,
     notes: [
@@ -9107,7 +9228,7 @@ app.get("/admin-sessions", requireAdminAuth, async (req, res) => {
       WHERE expires_at > $2
       ORDER BY created_at DESC
       `,
-      [currentToken, new Date().toISOString()],
+      [hashToken(currentToken), new Date().toISOString()],
     );
 
     return res.json(result.rows);
@@ -9122,13 +9243,28 @@ app.get("/admin-sessions", requireAdminAuth, async (req, res) => {
 let server = null;
 
 async function startApplication() {
-  await bulkOrderSchemaReady;
+  await Promise.all([
+    bulkOrderSchemaReady,
+    keysTableReady,
+    ordersTableReady,
+    adminSessionsTableReady,
+    rateLimitBucketsReady,
+  ]);
+  await migrateAdminSessionTokens();
   await migrateEncryptedGameKeys();
+  await cleanupExpiredRateLimits();
+
+  if (!gameKeyEncryptionSecret) {
+    console.warn(
+      "SECURITY WARNING: GAME_KEY_ENCRYPTION_SECRET belum diisi; sementara memakai legacy JWT key.",
+    );
+  }
 
   if (isShuttingDown) return;
 
   server = app.listen(port, () => {
     console.log("Server jalan di port", port);
+    startRateLimitCleanup();
     startVipStoreAutoSync();
     startDormantAccountCleanup();
   });
@@ -9150,6 +9286,7 @@ async function shutdown(signal) {
   if (isShuttingDown) return;
 
   isShuttingDown = true;
+  stopRateLimitCleanup();
   stopVipStoreAutoSync();
   stopDormantAccountCleanup();
   console.log(`${signal} diterima, memulai graceful shutdown`);

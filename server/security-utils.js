@@ -25,6 +25,33 @@ function decryptSecret(value, key) {
   ]).toString("utf8");
 }
 
+function decryptSecretWithKeys(value, keys) {
+  const candidates = [...new Set((keys || []).filter(Boolean))];
+  let lastError;
+  for (const key of candidates) {
+    try {
+      return decryptSecret(value, key);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  if (lastError) throw lastError;
+  return decryptSecret(value, null);
+}
+
+function rotateEncryptedSecret(value, primaryKey, fallbackKeys = []) {
+  const text = String(value || "");
+  if (!text) return text;
+  if (text.startsWith(ENCRYPTED_PREFIX)) {
+    try {
+      decryptSecret(text, primaryKey);
+      return text;
+    } catch (_) {}
+  }
+  const plaintext = decryptSecretWithKeys(text, [primaryKey, ...fallbackKeys]);
+  return encryptSecret(plaintext, primaryKey);
+}
+
 function decodeBase32(value) {
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
   const input = String(value || "").toUpperCase().replace(/[\s-]/g, "").replace(/=+$/, "");
@@ -65,8 +92,10 @@ function escapeCsvFormula(value) {
 
 module.exports = {
   decryptSecret,
+  decryptSecretWithKeys,
   encryptSecret,
   escapeCsvFormula,
+  rotateEncryptedSecret,
   totp,
   verifyTotp,
 };
