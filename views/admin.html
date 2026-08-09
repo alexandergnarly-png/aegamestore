@@ -3080,6 +3080,167 @@
         }
       }
 
+      /* User Monitor: compact Nothing UI control surface. */
+      #section-users .user-control-deck {
+        display: grid;
+        grid-template-columns: minmax(260px, 1fr) auto;
+        align-items: end;
+        gap: 8px;
+        margin-bottom: 12px;
+        padding: 8px;
+        border: 1px solid var(--line);
+        border-radius: 3px;
+        background: var(--surface-2);
+      }
+
+      #section-users .user-control-label {
+        display: block;
+        margin-bottom: 6px;
+        color: var(--muted);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+      }
+
+      #section-users .user-control-deck input,
+      #section-users .user-badge-grid input,
+      #section-users .user-badge-grid select {
+        width: 100%;
+        min-width: 0;
+        min-height: 48px;
+        border-radius: 2px;
+        background: var(--surface);
+      }
+
+      #section-users .user-control-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(112px, auto));
+        gap: 8px;
+      }
+
+      #section-users .user-control-actions button {
+        width: auto;
+        min-height: 48px;
+        margin: 0;
+        border-radius: 2px;
+        white-space: nowrap;
+      }
+
+      #section-users .user-badge-lab {
+        margin-bottom: 16px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 3px;
+        background: var(--surface);
+      }
+
+      #section-users .user-badge-lab > summary {
+        min-height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 12px 14px;
+        color: var(--ink);
+        cursor: pointer;
+        list-style: none;
+        touch-action: manipulation;
+      }
+
+      #section-users .user-badge-lab > summary::-webkit-details-marker {
+        display: none;
+      }
+
+      #section-users .user-badge-lab > summary::after {
+        content: "+";
+        width: 32px;
+        height: 32px;
+        flex: 0 0 32px;
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--line-strong);
+        border-radius: 2px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 18px;
+        font-weight: 800;
+      }
+
+      #section-users .user-badge-lab[open] > summary::after {
+        content: "−";
+      }
+
+      #section-users .user-badge-summary-copy {
+        min-width: 0;
+        display: grid;
+        gap: 3px;
+      }
+
+      #section-users .user-badge-summary-copy strong {
+        font-size: 14px;
+        font-weight: 900;
+      }
+
+      #section-users .user-badge-summary-copy small {
+        color: var(--muted);
+        font-size: 11px;
+        line-height: 1.4;
+      }
+
+      #section-users .user-badge-body {
+        padding: 14px;
+        border-top: 1px solid var(--line);
+      }
+
+      #section-users .user-badge-grid {
+        display: grid;
+        grid-template-columns: minmax(220px, 1fr) repeat(2, minmax(160px, 0.45fr));
+        gap: 8px;
+      }
+
+      #section-users .user-badge-note {
+        margin: 10px 0 12px;
+        padding-left: 10px;
+        border-left: 2px solid var(--line-strong);
+        font-size: 12px;
+        line-height: 1.55;
+      }
+
+      @media (max-width: 768px) {
+        #section-users .card {
+          padding-bottom: calc(104px + var(--safe-bottom));
+          border-radius: 3px;
+        }
+
+        #section-users .user-control-deck {
+          grid-template-columns: 1fr;
+        }
+
+        #section-users .user-control-actions,
+        #section-users .user-badge-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        #section-users .user-control-actions button {
+          width: 100%;
+          min-width: 0;
+        }
+
+        #section-users .user-badge-search {
+          grid-column: 1 / -1;
+        }
+
+        #section-users .user-badge-body {
+          padding: 12px;
+        }
+
+        #section-users tbody tr {
+          border-radius: 3px;
+          box-shadow: none;
+        }
+      }
+
 
     </style>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -3875,86 +4036,99 @@
             <div class="section-badge">User Monitor</div>
           </div>
 
-          <div class="toolbar user-toolbar">
+          <div class="user-control-deck">
             <div class="field user-search-field">
+              <label class="user-control-label" for="userSearchInput">Cari buyer</label>
               <input
                 type="text"
                 id="userSearchInput"
-                placeholder="Cari username buyer..."
+                placeholder="Username buyer"
                 autocomplete="off"
                 oninput="renderUserTable()"
               />
             </div>
 
-            <div class="btn-group">
-              <button type="button" onclick="loadUsers()">Refresh User</button>
+            <div class="user-control-actions" aria-label="Aksi daftar user">
+              <button type="button" onclick="loadUsers()">Muat ulang</button>
               <button
                 type="button"
                 class="ghost-btn"
                 onclick="clearUserSearch()"
               >
-                Reset
+                Bersihkan
               </button>
             </div>
           </div>
 
-          <div class="toolbar user-toolbar">
-            <div class="field user-search-field">
-              <input
-                type="text"
-                id="badgeOverrideSearchInput"
-                placeholder="Cari username untuk test badge..."
-                autocomplete="off"
-                oninput="renderBadgeOverrideMatches()"
-              />
+          <details class="user-badge-lab">
+            <summary>
+              <span class="user-badge-summary-copy">
+                <strong>Test badge sementara</strong>
+                <small>Owner only · buka saat diperlukan</small>
+              </span>
+            </summary>
+
+            <div class="user-badge-body">
+              <div class="user-badge-grid">
+                <div class="field user-badge-search">
+                  <label class="user-control-label" for="badgeOverrideSearchInput">Akun test</label>
+                  <input
+                    type="text"
+                    id="badgeOverrideSearchInput"
+                    placeholder="Username untuk test badge"
+                    autocomplete="off"
+                    oninput="renderBadgeOverrideMatches()"
+                  />
+                </div>
+
+                <div class="field">
+                  <label class="user-control-label" for="badgeOverrideSelect">Badge</label>
+                  <select id="badgeOverrideSelect">
+                    <option value="prestige">Prestige</option>
+                    <option value="sovereign">Sovereign</option>
+                    <option value="prime">Vanguard</option>
+                    <option value="verified">Verified</option>
+                    <option value="advocate">Advocate</option>
+                    <option value="entry">Rookie</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label class="user-control-label" for="badgeOverrideExpires">Masa berlaku</label>
+                  <select id="badgeOverrideExpires">
+                    <option value="1d">1 hari</option>
+                    <option value="7d">7 hari</option>
+                    <option value="manual">Manual</option>
+                  </select>
+                </div>
+              </div>
+
+              <p class="info user-badge-note">
+                Gunakan hanya untuk akun test. Override akan berakhir otomatis
+                sesuai masa berlaku.
+              </p>
+
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>User</th>
+                      <th>Badge Sekarang</th>
+                      <th>Override</th>
+                      <th>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="badgeOverrideTableBody">
+                    <tr>
+                      <td colspan="4" class="empty">
+                        Cari username buyer untuk testing badge.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
-
-            <div class="field">
-              <select id="badgeOverrideSelect">
-                <option value="prestige">✧ Prestige</option>
-                <option value="sovereign">♛ Sovereign</option>
-                <option value="prime">✦ Prime</option>
-                <option value="verified">◆ Verified</option>
-                <option value="advocate">★ Advocate</option>
-                <option value="entry">◇ Entry</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <select id="badgeOverrideExpires">
-                <option value="1d">Expired 1 hari</option>
-                <option value="7d">Expired 7 hari</option>
-                <option value="manual">Manual reset</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="info-row">
-            <p class="info">
-              Owner testing: pakai ini untuk kasih badge sementara ke akun test.
-              Reset setelah selesai test.
-            </p>
-          </div>
-
-          <div class="table-wrap" style="margin-bottom: 16px">
-            <table>
-              <thead>
-                <tr>
-                  <th>User</th>
-                  <th>Badge Sekarang</th>
-                  <th>Override</th>
-                  <th>Aksi</th>
-                </tr>
-              </thead>
-              <tbody id="badgeOverrideTableBody">
-                <tr>
-                  <td colspan="4" class="empty">
-                    Cari username buyer untuk testing badge.
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          </details>
 
           <div class="info-row">
             <div class="info" id="userStatusText">Memuat daftar user...</div>

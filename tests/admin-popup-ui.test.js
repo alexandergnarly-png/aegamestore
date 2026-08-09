@@ -35,6 +35,11 @@ scripts.forEach(([, source]) =>
   'class="order-advanced-panel"',
   "Mobile order control: one primary search, compact stats, advanced on demand.",
   ".order-filter-toolbar .order-desktop-search",
+  'class="user-control-deck"',
+  'class="user-badge-lab"',
+  'for="userSearchInput"',
+  "#section-users .user-control-actions",
+  "padding-bottom: calc(104px + var(--safe-bottom))",
 ].forEach((marker) =>
   assert.ok(admin.includes(marker), `Missing admin popup marker: ${marker}`),
 );
