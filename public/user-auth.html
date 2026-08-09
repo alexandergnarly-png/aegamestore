@@ -6,7 +6,7 @@
     <title>Masuk / Daftar - AE Game Store</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
     <style>
@@ -735,6 +735,285 @@
         }
       }
 
+      /* Nothing UI auth refresh — aligned with DESIGN.md. */
+      :root {
+        --bg: #ecece4;
+        --bg-2: #f7f7f1;
+        --surface: #f7f7f1;
+        --surface-2: #deded7;
+        --surface-3: #c6c6be;
+        --ink: #0b0b0a;
+        --ink-2: #0b0b0a;
+        --muted: #666661;
+        --line: #c6c6be;
+        --line-strong: #0b0b0a;
+        --shadow: none;
+        --shadow-sm: none;
+        --radius-xl: 4px;
+        --radius-lg: 3px;
+        --radius-md: 3px;
+        --radius-sm: 3px;
+        --pill: 3px;
+      }
+      body.dark-theme {
+        --bg: #080808;
+        --bg-2: #101010;
+        --surface: #101010;
+        --surface-2: #181818;
+        --surface-3: #2a2a27;
+        --ink: #f7f7f1;
+        --ink-2: #f7f7f1;
+        --muted: #a2a29c;
+        --line: #2a2a27;
+        --line-strong: #f7f7f1;
+      }
+      body {
+        min-height: 100dvh;
+        font-family: "Space Grotesk", system-ui, sans-serif;
+        background:
+          linear-gradient(var(--line) 1px, transparent 1px) 0 0 / 48px 48px,
+          linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0 / 48px 48px,
+          var(--bg);
+      }
+      body.dark-theme {
+        background:
+          linear-gradient(var(--line) 1px, transparent 1px) 0 0 / 48px 48px,
+          linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0 / 48px 48px,
+          var(--bg);
+      }
+      :focus-visible { border-radius: 2px; outline-width: 2px; }
+      .skip-link { border-radius: 2px; font-family: "DM Mono", monospace; }
+      .top-bar,
+      body.dark-theme .top-bar {
+        position: relative;
+        background: color-mix(in srgb, var(--bg-2) 94%, transparent);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
+      .top-bar-inner { min-height: 66px; padding-block: 10px; }
+      .brand-mark {
+        border-radius: 3px;
+        font-family: "DM Mono", monospace;
+        font-weight: 500;
+      }
+      .brand-name { font-size: 16px; letter-spacing: -.04em; }
+      .brand-sub,
+      .hero-eyebrow,
+      .input-label,
+      .divider,
+      .password-requirements-head small,
+      .password-rule-state {
+        font-family: "DM Mono", monospace;
+        font-weight: 500;
+      }
+      .lang-switch,
+      .icon-btn { border-radius: 3px; }
+      .lang-btn,
+      .icon-btn { border-radius: 2px; }
+      .lang-btn:hover,
+      .icon-btn:hover { transform: none; }
+      .main {
+        padding-top: 24px;
+        grid-template-columns: minmax(0, 1.08fr) minmax(390px, .92fr);
+        gap: 12px;
+      }
+      .hero,
+      .auth-card {
+        min-height: 610px;
+        border-radius: 4px;
+        background: var(--bg-2);
+        box-shadow: none;
+      }
+      body.dark-theme .hero,
+      body.dark-theme .auth-card { background: var(--bg-2); }
+      .hero {
+        position: relative;
+        padding: 32px;
+        overflow: hidden;
+      }
+      .hero::before {
+        content: "AE // MEMBER ACCESS";
+        position: absolute;
+        top: 0;
+        right: 0;
+        padding: 8px 10px;
+        border-left: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+        background: var(--surface-2);
+        color: var(--muted);
+        font: 500 10px/1 "DM Mono", monospace;
+        letter-spacing: .08em;
+      }
+      .hero-eyebrow {
+        min-height: 32px;
+        border-radius: 2px;
+        letter-spacing: .1em;
+      }
+      .pulse { border-radius: 1px; }
+      .hero-title {
+        max-width: 580px;
+        font-size: clamp(48px, 6vw, 78px);
+        line-height: .92;
+        letter-spacing: -.075em;
+        font-weight: 700;
+      }
+      .hero-title .grad {
+        display: block;
+        color: transparent;
+        -webkit-text-stroke: 1.5px var(--ink-2);
+      }
+      .hero-desc { font-size: 16px; line-height: 1.65; }
+      .hero-features { gap: 8px; }
+      .hero-feature {
+        min-height: 156px;
+        padding: 14px;
+        border-radius: 3px;
+      }
+      .hero-feature-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 2px;
+        font-size: 20px;
+      }
+      .hero-feature-title { font-size: 14px; }
+      .hero-feature-desc { font-size: 12px; }
+      .ava { border-radius: 2px; font-family: "DM Mono", monospace; }
+      .auth-card { padding: 16px; }
+      .auth-tabs {
+        padding: 3px;
+        border-radius: 3px;
+        background: var(--surface-2);
+      }
+      .auth-tab-indicator,
+      .auth-tab { border-radius: 2px; }
+      .auth-tab { min-height: 46px; font-size: 14px; }
+      .auth-head {
+        grid-template-columns: 44px 1fr;
+        justify-items: start;
+        gap: 2px 12px;
+        padding: 6px 2px 20px;
+        text-align: left;
+      }
+      .auth-emoji {
+        grid-row: 1 / 3;
+        width: 44px;
+        height: 44px;
+        border-radius: 3px;
+        font-family: "DM Mono", monospace;
+        font-weight: 500;
+      }
+      .auth-title {
+        align-self: end;
+        font-size: 27px;
+        letter-spacing: -.055em;
+        font-weight: 700;
+      }
+      .auth-subtitle {
+        align-self: start;
+        max-width: 42ch;
+        font-size: 13px;
+      }
+      .input-group { margin-bottom: 16px; }
+      .input-label { color: var(--ink); letter-spacing: .1em; }
+      .input-group input {
+        min-height: 56px;
+        border-radius: 3px;
+        background: var(--surface);
+        font-size: 16px;
+        font-weight: 600;
+      }
+      .input-group input:focus,
+      body.dark-theme .input-group input:focus {
+        box-shadow: 4px 4px 0 var(--line-strong);
+      }
+      .password-toggle-btn { border-radius: 2px; }
+      .field-error,
+      .input-hint,
+      .strength-label { font-size: 12px; }
+      .password-requirements,
+      .caps-warning,
+      .auth-tip { border-radius: 3px; }
+      .password-requirement-copy::before,
+      .strength-bar { border-radius: 1px; }
+      .checkbox-row input { border-radius: 2px; }
+      .btn-primary {
+        min-height: 54px;
+        border: 1px solid var(--ink);
+        border-radius: 3px;
+        font-family: "DM Mono", monospace;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+      }
+      .btn-primary:hover:not(:disabled) {
+        transform: none;
+        box-shadow: 4px 4px 0 var(--muted);
+      }
+      .btn-primary:active:not(:disabled) { box-shadow: 2px 2px 0 var(--muted); }
+      .auth-mini-benefits { gap: 6px; }
+      .auth-mini-benefit {
+        min-height: 54px;
+        border-radius: 3px;
+        font-family: "DM Mono", monospace;
+        font-size: 10px;
+        font-weight: 500;
+      }
+      .auth-mini-benefit iconify-icon { font-size: 18px; }
+      .back-link {
+        border-radius: 3px;
+        font-family: "DM Mono", monospace;
+      }
+      .swal2-popup,
+      .swal2-confirm,
+      .swal2-cancel,
+      .swal2-deny { border-radius: 3px !important; }
+
+      @media (max-width: 920px) {
+        .main { grid-template-columns: 1fr; }
+        .hero { min-height: auto; }
+        .auth-card { min-height: auto; }
+      }
+      @media (max-width: 720px) {
+        .top-bar-inner { min-height: 60px; padding: 8px 10px; }
+        .brand { gap: 8px; }
+        .brand-mark { width: 42px; height: 42px; flex-basis: 42px; border-radius: 3px; }
+        .top-actions { gap: 5px; }
+        .lang-switch { padding: 2px; }
+        .lang-btn,
+        .icon-btn { min-height: 42px; height: 42px; }
+        .main { padding: 8px 8px 18px; }
+        .auth-card { padding: 12px; border-radius: 3px; }
+        .auth-tabs { margin-bottom: 16px; }
+        .auth-head { padding: 2px 0 18px; }
+        .auth-emoji { width: 42px; height: 42px; border-radius: 3px; }
+        .auth-title { font-size: 24px; }
+        .auth-subtitle { font-size: 13px; }
+        .input-group input { min-height: 54px; }
+        .auth-mini-benefits {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          margin-top: 16px;
+        }
+        .auth-mini-benefit {
+          min-height: 64px;
+          grid-template-columns: 1fr;
+          justify-items: center;
+          padding: 8px 4px;
+          text-align: center;
+        }
+      }
+      @media (max-width: 390px) {
+        .brand-text { display: none; }
+        .form-row { align-items: center; flex-direction: row; }
+        .checkbox-row,
+        .forgot-link { font-size: 12px; }
+        .auth-title { font-size: 22px; }
+        .auth-subtitle { font-size: 12px; }
+      }
+      @media (max-width: 340px) {
+        .main { padding-inline: 4px; }
+        .auth-card { padding-inline: 10px; }
+      }
+
     </style>
   </head>
 <body onload="applyAuthLanguage()">
@@ -810,7 +1089,9 @@
 
           <div class="hero-features">
             <div class="hero-feature">
-              <div class="hero-feature-icon" aria-hidden="true">01</div>
+              <div class="hero-feature-icon" aria-hidden="true">
+                <iconify-icon icon="ph:lightning-bold"></iconify-icon>
+              </div>
               <div>
                 <div
                   class="hero-feature-title"
@@ -827,7 +1108,9 @@
               </div>
             </div>
             <div class="hero-feature">
-              <div class="hero-feature-icon" aria-hidden="true">02</div>
+              <div class="hero-feature-icon" aria-hidden="true">
+                <iconify-icon icon="ph:shield-check-bold"></iconify-icon>
+              </div>
               <div>
                 <div
                   class="hero-feature-title"
@@ -844,7 +1127,9 @@
               </div>
             </div>
             <div class="hero-feature">
-              <div class="hero-feature-icon" aria-hidden="true">03</div>
+              <div class="hero-feature-icon" aria-hidden="true">
+                <iconify-icon icon="ph:ticket-bold"></iconify-icon>
+              </div>
               <div>
                 <div
                   class="hero-feature-title"
@@ -1255,15 +1540,15 @@
 
             <div class="auth-mini-benefits" aria-label="Login benefits">
               <div class="auth-mini-benefit">
-                <span aria-hidden="true">01</span>
+                <iconify-icon icon="ph:lightning-bold" aria-hidden="true"></iconify-icon>
                 <b data-auth-i18n="benefitInstant">Instant Delivery</b>
               </div>
               <div class="auth-mini-benefit">
-                <span aria-hidden="true">02</span>
+                <iconify-icon icon="ph:ticket-bold" aria-hidden="true"></iconify-icon>
                 <b data-auth-i18n="benefitVoucher">Voucher Member</b>
               </div>
               <div class="auth-mini-benefit">
-                <span aria-hidden="true">03</span>
+                <iconify-icon icon="ph:shield-check-bold" aria-hidden="true"></iconify-icon>
                 <b data-auth-i18n="benefitSecure">Secure Payment</b>
               </div>
             </div>
