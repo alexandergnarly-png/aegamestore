@@ -5,6 +5,9 @@ const html = fs.readFileSync("public/index.html", "utf8");
 const script = fs.readFileSync("public/script.js", "utf8");
 const css = fs.readFileSync("public/style.css", "utf8");
 const keysystemCss = fs.readFileSync("public/keysystem-ui.css", "utf8");
+const serviceWorker = fs.readFileSync("public/service-worker.js", "utf8");
+
+assert.doesNotThrow(() => new Function(script));
 
 assert.match(html, /href="#main-content"/);
 assert.match(html, /id="main-content"[^>]*tabindex="-1"/);
@@ -124,5 +127,24 @@ assert.match(
 assert.match(script, /class="account-orbit-icon"/);
 assert.match(css, /@keyframes accountIconFloat/);
 assert.match(css, /prefers-reduced-motion: reduce[\s\S]*?account-orbit-icon/);
+[
+  "promoLimitedTitle",
+  "promoBuyerTitle",
+  "reviewLoading",
+  "orderProductTitle",
+  "orderBuyerTitle",
+  "orderSummaryTitle",
+  "gatewayPaymentDesc",
+].forEach((key) => {
+  assert.ok(html.includes(`data-i18n="${key}"`), `Missing homepage i18n marker: ${key}`);
+  assert.ok(
+    (script.match(new RegExp(`${key}:`, "g")) || []).length >= 2,
+    `Missing Indonesian/English translations for: ${key}`,
+  );
+});
+assert.match(html, /script\.js\?v=20260809-home-i18n-1/);
+assert.match(serviceWorker, /CACHE_VERSION = "20260809-home-i18n-v1"/);
+assert.match(script, /new CustomEvent\("ae:languagechange"\)/);
+assert.match(script, /els\.modal\?\.querySelectorAll\("\[data-i18n\]"\)/);
 
 console.log("Homepage UI/UX accessibility check passed.");

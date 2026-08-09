@@ -202,6 +202,78 @@ const translations = {
     adminChatNote: "Sertakan Order ID kalau bertanya soal transaksi.",
     voucherToggleTitle: "Punya voucher?",
     voucherToggleDesc: "Masukkan kode jika ada",
+    featuredDrop: "Produk Unggulan",
+    loadingCatalog: "Memuat katalog...",
+    startingFrom: "Mulai dari",
+    promoLimitedLabel: "Penawaran Terbatas",
+    promoLimitedTitle: "Promo ringkas, checkout cepat",
+    promoLimitedDesc:
+      "Promo aktif dan update produk ditampilkan ringkas tanpa membuat halaman terasa ramai.",
+    promoBuyerLabel: "Buyer Baru",
+    promoBuyerTitle: "Benefit buyer terbuka",
+    promoBuyerDesc:
+      "Login untuk menyimpan nama order, riwayat transaksi, dan mengakses promo buyer.",
+    reviewLoading: "Memuat review buyer...",
+    reviewBuyerLabel: "Review Buyer",
+    orderProductTitle: "Pilih produk",
+    orderProductDesc: "Tentukan platform, brand, dan nominal.",
+    orderBuyerTitle: "Data buyer",
+    orderBuyerDesc: "Pastikan nama penerima sudah benar.",
+    orderSummaryTitle: "Ringkasan & pembayaran",
+    orderSummaryDesc: "Periksa pesanan sebelum melanjutkan.",
+    quantitySelected: "1 key dipilih",
+    discountVipLabel: "Diskon Voucher / VIP",
+    gatewayPaymentTitle: "QRIS / E-wallet",
+    gatewayPaymentDesc: "Biaya gateway berlaku",
+    walletPaymentTitle: "AE Credit",
+    walletBalanceLabel: "Saldo",
+    productsUnavailableTitle: "Produk belum tersedia",
+    productsUnavailableDesc:
+      "Belum ada produk aktif saat ini. Silakan hubungi admin untuk info stok.",
+    productLoadFailedTitle: "Gagal memuat produk",
+    productLoadFailedDesc:
+      "Coba refresh halaman atau hubungi admin jika masalah masih terjadi.",
+    playMaintenanceText: "Produk sedang maintenance dan belum bisa dibeli.",
+    playRiskText: "Produk bisa dibeli, tapi gunakan dengan risiko sendiri.",
+    playSafeText: "Produk aman digunakan saat ini.",
+    quantityChooseProduct: "Pilih produk terlebih dahulu",
+    quantityManualOnly: "Produk manual hanya tersedia 1 key per order",
+    quantityAvailable: "tersedia",
+    loginRequiredTitle: "Login Dulu",
+    loginRequiredText: "Kamu harus login dulu sebelum order.",
+    loginNow: "Login Sekarang",
+    loginCheckFailedTitle: "Gagal Cek Login",
+    loginCheckFailedText: "Coba refresh halaman lalu login ulang.",
+    playerNameMissing: "Nama player belum terisi.",
+    chooseProductTitle: "Pilih Produk",
+    chooseProductText: "Pilih game dan durasi produknya dulu.",
+    insufficientStock: "Stok tidak cukup. Kurangi jumlah atau pilih produk lain.",
+    logoutTitle: "Keluar Akun?",
+    logoutText: "Kamu akan keluar dari sesi ini.",
+    logoutConfirm: "Ya, Keluar",
+    reviewEmptyText: "Jadilah buyer pertama yang kasih review setelah order berhasil.",
+    reviewEmptySummary: "Belum ada review buyer.",
+    reviewCountPrefix: "Dari",
+    reviewCountSuffix: "review buyer.",
+    reviewLoadFailed: "Gagal dimuat",
+    reviewLoadFailedText: "Review belum bisa dimuat. Coba refresh halaman.",
+    reviewLoginText: "Kamu harus login dan pernah berhasil order untuk kasih review.",
+    reviewPopupTitle: "Kasih Review",
+    reviewExperienceLabel: "Pengalaman kamu",
+    reviewPlaceholder: "Tulis pengalaman kamu belanja di AE Game Store...",
+    reviewEligibility: "Review hanya bisa dikirim oleh akun yang sudah pernah berhasil order.",
+    reviewSubmit: "Kirim Review",
+    cancel: "Batal",
+    reviewMinValidation: "Review minimal 8 karakter.",
+    reviewShortTitle: "Komentar terlalu pendek",
+    reviewShortText: "Tulis review minimal 8 karakter.",
+    reviewSaveFailed: "Gagal menyimpan review",
+    reviewSavedTitle: "Review Tersimpan",
+    reviewThanks: "Terima kasih untuk review kamu!",
+    reviewServerError: "Terjadi error server saat menyimpan review.",
+    installManualTitle: "Install manual",
+    installManualText:
+      "Kalau tombol install belum muncul, tekan menu browser lalu pilih Tambahkan ke layar utama.",
   },
   en: {
     selectProduct: "Choose Game",
@@ -396,6 +468,78 @@ const translations = {
     adminChatTermsTitle: "Terms",
     adminChatTermsDesc: "Refund & policy",
     adminChatNote: "Include your Order ID when asking about a transaction.",
+    featuredDrop: "Featured Drop",
+    loadingCatalog: "Loading catalog...",
+    startingFrom: "Starting from",
+    promoLimitedLabel: "Limited Offer",
+    promoLimitedTitle: "Clean deals, fast checkout",
+    promoLimitedDesc:
+      "Active deals and product updates stay concise without cluttering the page.",
+    promoBuyerLabel: "New Buyer",
+    promoBuyerTitle: "Buyer benefits unlocked",
+    promoBuyerDesc:
+      "Log in to save your order name, view transaction history, and access buyer deals.",
+    reviewLoading: "Loading buyer reviews...",
+    reviewBuyerLabel: "Buyer Reviews",
+    orderProductTitle: "Choose a product",
+    orderProductDesc: "Select the platform, brand, and amount.",
+    orderBuyerTitle: "Buyer details",
+    orderBuyerDesc: "Make sure the recipient name is correct.",
+    orderSummaryTitle: "Summary & payment",
+    orderSummaryDesc: "Review your order before continuing.",
+    quantitySelected: "1 key selected",
+    discountVipLabel: "Voucher / VIP Discount",
+    gatewayPaymentTitle: "QRIS / E-wallet",
+    gatewayPaymentDesc: "Gateway fees apply",
+    walletPaymentTitle: "AE Credit",
+    walletBalanceLabel: "Balance",
+    productsUnavailableTitle: "Products are not available yet",
+    productsUnavailableDesc:
+      "There are no active products right now. Contact admin for stock information.",
+    productLoadFailedTitle: "Failed to load products",
+    productLoadFailedDesc:
+      "Refresh the page or contact admin if the problem continues.",
+    playMaintenanceText: "This product is under maintenance and cannot be purchased.",
+    playRiskText: "This product is available, but use it at your own risk.",
+    playSafeText: "This product is currently safe to use.",
+    quantityChooseProduct: "Choose a product first",
+    quantityManualOnly: "Manual products are limited to 1 key per order",
+    quantityAvailable: "available",
+    loginRequiredTitle: "Login Required",
+    loginRequiredText: "You need to log in before placing an order.",
+    loginNow: "Login Now",
+    loginCheckFailedTitle: "Login Check Failed",
+    loginCheckFailedText: "Refresh the page and log in again.",
+    playerNameMissing: "Player name is missing.",
+    chooseProductTitle: "Choose a Product",
+    chooseProductText: "Choose a game and product duration first.",
+    insufficientStock: "Insufficient stock. Reduce the quantity or choose another product.",
+    logoutTitle: "Log out?",
+    logoutText: "You will be signed out of this session.",
+    logoutConfirm: "Yes, Log Out",
+    reviewEmptyText: "Be the first buyer to leave a review after a completed order.",
+    reviewEmptySummary: "No buyer reviews yet.",
+    reviewCountPrefix: "From",
+    reviewCountSuffix: "buyer reviews.",
+    reviewLoadFailed: "Failed to load",
+    reviewLoadFailedText: "Reviews could not be loaded. Refresh the page.",
+    reviewLoginText: "You must log in and complete an order before leaving a review.",
+    reviewPopupTitle: "Leave a Review",
+    reviewExperienceLabel: "Your experience",
+    reviewPlaceholder: "Tell us about your experience with AE Game Store...",
+    reviewEligibility: "Reviews are available to accounts with a completed order.",
+    reviewSubmit: "Submit Review",
+    cancel: "Cancel",
+    reviewMinValidation: "Your review must be at least 8 characters.",
+    reviewShortTitle: "Comment is too short",
+    reviewShortText: "Write a review with at least 8 characters.",
+    reviewSaveFailed: "Failed to save review",
+    reviewSavedTitle: "Review Saved",
+    reviewThanks: "Thank you for your review!",
+    reviewServerError: "A server error occurred while saving your review.",
+    installManualTitle: "Manual installation",
+    installManualText:
+      "If the install button does not appear, open your browser menu and choose Add to Home Screen.",
   },
 };
 
@@ -418,6 +562,10 @@ function detectBrowserLanguage() {
 }
 
 let currentLanguage = detectBrowserLanguage();
+
+function tr(key, fallback = key) {
+  return translations[currentLanguage]?.[key] || translations.id[key] || fallback;
+}
 
 function setupBackgroundMusic() {
   const audio = document.getElementById("backgroundMusic");
@@ -472,7 +620,7 @@ function setupBackgroundMusic() {
 
 onReady(setupBackgroundMusic);
 
-function setLanguage(lang) {
+function setLanguage(lang, refreshDynamic = true) {
   currentLanguage = lang;
   localStorage.setItem("ae_language", lang);
 
@@ -513,12 +661,28 @@ function setLanguage(lang) {
   }
 
   document.documentElement.setAttribute("lang", lang);
+  document.dispatchEvent(new CustomEvent("ae:languagechange"));
+
+  const featuredName = document.getElementById("keysystemFeaturedName");
+  if (featuredName && !keysystemFeaturedGames.length) {
+    featuredName.innerText = tr("loadingCatalog");
+  }
 
   // Re-render localized user menu (if present) so labels follow language
   if (typeof checkLoginStatus === "function") {
     try {
       checkLoginStatus();
     } catch (e) { }
+  }
+
+  if (refreshDynamic) {
+    if (typeof loadReviews === "function") loadReviews();
+    if (typeof updateOrderQuantityUI === "function") {
+      const selectedProduct = allProducts.find(
+        (item) => String(item.id) === String(productSelect?.value || ""),
+      );
+      updateOrderQuantityUI(selectedProduct);
+    }
   }
 }
 let allProducts = [];
@@ -792,7 +956,7 @@ function getPlayStatusMeta(status) {
     return {
       value,
       label: "MAINTENANCE",
-      text: "Produk sedang maintenance dan belum bisa dibeli.",
+      text: tr("playMaintenanceText"),
     };
   }
 
@@ -800,14 +964,14 @@ function getPlayStatusMeta(status) {
     return {
       value,
       label: "USE AT YOUR OWN RISK",
-      text: "Produk bisa dibeli, tapi gunakan dengan risiko sendiri.",
+      text: tr("playRiskText"),
     };
   }
 
   return {
     value,
     label: "SAFE TO PLAY",
-    text: "Produk aman digunakan saat ini.",
+    text: tr("playSafeText"),
   };
 }
 
@@ -849,8 +1013,8 @@ async function loadAllProducts() {
       gameGrid.innerHTML = `
     <div class="empty-category-card">
       <div class="empty-category-icon"></div>
-      <h3>Produk belum tersedia</h3>
-      <p>Belum ada produk aktif saat ini. Silakan hubungi admin untuk info stok.</p>
+      <h3>${escapeHtml(tr("productsUnavailableTitle"))}</h3>
+      <p>${escapeHtml(tr("productsUnavailableDesc"))}</p>
       <a href="https://t.me/aegamestore" target="_blank">Chat Admin</a>
     </div>
   `;
@@ -871,8 +1035,8 @@ async function loadAllProducts() {
     gameGrid.innerHTML = `
   <div class="empty-category-card">
     <div class="empty-category-icon">!</div>
-    <h3>Gagal memuat produk</h3>
-    <p>Coba refresh halaman atau hubungi admin jika masalah masih terjadi.</p>
+    <h3>${escapeHtml(tr("productLoadFailedTitle"))}</h3>
+    <p>${escapeHtml(tr("productLoadFailedDesc"))}</p>
     <a href="https://t.me/aegamestore" target="_blank">Chat Admin</a>
   </div>
 `;
@@ -1486,7 +1650,7 @@ function updateOrderModalBanner(game) {
   banner.classList.toggle("has-image", Boolean(imageUrl));
 
   if (bannerTitle) {
-    bannerTitle.textContent = gameName || "Pilih Game";
+    bannerTitle.textContent = gameName || tr("selectProduct");
   }
 
   if (bannerImg) {
@@ -1526,10 +1690,10 @@ async function openOrderModal(game) {
     if (!data.loggedIn) {
       Swal.fire({
         icon: "warning",
-        title: "Login Dulu",
-        text: "Kamu harus login dulu sebelum order.",
+        title: tr("loginRequiredTitle"),
+        text: tr("loginRequiredText"),
         confirmButtonColor: "#0a0a0a",
-        confirmButtonText: "Login Sekarang",
+        confirmButtonText: tr("loginNow"),
       }).then(() => {
         window.location.href = "/auth";
       });
@@ -1546,13 +1710,13 @@ async function openOrderModal(game) {
     }
     checkoutWalletBalance = Number(data.wallet?.balance || 0);
     const walletBalance = document.getElementById("checkoutWalletBalance");
-    if (walletBalance) walletBalance.innerText = `Saldo: ${formatRupiah(checkoutWalletBalance)}`;
+    if (walletBalance) walletBalance.innerText = `${tr("walletBalanceLabel")}: ${formatRupiah(checkoutWalletBalance)}`;
     document.querySelectorAll(".checkout-payment-option").forEach((btn) => btn.classList.toggle("active", btn.dataset.paymentMethod === "midtrans"));
   } catch (err) {
     Swal.fire({
       icon: "error",
-      title: "Gagal Cek Login",
-      text: "Coba refresh halaman lalu login ulang.",
+      title: tr("loginCheckFailedTitle"),
+      text: tr("loginCheckFailedText"),
       confirmButtonColor: "#ffe135",
     });
     return;
@@ -1959,11 +2123,11 @@ function updateOrderQuantityUI(product) {
 
   if (stockHint) {
     if (!product) {
-      stockHint.textContent = "Pilih produk terlebih dahulu";
+      stockHint.textContent = tr("quantityChooseProduct");
     } else if (isManual) {
-      stockHint.textContent = "Produk manual hanya tersedia 1 key per order";
+      stockHint.textContent = tr("quantityManualOnly");
     } else {
-      stockHint.textContent = `${selectedOrderQuantity} key dipilih | tersedia ${Number(product.available_keys || 0)}`;
+      stockHint.textContent = `${selectedOrderQuantity} key | ${tr("quantityAvailable")} ${Number(product.available_keys || 0)}`;
     }
   }
 }
@@ -2050,7 +2214,7 @@ async function buy() {
     Swal.fire({
       icon: "warning",
       title: "Oops...",
-      text: "Nama player belum terisi.",
+      text: tr("playerNameMissing"),
       confirmButtonColor: "#0a0a0a",
     });
     return;
@@ -2058,8 +2222,8 @@ async function buy() {
   if (!selectedProduct) {
     Swal.fire({
       icon: "info",
-      title: "Pilih Produk",
-      text: "Pilih game dan durasi produknya dulu.",
+      title: tr("chooseProductTitle"),
+      text: tr("chooseProductText"),
       confirmButtonColor: "#0a0a0a",
     });
     return;
@@ -2085,7 +2249,7 @@ async function buy() {
     Swal.fire({
       icon: "error",
       title: translations[currentLanguage].outOfStockTitle,
-      text: `Stok tidak cukup untuk ${selectedOrderQuantity} key. Silakan kurangi jumlah atau pilih produk lain.`,
+      text: tr("insufficientStock"),
       confirmButtonColor: "#ffe135",
     });
 
@@ -2118,8 +2282,8 @@ async function buy() {
     if (res.status === 401) {
       Swal.fire({
         icon: "warning",
-        title: "Login Dulu",
-        text: data.message || "Kamu harus login dulu sebelum order",
+        title: tr("loginRequiredTitle"),
+        text: tr("loginRequiredText"),
         confirmButtonColor: "#0a0a0a",
       }).then(() => {
         window.location.href = data.redirectUrl || "/auth";
@@ -2291,13 +2455,13 @@ async function checkLoginStatus() {
 
 async function logoutUser() {
   Swal.fire({
-    title: "Keluar Akun?",
-    text: "Kamu akan keluar dari sesi ini.",
+    title: tr("logoutTitle"),
+    text: tr("logoutText"),
     icon: "question",
     showCancelButton: true,
     confirmButtonColor: "#ffe135",
     cancelButtonColor: "#fafaf5",
-    confirmButtonText: "Ya, Keluar",
+    confirmButtonText: tr("logoutConfirm"),
   }).then(async (result) => {
     if (result.isConfirmed) {
       await fetch("/user-logout", {
@@ -2313,7 +2477,7 @@ async function logoutUser() {
 
 // Jalankan fungsi saat halaman beranda pertama kali dibuka
 document.addEventListener("DOMContentLoaded", () => {
-  setLanguage(currentLanguage);
+  setLanguage(currentLanguage, false);
   checkLoginStatus();
 });
 // --------------------------------
@@ -2965,14 +3129,14 @@ async function loadReviews() {
             </div>
             <div class="testi-rating">⭐⭐⭐⭐⭐</div>
           </div>
-          <p>Jadilah buyer pertama yang kasih review setelah order berhasil.</p>
+          <p>${escapeHtml(tr("reviewEmptyText"))}</p>
         </div>
       `;
 
       if (reviewSummary) {
         reviewSummary.innerHTML = `
           <strong>⭐ 0.0</strong>
-          <span>Belum ada review buyer.</span>
+          <span>${escapeHtml(tr("reviewEmptySummary"))}</span>
         `;
       }
 
@@ -2986,7 +3150,7 @@ async function loadReviews() {
     if (reviewSummary) {
       reviewSummary.innerHTML = `
         <strong>⭐ ${average.toFixed(1)}</strong>
-        <span>Dari ${data.length} review buyer.</span>
+        <span>${escapeHtml(tr("reviewCountPrefix"))} ${data.length} ${escapeHtml(tr("reviewCountSuffix"))}</span>
       `;
     }
 
@@ -3020,11 +3184,11 @@ async function loadReviews() {
           <div class="testi-avatar">!</div>
           <div>
             <strong>Review</strong>
-            <span class="testi-game">Gagal dimuat</span>
+            <span class="testi-game">${escapeHtml(tr("reviewLoadFailed"))}</span>
           </div>
           <div class="testi-rating">⭐⭐⭐⭐⭐</div>
         </div>
-        <p>Review belum bisa dimuat. Coba refresh halaman.</p>
+        <p>${escapeHtml(tr("reviewLoadFailedText"))}</p>
       </div>
     `;
   }
@@ -3061,9 +3225,9 @@ async function openReviewPopup() {
     if (res.status === 401) {
       Swal.fire({
         icon: "warning",
-        title: "Login dulu",
-        text: "Kamu harus login dan pernah berhasil order untuk kasih review.",
-        confirmButtonText: "Login Sekarang",
+        title: tr("loginRequiredTitle"),
+        text: tr("reviewLoginText"),
+        confirmButtonText: tr("loginNow"),
         confirmButtonColor: "#0a0a0a",
       }).then(() => {
         window.location.href = "/auth";
@@ -3097,27 +3261,27 @@ async function openReviewPopup() {
       .join("");
 
   const result = await Swal.fire({
-    title: "Kasih Review ⭐",
+    title: `${tr("reviewPopupTitle")} ⭐`,
     html: `
       <div class="review-popup-stars" id="reviewPopupStars">
         ${renderPopupStars()}
       </div>
 
-      <label class="review-popup-label" for="reviewPopupComment">${currentLanguage === "en" ? "Your experience" : "Pengalaman kamu"}</label>
+      <label class="review-popup-label" for="reviewPopupComment">${escapeHtml(tr("reviewExperienceLabel"))}</label>
       <textarea
         id="reviewPopupComment"
         class="review-popup-textarea"
         maxlength="240"
-        placeholder="Tulis pengalaman kamu belanja di AE Game Store..."
+        placeholder="${escapeHtml(tr("reviewPlaceholder"))}"
       >${escapeHtml(existingComment)}</textarea>
 
       <div class="review-popup-note">
-        Review hanya bisa dikirim oleh akun yang sudah pernah berhasil order.
+        ${escapeHtml(tr("reviewEligibility"))}
       </div>
     `,
     showCancelButton: true,
-    confirmButtonText: "Kirim Review",
-    cancelButtonText: "Batal",
+    confirmButtonText: tr("reviewSubmit"),
+    cancelButtonText: tr("cancel"),
     confirmButtonColor: "#0a0a0a",
     cancelButtonColor: "#fafaf5",
     didOpen: () => {
@@ -3145,7 +3309,7 @@ async function openReviewPopup() {
         document.getElementById("reviewPopupComment")?.value || "";
 
       if (String(comment).trim().length < 8) {
-        Swal.showValidationMessage("Review minimal 8 karakter.");
+        Swal.showValidationMessage(tr("reviewMinValidation"));
         return false;
       }
 
@@ -3168,8 +3332,8 @@ async function submitReview({ rating, comment }) {
   if (cleanComment.length < 8) {
     Swal.fire({
       icon: "warning",
-      title: "Komentar terlalu pendek",
-      text: "Tulis review minimal 8 karakter.",
+      title: tr("reviewShortTitle"),
+      text: tr("reviewShortText"),
       confirmButtonColor: "#0a0a0a",
     });
     return false;
@@ -3194,7 +3358,7 @@ async function submitReview({ rating, comment }) {
       Swal.fire({
         icon: "error",
         title: "Gagal",
-        text: data.message || "Gagal menyimpan review",
+        text: data.message || tr("reviewSaveFailed"),
         confirmButtonColor: "#ffe135",
       });
       return false;
@@ -3202,8 +3366,8 @@ async function submitReview({ rating, comment }) {
 
     Swal.fire({
       icon: "success",
-      title: "Review Tersimpan",
-      text: data.message || "Terima kasih untuk review kamu!",
+      title: tr("reviewSavedTitle"),
+      text: data.message || tr("reviewThanks"),
       confirmButtonColor: "#0a0a0a",
     });
 
@@ -3212,7 +3376,7 @@ async function submitReview({ rating, comment }) {
     Swal.fire({
       icon: "error",
       title: "Error",
-      text: "Terjadi error server saat menyimpan review.",
+      text: tr("reviewServerError"),
       confirmButtonColor: "#ffe135",
     });
     return false;
@@ -3232,7 +3396,7 @@ document.addEventListener("DOMContentLoaded", () => {
     themeBtn.setAttribute("aria-label", "Aktifkan mode terang");
   }
 });
-setLanguage(currentLanguage);
+setLanguage(currentLanguage, false);
 loadAllProducts();
 // ===== HOMEPAGE INLINE SCRIPT CLEANUP =====
 
@@ -4647,8 +4811,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!prompt) {
         Swal.fire({
           icon: "info",
-          title: "Install manual",
-          text: "Kalau tombol install belum muncul, tekan menu browser lalu pilih Tambahkan ke layar utama.",
+          title: tr("installManualTitle"),
+          text: tr("installManualText"),
           confirmButtonColor: "#0a0a0a",
         });
         return;
@@ -5141,6 +5305,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function applyI18n() {
     const els = getElements();
+    els.modal?.querySelectorAll("[data-i18n]").forEach((element) => {
+      const key = element.getAttribute("data-i18n");
+      const dict = i18n[currentLanguage] || i18n.id;
+      if (dict[key]) element.textContent = t(key);
+    });
     if (els.statusText && els.statusPill.dataset.state === "pending") {
       els.statusText.textContent = t("paymentStatusPending");
     }
@@ -5151,6 +5320,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (small) small.textContent = t("paymentLoadingSnap");
     }
   }
+
+  document.addEventListener("ae:languagechange", applyI18n);
 
   function setStatus(status) {
     const els = getElements();

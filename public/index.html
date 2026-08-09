@@ -359,11 +359,11 @@
             </span>
             <span class="keysystem-feature-info">
               <span>
-                <small>FEATURED DROP</small>
+                <small data-i18n="featuredDrop">FEATURED DROP</small>
                 <strong id="keysystemFeaturedName">Memuat katalog...</strong>
               </span>
               <span>
-                <small>STARTING FROM</small>
+                <small data-i18n="startingFrom">STARTING FROM</small>
                 <strong id="keysystemFeaturedPrice">—</strong>
               </span>
             </span>
@@ -455,9 +455,9 @@
               <div class="promo-deco-icon">01</div>
             </div>
             <div class="promo-content">
-              <span>LIMITED OFFER</span>
-              <h3>Clean deals, fast checkout</h3>
-              <p>Promo aktif dan update produk ditampilkan ringkas tanpa bikin halaman terasa ramai.</p>
+              <span data-i18n="promoLimitedLabel">LIMITED OFFER</span>
+              <h3 data-i18n="promoLimitedTitle">Clean deals, fast checkout</h3>
+              <p data-i18n="promoLimitedDesc">Promo aktif dan update produk ditampilkan ringkas tanpa bikin halaman terasa ramai.</p>
               <div
                 class="promo-countdown"
                 id="promoCountdown"
@@ -529,9 +529,9 @@
               <div class="promo-deco-icon">02</div>
             </div>
             <div class="promo-content">
-              <span>NEW BUYER</span>
-              <h3>Buyer benefit unlocked</h3>
-              <p>Login untuk simpan nama order, riwayat transaksi, dan akses promo buyer.</p>
+              <span data-i18n="promoBuyerLabel">NEW BUYER</span>
+              <h3 data-i18n="promoBuyerTitle">Buyer benefit unlocked</h3>
+              <p data-i18n="promoBuyerDesc">Login untuk simpan nama order, riwayat transaksi, dan akses promo buyer.</p>
             </div>
           </div>
         </div>
@@ -780,7 +780,7 @@
 
         <div class="review-summary" id="reviewSummary">
           <strong>⭐ 0.0</strong>
-          <span>Memuat review buyer...</span>
+          <span data-i18n="reviewLoading">Memuat review buyer...</span>
         </div>
 
         <div class="review-action-card">
@@ -805,11 +805,11 @@
                 <div class="testi-avatar">AE</div>
                 <div>
                   <strong>AE Game Store</strong>
-                  <span class="testi-game">Review Buyer</span>
+                  <span class="testi-game" data-i18n="reviewBuyerLabel">Review Buyer</span>
                 </div>
                 <div class="testi-rating">⭐⭐⭐⭐⭐</div>
               </div>
-              <p>Memuat review...</p>
+              <p data-i18n="reviewLoading">Memuat review...</p>
             </div>
           </div>
         </div>
@@ -888,8 +888,8 @@
         <div class="checkout-section-heading">
           <span aria-hidden="true">01</span>
           <div>
-            <strong>Pilih produk</strong>
-            <small>Tentukan platform, brand, dan nominal.</small>
+            <strong data-i18n="orderProductTitle">Pilih produk</strong>
+            <small data-i18n="orderProductDesc">Tentukan platform, brand, dan nominal.</small>
           </div>
         </div>
 
@@ -961,15 +961,15 @@
                 aria-label="Tambah jumlah key"
               >+</button>
             </div>
-            <small id="quantityStockHint" class="quantity-stock-hint">1 key dipilih</small>
+            <small id="quantityStockHint" class="quantity-stock-hint" data-i18n="quantitySelected">1 key dipilih</small>
           </div>
         </div>
 
         <div class="checkout-section-heading">
           <span aria-hidden="true">02</span>
           <div>
-            <strong>Data buyer</strong>
-            <small>Pastikan nama penerima sudah benar.</small>
+            <strong data-i18n="orderBuyerTitle">Data buyer</strong>
+            <small data-i18n="orderBuyerDesc">Pastikan nama penerima sudah benar.</small>
           </div>
         </div>
 
@@ -990,8 +990,8 @@
         <div class="checkout-section-heading">
           <span aria-hidden="true">03</span>
           <div>
-            <strong>Ringkasan &amp; pembayaran</strong>
-            <small>Periksa pesanan sebelum melanjutkan.</small>
+            <strong data-i18n="orderSummaryTitle">Ringkasan &amp; pembayaran</strong>
+            <small data-i18n="orderSummaryDesc">Periksa pesanan sebelum melanjutkan.</small>
           </div>
         </div>
 
@@ -1043,7 +1043,7 @@
             <b id="originalPriceText">Rp 0</b>
           </div>
           <div>
-            <span>Diskon Voucher / VIP</span>
+            <span data-i18n="discountVipLabel">Diskon Voucher / VIP</span>
             <b id="discountText">-Rp 0</b>
           </div>
           <div>
@@ -1077,10 +1077,10 @@
 
         <div class="checkout-payment-choice" aria-label="Pilih metode pembayaran">
           <button type="button" class="checkout-payment-option active" data-payment-method="midtrans" onclick="selectCheckoutPaymentMethod('midtrans', this)">
-            <strong>QRIS / E-wallet</strong><small>Biaya gateway berlaku</small>
+            <strong data-i18n="gatewayPaymentTitle">QRIS / E-wallet</strong><small data-i18n="gatewayPaymentDesc">Biaya gateway berlaku</small>
           </button>
           <button type="button" class="checkout-payment-option" data-payment-method="ae_credit" onclick="selectCheckoutPaymentMethod('ae_credit', this)">
-            <strong>AE Credit</strong><small id="checkoutWalletBalance">Saldo: Rp0</small>
+            <strong data-i18n="walletPaymentTitle">AE Credit</strong><small id="checkoutWalletBalance">Saldo: Rp0</small>
           </button>
         </div>
 
@@ -1634,6 +1634,6 @@
       preload="none"
       loop
     ></audio>
-    <script src="/script.js?v=20260802-gold-glory-art" defer></script>
+    <script src="/script.js?v=20260809-home-i18n-1" defer></script>
   </body>
 </html>
