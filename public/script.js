@@ -200,6 +200,18 @@ const translations = {
     adminChatTermsTitle: "Terms",
     adminChatTermsDesc: "Refund & ketentuan",
     adminChatNote: "Sertakan Order ID kalau bertanya soal transaksi.",
+    aiAssistantTitle: "Tanya AE AI",
+    aiAssistantDesc: "Cari produk, bandingkan pilihan, atau minta rekomendasi.",
+    aiAssistantGreeting: "Halo! Sebutkan game, platform, durasi, atau budget kamu. Aku akan mencarikan produk yang tersedia.",
+    aiAssistantInputLabel: "Pertanyaan untuk AE AI",
+    aiAssistantPlaceholder: "Contoh: brand Android terbaik untuk Delta Force",
+    aiAssistantSend: "Kirim",
+    aiAssistantDisclaimer: "Rekomendasi memakai harga dan stok toko saat ini. Konfirmasi sebelum checkout.",
+    aiPromptCheap: "Yang paling hemat",
+    aiPromptAndroid: "Rekomendasi Android",
+    aiPromptStock: "Stok ready",
+    aiAssistantLoading: "AE AI sedang mencari...",
+    aiAssistantError: "AE AI sedang tidak tersedia. Coba lagi atau hubungi admin lewat Telegram.",
     voucherToggleTitle: "Punya voucher?",
     voucherToggleDesc: "Masukkan kode jika ada",
     featuredDrop: "Produk Unggulan",
@@ -468,6 +480,18 @@ const translations = {
     adminChatTermsTitle: "Terms",
     adminChatTermsDesc: "Refund & policy",
     adminChatNote: "Include your Order ID when asking about a transaction.",
+    aiAssistantTitle: "Ask AE AI",
+    aiAssistantDesc: "Find products, compare options, or get a recommendation.",
+    aiAssistantGreeting: "Hi! Tell me your game, platform, duration, or budget and I will find available products.",
+    aiAssistantInputLabel: "Question for AE AI",
+    aiAssistantPlaceholder: "Example: best Android brand for Delta Force",
+    aiAssistantSend: "Send",
+    aiAssistantDisclaimer: "Recommendations use the store's current prices and stock. Confirm before checkout.",
+    aiPromptCheap: "Best value",
+    aiPromptAndroid: "Android picks",
+    aiPromptStock: "In stock",
+    aiAssistantLoading: "AE AI is searching...",
+    aiAssistantError: "AE AI is unavailable right now. Try again or contact the admin on Telegram.",
     featuredDrop: "Featured Drop",
     loadingCatalog: "Loading catalog...",
     startingFrom: "Starting from",
@@ -638,6 +662,11 @@ function setLanguage(lang, refreshDynamic = true) {
     if (translations[lang][key]) {
       element.placeholder = translations[lang][key];
     }
+  });
+
+  document.querySelectorAll("[data-i18n-aria]").forEach((element) => {
+    const key = element.getAttribute("data-i18n-aria");
+    if (translations[lang]?.[key]) element.setAttribute("aria-label", translations[lang][key]);
   });
 
   if (
@@ -5037,10 +5066,60 @@ function setupAdminChatPopup() {
   const backdrop = document.getElementById("adminChatBackdrop");
   const guideBtn = document.getElementById("adminChatGuideBtn");
   const termsBtn = document.getElementById("adminChatTermsBtn");
+  const aiForm = document.getElementById("aeAiForm");
+  const aiInput = document.getElementById("aeAiInput");
+  const aiSend = document.getElementById("aeAiSend");
+  const aiMessages = document.getElementById("aeAiMessages");
+  const aiPromptButtons = sheet?.querySelectorAll("[data-ai-prompt]") || [];
 
   if (!btn || !sheet) return;
   sheet.setAttribute("inert", "");
   let lastAdminChatTrigger = null;
+  let aiBusy = false;
+  const aiHistory = [];
+
+  function appendAiMessage(content, role, extraClass = "") {
+    if (!aiMessages) return null;
+    const bubble = document.createElement("p");
+    bubble.className = `ae-ai-bubble is-${role}${extraClass ? ` ${extraClass}` : ""}`;
+    bubble.textContent = content;
+    aiMessages.appendChild(bubble);
+    aiMessages.scrollTop = aiMessages.scrollHeight;
+    return bubble;
+  }
+
+  async function sendAiMessage(rawMessage) {
+    const message = String(rawMessage || "").trim().slice(0, 500);
+    if (!message || aiBusy || !aiInput || !aiSend) return;
+    const context = aiHistory.slice(-6);
+    aiHistory.push({ role: "user", content: message });
+    appendAiMessage(message, "user");
+    aiBusy = true;
+    aiInput.disabled = true;
+    aiSend.disabled = true;
+    const loadingBubble = appendAiMessage(tr("aiAssistantLoading", "AE AI sedang mencari..."), "assistant", "is-loading");
+
+    try {
+      const response = await fetch("/api/ai-assistant", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message, messages: context }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.answer) throw new Error("assistant_unavailable");
+      loadingBubble?.remove();
+      aiHistory.push({ role: "assistant", content: data.answer });
+      appendAiMessage(data.answer, "assistant");
+    } catch (err) {
+      loadingBubble?.remove();
+      appendAiMessage(tr("aiAssistantError", "AE AI sedang tidak tersedia. Coba lagi atau hubungi admin lewat Telegram."), "assistant", "is-error");
+    } finally {
+      aiBusy = false;
+      aiInput.disabled = false;
+      aiSend.disabled = false;
+      aiInput.focus();
+    }
+  }
 
   function getAdminChatFocusable() {
     return Array.from(
@@ -5104,6 +5183,17 @@ function setupAdminChatPopup() {
     if (typeof showTermsPolicy === "function") {
       showTermsPolicy();
     }
+  });
+
+  aiForm?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const message = aiInput?.value || "";
+    if (aiInput) aiInput.value = "";
+    sendAiMessage(message);
+  });
+
+  aiPromptButtons.forEach((promptButton) => {
+    promptButton.addEventListener("click", () => sendAiMessage(promptButton.textContent));
   });
 
   document.addEventListener("keydown", (event) => {

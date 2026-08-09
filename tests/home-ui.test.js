@@ -142,8 +142,14 @@ assert.match(css, /prefers-reduced-motion: reduce[\s\S]*?account-orbit-icon/);
     `Missing Indonesian/English translations for: ${key}`,
   );
 });
-assert.match(html, /script\.js\?v=20260809-home-i18n-1/);
-assert.match(serviceWorker, /CACHE_VERSION = "20260809-home-i18n-v1"/);
+assert.match(html, /script\.js\?v=20260809-ai-assistant-1/);
+assert.match(serviceWorker, /CACHE_VERSION = "20260809-ai-assistant-v1"/);
+assert.match(html, /id="aeAiForm"/);
+assert.match(html, /id="aeAiMessages"[\s\S]*?role="log"/);
+assert.match(html, /data-ai-prompt/);
+assert.match(script, /fetch\("\/api\/ai-assistant"/);
+assert.match(script, /bubble\.textContent = content/);
+assert.match(css, /\.ae-ai-assistant/);
 assert.match(script, /new CustomEvent\("ae:languagechange"\)/);
 assert.match(script, /els\.modal\?\.querySelectorAll\("\[data-i18n\]"\)/);
 assert.match(script, /if \(modal\?\.classList\.contains\("show"\)\) onProductChange\(\)/);

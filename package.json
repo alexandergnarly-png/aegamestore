@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon server.js",
     "start": "node server.js",
-    "test": "node tests/security-hardening.test.js && node tests/cheatgame-integration.test.js && node tests/supplier-compare.test.js && node tests/buyer-policy.test.js && node tests/user-session-security.test.js && node tests/account-wallet-ui.test.js && node tests/midtrans-wallet.test.js && node tests/home-ui.test.js && node tests/auth-ui.test.js && node tests/admin-popup-ui.test.js && node tests/vipstore-claim.test.js"
+    "test": "node tests/security-hardening.test.js && node tests/cheatgame-integration.test.js && node tests/supplier-compare.test.js && node tests/buyer-policy.test.js && node tests/user-session-security.test.js && node tests/account-wallet-ui.test.js && node tests/midtrans-wallet.test.js && node tests/home-ui.test.js && node tests/auth-ui.test.js && node tests/admin-popup-ui.test.js && node tests/vipstore-claim.test.js && node tests/ai-assistant.test.js"
   },
   "engines": {
     "node": "20.x"

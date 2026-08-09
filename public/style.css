@@ -14627,3 +14627,31 @@ body.dark-theme .game-card-fav > span {
     display: none !important;
   }
 }
+
+/* AE AI — compact Nothing UI assistant inside AE Help */
+.ae-ai-assistant { display: grid; gap: 12px; padding: 16px; border: 1px solid var(--border, #d6d5ce); border-radius: 22px; background: var(--surface, #fff); }
+.ae-ai-heading { display: flex; align-items: center; gap: 11px; }
+.ae-ai-heading > div { display: grid; min-width: 0; gap: 2px; }
+.ae-ai-heading strong, .ae-ai-heading small { display: block; }
+.ae-ai-heading small, .ae-ai-disclaimer, .ae-help-telegram-link small { color: var(--muted, #72716b); }
+.ae-ai-mark { display: grid; flex: 0 0 40px; width: 40px; height: 40px; place-items: center; border-radius: 13px; background: #101010; color: #fff; font: 800 13px/1 monospace; letter-spacing: .08em; }
+.ae-ai-messages { display: flex; max-height: 220px; flex-direction: column; gap: 8px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.ae-ai-bubble { width: fit-content; max-width: 88%; margin: 0; padding: 10px 12px; border: 1px solid var(--border, #d6d5ce); border-radius: 15px 15px 15px 4px; background: #f4f3ee; color: #171717; font-size: .88rem; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
+.ae-ai-bubble.is-user { align-self: flex-end; border-color: #101010; border-radius: 15px 15px 4px 15px; background: #101010; color: #fff; }
+.ae-ai-bubble.is-loading { color: var(--muted, #72716b); animation: ae-ai-pulse 1.1s ease-in-out infinite alternate; }
+.ae-ai-bubble.is-error { border-color: #e2b8b8; background: #fff1f1; color: #8d2525; }
+.ae-ai-prompts { display: flex; gap: 7px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+.ae-ai-prompts::-webkit-scrollbar { display: none; }
+.ae-ai-prompts button { min-height: 36px; flex: 0 0 auto; padding: 7px 11px; border: 1px solid var(--border, #d6d5ce); border-radius: 999px; background: transparent; color: #171717; font: inherit; font-size: .78rem; font-weight: 700; cursor: pointer; }
+.ae-ai-form { display: grid; grid-template-columns: minmax(0, 1fr) 46px; gap: 8px; }
+.ae-ai-form input { width: 100%; min-width: 0; height: 46px; padding: 0 14px; border: 1px solid var(--border, #d6d5ce); border-radius: 14px; background: #fff; color: #171717; font: inherit; }
+.ae-ai-form button { display: grid; width: 46px; height: 46px; place-items: center; border: 0; border-radius: 14px; background: #101010; color: #fff; cursor: pointer; }
+.ae-ai-form button:disabled, .ae-ai-form input:disabled { cursor: wait; opacity: .58; }
+.ae-ai-form input:focus-visible, .ae-ai-form button:focus-visible, .ae-ai-prompts button:focus-visible, .ae-help-telegram-link:focus-visible { outline: 3px solid rgba(17, 17, 17, .22); outline-offset: 2px; }
+.ae-ai-disclaimer { font-size: .72rem; line-height: 1.4; }
+.ae-help-telegram-link { display: grid; grid-template-columns: 34px minmax(0, 1fr); grid-template-rows: auto auto; column-gap: 10px; align-items: center; min-height: 58px; padding: 10px 13px; border: 1px solid var(--border, #d6d5ce); border-radius: 17px; color: #171717; text-decoration: none; }
+.ae-help-telegram-link iconify-icon { grid-row: 1 / 3; font-size: 26px; }
+.ae-help-telegram-link small { font-size: .74rem; }
+@keyframes ae-ai-pulse { to { opacity: .48; } }
+@media (max-width: 520px) { .ae-ai-assistant { padding: 13px; border-radius: 18px; } .ae-ai-messages { max-height: 190px; } }
+@media (prefers-reduced-motion: reduce) { .ae-ai-bubble.is-loading { animation: none; } }
