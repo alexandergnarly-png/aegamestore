@@ -388,6 +388,73 @@
       }
       .input-hint.ok, .strength-label[data-strength="4"] { color: var(--ink); }
       .input-hint.warn, .strength-label[data-strength="1"], .strength-label[data-strength="2"] { color: var(--muted); }
+      .password-requirements {
+        margin-top: 10px;
+        padding: 11px 12px;
+        border: 1px solid var(--line);
+        border-radius: 15px;
+        background: var(--surface-2);
+      }
+      .password-requirements-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 8px;
+        color: var(--ink);
+        font-size: 12px;
+        font-weight: 900;
+      }
+      .password-requirements-head small {
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .05em;
+        text-transform: uppercase;
+      }
+      .password-requirement-list {
+        display: grid;
+        gap: 7px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      .password-requirement {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 750;
+      }
+      .password-requirement-copy {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+      }
+      .password-requirement-copy::before {
+        content: "";
+        flex: 0 0 auto;
+        width: 7px;
+        height: 7px;
+        border: 1px solid var(--line-strong);
+        border-radius: 50%;
+        background: var(--surface);
+      }
+      .password-requirement.is-met { color: var(--ink); }
+      .password-requirement.is-met .password-requirement-copy::before {
+        border-color: var(--ink);
+        background: var(--ink);
+      }
+      .password-rule-state {
+        flex: 0 0 auto;
+        font-size: 10px;
+        font-weight: 900;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+      }
       .caps-warning {
         display: none;
         margin-top: 8px;
@@ -1053,7 +1120,7 @@
                     minlength="12"
                     maxlength="72"
                     required
-                    aria-describedby="regPasswordError regStrengthLabel regCapsWarn"
+                    aria-describedby="regPasswordError passwordRequirements regStrengthLabel regCapsWarn"
                   />
                   <button
                     type="button"
@@ -1066,6 +1133,49 @@
                   </button>
                 </div>
                 <small class="field-error" id="regPasswordError" role="alert"></small>
+                <div
+                  class="password-requirements"
+                  id="passwordRequirements"
+                  role="group"
+                  aria-labelledby="passwordRequirementsTitle"
+                >
+                  <div class="password-requirements-head">
+                    <strong
+                      id="passwordRequirementsTitle"
+                      data-auth-i18n="passwordRequirementsTitle"
+                      >Syarat password</strong
+                    >
+                    <small data-auth-i18n="passwordRequirementsHint"
+                      >Wajib + rekomendasi</small
+                    >
+                  </div>
+                  <ul class="password-requirement-list">
+                    <li class="password-requirement" data-password-rule="length">
+                      <span
+                        class="password-requirement-copy"
+                        data-auth-i18n="passwordRuleLength"
+                        >12–72 karakter (wajib)</span
+                      >
+                      <span class="password-rule-state">Belum</span>
+                    </li>
+                    <li class="password-requirement" data-password-rule="case">
+                      <span
+                        class="password-requirement-copy"
+                        data-auth-i18n="passwordRuleCase"
+                        >Huruf besar & kecil (disarankan)</span
+                      >
+                      <span class="password-rule-state">Belum</span>
+                    </li>
+                    <li class="password-requirement" data-password-rule="mix">
+                      <span
+                        class="password-requirement-copy"
+                        data-auth-i18n="passwordRuleMix"
+                        >Angka & simbol (disarankan)</span
+                      >
+                      <span class="password-rule-state">Belum</span>
+                    </li>
+                  </ul>
+                </div>
                 <div
                   class="strength-meter"
                   id="regStrength"
@@ -1421,9 +1531,8 @@
 
       function calcStrength(pw) {
         if (!pw) return 0;
-        let score = 0;
-        if (pw.length >= 6) score++;
-        if (pw.length >= 10) score++;
+        if (pw.length < 12) return 1;
+        let score = 2;
         if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++;
         if (/\d/.test(pw) && /[^A-Za-z0-9]/.test(pw)) score++;
         return Math.min(score, 4);
@@ -1435,6 +1544,18 @@
         const score = calcStrength(pw);
         const lang = getSavedAuthLanguage();
         const dict = authTranslations[lang] || authTranslations.id;
+        const rules = {
+          length: pw.length >= 12 && pw.length <= 72,
+          case: /[A-Z]/.test(pw) && /[a-z]/.test(pw),
+          mix: /\d/.test(pw) && /[^A-Za-z0-9]/.test(pw),
+        };
+        Object.entries(rules).forEach(([rule, met]) => {
+          const item = document.querySelector(`[data-password-rule="${rule}"]`);
+          if (!item) return;
+          item.classList.toggle("is-met", met);
+          const state = item.querySelector(".password-rule-state");
+          if (state) state.innerText = met ? dict.requirementMet : dict.requirementPending;
+        });
         meter.setAttribute("data-strength", String(score));
         label.setAttribute("data-strength", String(score));
         if (!pw) {
@@ -1761,6 +1882,13 @@
           requiredField: "Kolom ini wajib diisi.",
           passwordTooShort: "Password minimal 12 karakter.",
           passwordTooLong: "Password maksimal 72 karakter.",
+          passwordRequirementsTitle: "Syarat password",
+          passwordRequirementsHint: "Wajib + rekomendasi",
+          passwordRuleLength: "12–72 karakter (wajib)",
+          passwordRuleCase: "Huruf besar & kecil (disarankan)",
+          passwordRuleMix: "Angka & simbol (disarankan)",
+          requirementMet: "Terpenuhi",
+          requirementPending: "Belum",
           verifying: "Memverifikasi...",
           registering: "Mendaftarkan...",
           failedLoginTitle: "Gagal Masuk",
@@ -1862,6 +1990,13 @@
           requiredField: "This field is required.",
           passwordTooShort: "Password must be at least 12 characters.",
           passwordTooLong: "Password must not exceed 72 characters.",
+          passwordRequirementsTitle: "Password requirements",
+          passwordRequirementsHint: "Required + recommended",
+          passwordRuleLength: "12–72 characters (required)",
+          passwordRuleCase: "Uppercase & lowercase (recommended)",
+          passwordRuleMix: "Number & symbol (recommended)",
+          requirementMet: "Met",
+          requirementPending: "Not yet",
           verifying: "Verifying...",
           registering: "Creating...",
           failedLoginTitle: "Login Failed",
