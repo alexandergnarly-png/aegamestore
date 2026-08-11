@@ -52,6 +52,12 @@ function paymentConfigNumber(name, fallback, { max = Infinity, min = 0 } = {}) {
 const paymentVatRate = paymentConfigNumber("PAYMENT_VAT_RATE", 0.11, { max: 0.5 });
 const midtransQrisFeeRate = paymentConfigNumber("MIDTRANS_QRIS_FEE_RATE", 0.007, { max: 0.5 });
 const usdIdrRate = paymentConfigNumber("USD_IDR_RATE", 18000, { min: 1 });
+const binanceUsdtAddress = String(process.env.BINANCE_USDT_ADDRESS || "").trim();
+const binanceUsdtNetwork = String(
+  process.env.BINANCE_USDT_NETWORK || "BSC (BEP20)",
+).trim();
+const telegramBotToken = String(process.env.TELEGRAM_BOT_TOKEN || "").trim();
+const telegramChatId = String(process.env.TELEGRAM_CHAT_ID || "").trim();
 const jwtSecret = String(process.env.JWT_SECRET || "").trim();
 const adminTotpSecret = String(process.env.ADMIN_TOTP_SECRET || "").trim();
 const gameKeyEncryptionSecret = String(
@@ -354,7 +360,23 @@ db.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS snap_redirect_url TEXT`);
 db.query(
   `ALTER TABLE orders ADD COLUMN IF NOT EXISTS snap_token_created_at TEXT`,
 );
-const bulkOrderSchemaReady = Promise.all([productsTableReady, ordersTableReady, keysTableReady])
+const binancePaymentSchemaReady = ordersTableReady.then(async () => {
+  await db.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_reference TEXT`);
+  await db.query(
+    `ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_amount_usd NUMERIC(12,2)`,
+  );
+  await db.query(
+    `CREATE UNIQUE INDEX IF NOT EXISTS idx_orders_payment_reference_unique
+     ON orders (LOWER(payment_reference))
+     WHERE payment_reference IS NOT NULL AND payment_reference <> ''`,
+  );
+});
+const bulkOrderSchemaReady = Promise.all([
+  productsTableReady,
+  ordersTableReady,
+  keysTableReady,
+  binancePaymentSchemaReady,
+])
   .then(() => ensureBulkOrderSchema(db))
   .then(() => ensureWalletSchema(db))
   .then(() => {
@@ -2364,8 +2386,38 @@ async function getLoggedInUserFromRequest(req) {
   }
 }
 function calculatePaymentPrice(netPrice, paymentMethod = "midtrans") {
-  if (paymentMethod === "ae_credit") return Number(netPrice);
+  if (["ae_credit", "binance_manual"].includes(paymentMethod)) return Number(netPrice);
   return grossUpPaymentPrice(netPrice, midtransQrisFeeRate, paymentVatRate);
+}
+
+function calculateUsdtAmount(idrAmount) {
+  return Math.ceil((Number(idrAmount || 0) / usdIdrRate) * 100) / 100;
+}
+
+async function notifyTelegram(text) {
+  if (!telegramBotToken || !telegramChatId) {
+    console.warn("TELEGRAM PAYMENT NOTICE SKIPPED: bot belum dikonfigurasi");
+    return false;
+  }
+
+  const response = await fetch(
+    `https://api.telegram.org/bot${telegramBotToken}/sendMessage`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: telegramChatId,
+        text,
+        disable_web_page_preview: true,
+      }),
+      signal: AbortSignal.timeout(10000),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(`Telegram HTTP ${response.status}`);
+  }
+  return true;
 }
 
 function getMidtransPaymentOptions() {
@@ -5337,7 +5389,7 @@ app.post("/voucher-preview", voucherPreviewLimiter, async (req, res) => {
   const cleanQuantity = parseOrderQuantity(req.body.quantity);
   const paymentMethod = String(req.body?.payment_method || "midtrans").trim().toLowerCase();
 
-  if (!["midtrans", "ae_credit"].includes(paymentMethod)) {
+  if (!["midtrans", "ae_credit", "binance_manual"].includes(paymentMethod)) {
     return res.status(400).json({ message: "Metode pembayaran tidak valid" });
   }
 
@@ -5425,8 +5477,13 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
   }
   const { product_id, name, voucher_code, quantity } = req.body;
   const paymentMethod = String(req.body?.payment_method || "midtrans").trim().toLowerCase();
-  if (!["midtrans", "ae_credit"].includes(paymentMethod)) {
+  if (!["midtrans", "ae_credit", "binance_manual"].includes(paymentMethod)) {
     return res.status(400).json({ message: "Metode pembayaran tidak valid" });
+  }
+  if (paymentMethod === "binance_manual" && !binanceUsdtAddress) {
+    return res.status(503).json({
+      message: "Pembayaran USDT belum dikonfigurasi. Pilih QRIS atau AE Credit.",
+    });
   }
 
   const cleanProductId = Number(product_id);
@@ -5725,6 +5782,28 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
       });
     }
 
+    if (paymentMethod === "binance_manual") {
+      const paymentAmountUsd = calculateUsdtAmount(price);
+      await query(
+        `UPDATE orders SET payment_amount_usd = $1, admin_note = $2 WHERE id = $3`,
+        [
+          paymentAmountUsd,
+          `Menunggu pembayaran USDT ${paymentAmountUsd.toFixed(2)} via ${binanceUsdtNetwork}`,
+          orderId,
+        ],
+      );
+      return res.json({
+        message: "Order USDT dibuat. Kirim nominal tepat lalu masukkan TXID.",
+        orderId,
+        quantity: cleanQuantity,
+        binanceManual: true,
+        usdtAmount: paymentAmountUsd.toFixed(2),
+        usdtAddress: binanceUsdtAddress,
+        usdtNetwork: binanceUsdtNetwork,
+        resultUrl: `${baseUrl}/result?order_id=${orderId}`,
+      });
+    }
+
     const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanContact);
     const transaction = await snap.createTransaction({
       transaction_details: {
@@ -5809,6 +5888,107 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
     });
   }
 });
+
+app.post(
+  "/orders/:id/binance-payment",
+  orderLimiter,
+  requireUserCsrf,
+  async (req, res) => {
+    const loggedInUser = await getLoggedInUserFromRequest(req);
+    if (!loggedInUser) {
+      return res.status(401).json({ message: "Sesi login berakhir. Silakan login lagi." });
+    }
+
+    const orderId = String(req.params.id || "").trim();
+    const paymentReference = String(req.body?.payment_reference || "").trim();
+    if (!/^[A-Za-z0-9_-]{8,128}$/.test(paymentReference)) {
+      return res.status(400).json({
+        message: "TXID / payment reference harus 8-128 karakter tanpa spasi.",
+      });
+    }
+
+    const client = await db.connect();
+    let order;
+    try {
+      await client.query("BEGIN");
+      const result = await client.query(
+        `SELECT id, user_id, name, contact, game, product, quantity, price,
+                payment_method, payment_status, delivery_status,
+                payment_reference, payment_amount_usd
+         FROM orders WHERE id = $1 LIMIT 1 FOR UPDATE`,
+        [orderId],
+      );
+      order = result.rows[0];
+
+      if (!order || Number(order.user_id) !== Number(loggedInUser.id)) {
+        await client.query("ROLLBACK");
+        return res.status(404).json({ message: "Order tidak ditemukan." });
+      }
+      if (order.payment_method !== "binance_manual") {
+        await client.query("ROLLBACK");
+        return res.status(400).json({ message: "Order ini bukan pembayaran USDT." });
+      }
+      if (String(order.payment_status).toLowerCase() !== "pending") {
+        await client.query("ROLLBACK");
+        return res.status(409).json({ message: "Status pembayaran order sudah berubah." });
+      }
+      if (order.payment_reference) {
+        await client.query("ROLLBACK");
+        return res.status(409).json({
+          message:
+            order.payment_reference === paymentReference
+              ? "TXID sudah dikirim dan sedang diverifikasi."
+              : "Order ini sudah memiliki TXID.",
+        });
+      }
+
+      await client.query(
+        `UPDATE orders
+         SET payment_reference = $1,
+             delivery_status = 'payment_review',
+             admin_note = $2
+         WHERE id = $3`,
+        [
+          paymentReference,
+          `Bukti USDT dikirim. Verifikasi TXID ${paymentReference} sebelum konfirmasi pembayaran.`,
+          orderId,
+        ],
+      );
+      await client.query("COMMIT");
+    } catch (error) {
+      await client.query("ROLLBACK").catch(() => {});
+      if (error.code === "23505") {
+        return res.status(409).json({ message: "TXID ini sudah dipakai pada order lain." });
+      }
+      console.error("BINANCE PAYMENT SUBMISSION ERROR:", error.message);
+      return res.status(500).json({ message: "Gagal menyimpan TXID pembayaran." });
+    } finally {
+      client.release();
+    }
+
+    const adminUrl = `${getAppBaseUrl(req)}/ae-control#orders`;
+    const telegramText = [
+      "USDT PAYMENT NEEDS REVIEW",
+      `Order: ${order.id}`,
+      `Amount: ${Number(order.payment_amount_usd || 0).toFixed(2)} USDT`,
+      `Network: ${binanceUsdtNetwork}`,
+      `TXID: ${paymentReference}`,
+      `Buyer: ${order.name || "-"} (${order.contact || "-"})`,
+      `Product: ${order.game || "-"} / ${order.product || "-"}`,
+      `Quantity: ${getOrderQuantity(order.quantity)}`,
+      `Review: ${adminUrl}`,
+    ].join("\n");
+
+    notifyTelegram(telegramText).catch((error) =>
+      console.error("TELEGRAM PAYMENT NOTICE ERROR:", error.message),
+    );
+
+    return res.json({
+      message: "TXID diterima. Pembayaran akan diverifikasi admin sebelum key dikirim.",
+      resultUrl: `/result?order_id=${encodeURIComponent(orderId)}`,
+    });
+  },
+);
 
 app.post("/midtrans-notification", webhookLimiter, async (req, res) => {
   try {
@@ -6169,6 +6349,25 @@ app.get("/order/:id/resume", orderCheckLimiter, async (req, res) => {
       });
     }
 
+    if (order.payment_method === "binance_manual") {
+      if (order.payment_reference) {
+        return res.status(409).json({
+          message: "TXID sudah dikirim dan sedang diverifikasi admin.",
+          code: "PAYMENT_REVIEW",
+          resultUrl: `/result?order_id=${orderId}`,
+        });
+      }
+      return res.json({
+        message: "Resume pembayaran USDT siap",
+        orderId,
+        binanceManual: true,
+        usdtAmount: Number(order.payment_amount_usd || 0).toFixed(2),
+        usdtAddress: binanceUsdtAddress,
+        usdtNetwork: binanceUsdtNetwork,
+        resultUrl: `/result?order_id=${orderId}`,
+      });
+    }
+
     const baseUrl = getAppBaseUrl(req);
     const TWENTY_THREE_HOURS_MS = 23 * 60 * 60 * 1000;
     const tokenCreatedAtIso = order.snap_token_created_at || order.created_at;
@@ -6297,6 +6496,15 @@ app.post(
       if (String(order.payment_status).toLowerCase() === "paid") {
         await client.query("COMMIT");
         return res.json({ message: "Order sudah dibayar sebelumnya" });
+      }
+      if (
+        order.payment_method === "binance_manual" &&
+        !String(order.payment_reference || "").trim()
+      ) {
+        await client.query("ROLLBACK");
+        return res.status(409).json({
+          message: "Buyer belum mengirim TXID pembayaran USDT.",
+        });
       }
 
       const orderDeliveryType = normalizeProductDeliveryType(order.delivery_type);
@@ -7926,6 +8134,8 @@ app.get("/payment-config", (req, res) => {
     usd_idr_rate: usdIdrRate,
     vat_rate: paymentVatRate,
     qris_fee_rate: midtransQrisFeeRate,
+    binance_manual_enabled: Boolean(binanceUsdtAddress),
+    binance_usdt_network: binanceUsdtNetwork,
   });
 });
 

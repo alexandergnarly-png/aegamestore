@@ -1334,6 +1334,49 @@ const resultTranslations = {
         });
       }
 
+      async function resumeUsdtPayment(data) {
+        const english = localStorage.getItem("ae_language") === "en";
+        const result = await Swal.fire({
+          title: english ? "Pay with USDT" : "Bayar dengan USDT",
+          html: `<p><strong>${escapeHtml(data.usdtAmount)} USDT</strong> &middot; ${escapeHtml(data.usdtNetwork)}</p><p style="overflow-wrap:anywhere"><code>${escapeHtml(data.usdtAddress)}</code></p><p><small>Order ID: ${escapeHtml(data.orderId)}</small></p>`,
+          input: "text",
+          inputLabel: "TXID / payment reference",
+          inputPlaceholder: english ? "Paste after payment" : "Tempel setelah pembayaran",
+          showCancelButton: true,
+          confirmButtonText: english ? "Submit payment" : "Kirim bukti bayar",
+          confirmButtonColor: "#111111",
+          preConfirm: async (reference) => {
+            const clean = String(reference || "").trim();
+            if (!/^[A-Za-z0-9_-]{8,128}$/.test(clean)) {
+              Swal.showValidationMessage("TXID harus 8-128 karakter tanpa spasi.");
+              return false;
+            }
+            const csrf = document.cookie
+              .split("; ")
+              .find((row) => row.startsWith("user_csrf="))
+              ?.split("=")[1] || "";
+            const response = await fetch(
+              `/orders/${encodeURIComponent(data.orderId)}/binance-payment`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "x-user-csrf-token": decodeURIComponent(csrf),
+                },
+                body: JSON.stringify({ payment_reference: clean }),
+              },
+            );
+            const body = await response.json();
+            if (!response.ok) {
+              Swal.showValidationMessage(body.message || "Gagal mengirim TXID.");
+              return false;
+            }
+            return body;
+          },
+        });
+        if (result.isConfirmed) window.location.reload();
+      }
+
       async function continuePayment() {
         const orderId = getOrderIdFromUrl();
         const btn = document.getElementById("continuePayBtn");
@@ -1351,6 +1394,10 @@ const resultTranslations = {
             return;
           }
           if (!res.ok) throw new Error(data.message || tResult("continuePaymentFailed"));
+          if (data.binanceManual) {
+            await resumeUsdtPayment(data);
+            return;
+          }
           if (data.paymentUrl) {
             window.location.href = data.paymentUrl;
             return;

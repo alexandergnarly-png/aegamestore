@@ -7125,6 +7125,22 @@
               <span class="label">Total Bayar</span>
               <span class="value" style="color: var(--primary-strong); font-size: 15px;">${formatRupiah(order.price || 0)}</span>
             </div>
+            <div class="order-drawer-field">
+              <span class="label">Metode</span>
+              <span class="value">${escapeHtml(order.payment_method || "-")}</span>
+            </div>
+            ${
+              order.payment_method === "binance_manual"
+                ? `<div class="order-drawer-field">
+                    <span class="label">Nominal USDT</span>
+                    <span class="value">${Number(order.payment_amount_usd || 0).toFixed(2)} USDT</span>
+                  </div>
+                  <div class="order-drawer-field" style="flex-direction:column;align-items:stretch;">
+                    <span class="label">TXID / Payment Reference</span>
+                    <span class="value" style="text-align:left;overflow-wrap:anywhere;">${escapeHtml(order.payment_reference || "Belum dikirim")}</span>
+                  </div>`
+                : ""
+            }
           </div>
 
           <div class="order-drawer-section">
@@ -7762,9 +7778,13 @@
         copyToClipboard(text);
       }
       async function confirmPayment(orderId) {
+        const order = allOrders.find((item) => String(item.id) === String(orderId));
+        const isUsdt = order?.payment_method === "binance_manual";
         const result = await Swal.fire({
           title: "Konfirmasi Pembayaran?",
-          text: "Pastikan pembayaran benar-benar sudah masuk sebelum key dikirim.",
+          html: isUsdt
+            ? `<p>Pastikan <strong>${Number(order.payment_amount_usd || 0).toFixed(2)} USDT</strong> benar-benar sudah masuk.</p><p style="overflow-wrap:anywhere"><small>TXID: ${escapeHtml(order.payment_reference || "belum dikirim")}</small></p>`
+            : "Pastikan pembayaran benar-benar sudah masuk sebelum key dikirim.",
           icon: "warning",
           showCancelButton: true,
           confirmButtonText: "Ya, Konfirmasi",

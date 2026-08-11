@@ -14973,13 +14973,18 @@ body.dark-theme .order-product-card:not(.active) .price-usd {
 }
 
 .checkout-payment-choice {
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
 }
 
 .checkout-payment-option {
   min-width: 0;
   background: #ffffff;
   border-color: #d6d6d0;
+}
+
+.checkout-payment-option:disabled {
+  cursor: not-allowed;
+  opacity: 0.46;
 }
 
 @media (max-width: 720px) {
@@ -14989,5 +14994,100 @@ body.dark-theme .order-product-card:not(.active) .price-usd {
 
   .checkout-payment-option {
     min-height: 56px !important;
+  }
+}
+
+.usdt-payment-popup.swal2-popup {
+  width: min(460px, calc(100vw - 24px));
+  border: 1px solid #d6d6d0;
+  border-radius: 28px;
+  background: #ffffff;
+  color: #0a0a0a;
+}
+
+.usdt-payment-html.swal2-html-container {
+  margin-inline: 0;
+  text-align: left;
+}
+
+.usdt-payment-sheet {
+  display: grid;
+  gap: 10px;
+}
+
+.usdt-payment-amount {
+  display: grid;
+  gap: 4px;
+  padding: 18px;
+  border-radius: 20px;
+  background: #0a0a0a;
+  color: #ffffff;
+}
+
+.usdt-payment-amount small,
+.usdt-payment-row span {
+  color: #74746f;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.usdt-payment-amount small { color: #bdbdb8; }
+.usdt-payment-amount strong { font-size: clamp(28px, 9vw, 42px); line-height: 1; }
+
+.usdt-payment-row {
+  display: grid;
+  gap: 6px;
+  padding: 13px 14px;
+  border: 1px solid #deded8;
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.usdt-payment-copy {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.usdt-payment-copy span { grid-column: 1 / -1; }
+.usdt-payment-copy code { overflow-wrap: anywhere; font-size: 12px; }
+.usdt-payment-copy button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid #0a0a0a;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #0a0a0a;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background-color 180ms ease, color 180ms ease;
+}
+
+.usdt-payment-copy button:hover {
+  background: #0a0a0a;
+  color: #ffffff;
+}
+
+.usdt-payment-copy button:focus-visible {
+  outline: 3px solid #d4af37;
+  outline-offset: 2px;
+}
+
+.usdt-payment-warning {
+  margin: 2px 0 0;
+  padding: 12px 14px;
+  border-left: 3px solid #0a0a0a;
+  background: #f6f6f3;
+  color: #555550;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+@media (max-width: 720px) {
+  .usdt-payment-popup.swal2-popup {
+    padding: 18px 14px;
+    border-radius: 24px;
   }
 }

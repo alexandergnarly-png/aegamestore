@@ -66,6 +66,24 @@ MIDTRANS_QRIS_FEE_RATE=0.007
 
 Harga USD hanya estimasi tampilan. Pembayaran QRIS Midtrans tetap dalam IDR. Fee dan pajaknya dihitung dengan gross-up agar nilai bersih produk tidak berkurang.
 
+### Pembayaran USDT internasional
+
+Jalur ini khusus buyer internasional dan diverifikasi manual oleh owner sebelum key
+dikirim. Tambahkan ke Environment Render:
+
+```text
+BINANCE_USDT_ADDRESS=alamat_deposit_usdt_milik_toko
+BINANCE_USDT_NETWORK=BSC (BEP20)
+TELEGRAM_BOT_TOKEN=token_dari_BotFather
+TELEGRAM_CHAT_ID=chat_id_owner
+```
+
+`BINANCE_USDT_NETWORK` harus sama persis dengan jaringan alamat deposit. Jika
+`BINANCE_USDT_ADDRESS` kosong, opsi USDT otomatis nonaktif. Bot Telegram hanya
+memberi notifikasi; admin tetap wajib memeriksa nominal, jaringan, dan TXID di
+Binance lalu menekan **Konfirmasi Bayar** di halaman Order. Jangan pernah memberi
+bot izin withdrawal atau menyimpan private key/seed phrase di Render.
+
 ### Supplier CHEATGAME
 
 Tambahkan ke environment lokal dan Render:

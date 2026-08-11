@@ -79,7 +79,7 @@
       href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/style.css?v=20260811-qris-usd-3" />
+    <link rel="stylesheet" href="/style.css?v=20260811-binance-usdt-1" />
     <link rel="stylesheet" href="/keysystem-ui.css?v=20260811-header-controls-2" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#f4f3ee" />
@@ -1086,6 +1086,9 @@
           <button type="button" class="checkout-payment-option" data-payment-method="ae_credit" onclick="selectCheckoutPaymentMethod('ae_credit', this)">
             <strong data-i18n="walletPaymentTitle">AE Credit</strong><small id="checkoutWalletBalance">Saldo: Rp0</small>
           </button>
+          <button type="button" class="checkout-payment-option" id="binancePaymentOption" data-payment-method="binance_manual" onclick="selectCheckoutPaymentMethod('binance_manual', this)" disabled>
+            <strong data-i18n="binancePaymentTitle">USDT International</strong><small data-i18n="binancePaymentDesc">Verifikasi manual via Binance</small>
+          </button>
         </div>
 
         <div
@@ -1133,6 +1136,9 @@
             </span>
             <span title="ShopeePay">
               <iconify-icon icon="mdi:shopping-outline"></iconify-icon>
+            </span>
+            <span title="USDT">
+              <iconify-icon icon="simple-icons:tether"></iconify-icon>
             </span>
           </div>
         </div>
@@ -1652,6 +1658,6 @@
       preload="none"
       loop
     ></audio>
-    <script src="/script.js?v=20260811-qris-usd-3" defer></script>
+    <script src="/script.js?v=20260811-binance-usdt-1" defer></script>
   </body>
 </html>

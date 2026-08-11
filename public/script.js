@@ -241,6 +241,8 @@ const translations = {
     paymentFeeLabel: "Biaya pembayaran + pajak",
     walletPaymentTitle: "AE Credit",
     walletBalanceLabel: "Saldo",
+    binancePaymentTitle: "USDT Internasional",
+    binancePaymentDesc: "Verifikasi manual via Binance",
     productsUnavailableTitle: "Produk belum tersedia",
     productsUnavailableDesc:
       "Belum ada produk aktif saat ini. Silakan hubungi admin untuk info stok.",
@@ -521,6 +523,8 @@ const translations = {
     paymentFeeLabel: "Payment fee + tax",
     walletPaymentTitle: "AE Credit",
     walletBalanceLabel: "Balance",
+    binancePaymentTitle: "International USDT",
+    binancePaymentDesc: "Manual verification via Binance",
     productsUnavailableTitle: "Products are not available yet",
     productsUnavailableDesc:
       "There are no active products right now. Contact admin for stock information.",
@@ -867,6 +871,7 @@ let paymentPricingConfig = {
   usd_idr_rate: 18000,
   vat_rate: 0.11,
   qris_fee_rate: 0.007,
+  binance_manual_enabled: false,
 };
 let selectedReviewRating = 5;
 let currentSort = localStorage.getItem("ae_sort") || "default";
@@ -977,6 +982,15 @@ async function loadPaymentConfig() {
     const res = await fetch("/payment-config");
     if (!res.ok) return;
     paymentPricingConfig = { ...paymentPricingConfig, ...(await res.json()) };
+    const binanceButton = document.getElementById("binancePaymentOption");
+    if (binanceButton) {
+      binanceButton.disabled = !paymentPricingConfig.binance_manual_enabled;
+      binanceButton.title = binanceButton.disabled
+        ? currentLanguage === "en"
+          ? "USDT payment is not configured yet"
+          : "Pembayaran USDT belum dikonfigurasi"
+        : "";
+    }
     renderGames();
     if (selectedProductBasePrice > 0) refreshCheckoutDiscountPreview();
   } catch (err) { }
@@ -2262,6 +2276,95 @@ if (platformSelect) platformSelect.addEventListener("change", loadBrands);
 brandSelect.addEventListener("change", loadDurations);
 productSelect.addEventListener("change", updatePreview);
 
+async function showBinancePaymentModal(data) {
+  const english = currentLanguage === "en";
+  const amount = escapeHtml(data.usdtAmount || "0.00");
+  const network = escapeHtml(data.usdtNetwork || "-");
+  const address = escapeHtml(data.usdtAddress || "-");
+  const orderId = escapeHtml(data.orderId || "-");
+
+  const result = await Swal.fire({
+    title: english ? "Pay with USDT" : "Bayar dengan USDT",
+    html: `
+      <div class="usdt-payment-sheet">
+        <div class="usdt-payment-amount"><small>${english ? "Exact amount" : "Nominal tepat"}</small><strong>${amount} USDT</strong></div>
+        <div class="usdt-payment-row"><span>${english ? "Network" : "Jaringan"}</span><b>${network}</b></div>
+        <div class="usdt-payment-row usdt-payment-copy"><span>${english ? "Wallet address" : "Alamat wallet"}</span><code>${address}</code><button type="button" id="copyUsdtAddress">${english ? "Copy" : "Salin"}</button></div>
+        <div class="usdt-payment-row usdt-payment-copy"><span>Order ID</span><code>${orderId}</code><button type="button" id="copyUsdtOrderId">${english ? "Copy" : "Salin"}</button></div>
+        <p class="usdt-payment-warning">${english ? "Send only USDT on the exact network. A wrong network can permanently lose funds." : "Kirim hanya USDT pada jaringan yang sama. Salah jaringan dapat membuat dana hilang permanen."}</p>
+      </div>`,
+    input: "text",
+    inputLabel: english
+      ? "Transaction ID (TXID) / payment reference"
+      : "Transaction ID (TXID) / referensi pembayaran",
+    inputPlaceholder: english ? "Paste after payment" : "Tempel setelah pembayaran",
+    showCancelButton: true,
+    confirmButtonText: english ? "Submit payment" : "Kirim bukti bayar",
+    cancelButtonText: english ? "Pay later" : "Bayar nanti",
+    confirmButtonColor: "#0a0a0a",
+    cancelButtonColor: "#ffffff",
+    allowOutsideClick: false,
+    customClass: {
+      popup: "usdt-payment-popup",
+      htmlContainer: "usdt-payment-html",
+    },
+    didOpen: () => {
+      const copy = async (value) => {
+        await navigator.clipboard.writeText(value);
+        showToast(english ? "Copied" : "Berhasil disalin", { tone: "success" });
+      };
+      document
+        .getElementById("copyUsdtAddress")
+        ?.addEventListener("click", () => copy(data.usdtAddress));
+      document
+        .getElementById("copyUsdtOrderId")
+        ?.addEventListener("click", () => copy(data.orderId));
+    },
+    preConfirm: async (reference) => {
+      const cleanReference = String(reference || "").trim();
+      if (!/^[A-Za-z0-9_-]{8,128}$/.test(cleanReference)) {
+        Swal.showValidationMessage(
+          english
+            ? "Enter a valid 8-128 character TXID without spaces."
+            : "Masukkan TXID 8-128 karakter tanpa spasi.",
+        );
+        return false;
+      }
+      try {
+        const response = await fetch(
+          `/orders/${encodeURIComponent(data.orderId)}/binance-payment`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-user-csrf-token": getCookie("user_csrf"),
+            },
+            body: JSON.stringify({ payment_reference: cleanReference }),
+          },
+        );
+        const body = await response.json();
+        if (!response.ok) throw new Error(body.message || "Failed to submit payment");
+        return body;
+      } catch (error) {
+        Swal.showValidationMessage(error.message);
+        return false;
+      }
+    },
+  });
+
+  if (result.isConfirmed) {
+    await Swal.fire({
+      icon: "success",
+      title: english ? "Payment submitted" : "Bukti pembayaran terkirim",
+      text: english
+        ? "The admin will verify it before your key is delivered."
+        : "Admin akan memverifikasi pembayaran sebelum key dikirim.",
+      confirmButtonColor: "#0a0a0a",
+    });
+  }
+  window.location.href = result.value?.resultUrl || data.resultUrl;
+}
+
 async function buy() {
   const name = document.getElementById("name").value.trim();
   const contact = "Telegram Admin";
@@ -2348,6 +2451,13 @@ async function buy() {
       }).then(() => {
         window.location.href = data.redirectUrl || "/auth";
       });
+      return;
+    }
+
+    if (data.binanceManual) {
+      closeOrderModal();
+      setLoading(false);
+      await showBinancePaymentModal(data);
       return;
     }
 
@@ -2770,7 +2880,9 @@ function formatRupiah(value) {
 }
 
 function calculatePaymentGrossPrice(netPrice, method = selectedCheckoutPaymentMethod) {
-  if (method === "ae_credit") return Number(netPrice || 0);
+  if (["ae_credit", "binance_manual"].includes(method)) {
+    return Number(netPrice || 0);
+  }
   const vatMultiplier = 1 + paymentPricingConfig.vat_rate;
   return Math.ceil(
     Number(netPrice || 0) /
@@ -2786,8 +2898,15 @@ function setDualPrice(element, amount, prefix = "") {
 function updatePaymentFeeLabel() {
   const label = document.getElementById("paymentFeeLabel");
   if (!label) return;
-  if (selectedCheckoutPaymentMethod === "ae_credit") {
-    label.textContent = currentLanguage === "en" ? "Payment fee" : "Biaya pembayaran";
+  if (["ae_credit", "binance_manual"].includes(selectedCheckoutPaymentMethod)) {
+    label.textContent =
+      selectedCheckoutPaymentMethod === "binance_manual"
+        ? currentLanguage === "en"
+          ? "Gateway fee"
+          : "Biaya gateway"
+        : currentLanguage === "en"
+          ? "Payment fee"
+          : "Biaya pembayaran";
     return;
   }
   const rate = 100 * paymentPricingConfig.qris_fee_rate;
@@ -2826,7 +2945,8 @@ function showPriceBreakdown({
 }
 
 function selectCheckoutPaymentMethod(method, button) {
-  selectedCheckoutPaymentMethod = ["midtrans", "ae_credit"].includes(method)
+  if (button?.disabled) return;
+  selectedCheckoutPaymentMethod = ["midtrans", "ae_credit", "binance_manual"].includes(method)
     ? method
     : "midtrans";
   document.querySelectorAll(".checkout-payment-option").forEach((item) => item.classList.toggle("active", item === button || item.dataset.paymentMethod === selectedCheckoutPaymentMethod));
