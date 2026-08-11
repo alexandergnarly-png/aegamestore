@@ -2279,8 +2279,7 @@ productSelect.addEventListener("change", updatePreview);
 async function showBinancePaymentModal(data) {
   const english = currentLanguage === "en";
   const amount = escapeHtml(data.usdtAmount || "0.00");
-  const network = escapeHtml(data.usdtNetwork || "-");
-  const address = escapeHtml(data.usdtAddress || "-");
+  const payUid = escapeHtml(data.binancePayUid || "-");
   const orderId = escapeHtml(data.orderId || "-");
 
   const result = await Swal.fire({
@@ -2288,15 +2287,14 @@ async function showBinancePaymentModal(data) {
     html: `
       <div class="usdt-payment-sheet">
         <div class="usdt-payment-amount"><small>${english ? "Exact amount" : "Nominal tepat"}</small><strong>${amount} USDT</strong></div>
-        <div class="usdt-payment-row"><span>${english ? "Network" : "Jaringan"}</span><b>${network}</b></div>
-        <div class="usdt-payment-row usdt-payment-copy"><span>${english ? "Wallet address" : "Alamat wallet"}</span><code>${address}</code><button type="button" id="copyUsdtAddress">${english ? "Copy" : "Salin"}</button></div>
+        <div class="usdt-payment-row usdt-payment-copy"><span>Binance Pay UID</span><code>${payUid}</code><button type="button" id="copyBinancePayUid">${english ? "Copy" : "Salin"}</button></div>
         <div class="usdt-payment-row usdt-payment-copy"><span>Order ID</span><code>${orderId}</code><button type="button" id="copyUsdtOrderId">${english ? "Copy" : "Salin"}</button></div>
-        <p class="usdt-payment-warning">${english ? "Send only USDT on the exact network. A wrong network can permanently lose funds." : "Kirim hanya USDT pada jaringan yang sama. Salah jaringan dapat membuat dana hilang permanen."}</p>
+        <p class="usdt-payment-warning">${english ? "Send the exact USDT amount through Binance Pay, then paste its Transaction ID below." : "Kirim nominal USDT yang tepat melalui Binance Pay, lalu tempel Transaction ID di bawah."}</p>
       </div>`,
     input: "text",
     inputLabel: english
-      ? "Transaction ID (TXID) / payment reference"
-      : "Transaction ID (TXID) / referensi pembayaran",
+      ? "Binance Pay Transaction ID"
+      : "Transaction ID Binance Pay",
     inputPlaceholder: english ? "Paste after payment" : "Tempel setelah pembayaran",
     showCancelButton: true,
     confirmButtonText: english ? "Submit payment" : "Kirim bukti bayar",
@@ -2314,8 +2312,8 @@ async function showBinancePaymentModal(data) {
         showToast(english ? "Copied" : "Berhasil disalin", { tone: "success" });
       };
       document
-        .getElementById("copyUsdtAddress")
-        ?.addEventListener("click", () => copy(data.usdtAddress));
+        .getElementById("copyBinancePayUid")
+        ?.addEventListener("click", () => copy(data.binancePayUid));
       document
         .getElementById("copyUsdtOrderId")
         ?.addEventListener("click", () => copy(data.orderId));
@@ -2325,8 +2323,8 @@ async function showBinancePaymentModal(data) {
       if (!/^[A-Za-z0-9_-]{8,128}$/.test(cleanReference)) {
         Swal.showValidationMessage(
           english
-            ? "Enter a valid 8-128 character TXID without spaces."
-            : "Masukkan TXID 8-128 karakter tanpa spasi.",
+            ? "Enter a valid 8-128 character Transaction ID without spaces."
+            : "Masukkan Transaction ID 8-128 karakter tanpa spasi.",
         );
         return false;
       }

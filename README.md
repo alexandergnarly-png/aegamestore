@@ -72,15 +72,14 @@ Jalur ini khusus buyer internasional dan diverifikasi manual oleh owner sebelum 
 dikirim. Tambahkan ke Environment Render:
 
 ```text
-BINANCE_USDT_ADDRESS=alamat_deposit_usdt_milik_toko
-BINANCE_USDT_NETWORK=BSC (BEP20)
+BINANCE_PAY_UID=uid_binance_milik_toko
 TELEGRAM_BOT_TOKEN=token_dari_BotFather
 TELEGRAM_CHAT_ID=chat_id_owner
 ```
 
-`BINANCE_USDT_NETWORK` harus sama persis dengan jaringan alamat deposit. Jika
-`BINANCE_USDT_ADDRESS` kosong, opsi USDT otomatis nonaktif. Bot Telegram hanya
-memberi notifikasi; admin tetap wajib memeriksa nominal, jaringan, dan TXID di
+Jika `BINANCE_PAY_UID` kosong, opsi USDT otomatis nonaktif. Buyer mengirim USDT
+antar-akun melalui Binance Pay lalu memasukkan Transaction ID. Bot Telegram hanya
+memberi notifikasi; admin tetap wajib memeriksa nominal dan Transaction ID di
 Binance lalu menekan **Konfirmasi Bayar** di halaman Order. Jangan pernah memberi
 bot izin withdrawal atau menyimpan private key/seed phrase di Render.
 

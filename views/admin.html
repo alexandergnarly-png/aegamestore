@@ -7136,7 +7136,7 @@
                     <span class="value">${Number(order.payment_amount_usd || 0).toFixed(2)} USDT</span>
                   </div>
                   <div class="order-drawer-field" style="flex-direction:column;align-items:stretch;">
-                    <span class="label">TXID / Payment Reference</span>
+                    <span class="label">Binance Pay Transaction ID</span>
                     <span class="value" style="text-align:left;overflow-wrap:anywhere;">${escapeHtml(order.payment_reference || "Belum dikirim")}</span>
                   </div>`
                 : ""
@@ -7783,7 +7783,7 @@
         const result = await Swal.fire({
           title: "Konfirmasi Pembayaran?",
           html: isUsdt
-            ? `<p>Pastikan <strong>${Number(order.payment_amount_usd || 0).toFixed(2)} USDT</strong> benar-benar sudah masuk.</p><p style="overflow-wrap:anywhere"><small>TXID: ${escapeHtml(order.payment_reference || "belum dikirim")}</small></p>`
+            ? `<p>Pastikan <strong>${Number(order.payment_amount_usd || 0).toFixed(2)} USDT</strong> benar-benar sudah masuk melalui Binance Pay.</p><p style="overflow-wrap:anywhere"><small>Transaction ID: ${escapeHtml(order.payment_reference || "belum dikirim")}</small></p>`
             : "Pastikan pembayaran benar-benar sudah masuk sebelum key dikirim.",
           icon: "warning",
           showCancelButton: true,

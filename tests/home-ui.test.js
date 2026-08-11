@@ -142,10 +142,10 @@ assert.match(css, /prefers-reduced-motion: reduce[\s\S]*?account-orbit-icon/);
     `Missing Indonesian/English translations for: ${key}`,
   );
 });
-assert.match(html, /script\.js\?v=20260811-binance-usdt-1/);
+assert.match(html, /script\.js\?v=20260811-binance-pay-uid-1/);
 assert.match(html, /style\.css\?v=20260811-binance-usdt-1/);
 assert.match(html, /keysystem-ui\.css\?v=20260811-header-controls-2/);
-assert.match(serviceWorker, /CACHE_VERSION = "20260811-binance-usdt-v1"/);
+assert.match(serviceWorker, /CACHE_VERSION = "20260811-binance-pay-uid-v1"/);
 assert.doesNotMatch(css, /body \{\s*padding-bottom: 92px !important;/);
 assert.match(keysystemCss, /Mobile footer closes the page cleanly/);
 assert.match(keysystemCss, /body\.keysystem-ui \{\s*padding-bottom: 0 !important;/);

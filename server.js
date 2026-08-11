@@ -52,10 +52,7 @@ function paymentConfigNumber(name, fallback, { max = Infinity, min = 0 } = {}) {
 const paymentVatRate = paymentConfigNumber("PAYMENT_VAT_RATE", 0.11, { max: 0.5 });
 const midtransQrisFeeRate = paymentConfigNumber("MIDTRANS_QRIS_FEE_RATE", 0.007, { max: 0.5 });
 const usdIdrRate = paymentConfigNumber("USD_IDR_RATE", 18000, { min: 1 });
-const binanceUsdtAddress = String(process.env.BINANCE_USDT_ADDRESS || "").trim();
-const binanceUsdtNetwork = String(
-  process.env.BINANCE_USDT_NETWORK || "BSC (BEP20)",
-).trim();
+const binancePayUid = String(process.env.BINANCE_PAY_UID || "").trim();
 const telegramBotToken = String(process.env.TELEGRAM_BOT_TOKEN || "").trim();
 const telegramChatId = String(process.env.TELEGRAM_CHAT_ID || "").trim();
 const jwtSecret = String(process.env.JWT_SECRET || "").trim();
@@ -5480,7 +5477,7 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
   if (!["midtrans", "ae_credit", "binance_manual"].includes(paymentMethod)) {
     return res.status(400).json({ message: "Metode pembayaran tidak valid" });
   }
-  if (paymentMethod === "binance_manual" && !binanceUsdtAddress) {
+  if (paymentMethod === "binance_manual" && !binancePayUid) {
     return res.status(503).json({
       message: "Pembayaran USDT belum dikonfigurasi. Pilih QRIS atau AE Credit.",
     });
@@ -5788,18 +5785,17 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
         `UPDATE orders SET payment_amount_usd = $1, admin_note = $2 WHERE id = $3`,
         [
           paymentAmountUsd,
-          `Menunggu pembayaran USDT ${paymentAmountUsd.toFixed(2)} via ${binanceUsdtNetwork}`,
+          `Menunggu pembayaran ${paymentAmountUsd.toFixed(2)} USDT via Binance Pay UID ${binancePayUid}`,
           orderId,
         ],
       );
       return res.json({
-        message: "Order USDT dibuat. Kirim nominal tepat lalu masukkan TXID.",
+        message: "Order USDT dibuat. Kirim nominal tepat ke Binance Pay UID lalu masukkan Transaction ID.",
         orderId,
         quantity: cleanQuantity,
         binanceManual: true,
         usdtAmount: paymentAmountUsd.toFixed(2),
-        usdtAddress: binanceUsdtAddress,
-        usdtNetwork: binanceUsdtNetwork,
+        binancePayUid,
         resultUrl: `${baseUrl}/result?order_id=${orderId}`,
       });
     }
@@ -5903,7 +5899,7 @@ app.post(
     const paymentReference = String(req.body?.payment_reference || "").trim();
     if (!/^[A-Za-z0-9_-]{8,128}$/.test(paymentReference)) {
       return res.status(400).json({
-        message: "TXID / payment reference harus 8-128 karakter tanpa spasi.",
+        message: "Binance Pay Transaction ID harus 8-128 karakter tanpa spasi.",
       });
     }
 
@@ -5937,8 +5933,8 @@ app.post(
         return res.status(409).json({
           message:
             order.payment_reference === paymentReference
-              ? "TXID sudah dikirim dan sedang diverifikasi."
-              : "Order ini sudah memiliki TXID.",
+              ? "Transaction ID sudah dikirim dan sedang diverifikasi."
+              : "Order ini sudah memiliki Transaction ID.",
         });
       }
 
@@ -5950,7 +5946,7 @@ app.post(
          WHERE id = $3`,
         [
           paymentReference,
-          `Bukti USDT dikirim. Verifikasi TXID ${paymentReference} sebelum konfirmasi pembayaran.`,
+          `Bukti Binance Pay dikirim. Verifikasi Transaction ID ${paymentReference} sebelum konfirmasi pembayaran.`,
           orderId,
         ],
       );
@@ -5958,10 +5954,10 @@ app.post(
     } catch (error) {
       await client.query("ROLLBACK").catch(() => {});
       if (error.code === "23505") {
-        return res.status(409).json({ message: "TXID ini sudah dipakai pada order lain." });
+        return res.status(409).json({ message: "Transaction ID ini sudah dipakai pada order lain." });
       }
       console.error("BINANCE PAYMENT SUBMISSION ERROR:", error.message);
-      return res.status(500).json({ message: "Gagal menyimpan TXID pembayaran." });
+      return res.status(500).json({ message: "Gagal menyimpan Transaction ID pembayaran." });
     } finally {
       client.release();
     }
@@ -5971,8 +5967,8 @@ app.post(
       "USDT PAYMENT NEEDS REVIEW",
       `Order: ${order.id}`,
       `Amount: ${Number(order.payment_amount_usd || 0).toFixed(2)} USDT`,
-      `Network: ${binanceUsdtNetwork}`,
-      `TXID: ${paymentReference}`,
+      `Binance Pay UID: ${binancePayUid}`,
+      `Transaction ID: ${paymentReference}`,
       `Buyer: ${order.name || "-"} (${order.contact || "-"})`,
       `Product: ${order.game || "-"} / ${order.product || "-"}`,
       `Quantity: ${getOrderQuantity(order.quantity)}`,
@@ -5984,7 +5980,7 @@ app.post(
     );
 
     return res.json({
-      message: "TXID diterima. Pembayaran akan diverifikasi admin sebelum key dikirim.",
+      message: "Transaction ID diterima. Pembayaran akan diverifikasi admin sebelum key dikirim.",
       resultUrl: `/result?order_id=${encodeURIComponent(orderId)}`,
     });
   },
@@ -6352,7 +6348,7 @@ app.get("/order/:id/resume", orderCheckLimiter, async (req, res) => {
     if (order.payment_method === "binance_manual") {
       if (order.payment_reference) {
         return res.status(409).json({
-          message: "TXID sudah dikirim dan sedang diverifikasi admin.",
+          message: "Transaction ID sudah dikirim dan sedang diverifikasi admin.",
           code: "PAYMENT_REVIEW",
           resultUrl: `/result?order_id=${orderId}`,
         });
@@ -6362,8 +6358,7 @@ app.get("/order/:id/resume", orderCheckLimiter, async (req, res) => {
         orderId,
         binanceManual: true,
         usdtAmount: Number(order.payment_amount_usd || 0).toFixed(2),
-        usdtAddress: binanceUsdtAddress,
-        usdtNetwork: binanceUsdtNetwork,
+        binancePayUid,
         resultUrl: `/result?order_id=${orderId}`,
       });
     }
@@ -6503,7 +6498,7 @@ app.post(
       ) {
         await client.query("ROLLBACK");
         return res.status(409).json({
-          message: "Buyer belum mengirim TXID pembayaran USDT.",
+          message: "Buyer belum mengirim Binance Pay Transaction ID.",
         });
       }
 
@@ -8134,8 +8129,7 @@ app.get("/payment-config", (req, res) => {
     usd_idr_rate: usdIdrRate,
     vat_rate: paymentVatRate,
     qris_fee_rate: midtransQrisFeeRate,
-    binance_manual_enabled: Boolean(binanceUsdtAddress),
-    binance_usdt_network: binanceUsdtNetwork,
+    binance_manual_enabled: Boolean(binancePayUid),
   });
 });
 

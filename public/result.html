@@ -1338,9 +1338,9 @@ const resultTranslations = {
         const english = localStorage.getItem("ae_language") === "en";
         const result = await Swal.fire({
           title: english ? "Pay with USDT" : "Bayar dengan USDT",
-          html: `<p><strong>${escapeHtml(data.usdtAmount)} USDT</strong> &middot; ${escapeHtml(data.usdtNetwork)}</p><p style="overflow-wrap:anywhere"><code>${escapeHtml(data.usdtAddress)}</code></p><p><small>Order ID: ${escapeHtml(data.orderId)}</small></p>`,
+          html: `<p><strong>${escapeHtml(data.usdtAmount)} USDT</strong></p><p>Binance Pay UID<br><code>${escapeHtml(data.binancePayUid)}</code></p><p><small>Order ID: ${escapeHtml(data.orderId)}</small></p>`,
           input: "text",
-          inputLabel: "TXID / payment reference",
+          inputLabel: "Binance Pay Transaction ID",
           inputPlaceholder: english ? "Paste after payment" : "Tempel setelah pembayaran",
           showCancelButton: true,
           confirmButtonText: english ? "Submit payment" : "Kirim bukti bayar",
@@ -1348,7 +1348,7 @@ const resultTranslations = {
           preConfirm: async (reference) => {
             const clean = String(reference || "").trim();
             if (!/^[A-Za-z0-9_-]{8,128}$/.test(clean)) {
-              Swal.showValidationMessage("TXID harus 8-128 karakter tanpa spasi.");
+              Swal.showValidationMessage("Transaction ID harus 8-128 karakter tanpa spasi.");
               return false;
             }
             const csrf = document.cookie
@@ -1368,7 +1368,7 @@ const resultTranslations = {
             );
             const body = await response.json();
             if (!response.ok) {
-              Swal.showValidationMessage(body.message || "Gagal mengirim TXID.");
+              Swal.showValidationMessage(body.message || "Gagal mengirim Transaction ID.");
               return false;
             }
             return body;
