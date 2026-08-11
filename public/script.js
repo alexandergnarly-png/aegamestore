@@ -238,8 +238,6 @@ const translations = {
     discountVipLabel: "Diskon Voucher / VIP",
     gatewayPaymentTitle: "QRIS Indonesia",
     gatewayPaymentDesc: "0,7% + pajak biaya",
-    internationalCardTitle: "Kartu Internasional",
-    internationalCardDesc: "Visa, Mastercard, JCB, Amex",
     paymentFeeLabel: "Biaya pembayaran + pajak",
     walletPaymentTitle: "AE Credit",
     walletBalanceLabel: "Saldo",
@@ -520,8 +518,6 @@ const translations = {
     discountVipLabel: "Voucher / VIP Discount",
     gatewayPaymentTitle: "Indonesia QRIS",
     gatewayPaymentDesc: "0.7% + fee tax",
-    internationalCardTitle: "International Card",
-    internationalCardDesc: "Visa, Mastercard, JCB, Amex",
     paymentFeeLabel: "Payment fee + tax",
     walletPaymentTitle: "AE Credit",
     walletBalanceLabel: "Balance",
@@ -871,8 +867,6 @@ let paymentPricingConfig = {
   usd_idr_rate: 18000,
   vat_rate: 0.11,
   qris_fee_rate: 0.007,
-  card_fee_rate: 0.029,
-  card_fixed_fee: 2000,
 };
 let selectedReviewRating = 5;
 let currentSort = localStorage.getItem("ae_sort") || "default";
@@ -2777,15 +2771,10 @@ function formatRupiah(value) {
 
 function calculatePaymentGrossPrice(netPrice, method = selectedCheckoutPaymentMethod) {
   if (method === "ae_credit") return Number(netPrice || 0);
-  const isCard = method === "midtrans_card";
-  const rate = isCard
-    ? paymentPricingConfig.card_fee_rate
-    : paymentPricingConfig.qris_fee_rate;
-  const fixedFee = isCard ? paymentPricingConfig.card_fixed_fee : 0;
   const vatMultiplier = 1 + paymentPricingConfig.vat_rate;
   return Math.ceil(
-    (Number(netPrice || 0) + fixedFee * vatMultiplier) /
-      (1 - rate * vatMultiplier),
+    Number(netPrice || 0) /
+      (1 - paymentPricingConfig.qris_fee_rate * vatMultiplier),
   );
 }
 
@@ -2801,10 +2790,8 @@ function updatePaymentFeeLabel() {
     label.textContent = currentLanguage === "en" ? "Payment fee" : "Biaya pembayaran";
     return;
   }
-  const isCard = selectedCheckoutPaymentMethod === "midtrans_card";
-  const rate = 100 * (isCard ? paymentPricingConfig.card_fee_rate : paymentPricingConfig.qris_fee_rate);
-  const fixed = isCard ? ` + ${formatRupiah(paymentPricingConfig.card_fixed_fee)}` : "";
-  label.textContent = `${isCard ? (currentLanguage === "en" ? "Card" : "Kartu") : "QRIS"} ${rate.toLocaleString(currentLanguage === "en" ? "en-US" : "id-ID", { maximumFractionDigits: 2 })}%${fixed} + ${currentLanguage === "en" ? "fee tax" : "pajak biaya"}`;
+  const rate = 100 * paymentPricingConfig.qris_fee_rate;
+  label.textContent = `QRIS ${rate.toLocaleString(currentLanguage === "en" ? "en-US" : "id-ID", { maximumFractionDigits: 2 })}% + ${currentLanguage === "en" ? "fee tax" : "pajak biaya"}`;
 }
 
 function showPriceBreakdown({
@@ -2839,7 +2826,7 @@ function showPriceBreakdown({
 }
 
 function selectCheckoutPaymentMethod(method, button) {
-  selectedCheckoutPaymentMethod = ["midtrans", "midtrans_card", "ae_credit"].includes(method)
+  selectedCheckoutPaymentMethod = ["midtrans", "ae_credit"].includes(method)
     ? method
     : "midtrans";
   document.querySelectorAll(".checkout-payment-option").forEach((item) => item.classList.toggle("active", item === button || item.dataset.paymentMethod === selectedCheckoutPaymentMethod));

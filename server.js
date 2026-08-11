@@ -51,8 +51,6 @@ function paymentConfigNumber(name, fallback, { max = Infinity, min = 0 } = {}) {
 
 const paymentVatRate = paymentConfigNumber("PAYMENT_VAT_RATE", 0.11, { max: 0.5 });
 const midtransQrisFeeRate = paymentConfigNumber("MIDTRANS_QRIS_FEE_RATE", 0.007, { max: 0.5 });
-const midtransCardFeeRate = paymentConfigNumber("MIDTRANS_CARD_FEE_RATE", 0.029, { max: 0.5 });
-const midtransCardFixedFee = paymentConfigNumber("MIDTRANS_CARD_FIXED_FEE", 2000);
 const usdIdrRate = paymentConfigNumber("USD_IDR_RATE", 18000, { min: 1 });
 const jwtSecret = String(process.env.JWT_SECRET || "").trim();
 const adminTotpSecret = String(process.env.ADMIN_TOTP_SECRET || "").trim();
@@ -2367,21 +2365,11 @@ async function getLoggedInUserFromRequest(req) {
 }
 function calculatePaymentPrice(netPrice, paymentMethod = "midtrans") {
   if (paymentMethod === "ae_credit") return Number(netPrice);
-  if (paymentMethod === "midtrans_card") {
-    return grossUpPaymentPrice(
-      netPrice,
-      midtransCardFeeRate,
-      midtransCardFixedFee,
-      paymentVatRate,
-    );
-  }
-  return grossUpPaymentPrice(netPrice, midtransQrisFeeRate, 0, paymentVatRate);
+  return grossUpPaymentPrice(netPrice, midtransQrisFeeRate, paymentVatRate);
 }
 
-function getMidtransPaymentOptions(paymentMethod) {
-  return paymentMethod === "midtrans_card"
-    ? { enabled_payments: ["credit_card"], credit_card: { secure: true } }
-    : { enabled_payments: ["other_qris"] };
+function getMidtransPaymentOptions() {
+  return { enabled_payments: ["other_qris"] };
 }
 
 function parseWalletAmount(value) {
@@ -5349,7 +5337,7 @@ app.post("/voucher-preview", voucherPreviewLimiter, async (req, res) => {
   const cleanQuantity = parseOrderQuantity(req.body.quantity);
   const paymentMethod = String(req.body?.payment_method || "midtrans").trim().toLowerCase();
 
-  if (!["midtrans", "midtrans_card", "ae_credit"].includes(paymentMethod)) {
+  if (!["midtrans", "ae_credit"].includes(paymentMethod)) {
     return res.status(400).json({ message: "Metode pembayaran tidak valid" });
   }
 
@@ -5437,7 +5425,7 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
   }
   const { product_id, name, voucher_code, quantity } = req.body;
   const paymentMethod = String(req.body?.payment_method || "midtrans").trim().toLowerCase();
-  if (!["midtrans", "midtrans_card", "ae_credit"].includes(paymentMethod)) {
+  if (!["midtrans", "ae_credit"].includes(paymentMethod)) {
     return res.status(400).json({ message: "Metode pembayaran tidak valid" });
   }
 
@@ -7938,8 +7926,6 @@ app.get("/payment-config", (req, res) => {
     usd_idr_rate: usdIdrRate,
     vat_rate: paymentVatRate,
     qris_fee_rate: midtransQrisFeeRate,
-    card_fee_rate: midtransCardFeeRate,
-    card_fixed_fee: midtransCardFixedFee,
   });
 });
 

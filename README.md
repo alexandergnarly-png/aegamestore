@@ -54,7 +54,7 @@ File lokal tersebut disimpan di `private/` yang diabaikan Git.
 - Gunakan Internal Database URL Render. Untuk URL eksternal, jangan set `DATABASE_SSL_REJECT_UNAUTHORIZED=false`.
 - Jangan rotasi `JWT_SECRET` tanpa migrasi key game; secret itu juga menurunkan kunci enkripsi data game key.
 
-### Harga pembayaran internasional
+### Tampilan harga IDR / USD
 
 Nilai berikut memiliki default aman di aplikasi, tetapi bisa diubah di Environment Render bila tarif kontrak Midtrans berbeda:
 
@@ -62,11 +62,9 @@ Nilai berikut memiliki default aman di aplikasi, tetapi bisa diubah di Environme
 USD_IDR_RATE=18000
 PAYMENT_VAT_RATE=0.11
 MIDTRANS_QRIS_FEE_RATE=0.007
-MIDTRANS_CARD_FEE_RATE=0.029
-MIDTRANS_CARD_FIXED_FEE=2000
 ```
 
-Harga USD hanya estimasi tampilan. Charge Midtrans tetap dalam IDR. Fee dan pajaknya dihitung dengan gross-up agar nilai bersih produk tidak berkurang.
+Harga USD hanya estimasi tampilan. Pembayaran QRIS Midtrans tetap dalam IDR. Fee dan pajaknya dihitung dengan gross-up agar nilai bersih produk tidak berkurang.
 
 ### Supplier CHEATGAME
 
