@@ -16,6 +16,10 @@ assert.match(route, /process\.env\.OPENAI_MODEL \|\| "gpt-5\.6-luna"/);
 assert.match(route, /https:\/\/api\.openai\.com\/v1\/responses/);
 assert.match(route, /store: false/);
 assert.match(route, /AbortSignal\.timeout\(20_000\)/);
+assert.match(route, /max_output_tokens: 180/);
+assert.match(route, /Sound like a friendly human store assistant/);
+assert.match(route, /Never use Markdown, bullets, numbered lists, headings, tables, or dash separators/);
+assert.match(route, /Answer in one or two short sentences by default/);
 assert.match(route, /WHERE p\.active = 1/);
 assert.match(route, /price_idr/);
 assert.match(server, /function buildLocalCatalogReply\(message, catalog\)/);
@@ -36,5 +40,7 @@ const sampleCatalog = [
 const localReply = buildLocalCatalogReply("Delta Force Android paling murah", sampleCatalog);
 assert.match(localReply, /Aorus/);
 assert.doesNotMatch(localReply, /PUBG/);
+assert.doesNotMatch(localReply, /\n|^\d+\.|—| - /);
+assert.ok((localReply.match(/[.!?](?:\s|$)/g) || []).length <= 2, "local reply should stay conversational and short");
 
 console.log("AI assistant security contract check passed.");
