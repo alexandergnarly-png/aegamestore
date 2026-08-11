@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Panel - AE Game Store</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -1601,9 +1602,20 @@
       .admin-order-mobile-ops {
         display: none;
         margin-bottom: 14px;
-        padding: 14px;
-        border-radius: 24px;
+        padding: 16px;
+        overflow: hidden;
+        border-radius: 26px;
         box-shadow: none;
+      }
+
+      .admin-order-mobile-ops::before {
+        content: "";
+        display: block;
+        width: 36px;
+        height: 4px;
+        margin-bottom: 14px;
+        border-radius: var(--pill);
+        background: var(--ink);
       }
 
       .admin-order-ops-head {
@@ -1628,10 +1640,35 @@
       }
 
       .admin-ops-refresh {
-        width: 40px;
+        width: auto;
+        min-width: 92px;
         height: 40px;
-        padding: 0;
-        border-radius: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 0 13px;
+        border: 1px solid var(--ink);
+        border-radius: var(--pill);
+        background: var(--ink);
+        color: var(--surface);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .admin-ops-refresh:disabled {
+        cursor: wait;
+        opacity: 0.64;
+      }
+
+      .admin-ops-refresh.is-loading .ui-icon {
+        animation: admin-refresh-spin 0.8s linear infinite;
+      }
+
+      @keyframes admin-refresh-spin {
+        to {
+          transform: rotate(360deg);
+        }
       }
 
       .admin-order-ops-grid {
@@ -1653,6 +1690,16 @@
         background: var(--surface-2);
         color: var(--ink);
         box-shadow: none;
+      }
+
+      .admin-ops-card.active {
+        border-color: var(--ink);
+        background: var(--ink);
+      }
+
+      .admin-ops-card.active .ops-num,
+      .admin-ops-card.active .ops-label {
+        color: var(--surface);
       }
 
       .ops-num {
@@ -3758,18 +3805,22 @@
                 <span>Mode cepat untuk pantauan mobile</span>
               </div>
               <button
+                id="adminOrderRefresh"
                 type="button"
                 class="admin-ops-refresh"
                 onclick="loadOrders()"
                 aria-label="Refresh order"
               >
-                <svg class="icon" aria-hidden="true"><use href="#icon-refresh"></use></svg>
+                <svg class="ui-icon" aria-hidden="true"><use href="#icon-refresh"></use></svg>
+                <span class="admin-ops-refresh-label">Refresh</span>
               </button>
             </div>
             <div class="admin-order-ops-grid">
               <button
                 type="button"
                 class="admin-ops-card"
+                data-quick-order="manual"
+                aria-pressed="false"
                 onclick="setQuickOrderFilter('manual')"
               >
                 <span class="ops-num" id="opsManualCount">0</span>
@@ -3778,6 +3829,8 @@
               <button
                 type="button"
                 class="admin-ops-card"
+                data-quick-order="pending"
+                aria-pressed="false"
                 onclick="setQuickOrderFilter('pending')"
               >
                 <span class="ops-num" id="opsPendingCount">0</span>
@@ -3786,6 +3839,8 @@
               <button
                 type="button"
                 class="admin-ops-card"
+                data-quick-order="paid"
+                aria-pressed="false"
                 onclick="setQuickOrderFilter('paid')"
               >
                 <span class="ops-num" id="opsPaidCount">0</span>
@@ -3800,6 +3855,7 @@
                 type="button"
                 class="admin-order-chip active"
                 data-quick-order="all"
+                aria-pressed="true"
                 onclick="setQuickOrderFilter('all', this)"
               >
                 Semua
@@ -3808,6 +3864,7 @@
                 type="button"
                 class="admin-order-chip"
                 data-quick-order="manual"
+                aria-pressed="false"
                 onclick="setQuickOrderFilter('manual', this)"
               >
                 Manual
@@ -3816,6 +3873,7 @@
                 type="button"
                 class="admin-order-chip"
                 data-quick-order="pending"
+                aria-pressed="false"
                 onclick="setQuickOrderFilter('pending', this)"
               >
                 Pending
@@ -3824,6 +3882,7 @@
                 type="button"
                 class="admin-order-chip"
                 data-quick-order="paid"
+                aria-pressed="false"
                 onclick="setQuickOrderFilter('paid', this)"
               >
                 Paid
@@ -3832,6 +3891,7 @@
                 type="button"
                 class="admin-order-chip"
                 data-quick-order="delivered"
+                aria-pressed="false"
                 onclick="setQuickOrderFilter('delivered', this)"
               >
                 Delivered
@@ -6679,10 +6739,20 @@
       async function loadOrders() {
         const statusText = document.getElementById("orderStatusText");
         const tableBody = document.getElementById("orderTableBody");
+        const refreshButton = document.getElementById("adminOrderRefresh");
+        const refreshLabel = refreshButton?.querySelector(
+          ".admin-ops-refresh-label",
+        );
         if (!tableBody || !statusText) return;
 
         if (ORDERS_STATE.loading) return;
         ORDERS_STATE.loading = true;
+        if (refreshButton) {
+          refreshButton.disabled = true;
+          refreshButton.classList.add("is-loading");
+          refreshButton.setAttribute("aria-busy", "true");
+        }
+        if (refreshLabel) refreshLabel.innerText = "Memuat";
 
         statusText.innerText = "Memuat daftar order...";
         renderOrderTableSkeleton(5);
@@ -6754,6 +6824,12 @@
           `;
         } finally {
           ORDERS_STATE.loading = false;
+          if (refreshButton) {
+            refreshButton.disabled = false;
+            refreshButton.classList.remove("is-loading");
+            refreshButton.removeAttribute("aria-busy");
+          }
+          if (refreshLabel) refreshLabel.innerText = "Refresh";
         }
       }
 
@@ -7735,12 +7811,11 @@
           delivery.value = "delivered";
         }
 
-        document
-          .querySelectorAll(".admin-order-chip")
-          .forEach((el) => el.classList.remove("active"));
-        const activeBtn =
-          btn || document.querySelector(`[data-quick-order="${type}"]`);
-        if (activeBtn) activeBtn.classList.add("active");
+        document.querySelectorAll("[data-quick-order]").forEach((el) => {
+          const active = el.dataset.quickOrder === type;
+          el.classList.toggle("active", active);
+          el.setAttribute("aria-pressed", String(active));
+        });
 
         applyOrderFilters();
       }
