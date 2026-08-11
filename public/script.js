@@ -236,8 +236,11 @@ const translations = {
     orderSummaryDesc: "Periksa pesanan sebelum melanjutkan.",
     quantitySelected: "1 key dipilih",
     discountVipLabel: "Diskon Voucher / VIP",
-    gatewayPaymentTitle: "QRIS / E-wallet",
-    gatewayPaymentDesc: "Biaya gateway berlaku",
+    gatewayPaymentTitle: "QRIS Indonesia",
+    gatewayPaymentDesc: "0,7% + pajak biaya",
+    internationalCardTitle: "Kartu Internasional",
+    internationalCardDesc: "Visa, Mastercard, JCB, Amex",
+    paymentFeeLabel: "Biaya pembayaran + pajak",
     walletPaymentTitle: "AE Credit",
     walletBalanceLabel: "Saldo",
     productsUnavailableTitle: "Produk belum tersedia",
@@ -515,8 +518,11 @@ const translations = {
     orderSummaryDesc: "Review your order before continuing.",
     quantitySelected: "1 key selected",
     discountVipLabel: "Voucher / VIP Discount",
-    gatewayPaymentTitle: "QRIS / E-wallet",
-    gatewayPaymentDesc: "Gateway fees apply",
+    gatewayPaymentTitle: "Indonesia QRIS",
+    gatewayPaymentDesc: "0.7% + fee tax",
+    internationalCardTitle: "International Card",
+    internationalCardDesc: "Visa, Mastercard, JCB, Amex",
+    paymentFeeLabel: "Payment fee + tax",
     walletPaymentTitle: "AE Credit",
     walletBalanceLabel: "Balance",
     productsUnavailableTitle: "Products are not available yet",
@@ -693,6 +699,7 @@ function setLanguage(lang, refreshDynamic = true) {
 
   document.documentElement.setAttribute("lang", lang);
   document.dispatchEvent(new CustomEvent("ae:languagechange"));
+  if (typeof updatePaymentFeeLabel === "function") updatePaymentFeeLabel();
 
   const featuredName = document.getElementById("keysystemFeaturedName");
   if (featuredName && !keysystemFeaturedGames.length) {
@@ -779,7 +786,7 @@ function renderKeysystemFeatured(index) {
   document.getElementById("keysystemFeaturedImage").alt = game;
   document.getElementById("keysystemFeaturedName").textContent = game;
   document.getElementById("keysystemFeaturedPrice").textContent =
-    Number.isFinite(minPrice) ? formatRupiah(minPrice) : "—";
+    Number.isFinite(minPrice) ? `${formatRupiah(minPrice)} / ${formatUsd(minPrice)}` : "—";
   document.getElementById("keysystemFeaturedStock").textContent =
     `${stock.toLocaleString("id-ID")} KEYS READY`;
   document.getElementById("keysystemFeaturedCode").textContent =
@@ -860,6 +867,13 @@ let selectedOrderQuantity = 1;
 let selectedCheckoutPaymentMethod = "midtrans";
 let checkoutWalletBalance = 0;
 let lastCheckoutPricing = null;
+let paymentPricingConfig = {
+  usd_idr_rate: 18000,
+  vat_rate: 0.11,
+  qris_fee_rate: 0.007,
+  card_fee_rate: 0.029,
+  card_fixed_fee: 2000,
+};
 let selectedReviewRating = 5;
 let currentSort = localStorage.getItem("ae_sort") || "default";
 
@@ -951,6 +965,27 @@ const loadingText = document.getElementById("loading");
 
 function formatRupiah(num) {
   return "Rp " + Number(num || 0).toLocaleString("id-ID");
+}
+
+function formatUsd(num) {
+  return `US$${(Number(num || 0) / paymentPricingConfig.usd_idr_rate).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+}
+
+function formatDualPriceHtml(num) {
+  return `${formatRupiah(num)}<small class="price-usd">\u2248 ${formatUsd(num)}</small>`;
+}
+
+async function loadPaymentConfig() {
+  try {
+    const res = await fetch("/payment-config");
+    if (!res.ok) return;
+    paymentPricingConfig = { ...paymentPricingConfig, ...(await res.json()) };
+    renderGames();
+    if (selectedProductBasePrice > 0) refreshCheckoutDiscountPreview();
+  } catch (err) { }
 }
 
 function normalizePlayStatus(status) {
@@ -1587,7 +1622,7 @@ function renderGames() {
   <div class="game-card-meta">
     <span class="game-card-price">
       ${minPrice > 0
-        ? `<small>${escapeHtml(t.cardFromPrice)}</small><b>${formatRupiah(minPrice)}</b>`
+        ? `<small>${escapeHtml(t.cardFromPrice)}</small><b>${formatDualPriceHtml(minPrice)}</b>`
         : `<b>${escapeHtml(stockReady ? "—" : t.outOfStockLabel)}</b>`
       }
     </span>
@@ -1977,7 +2012,7 @@ function renderOrderProductCards(products) {
     btn.innerHTML = `
       <div class="order-product-main">
         <strong>${escapeHtml(item.duration)}</strong>
-        <b>${formatRupiah(item.price)}</b>
+        <b>${formatDualPriceHtml(item.price)}</b>
         <small>${escapeHtml(item.brand)} • ${deliveryLabel}</small>
       </div>
       <span class="order-product-status order-product-status-${playMeta.value}">
@@ -2104,7 +2139,7 @@ function loadDurations() {
     const option = document.createElement("option");
     option.value = item.id;
     option.disabled = isDisabled;
-    option.textContent = `${item.duration} - ${formatRupiah(item.price)} - ${playMeta.label} - ${stockText}`;
+    option.textContent = `${item.duration} - ${formatRupiah(item.price)} / ${formatUsd(item.price)} - ${playMeta.label} - ${stockText}`;
     productSelect.appendChild(option);
   });
 
@@ -2327,12 +2362,8 @@ async function buy() {
       window.AEPaymentModal &&
       typeof window.AEPaymentModal.open === "function"
     ) {
-      const finalPriceText =
-        document.getElementById("finalPriceText")?.innerText || "";
       const totalPrice = Number(
-        String(finalPriceText).replace(/[^0-9]/g, "") ||
-        selectedProductBasePrice ||
-        0,
+        data.finalPrice || lastCheckoutPricing?.finalPrice || selectedProductBasePrice || 0,
       );
       const gameNameForModal =
         document.getElementById("previewGame")?.innerText ||
@@ -2744,12 +2775,36 @@ function formatRupiah(value) {
   return "Rp " + Number(value || 0).toLocaleString("id-ID");
 }
 
-function calculateQrisGrossPrice(netPrice) {
-  const qrisFeeRate = 0.007;
-  const ppnRate = 0.11;
-  const totalFeeRate = qrisFeeRate * (1 + ppnRate);
+function calculatePaymentGrossPrice(netPrice, method = selectedCheckoutPaymentMethod) {
+  if (method === "ae_credit") return Number(netPrice || 0);
+  const isCard = method === "midtrans_card";
+  const rate = isCard
+    ? paymentPricingConfig.card_fee_rate
+    : paymentPricingConfig.qris_fee_rate;
+  const fixedFee = isCard ? paymentPricingConfig.card_fixed_fee : 0;
+  const vatMultiplier = 1 + paymentPricingConfig.vat_rate;
+  return Math.ceil(
+    (Number(netPrice || 0) + fixedFee * vatMultiplier) /
+      (1 - rate * vatMultiplier),
+  );
+}
 
-  return Math.ceil(Number(netPrice || 0) / (1 - totalFeeRate));
+function setDualPrice(element, amount, prefix = "") {
+  if (!element) return;
+  element.innerHTML = `${prefix}${formatRupiah(amount)}<small class="price-usd">\u2248 ${formatUsd(amount)}</small>`;
+}
+
+function updatePaymentFeeLabel() {
+  const label = document.getElementById("paymentFeeLabel");
+  if (!label) return;
+  if (selectedCheckoutPaymentMethod === "ae_credit") {
+    label.textContent = currentLanguage === "en" ? "Payment fee" : "Biaya pembayaran";
+    return;
+  }
+  const isCard = selectedCheckoutPaymentMethod === "midtrans_card";
+  const rate = 100 * (isCard ? paymentPricingConfig.card_fee_rate : paymentPricingConfig.qris_fee_rate);
+  const fixed = isCard ? ` + ${formatRupiah(paymentPricingConfig.card_fixed_fee)}` : "";
+  label.textContent = `${isCard ? (currentLanguage === "en" ? "Card" : "Kartu") : "QRIS"} ${rate.toLocaleString(currentLanguage === "en" ? "en-US" : "id-ID", { maximumFractionDigits: 2 })}%${fixed} + ${currentLanguage === "en" ? "fee tax" : "pajak biaya"}`;
 }
 
 function showPriceBreakdown({
@@ -2759,11 +2814,9 @@ function showPriceBreakdown({
   finalPrice = 0,
 }) {
   const netPrice = Math.max(0, Number(finalPrice || 0) - Number(paymentFee || 0));
-  lastCheckoutPricing = { originalPrice, discountAmount, paymentFee, finalPrice, netPrice };
-  if (selectedCheckoutPaymentMethod === "ae_credit") {
-    paymentFee = 0;
-    finalPrice = netPrice;
-  }
+  finalPrice = calculatePaymentGrossPrice(netPrice);
+  paymentFee = finalPrice - netPrice;
+  lastCheckoutPricing = { originalPrice, discountAmount, netPrice, paymentFee, finalPrice };
   const priceBreakdown = document.getElementById("priceBreakdown");
   const originalPriceText = document.getElementById("originalPriceText");
   const discountText = document.getElementById("discountText");
@@ -2774,33 +2827,40 @@ function showPriceBreakdown({
 
   if (!priceBreakdown) return;
 
-  if (originalPriceText)
-    originalPriceText.innerText = formatRupiah(originalPrice);
-  if (discountText)
-    discountText.innerText = "- " + formatRupiah(discountAmount);
-  if (paymentFeeText) paymentFeeText.innerText = formatRupiah(paymentFee);
-  if (finalPriceText) finalPriceText.innerText = formatRupiah(finalPrice);
-  if (stickyFinalPrice) stickyFinalPrice.innerText = formatRupiah(finalPrice);
-  if (previewPrice) previewPrice.innerText = formatRupiah(finalPrice);
+  setDualPrice(originalPriceText, originalPrice);
+  setDualPrice(discountText, discountAmount, "- ");
+  setDualPrice(paymentFeeText, paymentFee);
+  setDualPrice(finalPriceText, finalPrice);
+  setDualPrice(stickyFinalPrice, finalPrice);
+  setDualPrice(previewPrice, finalPrice);
+  updatePaymentFeeLabel();
 
   priceBreakdown.style.display = "block";
 }
 
 function selectCheckoutPaymentMethod(method, button) {
-  selectedCheckoutPaymentMethod = method === "ae_credit" ? "ae_credit" : "midtrans";
+  selectedCheckoutPaymentMethod = ["midtrans", "midtrans_card", "ae_credit"].includes(method)
+    ? method
+    : "midtrans";
   document.querySelectorAll(".checkout-payment-option").forEach((item) => item.classList.toggle("active", item === button || item.dataset.paymentMethod === selectedCheckoutPaymentMethod));
   if (lastCheckoutPricing) {
-    showPriceBreakdown(lastCheckoutPricing);
+    const netPrice = lastCheckoutPricing.netPrice;
+    showPriceBreakdown({
+      ...lastCheckoutPricing,
+      paymentFee: 0,
+      finalPrice: netPrice,
+    });
   } else if (selectedProductBasePrice > 0) {
     showDefaultPriceBreakdown(selectedProductBasePrice, selectedOrderQuantity);
   }
+  refreshCheckoutDiscountPreview();
 }
 
 function showDefaultPriceBreakdown(productPrice, quantity = selectedOrderQuantity) {
   const cleanQuantity = Math.max(1, Math.min(Number(quantity || 1), MAX_ORDER_QUANTITY));
   const originalPrice = Number(productPrice || 0) * cleanQuantity;
   const netPrice = Math.max(originalPrice, 1000 * cleanQuantity);
-  const finalPrice = calculateQrisGrossPrice(netPrice);
+  const finalPrice = calculatePaymentGrossPrice(netPrice);
   const paymentFee = finalPrice - netPrice;
 
   showPriceBreakdown({
@@ -2844,6 +2904,7 @@ async function refreshCheckoutDiscountPreview() {
         product_id: selectedProductId,
         quantity: selectedOrderQuantity,
         voucher_code: voucherCode,
+        payment_method: selectedCheckoutPaymentMethod,
       }),
     });
 
@@ -2929,6 +2990,7 @@ async function checkVoucher() {
         product_id: selectedProductId,
         quantity: selectedOrderQuantity,
         voucher_code: voucherCode,
+        payment_method: selectedCheckoutPaymentMethod,
       }),
     });
 
@@ -3420,6 +3482,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 setLanguage(currentLanguage, false);
+loadPaymentConfig();
 loadAllProducts();
 // ===== HOMEPAGE INLINE SCRIPT CLEANUP =====
 

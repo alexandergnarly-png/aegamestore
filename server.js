@@ -21,6 +21,7 @@ const {
 } = require("./server/order-utils");
 const { ensureBulkOrderSchema, ensureWalletSchema } = require("./server/database-migrations");
 const { parseMidtransAmount, verifyMidtransSignature } = require("./server/midtrans-utils");
+const { grossUpPaymentPrice, toUsd } = require("./server/payment-pricing");
 const { normalizeCatalogLabel, verifyCheatGameWebhook } = require("./server/cheatgame-utils");
 const { buildSupplierComparison, convertUsdToIdr, extractIdrRate } = require("./server/supplier-compare-utils");
 const { BUYER_BADGE_TIERS, getBuyerBadgeCode } = require("./server/buyer-policy");
@@ -39,6 +40,20 @@ app.disable("x-powered-by");
 app.set("trust proxy", 1);
 const port = process.env.PORT || 3000;
 const isMidtransProduction = process.env.MIDTRANS_IS_PRODUCTION === "true";
+
+function paymentConfigNumber(name, fallback, { max = Infinity, min = 0 } = {}) {
+  const value = Number(process.env[name] ?? fallback);
+  if (!Number.isFinite(value) || value < min || value > max) {
+    throw new Error(`${name} tidak valid`);
+  }
+  return value;
+}
+
+const paymentVatRate = paymentConfigNumber("PAYMENT_VAT_RATE", 0.11, { max: 0.5 });
+const midtransQrisFeeRate = paymentConfigNumber("MIDTRANS_QRIS_FEE_RATE", 0.007, { max: 0.5 });
+const midtransCardFeeRate = paymentConfigNumber("MIDTRANS_CARD_FEE_RATE", 0.029, { max: 0.5 });
+const midtransCardFixedFee = paymentConfigNumber("MIDTRANS_CARD_FIXED_FEE", 2000);
+const usdIdrRate = paymentConfigNumber("USD_IDR_RATE", 18000, { min: 1 });
 const jwtSecret = String(process.env.JWT_SECRET || "").trim();
 const adminTotpSecret = String(process.env.ADMIN_TOTP_SECRET || "").trim();
 const gameKeyEncryptionSecret = String(
@@ -2350,12 +2365,23 @@ async function getLoggedInUserFromRequest(req) {
     return null;
   }
 }
-function calculateQrisGrossPrice(netPrice) {
-  const qrisFeeRate = 0.007;
-  const ppnRate = 0.11;
-  const totalFeeRate = qrisFeeRate * (1 + ppnRate);
+function calculatePaymentPrice(netPrice, paymentMethod = "midtrans") {
+  if (paymentMethod === "ae_credit") return Number(netPrice);
+  if (paymentMethod === "midtrans_card") {
+    return grossUpPaymentPrice(
+      netPrice,
+      midtransCardFeeRate,
+      midtransCardFixedFee,
+      paymentVatRate,
+    );
+  }
+  return grossUpPaymentPrice(netPrice, midtransQrisFeeRate, 0, paymentVatRate);
+}
 
-  return Math.ceil(Number(netPrice) / (1 - totalFeeRate));
+function getMidtransPaymentOptions(paymentMethod) {
+  return paymentMethod === "midtrans_card"
+    ? { enabled_payments: ["credit_card"], credit_card: { secure: true } }
+    : { enabled_payments: ["other_qris"] };
 }
 
 function parseWalletAmount(value) {
@@ -5321,6 +5347,11 @@ app.post("/voucher-preview", voucherPreviewLimiter, async (req, res) => {
   const cleanProductId = Number(req.body.product_id);
   const cleanVoucherCode = normalizeVoucherCode(req.body.voucher_code);
   const cleanQuantity = parseOrderQuantity(req.body.quantity);
+  const paymentMethod = String(req.body?.payment_method || "midtrans").trim().toLowerCase();
+
+  if (!["midtrans", "midtrans_card", "ae_credit"].includes(paymentMethod)) {
+    return res.status(400).json({ message: "Metode pembayaran tidak valid" });
+  }
 
   if (!Number.isInteger(cleanProductId) || cleanProductId <= 0) {
     return res.status(400).json({ message: "Produk tidak valid" });
@@ -5367,7 +5398,7 @@ app.post("/voucher-preview", voucherPreviewLimiter, async (req, res) => {
     const originalPrice = bulkTotals.originalPrice;
     const discountAmount = bulkTotals.discountAmount;
     const netPrice = bulkTotals.netPrice;
-    const finalPrice = calculateQrisGrossPrice(netPrice);
+    const finalPrice = calculatePaymentPrice(netPrice, paymentMethod);
     const paymentFee = finalPrice - netPrice;
 
     return res.json({
@@ -5385,6 +5416,9 @@ app.post("/voucher-preview", voucherPreviewLimiter, async (req, res) => {
       net_price: netPrice,
       payment_fee: paymentFee,
       final_price: finalPrice,
+      payment_method: paymentMethod,
+      usd_idr_rate: usdIdrRate,
+      final_price_usd: toUsd(finalPrice, usdIdrRate),
     });
   } catch (err) {
     console.error("ERROR VOUCHER PREVIEW:", err);
@@ -5403,7 +5437,7 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
   }
   const { product_id, name, voucher_code, quantity } = req.body;
   const paymentMethod = String(req.body?.payment_method || "midtrans").trim().toLowerCase();
-  if (!["midtrans", "ae_credit"].includes(paymentMethod)) {
+  if (!["midtrans", "midtrans_card", "ae_credit"].includes(paymentMethod)) {
     return res.status(400).json({ message: "Metode pembayaran tidak valid" });
   }
 
@@ -5568,7 +5602,7 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
     const originalPrice = bulkTotals.originalPrice;
     const discountAmount = bulkTotals.discountAmount;
     const netPrice = bulkTotals.netPrice;
-    const price = paymentMethod === "ae_credit" ? netPrice : calculateQrisGrossPrice(netPrice);
+    const price = calculatePaymentPrice(netPrice, paymentMethod);
     const paymentFee = price - netPrice;
     const appliedVoucherCode = discountCheck.code || null;
 
@@ -5723,6 +5757,7 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
         },
       ],
       custom_field1: `quantity:${cleanQuantity}`,
+      ...getMidtransPaymentOptions(paymentMethod),
       callbacks: {
         finish: `${baseUrl}/result?order_id=${orderId}`,
         error: `${baseUrl}/result?order_id=${orderId}`,
@@ -5755,6 +5790,9 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
       resultUrl: `${baseUrl}/result?order_id=${orderId}`,
       midtransClientKey: process.env.MIDTRANS_CLIENT_KEY || "",
       midtransIsProduction: isMidtransProduction,
+      finalPrice: price,
+      finalPriceUsd: toUsd(price, usdIdrRate),
+      usdIdrRate,
     });
   } catch (err) {
     console.error(
@@ -6177,6 +6215,7 @@ app.get("/order/:id/resume", orderCheckLimiter, async (req, res) => {
             },
           ],
           custom_field1: `quantity:${getOrderQuantity(order.quantity)}`,
+          ...getMidtransPaymentOptions(order.payment_method),
           callbacks: {
             finish: `${baseUrl}/result?order_id=${orderId}`,
             error: `${baseUrl}/result?order_id=${orderId}`,
@@ -7892,6 +7931,16 @@ app.get("/public-products", async (req, res) => {
       message: "Gagal mengambil produk publik",
     });
   }
+});
+
+app.get("/payment-config", (req, res) => {
+  res.json({
+    usd_idr_rate: usdIdrRate,
+    vat_rate: paymentVatRate,
+    qris_fee_rate: midtransQrisFeeRate,
+    card_fee_rate: midtransCardFeeRate,
+    card_fixed_fee: midtransCardFixedFee,
+  });
 });
 
 function buildLocalCatalogReply(message, catalog) {

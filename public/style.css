@@ -14914,3 +14914,35 @@ body.dark-theme .ae-ai-prompts button {
     padding-block: 6px;
   }
 }
+
+/* International checkout: IDR is charged; USD is an estimate at the store rate. */
+.price-usd {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted, #666661);
+  font-family: var(--mono, "DM Mono", monospace);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.checkout-payment-choice {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+.checkout-payment-option {
+  min-width: 0;
+  background: #ffffff;
+  border-color: #d6d6d0;
+}
+
+@media (max-width: 720px) {
+  .checkout-payment-choice {
+    grid-template-columns: 1fr !important;
+  }
+
+  .checkout-payment-option {
+    min-height: 56px !important;
+  }
+}
