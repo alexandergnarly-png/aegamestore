@@ -58,6 +58,8 @@ adminScripts.forEach(([, source]) =>
   'autocomplete="current-password"',
   'prefers-reduced-motion: reduce',
   '@media (max-width: 820px) and (max-height: 620px)',
+  'border-radius: 999px; background: var(--surface);',
+  'min-height: 52px; justify-content: space-between;',
   '.field-error:empty, .form-status:empty',
   'matchMedia("(min-width: 821px)").matches',
   'password: passwordInput.value',
