@@ -1114,6 +1114,10 @@ body.keysystem-ui .ae-payment-info-confirm.swal2-confirm {
     flex: 0 0 auto;
   }
 
+  body.keysystem-ui .header-inner .brand-logo {
+    border-radius: 50%;
+  }
+
   body.keysystem-ui .brand-copy,
   body.keysystem-ui .account-auth-btn span {
     display: none;
@@ -1129,9 +1133,10 @@ body.keysystem-ui .ae-payment-info-confirm.swal2-confirm {
     flex: 0 0 auto;
     gap: 0;
     padding: 0 !important;
-    border: 0;
-    background: transparent;
-    box-shadow: none;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
   }
 
   body.keysystem-ui .lang-btn,
@@ -1147,6 +1152,7 @@ body.keysystem-ui .ae-payment-info-confirm.swal2-confirm {
     padding: 0 !important;
     border: 0 !important;
     background: transparent !important;
+    color: #000000 !important;
     box-shadow: none !important;
     touch-action: manipulation;
   }
@@ -1160,15 +1166,25 @@ body.keysystem-ui .ae-payment-info-confirm.swal2-confirm {
     z-index: -1;
     inset: 4px;
     display: block !important;
-    border: 1px solid var(--ks-line);
-    border-radius: 3px;
-    background: var(--ks-surface);
+    border: 1px solid #dedede;
+    border-radius: 50%;
+    background: #ffffff;
   }
 
   body.keysystem-ui .lang-btn.active::before,
-  body.keysystem-ui .account-auth-btn::before {
-    border-color: var(--ks-text);
-    background: var(--ks-text);
+  body.keysystem-ui #userMenu .account-auth-btn::before {
+    display: block !important;
+    border-color: #000000;
+    background: #000000;
+  }
+
+  body.keysystem-ui .lang-btn.active,
+  body.keysystem-ui #userMenu .account-auth-btn {
+    color: #ffffff !important;
+  }
+
+  body.keysystem-ui .nav-toggle span {
+    background: #000000;
   }
 
   body.keysystem-ui .hero {
