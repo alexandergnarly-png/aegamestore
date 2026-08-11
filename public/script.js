@@ -2370,12 +2370,26 @@ async function showBinancePaymentModal(data) {
 
   if (result.isConfirmed) {
     await Swal.fire({
-      icon: "success",
-      title: english ? "Payment submitted" : "Bukti pembayaran terkirim",
-      text: english
-        ? "The admin will verify it before your key is delivered."
-        : "Admin akan memverifikasi pembayaran sebelum key dikirim.",
-      confirmButtonColor: "#0a0a0a",
+      html: `<div class="usdt-success-content">
+        <div class="usdt-success-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="m5 12 4.2 4.2L19 6.5"></path></svg>
+        </div>
+        <span>${english ? "Verification queue" : "Antrean verifikasi"}</span>
+        <h2>${english ? "Payment sent" : "Pembayaran terkirim"}</h2>
+        <p>${
+          english
+            ? "We received your Transaction ID. The key will be delivered after the admin confirms the payment."
+            : "Transaction ID sudah diterima. Key dikirim setelah pembayaran dikonfirmasi admin."
+        }</p>
+      </div>`,
+      confirmButtonText: english ? "View order status" : "Lihat status order",
+      allowOutsideClick: false,
+      customClass: {
+        popup: "usdt-success-popup",
+        htmlContainer: "usdt-success-html",
+        actions: "usdt-success-actions",
+        confirmButton: "usdt-success-confirm",
+      },
     });
   }
   window.location.href = result.value?.resultUrl || data.resultUrl;
