@@ -24,6 +24,9 @@ assert.match(html, /id="binancePaymentOption"[^>]*disabled/);
 assert.match(script, /showBinancePaymentModal/);
 assert.match(script, /payment_reference: cleanReference/);
 assert.match(script, /binance_manual_enabled/);
+assert.match(script, /Swal\.getInput\(\)\?\.blur\(\)/);
+assert.match(script, /showCloseButton: true/);
+assert.match(script, /usdt-payment-actions/);
 assert.match(admin, /Binance Pay Transaction ID/);
 assert.match(admin, /payment_amount_usd/);
 

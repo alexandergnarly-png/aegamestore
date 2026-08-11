@@ -2281,32 +2281,50 @@ async function showBinancePaymentModal(data) {
   const amount = escapeHtml(data.usdtAmount || "0.00");
   const payUid = escapeHtml(data.binancePayUid || "-");
   const orderId = escapeHtml(data.orderId || "-");
+  const copyIcon = `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"></rect><path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3"></path></svg>`;
 
   const result = await Swal.fire({
     title: english ? "Pay with USDT" : "Bayar dengan USDT",
     html: `
       <div class="usdt-payment-sheet">
-        <div class="usdt-payment-amount"><small>${english ? "Exact amount" : "Nominal tepat"}</small><strong>${amount} USDT</strong></div>
-        <div class="usdt-payment-row usdt-payment-copy"><span>Binance Pay UID</span><code>${payUid}</code><button type="button" id="copyBinancePayUid">${english ? "Copy" : "Salin"}</button></div>
-        <div class="usdt-payment-row usdt-payment-copy"><span>Order ID</span><code>${orderId}</code><button type="button" id="copyUsdtOrderId">${english ? "Copy" : "Salin"}</button></div>
-        <p class="usdt-payment-warning">${english ? "Send the exact USDT amount through Binance Pay, then paste its Transaction ID below." : "Kirim nominal USDT yang tepat melalui Binance Pay, lalu tempel Transaction ID di bawah."}</p>
+        <div class="usdt-payment-amount"><small>${english ? "Send exactly" : "Kirim tepat"}</small><strong>${amount} <span>USDT</span></strong><em>Binance Pay</em></div>
+        <div class="usdt-payment-details">
+          <div class="usdt-payment-row usdt-payment-copy"><span>Binance Pay UID</span><code>${payUid}</code><button type="button" id="copyBinancePayUid" aria-label="${english ? "Copy Binance Pay UID" : "Salin Binance Pay UID"}" title="${english ? "Copy UID" : "Salin UID"}">${copyIcon}</button></div>
+          <div class="usdt-payment-row usdt-payment-copy"><span>Order ID</span><code>${orderId}</code><button type="button" id="copyUsdtOrderId" aria-label="${english ? "Copy Order ID" : "Salin Order ID"}" title="${english ? "Copy Order ID" : "Salin Order ID"}">${copyIcon}</button></div>
+        </div>
+        <p class="usdt-payment-warning" id="usdtPaymentNote">${english ? "Pay through Binance Pay, then enter the Transaction ID below for review." : "Bayar melalui Binance Pay, lalu masukkan Transaction ID untuk diverifikasi."}</p>
       </div>`,
     input: "text",
     inputLabel: english
       ? "Binance Pay Transaction ID"
       : "Transaction ID Binance Pay",
-    inputPlaceholder: english ? "Paste after payment" : "Tempel setelah pembayaran",
+    inputPlaceholder: english ? "Paste Transaction ID" : "Tempel Transaction ID",
+    inputAttributes: {
+      autocapitalize: "off",
+      autocomplete: "off",
+      "aria-describedby": "usdtPaymentNote",
+    },
     showCancelButton: true,
-    confirmButtonText: english ? "Submit payment" : "Kirim bukti bayar",
+    showCloseButton: true,
+    confirmButtonText: english ? "I've paid" : "Sudah bayar",
     cancelButtonText: english ? "Pay later" : "Bayar nanti",
     confirmButtonColor: "#0a0a0a",
     cancelButtonColor: "#ffffff",
     allowOutsideClick: false,
     customClass: {
       popup: "usdt-payment-popup",
+      title: "usdt-payment-title",
       htmlContainer: "usdt-payment-html",
+      inputLabel: "usdt-payment-input-label",
+      input: "usdt-payment-input",
+      actions: "usdt-payment-actions",
+      confirmButton: "usdt-payment-confirm",
+      cancelButton: "usdt-payment-cancel",
     },
     didOpen: () => {
+      const popup = Swal.getPopup();
+      Swal.getInput()?.blur();
+      if (popup) popup.scrollTop = 0;
       const copy = async (value) => {
         await navigator.clipboard.writeText(value);
         showToast(english ? "Copied" : "Berhasil disalin", { tone: "success" });
