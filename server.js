@@ -969,7 +969,7 @@ async function getVipStoreBalance() {
 
 async function claimVipStoreKey(productId, quantity = 1) {
   const cleanProductId = Number(productId);
-  const cleanQuantity = Math.max(Number(quantity || 1), 1);
+  const cleanQuantity = Math.min(Math.max(Number(quantity || 1), 1), 50);
 
   if (!Number.isInteger(cleanProductId) || cleanProductId <= 0) {
     throw new Error("Supplier Product ID tidak valid");
@@ -981,7 +981,7 @@ async function claimVipStoreKey(productId, quantity = 1) {
 
   return vipStoreRequest("claim.php", {
     method: "POST",
-    body: { product_id: cleanProductId, quantity: cleanQuantity },
+    body: { product_id: cleanProductId, qty: cleanQuantity },
   });
 }
 
@@ -990,14 +990,14 @@ async function getVipStoreResetProducts() {
 }
 
 async function resetVipStoreKey(productId, key) {
-  const cleanProductId = Number(productId);
+  const cleanProductId = String(productId || "").trim();
   const cleanKey = String(key || "").trim();
 
-  if (!Number.isInteger(cleanProductId) || cleanProductId <= 0) {
+  if (!cleanProductId || cleanProductId.length > 120) {
     throw new Error("Supplier Product ID untuk reset tidak valid");
   }
 
-  if (!cleanKey || cleanKey.length > 500) {
+  if (!cleanKey || cleanKey.length > 255) {
     throw new Error("Key supplier untuk reset tidak valid");
   }
 
