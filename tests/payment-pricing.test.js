@@ -12,10 +12,13 @@ assert.equal(toUsd(27000), 1.5);
 
 const server = fs.readFileSync("server.js", "utf8");
 const html = fs.readFileSync("public/index.html", "utf8");
+const script = fs.readFileSync("public/script.js", "utf8");
 assert.match(server, /enabled_payments: \["credit_card"\]/);
 assert.match(server, /credit_card: \{ secure: true \}/);
 assert.match(server, /enabled_payments: \["other_qris"\]/);
 assert.match(html, /data-payment-method="midtrans_card"/);
 assert.match(html, /id="paymentFeeLabel"/);
+assert.match(script, /window\.snap\.pay\(state\.currentSnapToken, callbacks\)/);
+assert.doesNotMatch(script, /window\.snap\.embed\(/);
 
 console.log("Payment pricing check passed.");

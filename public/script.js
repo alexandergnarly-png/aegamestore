@@ -975,7 +975,7 @@ function formatUsd(num) {
 }
 
 function formatDualPriceHtml(num) {
-  return `${formatRupiah(num)}<small class="price-usd">\u2248 ${formatUsd(num)}</small>`;
+  return `<span class="price-stack"><span class="price-idr">${formatRupiah(num)}</span><span class="price-usd"><span aria-hidden="true">\u2248</span> ${formatUsd(num)}</span></span>`;
 }
 
 async function loadPaymentConfig() {
@@ -2791,7 +2791,7 @@ function calculatePaymentGrossPrice(netPrice, method = selectedCheckoutPaymentMe
 
 function setDualPrice(element, amount, prefix = "") {
   if (!element) return;
-  element.innerHTML = `${prefix}${formatRupiah(amount)}<small class="price-usd">\u2248 ${formatUsd(amount)}</small>`;
+  element.innerHTML = `${prefix}${formatDualPriceHtml(amount)}`;
 }
 
 function updatePaymentFeeLabel() {
@@ -5772,29 +5772,9 @@ document.addEventListener("DOMContentLoaded", () => {
         },
       };
 
-      // Prefer snap.embed() (newer API, true inline iframe).
-      // Fallback to snap.pay(token, {embedId}) (older API that supports embedId).
-      // Last resort: snap.pay(token, {}) — opens Midtrans popup overlay (NOT a redirect).
-      const hasEmbed = typeof window.snap.embed === "function";
-      console.info(
-        "[AEPay] snap methods detected — embed:",
-        hasEmbed,
-        "pay:",
-        typeof window.snap.pay,
-      );
-
-      if (hasEmbed) {
-        window.snap.embed(state.currentSnapToken, {
-          embedId: "snap-container",
-          ...callbacks,
-        });
-      } else {
-        // Try pay() with embedId (some snap.js versions support this)
-        window.snap.pay(state.currentSnapToken, {
-          embedId: "snap-container",
-          ...callbacks,
-        });
-      }
+      // The embedded flow currently fails on Midtrans' own iframe CSP.
+      // Their standard popup flow is the smallest reliable integration.
+      window.snap.pay(state.currentSnapToken, callbacks);
       if (els.snapLoading) els.snapLoading.hidden = true;
     } catch (err) {
       console.error("[AEPay] Snap embed failed:", err);
