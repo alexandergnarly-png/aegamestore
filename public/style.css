@@ -12034,24 +12034,42 @@ body.dark-theme .order-platform-pill.active {
 }
 
 .ae-help-close {
-  top: 18px !important;
-  right: 18px !important;
-  width: 36px !important;
-  height: 36px !important;
-  border-radius: 999px !important;
-  background: rgba(255, 255, 255, 0.72) !important;
+  position: static !important;
+  align-self: center;
+  justify-self: end;
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 3px !important;
+  background: #ffffff !important;
   color: #0f172a !important;
-  border: 1px solid rgba(15, 23, 42, 0.08) !important;
+  border: 1px solid #d6d6d0 !important;
   box-shadow: none !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
+  font-size: 20px;
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+  touch-action: manipulation;
+}
+
+.ae-help-close:hover {
+  border-color: #0b0b0a !important;
+  background: #0b0b0a !important;
+  color: #ffffff !important;
+}
+
+.ae-help-close:focus-visible {
+  outline: 2px solid #0b0b0a;
+  outline-offset: 3px;
 }
 
 .ae-help-hero {
+  position: sticky;
+  top: 0;
+  z-index: 4;
   display: grid;
-  grid-template-columns: 54px minmax(0, 1fr);
+  grid-template-columns: 54px minmax(0, 1fr) 44px;
   gap: 14px;
   padding: 26px 24px 18px;
+  border-bottom: 1px solid #d6d6d0;
+  background: rgba(255, 255, 255, 0.96);
 }
 
 .ae-help-logo {
@@ -12324,7 +12342,7 @@ body.dark-theme .ae-help-note-wrap {
   }
 
   .ae-help-hero {
-    grid-template-columns: 46px minmax(0, 1fr);
+    grid-template-columns: 46px minmax(0, 1fr) 44px;
     padding: 22px 18px 14px;
   }
 
@@ -12709,7 +12727,7 @@ body.dark-theme .install-prompt-close {
   }
 
   .ae-help-hero {
-    grid-template-columns: 46px minmax(0, 1fr) !important;
+    grid-template-columns: 46px minmax(0, 1fr) 44px !important;
     gap: 12px !important;
     padding: 22px 22px 14px !important;
   }
@@ -14784,6 +14802,21 @@ body.dark-theme .ae-help-telegram-link {
   box-shadow: inset 0 3px 0 #f7f7f1;
 }
 
+body.dark-theme .ae-help-hero {
+  border-bottom-color: #2a2a27;
+  background: rgba(16, 16, 16, 0.96);
+}
+
+body.dark-theme .ae-help-close:hover {
+  border-color: #f7f7f1 !important;
+  background: #f7f7f1 !important;
+  color: #0b0b0a !important;
+}
+
+body.dark-theme .ae-help-close:focus-visible {
+  outline-color: #f7f7f1;
+}
+
 body.dark-theme .ae-ai-heading strong,
 body.dark-theme .ae-help-telegram-link {
   color: #f7f7f1;
@@ -14843,9 +14876,9 @@ body.dark-theme .ae-ai-prompts button {
   }
 
   .ae-help-hero {
-    grid-template-columns: 36px minmax(0, 1fr) !important;
+    grid-template-columns: 36px minmax(0, 1fr) 44px !important;
     gap: 10px !important;
-    padding: 10px 58px 8px 10px !important;
+    padding: 10px 10px 8px !important;
   }
 
   .ae-help-logo {

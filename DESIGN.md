@@ -6,15 +6,15 @@ Nothing-inspired industrial minimalism meets a compact bento control surface. Th
 
 ## 2. Color Palette & Roles
 
-- **Chalk Canvas (#ECECE4):** Primary light-page background with a warm hardware-like character.
-- **Paper Module (#F7F7F1):** Main cards, login surfaces, and elevated light containers.
-- **Pressed Module (#DEDED7):** Secondary controls, inactive states, and subtle grouping.
+- **Pure Paper (#FFFFFF):** Dominant light surface for cards, login panels, chat modules, and controls.
+- **Soft Canvas (#F8F8F5):** Light-page background with only a restrained warm cast.
+- **Pressed Module (#F2F2EE):** Secondary controls, inactive states, and subtle grouping.
 - **System Black (#0B0B0A):** Primary text, dark feature panels, and decisive actions.
 - **Night Canvas (#080808):** Primary dark-page background.
 - **Night Module (#101010):** Dark cards and form surfaces.
 - **Graphite Module (#181818):** Dark secondary controls and input backgrounds.
 - **Utility Grey (#666661 / #A2A29C):** Supporting copy and metadata in light / dark mode.
-- **Hardware Line (#C6C6BE / #2A2A27):** Dividers, card boundaries, and form strokes in light / dark mode.
+- **Hardware Line (#D6D6D0 / #2A2A27):** Dividers, card boundaries, and form strokes in light / dark mode.
 - **Signal Red (#A32626):** Validation and destructive/error feedback only.
 
 ## 3. Typography Rules
