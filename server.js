@@ -897,52 +897,70 @@ async function vipStoreRequest(endpoint, options = {}) {
   const body = options.body && method !== "GET" ? options.body : null;
   const rawBody = method === "GET" ? "" : JSON.stringify(body || {});
   const url = `${config.baseUrl}/${normalizeVipStoreEndpoint(endpoint)}`;
-  const controller = new AbortController();
   const timeoutMs = Number(options.timeoutMs || 30000);
-  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  const maxAttempts = method === "GET" ? 2 : 1;
 
-  try {
-    const response = await fetch(url, {
-      method,
-      headers: createVipStoreHeaders(rawBody),
-      body: method === "GET" ? undefined : rawBody,
-      signal: controller.signal,
-    });
-
-    const rawResponse = await response.text();
-    let data = null;
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
-      data = rawResponse ? JSON.parse(rawResponse) : null;
-    } catch (parseErr) {
-      data = {
-        success: false,
-        message: "Supplier API mengembalikan respons non-JSON",
-        raw_response: rawResponse,
-      };
-    }
+      const response = await fetch(url, {
+        method,
+        headers: createVipStoreHeaders(rawBody),
+        body: method === "GET" ? undefined : rawBody,
+        signal: controller.signal,
+      });
 
-    return {
-      ok: response.ok,
-      http_code: response.status,
-      data,
-    };
-  } catch (err) {
-    const isTimeout = err && err.name === "AbortError";
-    const error = new Error(
-      isTimeout
-        ? "Request supplier timeout"
-        : `Gagal menghubungi supplier: ${err.message}`,
-    );
-    error.code = isTimeout ? "VIPSTORE_TIMEOUT" : "VIPSTORE_REQUEST_FAILED";
-    throw error;
-  } finally {
-    clearTimeout(timeoutId);
+      const rawResponse = await response.text();
+      let data = null;
+
+      try {
+        data = rawResponse ? JSON.parse(rawResponse) : null;
+      } catch (parseErr) {
+        data = {
+          success: false,
+          message: "Supplier API mengembalikan respons non-JSON",
+          raw_response: rawResponse,
+        };
+      }
+
+      return {
+        ok: response.ok,
+        http_code: response.status,
+        data,
+      };
+    } catch (err) {
+      const isTimeout = err && err.name === "AbortError";
+      if (isTimeout && attempt < maxAttempts) {
+        console.warn(`VIPSTORE GET timeout, retry ${attempt}/${maxAttempts - 1}: ${endpoint}`);
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        continue;
+      }
+
+      const error = new Error(
+        isTimeout
+          ? "Request supplier timeout"
+          : `Gagal menghubungi supplier: ${err.message}`,
+      );
+      error.code = isTimeout ? "VIPSTORE_TIMEOUT" : "VIPSTORE_REQUEST_FAILED";
+      throw error;
+    } finally {
+      clearTimeout(timeoutId);
+    }
   }
 }
 
+let vipStoreCatalogRequest = null;
+
 async function getVipStoreCatalog() {
-  return vipStoreRequest("catalog.php", { method: "GET" });
+  if (!vipStoreCatalogRequest) {
+    vipStoreCatalogRequest = vipStoreRequest("catalog.php", { method: "GET" })
+      .finally(() => {
+        vipStoreCatalogRequest = null;
+      });
+  }
+  return vipStoreCatalogRequest;
 }
 
 async function getVipStoreBalance() {

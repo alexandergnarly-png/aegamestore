@@ -9,6 +9,9 @@ const server = fs.readFileSync("server.js", "utf8");
   "WHERE order_id = $1",
   "keyCount: claimedKeys.length",
   "keys: claimedKeys",
+  'const maxAttempts = method === "GET" ? 2 : 1',
+  "if (!vipStoreCatalogRequest)",
+  "vipStoreCatalogRequest = null",
 ].forEach((marker) =>
   assert.ok(server.includes(marker), `Missing safe supplier claim marker: ${marker}`),
 );
