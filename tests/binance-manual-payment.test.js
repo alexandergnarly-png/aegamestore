@@ -17,7 +17,13 @@ assert.match(server, /\/orders\/:id\/binance-payment/);
 assert.match(server, /delivery_status = 'payment_review'/);
 assert.match(server, /idx_orders_payment_reference_unique/);
 assert.match(server, /notifyTelegram\(telegramText\)/);
-assert.match(server, /Buyer belum mengirim Binance Pay Transaction ID/);
+assert.match(server, /BINANCE_PAYMENT_EXPIRY_MS = 30 \* 60 \* 1000/);
+assert.match(server, /BINANCE_ORDER_COOLDOWN_MS = 5 \* 60 \* 1000/);
+assert.match(server, /MAX_ACTIVE_BINANCE_ORDERS_PER_USER = 2/);
+assert.match(server, /startBinanceOrderCleanup/);
+assert.match(server, /delivery_status IN \('waiting_payment', 'payment_review'\)/);
+assert.match(server, /berstatus payment review dan memiliki Transaction ID/);
+assert.match(server, /Account: \$\{order\.username/);
 
 assert.match(html, /data-payment-method="binance_manual"/);
 assert.match(html, /id="binancePaymentOption"[^>]*disabled/);
@@ -27,7 +33,10 @@ assert.match(script, /binance_manual_enabled/);
 assert.match(script, /Swal\.getInput\(\)\?\.blur\(\)/);
 assert.match(script, /showCloseButton: true/);
 assert.match(script, /usdt-payment-actions/);
+assert.match(script, /Pay within 30 minutes/);
 assert.match(admin, /Binance Pay Transaction ID/);
 assert.match(admin, /payment_amount_usd/);
+assert.match(admin, /confirmUsdtVerified/);
+assert.match(admin, /Swal\.showValidationMessage/);
 
 console.log("binance manual payment tests passed");

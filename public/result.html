@@ -1338,7 +1338,7 @@ const resultTranslations = {
         const english = localStorage.getItem("ae_language") === "en";
         const result = await Swal.fire({
           title: english ? "Pay with USDT" : "Bayar dengan USDT",
-          html: `<p><strong>${escapeHtml(data.usdtAmount)} USDT</strong></p><p>Binance Pay UID<br><code>${escapeHtml(data.binancePayUid)}</code></p><p><small>Order ID: ${escapeHtml(data.orderId)}</small></p>`,
+          html: `<p><strong>${escapeHtml(data.usdtAmount)} USDT</strong></p><p>Binance Pay UID<br><code>${escapeHtml(data.binancePayUid)}</code></p><p><small>Order ID: ${escapeHtml(data.orderId)}</small></p><p><small>${english ? "Complete payment within 30 minutes of creating the order." : "Selesaikan pembayaran maksimal 30 menit sejak order dibuat."}</small></p>`,
           input: "text",
           inputLabel: "Binance Pay Transaction ID",
           inputPlaceholder: english ? "Paste after payment" : "Tempel setelah pembayaran",

@@ -2292,7 +2292,7 @@ async function showBinancePaymentModal(data) {
           <div class="usdt-payment-row usdt-payment-copy"><span>Binance Pay UID</span><code>${payUid}</code><button type="button" id="copyBinancePayUid" aria-label="${english ? "Copy Binance Pay UID" : "Salin Binance Pay UID"}" title="${english ? "Copy UID" : "Salin UID"}">${copyIcon}</button></div>
           <div class="usdt-payment-row usdt-payment-copy"><span>Order ID</span><code>${orderId}</code><button type="button" id="copyUsdtOrderId" aria-label="${english ? "Copy Order ID" : "Salin Order ID"}" title="${english ? "Copy Order ID" : "Salin Order ID"}">${copyIcon}</button></div>
         </div>
-        <p class="usdt-payment-warning" id="usdtPaymentNote">${english ? "Pay through Binance Pay, then enter the Transaction ID below for review." : "Bayar melalui Binance Pay, lalu masukkan Transaction ID untuk diverifikasi."}</p>
+        <p class="usdt-payment-warning" id="usdtPaymentNote">${english ? "Pay within 30 minutes through Binance Pay, then enter the Transaction ID below for review." : "Bayar dalam 30 menit melalui Binance Pay, lalu masukkan Transaction ID untuk diverifikasi."}</p>
       </div>`,
     input: "text",
     inputLabel: english

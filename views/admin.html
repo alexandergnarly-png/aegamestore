@@ -7783,7 +7783,7 @@
         const result = await Swal.fire({
           title: "Konfirmasi Pembayaran?",
           html: isUsdt
-            ? `<p>Pastikan <strong>${Number(order.payment_amount_usd || 0).toFixed(2)} USDT</strong> benar-benar sudah masuk melalui Binance Pay.</p><p style="overflow-wrap:anywhere"><small>Transaction ID: ${escapeHtml(order.payment_reference || "belum dikirim")}</small></p>`
+            ? `<div style="text-align:left;line-height:1.55"><p>Cocokkan langsung di riwayat Binance:</p><p><strong>${Number(order.payment_amount_usd || 0).toFixed(2)} USDT</strong><br><small style="overflow-wrap:anywhere">Transaction ID: ${escapeHtml(order.payment_reference || "belum dikirim")}</small><br><small>Waktu order: ${escapeHtml(formatTanggal(order.created_at))}</small></p><label style="display:flex;gap:10px;align-items:flex-start"><input id="confirmUsdtVerified" type="checkbox" style="margin-top:5px"><span>Saya sudah memastikan status Successful, nominal, Transaction ID, dan waktu pembayaran cocok.</span></label></div>`
             : "Pastikan pembayaran benar-benar sudah masuk sebelum key dikirim.",
           icon: "warning",
           showCancelButton: true,
@@ -7791,6 +7791,13 @@
           cancelButtonText: "Batal",
           confirmButtonColor: "#0ea5e9",
           cancelButtonColor: "#64748b",
+          preConfirm: () => {
+            if (isUsdt && !document.getElementById("confirmUsdtVerified")?.checked) {
+              Swal.showValidationMessage("Centang konfirmasi setelah pembayaran diverifikasi di Binance.");
+              return false;
+            }
+            return true;
+          },
         });
 
         if (!result.isConfirmed) return;

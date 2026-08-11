@@ -597,9 +597,12 @@ function isSupplierDeliveryType(deliveryType) {
 }
 
 const ORDER_RESERVATION_MS = 2 * 60 * 60 * 1000;
+const BINANCE_PAYMENT_EXPIRY_MS = 30 * 60 * 1000;
+const BINANCE_ORDER_COOLDOWN_MS = 5 * 60 * 1000;
+const MAX_ACTIVE_BINANCE_ORDERS_PER_USER = 2;
 
-function getReservationExpiryIso(now = new Date()) {
-  return new Date(now.getTime() + ORDER_RESERVATION_MS).toISOString();
+function getReservationExpiryIso(now = new Date(), durationMs = ORDER_RESERVATION_MS) {
+  return new Date(now.getTime() + durationMs).toISOString();
 }
 
 async function releaseReservedKeysForOrder(dbClient, orderId) {
@@ -2186,6 +2189,51 @@ function startDormantAccountCleanup() {
 function stopDormantAccountCleanup() {
   if (dormantAccountCleanupTimer) clearTimeout(dormantAccountCleanupTimer);
   dormantAccountCleanupTimer = null;
+}
+
+let binanceOrderCleanupTimer = null;
+
+async function expireStaleBinanceOrders() {
+  const nowIso = new Date().toISOString();
+  const cutoffIso = new Date(Date.now() - BINANCE_PAYMENT_EXPIRY_MS).toISOString();
+  const result = await query(
+    `WITH expired_orders AS MATERIALIZED (
+       UPDATE orders
+       SET payment_status = 'expired',
+           delivery_status = 'cancelled',
+           cancel_reason = 'Batas pembayaran Binance Pay 30 menit berakhir',
+           cancelled_at = $1
+       WHERE payment_method = 'binance_manual'
+         AND payment_status = 'pending'
+         AND delivery_status = 'waiting_payment'
+         AND (payment_reference IS NULL OR payment_reference = '')
+         AND created_at <= $2
+       RETURNING id
+     ), released_keys AS (
+       UPDATE keys k
+       SET reserved_order_id = NULL, reserved_until = NULL
+       WHERE k.used = 0
+         AND k.reserved_order_id IN (SELECT id FROM expired_orders)
+       RETURNING k.id
+     )
+     SELECT COUNT(*)::int AS expired_count FROM expired_orders`,
+    [nowIso, cutoffIso],
+  );
+  return Number(result.rows[0]?.expired_count || 0);
+}
+
+function startBinanceOrderCleanup() {
+  const run = () => expireStaleBinanceOrders().then((count) => {
+    if (count > 0) console.log(`BINANCE ORDER CLEANUP: ${count} order expired`);
+  }).catch((error) => console.error("BINANCE ORDER CLEANUP ERROR:", error.message));
+  run();
+  binanceOrderCleanupTimer = setInterval(run, 60 * 1000);
+  if (typeof binanceOrderCleanupTimer.unref === "function") binanceOrderCleanupTimer.unref();
+}
+
+function stopBinanceOrderCleanup() {
+  if (binanceOrderCleanupTimer) clearInterval(binanceOrderCleanupTimer);
+  binanceOrderCleanupTimer = null;
 }
 
 
@@ -5656,12 +5704,69 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
     try {
       await client.query("BEGIN");
 
+      if (paymentMethod === "binance_manual") {
+        await client.query("SELECT id FROM users WHERE id = $1 FOR UPDATE", [userId]);
+
+        const cutoffIso = new Date(Date.now() - BINANCE_PAYMENT_EXPIRY_MS).toISOString();
+        const expiredResult = await client.query(
+          `UPDATE orders
+           SET payment_status = 'expired', delivery_status = 'cancelled',
+               cancel_reason = 'Batas pembayaran Binance Pay 30 menit berakhir',
+               cancelled_at = $1
+           WHERE user_id = $2
+             AND payment_method = 'binance_manual'
+             AND payment_status = 'pending'
+             AND delivery_status = 'waiting_payment'
+             AND (payment_reference IS NULL OR payment_reference = '')
+             AND created_at <= $3
+           RETURNING id`,
+          [createdAt, userId, cutoffIso],
+        );
+        for (const expiredOrder of expiredResult.rows) {
+          await releaseReservedKeysForOrder(client, expiredOrder.id);
+        }
+
+        const activeResult = await client.query(
+          `SELECT COUNT(*)::int AS total
+           FROM orders
+           WHERE user_id = $1
+             AND payment_method = 'binance_manual'
+             AND payment_status = 'pending'
+             AND delivery_status IN ('waiting_payment', 'payment_review')`,
+          [userId],
+        );
+        if (Number(activeResult.rows[0]?.total || 0) >= MAX_ACTIVE_BINANCE_ORDERS_PER_USER) {
+          const error = new Error("Maksimal 2 order USDT aktif. Selesaikan order sebelumnya dulu.");
+          error.statusCode = 429;
+          throw error;
+        }
+
+        const latestResult = await client.query(
+          `SELECT created_at FROM orders
+           WHERE user_id = $1 AND payment_method = 'binance_manual'
+           ORDER BY created_at DESC LIMIT 1`,
+          [userId],
+        );
+        const latestCreatedAt = Date.parse(latestResult.rows[0]?.created_at || "");
+        if (Number.isFinite(latestCreatedAt) && Date.now() - latestCreatedAt < BINANCE_ORDER_COOLDOWN_MS) {
+          const retryMinutes = Math.max(1, Math.ceil((BINANCE_ORDER_COOLDOWN_MS - (Date.now() - latestCreatedAt)) / 60000));
+          const error = new Error(`Tunggu ${retryMinutes} menit sebelum membuat order USDT baru.`);
+          error.statusCode = 429;
+          throw error;
+        }
+      }
+
       if (productDeliveryType === "auto") {
         const reservedKeys = await reserveLocalKeysForOrder(client, {
           productId: cleanProductId,
           orderId,
           quantity: cleanQuantity,
-          reservedUntil: getReservationExpiryIso(),
+          reservedUntil: getReservationExpiryIso(
+            new Date(),
+            paymentMethod === "binance_manual"
+              ? BINANCE_PAYMENT_EXPIRY_MS
+              : ORDER_RESERVATION_MS,
+          ),
         });
 
         if (!reservedKeys) {
@@ -5908,10 +6013,12 @@ app.post(
     try {
       await client.query("BEGIN");
       const result = await client.query(
-        `SELECT id, user_id, name, contact, game, product, quantity, price,
-                payment_method, payment_status, delivery_status,
-                payment_reference, payment_amount_usd
-         FROM orders WHERE id = $1 LIMIT 1 FOR UPDATE`,
+       `SELECT o.id, o.user_id, o.name, o.contact, o.game, o.product, o.quantity, o.price,
+               o.payment_method, o.payment_status, o.delivery_status, o.created_at,
+               o.payment_reference, o.payment_amount_usd, u.username
+        FROM orders o
+        LEFT JOIN users u ON u.id = o.user_id
+        WHERE o.id = $1 LIMIT 1 FOR UPDATE OF o`,
         [orderId],
       );
       order = result.rows[0];
@@ -5927,6 +6034,19 @@ app.post(
       if (String(order.payment_status).toLowerCase() !== "pending") {
         await client.query("ROLLBACK");
         return res.status(409).json({ message: "Status pembayaran order sudah berubah." });
+      }
+      if (Date.now() - Date.parse(order.created_at || "") >= BINANCE_PAYMENT_EXPIRY_MS) {
+        await client.query(
+          `UPDATE orders
+           SET payment_status = 'expired', delivery_status = 'cancelled',
+               cancel_reason = 'Batas pembayaran Binance Pay 30 menit berakhir',
+               cancelled_at = $1
+           WHERE id = $2`,
+          [new Date().toISOString(), orderId],
+        );
+        await releaseReservedKeysForOrder(client, orderId);
+        await client.query("COMMIT");
+        return res.status(410).json({ message: "Waktu pembayaran 30 menit sudah berakhir. Buat order baru." });
       }
       if (order.payment_reference) {
         await client.query("ROLLBACK");
@@ -5969,9 +6089,12 @@ app.post(
       `Amount: ${Number(order.payment_amount_usd || 0).toFixed(2)} USDT`,
       `Binance Pay UID: ${binancePayUid}`,
       `Transaction ID: ${paymentReference}`,
+      `Account: ${order.username || "-"} (User ID ${order.user_id})`,
       `Buyer: ${order.name || "-"} (${order.contact || "-"})`,
+      `Created: ${order.created_at || "-"}`,
       `Product: ${order.game || "-"} / ${order.product || "-"}`,
       `Quantity: ${getOrderQuantity(order.quantity)}`,
+      "Verify in Binance: status successful, exact USDT amount, Transaction ID, and payment time.",
       `Review: ${adminUrl}`,
     ].join("\n");
 
@@ -6492,14 +6615,17 @@ app.post(
         await client.query("COMMIT");
         return res.json({ message: "Order sudah dibayar sebelumnya" });
       }
-      if (
-        order.payment_method === "binance_manual" &&
-        !String(order.payment_reference || "").trim()
-      ) {
-        await client.query("ROLLBACK");
-        return res.status(409).json({
-          message: "Buyer belum mengirim Binance Pay Transaction ID.",
-        });
+      if (order.payment_method === "binance_manual") {
+        if (
+          String(order.payment_status).toLowerCase() !== "pending" ||
+          String(order.delivery_status).toLowerCase() !== "payment_review" ||
+          !String(order.payment_reference || "").trim()
+        ) {
+          await client.query("ROLLBACK");
+          return res.status(409).json({
+            message: "Order USDT hanya dapat dikonfirmasi saat berstatus payment review dan memiliki Transaction ID.",
+          });
+        }
       }
 
       const orderDeliveryType = normalizeProductDeliveryType(order.delivery_type);
@@ -9678,6 +9804,7 @@ async function startApplication() {
     startRateLimitCleanup();
     startVipStoreAutoSync();
     startDormantAccountCleanup();
+    startBinanceOrderCleanup();
   });
 }
 
@@ -9700,6 +9827,7 @@ async function shutdown(signal) {
   stopRateLimitCleanup();
   stopVipStoreAutoSync();
   stopDormantAccountCleanup();
+  stopBinanceOrderCleanup();
   console.log(`${signal} diterima, memulai graceful shutdown`);
 
   const forceShutdownTimer = setTimeout(() => {
