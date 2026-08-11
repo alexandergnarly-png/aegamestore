@@ -1521,7 +1521,8 @@ body.keysystem-ui.admin-chat-open .ae-help-fab {
   body.keysystem-ui .payment-icons {
     display: grid;
     grid-template-columns: repeat(6, minmax(0, 1fr));
-    width: min(100%, 274px);
+    width: min(100%, 220px);
+    margin-inline: auto;
     gap: 8px;
   }
 
@@ -1533,7 +1534,8 @@ body.keysystem-ui.admin-chat-open .ae-help-fab {
     flex-direction: column;
     justify-content: center;
     gap: 8px;
-    padding: 9px 5px;
+    padding: 6px 3px;
+    font-size: 11px;
     text-align: center;
     touch-action: manipulation;
   }
