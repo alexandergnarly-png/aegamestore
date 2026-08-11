@@ -1451,6 +1451,113 @@ body.keysystem-ui.admin-chat-open .ae-help-fab {
   pointer-events: none !important;
 }
 
+/* Mobile footer closes the page cleanly; safe-area space lives inside it. */
+@media (max-width: 640px) {
+  body.keysystem-ui {
+    padding-bottom: 0 !important;
+  }
+
+  body.keysystem-ui .site-footer {
+    margin: 20px 0 0 !important;
+    padding: 30px 20px calc(24px + env(safe-area-inset-bottom, 0px)) !important;
+    background: #ffffff !important;
+    border: 0 !important;
+    border-top: 1px solid var(--ks-line) !important;
+    border-radius: 24px 24px 0 0 !important;
+    box-shadow: none !important;
+  }
+
+  body.keysystem-ui.dark-theme .site-footer {
+    background: var(--ks-surface) !important;
+  }
+
+  body.keysystem-ui .footer-inner {
+    width: 100% !important;
+    max-width: none !important;
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+    padding-bottom: 24px !important;
+    border-bottom: 1px solid var(--ks-line) !important;
+  }
+
+  body.keysystem-ui .footer-brand {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+    gap: 4px 12px;
+    align-items: center;
+  }
+
+  body.keysystem-ui .footer-brand .brand-logo {
+    grid-row: 1 / 3;
+    width: 44px;
+    height: 44px;
+    border-radius: 3px;
+  }
+
+  body.keysystem-ui .footer-brand strong {
+    align-self: end;
+    font-size: 17px;
+    line-height: 1.2;
+  }
+
+  body.keysystem-ui .footer-brand p {
+    align-self: start;
+    max-width: 28ch;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  body.keysystem-ui .footer-payments {
+    gap: 12px;
+  }
+
+  body.keysystem-ui .footer-payments > p {
+    color: var(--ks-text);
+    font: 700 11px/1.3 var(--ks-mono);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+
+  body.keysystem-ui .payment-icons {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  body.keysystem-ui .payment-icons button {
+    width: 100%;
+    min-height: 48px;
+    justify-content: flex-start;
+    padding: 10px 12px;
+  }
+
+  body.keysystem-ui .payment-icons button:last-child {
+    grid-column: 1 / -1;
+  }
+
+  body.keysystem-ui .footer-links {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  body.keysystem-ui .footer-links button {
+    width: 100%;
+    min-height: 48px;
+    padding: 9px 10px;
+    line-height: 1.25;
+  }
+
+  body.keysystem-ui .footer-bottom {
+    max-width: 29ch;
+    margin: 20px auto 0;
+    color: var(--ks-muted);
+    font-size: 12px;
+    line-height: 1.55;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   body.keysystem-ui .ae-payment-info-icon {
     animation: none !important;
