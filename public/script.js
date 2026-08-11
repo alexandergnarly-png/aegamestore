@@ -34,6 +34,7 @@ const translations = {
     guideStep5: "Selesai! Game akan langsung dikirim setelah sukses.",
     guideOk: "Mengerti",
     loginBtn: "Masuk / Daftar",
+    navLogout: "Keluar",
     navHome: "Beranda",
     navStore: "Katalog Game",
     navGuide: "Cara Beli",
@@ -313,6 +314,7 @@ const translations = {
     guideStep5: "Done! Your game will be delivered instantly after success.",
     guideOk: "Got it",
     loginBtn: "Login / Register",
+    navLogout: "Log out",
     navHome: "Home",
     navStore: "Game Catalog",
     navGuide: "How to Buy",
@@ -2455,26 +2457,18 @@ async function checkLoginStatus() {
     const res = await fetch("/api/user/me");
     const data = await res.json();
     const userMenu = document.getElementById("userMenu");
+    const mobileNavLogout = document.getElementById("mobileNavLogout");
+
+    if (mobileNavLogout) mobileNavLogout.hidden = !data.loggedIn;
 
     // Kalau user sudah login dan elemen userMenu ditemukan
     if (data.loggedIn && userMenu) {
       const accountLabel = currentLanguage === "en" ? "Account" : "Akun";
-      const logoutLabel = currentLanguage === "en" ? "Logout" : "Keluar";
       userMenu.innerHTML = `
-    <div class="user-menu">
-      <span class="user-greeting">
-        <span aria-hidden="true">M</span>
-        <strong>${escapeHtml(data.username || "")}</strong>
-      </span>
-      <a href="/account.html" class="user-action-btn">
+      <a href="/account.html" class="auth-btn account-auth-btn" aria-label="${escapeHtml(accountLabel)}">
         <iconify-icon class="account-orbit-icon" icon="mdi:account-circle-outline" aria-hidden="true"></iconify-icon>
         <span>${escapeHtml(accountLabel)}</span>
       </a>
-      <button type="button" onclick="logoutUser()" class="user-action-btn user-action-danger">
-        <iconify-icon icon="mdi:logout" aria-hidden="true"></iconify-icon>
-        <span>${escapeHtml(logoutLabel)}</span>
-      </button>
-    </div>
 `;
     }
   } catch (err) {
@@ -3455,6 +3449,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const toggle = document.getElementById("navToggle");
   if (toggle) {
     toggle.addEventListener("click", toggleMobileNav);
+  }
+
+  const mobileNavLogout = document.getElementById("mobileNavLogout");
+  if (mobileNavLogout) {
+    mobileNavLogout.addEventListener("click", () => {
+      closeMobileNav();
+      logoutUser();
+    });
   }
 
   document.addEventListener("click", (event) => {

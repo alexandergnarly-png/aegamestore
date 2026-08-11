@@ -80,7 +80,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/style.css?v=20260811-mobile-footer-1" />
-    <link rel="stylesheet" href="/keysystem-ui.css?v=20260811-payment-tiles-2" />
+    <link rel="stylesheet" href="/keysystem-ui.css?v=20260811-header-controls-1" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#f4f3ee" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -194,6 +194,10 @@
               <path class="music-wave" d="M15 9a4 4 0 0 1 0 6m3-9a8 8 0 0 1 0 12" />
             </svg>
             <span>MUSIC</span>
+          </button>
+          <button type="button" class="nav-link mobile-nav-logout" id="mobileNavLogout" hidden>
+            <iconify-icon icon="mdi:logout" aria-hidden="true"></iconify-icon>
+            <span data-i18n="navLogout">Keluar</span>
           </button>
         </nav>
 
@@ -1648,6 +1652,6 @@
       preload="none"
       loop
     ></audio>
-    <script src="/script.js?v=20260809-ai-assistant-1" defer></script>
+    <script src="/script.js?v=20260811-header-controls-1" defer></script>
   </body>
 </html>

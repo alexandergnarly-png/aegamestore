@@ -132,6 +132,23 @@ body.keysystem-ui .music-toggle .music-wave {
   transition: opacity 180ms ease;
 }
 
+body.keysystem-ui .mobile-nav-logout {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  body.keysystem-ui .main-nav .mobile-nav-logout:not([hidden]) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #a12626;
+    font: 500 10px/1 var(--ks-mono);
+    letter-spacing: .05em;
+    text-transform: uppercase;
+  }
+}
+
 body.keysystem-ui .music-toggle.is-playing .music-wave {
   opacity: 1;
 }
@@ -1104,23 +1121,54 @@ body.keysystem-ui .ae-payment-info-confirm.swal2-confirm {
 
   body.keysystem-ui .header-actions {
     flex: 0 0 auto;
-    gap: 4px;
+    gap: 0;
     margin-left: auto;
   }
 
   body.keysystem-ui .lang-switch {
     flex: 0 0 auto;
+    gap: 0;
+    padding: 0 !important;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
   }
 
   body.keysystem-ui .lang-btn,
   body.keysystem-ui .theme-toggle-btn,
   body.keysystem-ui .account-auth-btn,
   body.keysystem-ui .nav-toggle {
-    width: 38px !important;
-    min-width: 38px !important;
-    height: 42px !important;
-    min-height: 42px !important;
+    position: relative;
+    isolation: isolate;
+    width: 44px !important;
+    min-width: 44px !important;
+    height: 44px !important;
+    min-height: 44px !important;
     padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    touch-action: manipulation;
+  }
+
+  body.keysystem-ui .lang-btn::before,
+  body.keysystem-ui .theme-toggle-btn::before,
+  body.keysystem-ui .account-auth-btn::before,
+  body.keysystem-ui .nav-toggle::before {
+    content: "" !important;
+    position: absolute;
+    z-index: -1;
+    inset: 4px;
+    display: block !important;
+    border: 1px solid var(--ks-line);
+    border-radius: 3px;
+    background: var(--ks-surface);
+  }
+
+  body.keysystem-ui .lang-btn.active::before,
+  body.keysystem-ui .account-auth-btn::before {
+    border-color: var(--ks-text);
+    background: var(--ks-text);
   }
 
   body.keysystem-ui .hero {

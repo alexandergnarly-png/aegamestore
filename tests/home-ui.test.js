@@ -142,10 +142,10 @@ assert.match(css, /prefers-reduced-motion: reduce[\s\S]*?account-orbit-icon/);
     `Missing Indonesian/English translations for: ${key}`,
   );
 });
-assert.match(html, /script\.js\?v=20260809-ai-assistant-1/);
+assert.match(html, /script\.js\?v=20260811-header-controls-1/);
 assert.match(html, /style\.css\?v=20260811-mobile-footer-1/);
-assert.match(html, /keysystem-ui\.css\?v=20260811-payment-tiles-2/);
-assert.match(serviceWorker, /CACHE_VERSION = "20260811-payment-tiles-v2"/);
+assert.match(html, /keysystem-ui\.css\?v=20260811-header-controls-1/);
+assert.match(serviceWorker, /CACHE_VERSION = "20260811-header-controls-v1"/);
 assert.doesNotMatch(css, /body \{\s*padding-bottom: 92px !important;/);
 assert.match(keysystemCss, /Mobile footer closes the page cleanly/);
 assert.match(keysystemCss, /body\.keysystem-ui \{\s*padding-bottom: 0 !important;/);
@@ -154,6 +154,12 @@ assert.match(keysystemCss, /\.payment-icons \{[\s\S]*?grid-template-columns: rep
 assert.match(keysystemCss, /\.payment-icons \{[\s\S]*?width: min\(100%, 220px\);[\s\S]*?margin-inline: auto/);
 assert.match(keysystemCss, /\.payment-icons button \{[\s\S]*?min-height: 48px;[\s\S]*?aspect-ratio: 1/);
 assert.match(keysystemCss, /\.payment-icons button:nth-child\(5\) \{[\s\S]*?grid-column: 4 \/ span 2/);
+assert.match(html, /id="mobileNavLogout" hidden/);
+assert.match(script, /mobileNavLogout\.hidden = !data\.loggedIn/);
+assert.match(script, /class="auth-btn account-auth-btn"/);
+assert.doesNotMatch(script, /class="user-action-btn user-action-danger"/);
+assert.match(keysystemCss, /\.account-auth-btn,[\s\S]*?\.nav-toggle \{[\s\S]*?width: 44px !important;[\s\S]*?height: 44px !important/);
+assert.match(keysystemCss, /\.nav-toggle::before \{[\s\S]*?inset: 4px/);
 assert.match(html, /id="adminChatClose"[\s\S]*?icon="ph:x-bold"/);
 assert.match(css, /\.ae-help-close \{[\s\S]*?width: 44px !important;[\s\S]*?height: 44px !important;/);
 assert.match(html, /id="aeAiForm"/);
