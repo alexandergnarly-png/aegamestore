@@ -1252,43 +1252,61 @@ body.keysystem-ui .ae-payment-info-confirm.swal2-confirm {
     display: grid !important;
     width: 100% !important;
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-    gap: 4px !important;
+    gap: 8px !important;
     margin-top: 28px;
-    overflow: hidden;
+    padding-block: 8px;
+    overflow: visible;
+    border-block: 1px solid var(--ks-line);
   }
 
   body.keysystem-ui .hero-trust li,
   body.keysystem-ui .hero-trust li:nth-child(3) {
-    display: grid;
+    position: relative;
+    display: grid !important;
     grid-column: auto !important;
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
+    grid-template-rows: 30px auto auto;
     justify-items: center;
-    gap: 4px;
+    align-content: center;
+    gap: 5px;
     width: auto !important;
     min-width: 0 !important;
-    min-height: 72px !important;
-    padding: 8px 2px !important;
+    min-height: 108px !important;
+    padding: 10px 5px 9px !important;
+    border: 1px solid var(--ks-line) !important;
+    border-radius: 3px !important;
+    background: var(--ks-surface) !important;
     text-align: center;
   }
 
   body.keysystem-ui .hero-trust-icon {
-    width: 22px;
-    height: 22px;
-    border: 0;
+    display: grid !important;
+    width: 30px !important;
+    height: 30px !important;
+    place-items: center;
+    border: 1px solid var(--ks-text) !important;
+    border-radius: 50% !important;
+    background: var(--ks-text) !important;
+    color: var(--ks-inverse) !important;
   }
 
   body.keysystem-ui .hero-trust-icon svg {
-    width: 16px;
+    width: 15px;
+    height: 15px;
   }
 
   body.keysystem-ui .hero-trust-proof {
-    font-size: clamp(9px, 3vw, 11px);
+    font-size: clamp(10px, 3.3vw, 12px);
+    line-height: 1;
+    letter-spacing: -.04em;
   }
 
   body.keysystem-ui .hero-trust strong {
-    margin-top: 2px;
-    font-size: clamp(6px, 2.4vw, 8px) !important;
-    white-space: nowrap;
+    margin-top: 0;
+    font-size: clamp(7px, 2.35vw, 9px) !important;
+    line-height: 1.25;
+    letter-spacing: .02em;
+    white-space: normal;
   }
 
   body.keysystem-ui .hero-trust small {
@@ -1501,10 +1519,17 @@ body.keysystem-ui .ae-payment-info-confirm.swal2-confirm {
 
   body.keysystem-ui .hero-trust {
     margin-top: 22px;
+    gap: 5px !important;
   }
 
   body.keysystem-ui .hero-trust strong {
     font-size: 7px !important;
+  }
+
+  body.keysystem-ui .hero-trust li,
+  body.keysystem-ui .hero-trust li:nth-child(3) {
+    min-height: 102px !important;
+    padding-inline: 3px !important;
   }
 }
 
