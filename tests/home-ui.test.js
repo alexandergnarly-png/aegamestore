@@ -142,10 +142,10 @@ assert.match(css, /prefers-reduced-motion: reduce[\s\S]*?account-orbit-icon/);
     `Missing Indonesian/English translations for: ${key}`,
   );
 });
-assert.match(html, /script\.js\?v=20260814-ai-terminal-2/);
+assert.match(html, /script\.js\?v=20260814-ai-replies-1/);
 assert.match(html, /style\.css\?v=20260814-ai-terminal-2/);
 assert.match(html, /keysystem-ui\.css\?v=20260814-trust-cards-1/);
-assert.match(serviceWorker, /CACHE_VERSION = "20260814-ai-terminal-v2"/);
+assert.match(serviceWorker, /CACHE_VERSION = "20260814-ai-replies-v1"/);
 assert.match(keysystemCss, /hero-trust li:nth-child\(3\)[\s\S]*?min-height: 108px !important/);
 assert.match(keysystemCss, /hero-trust-icon \{[\s\S]*?border-radius: 50% !important/);
 assert.doesNotMatch(css, /body \{\s*padding-bottom: 92px !important;/);
@@ -166,6 +166,8 @@ assert.match(keysystemCss, /#userMenu \.account-auth-btn::before \{[\s\S]*?backg
 assert.match(html, /id="adminChatClose"[\s\S]*?icon="ph:x-bold"/);
 assert.match(css, /\.ae-help-close \{[\s\S]*?width: 44px !important;[\s\S]*?height: 44px !important;/);
 assert.match(html, /id="aeAiForm"/);
+assert.match(html, /id="aeAiInput"[\s\S]*?placeholder="Tulis pertanyaan\.\.\."/);
+assert.doesNotMatch(html, /id="aeAiInput"[^>]*placeholder="Contoh:/);
 assert.match(html, /id="aeAiMessages"[\s\S]*?role="log"/);
 assert.match(html, /<details class="ae-ai-disclosure" id="aeAiDisclosure">[\s\S]*?<summary class="ae-ai-summary">/);
 assert.match(html, /class="ae-ai-summary-kicker"[\s\S]*?data-i18n="aiAssistantLive"/);

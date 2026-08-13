@@ -22,7 +22,8 @@ assert.match(route, /Never use Markdown, bullets, numbered lists, headings, tabl
 assert.match(route, /Answer in one or two short sentences by default/);
 assert.match(route, /WHERE p\.active = 1/);
 assert.match(route, /price_idr/);
-assert.match(server, /function buildLocalCatalogReply\(message, catalog\)/);
+assert.match(server, /function buildLocalCatalogReply\(message, catalog, history = \[\]\)/);
+assert.match(route, /buildLocalCatalogReply\(message, catalog, history\)/);
 assert.match(route, /if \(!apiKey\) return res\.json\(\{ answer: localAnswer, mode: "catalog" \}\)/);
 assert.doesNotMatch(route, /supplier_cost|api_secret|game_key|password_hash/);
 assert.doesNotMatch(route, /console\.(log|error)\([^\n]*message/);
@@ -39,8 +40,28 @@ const sampleCatalog = [
 ];
 const localReply = buildLocalCatalogReply("Delta Force Android paling murah", sampleCatalog);
 assert.match(localReply, /Aorus/);
+assert.match(localReply, /paling hemat/);
 assert.doesNotMatch(localReply, /PUBG/);
 assert.doesNotMatch(localReply, /\n|^\d+\.|—| - /);
 assert.ok((localReply.match(/[.!?](?:\s|$)/g) || []).length <= 2, "local reply should stay conversational and short");
+
+const stockReply = buildLocalCatalogReply("stok Delta Force paling banyak", sampleCatalog);
+assert.match(stockReply, /Nike/);
+assert.match(stockReply, /Stok paling aman/);
+
+const compareReply = buildLocalCatalogReply("bandingkan Nike vs Aorus Delta Force", sampleCatalog);
+assert.match(compareReply, /lebih hemat/);
+assert.match(compareReply, /selisih Rp10\.000/);
+
+const alternativeReply = buildLocalCatalogReply(
+  "yang lain",
+  sampleCatalog,
+  [
+    { role: "user", content: "Delta Force Android paling murah" },
+    { role: "assistant", content: "Yang paling hemat adalah Delta Force Aorus." },
+  ],
+);
+assert.match(alternativeReply, /Nike/);
+assert.match(alternativeReply, /Alternatif lainnya/);
 
 console.log("AI assistant security contract check passed.");

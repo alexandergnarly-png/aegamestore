@@ -8374,9 +8374,19 @@ app.get("/payment-config", (req, res) => {
   });
 });
 
-function buildLocalCatalogReply(message, catalog) {
+function buildLocalCatalogReply(message, catalog, history = []) {
   const text = String(message || "").toLowerCase();
-  const english = /\b(recommend|cheapest|available|which|show me|best value)\b/.test(text);
+  const english = /\b(recommend|cheapest|available|which|show me|best value|hello|another|compare)\b/.test(text);
+  const asksAlternative = /\b(yang lain|alternatif|lainnya|another|alternative)\b/.test(text);
+  const previousUser = asksAlternative
+    ? [...history].reverse().find((item) => item?.role === "user")?.content || ""
+    : "";
+  const searchText = `${previousUser} ${text}`.toLowerCase();
+  if (/^(halo|hai|hi|hello|pagi|siang|malam)[!. ]*$/.test(text)) {
+    return english
+      ? "Hi! Tell me the game, platform, duration, or budget you have in mind."
+      : "Hai! Sebutkan game, platform, durasi, atau budget yang kamu cari ya.";
+  }
   const asksOrder = /\b(order|pesanan|transaksi)\b/.test(text) && /\b(saya|my|status|cek|check)\b/.test(text);
   if (asksOrder) {
     return english
@@ -8384,22 +8394,44 @@ function buildLocalCatalogReply(message, catalog) {
       : "Buka Akun, lalu Riwayat Order. Kalau masih butuh bantuan, kirim Order ID ke admin Telegram.";
   }
 
-  const budgetMatch = text.match(/(?:budget|max|di bawah|dibawah|under|harga)[^0-9]{0,12}([0-9]+(?:[.,][0-9]+)?)\s*(k|rb|ribu)?/i);
+  const budgetMatch = searchText.match(/(?:budget|max|di bawah|dibawah|under|harga)[^0-9]{0,12}([0-9]+(?:[.,][0-9]+)?)\s*(k|rb|ribu)?/i);
   const budget = budgetMatch
     ? Number(budgetMatch[1].replace(",", ".")) * (budgetMatch[2] ? 1000 : 1)
     : 0;
-  const tokens = text.split(/[^a-z0-9]+/).filter((token) => token.length >= 3);
-  const generic = /rekomendasi|recommend|murah|cheapest|hemat|best|stok|stock|ready|tersedia|budget/.test(text);
+  const tokens = searchText.split(/[^a-z0-9]+/).filter((token) => token.length >= 3);
+  const generic = /rekomendasi|recommend|murah|cheapest|hemat|best|stok|stock|ready|tersedia|budget|banding|compare|aman|safe|alternatif|another/.test(searchText);
+  const asksCheapest = /murah|cheapest|hemat|best value/.test(searchText);
+  const asksStock = /stok|stock|ready|tersedia|available/.test(searchText);
+  const asksCompare = /banding|compare|versus|\bvs\b/.test(searchText);
+  const asksSafe = /aman|safe/.test(searchText);
   let matches = catalog
     .map((product) => {
       const searchable = `${product.game} ${product.brand} ${product.duration} ${product.platform}`.toLowerCase();
       let score = tokens.reduce((total, token) => total + (searchable.includes(token) ? 1 : 0), 0);
-      if (text.includes(String(product.game).toLowerCase())) score += 8;
-      if (text.includes(String(product.brand).toLowerCase())) score += 5;
-      if (text.includes(String(product.platform).toLowerCase())) score += 3;
+      if (searchText.includes(String(product.game).toLowerCase())) score += 8;
+      if (searchText.includes(String(product.brand).toLowerCase())) score += 5;
+      if (searchText.includes(String(product.platform).toLowerCase())) score += 3;
       return { ...product, score };
     })
     .filter((product) => product.stock > 0 && (!budget || product.price_idr <= budget));
+
+  const bestScore = Math.max(0, ...matches.map((product) => product.score));
+  if (bestScore > 0) matches = matches.filter((product) => product.score > 0);
+  if (asksSafe) {
+    const safeMatches = matches.filter((product) => /safe/i.test(String(product.play_status || "safe")));
+    if (safeMatches.length) matches = safeMatches;
+  }
+
+  if (asksAlternative) {
+    const previousAnswer = String(
+      [...history].reverse().find((item) => item?.role === "assistant")?.content || "",
+    ).toLowerCase();
+    const unseen = matches.filter(
+      (product) => !previousAnswer.includes(String(product.game).toLowerCase()) ||
+        !previousAnswer.includes(String(product.brand).toLowerCase()),
+    );
+    if (unseen.length) matches = unseen;
+  }
 
   if (!generic && !matches.some((product) => product.score > 0)) {
     return english
@@ -8407,7 +8439,11 @@ function buildLocalCatalogReply(message, catalog) {
       : "Sebutkan game, platform, durasi, atau budget yang kamu cari. Contoh: produk Android termurah di bawah 50 ribu.";
   }
 
-  matches.sort((a, b) => b.score - a.score || a.price_idr - b.price_idr || b.stock - a.stock);
+  matches.sort((a, b) =>
+    b.score - a.score ||
+    (asksStock ? b.stock - a.stock : a.price_idr - b.price_idr) ||
+    b.stock - a.stock,
+  );
   if (!matches.length) {
     return english
       ? "No ready-stock product matches that request right now. Try another game or budget."
@@ -8420,9 +8456,43 @@ function buildLocalCatalogReply(message, catalog) {
   const platformName = platform.toLowerCase() === "ios"
     ? "iOS"
     : platform.charAt(0).toUpperCase() + platform.slice(1);
+  const label = `${product.game} ${product.brand}, ${product.duration}`;
+  if (asksCompare && matches[1]) {
+    const other = matches[1];
+    const difference = Math.abs(Number(other.price_idr) - Number(product.price_idr)).toLocaleString("id-ID");
+    return english
+      ? `${label} is the better value at Rp${price}, Rp${difference} less than ${other.brand}. Both are currently in stock.`
+      : `${label} lebih hemat di Rp${price}, selisih Rp${difference} dari ${other.brand}. Keduanya sedang ready.`;
+  }
+  if (asksAlternative) {
+    return english
+      ? `Another solid pick is ${label} on ${platformName}. It is Rp${price} with ${product.stock} ready.`
+      : `Alternatif lainnya ada ${label} di ${platformName}. Harganya Rp${price} dengan stok ${product.stock}.`;
+  }
+  if (budget) {
+    const remaining = Math.max(0, budget - Number(product.price_idr)).toLocaleString("id-ID");
+    return english
+      ? `${label} fits your budget best at Rp${price}. You still have Rp${remaining} left.`
+      : `${label} paling pas untuk budgetmu di Rp${price}. Masih tersisa Rp${remaining}.`;
+  }
+  if (asksStock) {
+    return english
+      ? `${label} has the strongest availability right now with ${product.stock} ready. The price is Rp${price}.`
+      : `Stok paling aman saat ini ${label}, tersedia ${product.stock}. Harganya Rp${price}.`;
+  }
+  if (asksSafe) {
+    return english
+      ? `For a safe-to-play option, choose ${label} on ${platformName}. It is Rp${price} and ready now.`
+      : `Untuk opsi safe to play, pilih ${label} di ${platformName}. Harganya Rp${price} dan sedang ready.`;
+  }
+  if (asksCheapest) {
+    return english
+      ? `The cheapest match is ${label} at Rp${price}. There are ${product.stock} ready.`
+      : `Yang paling hemat adalah ${label} seharga Rp${price}. Stok ready ${product.stock}.`;
+  }
   return english
-    ? `I'd go with ${product.game} ${product.brand} for ${product.duration} on ${platformName}. It's Rp${price} with ${product.stock} in stock.`
-    : `Aku paling rekomendasi ${product.game} ${product.brand} untuk ${product.duration} di ${platformName}. Harganya Rp${price} dan stoknya masih ${product.stock}.`;
+    ? `My pick is ${label} on ${platformName} at Rp${price}. Stock is ready now.`
+    : `Pilihan yang paling cocok adalah ${label} di ${platformName}, harganya Rp${price}. Stoknya sedang ready.`;
 }
 
 app.post("/api/ai-assistant", aiAssistantLimiter, async (req, res) => {
@@ -8480,7 +8550,7 @@ app.post("/api/ai-assistant", aiAssistantLimiter, async (req, res) => {
       play_status: product.play_status,
       stock: Number(product.available_keys || 0),
     }));
-    localAnswer = buildLocalCatalogReply(message, catalog);
+    localAnswer = buildLocalCatalogReply(message, catalog, history);
     if (!apiKey) return res.json({ answer: localAnswer, mode: "catalog" });
 
     const transcript = history
@@ -8489,6 +8559,7 @@ app.post("/api/ai-assistant", aiAssistantLimiter, async (req, res) => {
     const instructions = `You are AE AI, the customer assistant for AE Game Store.
 Reply in the same language as the customer's latest message.
 Sound like a friendly human store assistant: warm, direct, natural, and never corporate or robotic.
+Vary sentence openings and wording across turns; do not repeat the same recommendation phrasing when the context changes.
 Only answer about this store's catalog, public selling prices, stock, platform, duration, play status, basic buying guidance, vouchers, and general support.
 Use only the supplied catalog. Never invent a product, price, stock, discount, policy, or availability.
 Recommend one best match by default. Mention one alternative only when it materially helps the customer.
