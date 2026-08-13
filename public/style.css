@@ -14685,20 +14685,29 @@ body.dark-theme .game-card-fav > span {
 }
 
 .ae-ai-disclosure {
+  position: relative;
   margin: 0 16px 12px;
   overflow: clip;
-  border: 1px solid #d6d6d0;
+  border: 1px solid #0b0b0a;
   border-radius: 3px;
   background: #ffffff;
 }
 
+.ae-ai-disclosure::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 5px;
+  background: #0b0b0a;
+  content: "";
+}
+
 .ae-ai-summary {
   display: grid;
-  min-height: 76px;
-  grid-template-columns: 40px minmax(0, 1fr) 36px;
-  align-items: center;
-  gap: 11px;
-  padding: 12px 14px;
+  min-height: 132px;
+  grid-template-columns: 48px minmax(0, 1fr) 44px;
+  align-items: start;
+  gap: 13px;
+  padding: 15px 14px 14px 19px;
   color: #0b0b0a;
   cursor: pointer;
   list-style: none;
@@ -14712,12 +14721,40 @@ body.dark-theme .game-card-fav > span {
 .ae-ai-summary-copy {
   display: grid;
   min-width: 0;
-  gap: 3px;
+  gap: 5px;
+}
+
+.ae-ai-summary-kicker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #666661;
+  font-family: "DM Mono", monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.ae-ai-summary-kicker b {
+  margin-left: auto;
+  color: #a2a29c;
+  font-weight: 500;
+}
+
+.ae-ai-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #0b0b0a;
+  box-shadow: 0 0 0 3px #e8e8e3;
 }
 
 .ae-ai-summary-copy strong {
-  font-size: 17px;
-  letter-spacing: -0.035em;
+  color: #0b0b0a;
+  font-size: 21px;
+  line-height: 1.05;
+  letter-spacing: -0.05em;
 }
 
 .ae-ai-summary-copy small {
@@ -14726,10 +14763,29 @@ body.dark-theme .game-card-fav > span {
   line-height: 1.35;
 }
 
+.ae-ai-summary-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 3px;
+}
+
+.ae-ai-summary-tags span {
+  padding: 3px 6px;
+  border: 1px solid #d6d6d0;
+  border-radius: 2px;
+  background: #f8f8f5;
+  color: #666661;
+  font-family: "DM Mono", monospace;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
 .ae-ai-summary-action {
   display: grid;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   place-items: center;
   border: 1px solid #d6d6d0;
   border-radius: 50%;
@@ -14738,11 +14794,12 @@ body.dark-theme .game-card-fav > span {
 }
 
 .ae-ai-summary-action iconify-icon {
-  font-size: 17px;
+  font-size: 19px;
 }
 
 .ae-ai-disclosure[open] .ae-ai-summary {
   border-bottom: 1px solid #d6d6d0;
+  background: #f8f8f5;
 }
 
 .ae-ai-disclosure[open] .ae-ai-summary-action {
@@ -14753,6 +14810,11 @@ body.dark-theme .game-card-fav > span {
 
 .ae-ai-summary:hover .ae-ai-summary-action {
   border-color: #0b0b0a;
+  background: #f2f2ee;
+}
+
+.ae-ai-disclosure[open] .ae-ai-summary:hover .ae-ai-summary-action {
+  background: #0b0b0a;
 }
 
 .ae-ai-summary:focus-visible {
@@ -14770,9 +14832,25 @@ body.dark-theme .game-card-fav > span {
   box-shadow: none;
 }
 
+.ae-ai-disclosure:not([open]) .ae-ai-summary::after {
+  position: absolute;
+  right: 14px;
+  bottom: 10px;
+  color: #666661;
+  content: "OPEN AI";
+  font-family: "DM Mono", monospace;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
 .ae-ai-mark {
+  width: 48px;
+  height: 48px;
+  flex-basis: 48px;
   border-radius: 3px;
   background: #0b0b0a;
+  box-shadow: 5px 5px 0 #e8e8e3;
   font-family: "DM Mono", monospace;
 }
 
@@ -14880,11 +14958,31 @@ body.dark-theme .ae-ai-summary {
   color: #f7f7f1;
 }
 
+body.dark-theme .ae-ai-disclosure::before {
+  background: #f7f7f1;
+}
+
 body.dark-theme .ae-ai-assistant {
   box-shadow: none;
 }
 
 body.dark-theme .ae-ai-summary-copy small {
+  color: #a2a29c;
+}
+
+body.dark-theme .ae-ai-summary-copy strong,
+body.dark-theme .ae-ai-summary-kicker {
+  color: #f7f7f1;
+}
+
+body.dark-theme .ae-ai-live-dot {
+  background: #f7f7f1;
+  box-shadow: 0 0 0 3px #2a2a27;
+}
+
+body.dark-theme .ae-ai-summary-tags span {
+  border-color: #2a2a27;
+  background: #181818;
   color: #a2a29c;
 }
 
@@ -14896,11 +14994,16 @@ body.dark-theme .ae-ai-summary-action {
 
 body.dark-theme .ae-ai-disclosure[open] .ae-ai-summary {
   border-bottom-color: #2a2a27;
+  background: #181818;
 }
 
 body.dark-theme .ae-ai-disclosure[open] .ae-ai-summary-action {
   background: #f7f7f1;
   color: #0b0b0a;
+}
+
+body.dark-theme .ae-ai-disclosure[open] .ae-ai-summary:hover .ae-ai-summary-action {
+  background: #f7f7f1;
 }
 
 body.dark-theme .ae-help-hero {
@@ -14964,9 +15067,33 @@ body.dark-theme .ae-ai-prompts button {
   }
 
   .ae-ai-summary {
-    min-height: 68px;
-    grid-template-columns: 38px minmax(0, 1fr) 36px;
-    padding: 10px 12px;
+    min-height: 124px;
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    gap: 11px;
+    padding: 13px 10px 13px 17px;
+  }
+
+  .ae-ai-mark {
+    width: 44px;
+    height: 44px;
+    flex-basis: 44px;
+  }
+
+  .ae-ai-summary-copy strong {
+    font-size: 19px;
+  }
+
+  .ae-ai-summary-copy small {
+    max-width: 190px;
+  }
+
+  .ae-ai-summary-kicker b {
+    display: none;
+  }
+
+  .ae-ai-disclosure:not([open]) .ae-ai-summary::after {
+    right: 10px;
+    bottom: 8px;
   }
 
   .ae-ai-assistant {
