@@ -41,7 +41,7 @@ assert.ok(!verifyTotp(secret, "000000", 59000));
 assert.strictEqual(escapeCsvFormula("=1+1"), "'=1+1");
 assert.strictEqual(escapeCsvFormula("safe"), "safe");
 assert.ok(server.includes("cleanPassword.length < 6"));
-assert.ok(server.includes("cleanNewPassword.length < 12"));
+assert.ok(server.includes("cleanNewPassword.length < 6"));
 assert.ok(server.includes("verifyTotp(adminTotpSecret, otp)"));
 assert.ok(server.includes('code: "ADMIN_AUTH_UNAVAILABLE"'));
 assert.ok(server.includes('code: "ADMIN_AUTH_REQUIRED"'));

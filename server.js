@@ -8862,10 +8862,10 @@ app.post(
     const cleanOldPassword = String(oldPassword || "").trim();
     const cleanNewPassword = String(newPassword || "").trim();
 
-    if (cleanNewPassword.length < 12 || cleanNewPassword.length > 72) {
+    if (cleanNewPassword.length < 6 || cleanNewPassword.length > 72) {
       return res
         .status(400)
-        .json({ message: "Password baru harus 12 sampai 72 karakter" });
+        .json({ message: "Password baru harus 6 sampai 72 karakter" });
     }
 
     try {

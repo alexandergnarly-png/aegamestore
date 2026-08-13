@@ -20,6 +20,8 @@ scripts.forEach(([, source]) => assert.doesNotThrow(() => new Function(source)))
   'class="account-orbit-icon" icon="mdi:account-outline"',
   'padding: max(12px, env(safe-area-inset-top, 0px)) 22px 12px',
   'flex-wrap: nowrap;',
+  'minlength="6"',
+  'newPassword.length < 6 || newPassword.length > 72',
 ].forEach((marker) => assert.ok(html.includes(marker), `Missing wallet UI marker: ${marker}`));
 
 console.log("AE Credit account UI check passed.");
