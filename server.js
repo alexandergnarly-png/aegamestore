@@ -8723,9 +8723,9 @@ app.post("/register", registerLimiter, async (req, res) => {
     });
   }
 
-  if (cleanPassword.length < 12 || cleanPassword.length > 72) {
+  if (cleanPassword.length < 6 || cleanPassword.length > 72) {
     return res.status(400).json({
-      message: "Password harus 12 sampai 72 karakter",
+      message: "Password harus 6 sampai 72 karakter",
     });
   }
 

@@ -1425,10 +1425,10 @@
                   <input
                     type="password"
                     id="regPassword"
-                    placeholder="Buat Password (Min. 12 Karakter)"
+                    placeholder="Buat Password (Min. 6 Karakter)"
                     data-auth-placeholder="registerPasswordPlaceholder"
                     autocomplete="new-password"
-                    minlength="12"
+                    minlength="6"
                     maxlength="72"
                     required
                     aria-describedby="regPasswordError passwordRequirements regStrengthLabel regCapsWarn"
@@ -1465,7 +1465,7 @@
                       <span
                         class="password-requirement-copy"
                         data-auth-i18n="passwordRuleLength"
-                        >12–72 karakter (wajib)</span
+                        >6–72 karakter (wajib)</span
                       >
                       <span class="password-rule-state">Belum</span>
                     </li>
@@ -1842,7 +1842,7 @@
 
       function calcStrength(pw) {
         if (!pw) return 0;
-        if (pw.length < 12) return 1;
+        if (pw.length < 6) return 1;
         let score = 2;
         if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++;
         if (/\d/.test(pw) && /[^A-Za-z0-9]/.test(pw)) score++;
@@ -1856,7 +1856,7 @@
         const lang = getSavedAuthLanguage();
         const dict = authTranslations[lang] || authTranslations.id;
         const rules = {
-          length: pw.length >= 12 && pw.length <= 72,
+          length: pw.length >= 6 && pw.length <= 72,
           case: /[A-Z]/.test(pw) && /[a-z]/.test(pw),
           mix: /\d/.test(pw) && /[^A-Za-z0-9]/.test(pw),
         };
@@ -1930,7 +1930,7 @@
 
         return {
           usernameOk: username.length >= 3 && !/\s/.test(username),
-          passwordOk: password.length >= 12 && password.length <= 72,
+          passwordOk: password.length >= 6 && password.length <= 72,
           termsOk: terms ? terms.checked : true,
         };
       }
@@ -2058,7 +2058,7 @@
         const lang = getSavedAuthLanguage();
         const dict = authTranslations[lang] || authTranslations.id;
 
-        if (username.length < 3 || password.length < 12 || password.length > 72) {
+        if (username.length < 3 || password.length < 6 || password.length > 72) {
           setAuthFieldError(
             "regUsername",
             "regUsernameError",
@@ -2067,7 +2067,7 @@
           setAuthFieldError(
             "regPassword",
             "regPasswordError",
-            password.length < 12
+            password.length < 6
               ? dict.passwordTooShort
               : password.length > 72
                 ? dict.passwordTooLong
@@ -2175,7 +2175,7 @@
           usernamePlaceholder: "Username",
           passwordPlaceholder: "Password",
           registerUsernamePlaceholder: "Pilih Username (Min. 3 Huruf)",
-          registerPasswordPlaceholder: "Buat Password (Min. 12 Karakter)",
+          registerPasswordPlaceholder: "Buat Password (Min. 6 Karakter)",
           rememberMe: "Ingat saya",
           acceptTerms: "Saya setuju ke Syarat & Kebijakan",
           orDivider: "atau",
@@ -2191,11 +2191,11 @@
           oopsTitle: "Oops!",
           fillUsernamePassword: "Isi username dan password dulu ya.",
           requiredField: "Kolom ini wajib diisi.",
-          passwordTooShort: "Password minimal 12 karakter.",
+          passwordTooShort: "Password minimal 6 karakter.",
           passwordTooLong: "Password maksimal 72 karakter.",
           passwordRequirementsTitle: "Syarat password",
           passwordRequirementsHint: "Wajib + rekomendasi",
-          passwordRuleLength: "12–72 karakter (wajib)",
+          passwordRuleLength: "6–72 karakter (wajib)",
           passwordRuleCase: "Huruf besar & kecil (disarankan)",
           passwordRuleMix: "Angka & simbol (disarankan)",
           requirementMet: "Terpenuhi",
@@ -2208,7 +2208,7 @@
           welcomeBack: "Selamat datang kembali!",
           invalidTitle: "Tidak Valid",
           invalidUserPass:
-            "Username min. 3 karakter & Password min. 12 karakter.",
+            "Username min. 3 karakter & Password min. 6 karakter.",
           termsTitle: "Setujui dulu",
           termsText: "Centang Syarat & Kebijakan untuk lanjut.",
           accountCreatedTitle: "Akun Dibuat! 🎉",
@@ -2283,7 +2283,7 @@
           usernamePlaceholder: "Username",
           passwordPlaceholder: "Password",
           registerUsernamePlaceholder: "Choose Username (Min. 3 characters)",
-          registerPasswordPlaceholder: "Create Password (Min. 12 characters)",
+          registerPasswordPlaceholder: "Create Password (Min. 6 characters)",
           rememberMe: "Remember me",
           acceptTerms: "I agree to the Terms & Policy",
           orDivider: "or",
@@ -2299,11 +2299,11 @@
           oopsTitle: "Oops!",
           fillUsernamePassword: "Please enter username and password.",
           requiredField: "This field is required.",
-          passwordTooShort: "Password must be at least 12 characters.",
+          passwordTooShort: "Password must be at least 6 characters.",
           passwordTooLong: "Password must not exceed 72 characters.",
           passwordRequirementsTitle: "Password requirements",
           passwordRequirementsHint: "Required + recommended",
-          passwordRuleLength: "12–72 characters (required)",
+          passwordRuleLength: "6–72 characters (required)",
           passwordRuleCase: "Uppercase & lowercase (recommended)",
           passwordRuleMix: "Number & symbol (recommended)",
           requirementMet: "Met",
@@ -2315,7 +2315,7 @@
           successTitle: "Success!",
           welcomeBack: "Welcome back!",
           invalidTitle: "Invalid",
-          invalidUserPass: "Username min. 3 chars & Password min. 12 chars.",
+          invalidUserPass: "Username min. 3 chars & Password min. 6 chars.",
           termsTitle: "Please accept",
           termsText: "Check Terms & Policy to continue.",
           accountCreatedTitle: "Account Created! 🎉",
