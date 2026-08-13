@@ -5310,6 +5310,7 @@ function setupAdminChatPopup() {
   const aiInput = document.getElementById("aeAiInput");
   const aiSend = document.getElementById("aeAiSend");
   const aiMessages = document.getElementById("aeAiMessages");
+  const aiDisclosure = document.getElementById("aeAiDisclosure");
   const aiPromptButtons = sheet?.querySelectorAll("[data-ai-prompt]") || [];
 
   if (!btn || !sheet) return;
@@ -5390,6 +5391,7 @@ function setupAdminChatPopup() {
     sheet.setAttribute("aria-hidden", "true");
     sheet.setAttribute("inert", "");
     document.body.classList.remove("admin-chat-open");
+    aiDisclosure?.removeAttribute("open");
 
     setTimeout(() => {
       if (lastAdminChatTrigger?.isConnected) {

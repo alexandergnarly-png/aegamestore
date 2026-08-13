@@ -79,7 +79,7 @@
       href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/style.css?v=20260813-auto-promo-1" />
+    <link rel="stylesheet" href="/style.css?v=20260814-ai-accordion-1" />
     <link rel="stylesheet" href="/keysystem-ui.css?v=20260814-trust-cards-1" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#f4f3ee" />
@@ -1225,32 +1225,37 @@
           </div>
         </div>
 
-        <section class="ae-ai-assistant" aria-labelledby="aeAiTitle">
-          <div class="ae-ai-heading">
+        <details class="ae-ai-disclosure" id="aeAiDisclosure">
+          <summary class="ae-ai-summary">
             <span class="ae-ai-mark" aria-hidden="true">AI</span>
-            <div>
+            <span class="ae-ai-summary-copy">
               <strong id="aeAiTitle" data-i18n="aiAssistantTitle">Tanya AE AI</strong>
               <small data-i18n="aiAssistantDesc">Cari produk, bandingkan pilihan, atau minta rekomendasi.</small>
+            </span>
+            <span class="ae-ai-summary-action" aria-hidden="true">
+              <iconify-icon icon="ph:caret-down-bold"></iconify-icon>
+            </span>
+          </summary>
+          <section class="ae-ai-assistant" aria-labelledby="aeAiTitle">
+            <div class="ae-ai-messages" id="aeAiMessages" role="log" aria-live="polite" aria-relevant="additions">
+              <p class="ae-ai-bubble is-assistant" data-i18n="aiAssistantGreeting">Halo! Sebutkan game, platform, durasi, atau budget kamu.</p>
             </div>
-          </div>
-          <div class="ae-ai-messages" id="aeAiMessages" role="log" aria-live="polite" aria-relevant="additions">
-            <p class="ae-ai-bubble is-assistant" data-i18n="aiAssistantGreeting">Halo! Sebutkan game, platform, durasi, atau budget kamu.</p>
-          </div>
-          <div class="ae-ai-prompts" aria-label="Pertanyaan cepat">
-            <button type="button" data-ai-prompt data-i18n="aiPromptCheap">Yang paling hemat</button>
-            <button type="button" data-ai-prompt data-i18n="aiPromptAndroid">Rekomendasi Android</button>
-            <button type="button" data-ai-prompt data-i18n="aiPromptStock">Stok ready</button>
-          </div>
-          <form class="ae-ai-form" id="aeAiForm">
-            <label class="sr-only" for="aeAiInput" data-i18n="aiAssistantInputLabel">Pertanyaan untuk AE AI</label>
-            <input id="aeAiInput" type="text" maxlength="500" autocomplete="off" data-i18n-placeholder="aiAssistantPlaceholder" placeholder="Contoh: brand Android terbaik untuk Delta Force" />
-            <button type="submit" id="aeAiSend" data-i18n-aria="aiAssistantSend">
-              <iconify-icon icon="ph:paper-plane-tilt-fill" aria-hidden="true"></iconify-icon>
-              <span class="sr-only" data-i18n="aiAssistantSend">Kirim</span>
-            </button>
-          </form>
-          <small class="ae-ai-disclaimer" data-i18n="aiAssistantDisclaimer">Rekomendasi memakai harga dan stok toko saat ini. Konfirmasi sebelum checkout.</small>
-        </section>
+            <div class="ae-ai-prompts" aria-label="Pertanyaan cepat">
+              <button type="button" data-ai-prompt data-i18n="aiPromptCheap">Yang paling hemat</button>
+              <button type="button" data-ai-prompt data-i18n="aiPromptAndroid">Rekomendasi Android</button>
+              <button type="button" data-ai-prompt data-i18n="aiPromptStock">Stok ready</button>
+            </div>
+            <form class="ae-ai-form" id="aeAiForm">
+              <label class="sr-only" for="aeAiInput" data-i18n="aiAssistantInputLabel">Pertanyaan untuk AE AI</label>
+              <input id="aeAiInput" type="text" maxlength="500" autocomplete="off" data-i18n-placeholder="aiAssistantPlaceholder" placeholder="Contoh: brand Android terbaik untuk Delta Force" />
+              <button type="submit" id="aeAiSend" data-i18n-aria="aiAssistantSend">
+                <iconify-icon icon="ph:paper-plane-tilt-fill" aria-hidden="true"></iconify-icon>
+                <span class="sr-only" data-i18n="aiAssistantSend">Kirim</span>
+              </button>
+            </form>
+            <small class="ae-ai-disclaimer" data-i18n="aiAssistantDisclaimer">Rekomendasi memakai harga dan stok toko saat ini. Konfirmasi sebelum checkout.</small>
+          </section>
+        </details>
 
         <a href="https://t.me/aegamestore" target="_blank" rel="noopener noreferrer" class="ae-help-telegram-link">
           <iconify-icon icon="ph:telegram-logo-fill" aria-hidden="true"></iconify-icon>
@@ -1671,6 +1676,6 @@
       preload="none"
       loop
     ></audio>
-    <script src="/script.js?v=20260813-auto-promo-1" defer></script>
+    <script src="/script.js?v=20260814-ai-accordion-1" defer></script>
   </body>
 </html>
