@@ -3,7 +3,7 @@
 // always return a valid Response object so the browser doesn't fall back
 // to the offline page on transient sub-resource fails.
 
-const CACHE_VERSION = "20260811-usdt-success-modal-v2";
+const CACHE_VERSION = "20260813-auto-promo-v1";
 const CACHE_NAME = `ae-game-store-auto-${CACHE_VERSION}`;
 
 const STATIC_ASSETS = [
@@ -32,6 +32,7 @@ const SW_BYPASS_PREFIXES = [
 const DYNAMIC_PREFIXES = [
   "/public-products",
   "/public-vouchers",
+  "/auto-promo",
   "/trending-products",
   "/api/",
   "/reviews",

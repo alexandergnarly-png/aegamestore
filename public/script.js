@@ -2675,7 +2675,7 @@ let currentSlide = 0;
 let promoTimer = null;
 
 function goToSlide(index) {
-  const slides = document.querySelectorAll(".promo-slide");
+  const slides = document.querySelectorAll(".promo-slide:not([hidden])");
   if (slides.length === 0) return;
   slides[currentSlide]?.classList.remove("active");
   currentSlide = ((index % slides.length) + slides.length) % slides.length;
@@ -2700,7 +2700,7 @@ function updatePromoDots() {
 
 function renderPromoDots() {
   const dotsBox = document.getElementById("promoDots");
-  const slides = document.querySelectorAll(".promo-slide");
+  const slides = document.querySelectorAll(".promo-slide:not([hidden])");
   if (!dotsBox || slides.length === 0) return;
   dotsBox.innerHTML = "";
   slides.forEach((_, idx) => {
@@ -2723,8 +2723,46 @@ function restartPromoAutoplay() {
   promoTimer = setInterval(nextSlide, 5500);
 }
 
+async function loadAutoPromo() {
+  const slide = document.getElementById("autoPromoSlide");
+  if (!slide) return;
+
+  try {
+    const response = await fetch("/auto-promo");
+    const data = await response.json();
+    const promo = response.ok ? data.promo : null;
+    if (!promo) return;
+
+    const title = document.getElementById("autoPromoTitle");
+    const description = document.getElementById("autoPromoDescription");
+    const label = document.getElementById("autoPromoLabel");
+    const cta = document.getElementById("autoPromoCta");
+    if (title) title.textContent = `${promo.game} · ${promo.brand}`;
+    if (label) label.textContent = currentLanguage === "en" ? "AUTO DEAL" : "PROMO OTOMATIS";
+    if (description) {
+      const voucher = promo.voucher
+        ? currentLanguage === "en"
+          ? ` Use ${promo.voucher.code} to save ${formatRupiah(promo.voucher.discount_amount)}.`
+          : ` Pakai ${promo.voucher.code}, hemat ${formatRupiah(promo.voucher.discount_amount)}.`
+        : "";
+      description.textContent = currentLanguage === "en"
+        ? `${promo.duration} from ${formatRupiah(promo.price)} · ${promo.stock} ready.${voucher}`
+        : `${promo.duration} mulai ${formatRupiah(promo.price)} · ${promo.stock} ready.${voucher}`;
+    }
+    if (cta) {
+      cta.textContent = currentLanguage === "en" ? "View product" : "Lihat produk";
+      cta.onclick = () => openOrderModal(promo.game);
+    }
+    slide.hidden = false;
+    renderPromoDots();
+  } catch (_error) {
+    slide.hidden = true;
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   renderPromoDots();
+  loadAutoPromo();
   restartPromoAutoplay();
   document.getElementById("promoPrevBtn")?.addEventListener("click", () => {
     prevSlide();

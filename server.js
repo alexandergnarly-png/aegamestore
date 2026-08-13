@@ -26,6 +26,7 @@ const { normalizeCatalogLabel, verifyCheatGameWebhook } = require("./server/chea
 const { buildSupplierComparison, convertUsdToIdr, extractIdrRate } = require("./server/supplier-compare-utils");
 const { BUYER_BADGE_TIERS, getBuyerBadgeCode } = require("./server/buyer-policy");
 const { PostgresRateLimitStore } = require("./server/postgres-rate-limit-store");
+const { getAutoPromoPeriod, selectAutoPromo } = require("./server/auto-promo");
 const {
   decryptSecretWithKeys,
   encryptSecret,
@@ -55,6 +56,7 @@ const usdIdrRate = paymentConfigNumber("USD_IDR_RATE", 18000, { min: 1 });
 const binancePayUid = String(process.env.BINANCE_PAY_UID || "").trim();
 const telegramBotToken = String(process.env.TELEGRAM_BOT_TOKEN || "").trim();
 const telegramChatId = String(process.env.TELEGRAM_CHAT_ID || "").trim();
+const autoPromoEnabled = process.env.AUTO_PROMO_ENABLED !== "false";
 const jwtSecret = String(process.env.JWT_SECRET || "").trim();
 const adminTotpSecret = String(process.env.ADMIN_TOTP_SECRET || "").trim();
 const gameKeyEncryptionSecret = String(
@@ -204,6 +206,14 @@ const productsTableReady = db.query(
 ).then(() => {
   console.log("Table products ready");
 });
+
+const autoPromoPeriodsReady = db.query(`
+  CREATE TABLE IF NOT EXISTS auto_promo_periods (
+    period_key BIGINT PRIMARY KEY,
+    product_id INTEGER NOT NULL,
+    notified_at TEXT NOT NULL
+  )
+`);
 
 const ordersTableReady = db.query(
   `
@@ -8268,6 +8278,93 @@ app.get("/public-products", async (req, res) => {
   }
 });
 
+app.get("/auto-promo", async (req, res) => {
+  if (!autoPromoEnabled) return res.json({ enabled: false });
+
+  try {
+    const period = getAutoPromoPeriod();
+    const productsResult = await query(`
+      SELECT p.id, p.game, p.brand, p.duration, p.price, p.active,
+        COALESCE(NULLIF(p.platform, ''), 'android') AS platform,
+        COALESCE(p.play_status, 'safe') AS play_status,
+        CASE
+          WHEN LOWER(COALESCE(p.delivery_type, 'auto')) = 'manual' THEN 9999
+          WHEN LOWER(COALESCE(p.delivery_type, 'auto')) IN ('vipstore_api', 'cheatgame_api') THEN CASE
+            WHEN COALESCE(p.supplier_maintenance, 0) = 1 THEN 0
+            WHEN LOWER(COALESCE(p.supplier_status, '')) IN ('maintenance', 'hidden', 'not_found', 'lookup_failed', 'not_configured', 'mapped_pending') THEN 0
+            ELSE GREATEST(COALESCE(p.supplier_stock, 0), 0)
+          END
+          ELSE (SELECT COUNT(*)::int FROM keys k WHERE k.product_id = p.id AND k.used = 0 AND (
+            k.reserved_order_id IS NULL OR k.reserved_until IS NULL OR
+            k.reserved_until <= TO_CHAR(CURRENT_TIMESTAMP AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"')
+          ))
+        END AS available_keys
+      FROM products p
+      WHERE p.active = 1
+      ORDER BY p.game ASC, p.price ASC, p.id ASC
+    `);
+    const product = selectAutoPromo(productsResult.rows, period);
+    if (!product) return res.json({ enabled: true, promo: null });
+
+    const voucherResult = await query(
+      `SELECT v.code, v.discount_amount
+       FROM vouchers v
+       WHERE v.active = 1
+         AND COALESCE(v.visibility, 'public') = 'public'
+         AND (v.expires_at IS NULL OR v.expires_at = '' OR v.expires_at > to_char(NOW(), 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'))
+         AND (
+           EXISTS (SELECT 1 FROM voucher_products vp WHERE vp.voucher_id = v.id AND vp.product_id = $1)
+           OR (
+             NOT EXISTS (SELECT 1 FROM voucher_products vp WHERE vp.voucher_id = v.id)
+             AND (COALESCE(TRIM(v.game_name), '') = '' OR LOWER(TRIM(v.game_name)) = LOWER(TRIM($2)))
+             AND (COALESCE(TRIM(v.brand_name), '') = '' OR LOWER(TRIM(v.brand_name)) = LOWER(TRIM($3)))
+             AND (COALESCE(TRIM(v.duration_name), '') = '' OR LOWER(TRIM(v.duration_name)) = LOWER(TRIM($4)))
+           )
+         )
+       ORDER BY v.discount_amount DESC, v.id ASC
+       LIMIT 1`,
+      [product.id, product.game, product.brand, product.duration],
+    );
+    const voucher = voucherResult.rows[0] || null;
+    const promo = {
+      period,
+      product_id: Number(product.id),
+      game: product.game,
+      brand: product.brand,
+      duration: product.duration,
+      platform: product.platform,
+      play_status: product.play_status,
+      price: Number(product.price),
+      stock: Number(product.available_keys),
+      voucher: voucher
+        ? { code: String(voucher.code), discount_amount: Number(voucher.discount_amount) }
+        : null,
+      changes_at: new Date((period + 1) * 12 * 60 * 60 * 1000).toISOString(),
+    };
+
+    const notification = await query(
+      `INSERT INTO auto_promo_periods (period_key, product_id, notified_at)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (period_key) DO NOTHING
+       RETURNING period_key`,
+      [period, product.id, new Date().toISOString()],
+    );
+    if (notification.rows.length) {
+      const voucherLine = voucher
+        ? `\nVoucher: ${voucher.code} (hemat Rp${Number(voucher.discount_amount).toLocaleString("id-ID")})`
+        : "";
+      notifyTelegram(
+        `AUTO PROMO AKTIF\n${product.game} - ${product.brand} ${product.duration}\nHarga: Rp${Number(product.price).toLocaleString("id-ID")}\nStok: ${product.available_keys}${voucherLine}`,
+      ).catch((error) => console.error("TELEGRAM AUTO PROMO ERROR:", error.message));
+    }
+
+    return res.json({ enabled: true, promo });
+  } catch (err) {
+    console.error("ERROR AUTO PROMO:", err);
+    return res.status(500).json({ message: "Gagal mengambil promo otomatis" });
+  }
+});
+
 app.get("/payment-config", (req, res) => {
   res.json({
     usd_idr_rate: usdIdrRate,
@@ -9804,6 +9901,7 @@ async function startApplication() {
     ordersTableReady,
     adminSessionsTableReady,
     rateLimitBucketsReady,
+    autoPromoPeriodsReady,
   ]);
   await migrateAdminSessionTokens();
   await migrateEncryptedGameKeys();

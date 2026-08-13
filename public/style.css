@@ -15386,3 +15386,31 @@ body.dark-theme .order-product-card:not(.active) .price-usd {
     margin-top: 18px !important;
   }
 }
+/* Auto promo reuses the existing slider instead of adding another banner. */
+.promo-slide-auto {
+  background: #0a0a0a;
+  color: #ffffff;
+}
+
+.promo-slide-auto[hidden] {
+  display: none !important;
+}
+
+.auto-promo-cta {
+  width: fit-content;
+  min-height: 40px;
+  margin-top: 12px;
+  padding: 0 18px;
+  border: 1px solid #ffffff;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #0a0a0a;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.auto-promo-cta:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 3px;
+}
