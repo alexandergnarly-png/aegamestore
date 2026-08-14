@@ -1072,19 +1072,25 @@ body.keysystem-ui .ae-payment-info-confirm.swal2-confirm {
   body.keysystem-ui .header-inner {
     display: flex !important;
     width: 100%;
-    min-height: 72px;
-    padding-inline: 12px;
-    gap: 6px;
+    min-height: 60px;
+    padding: 6px 10px;
+    gap: 4px;
     justify-content: space-between !important;
     overflow: hidden;
   }
 
   body.keysystem-ui .brand {
     flex: 0 0 auto;
+    min-width: 44px;
+    min-height: 44px;
+    justify-content: center;
   }
 
   body.keysystem-ui .header-inner .brand-logo {
-    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    border-radius: 13px;
   }
 
   body.keysystem-ui .brand-copy,
@@ -1094,7 +1100,7 @@ body.keysystem-ui .ae-payment-info-confirm.swal2-confirm {
 
   body.keysystem-ui .header-actions {
     flex: 0 0 auto;
-    gap: 0;
+    gap: 4px;
     margin-left: auto;
   }
 
@@ -1102,10 +1108,11 @@ body.keysystem-ui .ae-payment-info-confirm.swal2-confirm {
     flex: 0 0 auto;
     gap: 0;
     padding: 0 !important;
-    border: 0 !important;
-    border-radius: 0 !important;
-    background: transparent !important;
+    border: 1px solid #dedede !important;
+    border-radius: 15px !important;
+    background: #ffffff !important;
     box-shadow: none !important;
+    overflow: hidden;
   }
 
   body.keysystem-ui .lang-btn,
@@ -1133,11 +1140,17 @@ body.keysystem-ui .ae-payment-info-confirm.swal2-confirm {
     content: "" !important;
     position: absolute;
     z-index: -1;
-    inset: 4px;
+    inset: 3px;
     display: block !important;
     border: 1px solid #dedede;
-    border-radius: 50%;
+    border-radius: 13px;
     background: #ffffff;
+  }
+
+  body.keysystem-ui .lang-btn::before {
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
   }
 
   body.keysystem-ui .lang-btn.active::before,
@@ -1149,6 +1162,15 @@ body.keysystem-ui .ae-payment-info-confirm.swal2-confirm {
 
   body.keysystem-ui .lang-btn.active,
   body.keysystem-ui #userMenu .account-auth-btn {
+    color: #ffffff !important;
+  }
+
+  body.keysystem-ui.dark-theme .theme-toggle-btn::before {
+    border-color: #000000;
+    background: #000000;
+  }
+
+  body.keysystem-ui.dark-theme .theme-toggle-btn {
     color: #ffffff !important;
   }
 
