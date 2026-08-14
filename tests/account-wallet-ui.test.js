@@ -13,6 +13,7 @@ scripts.forEach(([, source]) => assert.doesNotThrow(() => new Function(source)))
   'walletSubmitAmount: "Bayar {amount} via Midtrans"',
   'onclick="createWalletMidtransTopup()"',
   'class="wallet-optional wallet-manual-fallback"',
+  'src="/qris.png" alt="QRIS AE Game Store" loading="lazy" decoding="async" fetchpriority="low"',
   'class="skip-link" data-account-i18n="skipToContent" href="#account-main"',
   'id="account-main" tabindex="-1"',
   'aria-controls="panel-wallet"',

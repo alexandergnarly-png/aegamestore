@@ -601,59 +601,6 @@ function tr(key, fallback = key) {
   return translations[currentLanguage]?.[key] || translations.id[key] || fallback;
 }
 
-function setupBackgroundMusic() {
-  const audio = document.getElementById("backgroundMusic");
-  const toggle = document.getElementById("musicToggle");
-  if (!audio || !toggle) return;
-
-  const storageKey = "ae_music_enabled";
-  audio.volume = 0.35;
-
-  const syncToggle = () => {
-    const playing = !audio.paused;
-    toggle.classList.toggle("is-playing", playing);
-    toggle.setAttribute("aria-pressed", String(playing));
-    toggle.setAttribute(
-      "aria-label",
-      playing
-        ? currentLanguage === "en"
-          ? "Pause music"
-          : "Jeda musik"
-        : currentLanguage === "en"
-          ? "Play music"
-          : "Nyalakan musik",
-    );
-  };
-
-  toggle.addEventListener("click", () => {
-    if (audio.paused) {
-      localStorage.setItem(storageKey, "on");
-      audio.play().catch(syncToggle);
-    } else {
-      localStorage.setItem(storageKey, "off");
-      audio.pause();
-    }
-  });
-
-  audio.addEventListener("play", syncToggle);
-  audio.addEventListener("pause", syncToggle);
-
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden) {
-      audio.pause();
-    } else if (localStorage.getItem(storageKey) === "on") {
-      audio.play().catch(syncToggle);
-    }
-  });
-
-  if (localStorage.getItem(storageKey) === "on") {
-    audio.play().catch(syncToggle);
-  }
-  syncToggle();
-}
-
-onReady(setupBackgroundMusic);
-
 function setLanguage(lang, refreshDynamic = true) {
   currentLanguage = lang;
   localStorage.setItem("ae_language", lang);
@@ -2912,7 +2859,6 @@ document.querySelector(".footer-payments")?.addEventListener("click", (event) =>
 });
 
 loadRecentPurchases();
-setInterval(loadRecentPurchases, 60000);
 if (window.innerWidth > 768) {
   setInterval(showSocialProof, 20000);
 }
