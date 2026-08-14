@@ -16,6 +16,9 @@ const root = path.join(__dirname, "..");
 const server = fs.readFileSync(path.join(root, "server.js"), "utf8");
 const admin = fs.readFileSync(path.join(root, "views", "admin.html"), "utf8");
 
+assert.ok(server.includes('"public, max-age=60, stale-while-revalidate=300"'));
+assert.ok(server.includes("m4a|mp3|mp4|ogg"));
+
 const key = Buffer.alloc(32, 7);
 const encrypted = encryptSecret("GAME-KEY-123", key);
 assert.match(encrypted, /^enc:v1:/);

@@ -3753,7 +3753,18 @@ app.use((req, res, next) => {
     res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive");
   }
 
-  if (
+  const isShortLivedPublicData = [
+    "/public-products",
+    "/public-vouchers",
+    "/trending-products",
+    "/recent-purchases",
+    "/auto-promo",
+    "/reviews",
+  ].some((routePath) => req.path === routePath);
+
+  if (isShortLivedPublicData && req.method === "GET") {
+    res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=300");
+  } else if (
     req.path.startsWith("/orders") ||
     req.path.startsWith("/order/") ||
     req.path.startsWith("/user/orders") ||
@@ -3763,10 +3774,6 @@ app.use((req, res, next) => {
     req.path.startsWith("/vip-discounts") ||
     req.path.startsWith("/products") ||
     req.path.startsWith("/security-audit") ||
-    req.path.startsWith("/public-products") ||
-    req.path.startsWith("/public-vouchers") ||
-    req.path.startsWith("/trending-products") ||
-    req.path.startsWith("/recent-purchases") ||
     req.path.startsWith("/api/user") ||
     req.path.startsWith("/api/admin")
   ) {
@@ -3793,14 +3800,14 @@ app.use(
       const isStyleOrScript =
         filePath.endsWith(".css") || filePath.endsWith(".js");
       const isLongLivedAsset =
-        /\.(?:avif|gif|ico|jpe?g|png|svg|webp|woff2?)$/i.test(filePath);
+        /\.(?:avif|gif|ico|jpe?g|m4a|mp3|mp4|ogg|png|svg|webm|webp|woff2?)$/i.test(filePath);
 
       if (
         filePath.endsWith(".html") ||
         filePath.endsWith("service-worker.js")
       ) {
         res.setHeader("Cache-Control", "no-cache");
-      } else if (isStyleOrScript && isVersionedAsset) {
+      } else if (isVersionedAsset) {
         res.setHeader(
           "Cache-Control",
           "public, max-age=31536000, immutable",

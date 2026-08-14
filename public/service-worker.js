@@ -3,7 +3,7 @@
 // always return a valid Response object so the browser doesn't fall back
 // to the offline page on transient sub-resource fails.
 
-const CACHE_VERSION = "20260814-ai-replies-v1";
+const CACHE_VERSION = "20260814-bandwidth-v1";
 const CACHE_NAME = `ae-game-store-auto-${CACHE_VERSION}`;
 
 const STATIC_ASSETS = [
@@ -159,10 +159,12 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // 5. Default — stale-while-revalidate untuk static assets lain
+  // 5. Cache-first for static assets: repeat visits use zero Render bandwidth.
   event.respondWith(
     caches.match(request).then((cached) => {
-      const networkFetch = fetch(request)
+      if (cached) return cached;
+
+      return fetch(request)
         .then((response) => {
           // Hanya cache response yang sukses + basic (same-origin)
           if (
@@ -178,16 +180,7 @@ self.addEventListener("fetch", (event) => {
           }
           return response;
         })
-        .catch(() => null);
-
-      // Kalau ada cache, return cache + update di background
-      if (cached) {
-        networkFetch.catch(() => {});
-        return cached;
-      }
-
-      // Kalau gak ada cache, tunggu network; kalau network gagal, return empty Response (bukan undefined!)
-      return networkFetch.then((response) => response || emptyResponse());
+        .catch(() => emptyResponse());
     }),
   );
 });
