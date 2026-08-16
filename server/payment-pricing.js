@@ -28,8 +28,16 @@ function calculateUsdtPayment(idrAmount, manualUnitUsdt, unitPriceIdr, usdIdrRat
   return recommendUsdtPrice(idrAmount, usdIdrRate);
 }
 
+function getSafeUsdtIdrRate(...rates) {
+  return Math.max(
+    18000,
+    ...rates.map(Number).filter((rate) => Number.isFinite(rate) && rate > 0),
+  );
+}
+
 module.exports = {
   calculateUsdtPayment,
+  getSafeUsdtIdrRate,
   grossUpPaymentPrice,
   recommendUsdtPrice,
   toUsd,

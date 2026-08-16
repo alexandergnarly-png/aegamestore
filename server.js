@@ -23,6 +23,7 @@ const { ensureBulkOrderSchema, ensureWalletSchema } = require("./server/database
 const { parseMidtransAmount, verifyMidtransSignature } = require("./server/midtrans-utils");
 const {
   calculateUsdtPayment,
+  getSafeUsdtIdrRate,
   grossUpPaymentPrice,
   recommendUsdtPrice,
 } = require("./server/payment-pricing");
@@ -56,9 +57,8 @@ function paymentConfigNumber(name, fallback, { max = Infinity, min = 0 } = {}) {
 
 const paymentVatRate = paymentConfigNumber("PAYMENT_VAT_RATE", 0.11, { max: 0.5 });
 const midtransQrisFeeRate = paymentConfigNumber("MIDTRANS_QRIS_FEE_RATE", 0.007, { max: 0.5 });
-const usdIdrRate = Math.max(
+const usdIdrRate = getSafeUsdtIdrRate(
   paymentConfigNumber("USD_IDR_RATE", 18000, { min: 1 }),
-  18000,
 );
 const binancePayUid = String(process.env.BINANCE_PAY_UID || "").trim();
 const telegramBotToken = String(process.env.TELEGRAM_BOT_TOKEN || "").trim();
@@ -1103,16 +1103,19 @@ function getCheatGameExchangeRate() {
 
 async function getVipStoreIdrRate() {
   const configuredRate = Number(process.env.VIPSTORE_USD_IDR_RATE || 0);
-  if (Number.isFinite(configuredRate) && configuredRate > 0) return configuredRate;
-
-  const result = await getCheatGameExchangeRate();
-  const rate = extractIdrRate(result.data);
-  if (!result.ok || !rate) {
-    const error = new Error("Rate USD/IDR belum tersedia; harga VIP Store tidak dapat dibandingkan.");
-    error.code = "VIPSTORE_EXCHANGE_RATE_UNAVAILABLE";
-    throw error;
+  if (Number.isFinite(configuredRate) && configuredRate > 0) {
+    return getSafeUsdtIdrRate(configuredRate);
   }
-  return rate;
+
+  try {
+    const result = await getCheatGameExchangeRate();
+    const rate = extractIdrRate(result.data);
+    if (result.ok && rate) return getSafeUsdtIdrRate(rate, usdIdrRate);
+  } catch (error) {
+    console.warn("VIPSTORE RATE: endpoint rate tidak tersedia, memakai rate aman.", error.message);
+  }
+
+  return usdIdrRate;
 }
 
 function getCheatGameOrderStatus(orderId) {
