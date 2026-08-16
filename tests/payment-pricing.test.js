@@ -22,6 +22,7 @@ assert.equal(getSafeUsdtIdrRate(undefined, 0), 18000);
 const server = fs.readFileSync("server.js", "utf8");
 const html = fs.readFileSync("public/index.html", "utf8");
 const script = fs.readFileSync("public/script.js", "utf8");
+const admin = fs.readFileSync("views/admin.html", "utf8");
 assert.match(server, /enabled_payments: \["other_qris"\]/);
 assert.doesNotMatch(server, /midtrans_card|MIDTRANS_CARD/);
 assert.doesNotMatch(html, /data-payment-method="midtrans_card"|International Cards/);
@@ -33,5 +34,7 @@ assert.match(server, /price_usdt_recommended/);
 assert.match(script, /price_usdt_effective/);
 assert.match(server, /VIPSTORE RATE: endpoint rate tidak tersedia, memakai rate aman/);
 assert.doesNotMatch(server, /VIPSTORE_EXCHANGE_RATE_UNAVAILABLE/);
+assert.match(admin, /Harga manual \$\{formatUsdt\(price_usdt\)\} tersimpan/);
+assert.match(admin, /if \(!isEditMode\) \{\s*resetProductForm\(\)/);
 
 console.log("Payment pricing check passed.");

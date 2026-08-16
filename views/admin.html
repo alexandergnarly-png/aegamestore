@@ -8456,10 +8456,14 @@
             return;
           }
 
-          Swal.fire("Berhasil", data.message || "Produk berhasil disimpan", "success");
-          resetProductForm();
-          if (window.matchMedia("(max-width: 768px)").matches) {
-            document.getElementById("productEditorPanel")?.removeAttribute("open");
+          const savedMessage = data.message || "Produk berhasil disimpan";
+          const savedUsdtNote = price_usdt ? ` Harga manual ${formatUsdt(price_usdt)} tersimpan.` : "";
+          Swal.fire("Berhasil", `${savedMessage}${savedUsdtNote}`, "success");
+          if (!isEditMode) {
+            resetProductForm();
+            if (window.matchMedia("(max-width: 768px)").matches) {
+              document.getElementById("productEditorPanel")?.removeAttribute("open");
+            }
           }
           loadProducts();
           loadKeyProductOptions();
