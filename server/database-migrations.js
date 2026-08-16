@@ -47,6 +47,11 @@ async function ensureBulkOrderSchema(db) {
     )`,
     `CREATE INDEX IF NOT EXISTS idx_product_supplier_offers_product
      ON product_supplier_offers(product_id)`,
+    `CREATE TABLE IF NOT EXISTS supplier_catalog_cache (
+      supplier_source TEXT PRIMARY KEY,
+      items JSONB NOT NULL,
+      updated_at TEXT NOT NULL
+    )`,
   ];
 
   for (const statement of statements) {

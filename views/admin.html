@@ -5648,7 +5648,8 @@
         }
 
         try {
-          const res = await fetch(`/api/admin/${source}/catalog-normalized?limit=800`);
+          const refreshParam = force ? "&refresh=1" : "";
+          const res = await fetch(`/api/admin/${source}/catalog-normalized?limit=800${refreshParam}`);
           const data = await res.json();
 
           if (res.status === 401) {
@@ -5665,7 +5666,8 @@
           vipStorePickerSource = source;
 
           if (statusEl) {
-            statusEl.innerText = `${vipStorePickerItems.length} produk dimuat dari ${data.total_detected_items || vipStorePickerItems.length} katalog supplier.`;
+            const fallbackNote = data.fallback ? " Cache terakhir dipakai karena supplier sedang gangguan." : "";
+            statusEl.innerText = `${vipStorePickerItems.length} produk dimuat dari ${data.total_detected_items || vipStorePickerItems.length} katalog supplier.${fallbackNote}`;
           }
 
           renderVipStoreProductPicker();

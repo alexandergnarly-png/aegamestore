@@ -1093,6 +1093,110 @@ function getCheatGameCatalog() {
   return cheatGameRequest("products");
 }
 
+const ADMIN_CATALOG_CACHE_TTL_MS = 5 * 60 * 1000;
+let cheatGameAdminCatalogRequest = null;
+
+async function readSupplierCatalogCache(source, freshOnly = false) {
+  await bulkOrderSchemaReady;
+  const result = await query(
+    "SELECT items, updated_at FROM supplier_catalog_cache WHERE supplier_source = $1 LIMIT 1",
+    [source],
+  );
+  const row = result.rows[0];
+  if (!row || !Array.isArray(row.items) || !row.items.length) return null;
+  const ageMs = Date.now() - new Date(row.updated_at).getTime();
+  if (freshOnly && (!Number.isFinite(ageMs) || ageMs > ADMIN_CATALOG_CACHE_TTL_MS)) return null;
+  return { items: row.items, updated_at: row.updated_at, stale: ageMs > ADMIN_CATALOG_CACHE_TTL_MS };
+}
+
+async function saveSupplierCatalogCache(source, items) {
+  await bulkOrderSchemaReady;
+  const updatedAt = new Date().toISOString();
+  await query(
+    `INSERT INTO supplier_catalog_cache (supplier_source, items, updated_at)
+     VALUES ($1, $2::jsonb, $3)
+     ON CONFLICT (supplier_source) DO UPDATE SET items = EXCLUDED.items, updated_at = EXCLUDED.updated_at`,
+    [source, JSON.stringify(items), updatedAt],
+  );
+  return updatedAt;
+}
+
+async function getMappedCheatGameCatalog() {
+  await bulkOrderSchemaReady;
+  const result = await query(
+    `SELECT supplier_product_id, supplier_product_name, supplier_price AS price_idr,
+            supplier_stock AS stock, supplier_status AS status,
+            supplier_maintenance_reason AS maintenance_reason
+       FROM products
+      WHERE supplier_source = 'cheatgame' AND COALESCE(supplier_product_id, '') <> ''
+     UNION ALL
+     SELECT supplier_product_id, supplier_product_name, price_idr, stock, status, maintenance_reason
+       FROM product_supplier_offers
+      WHERE supplier_source = 'cheatgame' AND COALESCE(supplier_product_id, '') <> ''`,
+  );
+  const unique = new Map();
+  for (const row of result.rows) {
+    const productId = String(row.supplier_product_id || "").trim();
+    if (!productId || unique.has(productId)) continue;
+    unique.set(productId, {
+      product_id: productId,
+      name: String(row.supplier_product_name || `CHEATGAME #${productId}`),
+      price: parseApiNumber(row.price_idr, null),
+      price_usd: null,
+      stock: Math.max(0, Math.floor(parseApiNumber(row.stock, 0))),
+      status: String(row.status || "mapped_pending"),
+      category: "",
+      duration: "",
+      description: "",
+      is_hidden: false,
+      is_maintenance: String(row.status || "").toLowerCase() === "maintenance",
+      maintenance_reason: String(row.maintenance_reason || ""),
+      custom_link: "",
+      youtube_link: "",
+    });
+  }
+  return [...unique.values()];
+}
+
+async function getAdminCheatGameCatalog(force = false) {
+  if (cheatGameAdminCatalogRequest) return cheatGameAdminCatalogRequest;
+  cheatGameAdminCatalogRequest = (async () => {
+    if (!force) {
+      const freshCache = await readSupplierCatalogCache("cheatgame", true);
+      if (freshCache) return { ...freshCache, cached: true, fallback: false, http_code: 200 };
+    }
+
+    try {
+      const result = await getCheatGameCatalog();
+      const products = extractVipStoreCatalogItems(result.data)
+        .map(normalizeCheatGameCatalogProduct)
+        .filter((item) => item.product_id);
+      if (!products.length) {
+        const error = new Error(result.data?.message || "Katalog CHEATGAME sedang tidak tersedia");
+        error.code = "CHEATGAME_EMPTY_CATALOG";
+        throw error;
+      }
+      const updatedAt = await saveSupplierCatalogCache("cheatgame", products);
+      return { items: products, updated_at: updatedAt, cached: false, stale: false, fallback: false, http_code: result.http_code };
+    } catch (error) {
+      const staleCache = await readSupplierCatalogCache("cheatgame", false);
+      if (staleCache) {
+        console.warn("CHEATGAME CATALOG: memakai cache terakhir.", error.message);
+        return { ...staleCache, cached: true, stale: true, fallback: true, http_code: 200 };
+      }
+      const mappedItems = await getMappedCheatGameCatalog();
+      if (mappedItems.length) {
+        console.warn("CHEATGAME CATALOG: memakai mapping lokal.", error.message);
+        return { items: mappedItems, updated_at: null, cached: true, stale: true, fallback: true, http_code: 200 };
+      }
+      throw error;
+    }
+  })().finally(() => {
+    cheatGameAdminCatalogRequest = null;
+  });
+  return cheatGameAdminCatalogRequest;
+}
+
 function getCheatGameBalance() {
   return cheatGameRequest("balance");
 }
@@ -4413,18 +4517,21 @@ app.get("/api/admin/cheatgame/status", requireAdminAuth, async (req, res) => {
 app.get("/api/admin/cheatgame/catalog-normalized", requireAdminAuth, async (req, res) => {
   try {
     const limit = Math.min(Math.max(Number(req.query.limit || 500), 1), 800);
-    const result = await getCheatGameCatalog();
-    const items = extractVipStoreCatalogItems(result.data);
-    const products = items.map(normalizeCheatGameCatalogProduct).filter((item) => item.product_id).slice(0, limit);
-    return res.status(result.ok ? 200 : 502).json({
-      ok: result.ok,
+    const result = await getAdminCheatGameCatalog(req.query.refresh === "1");
+    const products = result.items.slice(0, limit);
+    return res.json({
+      ok: true,
       http_code: result.http_code,
-      total_detected_items: items.length,
+      total_detected_items: result.items.length,
       total_returned_items: products.length,
       items: products,
-      exchange_rate: result.data?.exchange_rate || null,
+      cached: result.cached,
+      stale: result.stale,
+      fallback: result.fallback,
+      cached_at: result.updated_at,
     });
   } catch (err) {
+    console.error("ERROR CHEATGAME NORMALIZED CATALOG:", err);
     const statusCode = err.code === "CHEATGAME_NOT_CONFIGURED" ? 503 : 502;
     return res.status(statusCode).json({ ok: false, code: err.code || "CHEATGAME_ERROR", message: err.message, items: [] });
   }
