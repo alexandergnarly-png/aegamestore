@@ -1047,6 +1047,40 @@
         gap: 6px;
       }
 
+      .optional-label {
+        margin-left: 6px;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .usdt-price-recommendation {
+        min-height: 34px;
+        padding: 8px 10px;
+        border: 1px solid var(--line);
+        border-radius: 3px;
+        background: var(--surface-2);
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 750;
+        line-height: 1.45;
+      }
+
+      .usdt-price-recommendation strong {
+        color: var(--ink);
+      }
+
+      .admin-price-usdt {
+        display: block;
+        margin-top: 5px;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 800;
+        white-space: nowrap;
+      }
+
       .product-search-toolbar .field {
         max-width: 480px;
       }
@@ -3687,6 +3721,21 @@
               />
             </div>
             <div class="field">
+              <label for="productUsdtPrice">Harga USDT manual <span class="optional-label">Opsional</span></label>
+              <input
+                type="number"
+                id="productUsdtPrice"
+                placeholder="Kosong = pakai rekomendasi"
+                min="0.1"
+                step="0.1"
+                inputmode="decimal"
+                aria-describedby="productUsdtRecommendation"
+              />
+              <small class="usdt-price-recommendation" id="productUsdtRecommendation">
+                Isi harga rupiah untuk melihat rekomendasi.
+              </small>
+            </div>
+            <div class="field">
               <label for="productPlayStatus">Play status</label>
               <select id="productPlayStatus">
                 <option value="safe">Safe to Play</option>
@@ -5211,6 +5260,32 @@
 
       function formatRupiah(num) {
         return "Rp " + Number(num || 0).toLocaleString("id-ID");
+      }
+
+      function recommendAdminUsdtPrice(idrPrice) {
+        return Math.ceil(((Number(idrPrice || 0) / 18000) * 1.05) * 10) / 10;
+      }
+
+      function formatUsdt(value) {
+        return `${Number(value || 0).toLocaleString("en-US", {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 2,
+        })} USDT`;
+      }
+
+      function updateUsdtRecommendation() {
+        const idrPrice = Number(document.getElementById("productPrice")?.value || 0);
+        const output = document.getElementById("productUsdtRecommendation");
+        if (!output) return;
+        output.innerHTML = idrPrice > 0
+          ? `Rekomendasi aman: <strong>${formatUsdt(recommendAdminUsdtPrice(idrPrice))}</strong> · kurs Rp18.000 + buffer 5%`
+          : "Isi harga rupiah untuk melihat rekomendasi.";
+      }
+
+      function productUsdtPriceHtml(item) {
+        const manual = Number(item.price_usdt || 0);
+        const recommended = Number(item.price_usdt_recommended || recommendAdminUsdtPrice(item.price));
+        return `${formatRupiah(item.price)}<small class="admin-price-usdt">${manual > 0 ? `Manual ${formatUsdt(manual)}` : `Auto ${formatUsdt(recommended)}`}</small>`;
       }
 
       function formatTanggal(dateString) {
@@ -8311,6 +8386,7 @@
           .getElementById("productDuration")
           .value.trim();
         const price = document.getElementById("productPrice").value.trim();
+        const price_usdt = document.getElementById("productUsdtPrice").value.trim();
         const play_status =
           document.getElementById("productPlayStatus")?.value || "safe";
         const delivery_type = normalizeAdminDeliveryType(
@@ -8357,6 +8433,7 @@
               brand,
               duration,
               price,
+              price_usdt,
               play_status,
               delivery_type,
               supplier_product_id,
@@ -8687,6 +8764,7 @@
               String(item.brand || ""),
               String(item.duration || ""),
               Number(item.price || 0),
+              item.price_usdt == null ? "" : Number(item.price_usdt),
               String(item.play_status || "safe"),
               normalizeAdminDeliveryType(item.delivery_type),
               String(item.supplier_product_id || ""),
@@ -8700,7 +8778,7 @@
                                   <td data-label="Platform">${platformBadge(item.platform)}</td>
                                   <td data-label="Brand">${escapeHtml(item.brand)}</td>
                                   <td data-label="Durasi">${escapeHtml(item.duration)}</td>
-                                  <td data-label="Harga">${formatRupiah(item.price)}</td>
+                                  <td data-label="Harga">${productUsdtPriceHtml(item)}</td>
                                   <td data-label="Play Status">${playStatusBadge(item.play_status)}</td>
                                   <td data-label="Source">${deliverySourceBadge(item.delivery_type)}</td>
                                   <td data-label="Supplier">${supplierProductText(item)}</td>
@@ -9121,6 +9199,7 @@
         const brandInput = document.getElementById("productBrand");
         const durationInput = document.getElementById("productDuration");
         const priceInput = document.getElementById("productPrice");
+        const usdtPriceInput = document.getElementById("productUsdtPrice");
         const playStatusInput = document.getElementById("productPlayStatus");
         const deliveryTypeInput = document.getElementById("productDeliveryType");
         const supplierProductIdInput = document.getElementById("productSupplierProductId");
@@ -9136,6 +9215,8 @@
         if (brandInput) brandInput.value = "";
         if (durationInput) durationInput.value = "";
         if (priceInput) priceInput.value = "";
+        if (usdtPriceInput) usdtPriceInput.value = "";
+        updateUsdtRecommendation();
         if (playStatusInput) playStatusInput.value = "safe";
         if (deliveryTypeInput) deliveryTypeInput.value = "auto";
         if (supplierProductIdInput) {
@@ -9167,6 +9248,7 @@
         brand,
         duration,
         price,
+        priceUsdt = "",
         playStatus = "safe",
         deliveryType = "auto",
         supplierProductId = "",
@@ -9178,6 +9260,8 @@
         document.getElementById("productBrand").value = brand;
         document.getElementById("productDuration").value = duration;
         document.getElementById("productPrice").value = price;
+        document.getElementById("productUsdtPrice").value = priceUsdt;
+        updateUsdtRecommendation();
         const playStatusInput = document.getElementById("productPlayStatus");
         if (playStatusInput) playStatusInput.value = playStatus || "safe";
         const deliveryTypeInput = document.getElementById("productDeliveryType");
@@ -9917,6 +10001,9 @@
         if (productSearchInput) {
           productSearchInput.addEventListener("input", applyProductFilters);
         }
+
+        document.getElementById("productPrice")?.addEventListener("input", updateUsdtRecommendation);
+        updateUsdtRecommendation();
 
         const supplierPickerSearchInput = document.getElementById("supplierPickerSearch");
         if (supplierPickerSearchInput) {

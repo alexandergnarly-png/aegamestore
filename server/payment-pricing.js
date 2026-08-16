@@ -13,4 +13,24 @@ function toUsd(idrAmount, usdIdrRate = 18000) {
   return Number((Math.max(0, Number(idrAmount) || 0) / rate).toFixed(2));
 }
 
-module.exports = { grossUpPaymentPrice, toUsd };
+function recommendUsdtPrice(idrAmount, usdIdrRate = 18000) {
+  const rate = Math.max(1, Number(usdIdrRate) || 18000);
+  const buffered = (Math.max(0, Number(idrAmount) || 0) / rate) * 1.05;
+  return Math.ceil(buffered * 10) / 10;
+}
+
+function calculateUsdtPayment(idrAmount, manualUnitUsdt, unitPriceIdr, usdIdrRate = 18000) {
+  const manual = Number(manualUnitUsdt);
+  const unitPrice = Number(unitPriceIdr);
+  if (Number.isFinite(manual) && manual > 0 && unitPrice > 0) {
+    return Math.ceil(manual * (Math.max(0, Number(idrAmount) || 0) / unitPrice) * 10) / 10;
+  }
+  return recommendUsdtPrice(idrAmount, usdIdrRate);
+}
+
+module.exports = {
+  calculateUsdtPayment,
+  grossUpPaymentPrice,
+  recommendUsdtPrice,
+  toUsd,
+};

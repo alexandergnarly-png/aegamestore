@@ -21,7 +21,11 @@ const {
 } = require("./server/order-utils");
 const { ensureBulkOrderSchema, ensureWalletSchema } = require("./server/database-migrations");
 const { parseMidtransAmount, verifyMidtransSignature } = require("./server/midtrans-utils");
-const { grossUpPaymentPrice, toUsd } = require("./server/payment-pricing");
+const {
+  calculateUsdtPayment,
+  grossUpPaymentPrice,
+  recommendUsdtPrice,
+} = require("./server/payment-pricing");
 const { normalizeCatalogLabel, verifyCheatGameWebhook } = require("./server/cheatgame-utils");
 const { buildSupplierComparison, convertUsdToIdr, extractIdrRate } = require("./server/supplier-compare-utils");
 const { BUYER_BADGE_TIERS, getBuyerBadgeCode } = require("./server/buyer-policy");
@@ -52,7 +56,10 @@ function paymentConfigNumber(name, fallback, { max = Infinity, min = 0 } = {}) {
 
 const paymentVatRate = paymentConfigNumber("PAYMENT_VAT_RATE", 0.11, { max: 0.5 });
 const midtransQrisFeeRate = paymentConfigNumber("MIDTRANS_QRIS_FEE_RATE", 0.007, { max: 0.5 });
-const usdIdrRate = paymentConfigNumber("USD_IDR_RATE", 18000, { min: 1 });
+const usdIdrRate = Math.max(
+  paymentConfigNumber("USD_IDR_RATE", 18000, { min: 1 }),
+  18000,
+);
 const binancePayUid = String(process.env.BINANCE_PAY_UID || "").trim();
 const telegramBotToken = String(process.env.TELEGRAM_BOT_TOKEN || "").trim();
 const telegramChatId = String(process.env.TELEGRAM_CHAT_ID || "").trim();
@@ -199,11 +206,13 @@ const productsTableReady = db.query(
     brand TEXT NOT NULL,
     duration TEXT NOT NULL,
     price INTEGER NOT NULL,
+    price_usdt NUMERIC(12,2),
     active INTEGER DEFAULT 1,
     created_at TEXT
   )
   `,
-).then(() => {
+).then(async () => {
+  await db.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS price_usdt NUMERIC(12,2)`);
   console.log("Table products ready");
 });
 
@@ -2463,8 +2472,31 @@ function calculatePaymentPrice(netPrice, paymentMethod = "midtrans") {
   return grossUpPaymentPrice(netPrice, midtransQrisFeeRate, paymentVatRate);
 }
 
-function calculateUsdtAmount(idrAmount) {
-  return Math.ceil((Number(idrAmount || 0) / usdIdrRate) * 100) / 100;
+function normalizeManualUsdtPrice(value) {
+  if (value === "" || value === null || value === undefined) return null;
+  const price = Number(value);
+  return Number.isFinite(price) && price > 0
+    ? Math.round(price * 100) / 100
+    : Number.NaN;
+}
+
+function getProductUsdtPricing(product) {
+  const manual = normalizeManualUsdtPrice(product?.price_usdt);
+  const recommended = recommendUsdtPrice(product?.price, usdIdrRate);
+  return {
+    price_usdt: Number.isFinite(manual) ? manual : null,
+    price_usdt_recommended: recommended,
+    price_usdt_effective: Number.isFinite(manual) ? manual : recommended,
+  };
+}
+
+function calculateUsdtAmount(idrAmount, product) {
+  return calculateUsdtPayment(
+    idrAmount,
+    product?.price_usdt,
+    product?.price,
+    usdIdrRate,
+  );
 }
 
 async function notifyTelegram(text) {
@@ -5538,7 +5570,7 @@ app.post("/voucher-preview", voucherPreviewLimiter, async (req, res) => {
       final_price: finalPrice,
       payment_method: paymentMethod,
       usd_idr_rate: usdIdrRate,
-      final_price_usd: toUsd(finalPrice, usdIdrRate),
+      final_price_usd: calculateUsdtAmount(finalPrice, productRow),
     });
   } catch (err) {
     console.error("ERROR VOUCHER PREVIEW:", err);
@@ -5920,7 +5952,7 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
     }
 
     if (paymentMethod === "binance_manual") {
-      const paymentAmountUsd = calculateUsdtAmount(price);
+      const paymentAmountUsd = calculateUsdtAmount(price, productRow);
       await query(
         `UPDATE orders SET payment_amount_usd = $1, admin_note = $2 WHERE id = $3`,
         [
@@ -5994,7 +6026,7 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
       midtransClientKey: process.env.MIDTRANS_CLIENT_KEY || "",
       midtransIsProduction: isMidtransProduction,
       finalPrice: price,
-      finalPriceUsd: toUsd(price, usdIdrRate),
+      finalPriceUsd: calculateUsdtAmount(price, productRow),
       usdIdrRate,
     });
   } catch (err) {
@@ -7825,7 +7857,12 @@ app.get("/products", requireAdminAuth, async (req, res) => {
   ORDER BY products.game ASC, COALESCE(NULLIF(products.platform, ''), 'android') ASC, products.brand ASC, duration_order ASC, products.price ASC, products.id ASC
 `);
 
-    return res.json(result.rows);
+    return res.json(
+      result.rows.map((product) => ({
+        ...product,
+        ...getProductUsdtPricing(product),
+      })),
+    );
   } catch (err) {
     console.error("ERROR GET PRODUCTS:", err);
     return res.status(500).json({
@@ -7841,6 +7878,7 @@ app.post("/products", requireAdminAuth, requireAdminCsrf, async (req, res) => {
     brand,
     duration,
     price,
+    price_usdt,
     delivery_type,
     play_status,
     supplier_product_id,
@@ -7853,6 +7891,7 @@ app.post("/products", requireAdminAuth, requireAdminCsrf, async (req, res) => {
   const cleanPlatform = normalizePlatform(platform);
   const cleanDuration = String(duration || "").trim();
   const cleanPrice = Number(price);
+  const cleanUsdtPrice = normalizeManualUsdtPrice(price_usdt);
   const cleanDeliveryType = normalizeProductDeliveryType(delivery_type);
   const cleanSupplierProductId = normalizeSupplierProductId(supplier_product_id);
   const cleanPlayStatus = normalizePlayStatus(play_status);
@@ -7867,6 +7906,10 @@ app.post("/products", requireAdminAuth, requireAdminCsrf, async (req, res) => {
     return res.status(400).json({
       message: "Harga produk tidak valid",
     });
+  }
+
+  if (Number.isNaN(cleanUsdtPrice)) {
+    return res.status(400).json({ message: "Harga USDT manual tidak valid" });
   }
 
   if (isSupplierDeliveryType(cleanDeliveryType) && !cleanSupplierProductId) {
@@ -7895,18 +7938,18 @@ app.post("/products", requireAdminAuth, requireAdminCsrf, async (req, res) => {
 
     const result = await query(
       `INSERT INTO products (
-         game, platform, brand, duration, price, active, created_at,
+         game, platform, brand, duration, price, price_usdt, active, created_at,
          delivery_type, play_status,
          supplier_source, supplier_product_id, supplier_product_name,
          supplier_price, supplier_stock, supplier_status,
          supplier_maintenance, supplier_maintenance_reason, supplier_last_sync
        )
        VALUES (
-         $1, $2, $3, $4, $5, $6, $7,
-         $8, $9,
-         $10, $11, $12,
-         $13, $14, $15,
-         $16, $17, $18
+         $1, $2, $3, $4, $5, $6, $7, $8,
+         $9, $10,
+         $11, $12, $13,
+         $14, $15, $16,
+         $17, $18, $19
        ) RETURNING id`,
       [
         cleanGame,
@@ -7914,6 +7957,7 @@ app.post("/products", requireAdminAuth, requireAdminCsrf, async (req, res) => {
         cleanBrand,
         cleanDuration,
         cleanPrice,
+        cleanUsdtPrice,
         1,
         createdAt,
         cleanDeliveryType,
@@ -7966,7 +8010,7 @@ app.put(
   requireAdminCsrf,
   async (req, res) => {
     const productId = Number(req.params.id);
-    const { game, platform, brand, duration, price, delivery_type, supplier_product_id } = req.body;
+    const { game, platform, brand, duration, price, price_usdt, delivery_type, supplier_product_id } = req.body;
 
     if (!Number.isInteger(productId) || productId <= 0) {
       return res.status(400).json({
@@ -7979,6 +8023,7 @@ app.put(
     const cleanPlatform = normalizePlatform(platform);
     const cleanDuration = String(duration || "").trim();
     const cleanPrice = Number(price);
+    const cleanUsdtPrice = normalizeManualUsdtPrice(price_usdt);
     const cleanDeliveryType = normalizeProductDeliveryType(delivery_type);
     const cleanSupplierProductId = normalizeSupplierProductId(supplier_product_id);
     const syncBrandStatus =
@@ -8006,6 +8051,10 @@ app.put(
       });
     }
 
+    if (Number.isNaN(cleanUsdtPrice)) {
+      return res.status(400).json({ message: "Harga USDT manual tidak valid" });
+    }
+
     if (isSupplierDeliveryType(cleanDeliveryType) && !cleanSupplierProductId) {
       return res.status(400).json({
         message: "Supplier Product ID wajib diisi untuk Supplier API",
@@ -8025,18 +8074,19 @@ app.put(
        brand = $3,
        duration = $4,
        price = $5,
-       delivery_type = COALESCE($6, delivery_type),
-       play_status = COALESCE($7, play_status),
-       supplier_source = $8,
-       supplier_product_id = $9,
-       supplier_product_name = $10,
-       supplier_price = $11,
-       supplier_stock = $12,
-       supplier_status = $13,
-       supplier_maintenance = $14,
-       supplier_maintenance_reason = $15,
-       supplier_last_sync = $16
-   WHERE id = $17
+       price_usdt = $6,
+       delivery_type = COALESCE($7, delivery_type),
+       play_status = COALESCE($8, play_status),
+       supplier_source = $9,
+       supplier_product_id = $10,
+       supplier_product_name = $11,
+       supplier_price = $12,
+       supplier_stock = $13,
+       supplier_status = $14,
+       supplier_maintenance = $15,
+       supplier_maintenance_reason = $16,
+       supplier_last_sync = $17
+   WHERE id = $18
    RETURNING id`,
         [
           cleanGame,
@@ -8044,6 +8094,7 @@ app.put(
           cleanBrand,
           cleanDuration,
           cleanPrice,
+          cleanUsdtPrice,
           cleanDeliveryType,
           cleanPlayStatus,
           supplierSnapshot.supplier_source,
@@ -8228,6 +8279,7 @@ app.get("/public-products", async (req, res) => {
     p.brand,
     p.duration,
     p.price,
+    p.price_usdt,
     p.active,
     COALESCE(NULLIF(p.platform, ''), 'android') AS platform,
     COALESCE(p.delivery_type, 'auto') AS delivery_type,
@@ -8276,7 +8328,12 @@ app.get("/public-products", async (req, res) => {
   ORDER BY p.game ASC, COALESCE(NULLIF(p.platform, ''), 'android') ASC, p.brand ASC, duration_order ASC, p.price ASC, p.id ASC
 `);
 
-    return res.json(result.rows);
+    return res.json(
+      result.rows.map((product) => ({
+        ...product,
+        ...getProductUsdtPricing(product),
+      })),
+    );
   } catch (err) {
     console.error("ERROR PUBLIC PRODUCTS:", err);
     return res.status(500).json({
@@ -8291,7 +8348,7 @@ app.get("/auto-promo", async (req, res) => {
   try {
     const period = getAutoPromoPeriod();
     const productsResult = await query(`
-      SELECT p.id, p.game, p.brand, p.duration, p.price, p.active,
+      SELECT p.id, p.game, p.brand, p.duration, p.price, p.price_usdt, p.active,
         COALESCE(NULLIF(p.platform, ''), 'android') AS platform,
         COALESCE(p.play_status, 'safe') AS play_status,
         CASE
@@ -8342,6 +8399,7 @@ app.get("/auto-promo", async (req, res) => {
       platform: product.platform,
       play_status: product.play_status,
       price: Number(product.price),
+      ...getProductUsdtPricing(product),
       stock: Number(product.available_keys),
       voucher: voucher
         ? { code: String(voucher.code), discount_amount: Number(voucher.discount_amount) }

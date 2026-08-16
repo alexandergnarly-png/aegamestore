@@ -726,16 +726,16 @@ function renderKeysystemFeatured(index) {
     (total, item) => total + Number(item.available_keys || 0),
     0,
   );
-  const minPrice = Math.min(
-    ...gameProducts.map((item) => Number(item.price || 0)).filter(Boolean),
-  );
+  const minProduct = getGameMinProduct(game);
+  const minPrice = Number(minProduct?.price || 0);
 
   card.dataset.game = game;
   document.getElementById("keysystemFeaturedImage").src = getGameImage(game);
   document.getElementById("keysystemFeaturedImage").alt = game;
   document.getElementById("keysystemFeaturedName").textContent = game;
-  document.getElementById("keysystemFeaturedPrice").textContent =
-    Number.isFinite(minPrice) ? `${formatRupiah(minPrice)} / ${formatUsd(minPrice)}` : "—";
+  document.getElementById("keysystemFeaturedPrice").textContent = minPrice > 0
+    ? `${formatRupiah(minPrice)} / ${formatUsd(minPrice, minProduct.price_usdt_effective)}`
+    : "—";
   document.getElementById("keysystemFeaturedStock").textContent =
     `${stock.toLocaleString("id-ID")} KEYS READY`;
   document.getElementById("keysystemFeaturedCode").textContent =
@@ -811,6 +811,7 @@ let currentCategory = "all";
 let selectedProductId = null;
 let appliedVoucherCode = "";
 let selectedProductBasePrice = 0;
+let selectedProductUsdtPrice = 0;
 const MAX_ORDER_QUANTITY = 5;
 let selectedOrderQuantity = 1;
 let selectedCheckoutPaymentMethod = "midtrans";
@@ -915,15 +916,19 @@ function formatRupiah(num) {
   return "Rp " + Number(num || 0).toLocaleString("id-ID");
 }
 
-function formatUsd(num) {
-  return `US$${(Number(num || 0) / paymentPricingConfig.usd_idr_rate).toLocaleString("en-US", {
-    minimumFractionDigits: 2,
+function formatUsd(num, usdtAmount = null) {
+  const explicit = Number(usdtAmount);
+  const amount = Number.isFinite(explicit) && explicit > 0
+    ? explicit
+    : Number(num || 0) / paymentPricingConfig.usd_idr_rate;
+  return `US$${amount.toLocaleString("en-US", {
+    minimumFractionDigits: 1,
     maximumFractionDigits: 2,
   })}`;
 }
 
-function formatDualPriceHtml(num) {
-  return `<span class="price-stack"><span class="price-idr">${formatRupiah(num)}</span><span class="price-usd"><span aria-hidden="true">\u2248</span> ${formatUsd(num)}</span></span>`;
+function formatDualPriceHtml(num, usdtAmount = null) {
+  return `<span class="price-stack"><span class="price-idr">${formatRupiah(num)}</span><span class="price-usd"><span aria-hidden="true">\u2248</span> ${formatUsd(num, usdtAmount)}</span></span>`;
 }
 
 async function loadPaymentConfig() {
@@ -1089,10 +1094,13 @@ function getGameStock(game) {
 }
 
 function getGameMinPrice(game) {
-  const prices = getGameProducts(game)
-    .map((item) => Number(item.price || 0))
-    .filter((price) => price > 0);
-  return prices.length ? Math.min(...prices) : 0;
+  return Number(getGameMinProduct(game)?.price || 0);
+}
+
+function getGameMinProduct(game) {
+  return getGameProducts(game)
+    .filter((item) => Number(item.price || 0) > 0)
+    .sort((a, b) => Number(a.price) - Number(b.price))[0] || null;
 }
 
 function getGameBrandCount(game) {
@@ -1523,6 +1531,7 @@ function renderGames() {
   const card = document.createElement("div");
 
   const totalStock = getGameStock(game);
+  const minProduct = getGameMinProduct(game);
   const minPrice = getGameMinPrice(game);
   const stockReady = totalStock > 0;
   const stockLabel = stockReady
@@ -1579,7 +1588,7 @@ function renderGames() {
   <div class="game-card-meta">
     <span class="game-card-price">
       ${minPrice > 0
-        ? `<small>${escapeHtml(t.cardFromPrice)}</small><b>${formatDualPriceHtml(minPrice)}</b>`
+        ? `<small>${escapeHtml(t.cardFromPrice)}</small><b>${formatDualPriceHtml(minPrice, minProduct?.price_usdt_effective)}</b>`
         : `<b>${escapeHtml(stockReady ? "—" : t.outOfStockLabel)}</b>`
       }
     </span>
@@ -1969,7 +1978,7 @@ function renderOrderProductCards(products) {
     btn.innerHTML = `
       <div class="order-product-main">
         <strong>${escapeHtml(item.duration)}</strong>
-        <b>${formatDualPriceHtml(item.price)}</b>
+        <b>${formatDualPriceHtml(item.price, item.price_usdt_effective)}</b>
         <small>${escapeHtml(item.brand)} • ${deliveryLabel}</small>
       </div>
       <span class="order-product-status order-product-status-${playMeta.value}">
@@ -2096,7 +2105,7 @@ function loadDurations() {
     const option = document.createElement("option");
     option.value = item.id;
     option.disabled = isDisabled;
-    option.textContent = `${item.duration} - ${formatRupiah(item.price)} / ${formatUsd(item.price)} - ${playMeta.label} - ${stockText}`;
+    option.textContent = `${item.duration} - ${formatRupiah(item.price)} / ${formatUsd(item.price, item.price_usdt_effective)} - ${playMeta.label} - ${stockText}`;
     productSelect.appendChild(option);
   });
 
@@ -2179,6 +2188,7 @@ function updatePreview() {
   if (!selectedProduct) {
     selectedProductId = null;
     selectedProductBasePrice = 0;
+    selectedProductUsdtPrice = 0;
 
     document.getElementById("previewGame").innerText =
       translations[currentLanguage].previewEmpty;
@@ -2193,6 +2203,7 @@ function updatePreview() {
   selectedProductId = selectedProduct.id;
   syncOrderProductCardsActive();
   selectedProductBasePrice = Number(selectedProduct.price || 0);
+  selectedProductUsdtPrice = Number(selectedProduct.price_usdt_effective || 0);
 
   const availableKeys = Number(selectedProduct.available_keys || 0);
   const playMeta = getPlayStatusMeta(selectedProduct.play_status);
@@ -2695,8 +2706,8 @@ async function loadAutoPromo() {
           : ` Pakai ${promo.voucher.code}, hemat ${formatRupiah(promo.voucher.discount_amount)}.`
         : "";
       description.textContent = currentLanguage === "en"
-        ? `${promo.duration} from ${formatRupiah(promo.price)} · ${promo.stock} ready.${voucher}`
-        : `${promo.duration} mulai ${formatRupiah(promo.price)} · ${promo.stock} ready.${voucher}`;
+        ? `${promo.duration} from ${formatRupiah(promo.price)} / ${formatUsd(promo.price, promo.price_usdt_effective)} · ${promo.stock} ready.${voucher}`
+        : `${promo.duration} mulai ${formatRupiah(promo.price)} / ${formatUsd(promo.price, promo.price_usdt_effective)} · ${promo.stock} ready.${voucher}`;
     }
     if (cta) {
       cta.textContent = currentLanguage === "en" ? "View product" : "Lihat produk";
@@ -2906,9 +2917,16 @@ function calculatePaymentGrossPrice(netPrice, method = selectedCheckoutPaymentMe
   );
 }
 
+function calculateSelectedUsdt(amount) {
+  if (selectedProductUsdtPrice <= 0 || selectedProductBasePrice <= 0) return null;
+  return Math.ceil(
+    selectedProductUsdtPrice * (Math.max(0, Number(amount) || 0) / selectedProductBasePrice) * 10,
+  ) / 10;
+}
+
 function setDualPrice(element, amount, prefix = "") {
   if (!element) return;
-  element.innerHTML = `${prefix}${formatDualPriceHtml(amount)}`;
+  element.innerHTML = `${prefix}${formatDualPriceHtml(amount, calculateSelectedUsdt(amount))}`;
 }
 
 function updatePaymentFeeLabel() {
