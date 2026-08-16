@@ -1056,6 +1056,13 @@
         text-transform: uppercase;
       }
 
+      .product-field-hint {
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 650;
+        line-height: 1.4;
+      }
+
       .usdt-price-recommendation {
         min-height: 34px;
         padding: 8px 10px;
@@ -3685,8 +3692,13 @@
               <input
                 type="text"
                 id="productGame"
+                list="productGameOptions"
+                autocomplete="off"
+                aria-describedby="productGameHint"
                 placeholder="Game, contoh: Delta Force"
               />
+              <datalist id="productGameOptions"></datalist>
+              <small class="product-field-hint" id="productGameHint">Pilih game yang sudah ada atau ketik nama game baru.</small>
             </div>
             <div class="field">
               <label for="productPlatform">Platform</label>
@@ -3708,8 +3720,13 @@
               <input
                 type="text"
                 id="productDuration"
+                list="productDurationOptions"
+                autocomplete="off"
+                aria-describedby="productDurationHint"
                 placeholder="Durasi, contoh: 1 Hari"
               />
+              <datalist id="productDurationOptions"></datalist>
+              <small class="product-field-hint" id="productDurationHint">Pilih durasi yang sudah ada atau ketik durasi baru.</small>
             </div>
             <div class="field">
               <label for="productPrice">Harga jual</label>
@@ -8308,6 +8325,27 @@
         document.getElementById("totalProductStat").innerText = products.length;
       }
 
+      function populateProductSuggestions(products) {
+        const fields = [
+          ["productGameOptions", "game"],
+          ["productDurationOptions", "duration"],
+        ];
+        fields.forEach(([listId, key]) => {
+          const list = document.getElementById(listId);
+          if (!list) return;
+          const values = [...new Map(products
+            .map((item) => String(item[key] || "").trim())
+            .filter(Boolean)
+            .map((value) => [value.toLowerCase(), value])).values()]
+            .sort((a, b) => a.localeCompare(b));
+          list.replaceChildren(...values.map((value) => {
+            const option = document.createElement("option");
+            option.value = value;
+            return option;
+          }));
+        });
+      }
+
       async function loadProducts() {
         const statusText = document.getElementById("productStatusText");
         const tableBody = document.getElementById("productTableBody");
@@ -8329,6 +8367,7 @@
             allProducts = [];
             updateProductStats([]);
             populateProductFilters([]);
+            populateProductSuggestions([]);
             statusText.innerText = "Belum ada produk.";
             tableBody.innerHTML = `
                                 <tr>
@@ -8340,6 +8379,7 @@
 
           allProducts = data;
           populateProductFilters(data);
+          populateProductSuggestions(data);
           applyProductFilters();
         } catch (err) {
           statusText.innerText = "Gagal memuat daftar produk.";

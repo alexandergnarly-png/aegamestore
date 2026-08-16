@@ -6,6 +6,10 @@ const {
   recommendUsdtPrice,
   toUsd,
 } = require("../server/payment-pricing");
+const {
+  normalizeProductDuration,
+  normalizeProductGameName,
+} = require("../server/product-utils");
 const fs = require("node:fs");
 
 assert.equal(grossUpPaymentPrice(100000, 0.007, 0.11), 100784);
@@ -18,6 +22,11 @@ assert.equal(calculateUsdtPayment(45000, 1.5, 25000, 18000), 2.7);
 assert.equal(getSafeUsdtIdrRate(16000), 18000);
 assert.equal(getSafeUsdtIdrRate(19500), 19500);
 assert.equal(getSafeUsdtIdrRate(undefined, 0), 18000);
+assert.equal(normalizeProductGameName("  Pubg M "), "PUBG Mobile");
+assert.equal(normalizeProductGameName("8Ball   Pool"), "8 Ball Pool");
+assert.equal(normalizeProductGameName("Game Baru"), "Game Baru");
+assert.equal(normalizeProductDuration("1hari"), "1 Hari");
+assert.equal(normalizeProductDuration(" 30   HARI "), "30 Hari");
 
 const server = fs.readFileSync("server.js", "utf8");
 const html = fs.readFileSync("public/index.html", "utf8");
@@ -36,5 +45,8 @@ assert.match(server, /VIPSTORE RATE: endpoint rate tidak tersedia, memakai rate 
 assert.doesNotMatch(server, /VIPSTORE_EXCHANGE_RATE_UNAVAILABLE/);
 assert.match(admin, /Harga manual \$\{formatUsdt\(price_usdt\)\} tersimpan/);
 assert.match(admin, /if \(!isEditMode\) \{\s*resetProductForm\(\)/);
+assert.match(admin, /list="productGameOptions"/);
+assert.match(admin, /list="productDurationOptions"/);
+assert.match(admin, /function populateProductSuggestions\(products\)/);
 
 console.log("Payment pricing check passed.");

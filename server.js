@@ -33,6 +33,10 @@ const { BUYER_BADGE_TIERS, getBuyerBadgeCode } = require("./server/buyer-policy"
 const { PostgresRateLimitStore } = require("./server/postgres-rate-limit-store");
 const { getAutoPromoPeriod, selectAutoPromo } = require("./server/auto-promo");
 const {
+  normalizeProductDuration,
+  normalizeProductGameName,
+} = require("./server/product-utils");
+const {
   decryptSecretWithKeys,
   encryptSecret,
   escapeCsvFormula,
@@ -213,6 +217,16 @@ const productsTableReady = db.query(
   `,
 ).then(async () => {
   await db.query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS price_usdt NUMERIC(12,2)`);
+  await db.query(`
+    UPDATE products
+    SET game = CASE
+      WHEN REGEXP_REPLACE(LOWER(TRIM(game)), '[^a-z0-9]+', '', 'g') = '8ballpool' THEN '8 Ball Pool'
+      WHEN REGEXP_REPLACE(LOWER(TRIM(game)), '[^a-z0-9]+', '', 'g') IN ('pubgm', 'pubgmobile') THEN 'PUBG Mobile'
+      ELSE game
+    END
+    WHERE REGEXP_REPLACE(LOWER(TRIM(game)), '[^a-z0-9]+', '', 'g')
+      IN ('8ballpool', 'pubgm', 'pubgmobile')
+  `);
   console.log("Table products ready");
 });
 
@@ -7996,10 +8010,10 @@ app.post("/products", requireAdminAuth, requireAdminCsrf, async (req, res) => {
   const syncBrandStatus =
     req.body.sync_brand_status === true ||
     req.body.sync_brand_status === "true";
-  const cleanGame = String(game || "").trim();
+  const cleanGame = normalizeProductGameName(game);
   const cleanBrand = String(brand || "").trim();
   const cleanPlatform = normalizePlatform(platform);
-  const cleanDuration = String(duration || "").trim();
+  const cleanDuration = normalizeProductDuration(duration);
   const cleanPrice = Number(price);
   const cleanUsdtPrice = normalizeManualUsdtPrice(price_usdt);
   const cleanDeliveryType = normalizeProductDeliveryType(delivery_type);
@@ -8128,10 +8142,10 @@ app.put(
       });
     }
 
-    const cleanGame = String(game || "").trim();
+    const cleanGame = normalizeProductGameName(game);
     const cleanBrand = String(brand || "").trim();
     const cleanPlatform = normalizePlatform(platform);
-    const cleanDuration = String(duration || "").trim();
+    const cleanDuration = normalizeProductDuration(duration);
     const cleanPrice = Number(price);
     const cleanUsdtPrice = normalizeManualUsdtPrice(price_usdt);
     const cleanDeliveryType = normalizeProductDeliveryType(delivery_type);
