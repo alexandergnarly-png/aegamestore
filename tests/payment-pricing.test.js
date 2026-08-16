@@ -45,8 +45,10 @@ assert.match(server, /VIPSTORE RATE: endpoint rate tidak tersedia, memakai rate 
 assert.doesNotMatch(server, /VIPSTORE_EXCHANGE_RATE_UNAVAILABLE/);
 assert.match(admin, /Harga manual \$\{formatUsdt\(price_usdt\)\} tersimpan/);
 assert.match(admin, /if \(!isEditMode\) \{\s*resetProductForm\(\)/);
-assert.match(admin, /list="productGameOptions"/);
-assert.match(admin, /list="productDurationOptions"/);
+assert.match(admin, /role="combobox"/);
+assert.match(admin, /role="listbox"/);
+assert.match(admin, /function setupProductCombobox\(inputId, listId\)/);
 assert.match(admin, /function populateProductSuggestions\(products\)/);
+assert.doesNotMatch(admin, /<datalist/);
 
 console.log("Payment pricing check passed.");
