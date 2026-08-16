@@ -28,6 +28,7 @@ for (const marker of [
   'app.post("/api/admin/products/:productId/supplier-offers/:source/select"',
   'id="supplierCompareModal"',
   "openSupplierComparison(this.dataset.id, this)",
+  "releaseAdminDialogFocus(modal, preserveTrigger ? null : supplierCompareTrigger)",
 ]) {
   assert.ok(server.includes(marker) || admin.includes(marker) || migrations.includes(marker), `Missing supplier comparison marker: ${marker}`);
 }

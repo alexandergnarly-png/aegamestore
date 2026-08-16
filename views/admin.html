@@ -5470,11 +5470,20 @@
         return source === "cheatgame" ? "CHEATGAME" : "VIP Store";
       }
 
+      function releaseAdminDialogFocus(dialog, restoreTarget = null) {
+        const focused = document.activeElement;
+        if (!dialog?.contains(focused)) return;
+        if (restoreTarget?.isConnected) restoreTarget.focus();
+        else focused.blur();
+      }
+
       function showSupplierCompareModal() {
-        document.getElementById("supplierCompareModal")?.classList.add("show");
-        document.getElementById("supplierCompareModal")?.setAttribute("aria-hidden", "false");
+        const modal = document.getElementById("supplierCompareModal");
+        modal?.classList.add("show");
+        modal?.setAttribute("aria-hidden", "false");
         document.getElementById("supplierCompareBackdrop")?.classList.add("show");
         document.body.classList.add("admin-dialog-open");
+        setTimeout(() => modal?.querySelector(".supplier-picker-close")?.focus(), 50);
       }
 
       async function openSupplierComparison(productId, trigger = null) {
@@ -5500,12 +5509,11 @@
 
       function closeSupplierComparison(preserveTrigger = false) {
         const modal = document.getElementById("supplierCompareModal");
-        const wasOpen = modal?.classList.contains("show");
+        releaseAdminDialogFocus(modal, preserveTrigger ? null : supplierCompareTrigger);
         modal?.classList.remove("show");
         modal?.setAttribute("aria-hidden", "true");
         document.getElementById("supplierCompareBackdrop")?.classList.remove("show");
         document.body.classList.remove("admin-dialog-open");
-        if (wasOpen && !preserveTrigger && supplierCompareTrigger?.isConnected) supplierCompareTrigger.focus();
         if (!preserveTrigger) supplierCompareTrigger = null;
       }
 
@@ -5712,15 +5720,12 @@
 
       function closeVipStoreProductPicker(resumeComparison = true) {
         const modal = document.getElementById("supplierPickerModal");
-        const wasOpen = modal?.classList.contains("show");
         const shouldResumeComparison = resumeComparison && supplierPickerCompareSource && supplierCompareProductId;
+        releaseAdminDialogFocus(modal, shouldResumeComparison ? null : window.adminSupplierPickerTrigger);
         modal?.classList.remove("show");
         modal?.setAttribute("aria-hidden", "true");
         document.getElementById("supplierPickerBackdrop")?.classList.remove("show");
         document.body.classList.remove("admin-dialog-open");
-        if (wasOpen && !shouldResumeComparison && window.adminSupplierPickerTrigger?.isConnected) {
-          window.adminSupplierPickerTrigger.focus();
-        }
         window.adminSupplierPickerTrigger = null;
         if (shouldResumeComparison) {
           supplierPickerCompareSource = "";
