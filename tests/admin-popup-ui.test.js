@@ -45,6 +45,13 @@ scripts.forEach(([, source]) =>
   'class="user-badge-lab"',
   'for="userSearchInput"',
   "#section-users .user-control-actions",
+  'class="voucher-filter-card"',
+  'id="voucherEditorPanel" open',
+  'class="voucher-form-grid"',
+  "Pilih yang tampil",
+  "Kosongkan pilihan",
+  'id="voucherStatusText" aria-live="polite"',
+  'document.getElementById("voucherEditorPanel")',
   "padding-bottom: calc(104px + var(--safe-bottom))",
 ].forEach((marker) =>
   assert.ok(admin.includes(marker), `Missing admin popup marker: ${marker}`),

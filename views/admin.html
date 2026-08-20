@@ -2896,8 +2896,100 @@
       .voucher-product-target-panel {
         padding: 14px;
         border: 1px solid var(--line);
-        border-radius: 24px;
+        border-radius: 20px;
         background: var(--surface-2);
+      }
+
+      #section-vouchers .card-header {
+        margin-bottom: 14px;
+      }
+
+      .voucher-filter-card {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(180px, 0.28fr);
+        gap: 12px;
+        margin-bottom: 14px;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        background: var(--surface-2);
+      }
+
+      .voucher-filter-card .field,
+      .voucher-form-grid .field {
+        display: grid;
+        align-content: start;
+        gap: 6px;
+        min-width: 0;
+      }
+
+      .voucher-form-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .voucher-form-grid .voucher-code-field {
+        grid-column: span 1;
+      }
+
+      .voucher-product-target-panel,
+      .voucher-form-wide {
+        grid-column: 1 / -1;
+      }
+
+      .voucher-field-help {
+        display: block;
+        margin: 6px 2px 0;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 750;
+        line-height: 1.4;
+      }
+
+      .voucher-editor-actions {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        margin-top: 14px;
+        padding-top: 14px;
+        border-top: 1px solid var(--line);
+      }
+
+      .voucher-editor-actions .btn-group {
+        width: 100%;
+      }
+
+      .voucher-editor-actions #saveVoucherBtn {
+        margin-right: auto;
+      }
+
+      .voucher-list-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin: 18px 0 10px;
+      }
+
+      .voucher-list-header h3 {
+        font-size: 15px;
+        font-weight: 900;
+        letter-spacing: -0.025em;
+      }
+
+      #section-vouchers .voucher-scope-cell {
+        display: grid;
+        gap: 4px;
+      }
+
+      #section-vouchers .voucher-scope-chip {
+        font-weight: 900;
+      }
+
+      #section-vouchers .voucher-scope-detail {
+        color: var(--muted);
+        line-height: 1.35;
       }
 
       .voucher-target-head {
@@ -2981,13 +3073,102 @@
       }
 
       @media (max-width: 768px) {
-        .voucher-target-controls {
+        #section-vouchers .card {
+          padding: 12px;
+        }
+
+        #section-vouchers .card-header {
+          padding-bottom: 12px;
+        }
+
+        #section-vouchers .section-badge {
+          display: none;
+        }
+
+        .voucher-filter-card,
+        .voucher-form-grid {
           grid-template-columns: 1fr;
+        }
+
+        .voucher-form-grid .voucher-code-field,
+        .voucher-product-target-panel,
+        .voucher-form-wide {
+          grid-column: 1;
+        }
+
+        .voucher-filter-card {
+          gap: 8px;
+          padding: 10px;
+          border-radius: 18px;
+        }
+
+        .voucher-editor-panel > .product-panel-content {
+          padding: 10px;
+        }
+
+        .voucher-target-controls {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .voucher-target-controls input,
+        .voucher-target-controls select {
+          grid-column: 1 / -1;
+        }
+
+        .voucher-target-controls button {
+          width: 100%;
         }
 
         .voucher-product-checklist {
           grid-template-columns: 1fr;
-          max-height: 310px;
+          max-height: 238px;
+        }
+
+        .voucher-product-option {
+          padding: 10px;
+          border-radius: 16px;
+        }
+
+        .voucher-editor-actions {
+          position: sticky;
+          z-index: 3;
+          bottom: calc(78px + var(--safe-bottom));
+          margin: 12px -10px -10px;
+          padding: 10px;
+          background: color-mix(in srgb, var(--surface) 94%, transparent);
+          backdrop-filter: blur(12px);
+        }
+
+        .voucher-editor-actions .btn-group {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 8px;
+        }
+
+        .voucher-editor-actions #saveVoucherBtn {
+          grid-column: 1 / -1;
+        }
+
+        .voucher-list-header {
+          align-items: flex-start;
+          flex-direction: column;
+          margin-top: 14px;
+        }
+
+        #section-vouchers tbody tr {
+          border-radius: 18px;
+          box-shadow: none;
+        }
+
+        #section-vouchers tbody td:last-child {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 7px;
+        }
+
+        #section-vouchers tbody td:last-child::before,
+        #section-vouchers tbody td:last-child .danger-btn {
+          grid-column: 1 / -1;
         }
       }
 
@@ -4849,163 +5030,109 @@
             </div>
             <div class="section-badge">Voucher Manager</div>
           </div>
-          <div class="toolbar">
-            <div class="field-wide">
-              <input
-                type="text"
-                id="voucherSearchInput"
-                placeholder="Cari kode / game / brand / durasi voucher"
-              />
-            </div>
-
+          <div class="voucher-filter-card" aria-label="Filter voucher">
             <div class="field">
+              <label for="voucherSearchInput">Cari voucher</label>
+              <input type="text" id="voucherSearchInput" placeholder="Cari kode, game, brand, atau durasi" autocomplete="off" />
+            </div>
+            <div class="field">
+              <label for="voucherStatusFilter">Status</label>
               <select id="voucherStatusFilter" onchange="applyVoucherFilters()">
-                <option value="">Semua Status</option>
-                <option value="1">Active</option>
-                <option value="0">Inactive</option>
+                <option value="">Semua status</option>
+                <option value="1">Aktif</option>
+                <option value="0">Nonaktif</option>
               </select>
             </div>
           </div>
 
-          <div class="toolbar">
-            <input type="hidden" id="editingVoucherId" />
-
-            <div class="field">
-              <input
-                type="text"
-                id="voucherCode"
-                placeholder="Kode voucher, contoh: DELTA5K"
-              />
-            </div>
-
-            <div class="field-wide voucher-product-target-panel">
-              <div class="voucher-target-head">
-                <div>
-                  <label>Produk yang berlaku</label>
-                  <div class="card-subtitle">
-                    Centang 1 atau banyak produk. Kode voucher tetap sama.
-                  </div>
+          <details class="product-control-panel voucher-editor-panel" id="voucherEditorPanel" open>
+            <summary>
+              <span>Buat / Edit Voucher<small>Atur kode, produk, diskon, dan visibilitas</small></span>
+            </summary>
+            <div class="product-panel-content">
+              <input type="hidden" id="editingVoucherId" />
+              <div class="voucher-form-grid">
+                <div class="field voucher-code-field">
+                  <label for="voucherCode">Kode voucher</label>
+                  <input type="text" id="voucherCode" placeholder="Contoh: DELTA5K" autocomplete="off" spellcheck="false" />
+                  <small class="voucher-field-help">Gunakan kode singkat yang mudah diketik buyer.</small>
                 </div>
-                <small id="voucherProductSelectedCount">0 produk dipilih</small>
+
+                <div class="voucher-product-target-panel">
+                  <div class="voucher-target-head">
+                    <div>
+                      <label>Produk yang berlaku</label>
+                      <div class="card-subtitle">Centang satu atau banyak produk. Kode voucher tetap sama.</div>
+                    </div>
+                    <small id="voucherProductSelectedCount" aria-live="polite">0 produk dipilih</small>
+                  </div>
+                  <div class="voucher-target-controls">
+                    <input type="text" id="voucherProductSearch" placeholder="Cari game, platform, brand, atau durasi" oninput="renderVoucherProductChecklist()" />
+                    <select id="voucherProductGameFilter" onchange="renderVoucherProductChecklist()">
+                      <option value="">Semua game</option>
+                    </select>
+                    <button type="button" class="ghost-btn" onclick="selectVisibleVoucherProducts()">Pilih yang tampil</button>
+                    <button type="button" class="ghost-btn" onclick="clearVoucherProductSelection()">Kosongkan pilihan</button>
+                  </div>
+                  <div id="voucherProductChecklist" class="voucher-product-checklist">
+                    <div class="voucher-product-empty">Memuat produk...</div>
+                  </div>
+                  <select id="voucherProductSelect" onchange="syncVoucherProductFields()" hidden>
+                    <option value="">Pilih produk...</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="voucherGameName">Game</label>
+                  <input type="text" id="voucherGameName" placeholder="Contoh: Delta Force" />
+                </div>
+                <div class="field">
+                  <label for="voucherBrandName">Brand</label>
+                  <input type="text" id="voucherBrandName" placeholder="Opsional, contoh: Aorus" />
+                </div>
+                <div class="field">
+                  <label for="voucherDurationName">Durasi</label>
+                  <input type="text" id="voucherDurationName" placeholder="Opsional, contoh: 6 Jam" />
+                </div>
+                <div class="field">
+                  <label for="voucherDiscount">Nominal diskon</label>
+                  <input type="number" id="voucherDiscount" placeholder="Contoh: 5000" min="0" step="1000" inputmode="numeric" />
+                </div>
+                <div class="field">
+                  <label for="voucherExpiresAt">Tanggal kedaluwarsa</label>
+                  <input type="date" id="voucherExpiresAt" />
+                  <small class="voucher-field-help">Kosongkan jika tidak ingin dibatasi tanggal.</small>
+                </div>
+                <div class="field">
+                  <label for="voucherVisibility">Visibilitas</label>
+                  <select id="voucherVisibility">
+                    <option value="public">Publik — tampil di halaman utama</option>
+                    <option value="private">Privat — hanya buyer yang tahu kode</option>
+                  </select>
+                </div>
+                <div class="field voucher-form-wide">
+                  <label for="voucherTargetUsername">Target username</label>
+                  <input type="text" id="voucherTargetUsername" placeholder="Opsional — kosongkan jika berlaku untuk semua buyer" autocomplete="off" />
+                  <small class="voucher-field-help">Isi username jika voucher hanya boleh dipakai satu buyer tertentu.</small>
+                </div>
               </div>
-              <div class="voucher-target-controls">
-                <input
-                  type="text"
-                  id="voucherProductSearch"
-                  placeholder="Cari game / platform / brand / durasi..."
-                  oninput="renderVoucherProductChecklist()"
-                />
-                <select
-                  id="voucherProductGameFilter"
-                  onchange="renderVoucherProductChecklist()"
-                >
-                  <option value="">Semua Game</option>
-                </select>
-                <button
-                  type="button"
-                  class="ghost-btn"
-                  onclick="selectVisibleVoucherProducts()"
-                >
-                  Select Visible
-                </button>
-                <button
-                  type="button"
-                  class="ghost-btn"
-                  onclick="clearVoucherProductSelection()"
-                >
-                  Clear
-                </button>
+
+              <div class="voucher-editor-actions">
+                <div class="btn-group">
+                  <button id="saveVoucherBtn" onclick="saveVoucher()">Simpan Voucher</button>
+                  <button class="ghost-btn" onclick="resetVoucherForm()">Reset Form</button>
+                  <button class="ghost-btn" onclick="loadVouchers()">Muat Ulang</button>
+                </div>
               </div>
-              <div
-                id="voucherProductChecklist"
-                class="voucher-product-checklist"
-              >
-                <div class="voucher-product-empty">Memuat produk...</div>
-              </div>
-              <select
-                id="voucherProductSelect"
-                onchange="syncVoucherProductFields()"
-                hidden
-              >
-                <option value="">Pilih produk...</option>
-              </select>
             </div>
+          </details>
 
-            <div class="field">
-              <input
-                type="text"
-                id="voucherGameName"
-                placeholder="Nama game, contoh: Delta Force"
-              />
+          <div class="voucher-list-header">
+            <div>
+              <h3>Daftar voucher</h3>
+              <p class="card-subtitle">Pantau status, cakupan produk, dan masa berlaku.</p>
             </div>
-            <div class="field">
-              <input
-                type="text"
-                id="voucherBrandName"
-                placeholder="Brand optional, contoh: Aorus"
-              />
-            </div>
-
-            <div class="field">
-              <input
-                type="text"
-                id="voucherDurationName"
-                placeholder="Durasi optional, contoh: 6 Jam"
-              />
-            </div>
-
-            <div class="field">
-              <input
-                type="text"
-                id="voucherDiscount"
-                placeholder="Nominal diskon, contoh: 5000"
-              />
-            </div>
-
-            <div class="field">
-              <input
-                type="text"
-                id="voucherExpiresAt"
-                placeholder="Expired optional, contoh: 2026-12-31"
-              />
-            </div>
-          </div>
-
-          <div class="field">
-            <select id="voucherVisibility">
-              <option value="public">Public Voucher — tampil di index</option>
-              <option value="private">
-                Private / Hidden — hanya yang tahu kode
-              </option>
-            </select>
-          </div>
-
-          <div class="field">
-            <input
-              type="text"
-              id="voucherTargetUsername"
-              placeholder="Kosongkan — private cukup pakai kode voucher"
-            />
-          </div>
-
-          <div class="toolbar">
-            <div class="btn-group">
-              <button id="saveVoucherBtn" onclick="saveVoucher()">
-                Simpan Voucher
-              </button>
-              <button class="ghost-btn" onclick="resetVoucherForm()">
-                Reset Form
-              </button>
-              <button class="ghost-btn" onclick="loadVouchers()">
-                Refresh Voucher
-              </button>
-            </div>
-          </div>
-
-          <div class="info-row">
-            <div class="info" id="voucherStatusText">
-              Memuat daftar voucher...
-            </div>
+            <div class="info" id="voucherStatusText" aria-live="polite">Memuat daftar voucher...</div>
           </div>
 
           <div class="table-wrap">
@@ -9689,15 +9816,15 @@
          <td>
   ${
     active
-      ? '<span class="badge available">Active</span>'
-      : '<span class="badge used">Inactive</span>'
+      ? '<span class="badge available">Aktif</span>'
+      : '<span class="badge used">Nonaktif</span>'
   }
 </td>
 <td>
   ${
     String(item.visibility || "public") === "private"
-      ? `<span class="badge used">Private / Hidden<br><small>Redeem by code</small></span>`
-      : `<span class="badge available">Public</span>`
+      ? `<span class="badge used">Privat<br><small>Pakai kode</small></span>`
+      : `<span class="badge available">Publik</span>`
   }
 </td>
 <td>${escapeHtml(item.expires_at || "-")}</td>
@@ -9758,8 +9885,21 @@
         document.getElementById("voucherDurationName").value =
           durationName || "";
         document.getElementById("voucherDiscount").value = discountAmount;
-        document.getElementById("voucherExpiresAt").value = expiresAt || "";
+        document.getElementById("voucherExpiresAt").value = expiresAt
+          ? String(expiresAt).slice(0, 10)
+          : "";
         document.getElementById("saveVoucherBtn").innerText = "Update Voucher";
+
+        const editorPanel = document.getElementById("voucherEditorPanel");
+        if (editorPanel) {
+          editorPanel.open = true;
+          editorPanel.scrollIntoView({
+            behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+              ? "auto"
+              : "smooth",
+            block: "start",
+          });
+        }
       }
 
       async function saveVoucher() {
