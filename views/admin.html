@@ -7397,7 +7397,15 @@
 
         try {
           const params = buildOrderQueryParams();
-          const res = await fetch("/admin-orders?" + params.toString());
+          const orderUrl = "/admin-orders?" + params.toString();
+          let res;
+          try {
+            res = await fetch(orderUrl, { cache: "no-store" });
+          } catch (firstError) {
+            statusText.innerText = "Koneksi terputus. Mencoba sekali lagi...";
+            await new Promise((resolve) => window.setTimeout(resolve, 500));
+            res = await fetch(orderUrl, { cache: "no-store" });
+          }
 
           if (res.status === 401) {
             window.location.href = "/ae-auth";
@@ -7461,16 +7469,17 @@
           statusText.innerText = "Gagal memuat daftar order.";
           const updatedAt = document.getElementById("adminOrderUpdatedAt");
           if (updatedAt) updatedAt.innerText = "Gagal diperbarui";
-          ORDERS_STATE.manualCount = 0;
-          ORDERS_STATE.pendingCount = 0;
-          ORDERS_STATE.paidCount = 0;
-          ORDERS_STATE.deliveredCount = 0;
-          updateOrderMobileOps();
-          tableBody.innerHTML = `
-            <tr>
-              <td colspan="14" class="empty">Terjadi error saat mengambil order.</td>
-            </tr>
-          `;
+          if (allOrders.length) {
+            renderOrderRows(allOrders);
+            statusText.innerText =
+              "Koneksi terputus. Data terakhir tetap ditampilkan; klik Refresh untuk mencoba lagi.";
+          } else {
+            tableBody.innerHTML = `
+              <tr>
+                <td colspan="14" class="empty">Koneksi server terputus. Klik Refresh untuk mencoba lagi.</td>
+              </tr>
+            `;
+          }
         } finally {
           ORDERS_STATE.loading = false;
           if (refreshButton) {
