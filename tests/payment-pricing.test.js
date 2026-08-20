@@ -50,5 +50,10 @@ assert.match(admin, /role="listbox"/);
 assert.match(admin, /function setupProductCombobox\(inputId, listId\)/);
 assert.match(admin, /function populateProductSuggestions\(products\)/);
 assert.doesNotMatch(admin, /<datalist/);
+assert.match(admin, /function setupAdminSelect\(select\)/);
+assert.match(admin, /select\.multiple \|\| select\.hidden/);
+assert.match(admin, /document\.querySelectorAll\("body select"\)\.forEach\(setupAdminSelect\)/);
+assert.match(admin, /className = "admin-select-list"/);
+assert.match(admin, /new MutationObserver\(render\)\.observe\(select/);
 
 console.log("Payment pricing check passed.");
