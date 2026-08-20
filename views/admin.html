@@ -5082,18 +5082,9 @@
                   </select>
                 </div>
 
-                <div class="field">
-                  <label for="voucherGameName">Game</label>
-                  <input type="text" id="voucherGameName" placeholder="Contoh: Delta Force" />
-                </div>
-                <div class="field">
-                  <label for="voucherBrandName">Brand</label>
-                  <input type="text" id="voucherBrandName" placeholder="Opsional, contoh: Aorus" />
-                </div>
-                <div class="field">
-                  <label for="voucherDurationName">Durasi</label>
-                  <input type="text" id="voucherDurationName" placeholder="Opsional, contoh: 6 Jam" />
-                </div>
+                <input type="hidden" id="voucherGameName" />
+                <input type="hidden" id="voucherBrandName" />
+                <input type="hidden" id="voucherDurationName" />
                 <div class="field">
                   <label for="voucherDiscount">Nominal diskon</label>
                   <input type="number" id="voucherDiscount" placeholder="Contoh: 5000" min="0" step="1000" inputmode="numeric" />
@@ -5121,7 +5112,7 @@
                 <div class="btn-group">
                   <button id="saveVoucherBtn" onclick="saveVoucher()">Simpan Voucher</button>
                   <button class="ghost-btn" onclick="resetVoucherForm()">Reset Form</button>
-                  <button class="ghost-btn" onclick="loadVouchers()">Muat Ulang</button>
+                  <button class="ghost-btn" onclick="loadVouchers(true)">Muat Ulang</button>
                 </div>
               </div>
             </div>
@@ -9670,15 +9661,21 @@
         document.getElementById("saveVoucherBtn").innerText = "Simpan Voucher";
       }
 
-      async function loadVouchers() {
+      async function loadVouchers(resetFilters = false) {
         const statusText = document.getElementById("voucherStatusText");
         const tableBody = document.getElementById("voucherTableBody");
+
+        if (resetFilters) {
+          document.getElementById("voucherSearchInput").value = "";
+          document.getElementById("voucherStatusFilter").value = "";
+          syncAdminSelects();
+        }
 
         statusText.innerText = "Memuat daftar voucher...";
         tableBody.innerHTML = "";
 
         try {
-          const res = await fetch("/vouchers");
+          const res = await fetch("/vouchers", { cache: "no-store" });
           if (res.status === 401) {
             window.location.href = "/ae-auth";
             return;
@@ -9985,9 +9982,9 @@
             return;
           }
 
-          Swal.fire(data.message || "Voucher berhasil disimpan");
+          await Swal.fire(data.message || "Voucher berhasil disimpan");
           resetVoucherForm();
-          loadVouchers();
+          await loadVouchers(true);
         } catch (err) {
           Swal.fire("Terjadi error server saat menyimpan voucher");
         }

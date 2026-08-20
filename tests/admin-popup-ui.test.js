@@ -50,11 +50,24 @@ scripts.forEach(([, source]) =>
   'class="voucher-form-grid"',
   "Pilih yang tampil",
   "Kosongkan pilihan",
+  'type="hidden" id="voucherGameName"',
+  'type="hidden" id="voucherBrandName"',
+  'type="hidden" id="voucherDurationName"',
+  'fetch("/vouchers", { cache: "no-store" })',
+  'async function loadVouchers(resetFilters = false)',
+  'onclick="loadVouchers(true)"',
+  'await loadVouchers(true);',
   'id="voucherStatusText" aria-live="polite"',
   'document.getElementById("voucherEditorPanel")',
   "padding-bottom: calc(104px + var(--safe-bottom))",
 ].forEach((marker) =>
   assert.ok(admin.includes(marker), `Missing admin popup marker: ${marker}`),
+);
+assert.ok(
+  !admin.includes('label for="voucherGameName"') &&
+    !admin.includes('label for="voucherBrandName"') &&
+    !admin.includes('label for="voucherDurationName"'),
+  "Legacy voucher scope fields must stay hidden when products are selected",
 );
 assert.ok(
   server.includes("AS pending_count") && server.includes("AS manual_count"),
