@@ -1030,21 +1030,138 @@
       }
 
       .product-control-panel {
-        margin: 0;
-        border: 0;
+        margin: 0 0 16px;
+        overflow: visible;
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        background: var(--surface);
       }
 
       .product-control-panel > summary {
+        min-height: 58px;
+        padding: 13px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        border-radius: 19px 19px 0 0;
+        background: var(--surface-2);
+        color: var(--ink);
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 900;
+        list-style: none;
+      }
+
+      .product-control-panel > summary::-webkit-details-marker {
         display: none;
       }
 
+      .product-control-panel > summary::after {
+        content: "\2212";
+        width: 32px;
+        height: 32px;
+        flex: 0 0 32px;
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--line-strong);
+        border-radius: 50%;
+        font-family: "DM Mono", monospace;
+        font-size: 18px;
+        font-weight: 600;
+      }
+
+      .product-control-panel:not([open]) > summary {
+        border-radius: 19px;
+      }
+
+      .product-control-panel:not([open]) > summary::after {
+        content: "+";
+      }
+
+      .product-control-panel > summary small {
+        display: block;
+        margin-top: 3px;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 750;
+      }
+
+      #productEditorPanel > summary {
+        background: var(--ink);
+        color: var(--surface);
+      }
+
+      #productEditorPanel > summary small {
+        color: color-mix(in srgb, var(--surface) 66%, transparent);
+      }
+
+      #productEditorPanel > summary::after {
+        border-color: color-mix(in srgb, var(--surface) 35%, transparent);
+      }
+
       .product-control-panel > .product-panel-content {
-        display: flex;
+        margin: 0;
+        padding: 16px;
+        border-top: 1px solid var(--line);
+      }
+
+      .product-control-panel:not([open]) > .product-panel-content {
+        display: none;
+      }
+
+      .product-filter-grid {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .product-editor-grid {
+        display: grid !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px 12px;
+        align-items: start;
       }
 
       .product-panel-content .field {
         display: grid;
         gap: 6px;
+        align-content: start;
+      }
+
+      .product-editor-grid .field-wide {
+        grid-column: span 2;
+      }
+
+      .product-editor-grid .supplier-actions-field {
+        align-self: end;
+      }
+
+      .product-editor-grid .supplier-picker-actions {
+        min-height: 44px;
+        align-self: end;
+      }
+
+      .product-editor-grid .product-sync-field {
+        grid-column: span 2;
+      }
+
+      .product-editor-actions {
+        padding: 13px 16px 16px !important;
+        border-top: 1px solid var(--line) !important;
+        background: var(--surface-2);
+        border-radius: 0 0 19px 19px;
+      }
+
+      .product-editor-actions .btn-group {
+        width: 100%;
+        display: grid;
+        grid-template-columns: minmax(180px, 1.3fr) repeat(3, minmax(150px, 1fr));
+      }
+
+      .product-editor-actions button {
+        width: 100%;
+        margin: 0;
       }
 
       .optional-label {
@@ -1089,7 +1206,15 @@
       }
 
       .product-search-toolbar .field {
-        max-width: 480px;
+        max-width: none;
+      }
+
+      #section-products .product-search-toolbar {
+        margin-bottom: 16px;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: var(--surface-2);
       }
 
       #section-products input[type="text"],
@@ -1097,7 +1222,18 @@
       #section-products select,
       #section-products .supplier-map-preview,
       #section-products .product-sync-toggle {
-        border-radius: 3px;
+        border-radius: 14px;
+      }
+
+      @media (min-width: 769px) and (max-width: 1200px) {
+        .product-filter-grid,
+        .product-editor-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .product-editor-actions .btn-group {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
       }
 
       .product-combobox {
@@ -2425,10 +2561,6 @@
           font-weight: 500;
         }
 
-        .product-control-panel[open] > summary::after {
-          content: "−";
-        }
-
         .product-control-panel > summary small {
           display: block;
           margin-top: 2px;
@@ -2445,6 +2577,28 @@
 
         .product-control-panel:not([open]) > .product-panel-content {
           display: none;
+        }
+
+        .product-control-panel > summary::after {
+          content: "\2212";
+        }
+
+        .product-control-panel:not([open]) > summary::after {
+          content: "+";
+        }
+
+        .product-filter-grid,
+        .product-editor-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .product-editor-grid .field-wide,
+        .product-editor-grid .product-sync-field {
+          grid-column: 1;
+        }
+
+        .product-editor-actions {
+          background: transparent;
         }
 
         .product-search-toolbar .field {
@@ -3886,7 +4040,7 @@
 
           <details class="product-control-panel" id="productFilterPanel" open>
             <summary><span>Filter Produk<small>Game, brand, platform, status, dan source</small></span></summary>
-            <div class="toolbar product-panel-content">
+            <div class="toolbar product-panel-content product-filter-grid">
             <div class="field">
               <label for="productGameFilter">Game</label>
               <select id="productGameFilter" onchange="applyProductFilters()">
@@ -3945,7 +4099,7 @@
 
           <details class="product-control-panel" id="productEditorPanel" open>
             <summary><span>Tambah / Edit Produk<small>Form produk dan mapping supplier</small></span></summary>
-            <div class="toolbar product-panel-content">
+            <div class="toolbar product-panel-content product-editor-grid">
             <input type="hidden" id="editingProductId" />
             <div class="field">
               <label for="productGame">Game</label>
@@ -4061,7 +4215,7 @@
                 inputmode="numeric"
               />
             </div>
-            <div class="field">
+            <div class="field supplier-actions-field">
               <div class="supplier-picker-actions">
                 <button type="button" class="ghost-btn" onclick="openVipStoreProductPicker()">
                   Cari Supplier
@@ -4076,7 +4230,7 @@
                 Pilih Supplier API lalu isi Product ID untuk mapping stok.
               </div>
             </div>
-            <div class="field">
+            <div class="field product-sync-field">
               <label class="product-sync-toggle" for="productSyncBrandStatus">
                 <input type="checkbox" id="productSyncBrandStatus" checked />
                 <span>

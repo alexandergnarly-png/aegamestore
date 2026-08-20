@@ -55,5 +55,8 @@ assert.match(admin, /select\.multiple \|\| select\.hidden/);
 assert.match(admin, /document\.querySelectorAll\("body select"\)\.forEach\(setupAdminSelect\)/);
 assert.match(admin, /className = "admin-select-list"/);
 assert.match(admin, /new MutationObserver\(render\)\.observe\(select/);
+assert.match(admin, /product-panel-content product-filter-grid/);
+assert.match(admin, /product-panel-content product-editor-grid/);
+assert.match(admin, /grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/);
 
 console.log("Payment pricing check passed.");
