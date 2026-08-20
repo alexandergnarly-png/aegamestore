@@ -2070,23 +2070,31 @@
         margin-top: 2px;
         color: var(--muted);
         font-size: 12px;
+        font-weight: 700;
       }
 
       .admin-ops-refresh {
-        width: auto;
-        min-width: 92px;
-        height: 40px;
+        width: 44px;
+        min-width: 44px;
+        height: 44px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 8px;
-        padding: 0 13px;
+        padding: 0;
         border: 1px solid var(--ink);
-        border-radius: var(--pill);
+        border-radius: 50%;
         background: var(--ink);
         color: var(--surface);
-        font-size: 12px;
-        font-weight: 800;
+      }
+
+      .admin-ops-refresh-label {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        clip-path: inset(50%);
+        white-space: nowrap;
       }
 
       .admin-ops-refresh:disabled {
@@ -2106,13 +2114,14 @@
 
       .admin-order-ops-grid {
         display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 8px;
         margin-bottom: 12px;
       }
 
       .admin-ops-card {
-        min-height: 70px;
+        position: relative;
+        min-height: 66px;
         display: grid;
         align-content: center;
         justify-items: start;
@@ -2123,6 +2132,26 @@
         background: var(--surface-2);
         color: var(--ink);
         box-shadow: none;
+      }
+
+      .admin-ops-card-all {
+        grid-column: 1 / -1;
+        min-height: 54px;
+        grid-template-columns: auto 1fr;
+        align-items: center;
+        align-content: initial;
+        column-gap: 10px;
+      }
+
+      .admin-ops-card:not(.active):hover {
+        border-color: var(--ink);
+        background: var(--surface);
+      }
+
+      .admin-ops-card:focus-visible,
+      .admin-ops-refresh:focus-visible {
+        outline: 3px solid color-mix(in srgb, var(--ink) 22%, transparent);
+        outline-offset: 2px;
       }
 
       .admin-ops-card.active {
@@ -2150,18 +2179,11 @@
         text-transform: uppercase;
       }
 
-      .admin-order-quick-chips {
-        display: flex;
-        gap: 7px;
-        overflow-x: auto;
-        padding-bottom: 2px;
-        -webkit-overflow-scrolling: touch;
-      }
-
       .admin-order-sticky-search {
         display: none;
         gap: 8px;
-        margin-bottom: 12px;
+        padding-top: 12px;
+        border-top: 1px solid var(--line);
       }
 
       .admin-order-sticky-search input {
@@ -3576,48 +3598,34 @@
         }
 
         .admin-order-ops-grid {
-          grid-template-columns: repeat(3, minmax(0, 1fr));
+          grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: 6px;
+          margin-bottom: 0;
         }
 
         .admin-ops-card {
-          min-height: 64px;
+          min-height: 60px;
           padding: 9px;
           border-radius: 16px;
+        }
+
+        .admin-ops-card-all {
+          min-height: 50px;
         }
 
         .ops-num {
           font-size: 22px;
         }
 
-        .admin-order-quick-chips {
-          display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 6px;
-          margin: 0;
-          padding: 2px;
-          overflow: visible;
-        }
-
-        .admin-order-chip {
-          width: 100%;
-          min-width: 0;
-          min-height: 44px;
-          padding-inline: 8px;
-          font-size: 11px;
-        }
-
         .admin-order-sticky-search {
-          position: sticky;
-          top: 8px;
-          z-index: 20;
-          margin-bottom: 10px;
-          padding: 6px;
-          border: 1px solid var(--line);
-          border-radius: 20px;
-          background: color-mix(in srgb, var(--surface) 94%, transparent);
-          box-shadow: var(--shadow-sm);
-          backdrop-filter: blur(12px);
+          margin-top: 12px;
+          margin-bottom: 0;
+          padding: 12px 0 0;
+          border: 0;
+          border-top: 1px solid var(--line);
+          border-radius: 0;
+          background: transparent;
+          box-shadow: none;
         }
 
         .admin-order-sticky-search input,
@@ -3627,8 +3635,8 @@
 
         .admin-order-sticky-search input {
           min-width: 0;
-          border: 0;
-          background: transparent;
+          border: 1px solid var(--line);
+          background: var(--surface);
         }
 
         .admin-order-sticky-search button {
@@ -4491,7 +4499,7 @@
             <div class="admin-order-ops-head">
               <div>
                 <strong>Order Control</strong>
-                <span>Mode cepat untuk pantauan mobile</span>
+                <span id="adminOrderUpdatedAt" aria-live="polite">Ringkasan &amp; filter cepat</span>
               </div>
               <button
                 id="adminOrderRefresh"
@@ -4504,7 +4512,17 @@
                 <span class="admin-ops-refresh-label">Refresh</span>
               </button>
             </div>
-            <div class="admin-order-ops-grid">
+            <div class="admin-order-ops-grid" aria-label="Filter cepat order">
+              <button
+                type="button"
+                class="admin-ops-card admin-ops-card-all active"
+                data-quick-order="all"
+                aria-pressed="true"
+                onclick="setQuickOrderFilter('all')"
+              >
+                <span class="ops-num" id="opsAllCount">0</span>
+                <span class="ops-label">Semua order</span>
+              </button>
               <button
                 type="button"
                 class="admin-ops-card"
@@ -4535,68 +4553,27 @@
                 <span class="ops-num" id="opsPaidCount">0</span>
                 <span class="ops-label">Paid</span>
               </button>
-            </div>
-            <div
-              class="admin-order-quick-chips"
-              aria-label="Filter cepat order"
-            >
               <button
                 type="button"
-                class="admin-order-chip active"
-                data-quick-order="all"
-                aria-pressed="true"
-                onclick="setQuickOrderFilter('all', this)"
-              >
-                Semua
-              </button>
-              <button
-                type="button"
-                class="admin-order-chip"
-                data-quick-order="manual"
-                aria-pressed="false"
-                onclick="setQuickOrderFilter('manual', this)"
-              >
-                Manual
-              </button>
-              <button
-                type="button"
-                class="admin-order-chip"
-                data-quick-order="pending"
-                aria-pressed="false"
-                onclick="setQuickOrderFilter('pending', this)"
-              >
-                Pending
-              </button>
-              <button
-                type="button"
-                class="admin-order-chip"
-                data-quick-order="paid"
-                aria-pressed="false"
-                onclick="setQuickOrderFilter('paid', this)"
-              >
-                Paid
-              </button>
-              <button
-                type="button"
-                class="admin-order-chip"
+                class="admin-ops-card"
                 data-quick-order="delivered"
                 aria-pressed="false"
-                onclick="setQuickOrderFilter('delivered', this)"
+                onclick="setQuickOrderFilter('delivered')"
               >
-                Delivered
+                <span class="ops-num" id="opsDeliveredCount">0</span>
+                <span class="ops-label">Delivered</span>
               </button>
             </div>
-          </div>
-
-          <div class="admin-order-sticky-search" id="adminOrderStickySearch">
-            <input
-              type="text"
-              id="orderMobileSearchInput"
-              placeholder="Cari ID / user / kontak..."
-              aria-label="Cari order berdasarkan ID, user, atau kontak"
-              oninput="syncMobileOrderSearch(this.value)"
-            />
-            <button type="button" onclick="loadOrders()">Cari</button>
+            <div class="admin-order-sticky-search" id="adminOrderStickySearch">
+              <input
+                type="search"
+                id="orderMobileSearchInput"
+                placeholder="Cari ID, user, atau kontak"
+                aria-label="Cari order berdasarkan ID, user, atau kontak"
+                oninput="syncMobileOrderSearch(this.value)"
+              />
+              <button type="button" onclick="loadOrders()">Cari</button>
+            </div>
           </div>
 
           <details class="order-advanced-panel">
@@ -7357,6 +7334,7 @@
         paidCount: 0,
         pendingCount: 0,
         manualCount: 0,
+        deliveredCount: 0,
         loading: false,
       };
 
@@ -7410,6 +7388,7 @@
           refreshButton.disabled = true;
           refreshButton.classList.add("is-loading");
           refreshButton.setAttribute("aria-busy", "true");
+          refreshButton.setAttribute("aria-label", "Memuat order");
         }
         if (refreshLabel) refreshLabel.innerText = "Memuat";
 
@@ -7437,9 +7416,17 @@
           ORDERS_STATE.paidCount = Number(data?.paid_count) || 0;
           ORDERS_STATE.pendingCount = Number(data?.pending_count) || 0;
           ORDERS_STATE.manualCount = Number(data?.manual_count) || 0;
+          ORDERS_STATE.deliveredCount = Number(data?.delivered_count) || 0;
 
           allOrders = rows;
           updateOrderMobileOps();
+          const updatedAt = document.getElementById("adminOrderUpdatedAt");
+          if (updatedAt) {
+            updatedAt.innerText = `Diperbarui ${new Intl.DateTimeFormat("id-ID", {
+              hour: "2-digit",
+              minute: "2-digit",
+            }).format(new Date())}`;
+          }
           syncOrderSearchInputsFromDesktop();
 
           if (rows.length === 0 && ORDERS_STATE.page === 0) {
@@ -7472,9 +7459,12 @@
         } catch (err) {
           console.error("loadOrders error", err);
           statusText.innerText = "Gagal memuat daftar order.";
+          const updatedAt = document.getElementById("adminOrderUpdatedAt");
+          if (updatedAt) updatedAt.innerText = "Gagal diperbarui";
           ORDERS_STATE.manualCount = 0;
           ORDERS_STATE.pendingCount = 0;
           ORDERS_STATE.paidCount = 0;
+          ORDERS_STATE.deliveredCount = 0;
           updateOrderMobileOps();
           tableBody.innerHTML = `
             <tr>
@@ -7487,6 +7477,7 @@
             refreshButton.disabled = false;
             refreshButton.classList.remove("is-loading");
             refreshButton.removeAttribute("aria-busy");
+            refreshButton.setAttribute("aria-label", "Refresh order");
           }
           if (refreshLabel) refreshLabel.innerText = "Refresh";
         }
@@ -8451,7 +8442,7 @@
         }
       }
 
-      function setQuickOrderFilter(type, btn) {
+      function setQuickOrderFilter(type) {
         const payment = document.getElementById("paymentFilter");
         const delivery = document.getElementById("deliveryFilter");
         if (!payment || !delivery) return;
@@ -8480,14 +8471,18 @@
       }
 
       function updateOrderMobileOps() {
+        const allEl = document.getElementById("opsAllCount");
         const manualEl = document.getElementById("opsManualCount");
         const pendingEl = document.getElementById("opsPendingCount");
         const paidEl = document.getElementById("opsPaidCount");
-        if (!manualEl || !pendingEl || !paidEl) return;
+        const deliveredEl = document.getElementById("opsDeliveredCount");
+        if (!allEl || !manualEl || !pendingEl || !paidEl || !deliveredEl) return;
 
+        allEl.innerText = ORDERS_STATE.total;
         manualEl.innerText = ORDERS_STATE.manualCount;
         pendingEl.innerText = ORDERS_STATE.pendingCount;
         paidEl.innerText = ORDERS_STATE.paidCount;
+        deliveredEl.innerText = ORDERS_STATE.deliveredCount;
       }
 
       function copyOrderDetail(id) {

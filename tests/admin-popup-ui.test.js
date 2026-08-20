@@ -32,7 +32,10 @@ scripts.forEach(([, source]) =>
   ".product-control-panel:not([open]) > summary",
   "ORDERS_STATE.manualCount",
   "ORDERS_STATE.pendingCount",
+  "ORDERS_STATE.deliveredCount",
   "paidEl.innerText = ORDERS_STATE.paidCount",
+  'id="opsAllCount"',
+  'id="opsDeliveredCount"',
   'id="adminOrderRefresh"',
   'class="ui-icon" aria-hidden="true"><use href="#icon-refresh"',
   'refreshButton.setAttribute("aria-busy", "true")',
@@ -70,7 +73,9 @@ assert.ok(
   "Legacy voucher scope fields must stay hidden when products are selected",
 );
 assert.ok(
-  server.includes("AS pending_count") && server.includes("AS manual_count"),
+  server.includes("AS pending_count") &&
+    server.includes("AS manual_count") &&
+    server.includes("AS delivered_count"),
   "Order control counts must come from the full filtered query",
 );
 
