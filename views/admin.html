@@ -1455,6 +1455,15 @@
         font-weight: 800;
       }
 
+      .admin-select-option > span {
+        min-width: 0;
+        overflow-wrap: anywhere;
+      }
+
+      .admin-select-option > small {
+        flex: 0 0 auto;
+      }
+
       body .admin-select-option[aria-selected="true"] {
         background: var(--surface-2);
         color: var(--ink);
@@ -3111,8 +3120,13 @@
         }
 
         .voucher-target-controls input,
-        .voucher-target-controls select {
+        .voucher-target-controls select,
+        .voucher-target-controls > .admin-select {
           grid-column: 1 / -1;
+        }
+
+        .voucher-target-controls > .admin-select .admin-select-list {
+          max-height: min(240px, calc(100dvh - 190px));
         }
 
         .voucher-target-controls button {
