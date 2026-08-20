@@ -3,6 +3,7 @@ const fs = require("node:fs");
 
 const admin = fs.readFileSync("views/admin.html", "utf8");
 const server = fs.readFileSync("server.js", "utf8");
+assert.match(admin, /fetch\(`\/products\?fresh=\$\{Date\.now\(\)\}`,[\s\S]*?cache: "no-store"/);
 const scripts = [
   ...admin.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi),
 ];

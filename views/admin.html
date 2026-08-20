@@ -9160,7 +9160,9 @@
         tableBody.innerHTML = "";
 
         try {
-          const res = await fetch("/products");
+          const res = await fetch(`/products?fresh=${Date.now()}`, {
+            cache: "no-store",
+          });
 
           if (res.status === 401) {
             window.location.href = "/ae-auth";
@@ -9316,7 +9318,7 @@
               document.getElementById("productEditorPanel")?.removeAttribute("open");
             }
           }
-          loadProducts();
+          await loadProducts();
           loadKeyProductOptions();
         } catch (err) {
           Swal.fire("Terjadi error server saat menyimpan produk");
