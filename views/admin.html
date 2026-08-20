@@ -1087,19 +1087,6 @@
         font-weight: 750;
       }
 
-      #productEditorPanel > summary {
-        background: var(--ink);
-        color: var(--surface);
-      }
-
-      #productEditorPanel > summary small {
-        color: color-mix(in srgb, var(--surface) 66%, transparent);
-      }
-
-      #productEditorPanel > summary::after {
-        border-color: color-mix(in srgb, var(--surface) 35%, transparent);
-      }
-
       .product-control-panel > .product-panel-content {
         margin: 0;
         padding: 16px;
@@ -2532,8 +2519,8 @@
         .product-control-panel {
           margin-bottom: 8px;
           border: 1px solid var(--line-strong);
-          border-radius: 3px;
-          background: var(--surface-2);
+          border-radius: 16px;
+          background: var(--surface);
         }
 
         .product-control-panel > summary {
@@ -2543,11 +2530,16 @@
           justify-content: space-between;
           gap: 12px;
           padding: 10px 12px;
+          border-radius: 15px 15px 0 0;
           color: var(--ink);
           cursor: pointer;
           font-size: 13px;
           font-weight: 900;
           list-style: none;
+        }
+
+        .product-control-panel:not([open]) > summary {
+          border-radius: 15px;
         }
 
         .product-control-panel > summary::-webkit-details-marker {

@@ -29,6 +29,7 @@ scripts.forEach(([, source]) =>
   'id="productFilterPanel" open',
   'id="productEditorPanel" open',
   'document.querySelectorAll(".product-control-panel")',
+  ".product-control-panel:not([open]) > summary",
   "ORDERS_STATE.manualCount",
   "ORDERS_STATE.pendingCount",
   "paidEl.innerText = ORDERS_STATE.paidCount",
