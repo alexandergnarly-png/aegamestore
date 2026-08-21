@@ -1871,7 +1871,10 @@ async function claimVipStoreKeyForOrder(order, options = {}) {
           responseSummary: lastResponseSummary,
         });
 
-        throw new Error(message);
+        const supplierError = new Error(message);
+        supplierError.code = "VIPSTORE_CLAIM_REJECTED";
+        supplierError.supplierHttpCode = Number(claimResult.http_code || 0) || null;
+        throw supplierError;
       }
 
       const responseKeys = extractVipStoreClaimKeys(claimData).filter(
@@ -1893,7 +1896,10 @@ async function claimVipStoreKeyForOrder(order, options = {}) {
           responseSummary: lastResponseSummary,
         });
 
-        throw new Error(message);
+        const emptyClaimError = new Error(message);
+        emptyClaimError.code = "VIPSTORE_EMPTY_CLAIM";
+        emptyClaimError.supplierHttpCode = Number(claimResult.http_code || 0) || null;
+        throw emptyClaimError;
       }
 
       for (const key of responseKeys) {
@@ -2347,6 +2353,24 @@ function startDormantAccountCleanup() {
 function stopDormantAccountCleanup() {
   if (dormantAccountCleanupTimer) clearTimeout(dormantAccountCleanupTimer);
   dormantAccountCleanupTimer = null;
+}
+
+function getVipStoreClaimPublicError(err) {
+  const message = String(err?.message || "VIP Store tidak memberikan alasan")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 240);
+  const httpCode = Number(err?.supplierHttpCode || 0) || null;
+
+  if (err?.code === "VIPSTORE_TIMEOUT") {
+    return "VIP Store timeout. Status claim belum pasti; cek Claim Log sebelum mencoba lagi.";
+  }
+
+  if (err?.code === "VIPSTORE_REQUEST_FAILED") {
+    return "Server tidak dapat terhubung ke VIP Store. Coba lagi setelah koneksi supplier normal.";
+  }
+
+  return `VIP Store menolak claim: ${message}${httpCode ? ` (HTTP ${httpCode})` : ""}`;
 }
 
 let binanceOrderCleanupTimer = null;
@@ -2866,7 +2890,17 @@ async function getAdminSessionUsername(req) {
 
 async function settleWalletVipOrder(orderId) {
   try {
-    const result = await query(`SELECT o.*, p.supplier_product_id, p.supplier_source, p.delivery_type FROM orders o LEFT JOIN products p ON p.id = o.product_id WHERE o.id = $1 LIMIT 1`, [orderId]);
+    const result = await query(
+      `SELECT o.*,
+              COALESCE(NULLIF(o.supplier_product_id, ''), p.supplier_product_id, '') AS supplier_product_id,
+              COALESCE(NULLIF(o.supplier_source, ''), p.supplier_source, '') AS supplier_source,
+              COALESCE(NULLIF(o.supplier_delivery_type, ''), p.delivery_type, 'auto') AS delivery_type
+         FROM orders o
+         LEFT JOIN products p ON p.id = o.product_id
+        WHERE o.id = $1
+        LIMIT 1`,
+      [orderId],
+    );
     const order = result.rows[0];
     if (!order || order.delivery_status !== "processing_supplier") return;
     if (String(order.supplier_source || "") === "cheatgame") {
@@ -4868,10 +4902,11 @@ app.post(
       const orderResult = await client.query(
         `SELECT
            o.*,
-           COALESCE(p.delivery_type, 'auto') AS delivery_type,
-           COALESCE(p.supplier_source, '') AS supplier_source,
-           COALESCE(p.supplier_product_id, '') AS supplier_product_id,
-           COALESCE(p.supplier_product_name, '') AS supplier_product_name,
+           o.supplier_product_id AS order_supplier_product_id,
+           COALESCE(NULLIF(o.supplier_delivery_type, ''), p.delivery_type, 'auto') AS delivery_type,
+           COALESCE(NULLIF(o.supplier_source, ''), p.supplier_source, '') AS supplier_source,
+           COALESCE(NULLIF(o.supplier_product_id, ''), p.supplier_product_id, '') AS supplier_product_id,
+           COALESCE(NULLIF(o.supplier_product_name, ''), p.supplier_product_name, '') AS supplier_product_name,
            COALESCE(p.supplier_stock, 0) AS supplier_stock,
            COALESCE(p.supplier_status, '') AS supplier_status,
            COALESCE(p.supplier_maintenance, 0) AS supplier_maintenance
@@ -4891,6 +4926,34 @@ app.post(
           ok: false,
           message: "Order tidak ditemukan",
         });
+      }
+
+      if (!normalizeSupplierProductId(order.order_supplier_product_id)) {
+        const originalClaimResult = await client.query(
+          `SELECT supplier_product_id
+             FROM vipstore_claim_logs
+            WHERE order_id = $1
+              AND COALESCE(supplier_product_id, '') <> ''
+            ORDER BY created_at ASC, id ASC
+            LIMIT 1`,
+          [orderId],
+        );
+        const originalSupplierProductId = normalizeSupplierProductId(
+          originalClaimResult.rows[0]?.supplier_product_id,
+        );
+        if (originalSupplierProductId) {
+          order.delivery_type = "vipstore_api";
+          order.supplier_source = "vipstore";
+          order.supplier_product_id = originalSupplierProductId;
+          await client.query(
+            `UPDATE orders
+                SET supplier_delivery_type = 'vipstore_api',
+                    supplier_source = 'vipstore',
+                    supplier_product_id = $2
+              WHERE id = $1`,
+            [orderId, originalSupplierProductId],
+          );
+        }
       }
 
       const deliveryType = normalizeProductDeliveryType(order.delivery_type);
@@ -4999,6 +5062,7 @@ app.post(
         });
       } catch (claimErr) {
         console.error("VIPSTORE RETRY CLAIM ERROR:", claimErr.message);
+        const publicMessage = getVipStoreClaimPublicError(claimErr);
 
         await query(
           `UPDATE orders
@@ -5010,15 +5074,20 @@ app.post(
           [
             "problem",
             "KEY BELUM TERSEDIA - HUBUNGI ADMIN",
-            `Supplier retry failed: ${String(claimErr.message || "Unknown error").slice(0, 500)}`,
+            `Supplier retry failed: ${publicMessage}`.slice(0, 500),
             orderId,
             "processing_supplier",
           ],
         );
 
-        return res.status(502).json({
+        const responseStatus = ["VIPSTORE_CLAIM_REJECTED", "VIPSTORE_EMPTY_CLAIM"].includes(claimErr?.code)
+          ? 409
+          : 502;
+        return res.status(responseStatus).json({
           ok: false,
-          message: "Retry claim gagal. Cek balance supplier / claim log.",
+          message: publicMessage,
+          code: claimErr?.code || "VIPSTORE_RETRY_FAILED",
+          supplier_http_code: Number(claimErr?.supplierHttpCode) || null,
         });
       }
     } catch (err) {
@@ -5983,10 +6052,12 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
         const paidDeliveryStatus = isSupplierDeliveryType(productDeliveryType) ? "processing_supplier" : productDeliveryType === "manual" ? "manual" : "waiting_delivery";
         await client.query(
           `INSERT INTO orders
-          (id, product_id, user_id, access_token, name, contact, game, product, price, unit_price, quantity, original_price, discount_amount, payment_fee, voucher_code, payment_method, payment_status, delivery_status, created_at)
+          (id, product_id, user_id, access_token, name, contact, game, product, price, unit_price, quantity, original_price, discount_amount, payment_fee, voucher_code, payment_method, payment_status, delivery_status, created_at,
+           supplier_delivery_type, supplier_source, supplier_product_id, supplier_product_name)
           VALUES
-          ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)`,
-          [orderId, cleanProductId, userId, accessToken, cleanName, cleanContact, game, orderProductName, price, unitPrice, cleanQuantity, originalPrice, discountAmount, paymentFee, appliedVoucherCode, paymentMethod, "paid", paidDeliveryStatus, createdAt],
+          ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)`,
+          [orderId, cleanProductId, userId, accessToken, cleanName, cleanContact, game, orderProductName, price, unitPrice, cleanQuantity, originalPrice, discountAmount, paymentFee, appliedVoucherCode, paymentMethod, "paid", paidDeliveryStatus, createdAt,
+            productDeliveryType, String(productRow.supplier_source || ""), normalizeSupplierProductId(productRow.supplier_product_id), String(productRow.supplier_product_name || "")],
         );
         await client.query(`UPDATE wallet_accounts SET balance = $1, updated_at = $2 WHERE user_id = $3`, [balanceAfter, createdAt, userId]);
         await client.query(
@@ -6012,9 +6083,10 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
       } else {
         await client.query(
           `INSERT INTO orders
-          (id, product_id, user_id, access_token, name, contact, game, product, price, unit_price, quantity, original_price, discount_amount, payment_fee, voucher_code, payment_method, payment_status, delivery_status, created_at)
+          (id, product_id, user_id, access_token, name, contact, game, product, price, unit_price, quantity, original_price, discount_amount, payment_fee, voucher_code, payment_method, payment_status, delivery_status, created_at,
+           supplier_delivery_type, supplier_source, supplier_product_id, supplier_product_name)
           VALUES
-          ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)`,
+          ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)`,
         [
           orderId,
           cleanProductId,
@@ -6035,6 +6107,10 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
           "pending",
           "waiting_payment",
           createdAt,
+          productDeliveryType,
+          String(productRow.supplier_source || ""),
+          normalizeSupplierProductId(productRow.supplier_product_id),
+          String(productRow.supplier_product_name || ""),
         ],
         );
       }
@@ -6349,10 +6425,10 @@ app.post("/midtrans-notification", webhookLimiter, async (req, res) => {
         const orderResult = await client.query(
           `SELECT
              o.*,
-             COALESCE(p.delivery_type, 'auto') AS delivery_type,
-             COALESCE(p.supplier_source, '') AS supplier_source,
-             COALESCE(p.supplier_product_id, '') AS supplier_product_id,
-             COALESCE(p.supplier_product_name, '') AS supplier_product_name,
+             COALESCE(NULLIF(o.supplier_delivery_type, ''), p.delivery_type, 'auto') AS delivery_type,
+             COALESCE(NULLIF(o.supplier_source, ''), p.supplier_source, '') AS supplier_source,
+             COALESCE(NULLIF(o.supplier_product_id, ''), p.supplier_product_id, '') AS supplier_product_id,
+             COALESCE(NULLIF(o.supplier_product_name, ''), p.supplier_product_name, '') AS supplier_product_name,
              COALESCE(p.supplier_stock, 0) AS supplier_stock,
              COALESCE(p.supplier_status, '') AS supplier_status,
              COALESCE(p.supplier_maintenance, 0) AS supplier_maintenance
@@ -6780,10 +6856,10 @@ app.post(
       const orderResult = await client.query(
         `SELECT
            o.*,
-           COALESCE(p.delivery_type, 'auto') AS delivery_type,
-           COALESCE(p.supplier_source, '') AS supplier_source,
-           COALESCE(p.supplier_product_id, '') AS supplier_product_id,
-           COALESCE(p.supplier_product_name, '') AS supplier_product_name,
+           COALESCE(NULLIF(o.supplier_delivery_type, ''), p.delivery_type, 'auto') AS delivery_type,
+           COALESCE(NULLIF(o.supplier_source, ''), p.supplier_source, '') AS supplier_source,
+           COALESCE(NULLIF(o.supplier_product_id, ''), p.supplier_product_id, '') AS supplier_product_id,
+           COALESCE(NULLIF(o.supplier_product_name, ''), p.supplier_product_name, '') AS supplier_product_name,
            COALESCE(p.supplier_stock, 0) AS supplier_stock,
            COALESCE(p.supplier_status, '') AS supplier_status,
            COALESCE(p.supplier_maintenance, 0) AS supplier_maintenance
@@ -7363,10 +7439,10 @@ app.get("/admin-orders", requireAdminAuth, async (req, res) => {
     const rowsResult = await query(
       `SELECT
          o.*,
-         COALESCE(p.delivery_type, 'auto') AS delivery_type,
-         COALESCE(p.supplier_source, '') AS supplier_source,
-         COALESCE(p.supplier_product_id, '') AS supplier_product_id,
-         COALESCE(p.supplier_product_name, '') AS supplier_product_name
+         COALESCE(NULLIF(o.supplier_delivery_type, ''), p.delivery_type, 'auto') AS delivery_type,
+         COALESCE(NULLIF(o.supplier_source, ''), p.supplier_source, '') AS supplier_source,
+         COALESCE(NULLIF(o.supplier_product_id, ''), p.supplier_product_id, '') AS supplier_product_id,
+         COALESCE(NULLIF(o.supplier_product_name, ''), p.supplier_product_name, '') AS supplier_product_name
        FROM orders o
        LEFT JOIN products p ON p.id = o.product_id
        ${where ? where.replace(/\b(id|name|contact|game|product|created_at|payment_status|delivery_status)\b/g, "o.$1") : ""}
@@ -7484,10 +7560,10 @@ app.get("/admin-orders/:id", requireAdminAuth, async (req, res) => {
     const result = await query(
       `SELECT
          o.*,
-         COALESCE(p.delivery_type, 'auto') AS delivery_type,
-         COALESCE(p.supplier_source, '') AS supplier_source,
-         COALESCE(p.supplier_product_id, '') AS supplier_product_id,
-         COALESCE(p.supplier_product_name, '') AS supplier_product_name,
+         COALESCE(NULLIF(o.supplier_delivery_type, ''), p.delivery_type, 'auto') AS delivery_type,
+         COALESCE(NULLIF(o.supplier_source, ''), p.supplier_source, '') AS supplier_source,
+         COALESCE(NULLIF(o.supplier_product_id, ''), p.supplier_product_id, '') AS supplier_product_id,
+         COALESCE(NULLIF(o.supplier_product_name, ''), p.supplier_product_name, '') AS supplier_product_name,
          COALESCE(p.supplier_stock, 0) AS supplier_stock,
          COALESCE(p.supplier_status, '') AS supplier_status
        FROM orders o

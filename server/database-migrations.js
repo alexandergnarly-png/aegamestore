@@ -19,6 +19,10 @@ async function ensureBulkOrderSchema(db) {
     `CREATE INDEX IF NOT EXISTS idx_order_keys_order_id
      ON order_keys(order_id)`,
     `ALTER TABLE orders ADD COLUMN IF NOT EXISTS supplier_order_id TEXT`,
+    `ALTER TABLE orders ADD COLUMN IF NOT EXISTS supplier_delivery_type TEXT DEFAULT ''`,
+    `ALTER TABLE orders ADD COLUMN IF NOT EXISTS supplier_source TEXT DEFAULT ''`,
+    `ALTER TABLE orders ADD COLUMN IF NOT EXISTS supplier_product_id TEXT DEFAULT ''`,
+    `ALTER TABLE orders ADD COLUMN IF NOT EXISTS supplier_product_name TEXT DEFAULT ''`,
     `CREATE INDEX IF NOT EXISTS idx_orders_supplier_order_id
      ON orders(supplier_order_id)
      WHERE supplier_order_id IS NOT NULL`,
