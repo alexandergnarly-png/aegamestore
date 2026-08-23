@@ -8295,7 +8295,9 @@
         if (!box) return;
 
         try {
-          const res = await fetch("/api/admin/vipstore/safety");
+          const res = await fetch("/api/admin/vipstore/safety", {
+            cache: "no-store",
+          });
 
           if (!res.ok) {
             box.style.display = "none";
@@ -8351,8 +8353,8 @@
               ${alerts.join("")}
             </div>
             <div class="admin-alert-actions">
-              <button type="button" onclick="loadVipStoreSafetyAlerts()">Refresh Safety</button>
-              <button type="button" class="ghost-btn" onclick="setQuickOrderFilter('paid')">Cek Order Paid</button>
+              <button type="button" data-safety-action="refresh">Refresh Safety</button>
+              <button type="button" class="ghost-btn" data-safety-action="paid">Cek Order Paid</button>
             </div>
           `;
           box.style.display = "block";
@@ -8476,7 +8478,12 @@
           el.setAttribute("aria-pressed", String(active));
         });
 
-        applyOrderFilters();
+        const ordersSection = document.getElementById("section-orders");
+        if (ordersSection?.classList.contains("active")) {
+          applyOrderFilters();
+        } else {
+          showSection("orders");
+        }
       }
 
       function updateOrderMobileOps() {
@@ -10852,6 +10859,20 @@
         setupProductCombobox("productGame", "productGameOptions");
         setupProductCombobox("productDuration", "productDurationOptions");
         setupAdminSelects();
+        document
+          .getElementById("vipStoreSafetyBox")
+          ?.addEventListener("click", (event) => {
+            const button = event.target.closest("[data-safety-action]");
+            if (!button) return;
+
+            if (button.dataset.safetyAction === "refresh") {
+              button.disabled = true;
+              button.setAttribute("aria-busy", "true");
+              loadVipStoreSafetyAlerts();
+            } else if (button.dataset.safetyAction === "paid") {
+              setQuickOrderFilter("paid");
+            }
+          });
         document.addEventListener("pointerdown", (event) => {
           document.querySelectorAll(".admin-select.open").forEach((root) => {
             if (!root.contains(event.target)) root._close?.();
