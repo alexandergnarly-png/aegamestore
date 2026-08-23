@@ -4287,6 +4287,24 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (err) { }
   }
 
+  function calculatePublicVoucherDiscount(voucher, subtotal) {
+    const price = Math.max(0, Number(subtotal || 0));
+    if (!voucher || price <= 0) return 0;
+
+    if (String(voucher.discount_type || "fixed").toLowerCase() === "percent") {
+      const percent = Math.max(0, Math.min(90, Number(voucher.discount_percent || 0)));
+      const cap = Math.max(0, Number(voucher.max_discount_amount || 0));
+      let discount = Math.floor((price * percent) / 100 / 100) * 100;
+      if (cap > 0) discount = Math.min(discount, cap);
+      return Math.min(discount, Math.max(price - 1000, 0));
+    }
+
+    return Math.min(
+      Math.max(0, Number(voucher.discount_amount || 0)),
+      Math.max(price - 1000, 0),
+    );
+  }
+
   function findBestVoucherForProduct(product) {
     if (
       !product ||
@@ -4323,10 +4341,12 @@ document.addEventListener("DOMContentLoaded", () => {
         if (v.scope === "game" && vGame !== game) continue;
       }
 
-      const disc = Number(v.discount_amount || 0);
+      const disc = calculatePublicVoucherDiscount(v, product.price);
       if (disc <= 0) continue;
       if (disc >= Number(product.price || 0)) continue;
-      if (!best || disc > Number(best.discount_amount || 0)) best = v;
+      if (!best || disc > Number(best.effective_discount || 0)) {
+        best = { ...v, effective_discount: disc };
+      }
     }
     return best;
   }
@@ -4349,8 +4369,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const savings = safeT("autoVoucherSavings", "Hemat");
     const rupiah =
       typeof formatRupiah === "function"
-        ? formatRupiah(best.discount_amount)
-        : "Rp " + best.discount_amount;
+        ? formatRupiah(best.effective_discount)
+        : "Rp " + best.effective_discount;
 
     banner.hidden = false;
     banner.innerHTML = `

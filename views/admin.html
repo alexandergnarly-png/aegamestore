@@ -2995,6 +2995,171 @@
         margin-right: auto;
       }
 
+      .voucher-simulation-dialog {
+        width: min(880px, calc(100vw - 28px));
+        max-height: min(86dvh, 760px);
+        margin: auto;
+        padding: 0;
+        overflow: auto;
+        border: 1px solid var(--line-strong);
+        border-radius: 28px;
+        background: #fff;
+        color: var(--ink);
+        box-shadow: 0 28px 90px rgba(0, 0, 0, 0.28);
+      }
+
+      .voucher-simulation-dialog::backdrop {
+        background: rgba(12, 12, 12, 0.62);
+        backdrop-filter: blur(8px);
+      }
+
+      .voucher-simulation-head {
+        position: sticky;
+        z-index: 2;
+        top: 0;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 22px;
+        border-bottom: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.96);
+        backdrop-filter: blur(12px);
+      }
+
+      .voucher-simulation-head h3 {
+        margin: 3px 0 4px;
+        font-size: clamp(22px, 4vw, 30px);
+        font-weight: 950;
+        letter-spacing: -0.045em;
+      }
+
+      .voucher-simulation-head p {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .voucher-simulation-kicker {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 900;
+        letter-spacing: 0.16em;
+      }
+
+      .voucher-simulation-close {
+        width: 44px;
+        min-width: 44px;
+        min-height: 44px;
+        padding: 0;
+        border: 1px solid var(--line-strong);
+        border-radius: 50%;
+        background: #fff;
+        color: #111;
+        font-size: 28px;
+        line-height: 1;
+      }
+
+      .voucher-simulation-summary {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        padding: 18px 22px 4px;
+      }
+
+      .voucher-simulation-stat,
+      .voucher-simulation-item {
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        background: var(--surface-2);
+      }
+
+      .voucher-simulation-stat { padding: 14px; }
+
+      .voucher-simulation-stat span,
+      .voucher-simulation-metric span {
+        display: block;
+        margin-bottom: 4px;
+        color: var(--muted);
+        font-size: 9px;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .voucher-simulation-stat strong,
+      .voucher-simulation-metric strong {
+        font-size: 14px;
+        font-weight: 950;
+      }
+
+      .voucher-simulation-items {
+        display: grid;
+        gap: 10px;
+        padding: 14px 22px 22px;
+      }
+
+      .voucher-simulation-item { padding: 16px; }
+
+      .voucher-simulation-item-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 13px;
+      }
+
+      .voucher-simulation-item-head h4 {
+        font-size: 15px;
+        font-weight: 950;
+      }
+
+      .voucher-simulation-item-head p {
+        margin-top: 3px;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 750;
+      }
+
+      .voucher-verdict {
+        flex: 0 0 auto;
+        padding: 7px 10px;
+        border: 1px solid currentColor;
+        border-radius: 999px;
+        font-size: 10px;
+        font-weight: 950;
+        text-transform: uppercase;
+      }
+
+      .voucher-verdict.safe { color: #16734a; background: #edf9f2; }
+      .voucher-verdict.thin { color: #8a5a00; background: #fff8e7; }
+      .voucher-verdict.danger,
+      .voucher-verdict.loss { color: #a62929; background: #fff0f0; }
+      .voucher-verdict.unknown { color: #666; background: #f3f3f3; }
+
+      .voucher-simulation-metrics {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .voucher-simulation-metric {
+        min-width: 0;
+        padding: 10px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: #fff;
+      }
+
+      .voucher-simulation-footer {
+        position: sticky;
+        bottom: 0;
+        padding: 12px 22px 18px;
+        background: linear-gradient(transparent, #fff 28%);
+      }
+
+      .voucher-simulation-footer button { width: 100%; }
+
       .voucher-list-header {
         display: flex;
         align-items: center;
@@ -3184,6 +3349,29 @@
         .voucher-editor-actions #saveVoucherBtn {
           grid-column: 1 / -1;
         }
+
+        .voucher-simulation-dialog {
+          width: calc(100vw - 18px);
+          max-height: calc(100dvh - 24px);
+          border-radius: 24px;
+        }
+
+        .voucher-simulation-head,
+        .voucher-simulation-items {
+          padding-left: 14px;
+          padding-right: 14px;
+        }
+
+        .voucher-simulation-summary {
+          grid-template-columns: 1fr;
+          padding: 14px 14px 0;
+        }
+
+        .voucher-simulation-metrics {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .voucher-simulation-footer { padding: 10px 14px 14px; }
 
         .voucher-list-header {
           align-items: flex-start;
@@ -5076,9 +5264,27 @@
                 <input type="hidden" id="voucherGameName" />
                 <input type="hidden" id="voucherBrandName" />
                 <input type="hidden" id="voucherDurationName" />
-                <div class="field">
+                <div class="field voucher-discount-type">
+                  <label for="voucherDiscountType">Tipe diskon</label>
+                  <select id="voucherDiscountType" onchange="syncVoucherDiscountFields()">
+                    <option value="fixed">Nominal rupiah</option>
+                    <option value="percent">Persentase</option>
+                  </select>
+                </div>
+                <div class="field" id="voucherFixedDiscountField">
                   <label for="voucherDiscount">Nominal diskon</label>
-                  <input type="number" id="voucherDiscount" placeholder="Contoh: 5000" min="0" step="1000" inputmode="numeric" />
+                  <input type="number" id="voucherDiscount" placeholder="Contoh: 5000" min="100" step="100" inputmode="numeric" />
+                  <small class="voucher-field-help">Dipotong satu kali dari total order.</small>
+                </div>
+                <div class="field" id="voucherPercentDiscountField" hidden>
+                  <label for="voucherDiscountPercent">Persentase diskon</label>
+                  <input type="number" id="voucherDiscountPercent" placeholder="Contoh: 10" min="1" max="90" step="0.5" inputmode="decimal" />
+                  <small class="voucher-field-help">Berlaku pada subtotal dan dibulatkan turun ke Rp100.</small>
+                </div>
+                <div class="field" id="voucherMaxDiscountField" hidden>
+                  <label for="voucherMaxDiscount">Batas maksimal diskon</label>
+                  <input type="number" id="voucherMaxDiscount" placeholder="0 = tanpa batas" min="0" step="100" inputmode="numeric" />
+                  <small class="voucher-field-help">Opsional. Isi 0 jika tidak ingin memberi batas.</small>
                 </div>
                 <div class="field">
                   <label for="voucherExpiresAt">Tanggal kedaluwarsa</label>
@@ -5101,6 +5307,7 @@
 
               <div class="voucher-editor-actions">
                 <div class="btn-group">
+                  <button class="ghost-btn" type="button" onclick="simulateVoucher()">Simulasi Profit</button>
                   <button id="saveVoucherBtn" onclick="saveVoucher()">Simpan Voucher</button>
                   <button class="ghost-btn" onclick="resetVoucherForm()">Reset Form</button>
                   <button class="ghost-btn" onclick="loadVouchers(true)">Muat Ulang</button>
@@ -5108,6 +5315,24 @@
               </div>
             </div>
           </details>
+
+          <dialog id="voucherSimulationDialog" class="voucher-simulation-dialog" aria-labelledby="voucherSimulationTitle">
+            <div class="voucher-simulation-head">
+              <div>
+                <span class="voucher-simulation-kicker">PROFIT CHECK</span>
+                <h3 id="voucherSimulationTitle">Simulasi Voucher</h3>
+                <p>Perkiraan berdasarkan harga jual dan modal supplier terbaru.</p>
+              </div>
+              <form method="dialog">
+                <button class="voucher-simulation-close" aria-label="Tutup simulasi">&times;</button>
+              </form>
+            </div>
+            <div id="voucherSimulationSummary" class="voucher-simulation-summary"></div>
+            <div id="voucherSimulationItems" class="voucher-simulation-items"></div>
+            <form method="dialog" class="voucher-simulation-footer">
+              <button>Tutup</button>
+            </form>
+          </dialog>
 
           <div class="voucher-list-header">
             <div>
@@ -9666,6 +9891,216 @@
           .join("");
       }
 
+      function syncVoucherDiscountFields() {
+        const type =
+          document.getElementById("voucherDiscountType")?.value === "percent"
+            ? "percent"
+            : "fixed";
+        document.getElementById("voucherFixedDiscountField").hidden =
+          type !== "fixed";
+        document.getElementById("voucherPercentDiscountField").hidden =
+          type !== "percent";
+        document.getElementById("voucherMaxDiscountField").hidden =
+          type !== "percent";
+      }
+
+      function getVoucherDiscountPayload() {
+        const discountType =
+          document.getElementById("voucherDiscountType")?.value === "percent"
+            ? "percent"
+            : "fixed";
+
+        return {
+          discount_type: discountType,
+          discount_amount:
+            discountType === "fixed"
+              ? Number(document.getElementById("voucherDiscount").value || 0)
+              : 0,
+          discount_percent:
+            discountType === "percent"
+              ? Number(
+                  document.getElementById("voucherDiscountPercent").value || 0,
+                )
+              : 0,
+          max_discount_amount:
+            discountType === "percent"
+              ? Number(document.getElementById("voucherMaxDiscount").value || 0)
+              : 0,
+        };
+      }
+
+      function validateVoucherDiscountPayload(payload) {
+        if (payload.discount_type === "percent") {
+          if (
+            !Number.isFinite(payload.discount_percent) ||
+            payload.discount_percent <= 0 ||
+            payload.discount_percent > 90
+          ) {
+            return "Persentase diskon harus antara 1% sampai 90%.";
+          }
+          if (
+            !Number.isInteger(payload.max_discount_amount) ||
+            payload.max_discount_amount < 0
+          ) {
+            return "Batas maksimal diskon harus berupa rupiah bulat atau 0.";
+          }
+          return "";
+        }
+
+        if (
+          !Number.isInteger(payload.discount_amount) ||
+          payload.discount_amount <= 0
+        ) {
+          return "Nominal diskon harus lebih dari Rp0.";
+        }
+        return "";
+      }
+
+      function formatVoucherDiscount(item) {
+        if (String(item.discount_type || "fixed") === "percent") {
+          const percent = Number(item.discount_percent || 0);
+          const formattedPercent = Number.isInteger(percent)
+            ? String(percent)
+            : percent.toFixed(1).replace(".", ",");
+          const cap = Number(item.max_discount_amount || 0);
+          return `<div class="voucher-scope-cell"><b>${formattedPercent}%</b><small class="voucher-scope-detail">${
+            cap > 0 ? `Maks ${formatRupiah(cap)}` : "Tanpa batas"
+          }</small></div>`;
+        }
+        return formatRupiah(item.discount_amount || 0);
+      }
+
+      function getVoucherVerdictMeta(code) {
+        const labels = {
+          safe: "Aman",
+          thin: "Untung tipis",
+          danger: "Berisiko",
+          loss: "Rugi",
+          unknown: "Modal belum tersedia",
+        };
+        const normalized = Object.prototype.hasOwnProperty.call(labels, code)
+          ? code
+          : "unknown";
+        return { code: normalized, label: labels[normalized] };
+      }
+
+      function formatVoucherMargin(value) {
+        if (value === null || value === undefined) return "Belum diketahui";
+        const margin = Number(value);
+        return Number.isFinite(margin)
+          ? `${margin.toFixed(1).replace(".", ",")}%`
+          : "Belum diketahui";
+      }
+
+      function renderVoucherSimulation(simulation) {
+        const dialog = document.getElementById("voucherSimulationDialog");
+        const summaryEl = document.getElementById("voucherSimulationSummary");
+        const itemsEl = document.getElementById("voucherSimulationItems");
+        if (!dialog || !summaryEl || !itemsEl) return;
+
+        const summary = simulation?.summary || {};
+        const items = Array.isArray(simulation?.items) ? simulation.items : [];
+        const verdict = getVoucherVerdictMeta(summary.worst_code);
+
+        summaryEl.innerHTML = `
+          <div class="voucher-simulation-stat">
+            <small>Produk dihitung</small>
+            <strong>${Number(summary.product_count || items.length || 0)}</strong>
+          </div>
+          <div class="voucher-simulation-stat">
+            <small>Margin terendah</small>
+            <strong>${formatVoucherMargin(summary.worst_margin)}</strong>
+          </div>
+          <div class="voucher-simulation-stat">
+            <small>Kesimpulan</small>
+            <span class="voucher-verdict ${verdict.code}">${verdict.label}</span>
+          </div>`;
+
+        itemsEl.innerHTML = items.length
+          ? items
+              .map((item) => {
+                const itemVerdict = getVoucherVerdictMeta(item.code);
+                const title = [item.game, item.brand]
+                  .filter(Boolean)
+                  .map((value) => escapeHtml(value))
+                  .join(" · ");
+                const detail = [item.platform, item.duration]
+                  .filter(Boolean)
+                  .map((value) => escapeHtml(value))
+                  .join(" · ");
+                const supplierCost = Number(item.supplier_cost);
+                const hasKnownProfit =
+                  item.profit !== null &&
+                  item.profit !== undefined &&
+                  Number.isFinite(Number(item.profit));
+                const money = (value, known = true) =>
+                  known && Number.isFinite(Number(value))
+                    ? formatRupiah(Number(value))
+                    : "Belum tersedia";
+
+                return `
+                  <article class="voucher-simulation-item">
+                    <div class="voucher-simulation-item-head">
+                      <div><h4>${title || "Produk"}</h4><p>${detail || "—"}</p></div>
+                      <span class="voucher-verdict ${itemVerdict.code}">${itemVerdict.label}</span>
+                    </div>
+                    <div class="voucher-simulation-metrics">
+                      <div class="voucher-simulation-metric"><small>Harga jual</small><strong>${money(item.selling_price)}</strong></div>
+                      <div class="voucher-simulation-metric"><small>Modal supplier</small><strong>${money(item.supplier_cost, supplierCost > 0)}</strong></div>
+                      <div class="voucher-simulation-metric"><small>Diskon</small><strong>−${money(item.discount)}</strong></div>
+                      <div class="voucher-simulation-metric"><small>Buyer bayar</small><strong>${money(item.buyer_pays)}</strong></div>
+                      <div class="voucher-simulation-metric"><small>Estimasi fee buyer</small><strong>${money(item.estimated_payment_fee)}</strong></div>
+                      <div class="voucher-simulation-metric"><small>Estimasi profit</small><strong>${money(item.profit, hasKnownProfit)}</strong></div>
+                      <div class="voucher-simulation-metric"><small>Margin</small><strong>${formatVoucherMargin(item.margin)}</strong></div>
+                    </div>
+                  </article>`;
+              })
+              .join("")
+          : '<div class="empty">Belum ada produk yang dapat disimulasikan.</div>';
+
+        if (typeof dialog.showModal === "function") {
+          if (!dialog.open) dialog.showModal();
+        } else {
+          dialog.setAttribute("open", "");
+        }
+      }
+
+      async function simulateVoucher() {
+        const productIds = getSelectedVoucherProductIds();
+        const payload = getVoucherDiscountPayload();
+        const discountError = validateVoucherDiscountPayload(payload);
+
+        if (!productIds.length) {
+          return Swal.fire("Pilih Produk", "Pilih minimal satu produk untuk dihitung.", "info");
+        }
+        if (discountError) {
+          return Swal.fire("Diskon Belum Valid", discountError, "warning");
+        }
+
+        try {
+          const res = await fetch("/vouchers/simulate", {
+            method: "POST",
+            cache: "no-store",
+            headers: {
+              "Content-Type": "application/json",
+              "x-csrf-token": getCsrfToken(),
+            },
+            body: JSON.stringify({ product_ids: productIds, ...payload }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (res.status === 401) {
+            window.location.href = "/ae-auth";
+            return;
+          }
+          if (!res.ok) {
+            return Swal.fire("Simulasi Gagal", data.message || "Coba lagi.", "error");
+          }
+          renderVoucherSimulation(data);
+        } catch (error) {
+          Swal.fire("Simulasi Gagal", "Server tidak dapat dihubungi. Coba lagi.", "error");
+        }
+      }
+
       function resetVoucherForm() {
         document.getElementById("editingVoucherId").value = "";
         document.getElementById("voucherCode").value = "";
@@ -9681,11 +10116,15 @@
         document.getElementById("voucherGameName").value = "";
         document.getElementById("voucherBrandName").value = "";
         document.getElementById("voucherDurationName").value = "";
+        document.getElementById("voucherDiscountType").value = "fixed";
         document.getElementById("voucherDiscount").value = "";
+        document.getElementById("voucherDiscountPercent").value = "";
+        document.getElementById("voucherMaxDiscount").value = "";
         document.getElementById("voucherExpiresAt").value = "";
         document.getElementById("voucherVisibility").value = "public";
         document.getElementById("voucherTargetUsername").value = "";
         document.getElementById("saveVoucherBtn").innerText = "Simpan Voucher";
+        syncVoucherDiscountFields();
       }
 
       async function loadVouchers(resetFilters = false) {
@@ -9822,6 +10261,9 @@
               String(item.expires_at || ""),
               String(item.visibility || "public"),
               String(item.target_username || ""),
+              String(item.discount_type || "fixed"),
+              Number(item.discount_percent || 0),
+              Number(item.max_discount_amount || 0),
             ])));
             const itemId = escapeHtml(item.id);
             return `
@@ -9836,7 +10278,7 @@
           </td>
           <td>${escapeHtml(item.brand_name || (productCount > 0 ? "Multi" : "Semua"))}</td>
           <td>${escapeHtml(item.duration_name || (productCount > 0 ? "Multi" : "Semua"))}</td>
-          <td>${formatRupiah(item.discount_amount || 0)}</td>
+          <td>${formatVoucherDiscount(item)}</td>
          <td>
   ${
     active
@@ -9877,6 +10319,9 @@
         expiresAt,
         visibility,
         targetUsername,
+        discountType,
+        discountPercent,
+        maxDiscountAmount,
       ) {
         document.getElementById("voucherVisibility").value =
           visibility || "public";
@@ -9909,6 +10354,13 @@
         document.getElementById("voucherDurationName").value =
           durationName || "";
         document.getElementById("voucherDiscount").value = discountAmount;
+        document.getElementById("voucherDiscountType").value =
+          discountType === "percent" ? "percent" : "fixed";
+        document.getElementById("voucherDiscountPercent").value =
+          discountPercent || "";
+        document.getElementById("voucherMaxDiscount").value =
+          maxDiscountAmount || "";
+        syncVoucherDiscountFields();
         document.getElementById("voucherExpiresAt").value = expiresAt
           ? String(expiresAt).slice(0, 10)
           : "";
@@ -9931,9 +10383,7 @@
         const gameName = document
           .getElementById("voucherGameName")
           .value.trim();
-        const discountAmount = document
-          .getElementById("voucherDiscount")
-          .value.trim();
+        const discountPayload = getVoucherDiscountPayload();
         const brandName = document
           .getElementById("voucherBrandName")
           .value.trim();
@@ -9959,14 +10409,14 @@
           : "/vouchers";
         const voucherMethod = editingVoucherId ? "PUT" : "POST";
 
-        if (
-          !code ||
-          (!gameName && productIds.length === 0) ||
-          !discountAmount
-        ) {
-          Swal.fire(
-            "Kode, target produk/nama game, dan nominal diskon wajib diisi.",
-          );
+        if (!code || (!gameName && productIds.length === 0)) {
+          Swal.fire("Kode dan minimal satu target produk wajib diisi.");
+          return;
+        }
+
+        const discountError = validateVoucherDiscountPayload(discountPayload);
+        if (discountError) {
+          Swal.fire(discountError);
           return;
         }
 
@@ -9989,7 +10439,7 @@
               game_name: gameName,
               brand_name: brandName || null,
               duration_name: durationName || null,
-              discount_amount: Number(discountAmount),
+              ...discountPayload,
               expires_at: expiresAt || null,
               visibility,
               // Private voucher is hidden-only, not tied to a specific buyer.
@@ -10005,6 +10455,7 @@
           }
 
           if (!res.ok) {
+            if (data.simulation) renderVoucherSimulation(data.simulation);
             Swal.fire(data.message || "Gagal menyimpan voucher");
             return;
           }
@@ -10031,6 +10482,7 @@
           const data = await res.json();
 
           if (!res.ok) {
+            if (data.simulation) renderVoucherSimulation(data.simulation);
             Swal.fire(data.message || "Gagal mengubah status voucher");
             return;
           }

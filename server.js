@@ -37,6 +37,13 @@ const {
   normalizeProductGameName,
 } = require("./server/product-utils");
 const {
+  calculateVoucherDiscount,
+  getVoucherProfitVerdict,
+  normalizeVoucherDefinition,
+  normalizeVoucherDiscountType,
+  validateVoucherDefinition,
+} = require("./server/voucher-pricing");
+const {
   decryptSecretWithKeys,
   encryptSecret,
   escapeCsvFormula,
@@ -431,6 +438,9 @@ db.query(
     brand_name TEXT,
     duration_name TEXT,
     discount_amount INTEGER NOT NULL DEFAULT 0,
+    discount_type TEXT NOT NULL DEFAULT 'fixed',
+    discount_percent NUMERIC(5,2) NOT NULL DEFAULT 0,
+    max_discount_amount INTEGER NOT NULL DEFAULT 0,
     active INTEGER DEFAULT 1,
     expires_at TEXT,
     created_at TEXT NOT NULL
@@ -453,6 +463,9 @@ db.query(
   `ALTER TABLE vouchers ADD COLUMN IF NOT EXISTS target_user_id INTEGER`,
 );
 db.query(`ALTER TABLE vouchers ADD COLUMN IF NOT EXISTS product_id INTEGER`);
+db.query(`ALTER TABLE vouchers ADD COLUMN IF NOT EXISTS discount_type TEXT NOT NULL DEFAULT 'fixed'`);
+db.query(`ALTER TABLE vouchers ADD COLUMN IF NOT EXISTS discount_percent NUMERIC(5,2) NOT NULL DEFAULT 0`);
+db.query(`ALTER TABLE vouchers ADD COLUMN IF NOT EXISTS max_discount_amount INTEGER NOT NULL DEFAULT 0`);
 db.query(
   `CREATE INDEX IF NOT EXISTS idx_vouchers_product_id ON vouchers(product_id)`,
 );
@@ -2964,6 +2977,67 @@ async function getProductsByIds(productIds) {
   return result.rows;
 }
 
+function getVoucherDefinitionFromBody(body = {}) {
+  return normalizeVoucherDefinition({
+    discountType: body.discount_type,
+    discountAmount: body.discount_amount,
+    discountPercent: body.discount_percent,
+    maxDiscountAmount: body.max_discount_amount,
+  });
+}
+
+function buildVoucherProfitSimulation(products, definition) {
+  const items = (Array.isArray(products) ? products : []).map((product) => {
+    const price = Number(product.price || 0);
+    const supplierCost = Number(product.supplier_price || 0);
+    const discount = calculateVoucherDiscount({ ...definition, subtotal: price });
+    const buyerPays = Math.max(price - discount, 0);
+    const chargedTotal = calculatePaymentPrice(buyerPays, "midtrans");
+    const verdict = getVoucherProfitVerdict({ buyerPays, supplierCost });
+
+    return {
+      product_id: Number(product.id),
+      game: product.game,
+      platform: product.platform,
+      brand: product.brand,
+      duration: product.duration,
+      selling_price: price,
+      supplier_cost: supplierCost > 0 ? supplierCost : null,
+      discount,
+      buyer_pays: buyerPays,
+      estimated_payment_fee: Math.max(chargedTotal - buyerPays, 0),
+      ...verdict,
+    };
+  });
+
+  const knownItems = items.filter((item) => item.margin !== null);
+  const worst = knownItems.reduce(
+    (current, item) => (!current || item.margin < current.margin ? item : current),
+    null,
+  );
+  const hasLoss = items.some((item) => item.code === "loss");
+  const hasUnknown = items.some((item) => item.code === "unknown");
+
+  return {
+    items,
+    summary: {
+      product_count: items.length,
+      has_loss: hasLoss,
+      has_unknown: hasUnknown,
+      worst_code: hasLoss ? "loss" : hasUnknown ? "unknown" : worst?.code || "unknown",
+      worst_margin: worst?.margin ?? null,
+    },
+  };
+}
+
+function validateVoucherProfit(products, definition) {
+  const simulation = buildVoucherProfitSimulation(products, definition);
+  return {
+    simulation,
+    valid: !simulation.summary.has_loss,
+  };
+}
+
 function buildVoucherScopeFromProducts(products) {
   const rows = Array.isArray(products) ? products : [];
 
@@ -3545,7 +3619,7 @@ async function getBestCheckoutDiscount({
       brandName: productRow.brand,
       durationName: productRow.duration,
       voucherCode: cleanVoucherCode,
-      productPrice: originalPrice,
+      productPrice: originalPrice * getOrderQuantity(quantity),
       userId,
     });
 
@@ -3736,14 +3810,18 @@ async function getVoucherDiscount({
     };
   }
 
-  const rawDiscount = Number(voucher.discount_amount || 0);
-  const maxDiscount = Math.max(Number(productPrice) - 1000, 0);
-  const discountAmount = Math.min(rawDiscount, maxDiscount);
+  const discountAmount = calculateVoucherDiscount({
+    discountType: voucher.discount_type,
+    discountAmount: voucher.discount_amount,
+    discountPercent: voucher.discount_percent,
+    maxDiscountAmount: voucher.max_discount_amount,
+    subtotal: productPrice,
+  });
 
   if (discountAmount <= 0) {
     return {
       valid: false,
-      message: "Nominal voucher tidak valid",
+      message: "Nilai voucher tidak valid",
     };
   }
 
@@ -3751,6 +3829,7 @@ async function getVoucherDiscount({
     valid: true,
     code: cleanCode,
     discountAmount,
+    discountType: normalizeVoucherDiscountType(voucher.discount_type),
     message: "Voucher berhasil digunakan",
   };
 }
@@ -5115,6 +5194,9 @@ app.post("/vouchers", requireAdminAuth, requireAdminCsrf, async (req, res) => {
     brand_name,
     duration_name,
     discount_amount,
+    discount_type,
+    discount_percent,
+    max_discount_amount,
     expires_at,
     visibility,
     target_username,
@@ -5132,7 +5214,13 @@ app.post("/vouchers", requireAdminAuth, requireAdminCsrf, async (req, res) => {
       ? legacyProductId
       : null;
 
-  const discountAmount = Number(discount_amount);
+  const definition = getVoucherDefinitionFromBody({
+    discount_type,
+    discount_amount,
+    discount_percent,
+    max_discount_amount,
+  });
+  const discountAmount = definition.discountAmount;
   const expiresAt = expires_at ? String(expires_at).trim() : null;
   const cleanVisibility =
     String(visibility || "public")
@@ -5186,23 +5274,35 @@ app.post("/vouchers", requireAdminAuth, requireAdminCsrf, async (req, res) => {
       });
     }
 
-    if (!Number.isInteger(discountAmount) || discountAmount <= 0) {
+    const definitionCheck = validateVoucherDefinition(definition);
+    if (!definitionCheck.valid) {
       return res.status(400).json({
-        message: "Diskon tidak valid",
+        message: definitionCheck.message,
+      });
+    }
+
+    const profitCheck = validateVoucherProfit(targetProducts, definition);
+    if (!profitCheck.valid) {
+      return res.status(400).json({
+        message: "Voucher membuat setidaknya satu produk rugi. Turunkan diskonnya.",
+        simulation: profitCheck.simulation,
       });
     }
 
     const result = await query(
       `INSERT INTO vouchers
-  (code, product_id, game_name, brand_name, duration_name, discount_amount, active, expires_at, created_at, visibility, target_user_id)
+  (code, product_id, game_name, brand_name, duration_name, discount_amount, discount_type, discount_percent, max_discount_amount, active, expires_at, created_at, visibility, target_user_id)
  VALUES
-  ($1, $2, $3, $4, $5, $6, 1, $7, $8, $9, $10)
+  ($1, $2, $3, $4, $5, $6, $7, $8, $9, 1, $10, $11, $12, $13)
  ON CONFLICT (code)
  DO UPDATE SET
   game_name = EXCLUDED.game_name,
   brand_name = EXCLUDED.brand_name,
   duration_name = EXCLUDED.duration_name,
   discount_amount = EXCLUDED.discount_amount,
+  discount_type = EXCLUDED.discount_type,
+  discount_percent = EXCLUDED.discount_percent,
+  max_discount_amount = EXCLUDED.max_discount_amount,
   active = 1,
   expires_at = EXCLUDED.expires_at,
   visibility = EXCLUDED.visibility,
@@ -5216,6 +5316,9 @@ app.post("/vouchers", requireAdminAuth, requireAdminCsrf, async (req, res) => {
         cleanBrandName || null,
         cleanDurationName || null,
         discountAmount,
+        definition.discountType,
+        definition.discountPercent,
+        definition.maxDiscountAmount,
         expiresAt,
         new Date().toISOString(),
         cleanVisibility,
@@ -5254,6 +5357,9 @@ app.put(
       brand_name,
       duration_name,
       discount_amount,
+      discount_type,
+      discount_percent,
+      max_discount_amount,
       expires_at,
       visibility,
       target_username,
@@ -5271,7 +5377,13 @@ app.put(
         ? legacyProductId
         : null;
 
-    const discountAmount = Number(discount_amount);
+    const definition = getVoucherDefinitionFromBody({
+      discount_type,
+      discount_amount,
+      discount_percent,
+      max_discount_amount,
+    });
+    const discountAmount = definition.discountAmount;
     const expiresAt = expires_at ? String(expires_at).trim() : null;
     const cleanVisibility =
       String(visibility || "public")
@@ -5330,9 +5442,18 @@ app.put(
         });
       }
 
-      if (!Number.isInteger(discountAmount) || discountAmount <= 0) {
+      const definitionCheck = validateVoucherDefinition(definition);
+      if (!definitionCheck.valid) {
         return res.status(400).json({
-          message: "Diskon tidak valid",
+          message: definitionCheck.message,
+        });
+      }
+
+      const profitCheck = validateVoucherProfit(targetProducts, definition);
+      if (!profitCheck.valid) {
+        return res.status(400).json({
+          message: "Voucher membuat setidaknya satu produk rugi. Turunkan diskonnya.",
+          simulation: profitCheck.simulation,
         });
       }
 
@@ -5355,10 +5476,13 @@ app.put(
              brand_name = $4,
              duration_name = $5,
              discount_amount = $6,
-             expires_at = $7,
-             visibility = $8,
-             target_user_id = $9
-         WHERE id = $10
+             discount_type = $7,
+             discount_percent = $8,
+             max_discount_amount = $9,
+             expires_at = $10,
+             visibility = $11,
+             target_user_id = $12
+         WHERE id = $13
          RETURNING id`,
         [
           cleanCode,
@@ -5367,6 +5491,9 @@ app.put(
           cleanBrandName || null,
           cleanDurationName || null,
           discountAmount,
+          definition.discountType,
+          definition.discountPercent,
+          definition.maxDiscountAmount,
           expiresAt,
           cleanVisibility,
           targetUserId,
@@ -5447,6 +5574,41 @@ app.get("/vouchers", requireAdminAuth, async (req, res) => {
   }
 });
 
+app.post(
+  "/vouchers/simulate",
+  requireAdminAuth,
+  requireAdminCsrf,
+  async (req, res) => {
+    try {
+      const productIds = normalizeProductIds(req.body.product_ids);
+      const definition = getVoucherDefinitionFromBody(req.body);
+      const definitionCheck = validateVoucherDefinition(definition);
+
+      if (!definitionCheck.valid) {
+        return res.status(400).json({ message: definitionCheck.message });
+      }
+
+      if (!productIds.length) {
+        return res.status(400).json({
+          message: "Pilih minimal satu produk untuk disimulasikan",
+        });
+      }
+
+      const products = await getProductsByIds(productIds);
+      if (products.length !== productIds.length) {
+        return res.status(400).json({
+          message: "Sebagian produk tidak ditemukan. Muat ulang daftar produk.",
+        });
+      }
+
+      return res.json(buildVoucherProfitSimulation(products, definition));
+    } catch (err) {
+      console.error("ERROR SIMULATE VOUCHER:", err);
+      return res.status(500).json({ message: "Gagal menghitung simulasi voucher" });
+    }
+  },
+);
+
 app.patch(
   "/vouchers/:id/toggle-active",
   requireAdminAuth,
@@ -5464,6 +5626,49 @@ app.patch(
     }
 
     try {
+      if (active === 1) {
+        const voucherResult = await query(
+          `SELECT id, product_id, discount_type, discount_amount, discount_percent, max_discount_amount
+           FROM vouchers
+           WHERE id = $1`,
+          [voucherId],
+        );
+
+        if (voucherResult.rows.length === 0) {
+          return res.status(404).json({ message: "Voucher tidak ditemukan" });
+        }
+
+        const productResult = await query(
+          `SELECT p.*
+           FROM voucher_products vp
+           INNER JOIN products p ON p.id = vp.product_id
+           WHERE vp.voucher_id = $1
+           ORDER BY p.game ASC, p.brand ASC, p.duration ASC, p.id ASC`,
+          [voucherId],
+        );
+        const voucher = voucherResult.rows[0];
+        let products = productResult.rows;
+        const legacyProductId = Number(voucher.product_id || 0);
+        if (!products.length && Number.isInteger(legacyProductId) && legacyProductId > 0) {
+          products = await getProductsByIds([legacyProductId]);
+        }
+        const definition = normalizeVoucherDefinition({
+          discountType: voucher.discount_type,
+          discountAmount: voucher.discount_amount,
+          discountPercent: voucher.discount_percent,
+          maxDiscountAmount: voucher.max_discount_amount,
+        });
+        const profitCheck = validateVoucherProfit(products, definition);
+
+        if (!profitCheck.valid) {
+          return res.status(400).json({
+            message:
+              "Voucher tidak dapat diaktifkan karena membuat minimal satu produk rugi.",
+            simulation: profitCheck.simulation,
+          });
+        }
+      }
+
       const result = await query(
         "UPDATE vouchers SET active = $1 WHERE id = $2 RETURNING id",
         [active, voucherId],
@@ -8891,7 +9096,10 @@ app.get("/public-vouchers", async (req, res) => {
         vouchers.game_name,
         vouchers.brand_name,
         vouchers.duration_name,
+        vouchers.discount_type,
         vouchers.discount_amount,
+        vouchers.discount_percent,
+        vouchers.max_discount_amount,
         vouchers.expires_at,
         COALESCE(product_targets.product_ids, '[]'::json) AS product_ids
       FROM vouchers
@@ -8903,7 +9111,7 @@ app.get("/public-vouchers", async (req, res) => {
 WHERE vouchers.active = 1
   AND COALESCE(vouchers.visibility, 'public') = 'public'
   AND (vouchers.expires_at IS NULL OR vouchers.expires_at = '' OR vouchers.expires_at > to_char(NOW(), 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'))
-      ORDER BY vouchers.discount_amount DESC
+      ORDER BY vouchers.created_at DESC, vouchers.id DESC
       LIMIT 50
       `,
     );
@@ -8938,7 +9146,10 @@ WHERE vouchers.active = 1
         game_name: game || null,
         brand_name: brand || null,
         duration_name: duration || null,
+        discount_type: normalizeVoucherDiscountType(row.discount_type),
         discount_amount: Number(row.discount_amount || 0),
+        discount_percent: Number(row.discount_percent || 0),
+        max_discount_amount: Number(row.max_discount_amount || 0),
         expires_at: row.expires_at || null,
       };
     });
