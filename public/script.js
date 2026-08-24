@@ -675,6 +675,9 @@ function setLanguage(lang, refreshDynamic = true) {
 let allProducts = [];
 
 const gameImages = {
+  "8bp": "/images/games/8-ball-pool.jpg",
+  "8ballpool": "/images/games/8-ball-pool.jpg",
+
   pubgmobile: "/images/games/pubg.webp",
   pubgm: "/images/games/pubg.webp",
 
@@ -694,6 +697,8 @@ const gameImages = {
   deltaforce: "/images/games/delta-force.webp",
   arenabreakout: "/images/games/arena-breakout.webp",
   goldandglory: "/images/games/gold-and-glory.webp",
+  oxide: "/images/games/oxide.png",
+  oxidesurvivalisland: "/images/games/oxide.png",
   valorant: "/images/games/valorant.webp",
 };
 

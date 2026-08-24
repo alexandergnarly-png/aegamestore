@@ -189,5 +189,7 @@ assert.match(script, /new CustomEvent\("ae:languagechange"\)/);
 assert.match(script, /els\.modal\?\.querySelectorAll\("\[data-i18n\]"\)/);
 assert.match(script, /if \(modal\?\.classList\.contains\("show"\)\) onProductChange\(\)/);
 assert.match(script, /if \(!state\.publicVouchers\.length\) await loadPublicVouchers\(\)/);
+assert.match(script, /"8bp": "\/images\/games\/8-ball-pool\.jpg"/);
+assert.match(script, /oxide: "\/images\/games\/oxide\.png"/);
 
 console.log("Homepage UI/UX accessibility check passed.");
