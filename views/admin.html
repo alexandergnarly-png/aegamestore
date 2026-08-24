@@ -2996,16 +2996,21 @@
       }
 
       .voucher-simulation-dialog {
-        width: min(880px, calc(100vw - 28px));
-        max-height: min(86dvh, 760px);
+        width: min(760px, calc(100vw - 28px));
+        max-height: min(88svh, 780px);
         margin: auto;
         padding: 0;
-        overflow: auto;
+        overflow: hidden;
         border: 1px solid var(--line-strong);
         border-radius: 28px;
         background: #fff;
         color: var(--ink);
         box-shadow: 0 28px 90px rgba(0, 0, 0, 0.28);
+      }
+
+      .voucher-simulation-dialog[open] {
+        display: flex;
+        flex-direction: column;
       }
 
       .voucher-simulation-dialog::backdrop {
@@ -3014,17 +3019,13 @@
       }
 
       .voucher-simulation-head {
-        position: sticky;
-        z-index: 2;
-        top: 0;
         display: flex;
         align-items: flex-start;
         justify-content: space-between;
         gap: 16px;
         padding: 22px;
         border-bottom: 1px solid var(--line);
-        background: rgba(255, 255, 255, 0.96);
-        backdrop-filter: blur(12px);
+        background: #fff;
       }
 
       .voucher-simulation-head h3 {
@@ -3060,11 +3061,24 @@
         line-height: 1;
       }
 
+      .voucher-simulation-close:hover,
+      .voucher-simulation-close:focus-visible {
+        background: #111;
+        color: #fff;
+      }
+
+      .voucher-simulation-body {
+        min-height: 0;
+        overflow: auto;
+        overscroll-behavior: contain;
+        scrollbar-gutter: stable;
+      }
+
       .voucher-simulation-summary {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 10px;
-        padding: 18px 22px 4px;
+        padding: 18px 22px 0;
       }
 
       .voucher-simulation-stat,
@@ -3076,8 +3090,15 @@
 
       .voucher-simulation-stat { padding: 14px; }
 
-      .voucher-simulation-stat span,
-      .voucher-simulation-metric span {
+      .voucher-simulation-stat.verdict-stat {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .voucher-simulation-stat small,
+      .voucher-simulation-metric small,
+      .voucher-simulation-flow-step small {
         display: block;
         margin-bottom: 4px;
         color: var(--muted);
@@ -3088,9 +3109,25 @@
       }
 
       .voucher-simulation-stat strong,
-      .voucher-simulation-metric strong {
+      .voucher-simulation-metric strong,
+      .voucher-simulation-flow-step strong {
         font-size: 14px;
         font-weight: 950;
+      }
+
+      .voucher-simulation-alert {
+        grid-column: 1 / -1;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 12px 14px;
+        border: 1px solid #dfc57b;
+        border-radius: 16px;
+        background: #fff9e8;
+        color: #694900;
+        font-size: 11px;
+        font-weight: 800;
+        line-height: 1.45;
       }
 
       .voucher-simulation-items {
@@ -3099,26 +3136,88 @@
         padding: 14px 22px 22px;
       }
 
-      .voucher-simulation-item { padding: 16px; }
-
-      .voucher-simulation-item-head {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 12px;
-        margin-bottom: 13px;
+      .voucher-simulation-item {
+        overflow: hidden;
+        background: #fff;
       }
 
-      .voucher-simulation-item-head h4 {
+      .voucher-simulation-item > summary {
+        list-style: none;
+        cursor: pointer;
+      }
+
+      .voucher-simulation-item > summary::-webkit-details-marker { display: none; }
+
+      .voucher-simulation-item-summary {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto auto auto;
+        align-items: center;
+        gap: 12px;
+        padding: 15px 16px;
+      }
+
+      .voucher-simulation-item-summary:hover { background: var(--surface-2); }
+
+      .voucher-simulation-item-summary:focus-visible {
+        outline: 2px solid #111;
+        outline-offset: -3px;
+      }
+
+      .voucher-simulation-item-copy { min-width: 0; }
+
+      .voucher-simulation-item-copy h4 {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
         font-size: 15px;
         font-weight: 950;
       }
 
-      .voucher-simulation-item-head p {
+      .voucher-simulation-item-copy p {
         margin-top: 3px;
         color: var(--muted);
         font-size: 11px;
         font-weight: 750;
+      }
+
+      .voucher-simulation-buyer-preview {
+        min-width: 92px;
+        text-align: right;
+      }
+
+      .voucher-simulation-buyer-preview small {
+        display: block;
+        margin-bottom: 2px;
+        color: var(--muted);
+        font-size: 8px;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .voucher-simulation-buyer-preview strong {
+        font-size: 14px;
+        font-weight: 950;
+      }
+
+      .voucher-simulation-chevron {
+        width: 30px;
+        height: 30px;
+        border: 1px solid var(--line-strong);
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-size: 16px;
+        transition: transform 160ms ease;
+      }
+
+      .voucher-simulation-item[open] .voucher-simulation-chevron {
+        transform: rotate(180deg);
+      }
+
+      .voucher-simulation-item-content {
+        padding: 0 16px 16px;
+        border-top: 1px solid var(--line);
       }
 
       .voucher-verdict {
@@ -3137,6 +3236,36 @@
       .voucher-verdict.loss { color: #a62929; background: #fff0f0; }
       .voucher-verdict.unknown { color: #666; background: #f3f3f3; }
 
+      .voucher-simulation-flow {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr auto 1fr;
+        align-items: stretch;
+        gap: 8px;
+        padding: 14px 0;
+      }
+
+      .voucher-simulation-flow-step {
+        min-width: 0;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--surface-2);
+      }
+
+      .voucher-simulation-flow-step.buyer {
+        background: #111;
+        color: #fff;
+      }
+
+      .voucher-simulation-flow-step.buyer small { color: #bdbdbd; }
+
+      .voucher-simulation-flow-arrow {
+        align-self: center;
+        color: var(--muted);
+        font-family: var(--font-mono);
+        font-weight: 900;
+      }
+
       .voucher-simulation-metrics {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -3152,13 +3281,17 @@
       }
 
       .voucher-simulation-footer {
-        position: sticky;
-        bottom: 0;
-        padding: 12px 22px 18px;
-        background: linear-gradient(transparent, #fff 28%);
+        flex: 0 0 auto;
+        padding: 12px 22px max(18px, env(safe-area-inset-bottom));
+        border-top: 1px solid var(--line);
+        background: #fff;
       }
 
       .voucher-simulation-footer button { width: 100%; }
+
+      @media (prefers-reduced-motion: reduce) {
+        .voucher-simulation-chevron { transition: none; }
+      }
 
       .voucher-list-header {
         display: flex;
@@ -3351,27 +3484,86 @@
         }
 
         .voucher-simulation-dialog {
-          width: calc(100vw - 18px);
-          max-height: calc(100dvh - 24px);
-          border-radius: 24px;
+          width: calc(100vw - 10px);
+          max-height: calc(100svh - 8px);
+          margin: auto auto 0;
+          border-radius: 24px 24px 0 0;
         }
 
-        .voucher-simulation-head,
-        .voucher-simulation-items {
-          padding-left: 14px;
-          padding-right: 14px;
+        .voucher-simulation-head {
+          padding: 16px 14px 14px;
         }
+
+        .voucher-simulation-head h3 { font-size: 24px; }
+
+        .voucher-simulation-head p {
+          max-width: 250px;
+          font-size: 12px;
+        }
+
+        .voucher-simulation-close {
+          width: 40px;
+          height: 40px;
+          min-width: 40px;
+          min-height: 40px;
+        }
+
+        .voucher-simulation-body { padding: 12px 10px 18px; }
 
         .voucher-simulation-summary {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          padding: 0;
+        }
+
+        .voucher-simulation-stat.verdict-stat { grid-column: 1 / -1; }
+
+        .voucher-simulation-alert { grid-column: 1 / -1; }
+
+        .voucher-simulation-items {
+          gap: 8px;
+          padding: 10px 0 0;
+        }
+
+        .voucher-simulation-item-summary {
+          grid-template-columns: minmax(0, 1fr) auto;
+          gap: 8px 10px;
+          padding: 14px;
+        }
+
+        .voucher-simulation-item-summary .voucher-verdict {
+          justify-self: end;
+        }
+
+        .voucher-simulation-buyer-preview {
+          grid-column: 1;
+          text-align: left;
+        }
+
+        .voucher-simulation-chevron {
+          grid-column: 2;
+          grid-row: 2;
+          justify-self: end;
+        }
+
+        .voucher-simulation-item-content { padding: 0 14px 14px; }
+
+        .voucher-simulation-flow {
           grid-template-columns: 1fr;
-          padding: 14px 14px 0;
+          gap: 6px;
+        }
+
+        .voucher-simulation-flow-arrow {
+          justify-self: center;
+          transform: rotate(90deg);
         }
 
         .voucher-simulation-metrics {
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
-        .voucher-simulation-footer { padding: 10px 14px 14px; }
+        .voucher-simulation-footer {
+          padding: 10px 10px max(12px, env(safe-area-inset-bottom));
+        }
 
         .voucher-list-header {
           align-items: flex-start;
@@ -5316,22 +5508,29 @@
             </div>
           </details>
 
-          <dialog id="voucherSimulationDialog" class="voucher-simulation-dialog" aria-labelledby="voucherSimulationTitle">
-            <div class="voucher-simulation-head">
-              <div>
-                <span class="voucher-simulation-kicker">PROFIT CHECK</span>
-                <h3 id="voucherSimulationTitle">Simulasi Voucher</h3>
-                <p>Perkiraan berdasarkan harga jual dan modal supplier terbaru.</p>
-              </div>
-              <form method="dialog">
-                <button class="voucher-simulation-close" aria-label="Tutup simulasi">&times;</button>
-              </form>
-            </div>
-            <div id="voucherSimulationSummary" class="voucher-simulation-summary"></div>
-            <div id="voucherSimulationItems" class="voucher-simulation-items"></div>
-            <form method="dialog" class="voucher-simulation-footer">
-              <button>Tutup</button>
-            </form>
+      <dialog
+        id="voucherSimulationDialog"
+        class="voucher-simulation-dialog"
+        aria-labelledby="voucherSimulationTitle"
+        aria-describedby="voucherSimulationDescription"
+      >
+        <div class="voucher-simulation-head">
+          <div>
+            <span class="voucher-simulation-kicker">PROFIT CHECK</span>
+            <h3 id="voucherSimulationTitle">Simulasi Voucher</h3>
+            <p id="voucherSimulationDescription">Perkiraan berdasarkan harga jual dan modal supplier terbaru.</p>
+          </div>
+          <form method="dialog">
+            <button class="voucher-simulation-close" aria-label="Tutup simulasi">&times;</button>
+          </form>
+        </div>
+        <div class="voucher-simulation-body">
+          <div id="voucherSimulationSummary" class="voucher-simulation-summary"></div>
+          <div id="voucherSimulationItems" class="voucher-simulation-items"></div>
+        </div>
+        <form method="dialog" class="voucher-simulation-footer">
+          <button>Tutup</button>
+        </form>
           </dialog>
 
           <div class="voucher-list-header">
@@ -9976,7 +10175,7 @@
           thin: "Untung tipis",
           danger: "Berisiko",
           loss: "Rugi",
-          unknown: "Modal belum tersedia",
+          unknown: "Perlu sync",
         };
         const normalized = Object.prototype.hasOwnProperty.call(labels, code)
           ? code
@@ -10001,6 +10200,9 @@
         const summary = simulation?.summary || {};
         const items = Array.isArray(simulation?.items) ? simulation.items : [];
         const verdict = getVoucherVerdictMeta(summary.worst_code);
+        const missingCostCount = items.filter(
+          (item) => !(Number(item.supplier_cost) > 0),
+        ).length;
 
         summaryEl.innerHTML = `
           <div class="voucher-simulation-stat">
@@ -10011,49 +10213,78 @@
             <small>Margin terendah</small>
             <strong>${formatVoucherMargin(summary.worst_margin)}</strong>
           </div>
-          <div class="voucher-simulation-stat">
+          <div class="voucher-simulation-stat voucher-simulation-verdict-stat">
             <small>Kesimpulan</small>
             <span class="voucher-verdict ${verdict.code}">${verdict.label}</span>
-          </div>`;
+          </div>
+          ${
+            missingCostCount
+              ? `<div class="voucher-simulation-alert">
+                  <strong>${missingCostCount} produk belum punya modal supplier.</strong>
+                  <span>Profit dan margin belum bisa dinilai sampai data supplier tersinkron.</span>
+                </div>`
+              : ""
+          }`;
 
         itemsEl.innerHTML = items.length
           ? items
-              .map((item) => {
+              .map((item, index) => {
                 const itemVerdict = getVoucherVerdictMeta(item.code);
                 const title = [item.game, item.brand]
                   .filter(Boolean)
                   .map((value) => escapeHtml(value))
-                  .join(" · ");
+                  .join(" &middot; ");
                 const detail = [item.platform, item.duration]
                   .filter(Boolean)
                   .map((value) => escapeHtml(value))
-                  .join(" · ");
+                  .join(" &middot; ");
                 const supplierCost = Number(item.supplier_cost);
+                const hasSupplierCost = supplierCost > 0;
                 const hasKnownProfit =
+                  hasSupplierCost &&
                   item.profit !== null &&
                   item.profit !== undefined &&
                   Number.isFinite(Number(item.profit));
                 const money = (value, known = true) =>
                   known && Number.isFinite(Number(value))
                     ? formatRupiah(Number(value))
-                    : "Belum tersedia";
+                    : "&mdash;";
+                const discountValue = money(item.discount);
+                const formattedDiscount =
+                  discountValue === "&mdash;"
+                    ? discountValue
+                    : `&minus;${discountValue}`;
 
                 return `
-                  <article class="voucher-simulation-item">
-                    <div class="voucher-simulation-item-head">
-                      <div><h4>${title || "Produk"}</h4><p>${detail || "—"}</p></div>
+                  <details class="voucher-simulation-item" ${index === 0 ? "open" : ""}>
+                    <summary class="voucher-simulation-item-summary">
+                      <div class="voucher-simulation-item-copy">
+                        <h4>${title || "Produk"}</h4>
+                        <p>${detail || "Detail produk"}</p>
+                      </div>
                       <span class="voucher-verdict ${itemVerdict.code}">${itemVerdict.label}</span>
+                      <div class="voucher-simulation-buyer-preview">
+                        <small>Buyer bayar</small>
+                        <strong>${money(item.buyer_pays)}</strong>
+                      </div>
+                      <span class="voucher-simulation-chevron" aria-hidden="true">&#8964;</span>
+                    </summary>
+                    <div class="voucher-simulation-item-content">
+                      <div class="voucher-simulation-flow">
+                        <div><small>Harga jual</small><strong>${money(item.selling_price)}</strong></div>
+                        <span aria-hidden="true">&minus;</span>
+                        <div><small>Diskon</small><strong>${formattedDiscount}</strong></div>
+                        <span aria-hidden="true">&rarr;</span>
+                        <div class="is-total"><small>Buyer bayar</small><strong>${money(item.buyer_pays)}</strong></div>
+                      </div>
+                      <div class="voucher-simulation-metrics">
+                        <div><small>Modal supplier</small><strong>${money(item.supplier_cost, hasSupplierCost)}</strong></div>
+                        <div><small>Estimasi fee buyer</small><strong>${money(item.estimated_payment_fee)}</strong></div>
+                        <div><small>Estimasi profit</small><strong>${money(item.profit, hasKnownProfit)}</strong></div>
+                        <div><small>Margin</small><strong>${formatVoucherMargin(item.margin)}</strong></div>
+                      </div>
                     </div>
-                    <div class="voucher-simulation-metrics">
-                      <div class="voucher-simulation-metric"><small>Harga jual</small><strong>${money(item.selling_price)}</strong></div>
-                      <div class="voucher-simulation-metric"><small>Modal supplier</small><strong>${money(item.supplier_cost, supplierCost > 0)}</strong></div>
-                      <div class="voucher-simulation-metric"><small>Diskon</small><strong>−${money(item.discount)}</strong></div>
-                      <div class="voucher-simulation-metric"><small>Buyer bayar</small><strong>${money(item.buyer_pays)}</strong></div>
-                      <div class="voucher-simulation-metric"><small>Estimasi fee buyer</small><strong>${money(item.estimated_payment_fee)}</strong></div>
-                      <div class="voucher-simulation-metric"><small>Estimasi profit</small><strong>${money(item.profit, hasKnownProfit)}</strong></div>
-                      <div class="voucher-simulation-metric"><small>Margin</small><strong>${formatVoucherMargin(item.margin)}</strong></div>
-                    </div>
-                  </article>`;
+                  </details>`;
               })
               .join("")
           : '<div class="empty">Belum ada produk yang dapat disimulasikan.</div>';
