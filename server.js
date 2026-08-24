@@ -5566,7 +5566,14 @@ app.get("/vouchers", requireAdminAuth, async (req, res) => {
           LEFT JOIN products p ON p.id = vp.product_id
           WHERE vp.voucher_id = vouchers.id
         ) product_targets ON true
-        ORDER BY vouchers.created_at DESC, vouchers.id DESC`,
+        ORDER BY
+          vouchers.active DESC,
+          CASE
+            WHEN LOWER(COALESCE(vouchers.discount_type, 'fixed')) = 'percent' THEN 0
+            ELSE 1
+          END,
+          vouchers.created_at DESC,
+          vouchers.id DESC`,
     );
 
     return res.json(result.rows);

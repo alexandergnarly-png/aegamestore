@@ -1,4 +1,5 @@
 const assert = require("assert");
+const fs = require("fs");
 const {
   calculateVoucherDiscount,
   getVoucherProfitVerdict,
@@ -14,5 +15,12 @@ assert.equal(validateVoucherDefinition({ discountType: "percent", discountPercen
 assert.equal(getVoucherProfitVerdict({ buyerPays: 45000, supplierCost: 30000 }).code, "safe");
 assert.equal(getVoucherProfitVerdict({ buyerPays: 45000, supplierCost: 46000 }).code, "loss");
 assert.equal(getVoucherProfitVerdict({ buyerPays: 45000, supplierCost: 0 }).code, "unknown");
+
+const server = fs.readFileSync("server.js", "utf8");
+assert.match(
+  server,
+  /vouchers\.active DESC,[\s\S]*?vouchers\.discount_type[\s\S]*?= 'percent' THEN 0/,
+  "active percentage vouchers should be listed first in admin",
+);
 
 console.log("voucher-pricing tests passed");
