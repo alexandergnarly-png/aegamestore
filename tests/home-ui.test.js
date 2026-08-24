@@ -134,6 +134,10 @@ assert.match(css, /prefers-reduced-motion: reduce[\s\S]*?account-orbit-icon/);
   "orderBuyerTitle",
   "orderSummaryTitle",
   "gatewayPaymentDesc",
+  "installAppKicker",
+  "installAppReady",
+  "installAppBenefitFast",
+  "installAppBenefitLight",
 ].forEach((key) => {
   assert.ok(html.includes(`data-i18n="${key}"`), `Missing homepage i18n marker: ${key}`);
   assert.ok(
@@ -141,10 +145,14 @@ assert.match(css, /prefers-reduced-motion: reduce[\s\S]*?account-orbit-icon/);
     `Missing Indonesian/English translations for: ${key}`,
   );
 });
-assert.match(html, /script\.js\?v=20260825-game-art-v1/);
-assert.match(html, /style\.css\?v=20260814-ai-terminal-2/);
+assert.match(html, /script\.js\?v=20260825-install-pass-v1/);
+assert.match(html, /style\.css\?v=20260825-install-pass-v1/);
+assert.match(html, /class="install-prompt-meta"/);
+assert.match(html, /aria-labelledby="installPromptTitle"/);
+assert.match(css, /AE patch 20260825-install-pocket-pass-v1/);
+assert.match(css, /\.install-prompt-rail/);
 assert.match(html, /keysystem-ui\.css\?v=20260815-compact-header-1/);
-assert.match(serviceWorker, /CACHE_VERSION = "20260825-game-art-v1"/);
+assert.match(serviceWorker, /CACHE_VERSION = "20260825-install-pass-v1"/);
 assert.match(serviceWorker, /DYNAMIC_PREFIXES = \[[\s\S]*?"\/products"/);
 assert.match(serviceWorker, /if \(cached\) return cached;/);
 assert.doesNotMatch(serviceWorker, /networkFetch\.catch/);

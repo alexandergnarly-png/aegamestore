@@ -79,7 +79,7 @@
       href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/style.css?v=20260814-ai-terminal-2" />
+    <link rel="stylesheet" href="/style.css?v=20260825-install-pass-v1" />
     <link rel="stylesheet" href="/keysystem-ui.css?v=20260815-compact-header-1" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#f4f3ee" />
@@ -1477,8 +1477,10 @@
       id="installPromptBanner"
       hidden
       role="complementary"
-      aria-label="Install app"
+      aria-labelledby="installPromptTitle"
+      aria-describedby="installPromptDescription"
     >
+      <span class="install-prompt-rail" aria-hidden="true"></span>
       <button
         type="button"
         class="install-prompt-close"
@@ -1488,55 +1490,35 @@
         ×
       </button>
       <div class="install-prompt-icon" aria-hidden="true">
-        <svg
-          width="22"
-          height="22"
-          viewBox="0 0 24 24"
-          fill="none"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <rect x="2" y="5" width="20" height="2.5" rx="1.25" fill="white" />
-          <rect
-            x="1"
-            y="2"
-            width="22"
-            height="2"
-            rx="1"
-            fill="rgba(255,255,255,0.7)"
-          />
-          <rect x="4" y="7.5" width="2.2" height="14.5" rx="1.1" fill="white" />
-          <rect
-            x="17.8"
-            y="7.5"
-            width="2.2"
-            height="14.5"
-            rx="1.1"
-            fill="white"
-          />
-          <rect
-            x="8"
-            y="13"
-            width="8"
-            height="2"
-            rx="1"
-            fill="rgba(255,255,255,0.6)"
-          />
-        </svg>
+        <span>AE</span>
+        <i></i>
       </div>
       <div class="install-prompt-body">
-        <strong data-i18n="installAppTitle">Install AE Game Store</strong>
-        <small data-i18n="installAppDesc">
-          Akses cepat, notif promo, hemat data
+        <div class="install-prompt-meta">
+          <span data-i18n="installAppKicker">AE POCKET MODE</span>
+          <small>
+            <i aria-hidden="true"></i>
+            <span data-i18n="installAppReady">Siap dipasang</span>
+          </small>
+        </div>
+        <strong id="installPromptTitle" data-i18n="installAppTitle">
+          Bawa AE Game Store ke layar utama
+        </strong>
+        <small id="installPromptDescription" data-i18n="installAppDesc">
+          Buka katalog dan checkout lebih cepat, tanpa cari tab lagi.
         </small>
+        <div class="install-prompt-benefits" aria-hidden="true">
+          <span><b>+</b><span data-i18n="installAppBenefitFast">Buka instan</span></span>
+          <span><b>+</b><span data-i18n="installAppBenefitLight">Hemat data</span></span>
+        </div>
       </div>
       <button
         type="button"
         class="install-prompt-action"
         id="installPromptAction"
-        data-i18n="installAppBtn"
       >
-        Install
+        <span data-i18n="installAppBtn">Pasang</span>
+        <iconify-icon icon="ph:arrow-down-bold" aria-hidden="true"></iconify-icon>
       </button>
     </div>
 
@@ -1665,6 +1647,6 @@
 </div>
     </footer>
 
-    <script src="/script.js?v=20260825-game-art-v1" defer></script>
+    <script src="/script.js?v=20260825-install-pass-v1" defer></script>
   </body>
 </html>
