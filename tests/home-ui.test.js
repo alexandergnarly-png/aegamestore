@@ -146,17 +146,22 @@ assert.match(css, /prefers-reduced-motion: reduce[\s\S]*?account-orbit-icon/);
   );
 });
 assert.match(html, /script\.js\?v=20260825-install-pass-v1/);
-assert.match(html, /style\.css\?v=20260825-support-deck-v1/);
+assert.match(html, /style\.css\?v=20260825-install-mono-v2/);
 assert.match(html, /class="install-prompt-meta"/);
 assert.match(html, /AE SUPPORT DECK/);
 assert.match(html, /aria-labelledby="installPromptTitle"/);
-assert.match(css, /AE patch 20260825-install-pocket-pass-v1/);
+assert.match(css, /AE patch 20260825-install-pocket-pass-mono-v2/);
 assert.match(css, /\.install-prompt-rail/);
+const installPromptCss = css.slice(
+  css.indexOf("AE patch 20260825-install-pocket-pass-mono-v2"),
+  css.indexOf("AE patch 20260621-help-center-desktop-fit-v1"),
+);
+assert.doesNotMatch(installPromptCss, /#ff2d82|rgba?\(255,\s*45,\s*130/i);
 assert.match(css, /AE patch 20260825-support-deck-v1/);
 assert.match(css, /\.ae-ai-disclosure\[open\] \{[\s\S]*?flex: 1 1 auto/);
 assert.match(css, /grid-template-rows: minmax\(0, 1fr\) auto auto auto/);
 assert.match(html, /keysystem-ui\.css\?v=20260815-compact-header-1/);
-assert.match(serviceWorker, /CACHE_VERSION = "20260825-support-deck-v1"/);
+assert.match(serviceWorker, /CACHE_VERSION = "20260825-install-mono-v2"/);
 assert.match(serviceWorker, /DYNAMIC_PREFIXES = \[[\s\S]*?"\/products"/);
 assert.match(serviceWorker, /if \(cached\) return cached;/);
 assert.doesNotMatch(serviceWorker, /networkFetch\.catch/);
