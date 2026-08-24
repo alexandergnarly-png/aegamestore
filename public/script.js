@@ -3952,7 +3952,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     navigator.serviceWorker
-      .register("/service-worker.js?v=20260811-usdt-success-modal-v2", {
+      .register("/service-worker.js?v=20260825-game-art-v1", {
         updateViaCache: "none",
       })
       .then((registration) => {
