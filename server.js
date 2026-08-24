@@ -31,7 +31,11 @@ const { normalizeCatalogLabel, verifyCheatGameWebhook } = require("./server/chea
 const { buildSupplierComparison, convertUsdToIdr, extractIdrRate } = require("./server/supplier-compare-utils");
 const { BUYER_BADGE_TIERS, getBuyerBadgeCode } = require("./server/buyer-policy");
 const { PostgresRateLimitStore } = require("./server/postgres-rate-limit-store");
-const { getAutoPromoPeriod, selectAutoPromo } = require("./server/auto-promo");
+const {
+  getAutoPromoPeriod,
+  selectAutoPromo,
+  selectBestPromoVoucher,
+} = require("./server/auto-promo");
 const {
   normalizeProductDuration,
   normalizeProductGameName,
@@ -8779,7 +8783,8 @@ app.get("/auto-promo", async (req, res) => {
     if (!product) return res.json({ enabled: true, promo: null });
 
     const voucherResult = await query(
-      `SELECT v.code, v.discount_amount
+      `SELECT v.code, v.discount_type, v.discount_amount,
+              v.discount_percent, v.max_discount_amount
        FROM vouchers v
        WHERE v.active = 1
          AND COALESCE(v.visibility, 'public') = 'public'
@@ -8793,11 +8798,10 @@ app.get("/auto-promo", async (req, res) => {
              AND (COALESCE(TRIM(v.duration_name), '') = '' OR LOWER(TRIM(v.duration_name)) = LOWER(TRIM($4)))
            )
          )
-       ORDER BY v.discount_amount DESC, v.id ASC
-       LIMIT 1`,
+       ORDER BY v.id ASC`,
       [product.id, product.game, product.brand, product.duration],
     );
-    const voucher = voucherResult.rows[0] || null;
+    const voucher = selectBestPromoVoucher(voucherResult.rows, product.price);
     const promo = {
       period,
       product_id: Number(product.id),
@@ -8810,7 +8814,14 @@ app.get("/auto-promo", async (req, res) => {
       ...getProductUsdtPricing(product),
       stock: Number(product.available_keys),
       voucher: voucher
-        ? { code: String(voucher.code), discount_amount: Number(voucher.discount_amount) }
+        ? {
+            code: String(voucher.code),
+            discount_type: normalizeVoucherDiscountType(voucher.discount_type),
+            discount_amount: Number(voucher.discount_amount || 0),
+            discount_percent: Number(voucher.discount_percent || 0),
+            max_discount_amount: Number(voucher.max_discount_amount || 0),
+            effective_discount: Number(voucher.effective_discount || 0),
+          }
         : null,
       changes_at: new Date((period + 1) * 12 * 60 * 60 * 1000).toISOString(),
     };
@@ -8824,7 +8835,7 @@ app.get("/auto-promo", async (req, res) => {
     );
     if (notification.rows.length) {
       const voucherLine = voucher
-        ? `\nVoucher: ${voucher.code} (hemat Rp${Number(voucher.discount_amount).toLocaleString("id-ID")})`
+        ? `\nVoucher: ${voucher.code} (hemat Rp${Number(voucher.effective_discount).toLocaleString("id-ID")})`
         : "";
       notifyTelegram(
         `AUTO PROMO AKTIF\n${product.game} - ${product.brand} ${product.duration}\nHarga: Rp${Number(product.price).toLocaleString("id-ID")}\nStok: ${product.available_keys}${voucherLine}`,

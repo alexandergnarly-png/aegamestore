@@ -1,6 +1,10 @@
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
-const { getAutoPromoPeriod, selectAutoPromo } = require("../server/auto-promo");
+const {
+  getAutoPromoPeriod,
+  selectAutoPromo,
+  selectBestPromoVoucher,
+} = require("../server/auto-promo");
 
 const products = [
   { id: 1, active: 1, price: 20000, available_keys: 0, play_status: "safe" },
@@ -12,6 +16,22 @@ assert.equal(getAutoPromoPeriod(12 * 60 * 60 * 1000), 1);
 assert.equal(selectAutoPromo(products, 0).id, 3, "safe ready product should win");
 assert.equal(selectAutoPromo(products, 999).id, 3, "selection must stay valid");
 assert.equal(selectAutoPromo([], 0), null);
+assert.deepEqual(
+  selectBestPromoVoucher(
+    [
+      { code: "FIXED", discount_type: "fixed", discount_amount: 2000 },
+      { code: "PERCENT", discount_type: "percent", discount_percent: 10 },
+    ],
+    50000,
+  ),
+  {
+    code: "PERCENT",
+    discount_type: "percent",
+    discount_percent: 10,
+    effective_discount: 5000,
+  },
+  "percentage voucher should win by its effective discount",
+);
 
 const server = fs.readFileSync("server.js", "utf8");
 const html = fs.readFileSync("public/index.html", "utf8");
@@ -21,5 +41,6 @@ assert.match(server, /AUTO_PROMO_ENABLED/);
 assert.match(server, /notifyTelegram\(/);
 assert.match(html, /id="autoPromoSlide"/);
 assert.match(script, /fetch\("\/auto-promo"\)/);
+assert.match(script, /promo\.voucher\?\.discount_type === "percent"/);
 
 console.log("Auto promo checks passed.");

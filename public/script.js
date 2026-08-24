@@ -2700,10 +2700,13 @@ async function loadAutoPromo() {
     if (title) title.textContent = `${promo.game} · ${promo.brand}`;
     if (label) label.textContent = currentLanguage === "en" ? "AUTO DEAL" : "PROMO OTOMATIS";
     if (description) {
+      const voucherLabel = promo.voucher?.discount_type === "percent"
+        ? `${Number(promo.voucher.discount_percent || 0).toLocaleString("id-ID")}%`
+        : formatRupiah(promo.voucher?.effective_discount || 0);
       const voucher = promo.voucher
         ? currentLanguage === "en"
-          ? ` Use ${promo.voucher.code} to save ${formatRupiah(promo.voucher.discount_amount)}.`
-          : ` Pakai ${promo.voucher.code}, hemat ${formatRupiah(promo.voucher.discount_amount)}.`
+          ? ` Use ${promo.voucher.code} for ${voucherLabel} off (save ${formatRupiah(promo.voucher.effective_discount)}).`
+          : ` Pakai ${promo.voucher.code}, diskon ${voucherLabel} (hemat ${formatRupiah(promo.voucher.effective_discount)}).`
         : "";
       description.textContent = currentLanguage === "en"
         ? `${promo.duration} from ${formatRupiah(promo.price)} / ${formatUsd(promo.price, promo.price_usdt_effective)} · ${promo.stock} ready.${voucher}`
