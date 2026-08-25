@@ -614,6 +614,10 @@
         margin-bottom: 18px;
       }
 
+      .dashboard-metric-rail {
+        display: contents;
+      }
+
       .stat-card {
         min-height: 142px;
         padding: 17px;
@@ -1718,6 +1722,95 @@
         padding: 16px;
         border-radius: 26px;
         color: var(--ink);
+      }
+
+      .dashboard-session-box {
+        padding: 0;
+        overflow: hidden;
+      }
+
+      .dashboard-session-panel > summary {
+        min-height: 66px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 13px 16px;
+        cursor: pointer;
+        list-style: none;
+      }
+
+      .dashboard-session-panel > summary::-webkit-details-marker {
+        display: none;
+      }
+
+      .dashboard-session-summary span {
+        min-width: 0;
+        display: grid;
+        gap: 2px;
+      }
+
+      .dashboard-session-summary small {
+        color: var(--danger-text);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      .dashboard-session-summary strong {
+        color: var(--ink);
+        font-size: 14px;
+        font-weight: 900;
+      }
+
+      .dashboard-session-summary > b {
+        width: 34px;
+        height: 34px;
+        flex: 0 0 34px;
+        display: grid;
+        place-items: center;
+        border-radius: 10px;
+        background: var(--danger-bg);
+        color: var(--danger-text);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 13px;
+      }
+
+      .dashboard-session-content {
+        display: grid;
+        gap: 12px;
+        padding: 0 16px 16px;
+        border-top: 1px solid var(--line);
+      }
+
+      .dashboard-session-list {
+        padding-top: 12px;
+      }
+
+      .dashboard-session-item {
+        display: grid;
+        gap: 5px;
+      }
+
+      .dashboard-session-item > strong {
+        color: var(--ink);
+        font-size: 13px;
+      }
+
+      .dashboard-session-item > span:not(.admin-alert-tag),
+      .dashboard-session-item time {
+        color: var(--muted);
+        font-size: 10px;
+        font-style: normal;
+        font-weight: 700;
+      }
+
+      .dashboard-session-browser {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
       .admin-alerts-head {
@@ -3211,6 +3304,225 @@
           padding: 7px 8px;
           border-radius: 10px;
           font-size: 10px;
+        }
+
+        /* Operations Brief: prioritized mobile dashboard. */
+        #section-dashboard {
+          padding-bottom: calc(96px + var(--safe-bottom));
+        }
+
+        #section-dashboard .hero {
+          margin-bottom: 12px;
+          padding: 16px;
+          border: 2px solid var(--ink);
+          border-radius: 20px;
+          box-shadow: 4px 4px 0 var(--ink);
+        }
+
+        #section-dashboard .hero-badge {
+          margin-bottom: 10px;
+          padding: 5px 9px;
+          border-radius: 9px;
+          font-family: "JetBrains Mono", monospace;
+          font-size: 8px;
+        }
+
+        #section-dashboard .hero h1 {
+          max-width: 230px;
+          margin-bottom: 8px;
+          font-size: 27px;
+          line-height: 0.96;
+        }
+
+        #section-dashboard .hero p {
+          font-size: 11px;
+          line-height: 1.5;
+        }
+
+        #section-dashboard #refreshAllButton {
+          width: 100%;
+          min-height: 46px;
+          margin-top: 12px;
+          justify-content: center;
+          border-radius: 12px;
+          background: var(--ink);
+          color: var(--surface);
+          font-size: 11px;
+        }
+
+        #section-dashboard .hero-mini {
+          display: none;
+        }
+
+        #section-dashboard .dashboard-metrics {
+          display: block;
+          margin-bottom: 12px;
+          overflow: visible;
+        }
+
+        #section-dashboard .dashboard-primary-metric {
+          min-height: 124px;
+          padding: 14px;
+          border: 2px solid var(--ink);
+          border-radius: 18px;
+          background: var(--ink);
+          box-shadow: 4px 4px 0 color-mix(in srgb, var(--ink) 20%, transparent);
+        }
+
+        #section-dashboard .dashboard-primary-metric .stat-label,
+        #section-dashboard .dashboard-primary-metric .stat-value,
+        #section-dashboard .dashboard-primary-metric .stat-note {
+          color: var(--surface);
+        }
+
+        #section-dashboard .dashboard-primary-metric .stat-top {
+          margin-bottom: 10px;
+        }
+
+        #section-dashboard .dashboard-primary-metric .stat-label {
+          font-family: "JetBrains Mono", monospace;
+          font-size: 9px;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+        }
+
+        #section-dashboard .dashboard-primary-metric .stat-icon {
+          width: 36px;
+          height: 36px;
+          border-radius: 10px;
+          background: var(--surface);
+          color: var(--ink);
+        }
+
+        #section-dashboard .dashboard-primary-metric .stat-value {
+          overflow: hidden;
+          font-family: "JetBrains Mono", monospace;
+          font-size: clamp(25px, 9vw, 34px);
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        #section-dashboard .dashboard-primary-metric .stat-note {
+          margin-top: 6px;
+          padding: 0;
+          border: 0;
+          background: transparent;
+          font-family: inherit;
+          font-size: 10px;
+          opacity: 0.68;
+        }
+
+        #section-dashboard .dashboard-metric-rail {
+          display: flex;
+          gap: 8px;
+          margin-top: 10px;
+          padding: 1px 4px 6px 1px;
+          overflow-x: auto;
+          overscroll-behavior-inline: contain;
+          scroll-snap-type: inline mandatory;
+          scrollbar-width: none;
+        }
+
+        #section-dashboard .dashboard-metric-rail::-webkit-scrollbar {
+          display: none;
+        }
+
+        #section-dashboard .dashboard-metric-rail .stat-card {
+          min-width: 0;
+          min-height: 112px;
+          flex: 0 0 152px;
+          padding: 11px;
+          border-radius: 15px;
+          box-shadow: none;
+          scroll-snap-align: start;
+        }
+
+        #section-dashboard .dashboard-metric-rail .stat-top {
+          align-items: flex-start;
+          margin-bottom: 10px;
+        }
+
+        #section-dashboard .dashboard-metric-rail .stat-label {
+          font-family: "JetBrains Mono", monospace;
+          font-size: 8px;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+        }
+
+        #section-dashboard .dashboard-metric-rail .stat-icon {
+          width: 32px;
+          height: 32px;
+          flex: 0 0 32px;
+          border-radius: 10px;
+        }
+
+        #section-dashboard .dashboard-metric-rail .stat-icon .ui-icon {
+          width: 17px;
+          height: 17px;
+        }
+
+        #section-dashboard .dashboard-metric-rail .stat-value {
+          overflow: hidden;
+          font-family: "JetBrains Mono", monospace;
+          font-size: 18px;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        #section-dashboard .dashboard-metric-rail .stat-note {
+          display: none;
+        }
+
+        #section-dashboard .dashboard-metric-pending {
+          border-color: var(--warn-border);
+          background: var(--warn-bg);
+        }
+
+        #section-dashboard .dashboard-session-box {
+          margin-bottom: 0;
+          border-color: var(--danger-border);
+          border-radius: 18px;
+          box-shadow: none;
+        }
+
+        #section-dashboard .dashboard-session-summary {
+          min-height: 62px;
+          padding: 11px 13px;
+        }
+
+        #section-dashboard .dashboard-session-summary:focus-visible {
+          outline: 3px solid color-mix(in srgb, var(--danger-text) 22%, transparent);
+          outline-offset: -3px;
+        }
+
+        #section-dashboard .dashboard-session-list {
+          display: flex;
+          gap: 8px;
+          overflow-x: auto;
+          scroll-snap-type: inline mandatory;
+          scrollbar-width: none;
+        }
+
+        #section-dashboard .dashboard-session-item {
+          min-width: 0;
+          flex: 0 0 220px;
+          scroll-snap-align: start;
+        }
+
+        #section-dashboard .dashboard-session-actions {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 8px;
+        }
+
+        #section-dashboard .dashboard-session-actions button {
+          width: 100%;
+          min-width: 0;
+          min-height: 42px;
+          padding: 7px;
+          border-radius: 10px;
+          font-size: 9px;
+          line-height: 1.25;
         }
       }
 
@@ -5523,14 +5835,14 @@
               <div class="hero-badge">AE GAME STORE • ADMIN</div>
               <h1>Dashboard Operasional</h1>
               <p>
-                Kelola produk, order, stok key, voucher, dan buyer dari satu
-                panel yang clean.
+                Pantau transaksi, katalog, stok, dan keamanan toko dari satu
+                pusat kendali.
               </p>
             </div>
             <div>
               <button class="logout-btn" id="refreshAllButton" onclick="refreshAllData(this)">
                 <svg class="ui-icon" aria-hidden="true"><use href="#icon-refresh"></use></svg>
-                <span>Refresh Semua Data</span>
+                <span>Muat Ulang Data</span>
               </button>
             </div>
           </div>
@@ -5550,58 +5862,8 @@
           class="admin-alerts-box"
           style="display: none"
         ></div>
-        <div
-          id="adminSessionsBox"
-          class="admin-alerts-box"
-          style="display: none"
-        ></div>
-        <div class="stats delay-1">
-          <div class="stat-card">
-            <div class="stat-top">
-              <div class="stat-label">Total Key</div>
-              <div class="stat-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-key"></use></svg></div>
-            </div>
-            <div class="stat-value" id="totalKeyStat">0</div>
-            <div class="stat-note">Seluruh key di database.</div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-top">
-              <div class="stat-label">Key Available</div>
-              <div class="stat-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-check"></use></svg></div>
-            </div>
-            <div class="stat-value" id="availableKeyStat">0</div>
-            <div class="stat-note">Stok key yang belum dipakai.</div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-top">
-              <div class="stat-label">Total Order</div>
-              <div class="stat-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-receipt"></use></svg></div>
-            </div>
-            <div class="stat-value" id="totalOrderStat">0</div>
-            <div class="stat-note">Jumlah order yang tercatat.</div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-top">
-              <div class="stat-label">Total Produk</div>
-              <div class="stat-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-product"></use></svg></div>
-            </div>
-            <div class="stat-value" id="totalProductStat">0</div>
-            <div class="stat-note">Produk tersedia di panel.</div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-top">
-              <div class="stat-label">Revenue Hari Ini</div>
-              <div class="stat-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-money"></use></svg></div>
-            </div>
-            <div class="stat-value" id="revenueTodayStat">Rp 0</div>
-            <div class="stat-note">Total order paid hari ini.</div>
-          </div>
-
-          <div class="stat-card">
+        <div class="stats dashboard-metrics delay-1">
+          <div class="stat-card dashboard-primary-metric">
             <div class="stat-top">
               <div class="stat-label">Revenue Bulan Ini</div>
               <div class="stat-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-trend"></use></svg></div>
@@ -5610,7 +5872,26 @@
             <div class="stat-note">Total order paid bulan ini.</div>
           </div>
 
-          <div class="stat-card">
+          <div class="dashboard-metric-rail" aria-label="Metrik operasional lainnya">
+          <div class="stat-card dashboard-metric-revenue-today">
+            <div class="stat-top">
+              <div class="stat-label">Revenue Hari Ini</div>
+              <div class="stat-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-money"></use></svg></div>
+            </div>
+            <div class="stat-value" id="revenueTodayStat">Rp 0</div>
+            <div class="stat-note">Total order paid hari ini.</div>
+          </div>
+
+          <div class="stat-card dashboard-metric-pending">
+            <div class="stat-top">
+              <div class="stat-label">Order Pending</div>
+              <div class="stat-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-clock"></use></svg></div>
+            </div>
+            <div class="stat-value" id="pendingOrderStat">0</div>
+            <div class="stat-note">Order belum dibayar.</div>
+          </div>
+
+          <div class="stat-card dashboard-metric-paid">
             <div class="stat-top">
               <div class="stat-label">Paid Hari Ini</div>
               <div class="stat-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-check"></use></svg></div>
@@ -5619,15 +5900,48 @@
             <div class="stat-note">Order berhasil dibayar hari ini.</div>
           </div>
 
-          <div class="stat-card">
+          <div class="stat-card dashboard-metric-orders">
             <div class="stat-top">
-              <div class="stat-label">Order Pending</div>
-              <div class="stat-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-clock"></use></svg></div>
+              <div class="stat-label">Total Order</div>
+              <div class="stat-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-receipt"></use></svg></div>
             </div>
-            <div class="stat-value" id="pendingOrderStat">0</div>
-            <div class="stat-note">Order belum dibayar.</div>
+            <div class="stat-value" id="totalOrderStat">0</div>
+            <div class="stat-note">Jumlah order yang tercatat.</div>
+          </div>
+
+          <div class="stat-card dashboard-metric-products">
+            <div class="stat-top">
+              <div class="stat-label">Total Produk</div>
+              <div class="stat-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-product"></use></svg></div>
+            </div>
+            <div class="stat-value" id="totalProductStat">0</div>
+            <div class="stat-note">Produk tersedia di panel.</div>
+          </div>
+
+          <div class="stat-card dashboard-metric-key-ready">
+            <div class="stat-top">
+              <div class="stat-label">Key Available</div>
+              <div class="stat-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-check"></use></svg></div>
+            </div>
+            <div class="stat-value" id="availableKeyStat">0</div>
+            <div class="stat-note">Stok key yang belum dipakai.</div>
+          </div>
+
+          <div class="stat-card dashboard-metric-key-total">
+            <div class="stat-top">
+              <div class="stat-label">Total Key</div>
+              <div class="stat-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-key"></use></svg></div>
+            </div>
+            <div class="stat-value" id="totalKeyStat">0</div>
+            <div class="stat-note">Seluruh key di database.</div>
+          </div>
           </div>
         </div>
+        <div
+          id="adminSessionsBox"
+          class="admin-alerts-box dashboard-session-box"
+          style="display: none"
+        ></div>
       </section>
 
       <section id="section-products" class="admin-section">
@@ -7302,7 +7616,7 @@
         if (button) {
           button.disabled = true;
           button.setAttribute("aria-busy", "true");
-          button.innerHTML = `${adminIcon("refresh")}<span>Memperbarui...</span>`;
+          button.innerHTML = `${adminIcon("refresh")}<span>Memuat ulang...</span>`;
         }
         announceAdmin("Memperbarui seluruh data admin");
         try {
@@ -7326,7 +7640,7 @@
           if (button) {
             button.disabled = false;
             button.removeAttribute("aria-busy");
-            button.innerHTML = `${adminIcon("refresh")}<span>Refresh Semua Data</span>`;
+            button.innerHTML = `${adminIcon("refresh")}<span>Muat Ulang Data</span>`;
           }
         }
       }
@@ -9938,38 +10252,47 @@
           }
 
           box.innerHTML = `
-                              <div class="admin-alerts-head">
-                                <strong>🔐 Admin Login Terdeteksi</strong>
-                                <span>${sessions.length} sesi aktif</span>
-                              </div>
+            <details class="dashboard-session-panel" ${window.matchMedia("(min-width: 769px)").matches ? "open" : ""}>
+              <summary class="dashboard-session-summary">
+                <span>
+                  <small>Keamanan akun</small>
+                  <strong>Sesi admin aktif</strong>
+                </span>
+                <b>${sessions.length}</b>
+              </summary>
 
-                              <div class="admin-alert-list">
-                                ${sessions
-                                  .map(
-                                    (item) => `
-                                      <div class="admin-alert-item">
-                                        <span class="admin-alert-tag">
-                                          ${item.current_session ? "SESSION KAMU" : "SESSION LAIN"}
-                                        </span><br>
-                                        <b>${escapeHtml(item.username || "-")}</b><br>
-                                        IP: ${escapeHtml(item.ip_address || "-")}<br>
-                                        Browser: ${escapeHtml(item.user_agent || "-")}<br>
-                                        Login: ${formatTanggal(item.created_at)}
-                                      </div>
-                                    `,
-                                  )
-                                  .join("")}
-                              </div>
+              <div class="dashboard-session-content">
+                <div class="admin-alert-list dashboard-session-list">
+                  ${sessions
+                    .map(
+                      (item) => `
+                        <article class="admin-alert-item dashboard-session-item">
+                          <span class="admin-alert-tag">
+                            ${item.current_session ? "Sesi kamu" : "Sesi lain"}
+                          </span>
+                          <strong>${escapeHtml(item.username || "-")}</strong>
+                          <span>IP ${escapeHtml(item.ip_address || "-")}</span>
+                          <span class="dashboard-session-browser" title="${escapeHtml(item.user_agent || "-")}">
+                            ${escapeHtml(item.user_agent || "-")}
+                          </span>
+                          <time>${formatTanggal(item.created_at)}</time>
+                        </article>
+                      `,
+                    )
+                    .join("")}
+                </div>
 
-                              <div class="admin-alert-actions">
-                                <button type="button" class="danger-btn" onclick="logoutOtherAdminSessions()">
-                                  Logout Semua Session Lain
-                                </button>
-                                <button type="button" class="ghost-btn" onclick="loadAdminSessions()">
-                                  Refresh Session
-                                </button>
-                              </div>
-                            `;
+                <div class="admin-alert-actions dashboard-session-actions">
+                  <button type="button" class="danger-btn" onclick="logoutOtherAdminSessions()">
+                    Keluar dari sesi lain
+                  </button>
+                  <button type="button" class="ghost-btn" onclick="loadAdminSessions()">
+                    Muat ulang sesi
+                  </button>
+                </div>
+              </div>
+            </details>
+          `;
 
           box.style.display = "block";
         } catch (err) {
