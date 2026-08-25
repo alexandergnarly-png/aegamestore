@@ -3971,33 +3971,115 @@
 
         .admin-order-mobile-ops {
           margin-bottom: 10px;
-          padding: 12px;
-          border: 1px solid var(--line);
-          border-radius: 22px;
+          padding: 14px;
+          border: 2px solid var(--ink);
+          border-radius: 18px;
           background: var(--surface);
+          box-shadow: 4px 4px 0 var(--ink);
+        }
+
+        .admin-order-mobile-ops::before {
+          width: 44px;
+          height: 3px;
+          margin-bottom: 12px;
+          border-radius: 0;
+        }
+
+        .admin-order-ops-head {
+          align-items: flex-start;
+          margin-bottom: 14px;
+        }
+
+        .admin-order-kicker {
+          display: flex !important;
+          align-items: center;
+          gap: 6px;
+          margin: 0 0 7px !important;
+          color: var(--muted) !important;
+          font-family: "JetBrains Mono", monospace;
+          font-size: 9px !important;
+          font-weight: 900 !important;
+          letter-spacing: 0.12em;
+          line-height: 1;
+          text-transform: uppercase;
+        }
+
+        .admin-order-kicker::before {
+          content: "";
+          width: 7px;
+          height: 7px;
+          flex: 0 0 7px;
+          border-radius: 50%;
+          background: #397a5b;
+          box-shadow: 0 0 0 3px color-mix(in srgb, #397a5b 16%, transparent);
+        }
+
+        .admin-order-ops-head strong {
+          font-size: 18px;
+          letter-spacing: -0.035em;
+        }
+
+        .admin-order-ops-head #adminOrderUpdatedAt {
+          margin-top: 4px;
+          font-size: 11px;
+        }
+
+        .admin-ops-refresh {
+          border: 1px solid var(--ink);
+          border-radius: 12px;
+          box-shadow: 2px 2px 0 color-mix(in srgb, var(--ink) 18%, transparent);
         }
 
         .admin-order-ops-grid {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 6px;
+          display: flex;
+          gap: 8px;
           margin-bottom: 0;
+          padding: 0 1px 5px;
+          overflow-x: auto;
+          overscroll-behavior-inline: contain;
+          scroll-snap-type: inline mandatory;
+          scrollbar-width: none;
+        }
+
+        .admin-order-ops-grid::-webkit-scrollbar {
+          display: none;
         }
 
         .admin-ops-card {
-          min-height: 60px;
-          padding: 9px;
-          border-radius: 16px;
+          min-width: 0;
+          min-height: 66px;
+          flex: 0 0 104px;
+          padding: 10px 11px;
+          border-radius: 12px;
+          scroll-snap-align: start;
         }
 
         .admin-ops-card-all {
-          min-height: 50px;
+          min-height: 66px;
+          display: grid;
+          grid-template-columns: 1fr;
+          align-items: initial;
+          align-content: center;
+          column-gap: 0;
         }
 
         .ops-num {
-          font-size: 22px;
+          font-family: "JetBrains Mono", monospace;
+          font-size: 20px;
+        }
+
+        .ops-label {
+          overflow: hidden;
+          max-width: 100%;
+          font-family: "JetBrains Mono", monospace;
+          font-size: 9px;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
 
         .admin-order-sticky-search {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) 58px;
           margin-top: 12px;
           margin-bottom: 0;
           padding: 12px 0 0;
@@ -4015,13 +4097,18 @@
 
         .admin-order-sticky-search input {
           min-width: 0;
-          border: 1px solid var(--line);
+          width: 100%;
+          border: 1px solid var(--ink);
+          border-radius: 12px;
           background: var(--surface);
+          font-size: 14px;
         }
 
         .admin-order-sticky-search button {
-          min-width: 64px;
-          border-radius: 15px;
+          min-width: 0;
+          padding-inline: 8px;
+          border-radius: 12px;
+          font-size: 12px;
         }
 
         .order-advanced-panel {
@@ -5300,6 +5387,7 @@
           <div class="admin-order-mobile-ops" id="adminOrderMobileOps">
             <div class="admin-order-ops-head">
               <div>
+                <span class="admin-order-kicker">Ops // Live</span>
                 <strong>Order Control</strong>
                 <span id="adminOrderUpdatedAt" aria-live="polite">Ringkasan &amp; filter cepat</span>
               </div>
@@ -5370,7 +5458,7 @@
               <input
                 type="search"
                 id="orderMobileSearchInput"
-                placeholder="Cari ID, user, atau kontak"
+                placeholder="Cari ID atau buyer"
                 aria-label="Cari order berdasarkan ID, user, atau kontak"
                 oninput="syncMobileOrderSearch(this.value)"
               />
