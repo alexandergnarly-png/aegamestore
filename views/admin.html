@@ -4205,6 +4205,44 @@
         white-space: nowrap;
       }
 
+      #section-users .user-refresh-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        background: var(--ink);
+        color: var(--surface);
+      }
+
+      #section-users .user-refresh-btn .ui-icon {
+        width: 17px;
+        height: 17px;
+      }
+
+      #section-users .user-refresh-btn[aria-busy="true"] .ui-icon {
+        animation: user-refresh-spin 0.7s linear infinite;
+      }
+
+      #section-users .user-id-mobile {
+        display: none;
+      }
+
+      #section-users .badge-override {
+        margin-left: 6px;
+      }
+
+      @keyframes user-refresh-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        #section-users .user-refresh-btn[aria-busy="true"] .ui-icon {
+          animation: none;
+        }
+      }
+
       #section-users .user-badge-lab {
         margin-bottom: 16px;
         overflow: hidden;
@@ -4312,9 +4350,135 @@
           padding: 12px;
         }
 
-        #section-users tbody tr {
-          border-radius: 3px;
+        /* Buyer Ledger: compact mobile account cards. */
+        #section-users .user-ledger-table tbody tr {
+          position: relative;
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 0 12px;
+          padding: 16px 14px 14px;
+          overflow: hidden;
+          border: 1px solid var(--line-strong);
+          border-radius: 18px;
+          box-shadow: 4px 4px 0 var(--ink);
+        }
+
+        #section-users .user-ledger-table tbody tr::before {
+          content: "";
+          position: absolute;
+          inset: 0 0 auto;
+          height: 5px;
+          background: var(--ink);
+        }
+
+        #section-users .user-ledger-table tbody td {
+          min-height: 0;
+          display: grid;
+          align-content: start;
+          justify-content: stretch;
+          gap: 4px;
+          padding: 10px 0;
+          text-align: left;
+        }
+
+        #section-users .user-ledger-table tbody td::before {
+          font-family: "JetBrains Mono", monospace;
+          font-size: 9px;
+        }
+
+        #section-users .user-ledger-table tbody td[data-label="ID"] {
+          display: none;
+        }
+
+        #section-users .user-ledger-table tbody td[data-label="Username"],
+        #section-users .user-ledger-table tbody td[data-label="Badge"],
+        #section-users .user-ledger-table tbody td[data-label="Daftar"],
+        #section-users .user-ledger-table tbody td[data-label="Aksi"] {
+          grid-column: 1 / -1;
+        }
+
+        #section-users .user-ledger-table tbody td[data-label="Username"] {
+          padding-top: 12px;
+          font-size: 18px;
+          font-weight: 900;
+          letter-spacing: -0.035em;
+        }
+
+        #section-users .user-id-mobile {
+          display: block;
+          color: var(--muted);
+          font-family: "JetBrains Mono", monospace;
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.04em;
+        }
+
+        #section-users .badge-override {
+          margin-left: 0;
+        }
+
+        #section-users .user-ledger-table tbody tr:has(.empty) {
+          display: block;
+          padding: 14px;
           box-shadow: none;
+        }
+
+        #section-users .user-ledger-table tbody tr:has(.empty)::before {
+          display: none;
+        }
+
+        #section-users .user-ledger-table .empty {
+          display: block;
+          padding: 12px;
+          text-align: center;
+        }
+
+        #section-users .user-ledger-table tbody td[data-label="Badge"] {
+          display: flex;
+          flex-direction: row;
+          flex-wrap: wrap;
+          align-items: center;
+          justify-content: flex-start;
+          gap: 7px;
+        }
+
+        #section-users .user-ledger-table tbody td[data-label="Badge"]::before {
+          width: 100%;
+        }
+
+        #section-users .user-ledger-table tbody td[data-label="Order Paid"],
+        #section-users .user-ledger-table tbody td[data-label="Total Belanja"] {
+          border-bottom: 0;
+          padding: 11px;
+          border-radius: 12px;
+          background: var(--surface-2);
+          font-size: 15px;
+          font-weight: 850;
+        }
+
+        #section-users .user-ledger-table tbody td[data-label="Daftar"] {
+          color: var(--muted);
+          font-size: 12px;
+        }
+
+        #section-users .user-ledger-table tbody td[data-label="Aksi"] {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 8px;
+          padding-top: 12px;
+        }
+
+        #section-users .user-ledger-table tbody td[data-label="Aksi"]::before {
+          grid-column: 1 / -1;
+          margin-bottom: 0;
+        }
+
+        #section-users .user-ledger-table tbody td[data-label="Aksi"] button {
+          width: 100%;
+          min-width: 0;
+          min-height: 44px;
+          padding-inline: 8px;
+          font-size: 11px;
         }
       }
 
@@ -5155,7 +5319,15 @@
             </div>
 
             <div class="user-control-actions" aria-label="Aksi daftar user">
-              <button type="button" onclick="loadUsers()">Muat ulang</button>
+              <button
+                type="button"
+                class="user-refresh-btn"
+                id="userRefreshButton"
+                onclick="loadUsers()"
+              >
+                <svg class="ui-icon" aria-hidden="true"><use href="#icon-refresh"></use></svg>
+                <span data-user-refresh-label>Muat ulang</span>
+              </button>
               <button
                 type="button"
                 class="ghost-btn"
@@ -5237,11 +5409,13 @@
           </details>
 
           <div class="info-row">
-            <div class="info" id="userStatusText">Memuat daftar user...</div>
+            <div class="info" id="userStatusText" role="status" aria-live="polite">
+              Memuat daftar user...
+            </div>
           </div>
 
           <div class="table-wrap">
-            <table>
+            <table class="user-ledger-table">
               <thead>
                 <tr>
                   <th style="width: 90px">ID</th>
@@ -7408,21 +7582,31 @@
       async function loadUsers() {
         const statusText = document.getElementById("userStatusText");
         const tableBody = document.getElementById("userTableBody");
+        const refreshButton = document.getElementById("userRefreshButton");
+        const refreshLabel = refreshButton?.querySelector("[data-user-refresh-label]");
 
         statusText.innerText = "Memuat daftar user...";
         tableBody.innerHTML = "";
+        if (refreshButton) {
+          refreshButton.disabled = true;
+          refreshButton.setAttribute("aria-busy", "true");
+        }
+        if (refreshLabel) refreshLabel.textContent = "Memuat...";
 
         try {
-          const res = await fetch("/users");
+          const res = await fetch("/users", { cache: "no-store" });
 
           if (res.status === 401) {
             window.location.href = "/ae-auth";
             return;
           }
 
-          const data = await res.json();
+          if (!res.ok) throw new Error(`Gagal memuat user (${res.status})`);
 
-          if (!Array.isArray(data) || data.length === 0) {
+          const data = await res.json();
+          if (!Array.isArray(data)) throw new Error("Respons user tidak valid");
+
+          if (data.length === 0) {
             ADMIN_USERS_CACHE = [];
             statusText.innerText = "Belum ada user buyer.";
             tableBody.innerHTML = `
@@ -7442,6 +7626,12 @@
         <td colspan="7" class="empty">Terjadi error saat mengambil user.</td>
       </tr>
     `;
+        } finally {
+          if (refreshButton) {
+            refreshButton.disabled = false;
+            refreshButton.removeAttribute("aria-busy");
+          }
+          if (refreshLabel) refreshLabel.textContent = "Muat ulang";
         }
       }
       function getFilteredUsers() {
@@ -7498,12 +7688,15 @@
             (item) => `
         <tr>
   <td data-label="ID">${item.id}</td>
-  <td data-label="Username">${escapeHtml(item.username || "-")}</td>
+  <td data-label="Username">
+    ${escapeHtml(item.username || "-")}
+    <small class="user-id-mobile">BUYER #${escapeHtml(item.id)}</small>
+  </td>
   <td data-label="Badge">
   ${buyerBadge(item.badge)}
   ${
     item.badge_is_override
-      ? `<span class="badge vip" style="margin-left:6px;">Override</span>`
+      ? `<span class="badge vip badge-override">Override</span>`
       : ""
   }
 </td>

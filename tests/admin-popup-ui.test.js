@@ -58,6 +58,10 @@ scripts.forEach(([, source]) =>
   'class="user-badge-lab"',
   'for="userSearchInput"',
   "#section-users .user-control-actions",
+  'id="userRefreshButton"',
+  'refreshButton.setAttribute("aria-busy", "true")',
+  'fetch("/users", { cache: "no-store" })',
+  "Buyer Ledger: compact mobile account cards.",
   'class="voucher-filter-card"',
   'id="voucherEditorPanel" open',
   'class="voucher-form-grid"',
@@ -87,6 +91,10 @@ assert.ok(
     server.includes("AS manual_count") &&
     server.includes("AS delivered_count"),
   "Order control counts must come from the full filtered query",
+);
+assert.match(
+  server,
+  /app\.get\("\/users"[\s\S]*?Cache-Control", "private, no-store, max-age=0"/,
 );
 
 assert.ok(

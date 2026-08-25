@@ -7281,6 +7281,7 @@ app.post(
 );
 
 app.get("/users", requireAdminAuth, async (req, res) => {
+  res.set("Cache-Control", "private, no-store, max-age=0");
   try {
     const result = await query(
       `
