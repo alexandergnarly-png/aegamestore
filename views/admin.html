@@ -3963,6 +3963,10 @@
         display: contents;
       }
 
+      .order-panel-section-label {
+        display: none;
+      }
+
       @media (max-width: 768px) {
         #section-orders .card {
           padding-bottom: calc(96px + var(--safe-bottom));
@@ -4114,21 +4118,22 @@
         .order-advanced-panel {
           margin-bottom: 14px;
           overflow: hidden;
-          border: 1px solid var(--line);
-          border-radius: 22px;
-          background: var(--surface-2);
+          border: 1px solid var(--ink);
+          border-radius: 18px;
+          background: var(--surface);
         }
 
         .order-advanced-panel > summary {
-          min-height: 56px;
+          min-height: 62px;
           display: flex;
           align-items: center;
           justify-content: space-between;
           gap: 12px;
-          padding: 10px 14px;
-          color: var(--ink);
+          padding: 12px 14px;
+          color: var(--surface);
           cursor: pointer;
           list-style: none;
+          background: var(--ink);
         }
 
         .order-advanced-panel > summary::-webkit-details-marker {
@@ -4137,8 +4142,16 @@
 
         .order-advanced-panel > summary::after {
           content: "+";
-          font-family: "DM Mono", monospace;
-          font-size: 22px;
+          width: 30px;
+          height: 30px;
+          flex: 0 0 30px;
+          display: grid;
+          place-items: center;
+          border: 1px solid color-mix(in srgb, var(--surface) 36%, transparent);
+          border-radius: 9px;
+          font-family: "JetBrains Mono", monospace;
+          font-size: 18px;
+          line-height: 1;
         }
 
         .order-advanced-panel[open] > summary::after {
@@ -4151,15 +4164,21 @@
         }
 
         .order-advanced-panel > summary strong {
-          font-size: 13px;
+          font-size: 14px;
           font-weight: 900;
+          letter-spacing: -0.025em;
         }
 
         .order-advanced-panel > summary small {
           margin-top: 2px;
-          color: var(--muted);
+          color: color-mix(in srgb, var(--surface) 68%, transparent);
           font-size: 10px;
           font-weight: 750;
+        }
+
+        .order-advanced-panel > summary:focus-visible {
+          outline: 3px solid color-mix(in srgb, var(--surface) 50%, transparent);
+          outline-offset: -3px;
         }
 
         .order-advanced-content {
@@ -4168,15 +4187,41 @@
 
         .order-advanced-panel[open] > .order-advanced-content {
           display: grid;
-          gap: 10px;
-          padding: 12px;
-          border-top: 1px solid var(--line);
+          gap: 16px;
+          padding: 14px;
+          border-top: 0;
         }
 
         .order-filter-toolbar {
           display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: 8px;
+          margin: 0;
+        }
+
+        .order-panel-section-label {
+          grid-column: 1 / -1;
+          display: flex;
+          align-items: baseline;
+          justify-content: space-between;
+          gap: 10px;
+          padding-bottom: 7px;
+          border-bottom: 1px solid var(--line);
+        }
+
+        .order-panel-section-label strong {
+          color: var(--ink);
+          font-family: "JetBrains Mono", monospace;
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+        }
+
+        .order-panel-section-label small {
+          color: var(--muted);
+          font-size: 9px;
+          font-weight: 700;
         }
 
         .order-filter-toolbar .order-desktop-search {
@@ -4189,22 +4234,50 @@
           min-width: 0;
         }
 
-        .order-filter-toolbar .btn-group {
-          grid-column: 1 / -1;
+        .order-filter-toolbar select {
+          min-height: 48px;
+          padding-inline: 12px 36px;
+          border-color: var(--line);
+          border-radius: 12px;
+          font-size: 13px;
+        }
+
+        .order-action-toolbar {
+          display: grid;
+          gap: 8px;
+          margin: 0;
+          padding-top: 14px;
+          border-top: 1px solid var(--line);
+        }
+
+        .order-action-grid {
           display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: 8px;
         }
 
-        .order-filter-toolbar .btn-group button {
+        .order-action-grid button {
           width: 100%;
           min-width: 0;
           min-height: 44px;
           margin: 0;
+          padding: 8px 10px;
+          border-radius: 12px;
+          font-size: 11px;
+          line-height: 1.25;
         }
 
-        .order-filter-toolbar .btn-group button:last-child {
+        .order-action-grid .order-danger-action {
           grid-column: 1 / -1;
+          border-color: var(--danger-border);
+          background: var(--danger-bg);
+          color: var(--danger-text);
+        }
+
+        .order-action-grid .order-danger-action:hover {
+          border-color: var(--danger-text);
+          background: var(--danger-text);
+          color: var(--surface);
         }
 
         .order-advanced-content > .toolbar:last-child {
@@ -4217,12 +4290,43 @@
           gap: 8px;
         }
 
+        .order-date-toolbar {
+          display: grid;
+          gap: 10px;
+          margin: 0;
+        }
+
+        .order-date-toolbar label {
+          color: var(--muted) !important;
+          font-family: "JetBrains Mono", monospace;
+          font-size: 9px !important;
+          letter-spacing: 0.08em;
+        }
+
+        .order-date-toolbar input[type="date"] {
+          min-width: 0;
+          min-height: 44px;
+          padding-inline: 9px;
+          border-color: var(--line);
+          border-radius: 12px;
+          font-size: 12px;
+        }
+
         .order-advanced-content .date-quick-chips {
           grid-column: 1 / -1;
-          display: flex;
-          overflow-x: auto;
-          padding-bottom: 2px !important;
-          scrollbar-width: none;
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 6px;
+          padding: 0 !important;
+        }
+
+        .order-advanced-content .date-quick-chip {
+          width: 100%;
+          min-width: 0;
+          min-height: 34px;
+          padding: 5px 4px;
+          border-radius: 9px;
+          font-size: 9px;
         }
       }
 
@@ -4233,13 +4337,11 @@
       }
 
       @media (max-width: 380px) {
-        .order-filter-toolbar,
-        .order-advanced-content .date-range-row {
+        .order-filter-toolbar {
           grid-template-columns: 1fr;
         }
 
-        .order-filter-toolbar .btn-group,
-        .order-advanced-content .date-quick-chips {
+        .order-filter-toolbar .order-panel-section-label {
           grid-column: 1;
         }
       }
@@ -5470,11 +5572,15 @@
             <summary>
               <span>
                 <strong>Filter &amp; aksi lanjutan</strong>
-                <small>Tanggal, status, export, dan pilihan massal</small>
+                <small>Status, tanggal, ekspor, dan pilihan massal</small>
               </span>
             </summary>
             <div class="order-advanced-content">
               <div class="toolbar order-filter-toolbar">
+                <div class="order-panel-section-label">
+                  <strong>Status</strong>
+                  <small>Saring daftar order</small>
+                </div>
                 <div class="field-wide order-desktop-search">
                   <input
                   type="text"
@@ -5502,25 +5608,13 @@
                 <option value="cancelled">Cancelled</option>
               </select>
             </div>
-
-            <div class="btn-group">
-              <button onclick="loadOrders()">Refresh Order</button>
-              <button class="ghost-btn" onclick="exportOrdersCSV()">
-                Export CSV
-              </button>
-              <button class="ghost-btn" onclick="selectAllFilteredOrders()">
-                Pilih Semua Filter
-              </button>
-              <button class="danger-btn" onclick="deleteSelectedOrders()">
-                Hapus Terpilih
-              </button>
-              <button class="ghost-btn" onclick="clearSelectedOrders()">
-                Batal Pilih
-              </button>
-            </div>
               </div>
 
-              <div class="toolbar">
+              <div class="toolbar order-date-toolbar">
+                <div class="order-panel-section-label">
+                  <strong>Rentang waktu</strong>
+                  <small>Opsional</small>
+                </div>
             <div class="date-range-row" style="width: 100%">
               <div class="field">
                 <label
@@ -5590,6 +5684,31 @@
                 </button>
               </div>
             </div>
+              </div>
+
+              <div class="toolbar order-action-toolbar">
+                <div class="order-panel-section-label">
+                  <strong>Aksi &amp; pilihan</strong>
+                  <small>Aksi pada hasil filter</small>
+                </div>
+                <div class="btn-group order-action-grid">
+                  <button onclick="loadOrders()">Muat ulang</button>
+                  <button class="ghost-btn" onclick="exportOrdersCSV()">
+                    Unduh CSV
+                  </button>
+                  <button class="ghost-btn" onclick="selectAllFilteredOrders()">
+                    Pilih hasil
+                  </button>
+                  <button class="ghost-btn" onclick="clearSelectedOrders()">
+                    Kosongkan pilihan
+                  </button>
+                  <button
+                    class="danger-btn order-danger-action"
+                    onclick="deleteSelectedOrders()"
+                  >
+                    Hapus pilihan
+                  </button>
+                </div>
               </div>
             </div>
           </details>
