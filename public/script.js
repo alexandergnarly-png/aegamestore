@@ -1720,7 +1720,7 @@ async function openOrderModal(game) {
   if (voucherInput) voucherInput.value = "";
   const voucherPanel = document.getElementById("voucherPanel");
   if (voucherPanel) {
-    voucherPanel.open = window.matchMedia("(max-width: 640px)").matches;
+    voucherPanel.open = false;
   }
 
   const nameInput = document.getElementById("name");
