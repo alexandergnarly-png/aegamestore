@@ -1087,6 +1087,30 @@
         font-weight: 750;
       }
 
+      .product-panel-heading {
+        min-width: 0;
+        display: grid;
+        line-height: 1.2;
+      }
+
+      .product-control-panel > summary .product-panel-kicker {
+        margin: 0 0 5px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .product-control-panel > summary strong {
+        display: block;
+        letter-spacing: -0.025em;
+      }
+
+      .product-control-panel > summary .product-panel-description {
+        margin-top: 4px;
+      }
+
       .product-control-panel > .product-panel-content {
         margin: 0;
         padding: 16px;
@@ -1108,6 +1132,45 @@
         grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 14px 12px;
         align-items: start;
+      }
+
+      .product-form-section {
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: auto auto minmax(0, 1fr);
+        align-items: center;
+        gap: 8px;
+        padding: 6px 0 8px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .product-form-section span {
+        min-width: 28px;
+        padding: 3px 5px;
+        border-radius: 7px;
+        background: var(--ink);
+        color: var(--surface);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 9px;
+        font-weight: 700;
+        text-align: center;
+      }
+
+      .product-form-section strong {
+        color: var(--ink);
+        font-size: 11px;
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+
+      .product-form-section small {
+        overflow: hidden;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 700;
+        text-align: right;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
       .product-panel-content .field {
@@ -2639,6 +2702,142 @@
         }
 
         .product-editor-actions #saveProductBtn {
+          grid-column: 1 / -1;
+        }
+
+        /* Catalog workstation: dense filters, sequenced product composition. */
+        .product-control-panel {
+          border-color: var(--ink);
+          border-radius: 18px;
+        }
+
+        .product-control-panel > summary {
+          min-height: 68px;
+          padding: 11px 12px;
+          border-radius: 17px 17px 0 0;
+          font-size: 14px;
+        }
+
+        .product-control-panel:not([open]) > summary {
+          border-radius: 17px;
+        }
+
+        #productFilterPanel > summary {
+          background: var(--surface-2);
+        }
+
+        #productEditorPanel > summary {
+          background: var(--ink);
+          color: var(--surface);
+        }
+
+        .product-control-panel > summary::after {
+          width: 32px;
+          height: 32px;
+          flex: 0 0 32px;
+          border-radius: 10px;
+          font-family: "JetBrains Mono", monospace;
+          font-size: 17px;
+          font-weight: 700;
+        }
+
+        #productEditorPanel > summary::after {
+          border-color: color-mix(in srgb, var(--surface) 36%, transparent);
+        }
+
+        #productEditorPanel > summary .product-panel-kicker,
+        #productEditorPanel > summary .product-panel-description {
+          color: color-mix(in srgb, var(--surface) 68%, transparent);
+        }
+
+        .product-control-panel > summary:focus-visible {
+          outline: 3px solid color-mix(in srgb, var(--ink) 22%, transparent);
+          outline-offset: 3px;
+        }
+
+        .product-filter-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 9px 8px;
+        }
+
+        .product-editor-grid {
+          grid-template-columns: 1fr;
+          gap: 12px;
+        }
+
+        .product-filter-grid .field {
+          gap: 4px;
+        }
+
+        .product-filter-grid label {
+          overflow: hidden;
+          font-family: "JetBrains Mono", monospace;
+          font-size: 8px;
+          letter-spacing: 0.08em;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .product-filter-grid .admin-select-trigger {
+          min-height: 44px;
+          padding: 8px 32px 8px 10px;
+          border-radius: 11px;
+          font-size: 11px;
+        }
+
+        .product-filter-grid .admin-select-trigger svg {
+          right: 9px;
+          width: 15px;
+          height: 15px;
+        }
+
+        .product-editor-grid .field {
+          gap: 5px;
+        }
+
+        .product-editor-grid label {
+          font-family: "JetBrains Mono", monospace;
+          font-size: 9px;
+          letter-spacing: 0.08em;
+        }
+
+        .product-editor-grid input[type="text"],
+        .product-editor-grid input[type="number"],
+        .product-editor-grid .admin-select-trigger {
+          min-height: 48px;
+          border-radius: 12px;
+        }
+
+        .product-editor-grid .product-field-hint {
+          font-size: 10px;
+          line-height: 1.35;
+        }
+
+        .product-form-section {
+          grid-template-columns: auto auto minmax(0, 1fr);
+          gap: 7px;
+          padding: 4px 0 7px;
+        }
+
+        .product-form-section small {
+          font-size: 8px;
+        }
+
+        .product-editor-actions {
+          padding: 12px !important;
+          border-top: 1px solid var(--line) !important;
+          border-radius: 0 0 17px 17px;
+          background: var(--surface-2);
+        }
+
+        .product-editor-actions .btn-group button {
+          min-height: 44px;
+          padding: 8px;
+          border-radius: 11px;
+          font-size: 11px;
+        }
+
+        .product-editor-actions .btn-group button:last-child {
           grid-column: 1 / -1;
         }
 
@@ -5225,7 +5424,13 @@
           </div>
 
           <details class="product-control-panel" id="productFilterPanel" open>
-            <summary><span>Filter Produk<small>Game, brand, platform, status, dan source</small></span></summary>
+            <summary>
+              <span class="product-panel-heading">
+                <small class="product-panel-kicker">Katalog / Saring</small>
+                <strong>Filter Produk</strong>
+                <small class="product-panel-description">Game, brand, platform, status, dan sumber</small>
+              </span>
+            </summary>
             <div class="toolbar product-panel-content product-filter-grid">
             <div class="field">
               <label for="productGameFilter">Game</label>
@@ -5254,27 +5459,27 @@
               <label for="productStatusFilter">Status produk</label>
               <select id="productStatusFilter" onchange="applyProductFilters()">
                 <option value="">Semua Status</option>
-                <option value="1">Active</option>
-                <option value="0">Inactive</option>
+                <option value="1">Aktif</option>
+                <option value="0">Nonaktif</option>
               </select>
             </div>
             <div class="field">
-              <label for="productPlayStatusFilter">Play status</label>
+              <label for="productPlayStatusFilter">Status bermain</label>
               <select
                 id="productPlayStatusFilter"
                 onchange="applyProductFilters()"
               >
-                <option value="">Semua Play Status</option>
-                <option value="safe">Safe to Play</option>
-                <option value="risk">Use at Your Own Risk</option>
-                <option value="maintenance">Maintenance</option>
+                <option value="">Semua Status Main</option>
+                <option value="safe">Aman Dimainkan</option>
+                <option value="risk">Berisiko</option>
+                <option value="maintenance">Pemeliharaan</option>
               </select>
             </div>
             <div class="field">
-              <label for="productDeliveryFilter">Source</label>
+              <label for="productDeliveryFilter">Sumber stok</label>
               <select id="productDeliveryFilter" onchange="applyProductFilters()">
-                <option value="">Semua Source</option>
-                <option value="auto">Local Stock</option>
+                <option value="">Semua Sumber</option>
+                <option value="auto">Stok Lokal</option>
                 <option value="vipstore_api">VIP Store API</option>
                 <option value="cheatgame_api">CHEATGAME API</option>
                 <option value="manual">Manual</option>
@@ -5284,9 +5489,20 @@
           </details>
 
           <details class="product-control-panel" id="productEditorPanel" open>
-            <summary><span>Tambah / Edit Produk<small>Form produk dan mapping supplier</small></span></summary>
+            <summary>
+              <span class="product-panel-heading">
+                <small class="product-panel-kicker">Produk / Susun</small>
+                <strong>Tambah / Edit Produk</strong>
+                <small class="product-panel-description">Susun produk dan hubungkan supplier</small>
+              </span>
+            </summary>
             <div class="toolbar product-panel-content product-editor-grid">
             <input type="hidden" id="editingProductId" />
+            <div class="product-form-section">
+              <span>01</span>
+              <strong>Identitas</strong>
+              <small>Game, platform, brand, dan durasi</small>
+            </div>
             <div class="field">
               <label for="productGame">Game</label>
               <div class="product-combobox" id="productGameCombobox">
@@ -5350,6 +5566,11 @@
               </div>
               <small class="product-field-hint" id="productDurationHint">Pilih durasi yang sudah ada atau ketik durasi baru.</small>
             </div>
+            <div class="product-form-section">
+              <span>02</span>
+              <strong>Penawaran</strong>
+              <small>Harga jual dan status bermain</small>
+            </div>
             <div class="field">
               <label for="productPrice">Harga jual</label>
               <input
@@ -5375,20 +5596,25 @@
               </small>
             </div>
             <div class="field">
-              <label for="productPlayStatus">Play status</label>
+              <label for="productPlayStatus">Status bermain</label>
               <select id="productPlayStatus">
-                <option value="safe">Safe to Play</option>
-                <option value="risk">Use at Your Own Risk</option>
-                <option value="maintenance">Maintenance</option>
+                <option value="safe">Aman Dimainkan</option>
+                <option value="risk">Berisiko</option>
+                <option value="maintenance">Pemeliharaan</option>
               </select>
             </div>
+            <div class="product-form-section">
+              <span>03</span>
+              <strong>Fulfillment</strong>
+              <small>Sumber stok dan mapping supplier</small>
+            </div>
             <div class="field">
-              <label for="productDeliveryType">Source pengiriman</label>
+              <label for="productDeliveryType">Sumber pengiriman</label>
               <select id="productDeliveryType" onchange="updateProductSupplierUi()">
-                <option value="auto">Local Stock</option>
+                <option value="auto">Stok Lokal</option>
                 <option value="vipstore_api">VIP Store API</option>
                 <option value="cheatgame_api">CHEATGAME API</option>
-                <option value="manual">Manual Delivery</option>
+                <option value="manual">Pengiriman Manual</option>
               </select>
             </div>
             <div class="field">
@@ -5433,13 +5659,13 @@
                 Tambah Produk
               </button>
               <button class="ghost-btn" onclick="resetProductForm()">
-                Reset Form
+                Reset
               </button>
               <button class="ghost-btn" onclick="loadProducts()">
-                Refresh Produk
+                Muat Ulang
               </button>
               <button class="ghost-btn" onclick="syncVipStoreProducts()">
-                Sync Semua Supplier
+                Sinkron Supplier
               </button>
             </div>
             </div>
