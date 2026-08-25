@@ -2982,6 +2982,236 @@
           width: 92vw !important;
           max-width: 430px !important;
         }
+
+        /* Inventory Ticket: scannable mobile product records. */
+        #section-products tbody tr.product-inventory-card {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          grid-template-areas:
+            "id status"
+            "game game"
+            "brand brand"
+            "price price"
+            "platform duration"
+            "play source"
+            "actions actions";
+          gap: 8px;
+          margin-bottom: 14px;
+          padding: 12px;
+          border: 2px solid var(--ink);
+          border-radius: 18px;
+          background: var(--surface);
+          box-shadow: 4px 4px 0 var(--ink);
+        }
+
+        #section-products tbody tr.product-inventory-card[data-has-supplier="true"] {
+          grid-template-areas:
+            "id status"
+            "game game"
+            "brand brand"
+            "price price"
+            "platform duration"
+            "play source"
+            "supplier supplier"
+            "actions actions";
+        }
+
+        #section-products .product-inventory-card > td {
+          width: auto;
+          min-height: 0;
+          display: flex;
+          min-width: 0;
+          padding: 0;
+          border: 0;
+          text-align: left;
+        }
+
+        #section-products .product-card-id {
+          grid-area: id;
+          justify-content: flex-start;
+          gap: 6px;
+          color: var(--muted);
+          font-family: "JetBrains Mono", monospace;
+          font-size: 10px;
+          font-weight: 700;
+        }
+
+        #section-products .product-card-id::before {
+          content: "SKU";
+          color: var(--ink);
+          font-family: "JetBrains Mono", monospace;
+          font-size: 9px;
+        }
+
+        #section-products .product-card-status {
+          grid-area: status;
+          justify-content: flex-end;
+        }
+
+        #section-products .product-card-status::before,
+        #section-products .product-card-game::before {
+          display: none;
+        }
+
+        #section-products .product-card-game {
+          grid-area: game;
+          padding-top: 5px;
+          color: var(--ink-2);
+          font-size: 20px;
+          font-weight: 900;
+          letter-spacing: -0.045em;
+          line-height: 1.1;
+          overflow-wrap: anywhere;
+        }
+
+        #section-products .product-card-brand {
+          grid-area: brand;
+          justify-content: flex-start;
+          gap: 7px;
+          color: var(--muted);
+          font-size: 11px;
+          font-weight: 750;
+        }
+
+        #section-products .product-card-brand::before {
+          content: "Brand";
+          font-family: "JetBrains Mono", monospace;
+          font-size: 8px;
+        }
+
+        #section-products .product-card-price {
+          grid-area: price;
+          min-height: 62px;
+          display: grid;
+          grid-template-columns: 1fr auto;
+          align-items: end;
+          gap: 8px;
+          padding: 10px 12px;
+          border-radius: 12px;
+          background: var(--ink);
+          color: var(--surface);
+          font-family: "JetBrains Mono", monospace;
+          font-size: 17px;
+          font-weight: 700;
+        }
+
+        #section-products .product-card-price::before {
+          content: "Harga jual";
+          grid-column: 1 / -1;
+          color: color-mix(in srgb, var(--surface) 62%, transparent);
+          font-family: "JetBrains Mono", monospace;
+          font-size: 8px;
+          letter-spacing: 0.1em;
+        }
+
+        #section-products .product-card-price .admin-price-usdt {
+          margin: 0;
+          color: color-mix(in srgb, var(--surface) 70%, transparent);
+          font-size: 9px;
+        }
+
+        #section-products .product-card-platform,
+        #section-products .product-card-duration,
+        #section-products .product-card-play,
+        #section-products .product-card-source {
+          min-height: 52px;
+          flex-direction: column;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 6px;
+          padding: 8px 9px;
+          border: 1px solid var(--line);
+          border-radius: 11px;
+          background: var(--surface-2);
+        }
+
+        #section-products .product-card-platform {
+          grid-area: platform;
+        }
+
+        #section-products .product-card-duration {
+          grid-area: duration;
+          color: var(--ink);
+          font-family: "JetBrains Mono", monospace;
+          font-size: 11px;
+          font-weight: 700;
+        }
+
+        #section-products .product-card-play {
+          grid-area: play;
+        }
+
+        #section-products .product-card-source {
+          grid-area: source;
+        }
+
+        #section-products .product-card-platform::before,
+        #section-products .product-card-duration::before,
+        #section-products .product-card-play::before,
+        #section-products .product-card-source::before {
+          font-family: "JetBrains Mono", monospace;
+          font-size: 8px;
+          letter-spacing: 0.07em;
+        }
+
+        #section-products .product-card-platform .badge,
+        #section-products .product-card-play .badge,
+        #section-products .product-card-source .badge,
+        #section-products .product-card-status .badge {
+          max-width: 100%;
+          padding: 5px 8px;
+          font-size: 9px;
+          white-space: nowrap;
+        }
+
+        #section-products .product-card-supplier {
+          grid-area: supplier;
+          display: grid;
+          gap: 3px;
+          padding: 10px;
+          border: 1px dashed var(--line-strong);
+          border-radius: 11px;
+          background: var(--surface);
+          font-size: 10px;
+          overflow-wrap: anywhere;
+          align-items: stretch;
+          justify-content: stretch;
+          text-align: left;
+        }
+
+        #section-products .product-card-supplier::before {
+          margin-bottom: 2px;
+          font-family: "JetBrains Mono", monospace;
+          font-size: 8px;
+        }
+
+        #section-products .product-card-supplier.is-empty {
+          display: none;
+        }
+
+        #section-products .product-inventory-card > .action-cell {
+          grid-area: actions;
+          display: block;
+          padding-top: 10px;
+          border-top: 1px solid var(--line);
+        }
+
+        #section-products .product-inventory-card > .action-cell::before {
+          margin-bottom: 8px;
+          font-family: "JetBrains Mono", monospace;
+          font-size: 8px;
+        }
+
+        #section-products .product-inventory-card .product-action-group {
+          gap: 7px;
+        }
+
+        #section-products .product-inventory-card .product-action-group button {
+          min-height: 42px;
+          padding: 7px 8px;
+          border-radius: 10px;
+          font-size: 10px;
+        }
       }
 
       @media (max-width: 420px) {
@@ -7190,7 +7420,7 @@
         if (value === "manual") {
           return `<span class="badge manual">Manual</span>`;
         }
-        return `<span class="badge available">Local Stock</span>`;
+        return `<span class="badge available">Stok Lokal</span>`;
       }
 
       function supplierStatusBadge(item) {
@@ -7834,23 +8064,23 @@
 
       function activeBadge(active) {
         if (Number(active) === 1) {
-          return `<span class="badge available">Active</span>`;
+          return `<span class="badge available">Aktif</span>`;
         }
-        return `<span class="badge used">Inactive</span>`;
+        return `<span class="badge used">Nonaktif</span>`;
       }
 
       function playStatusBadge(status) {
         const value = String(status || "safe").toLowerCase();
 
         if (value === "maintenance") {
-          return `<span class="badge used">🛠 Maintenance</span>`;
+          return `<span class="badge used">Pemeliharaan</span>`;
         }
 
         if (value === "risk") {
-          return `<span class="badge warning">⚠ Use at Your Own Risk</span>`;
+          return `<span class="badge warning">Berisiko</span>`;
         }
 
-        return `<span class="badge available">✅ Safe to Play</span>`;
+        return `<span class="badge available">Aman</span>`;
       }
 
       function keyBadge(used) {
@@ -10962,22 +11192,22 @@
             const itemId = escapeHtml(item.id);
 
             return `
-                                <tr>
-                                  <td data-label="ID">${item.id}</td>
-                                  <td data-label="Game">${escapeHtml(item.game)}</td>
-                                  <td data-label="Platform">${platformBadge(item.platform)}</td>
-                                  <td data-label="Brand">${escapeHtml(item.brand)}</td>
-                                  <td data-label="Durasi">${escapeHtml(item.duration)}</td>
-                                  <td data-label="Harga">${productUsdtPriceHtml(item)}</td>
-                                  <td data-label="Play Status">${playStatusBadge(item.play_status)}</td>
-                                  <td data-label="Source">${deliverySourceBadge(item.delivery_type)}</td>
-                                  <td data-label="Supplier">${supplierProductText(item)}</td>
-                                  <td data-label="Status">${activeBadge(item.active)}</td>
+                                <tr class="product-inventory-card" data-has-supplier="${isAdminSupplierDelivery(item.delivery_type) ? "true" : "false"}">
+                                  <td data-label="ID" class="product-card-id">${itemId}</td>
+                                  <td data-label="Game" class="product-card-game">${escapeHtml(item.game)}</td>
+                                  <td data-label="Platform" class="product-card-platform">${platformBadge(item.platform)}</td>
+                                  <td data-label="Brand" class="product-card-brand">${escapeHtml(item.brand)}</td>
+                                  <td data-label="Durasi" class="product-card-duration">${escapeHtml(item.duration)}</td>
+                                  <td data-label="Harga" class="product-card-price">${productUsdtPriceHtml(item)}</td>
+                                  <td data-label="Status bermain" class="product-card-play">${playStatusBadge(item.play_status)}</td>
+                                  <td data-label="Sumber" class="product-card-source">${deliverySourceBadge(item.delivery_type)}</td>
+                                  <td data-label="Supplier" class="product-card-supplier ${isAdminSupplierDelivery(item.delivery_type) ? "" : "is-empty"}">${supplierProductText(item)}</td>
+                                  <td data-label="Status" class="product-card-status">${activeBadge(item.active)}</td>
                                   <td data-label="Aksi" class="action-cell">
                                     <div class="product-action-group">
                                       <button class="product-compare-btn" data-id="${itemId}" onclick="openSupplierComparison(this.dataset.id, this)">Bandingkan Harga</button>
                                       <button class="ghost-btn" data-args="${editArgs}" onclick="editProduct(...JSON.parse(decodeURIComponent(this.dataset.args)))">Edit</button>
-                                      ${isAdminSupplierDelivery(item.delivery_type) ? `<button class="ghost-btn" data-id="${itemId}" onclick="syncVipStoreProducts(this.dataset.id)">Sync</button>` : ""}
+                                      ${isAdminSupplierDelivery(item.delivery_type) ? `<button class="ghost-btn" data-id="${itemId}" onclick="syncVipStoreProducts(this.dataset.id)">Sinkron</button>` : ""}
                                       <button class="ghost-btn" data-id="${itemId}" data-active="${Number(item.active) === 1 ? 0 : 1}" onclick="toggleProductActive(this.dataset.id, Number(this.dataset.active))">
                                         ${Number(item.active) === 1 ? "Nonaktifkan" : "Aktifkan"}
                                       </button>
