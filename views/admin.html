@@ -4157,6 +4157,264 @@
         }
       }
 
+      /* Fulfillment Ticket: compact mobile order cards. */
+      .order-mobile-only {
+        display: none;
+      }
+
+      .order-ticket-id {
+        font-family: "DM Mono", monospace;
+        font-size: 11px;
+      }
+
+      @media (max-width: 768px) {
+        #section-orders .order-fulfillment-table tbody tr.order-ticket-row {
+          position: relative;
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 8px 10px;
+          padding: 17px 14px 14px;
+          overflow: hidden;
+          border: 1px solid var(--line-strong);
+          border-radius: 18px;
+          box-shadow: 4px 4px 0 var(--ink);
+        }
+
+        #section-orders .order-fulfillment-table tbody tr.order-ticket-row::before {
+          content: "";
+          position: absolute;
+          inset: 0 0 auto;
+          height: 5px;
+          background: var(--ink);
+        }
+
+        #section-orders
+          .order-fulfillment-table
+          tbody
+          tr.order-ticket-row.payment-paid.delivery-delivered::before {
+          background: #397a5b;
+        }
+
+        #section-orders .order-fulfillment-table .order-mobile-only {
+          display: grid;
+        }
+
+        #section-orders .order-fulfillment-table tbody td {
+          min-height: 0;
+          padding: 9px 0;
+          text-align: left;
+        }
+
+        #section-orders .order-fulfillment-table tbody td::before {
+          font-family: "JetBrains Mono", monospace;
+          font-size: 9px;
+        }
+
+        #section-orders .order-fulfillment-table tbody td[data-label="Pilih"] {
+          position: absolute;
+          top: 16px;
+          right: 13px;
+          z-index: 2;
+          width: 28px;
+          min-height: 28px;
+          display: grid;
+          padding: 0;
+          border: 0;
+          place-items: center;
+        }
+
+        #section-orders .order-fulfillment-table tbody td[data-label="Pilih"]::before {
+          display: none;
+        }
+
+        #section-orders .order-fulfillment-table tbody td[data-label="Pilih"] input {
+          width: 20px;
+          height: 20px;
+          accent-color: var(--ink);
+        }
+
+        #section-orders
+          .order-fulfillment-table
+          tbody
+          td[data-label="Pilih"]:has(input:disabled) {
+          display: none;
+        }
+
+        #section-orders .order-fulfillment-table tbody td[data-label="Order ID"],
+        #section-orders .order-fulfillment-table tbody td[data-label="Nama"],
+        #section-orders .order-fulfillment-table tbody td[data-label="Game Key"],
+        #section-orders .order-fulfillment-table tbody td[data-label="Aksi"] {
+          grid-column: 1 / -1;
+        }
+
+        #section-orders .order-fulfillment-table tbody td[data-label="Order ID"] {
+          display: grid;
+          gap: 6px;
+          padding-top: 10px;
+          padding-right: 36px;
+        }
+
+        #section-orders .order-ticket-id {
+          display: block;
+          overflow: hidden;
+          color: var(--muted);
+          font-size: 9px;
+          font-weight: 700;
+          letter-spacing: 0.03em;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        #section-orders .order-ticket-product {
+          gap: 3px;
+        }
+
+        #section-orders .order-ticket-product strong {
+          color: var(--ink);
+          font-size: 18px;
+          line-height: 1.1;
+          letter-spacing: -0.035em;
+        }
+
+        #section-orders .order-ticket-product small,
+        #section-orders .order-ticket-product time,
+        #section-orders .order-fulfillment-table tbody td[data-label="Nama"] small,
+        #section-orders .order-fulfillment-table tbody td[data-label="Total Bayar"] small {
+          color: var(--muted);
+          font-size: 10px;
+          line-height: 1.35;
+        }
+
+        #section-orders .order-ticket-product time {
+          font-family: "DM Mono", monospace;
+        }
+
+        #section-orders .order-fulfillment-table tbody td[data-label="Nama"] {
+          display: grid;
+          gap: 3px;
+          padding-block: 10px;
+        }
+
+        #section-orders .order-fulfillment-table tbody td[data-label="Kontak"],
+        #section-orders .order-fulfillment-table tbody td[data-label="Game"],
+        #section-orders .order-fulfillment-table tbody td[data-label="Produk"],
+        #section-orders .order-fulfillment-table tbody td[data-label="Voucher"],
+        #section-orders .order-fulfillment-table tbody td[data-label="Diskon"],
+        #section-orders .order-fulfillment-table tbody td[data-label="Waktu"] {
+          display: none;
+        }
+
+        #section-orders .order-fulfillment-table tbody td[data-label="Jumlah"],
+        #section-orders .order-fulfillment-table tbody td[data-label="Total Bayar"],
+        #section-orders .order-fulfillment-table .order-status-cell {
+          display: grid;
+          align-content: start;
+          justify-content: stretch;
+          gap: 5px;
+          padding: 11px;
+          border: 0;
+          border-radius: 12px;
+          background: var(--surface-2);
+        }
+
+        #section-orders .order-fulfillment-table tbody td[data-label="Jumlah"],
+        #section-orders .order-fulfillment-table tbody td[data-label="Total Bayar"] strong {
+          font-size: 14px;
+          font-weight: 900;
+        }
+
+        #section-orders .order-fulfillment-table .order-status-cell {
+          position: relative;
+          align-items: start;
+        }
+
+        #section-orders
+          .order-fulfillment-table
+          .order-status-cell[data-label="Pembayaran"]::after {
+          content: "";
+          position: absolute;
+          top: 50%;
+          right: -11px;
+          width: 12px;
+          border-top: 1px solid var(--line-strong);
+        }
+
+        #section-orders .order-fulfillment-table .order-status-cell .badge {
+          width: fit-content;
+          max-width: 100%;
+        }
+
+        #section-orders .order-fulfillment-table tbody td[data-label="Game Key"] {
+          display: grid;
+          gap: 6px;
+          padding-block: 11px;
+        }
+
+        #section-orders .key-inline-panel {
+          min-width: 0;
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto;
+          align-items: center;
+          gap: 8px;
+        }
+
+        #section-orders .key-mask {
+          max-width: none;
+          overflow: hidden;
+          padding: 10px;
+          border: 1px solid var(--line);
+          border-radius: 10px;
+          background: var(--surface-2);
+          font-size: 11px;
+          text-align: left;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        #section-orders .key-action-row {
+          width: auto;
+          display: grid;
+          grid-template-columns: repeat(2, 52px);
+          gap: 6px;
+        }
+
+        #section-orders .key-action-row button {
+          width: 52px;
+          min-height: 40px;
+          padding: 5px;
+          font-size: 10px;
+        }
+
+        #section-orders .order-fulfillment-table tbody td[data-label="Aksi"] {
+          display: grid;
+          gap: 7px;
+          padding-top: 11px;
+        }
+
+        #section-orders .order-fulfillment-table tbody td[data-label="Aksi"]::before {
+          margin-bottom: 0;
+        }
+
+        #section-orders .order-fulfillment-table .row-action-group {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 7px;
+        }
+
+        #section-orders .order-fulfillment-table .row-action-group button {
+          width: 100%;
+          min-width: 0;
+          min-height: 42px;
+          padding-inline: 7px;
+          font-size: 10px;
+          line-height: 1.2;
+        }
+
+        #section-orders .order-fulfillment-table .row-action-group button:disabled {
+          display: none;
+        }
+      }
+
       /* User Monitor: compact Nothing UI control surface. */
       #section-users .user-control-deck {
         display: grid;
@@ -5253,7 +5511,7 @@
           </div>
 
           <div class="table-wrap">
-            <table>
+            <table class="order-fulfillment-table">
               <thead>
                 <tr>
                   <th style="width: 50px">Pilih</th>
@@ -7235,7 +7493,7 @@
         const safeKey = escapeHtml(rawKey);
 
         return `
-    <div>
+    <div class="key-inline-panel">
       <code class="key-mask">${escapeHtml(maskSecretKey(rawKey))}</code>
       <div class="key-action-row">
         <button class="ghost-btn" data-value="${safeKey}" onclick="copyToClipboard(this.dataset.value)">
@@ -8149,7 +8407,7 @@
             const deleteBtn = `<button class="danger-btn" data-id="${safeId}" onclick="deleteOrder(this.dataset.id)" ${isProtected ? "disabled" : ""}>Hapus</button>`;
 
             return `
-              <tr>
+              <tr class="order-ticket-row payment-${escapeHtml(ps)} delivery-${escapeHtml(ds)}">
                 <td data-label="Pilih">
                   <input type="checkbox"
                     data-id="${safeId}"
@@ -8157,17 +8415,33 @@
                     ${isProtected ? "disabled" : ""}
                     onchange="toggleOrderSelection(this.dataset.id, this.checked)">
                 </td>
-                <td data-label="Order ID">${escapeHtml(item.id || "-")}</td>
-                <td data-label="Nama">${escapeHtml(item.name || "-")}</td>
+                <td data-label="Order ID">
+                  <code class="order-ticket-id">${escapeHtml(item.id || "-")}</code>
+                  <span class="order-mobile-only order-ticket-product">
+                    <strong>${escapeHtml(item.game || "-")}</strong>
+                    <small>${escapeHtml(item.product || "-")}</small>
+                    <time>${formatTanggal(item.created_at)}</time>
+                  </span>
+                </td>
+                <td data-label="Nama">
+                  <strong>${escapeHtml(item.name || "-")}</strong>
+                  <small class="order-mobile-only">${escapeHtml(item.contact || "-")}</small>
+                </td>
                 <td data-label="Kontak">${escapeHtml(item.contact || "-")}</td>
                 <td data-label="Game">${escapeHtml(item.game || "-")}</td>
                 <td data-label="Produk">${escapeHtml(item.product || "-")}</td>
                 <td data-label="Jumlah">${Math.max(Number(item.quantity || 1), 1)} key</td>
-                <td data-label="Total Bayar">${formatRupiah(item.price)}</td>
+                <td data-label="Total Bayar">
+                  <strong>${formatRupiah(item.price)}</strong>
+                  <small class="order-mobile-only">
+                    ${item.voucher_code ? `Voucher ${escapeHtml(item.voucher_code)}` : "Tanpa voucher"}
+                    · Diskon ${formatRupiah(item.discount_amount || 0)}
+                  </small>
+                </td>
                 <td data-label="Voucher">${escapeHtml(item.voucher_code || "-")}</td>
                 <td data-label="Diskon">${formatRupiah(item.discount_amount || 0)}</td>
-                <td data-label="Pembayaran">${orderBadge(item.payment_status)}</td>
-                <td data-label="Pengiriman">${deliveryBadge(item.delivery_status)}</td>
+                <td data-label="Pembayaran" class="order-status-cell">${orderBadge(item.payment_status)}</td>
+                <td data-label="Pengiriman" class="order-status-cell">${deliveryBadge(item.delivery_status)}</td>
                 <td data-label="Game Key">
                   ${
                     item.gameKey || item.gamekey

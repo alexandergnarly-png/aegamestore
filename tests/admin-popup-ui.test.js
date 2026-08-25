@@ -53,6 +53,9 @@ scripts.forEach(([, source]) =>
   ".admin-ops-card.active",
   'class="order-advanced-panel"',
   "Mobile order control: one primary search, compact stats, advanced on demand.",
+  "Fulfillment Ticket: compact mobile order cards.",
+  'class="order-fulfillment-table"',
+  'class="key-inline-panel"',
   ".order-filter-toolbar .order-desktop-search",
   'class="user-control-deck"',
   'class="user-badge-lab"',
@@ -95,6 +98,10 @@ assert.ok(
 assert.match(
   server,
   /app\.get\("\/users"[\s\S]*?Cache-Control", "private, no-store, max-age=0"/,
+);
+assert.match(
+  admin,
+  /const deleteBtn[\s\S]*?return `\s*<tr class="order-ticket-row payment-\$\{escapeHtml\(ps\)\} delivery-\$\{escapeHtml\(ds\)\}"/,
 );
 
 assert.ok(
