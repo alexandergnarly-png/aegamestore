@@ -1813,6 +1813,121 @@
         white-space: nowrap;
       }
 
+      .dashboard-activity-card {
+        display: grid;
+        gap: 18px;
+        margin-bottom: 18px;
+        padding: 20px;
+      }
+
+      .dashboard-activity-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .dashboard-activity-heading {
+        display: grid;
+        gap: 4px;
+      }
+
+      .dashboard-activity-heading small {
+        color: var(--muted);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      .dashboard-activity-heading h2 {
+        margin: 0;
+        color: var(--ink);
+        font-size: 20px;
+        line-height: 1;
+      }
+
+      .dashboard-quick-actions {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .dashboard-quick-action {
+        min-height: 54px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border: 1px solid var(--line-strong);
+        border-radius: 14px;
+        background: var(--surface);
+        color: var(--ink);
+        font-weight: 850;
+        text-align: left;
+      }
+
+      .dashboard-quick-action:first-child {
+        background: var(--ink);
+        color: var(--surface);
+      }
+
+      .dashboard-quick-action .ui-icon {
+        width: 19px;
+        height: 19px;
+        flex: 0 0 19px;
+      }
+
+      .dashboard-activity-list {
+        display: grid;
+        border-top: 1px solid var(--line);
+      }
+
+      .dashboard-activity-item {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 8px 14px;
+        padding: 13px 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .dashboard-activity-main {
+        min-width: 0;
+        display: grid;
+        gap: 3px;
+      }
+
+      .dashboard-activity-main strong {
+        overflow: hidden;
+        color: var(--ink);
+        font-size: 13px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .dashboard-activity-main span,
+      .dashboard-activity-meta time {
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 700;
+      }
+
+      .dashboard-activity-meta {
+        display: grid;
+        justify-items: end;
+        align-content: center;
+        gap: 5px;
+      }
+
+      .dashboard-activity-empty {
+        padding: 26px 12px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 750;
+        text-align: center;
+      }
+
       .admin-alerts-head {
         display: flex;
         justify-content: space-between;
@@ -3523,6 +3638,65 @@
           border-radius: 10px;
           font-size: 9px;
           line-height: 1.25;
+        }
+
+        /* Pocket Log: useful actions and live order context fill the dashboard tail. */
+        #section-dashboard .dashboard-activity-card {
+          gap: 14px;
+          margin-top: 10px;
+          margin-bottom: 0;
+          padding: 14px;
+          border-radius: 18px;
+          box-shadow: none;
+        }
+
+        #section-dashboard .dashboard-activity-head {
+          align-items: center;
+        }
+
+        #section-dashboard .dashboard-activity-heading h2 {
+          font-size: 17px;
+        }
+
+        #section-dashboard .dashboard-activity-head .ghost-btn {
+          min-height: 34px;
+          padding: 7px 10px;
+          border-radius: 9px;
+          font-size: 9px;
+        }
+
+        #section-dashboard .dashboard-quick-actions {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        #section-dashboard .dashboard-quick-action {
+          min-height: 72px;
+          display: grid;
+          align-content: space-between;
+          gap: 8px;
+          padding: 10px;
+          border-radius: 12px;
+          font-size: 9px;
+          line-height: 1.2;
+        }
+
+        #section-dashboard .dashboard-activity-item {
+          gap: 5px 10px;
+          padding: 11px 0;
+        }
+
+        #section-dashboard .dashboard-activity-main strong {
+          font-size: 11px;
+        }
+
+        #section-dashboard .dashboard-activity-main span,
+        #section-dashboard .dashboard-activity-meta time {
+          font-size: 8px;
+        }
+
+        #section-dashboard .dashboard-activity-meta .badge {
+          padding: 5px 7px;
+          font-size: 8px;
         }
       }
 
@@ -5942,6 +6116,36 @@
           class="admin-alerts-box dashboard-session-box"
           style="display: none"
         ></div>
+        <div class="card dashboard-activity-card delay-2">
+          <div class="dashboard-activity-head">
+            <div class="dashboard-activity-heading">
+              <small>Pusat gerak</small>
+              <h2>Aktivitas Terbaru</h2>
+            </div>
+            <button class="ghost-btn" type="button" onclick="showSection('orders')">
+              Semua order
+            </button>
+          </div>
+
+          <div class="dashboard-quick-actions" aria-label="Aksi cepat admin">
+            <button class="dashboard-quick-action" type="button" onclick="openDashboardWorkspace('products', 'productEditorPanel')">
+              <svg class="ui-icon" aria-hidden="true"><use href="#icon-product"></use></svg>
+              <span>Tambah produk</span>
+            </button>
+            <button class="dashboard-quick-action" type="button" onclick="showSection('orders')">
+              <svg class="ui-icon" aria-hidden="true"><use href="#icon-receipt"></use></svg>
+              <span>Lihat order</span>
+            </button>
+            <button class="dashboard-quick-action" type="button" onclick="openDashboardWorkspace('vouchers', 'voucherEditorPanel')">
+              <svg class="ui-icon" aria-hidden="true"><use href="#icon-ticket"></use></svg>
+              <span>Buat voucher</span>
+            </button>
+          </div>
+
+          <div class="dashboard-activity-list" id="dashboardActivityList" aria-live="polite">
+            <div class="dashboard-activity-empty">Memuat aktivitas order...</div>
+          </div>
+        </div>
       </section>
 
       <section id="section-products" class="admin-section">
@@ -7608,7 +7812,19 @@
           loadStockSummary();
           loadAdminStats();
           loadVipStoreSafetyAlerts();
+          loadDashboardActivity();
         }
+      }
+
+      function openDashboardWorkspace(sectionName, panelId) {
+        showSection(sectionName);
+        window.setTimeout(() => {
+          const panel = document.getElementById(panelId);
+          if (!panel) return;
+          if (panelId === "productEditorPanel") resetProductForm();
+          panel.open = true;
+          panel.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 0);
       }
 
       async function refreshAllData(button = document.getElementById("refreshAllButton")) {
@@ -7632,6 +7848,7 @@
             loadAdminAlerts(),
             loadVipStoreSafetyAlerts(),
             loadAdminSessions(),
+            loadDashboardActivity(),
           ]);
           announceAdmin(results.some((result) => result.status === "rejected")
             ? "Sebagian data gagal diperbarui"
@@ -10297,6 +10514,45 @@
           box.style.display = "block";
         } catch (err) {
           box.style.display = "none";
+        }
+      }
+
+      async function loadDashboardActivity() {
+        const list = document.getElementById("dashboardActivityList");
+        if (!list) return;
+
+        try {
+          const res = await fetch("/admin-orders?limit=5&offset=0", {
+            cache: "no-store",
+          });
+          if (res.status === 401) {
+            window.location.href = "/ae-auth";
+            return;
+          }
+          if (!res.ok) throw new Error("HTTP " + res.status);
+
+          const data = await res.json();
+          const rows = Array.isArray(data?.rows) ? data.rows : [];
+          list.innerHTML = rows.length
+            ? rows
+                .map(
+                  (item) => `
+                    <article class="dashboard-activity-item">
+                      <div class="dashboard-activity-main">
+                        <strong>${escapeHtml(item.game || "Order baru")} · ${escapeHtml(item.product || "-")}</strong>
+                        <span>#${escapeHtml(item.id || "-")} · ${escapeHtml(item.name || "Buyer")} · ${formatRupiah(item.price)}</span>
+                      </div>
+                      <div class="dashboard-activity-meta">
+                        ${orderBadge(item.payment_status)}
+                        <time>${formatTanggal(item.created_at)}</time>
+                      </div>
+                    </article>
+                  `,
+                )
+                .join("")
+            : '<div class="dashboard-activity-empty">Belum ada order. Tambahkan produk atau buat voucher untuk mulai berjualan.</div>';
+        } catch (err) {
+          list.innerHTML = '<div class="dashboard-activity-empty">Aktivitas belum dapat dimuat. Gunakan Muat Ulang Data untuk mencoba lagi.</div>';
         }
       }
 
