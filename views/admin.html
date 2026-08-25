@@ -5945,6 +5945,552 @@
         }
       }
 
+      /* Key Vault Workstation: inventory first, recovery on demand. */
+      #section-keys .key-vault-hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 22px;
+        margin-bottom: 18px;
+        padding: 24px;
+        border: 2px solid var(--ink);
+        border-radius: 28px;
+        background: var(--ink);
+        color: var(--surface);
+        box-shadow: 6px 6px 0 color-mix(in srgb, var(--ink) 20%, transparent);
+      }
+
+      #section-keys .key-vault-copy {
+        min-width: 0;
+      }
+
+      #section-keys .key-vault-copy small,
+      #section-keys .key-inventory-head small,
+      #section-keys .key-control-panel > summary small {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 9px;
+        font-style: normal;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      #section-keys .key-vault-copy small {
+        color: color-mix(in srgb, var(--surface) 62%, transparent);
+      }
+
+      #section-keys .key-vault-copy h1 {
+        margin: 7px 0 6px;
+        color: var(--surface);
+        font-size: clamp(30px, 4vw, 46px);
+        font-weight: 900;
+        letter-spacing: -0.065em;
+        line-height: 0.94;
+      }
+
+      #section-keys .key-vault-copy p {
+        max-width: 58ch;
+        margin: 0;
+        color: color-mix(in srgb, var(--surface) 68%, transparent);
+        font-size: 12px;
+        line-height: 1.55;
+      }
+
+      #section-keys .key-vault-refresh {
+        min-height: 44px;
+        align-self: start;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid color-mix(in srgb, var(--surface) 42%, transparent);
+        border-radius: 13px;
+        background: var(--surface);
+        color: var(--ink);
+        font-size: 11px;
+        font-weight: 900;
+      }
+
+      #section-keys .key-vault-refresh[aria-busy="true"] .ui-icon {
+        animation: admin-refresh-spin 0.8s linear infinite;
+      }
+
+      #section-keys .key-vault-stats {
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      #section-keys .key-vault-stat {
+        min-width: 0;
+        display: grid;
+        gap: 5px;
+        padding: 13px;
+        border: 1px solid color-mix(in srgb, var(--surface) 20%, transparent);
+        border-radius: 15px;
+        background: color-mix(in srgb, var(--surface) 8%, transparent);
+      }
+
+      #section-keys .key-vault-stat span {
+        color: color-mix(in srgb, var(--surface) 58%, transparent);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 8px;
+        font-weight: 800;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+      }
+
+      #section-keys .key-vault-stat strong {
+        overflow: hidden;
+        color: var(--surface);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 25px;
+        line-height: 1;
+        text-overflow: ellipsis;
+      }
+
+      #section-keys .key-vault-stat.is-primary {
+        background: var(--surface);
+      }
+
+      #section-keys .key-vault-stat.is-primary span {
+        color: var(--muted);
+      }
+
+      #section-keys .key-vault-stat.is-primary strong {
+        color: var(--success-text);
+      }
+
+      #section-keys .key-workspace-grid {
+        display: grid;
+        grid-template-columns: minmax(320px, 0.78fr) minmax(0, 1.22fr);
+        align-items: start;
+        gap: 18px;
+      }
+
+      #section-keys .key-tool-stack {
+        display: grid;
+        gap: 14px;
+      }
+
+      #section-keys .key-control-panel {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        border-radius: 22px;
+        box-shadow: none;
+      }
+
+      #section-keys .key-control-panel > summary {
+        min-height: 72px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 14px 16px;
+        cursor: pointer;
+        list-style: none;
+      }
+
+      #section-keys .key-control-panel > summary::-webkit-details-marker {
+        display: none;
+      }
+
+      #section-keys .key-control-panel > summary::after {
+        content: "+";
+        width: 34px;
+        height: 34px;
+        flex: 0 0 34px;
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--line-strong);
+        border-radius: 10px;
+        color: var(--ink);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 18px;
+        font-weight: 800;
+      }
+
+      #section-keys .key-control-panel[open] > summary::after {
+        content: "−";
+        background: var(--ink);
+        color: var(--surface);
+      }
+
+      #section-keys .key-control-panel > summary span {
+        min-width: 0;
+        display: grid;
+        gap: 3px;
+      }
+
+      #section-keys .key-control-panel > summary small,
+      #section-keys .key-inventory-head small {
+        color: var(--muted);
+      }
+
+      #section-keys .key-control-panel > summary strong {
+        color: var(--ink);
+        font-size: 16px;
+        font-weight: 900;
+      }
+
+      #section-keys .key-control-panel > summary em {
+        color: var(--muted);
+        font-size: 10px;
+        font-style: normal;
+        font-weight: 650;
+      }
+
+      #section-keys .key-panel-content {
+        display: grid;
+        gap: 12px;
+        padding: 16px;
+        border-top: 1px solid var(--line);
+        background: var(--surface-2);
+      }
+
+      #section-keys .key-panel-content .field {
+        min-width: 0;
+      }
+
+      #section-keys .key-panel-content label,
+      #section-keys .key-filter-deck label {
+        display: block;
+        margin-bottom: 6px;
+        color: var(--muted);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 8px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      #section-keys .key-entry-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      #section-keys .key-entry-mode {
+        min-width: 0;
+        display: grid;
+        align-content: start;
+        gap: 9px;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: var(--surface);
+      }
+
+      #section-keys .key-entry-heading {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      #section-keys .key-entry-heading strong {
+        color: var(--ink);
+        font-size: 12px;
+      }
+
+      #section-keys .key-entry-heading small {
+        color: var(--muted);
+        font-size: 8px;
+        font-weight: 700;
+      }
+
+      #section-keys .key-entry-mode input,
+      #section-keys .key-entry-mode textarea {
+        min-width: 0;
+        min-height: 48px;
+        padding: 11px;
+        border-radius: 12px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+      }
+
+      #section-keys .key-entry-mode textarea {
+        min-height: 94px;
+        resize: vertical;
+      }
+
+      #section-keys .key-entry-mode button,
+      #section-keys .key-reset-action {
+        width: 100%;
+        min-height: 44px;
+        border-radius: 12px;
+        background: var(--ink);
+        color: var(--surface);
+        font-size: 10px;
+      }
+
+      #section-keys .key-reset-panel {
+        border-color: var(--warn-border);
+      }
+
+      #section-keys .key-reset-panel > summary {
+        background: var(--warn-bg);
+      }
+
+      #section-keys .key-refresh-products {
+        width: 100%;
+        min-height: 42px;
+        border-radius: 12px;
+        font-size: 10px;
+      }
+
+      #section-keys .key-panel-content > .info {
+        margin: 0;
+        padding: 10px 0 0;
+        border-top: 1px solid var(--line);
+        font-size: 10px;
+      }
+
+      #section-keys .key-inventory-panel {
+        margin: 0;
+        padding: 18px;
+        border-radius: 22px;
+        box-shadow: none;
+      }
+
+      #section-keys .key-inventory-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 14px;
+        margin-bottom: 14px;
+      }
+
+      #section-keys .key-inventory-head h2 {
+        margin: 3px 0 0;
+        color: var(--ink);
+        font-size: 21px;
+        letter-spacing: -0.045em;
+      }
+
+      #section-keys .key-inventory-head .info {
+        max-width: 44%;
+        margin: 0;
+        font-size: 10px;
+        text-align: right;
+      }
+
+      #section-keys .key-filter-deck {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(140px, 0.32fr);
+        gap: 10px;
+        margin-bottom: 14px;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: var(--surface-2);
+      }
+
+      #section-keys .key-filter-deck .field {
+        min-width: 0;
+      }
+
+      #section-keys .key-inventory-wrap {
+        margin: 0;
+        box-shadow: none;
+      }
+
+      #section-keys .key-ticket-id {
+        color: var(--ink);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        font-weight: 800;
+      }
+
+      #section-keys .key-product-title {
+        display: grid;
+        gap: 3px;
+      }
+
+      #section-keys .key-product-title strong {
+        color: var(--ink);
+        font-size: 12px;
+      }
+
+      #section-keys .key-product-title small {
+        color: var(--muted);
+        font-size: 9px;
+        font-weight: 650;
+      }
+
+      @media (max-width: 768px) {
+        #section-keys .key-vault-hero {
+          grid-template-columns: minmax(0, 1fr) auto;
+          gap: 14px;
+          margin-bottom: 12px;
+          padding: 16px;
+          border-radius: 20px;
+          box-shadow: 4px 4px 0 color-mix(in srgb, var(--ink) 18%, transparent);
+        }
+
+        #section-keys .key-vault-copy h1 {
+          margin-top: 5px;
+          font-size: 28px;
+        }
+
+        #section-keys .key-vault-copy p {
+          max-width: 240px;
+          font-size: 10px;
+        }
+
+        #section-keys .key-vault-refresh {
+          width: 42px;
+          min-height: 42px;
+          justify-content: center;
+          padding: 0;
+        }
+
+        #section-keys .key-vault-refresh span {
+          display: none;
+        }
+
+        #section-keys .key-vault-stats {
+          gap: 6px;
+        }
+
+        #section-keys .key-vault-stat {
+          padding: 10px;
+          border-radius: 12px;
+        }
+
+        #section-keys .key-vault-stat span {
+          font-size: 7px;
+        }
+
+        #section-keys .key-vault-stat strong {
+          font-size: 20px;
+        }
+
+        #section-keys .key-workspace-grid {
+          grid-template-columns: 1fr;
+          gap: 12px;
+        }
+
+        #section-keys .key-tool-stack {
+          gap: 10px;
+        }
+
+        #section-keys .key-control-panel {
+          border-radius: 17px;
+        }
+
+        #section-keys .key-control-panel > summary {
+          min-height: 64px;
+          padding: 11px 13px;
+        }
+
+        #section-keys .key-control-panel > summary strong {
+          font-size: 14px;
+        }
+
+        #section-keys .key-panel-content {
+          gap: 10px;
+          padding: 12px;
+        }
+
+        #section-keys .key-entry-grid {
+          grid-template-columns: 1fr;
+        }
+
+        #section-keys .key-entry-mode {
+          padding: 10px;
+          border-radius: 13px;
+        }
+
+        #section-keys .key-entry-mode textarea {
+          min-height: 82px;
+        }
+
+        #section-keys .key-inventory-panel {
+          padding: 13px;
+          border-radius: 18px;
+        }
+
+        #section-keys .key-inventory-head {
+          align-items: flex-start;
+          margin-bottom: 11px;
+        }
+
+        #section-keys .key-inventory-head h2 {
+          font-size: 17px;
+        }
+
+        #section-keys .key-inventory-head .info {
+          max-width: 48%;
+          font-size: 8px;
+        }
+
+        #section-keys .key-filter-deck {
+          grid-template-columns: minmax(0, 1fr) 108px;
+          gap: 7px;
+          padding: 9px;
+          border-radius: 13px;
+        }
+
+        #section-keys .key-filter-deck input,
+        #section-keys .key-filter-deck select {
+          min-width: 0;
+          min-height: 44px;
+          padding-inline: 10px;
+          border-radius: 11px;
+          font-size: 10px;
+        }
+
+        #section-keys .key-inventory-table tbody {
+          display: grid;
+          gap: 10px;
+        }
+
+        #section-keys .key-inventory-table tbody tr {
+          display: block;
+          padding: 12px;
+          border: 1px solid var(--line);
+          border-left: 4px solid var(--success-text);
+          border-radius: 15px;
+          background: var(--surface);
+          box-shadow: none;
+        }
+
+        #section-keys .key-inventory-table tbody tr.is-used {
+          border-left-color: var(--muted-2);
+        }
+
+        #section-keys .key-inventory-table tbody tr:has(.empty) {
+          border-left-color: var(--line);
+        }
+
+        #section-keys .key-inventory-table tbody td {
+          min-height: 38px;
+          padding: 8px 0;
+        }
+
+        #section-keys .key-inventory-table tbody td[data-label="Produk"] {
+          align-items: flex-start;
+        }
+
+        #section-keys .key-inventory-table tbody td[data-label="Key"] {
+          align-items: center;
+        }
+
+        #section-keys .key-inventory-table .key-mask {
+          max-width: 155px;
+        }
+
+        #section-keys .key-inventory-table tbody td[data-label="Aksi"] {
+          padding-top: 10px;
+        }
+
+        #section-keys .key-inventory-table tbody td[data-label="Aksi"] button {
+          width: 100%;
+          min-height: 42px;
+          border-radius: 11px;
+        }
+      }
 
     </style>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -6974,133 +7520,162 @@
       </section>
 
       <section id="section-keys" class="admin-section">
-        <div class="card delay-1">
-          <div class="card-header">
-            <div class="card-title-wrap">
-              <h2>Tambah Game Key</h2>
-              <p class="card-subtitle">
-                Tambahkan key satuan atau bulk untuk setiap produk yang aktif.
-              </p>
+        <div class="key-vault-hero delay-1">
+          <div class="key-vault-copy">
+            <small>Inventory / Key Vault</small>
+            <h1>Game Key Control</h1>
+            <p>Isi stok, lacak pemakaian, dan pulihkan key supplier dari satu meja kerja.</p>
+          </div>
+          <button class="key-vault-refresh" id="keyRefreshButton" type="button" onclick="loadKeys()" aria-label="Muat ulang stok key">
+            <svg class="ui-icon" aria-hidden="true"><use href="#icon-refresh"></use></svg>
+            <span data-key-refresh-label>Muat ulang</span>
+          </button>
+          <div class="key-vault-stats" aria-label="Ringkasan stok key">
+            <div class="key-vault-stat is-primary">
+              <span>Tersedia</span>
+              <strong id="keyPageAvailableStat">0</strong>
             </div>
-            <div class="section-badge">Key Stock</div>
+            <div class="key-vault-stat">
+              <span>Terpakai</span>
+              <strong id="keyPageUsedStat">0</strong>
+            </div>
+            <div class="key-vault-stat">
+              <span>Total vault</span>
+              <strong id="keyPageTotalStat">0</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="key-workspace-grid">
+          <div class="key-tool-stack">
+            <details class="card key-control-panel delay-1" id="keyStockPanel" open>
+              <summary>
+                <span>
+                  <small>Stok / Tambah</small>
+                  <strong>Masukkan Game Key</strong>
+                  <em>Satuan atau banyak sekaligus</em>
+                </span>
+              </summary>
+              <div class="key-panel-content">
+                <div class="field key-product-field">
+                  <label for="keyProductSelect">Produk tujuan</label>
+                  <select id="keyProductSelect"></select>
+                </div>
+
+                <div class="key-entry-grid">
+                  <div class="key-entry-mode">
+                    <div class="key-entry-heading">
+                      <strong>Satu key</strong>
+                      <small>Tambah cepat</small>
+                    </div>
+                    <input
+                      type="text"
+                      id="singleKeyInput"
+                      placeholder="Contoh: KEY-AAA-111"
+                      autocomplete="off"
+                      spellcheck="false"
+                    />
+                    <button type="button" onclick="addSingleKey()">Simpan satu key</button>
+                  </div>
+
+                  <div class="key-entry-mode">
+                    <div class="key-entry-heading">
+                      <strong>Bulk key</strong>
+                      <small>Satu key per baris</small>
+                    </div>
+                    <textarea
+                      id="bulkKeyInput"
+                      placeholder="KEY-AAA-111&#10;KEY-BBB-222"
+                      spellcheck="false"
+                    ></textarea>
+                    <button type="button" onclick="addBulkKeys()">Simpan bulk key</button>
+                  </div>
+                </div>
+              </div>
+            </details>
+
+            <details class="card key-control-panel key-reset-panel delay-2">
+              <summary>
+                <span>
+                  <small>Supplier / Recovery</small>
+                  <strong>Reset Key Supplier</strong>
+                  <em>API Secret tetap diproses di server</em>
+                </span>
+              </summary>
+              <div class="key-panel-content">
+                <div class="field">
+                  <label for="vipResetProductSelect">Produk supplier</label>
+                  <select id="vipResetProductSelect">
+                    <option value="">Muat produk reset...</option>
+                  </select>
+                </div>
+                <button class="ghost-btn key-refresh-products" type="button" onclick="loadVipStoreResetProducts()">
+                  <svg class="ui-icon" aria-hidden="true"><use href="#icon-refresh"></use></svg>
+                  Muat produk supplier
+                </button>
+                <div class="field">
+                  <label for="vipResetKeyInput">Key customer</label>
+                  <input
+                    type="text"
+                    id="vipResetKeyInput"
+                    placeholder="Tempel key yang akan di-reset"
+                    autocomplete="off"
+                    maxlength="500"
+                  />
+                </div>
+                <button class="key-reset-action" type="button" onclick="resetVipStoreKeyFromAdmin()">
+                  Reset key supplier
+                </button>
+                <div class="info" id="vipResetStatus" aria-live="polite">
+                  Produk reset supplier belum dimuat.
+                </div>
+              </div>
+            </details>
           </div>
 
-          <div class="toolbar">
-            <div class="field-wide">
-              <input
-                type="text"
-                id="keySearchInput"
-                placeholder="Cari key / game / brand / durasi"
-              />
+          <div class="card key-inventory-panel delay-2">
+            <div class="key-inventory-head">
+              <div>
+                <small>Vault ledger</small>
+                <h2>Daftar Game Key</h2>
+              </div>
+              <div class="info" id="keyStatusText">Memuat daftar key...</div>
             </div>
 
-            <div class="field">
-              <select id="keyStatusFilter" onchange="applyKeyFilters()">
-                <option value="">Semua Status</option>
-                <option value="0">Available</option>
-                <option value="1">Used</option>
-              </select>
+            <div class="key-filter-deck">
+              <div class="field">
+                <label for="keySearchInput">Cari inventory</label>
+                <input
+                  type="search"
+                  id="keySearchInput"
+                  placeholder="Key, game, brand, atau durasi"
+                  autocomplete="off"
+                />
+              </div>
+              <div class="field">
+                <label for="keyStatusFilter">Status</label>
+                <select id="keyStatusFilter" onchange="applyKeyFilters()">
+                  <option value="">Semua status</option>
+                  <option value="0">Tersedia</option>
+                  <option value="1">Terpakai</option>
+                </select>
+              </div>
             </div>
-          </div>
 
-          <div class="toolbar">
-            <div class="field-wide">
-              <select id="keyProductSelect"></select>
+            <div class="table-wrap key-inventory-wrap">
+              <table class="key-inventory-table">
+                <thead>
+                  <tr>
+                    <th style="width: 90px">ID</th>
+                    <th>Produk</th>
+                    <th>Key</th>
+                    <th style="width: 180px">Status</th>
+                    <th style="width: 140px">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="keyTableBody"></tbody>
+              </table>
             </div>
-          </div>
-
-          <div class="toolbar">
-            <div class="field-wide">
-              <input
-                type="text"
-                id="singleKeyInput"
-                placeholder="Masukkan 1 game key, contoh: KEY-AAA-111"
-              />
-            </div>
-            <div class="btn-group">
-              <button onclick="addSingleKey()">Tambah 1 Key</button>
-            </div>
-          </div>
-
-          <div class="toolbar">
-            <div class="field-wide">
-              <textarea
-                id="bulkKeyInput"
-                placeholder="Masukkan banyak key, satu key per baris&#10;Contoh:&#10;KEY-AAA-111&#10;KEY-BBB-222"
-              ></textarea>
-            </div>
-          </div>
-
-          <div class="toolbar">
-            <div class="btn-group">
-              <button onclick="addBulkKeys()">Tambah Bulk Key</button>
-              <button class="ghost-btn" onclick="loadKeys()">
-                Refresh Key
-              </button>
-            </div>
-          </div>
-
-          <div class="card-header" style="margin-top: 18px;">
-            <div class="card-title-wrap">
-              <h3>Reset Key Supplier</h3>
-              <p class="card-subtitle">
-                Reset key yang sudah dibeli melalui Supplier API.
-                API Secret tetap diproses di server.
-              </p>
-            </div>
-            <div class="section-badge">Supplier Tool</div>
-          </div>
-          <div class="toolbar">
-            <div class="field-wide">
-              <select id="vipResetProductSelect" aria-label="Produk reset supplier">
-                <option value="">Muat produk reset...</option>
-              </select>
-            </div>
-            <div class="btn-group">
-              <button class="ghost-btn" type="button" onclick="loadVipStoreResetProducts()">
-                Refresh Produk
-              </button>
-            </div>
-          </div>
-          <div class="toolbar">
-            <div class="field-wide">
-              <input
-                type="text"
-                id="vipResetKeyInput"
-                placeholder="Tempel key customer yang mau di-reset"
-                autocomplete="off"
-                maxlength="500"
-              />
-            </div>
-            <div class="btn-group">
-              <button type="button" onclick="resetVipStoreKeyFromAdmin()">
-                Reset Key
-              </button>
-            </div>
-          </div>
-          <div class="info-row">
-            <div class="info" id="vipResetStatus" aria-live="polite">
-              Produk reset supplier belum dimuat.
-            </div>
-          </div>
-
-          <div class="info-row">
-            <div class="info" id="keyStatusText">Memuat daftar key...</div>
-          </div>
-
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th style="width: 90px">ID</th>
-                  <th>Produk</th>
-                  <th>Key</th>
-                  <th style="width: 180px">Status</th>
-                  <th style="width: 140px">Aksi</th>
-                </tr>
-              </thead>
-              <tbody id="keyTableBody"></tbody>
-            </table>
           </div>
         </div>
       </section>
@@ -8767,9 +9342,13 @@
       function updateKeyStats(keys) {
         const total = keys.length;
         const available = keys.filter((item) => Number(item.used) === 0).length;
+        const used = total - available;
 
         document.getElementById("totalKeyStat").innerText = total;
         document.getElementById("availableKeyStat").innerText = available;
+        document.getElementById("keyPageTotalStat").innerText = total;
+        document.getElementById("keyPageAvailableStat").innerText = available;
+        document.getElementById("keyPageUsedStat").innerText = used;
       }
 
       function updateOrderStats(orders) {
@@ -8951,12 +9530,21 @@
       async function loadKeys() {
         const statusText = document.getElementById("keyStatusText");
         const tableBody = document.getElementById("keyTableBody");
+        const refreshButton = document.getElementById("keyRefreshButton");
+        const refreshLabel = refreshButton?.querySelector("[data-key-refresh-label]");
 
         statusText.innerText = "Memuat daftar key...";
         tableBody.innerHTML = "";
+        if (refreshButton) {
+          refreshButton.disabled = true;
+          refreshButton.setAttribute("aria-busy", "true");
+        }
+        if (refreshLabel) refreshLabel.innerText = "Memuat...";
 
         try {
-          const res = await fetch("/keys");
+          const res = await fetch(`/keys?fresh=${Date.now()}`, {
+            cache: "no-store",
+          });
 
           if (res.status === 401) {
             window.location.href = "/ae-auth";
@@ -8987,6 +9575,12 @@
         <td colspan="5" class="empty">Terjadi error saat mengambil key.</td>
       </tr>
     `;
+        } finally {
+          if (refreshButton) {
+            refreshButton.disabled = false;
+            refreshButton.removeAttribute("aria-busy");
+          }
+          if (refreshLabel) refreshLabel.innerText = "Muat ulang";
         }
       }
 
@@ -9046,12 +9640,17 @@
         tableBody.innerHTML = filtered
           .map(
             (item) => `
-        <tr>
-          <td>${item.id}</td>
-          <td>${escapeHtml(formatAdminProductLabel(item, " - "))}</td>
-          <td>${renderMaskedKey(item.key)}</td>
-          <td>${keyBadge(item.used)}</td>
-          <td>
+        <tr class="key-inventory-card ${Number(item.used) === 1 ? "is-used" : "is-ready"}">
+          <td data-label="ID"><code class="key-ticket-id">#${escapeHtml(item.id)}</code></td>
+          <td data-label="Produk">
+            <span class="key-product-title">
+              <strong>${escapeHtml(item.game || "-")}</strong>
+              <small>${escapeHtml([getAdminPlatformLabel(item.platform), item.brand, item.duration].filter(Boolean).join(" · "))}</small>
+            </span>
+          </td>
+          <td data-label="Key">${renderMaskedKey(item.key)}</td>
+          <td data-label="Status">${keyBadge(item.used)}</td>
+          <td data-label="Aksi">
             <button class="danger-btn" data-id="${escapeHtml(item.id)}" onclick="deleteKey(this.dataset.id)">Hapus</button>
           </td>
         </tr>
