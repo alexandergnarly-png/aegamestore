@@ -16147,7 +16147,7 @@ body.dark-theme .ae-ai-form button {
   }
 }
 
-/* AE patch 20260825-checkout-docket-v1 */
+/* AE patch 20260825-checkout-docket-v2 */
 .order-modal {
   --checkout-paper: #f3f2ed;
   --checkout-card: #ffffff;
@@ -16158,6 +16158,7 @@ body.dark-theme .ae-ai-form button {
 }
 
 .order-modal-card {
+  position: relative;
   scroll-padding-block: 112px 104px;
   overscroll-behavior: contain;
 }
@@ -16255,15 +16256,15 @@ body.dark-theme .ae-ai-form button {
   }
 
   .order-modal .modal-head {
-    position: sticky;
-    top: 0;
-    z-index: 28;
+    position: relative;
+    top: auto;
+    z-index: 1;
     min-height: 68px;
     margin: 0 -12px !important;
     padding: calc(15px + env(safe-area-inset-top, 0px)) 64px 12px 16px !important;
     border-bottom: 1px solid var(--checkout-line);
-    background: rgba(243, 242, 237, 0.96);
-    backdrop-filter: blur(16px);
+    background: var(--checkout-paper);
+    backdrop-filter: none;
   }
 
   .order-modal .modal-head h2 {
@@ -16284,9 +16285,11 @@ body.dark-theme .ae-ai-form button {
   }
 
   .order-modal .modal-close-btn {
+    position: absolute !important;
     top: calc(10px + env(safe-area-inset-top, 0px)) !important;
+    right: 12px !important;
     z-index: 40 !important;
-    margin-bottom: -44px !important;
+    margin: 0 !important;
   }
 
   .order-modal .modal-close-btn::before {
@@ -16299,14 +16302,14 @@ body.dark-theme .ae-ai-form button {
   }
 
   .order-modal .order-steps {
-    position: sticky !important;
-    top: calc(68px + env(safe-area-inset-top, 0px)) !important;
-    z-index: 24 !important;
+    position: relative !important;
+    top: auto !important;
+    z-index: 1 !important;
     margin: 0 -12px 18px !important;
     padding: 8px 12px !important;
     border-top: 0 !important;
-    background: rgba(243, 242, 237, 0.96) !important;
-    backdrop-filter: blur(16px);
+    background: var(--checkout-paper) !important;
+    backdrop-filter: none;
   }
 
   .order-modal .order-step {
@@ -16345,22 +16348,48 @@ body.dark-theme .ae-ai-form button {
   }
 
   .order-modal .order-product-cards {
-    display: flex !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
     max-height: none !important;
-    gap: 9px !important;
-    margin-inline: -12px;
-    padding: 2px 12px 8px !important;
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-    scroll-padding-inline: 12px;
-    scroll-snap-type: x mandatory;
+    gap: 8px !important;
+    margin-inline: 0;
+    padding: 2px 0 4px !important;
+    overflow: visible !important;
+    scroll-snap-type: none;
   }
 
   .order-modal .order-product-card {
+    width: 100%;
     min-width: 0;
-    min-height: 132px !important;
-    flex: 0 0 min(78vw, 248px);
-    scroll-snap-align: start;
+    min-height: 92px !important;
+    padding: 32px 12px 10px !important;
+    scroll-snap-align: none;
+  }
+
+  .order-modal .order-product-status {
+    top: 9px;
+    left: 11px;
+    min-height: 18px;
+    padding: 3px 7px;
+    border-width: 1px;
+    box-shadow: none;
+  }
+
+  .order-modal .order-product-main {
+    gap: 1px;
+  }
+
+  .order-modal .order-product-main strong {
+    font-size: 12px;
+  }
+
+  .order-modal .order-product-main b {
+    font-size: 20px;
+  }
+
+  .order-modal .order-product-stock {
+    border-width: 1px;
+    box-shadow: none;
   }
 
   .order-modal .bulk-quantity-field,
@@ -16387,7 +16416,90 @@ body.dark-theme .ae-ai-form button {
 
   .order-modal .voucher-toggle {
     min-height: 58px;
-    padding: 12px 14px;
+    padding: 12px 13px;
+  }
+
+  .order-modal .voucher-panel[open] {
+    border-color: var(--checkout-ink) !important;
+  }
+
+  .order-modal .voucher-toggle-main {
+    gap: 9px;
+  }
+
+  .order-modal .voucher-toggle-main > span {
+    display: grid;
+    min-width: 42px;
+    min-height: 26px;
+    place-items: center;
+    border: 1px dashed var(--checkout-ink);
+    border-radius: 8px;
+    background: var(--checkout-paper);
+    font: 700 9px/1 "DM Mono", monospace;
+    letter-spacing: 0.08em;
+  }
+
+  .order-modal .voucher-toggle-main b {
+    font-size: 14px;
+  }
+
+  .order-modal .voucher-toggle small {
+    padding-left: 51px;
+    color: var(--checkout-muted);
+  }
+
+  .order-modal .voucher-toggle-arrow {
+    width: 34px;
+    height: 34px;
+    background: var(--checkout-ink);
+    color: #ffffff;
+  }
+
+  .order-modal .voucher-panel-body {
+    padding: 13px !important;
+    border-top: 1px dashed var(--checkout-line);
+    background: #fafaf8;
+  }
+
+  .order-modal .voucher-panel-body label {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--checkout-muted);
+    font: 700 10px/1.2 "DM Mono", monospace;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .order-modal .voucher-row {
+    grid-template-columns: minmax(0, 1fr) 84px;
+    gap: 7px;
+  }
+
+  .order-modal #voucherCodeInput {
+    min-width: 0;
+    min-height: 48px;
+    border: 1px solid var(--checkout-line) !important;
+    border-radius: 12px !important;
+    background: #ffffff !important;
+    font-size: 14px;
+    text-transform: uppercase;
+  }
+
+  .order-modal .voucher-check-btn {
+    min-height: 48px;
+    border-radius: 12px !important;
+  }
+
+  .order-modal .voucher-check-btn > span {
+    display: none;
+  }
+
+  .order-modal .voucher-message:not(:empty) {
+    min-height: 0;
+    margin-top: 9px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: var(--checkout-paper);
   }
 
   .order-modal .modal-summary {
@@ -16454,10 +16566,6 @@ body.dark-theme .ae-ai-form button {
 @media (max-width: 360px) {
   .order-modal .order-step-label {
     display: inline !important;
-  }
-
-  .order-modal .order-product-card {
-    flex-basis: 82vw;
   }
 }
 
