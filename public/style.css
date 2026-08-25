@@ -16147,7 +16147,7 @@ body.dark-theme .ae-ai-form button {
   }
 }
 
-/* AE patch 20260825-checkout-docket-v2 */
+/* AE patch 20260825-checkout-docket-v3 */
 .order-modal {
   --checkout-paper: #f3f2ed;
   --checkout-card: #ffffff;
@@ -16245,6 +16245,94 @@ body.dark-theme .ae-ai-form button {
   text-align: left;
 }
 
+.order-modal .order-steps {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 0 !important;
+  padding-block: 12px !important;
+}
+
+.order-modal .order-step {
+  position: relative;
+  display: flex !important;
+  min-height: 54px !important;
+  flex-direction: column;
+  gap: 6px !important;
+  padding: 0 4px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--checkout-muted) !important;
+  box-shadow: none !important;
+}
+
+.order-modal .order-step:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 15px;
+  left: calc(50% + 20px);
+  z-index: 0;
+  width: calc(100% - 40px);
+  height: 1px;
+  background: var(--checkout-line);
+}
+
+.order-modal .order-step-dot {
+  position: relative;
+  z-index: 1;
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  flex-basis: 32px !important;
+  border: 1px solid var(--checkout-line) !important;
+  border-radius: 50% !important;
+  background: var(--checkout-card) !important;
+  color: var(--checkout-muted) !important;
+  font: 700 10px/1 "DM Mono", monospace !important;
+}
+
+.order-modal .order-step-label {
+  display: block !important;
+  color: inherit !important;
+  font: 700 9px/1.1 "DM Mono", monospace !important;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.order-modal .order-step.is-active {
+  color: var(--checkout-ink) !important;
+}
+
+.order-modal .order-step.is-active .order-step-dot {
+  border-color: var(--checkout-ink) !important;
+  background: var(--checkout-ink) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 0 4px var(--checkout-card) !important;
+}
+
+.order-modal .order-step.is-done {
+  color: var(--checkout-safe) !important;
+}
+
+.order-modal .order-step.is-done::after {
+  background: var(--checkout-safe);
+}
+
+.order-modal .order-step.is-done .order-step-dot {
+  border-color: var(--checkout-safe) !important;
+  background: var(--checkout-safe) !important;
+  color: transparent !important;
+}
+
+.order-modal .order-step.is-done .order-step-dot::after {
+  content: "\2713";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  font: 800 14px/1 sans-serif;
+}
+
 @media (max-width: 640px) {
   .order-modal-card {
     padding: 0 12px calc(88px + env(safe-area-inset-bottom, 0px)) !important;
@@ -16306,15 +16394,15 @@ body.dark-theme .ae-ai-form button {
     top: auto !important;
     z-index: 1 !important;
     margin: 0 -12px 18px !important;
-    padding: 8px 12px !important;
+    padding: 11px 8px 9px !important;
     border-top: 0 !important;
     background: var(--checkout-paper) !important;
     backdrop-filter: none;
   }
 
   .order-modal .order-step {
-    min-height: 38px !important;
-    padding: 6px 8px !important;
+    min-height: 52px !important;
+    padding: 0 3px !important;
   }
 
   .order-modal .checkout-section-heading {
