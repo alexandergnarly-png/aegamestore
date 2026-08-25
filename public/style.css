@@ -16147,7 +16147,7 @@ body.dark-theme .ae-ai-form button {
   }
 }
 
-/* AE patch 20260825-checkout-docket-v3 */
+/* AE patch 20260825-checkout-docket-v4 */
 .order-modal {
   --checkout-paper: #f3f2ed;
   --checkout-card: #ffffff;
@@ -16166,6 +16166,18 @@ body.dark-theme .ae-ai-form button {
 .order-modal .order-platform-pills,
 .order-modal .order-brand-pills {
   scrollbar-width: none;
+}
+
+.order-modal .order-platform-pill iconify-icon {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  color: currentColor;
+  font-size: 20px;
+}
+
+.order-modal .order-platform-pill span {
+  margin-right: auto;
 }
 
 .order-modal .order-platform-pills::-webkit-scrollbar,
@@ -16433,6 +16445,11 @@ body.dark-theme .ae-ai-form button {
     min-height: 48px;
     flex: 0 0 auto;
     scroll-snap-align: start;
+  }
+
+  .order-modal .order-platform-pill {
+    gap: 8px !important;
+    padding-inline: 12px !important;
   }
 
   .order-modal .order-product-cards {

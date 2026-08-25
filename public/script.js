@@ -1855,6 +1855,12 @@ function renderOrderPlatformPills(platforms) {
 
   platforms.forEach((platform) => {
     const normalizedPlatform = normalizePlatform(platform);
+    const platformIcon =
+      normalizedPlatform === "ios"
+        ? "mdi:apple"
+        : normalizedPlatform === "android"
+          ? "mdi:android"
+          : "mdi:devices";
     const products = allProducts.filter(
       (item) => item.game === selectedGame && getProductPlatform(item) === normalizedPlatform,
     );
@@ -1873,6 +1879,7 @@ function renderOrderPlatformPills(platforms) {
     );
     btn.dataset.platform = normalizedPlatform;
     btn.innerHTML = `
+      <iconify-icon icon="${platformIcon}" aria-hidden="true"></iconify-icon>
       <span>${getPlatformLabel(normalizedPlatform)}</span>
       <small>${readyCount} ready</small>
     `;
