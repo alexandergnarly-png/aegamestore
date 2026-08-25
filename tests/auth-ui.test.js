@@ -63,6 +63,12 @@ adminScripts.forEach(([, source]) =>
   '.field-error:empty, .form-status:empty',
   'matchMedia("(min-width: 821px)").matches',
   'password: passwordInput.value',
+  'AE patch 20260825-admin-access-card-v1',
+  'class="access-status" role="status"',
+  'data-i18n="accessStatus"',
+  'data-i18n="accessStatusDetail"',
+  'data-i18n="accessStatusBadge"',
+  'border-radius: 24px;',
 ].forEach((marker) =>
   assert.ok(admin.includes(marker), `Missing admin login UX marker: ${marker}`),
 );
