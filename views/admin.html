@@ -832,6 +832,167 @@
         line-height: 1.5;
       }
 
+      .reseller-control-hero {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 12px;
+        padding: 24px;
+        border: 1px solid var(--line-strong);
+        border-radius: 30px 30px 10px 30px;
+        background: var(--surface);
+        box-shadow: 8px 8px 0 color-mix(in srgb, var(--ink) 14%, transparent);
+      }
+
+      .reseller-control-kicker {
+        margin-bottom: 7px;
+        color: var(--success-text);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .14em;
+      }
+
+      .reseller-control-hero h1 {
+        font-size: clamp(30px, 6vw, 48px);
+        line-height: .94;
+        letter-spacing: -.065em;
+      }
+
+      .reseller-control-hero p {
+        margin-top: 9px;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 650;
+      }
+
+      .reseller-control-hero-actions {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+      }
+
+      .reseller-control-hero-actions select,
+      .reseller-control-hero-actions button {
+        min-height: 46px;
+      }
+
+      .reseller-metric-strip {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        margin-bottom: 18px;
+        overflow: hidden;
+        border: 1px solid var(--line-strong);
+        border-radius: 22px;
+        background: var(--surface);
+      }
+
+      .reseller-metric-strip > div {
+        min-width: 0;
+        padding: 16px 18px;
+        border-right: 1px solid var(--line);
+      }
+
+      .reseller-metric-strip > div:last-child { border-right: 0; }
+      .reseller-metric-strip .is-profit { background: var(--ink); color: var(--surface); }
+      .reseller-metric-strip span,
+      .reseller-profit-summary span {
+        display: block;
+        color: var(--muted);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+      }
+      .reseller-metric-strip .is-profit span,
+      .reseller-metric-strip .is-profit small { color: color-mix(in srgb, var(--surface) 65%, transparent); }
+      .reseller-metric-strip strong {
+        display: block;
+        margin: 4px 0 1px;
+        overflow-wrap: anywhere;
+        font-size: clamp(19px, 3vw, 28px);
+        letter-spacing: -.045em;
+      }
+      .reseller-metric-strip small { color: var(--muted); font-size: 10px; font-weight: 700; }
+
+      .reseller-control-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.3fr) minmax(330px, .7fr);
+        gap: 18px;
+        align-items: start;
+      }
+      .reseller-control-grid > .card { margin: 0; }
+      .reseller-list-card { grid-row: span 2; }
+      .reseller-search-row { max-width: 420px; margin-bottom: 14px; }
+      .reseller-profit-summary {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin-bottom: 14px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 17px;
+        background: var(--surface-2);
+      }
+      .reseller-profit-summary > div { min-width: 0; padding: 11px; border-right: 1px solid var(--line); }
+      .reseller-profit-summary > div:last-child { border-right: 0; }
+      .reseller-profit-summary strong { display: block; margin-top: 4px; overflow-wrap: anywhere; font-size: 13px; }
+      .reseller-deposit-card { grid-column: 1 / -1; }
+      .reseller-deposit-toolbar { display: grid; grid-template-columns: repeat(2, minmax(180px, 280px)); }
+
+      .reseller-detail-dialog {
+        width: min(1040px, calc(100vw - 28px));
+        max-height: min(88vh, 900px);
+        margin: auto;
+        padding: 0;
+        overflow: hidden;
+        color: var(--ink);
+        border: 1px solid var(--line-strong);
+        border-radius: 30px;
+        background: var(--surface);
+        box-shadow: 14px 14px 0 rgba(0,0,0,.22);
+      }
+      .reseller-detail-dialog::backdrop { background: rgba(10,10,10,.62); backdrop-filter: blur(4px); }
+      .reseller-detail-shell { max-height: inherit; display: flex; flex-direction: column; }
+      .reseller-detail-head {
+        display: flex;
+        align-items: start;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 20px;
+        border-bottom: 1px solid var(--line);
+        background: var(--surface);
+      }
+      .reseller-detail-head h2 { font-size: 27px; letter-spacing: -.055em; }
+      .reseller-detail-head p { margin-top: 3px; color: var(--muted); font-size: 12px; font-weight: 700; }
+      .reseller-detail-close {
+        width: 48px;
+        height: 48px;
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: var(--surface-2);
+        color: var(--ink);
+        font-size: 24px;
+      }
+      .reseller-detail-content { padding: 18px; overflow: auto; }
+      .reseller-detail-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 16px; }
+      .reseller-detail-summary > div { min-width: 0; padding: 14px; border: 1px solid var(--line); border-radius: 18px; background: var(--surface-2); }
+      .reseller-detail-summary span { color: var(--muted); font-size: 10px; font-weight: 850; text-transform: uppercase; letter-spacing: .05em; }
+      .reseller-detail-summary strong { display: block; margin-top: 5px; overflow-wrap: anywhere; font-size: 18px; }
+      .reseller-adjustment-form { display: grid; grid-template-columns: 150px 180px minmax(220px, 1fr) auto; gap: 10px; align-items: end; margin-bottom: 18px; padding: 14px; border: 1px solid var(--line-strong); border-radius: 20px; }
+      .reseller-adjustment-form .field { display: grid; gap: 6px; }
+      .reseller-adjustment-form button { min-height: 46px; }
+      .reseller-detail-ledger-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+      .reseller-detail-block { min-width: 0; }
+      .reseller-detail-block h3 { margin-bottom: 8px; font-size: 15px; }
+      .reseller-detail-block .table-wrap { max-height: 360px; overflow: auto; box-shadow: none; }
+      .reseller-direction { display: inline-flex; align-items: center; gap: 5px; font-weight: 850; }
+      .reseller-direction.credit { color: var(--success-text); }
+      .reseller-direction.debit { color: var(--danger-text); }
+
       .field,
       .field-wide,
       .user-search-field {
@@ -2938,6 +3099,11 @@
         .wallet-grid {
           grid-template-columns: 1fr;
         }
+
+        .reseller-control-grid { grid-template-columns: 1fr; }
+        .reseller-list-card { grid-row: auto; }
+        .reseller-deposit-card { grid-column: auto; }
+        .reseller-detail-ledger-grid { grid-template-columns: 1fr; }
       }
 
       @media (max-width: 768px) {
@@ -3069,6 +3235,24 @@
         .wallet-filter-toolbar {
           grid-template-columns: 1fr;
         }
+
+        .reseller-control-hero { align-items: stretch; padding: 17px; flex-direction: column; border-radius: 26px 26px 8px 26px; }
+        .reseller-control-hero-actions { display: grid; grid-template-columns: 1fr; }
+        .reseller-control-hero-actions button { width: 100%; }
+        .reseller-metric-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .reseller-metric-strip > div { padding: 13px; border-bottom: 1px solid var(--line); }
+        .reseller-metric-strip > div:nth-child(2) { border-right: 0; }
+        .reseller-metric-strip > div:nth-child(n+3) { border-bottom: 0; }
+        .reseller-profit-summary { grid-template-columns: 1fr; }
+        .reseller-profit-summary > div { border-right: 0; border-bottom: 1px solid var(--line); }
+        .reseller-profit-summary > div:last-child { border-bottom: 0; }
+        .reseller-deposit-toolbar { grid-template-columns: 1fr; }
+        .reseller-detail-dialog { width: 100vw; max-height: 92vh; margin: auto 0 0; border-radius: 28px 28px 0 0; box-shadow: none; }
+        .reseller-detail-head { padding: 16px; }
+        .reseller-detail-content { padding: 13px; }
+        .reseller-detail-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .reseller-adjustment-form { grid-template-columns: 1fr; }
+        .reseller-adjustment-form button { width: 100%; }
 
         .toolbar,
         .date-range-row,
@@ -6940,6 +7124,10 @@
           <span class="nav-ico" aria-hidden="true"><svg class="ui-icon"><use href="#icon-crown"></use></svg></span>
           <span>Prestige Discount</span>
         </button>
+        <button class="nav-btn" data-section="resellers" onclick="showSection('resellers', this)">
+          <span class="nav-ico" aria-hidden="true"><svg class="ui-icon"><use href="#icon-users"></use></svg></span>
+          <span>Reseller</span>
+        </button>
         <button class="nav-btn" data-section="wallet" onclick="showSection('wallet', this)">
           <span class="nav-ico" aria-hidden="true"><svg class="ui-icon"><use href="#icon-wallet"></use></svg></span>
           <span>AE Credit</span>
@@ -8434,6 +8622,80 @@
       </div>
     </section>
 
+    <section id="section-resellers" class="admin-section">
+      <div class="reseller-control-hero delay-1">
+        <div>
+          <div class="reseller-control-kicker">AE / RESELLER CONTROL</div>
+          <h1>Reseller</h1>
+          <p>Saldo, deposit, dan laba dalam satu catatan.</p>
+        </div>
+        <div class="reseller-control-hero-actions">
+          <select id="resellerPeriodFilter" aria-label="Periode laporan reseller" onchange="loadResellerControl()">
+            <option value="7d">7 hari</option>
+            <option value="30d" selected>30 hari</option>
+            <option value="90d">90 hari</option>
+            <option value="all">Semua</option>
+          </select>
+          <button type="button" class="ghost-btn" onclick="loadResellerControl()"><svg class="ui-icon" aria-hidden="true"><use href="#icon-refresh"></use></svg> Muat ulang</button>
+        </div>
+      </div>
+
+      <div class="reseller-metric-strip delay-1" aria-label="Ringkasan reseller">
+        <div><span>Aktif</span><strong id="resellerMetricActive">0</strong><small id="resellerMetricSuspended">0 ditangguhkan</small></div>
+        <div><span>Total saldo</span><strong id="resellerMetricBalance">Rp0</strong><small>Saldo tersedia</small></div>
+        <div><span>Order dibayar</span><strong id="resellerMetricOrders">0</strong><small id="resellerMetricRevenue">Rp0 omzet</small></div>
+        <div class="is-profit"><span>Laba kotor</span><strong id="resellerMetricProfit">Rp0</strong><small id="resellerMetricMargin">0% margin</small></div>
+      </div>
+
+      <div class="reseller-control-grid">
+        <article class="card reseller-list-card delay-1">
+          <div class="card-header">
+            <div class="card-title-wrap"><h2>Daftar reseller</h2><p class="card-subtitle">Buka akun untuk melihat mutasi, deposit, order, dan mengubah saldo.</p></div>
+            <div class="section-badge" id="resellerCountBadge">0 akun</div>
+          </div>
+          <div class="reseller-search-row">
+            <div class="field"><label for="resellerControlSearch">Cari reseller</label><input id="resellerControlSearch" type="search" autocomplete="off" placeholder="Username atau ID" oninput="renderResellerControlList()"></div>
+          </div>
+          <div class="table-wrap"><table><thead><tr><th>Reseller</th><th>Status</th><th>Saldo</th><th>Order</th><th>Laba</th><th>Aksi</th></tr></thead><tbody id="resellerControlTableBody"><tr><td class="empty" colspan="6">Pilih menu Reseller untuk memuat data.</td></tr></tbody></table></div>
+        </article>
+
+        <article class="card reseller-profit-card delay-2">
+          <div class="card-header">
+            <div class="card-title-wrap"><h2>Laporan laba</h2><p class="card-subtitle">Modal API dan laba per produk reseller.</p></div>
+            <div class="section-badge">Kotor</div>
+          </div>
+          <div class="reseller-profit-summary">
+            <div><span>Omzet</span><strong id="resellerProfitRevenue">Rp0</strong></div>
+            <div><span>Modal API</span><strong id="resellerProfitCost">Rp0</strong></div>
+            <div><span>Laba</span><strong id="resellerProfitGross">Rp0</strong></div>
+          </div>
+          <div class="table-wrap"><table><thead><tr><th>Produk</th><th>Terjual</th><th>Modal</th><th>Laba</th></tr></thead><tbody id="resellerProfitTableBody"><tr><td class="empty" colspan="4">Belum ada data.</td></tr></tbody></table></div>
+        </article>
+
+        <article class="card reseller-deposit-card delay-2">
+          <div class="card-header">
+            <div class="card-title-wrap"><h2>Deposit reseller</h2><p class="card-subtitle">Cek, batalkan, atau verifikasi pembayaran reseller.</p></div>
+            <div class="section-badge" id="resellerDepositBadge">0 menunggu</div>
+          </div>
+          <div class="toolbar reseller-deposit-toolbar">
+            <div class="field"><label for="resellerDepositStatus">Status</label><select id="resellerDepositStatus" onchange="loadResellerDeposits()"><option value="all">Semua</option><option value="pending">Menunggu</option><option value="approved">Berhasil</option><option value="rejected">Gagal</option></select></div>
+            <div class="field"><label for="resellerDepositProvider">Metode</label><select id="resellerDepositProvider" onchange="loadResellerDeposits()"><option value="all">Semua</option><option value="midtrans">Midtrans</option><option value="manual_qris">QRIS manual</option></select></div>
+          </div>
+          <div class="table-wrap"><table><thead><tr><th>Reseller</th><th>Deposit</th><th>Status</th><th>Waktu</th><th>Aksi</th></tr></thead><tbody id="resellerDepositTableBody"><tr><td class="empty" colspan="5">Belum ada data.</td></tr></tbody></table></div>
+        </article>
+      </div>
+
+      <dialog id="resellerDetailDialog" class="reseller-detail-dialog" aria-labelledby="resellerDetailTitle">
+        <div class="reseller-detail-shell">
+          <header class="reseller-detail-head">
+            <div><div class="reseller-control-kicker">ACCOUNT LEDGER</div><h2 id="resellerDetailTitle">Detail reseller</h2><p id="resellerDetailMeta">Memuat data...</p></div>
+            <form method="dialog"><button class="reseller-detail-close" aria-label="Tutup detail reseller">&times;</button></form>
+          </header>
+          <div id="resellerDetailContent" class="reseller-detail-content"></div>
+        </div>
+      </dialog>
+    </section>
+
     <section id="section-wallet" class="admin-section">
       <div class="wallet-hero delay-1">
         <div class="wallet-hero-copy">
@@ -8551,9 +8813,13 @@
       </div>
       <div class="admin-more-sheet-section-label">
         <span>Kelola toko</span>
-        <small>4 menu</small>
+        <small>5 menu</small>
       </div>
       <div class="admin-more-sheet-grid">
+        <button type="button" class="admin-more-sheet-item" onclick="bottomNavGo('resellers'); closeMoreSheet();">
+          <span class="ico" aria-hidden="true"><svg class="ui-icon"><use href="#icon-users"></use></svg></span>
+          <span class="admin-more-sheet-item-copy"><strong>Reseller</strong><small>Saldo, deposit, dan laba</small></span>
+        </button>
         <button
           type="button"
           class="admin-more-sheet-item"
@@ -8669,6 +8935,9 @@
       let supplierCompareProductId = null;
       let supplierCompareData = null;
       let supplierCompareTrigger = null;
+      let adminResellers = [];
+      let adminResellerProfits = [];
+      let activeResellerId = null;
 
       function toggleSidebar() {
         const isCollapsed = document.body.classList.toggle("sidebar-collapsed");
@@ -8740,6 +9009,134 @@
 
       mountPersistentAdminTopNav();
 
+      async function loadResellerControl() {
+        const period = document.getElementById("resellerPeriodFilter")?.value || "30d";
+        const body = document.getElementById("resellerControlTableBody");
+        if (body) body.innerHTML = `<tr><td class="empty" colspan="6">Memuat reseller...</td></tr>`;
+        try {
+          const res = await fetch(`/api/admin/resellers?period=${encodeURIComponent(period)}`);
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.message || "Gagal memuat reseller");
+          adminResellers = data.resellers || [];
+          adminResellerProfits = data.profits || [];
+          const summary = data.summary || {};
+          const setText = (id, value) => { const element = document.getElementById(id); if (element) element.textContent = value; };
+          setText("resellerMetricActive", Number(summary.active || 0));
+          setText("resellerMetricSuspended", `${Number(summary.suspended || 0)} ditangguhkan`);
+          setText("resellerMetricBalance", formatRupiah(summary.balance || 0));
+          setText("resellerMetricOrders", Number(summary.paid_orders || 0));
+          setText("resellerMetricRevenue", `${formatRupiah(summary.revenue || 0)} omzet`);
+          setText("resellerMetricProfit", formatRupiah(summary.gross_profit || 0));
+          const margin = Number(summary.revenue || 0) > 0 ? (Number(summary.gross_profit || 0) / Number(summary.revenue || 0)) * 100 : 0;
+          setText("resellerMetricMargin", `${margin.toFixed(1)}% margin`);
+          setText("resellerCountBadge", `${adminResellers.length} akun`);
+          setText("resellerProfitRevenue", formatRupiah(summary.revenue || 0));
+          setText("resellerProfitCost", formatRupiah(summary.supplier_cost || 0));
+          setText("resellerProfitGross", formatRupiah(summary.gross_profit || 0));
+          setText("resellerDepositBadge", `${Number(summary.pending_deposits || 0)} menunggu`);
+          renderResellerControlList();
+          renderResellerProfitReport();
+          loadResellerDeposits();
+        } catch (err) {
+          if (body) body.innerHTML = `<tr><td class="empty" colspan="6">${escapeHtml(err.message)}</td></tr>`;
+        }
+      }
+
+      function renderResellerControlList() {
+        const body = document.getElementById("resellerControlTableBody");
+        if (!body) return;
+        const search = String(document.getElementById("resellerControlSearch")?.value || "").trim().toLowerCase();
+        const rows = adminResellers.filter((row) => !search || String(row.username || "").toLowerCase().includes(search) || String(row.id).includes(search));
+        body.innerHTML = rows.length ? rows.map((row) => `<tr>
+          <td data-label="Reseller"><strong>${escapeHtml(row.username || "-")}</strong><br><small>#${escapeHtml(row.id)} · sejak ${formatTanggal(row.reseller_approved_at || row.created_at)}</small></td>
+          <td data-label="Status"><span class="badge ${row.reseller_status === "approved" ? "approved" : "rejected"}">${row.reseller_status === "approved" ? "Aktif" : "Ditangguhkan"}</span></td>
+          <td data-label="Saldo"><strong>${formatRupiah(row.balance || 0)}</strong></td>
+          <td data-label="Order"><strong>${Number(row.paid_orders || 0)}</strong><br><small>${formatRupiah(row.revenue || 0)} omzet</small></td>
+          <td data-label="Laba"><strong>${formatRupiah(row.gross_profit || 0)}</strong></td>
+          <td data-label="Aksi"><button type="button" class="small-btn" data-id="${escapeHtml(row.id)}" onclick="openResellerDetail(this.dataset.id)">Buka akun</button></td>
+        </tr>`).join("") : `<tr><td class="empty" colspan="6">Reseller tidak ditemukan.</td></tr>`;
+      }
+
+      function renderResellerProfitReport() {
+        const body = document.getElementById("resellerProfitTableBody");
+        if (!body) return;
+        body.innerHTML = adminResellerProfits.length ? adminResellerProfits.map((row) => `<tr>
+          <td data-label="Produk"><strong>${escapeHtml(row.game || "-")}</strong><br><small>${escapeHtml(row.product || "-")}</small></td>
+          <td data-label="Terjual"><strong>${Number(row.keys_sold || 0)} key</strong><br><small>${Number(row.paid_orders || 0)} order</small></td>
+          <td data-label="Modal">${formatRupiah(row.supplier_cost || 0)}</td>
+          <td data-label="Laba"><strong>${formatRupiah(row.gross_profit || 0)}</strong></td>
+        </tr>`).join("") : `<tr><td class="empty" colspan="4">Belum ada order reseller dibayar pada periode ini.</td></tr>`;
+      }
+
+      async function loadResellerDeposits() {
+        const body = document.getElementById("resellerDepositTableBody");
+        if (!body) return;
+        const status = document.getElementById("resellerDepositStatus")?.value || "all";
+        const provider = document.getElementById("resellerDepositProvider")?.value || "all";
+        body.innerHTML = `<tr><td class="empty" colspan="5">Memuat deposit...</td></tr>`;
+        try {
+          const res = await fetch(`/api/admin/wallet/topups?scope=reseller&status=${encodeURIComponent(status)}&provider=${encodeURIComponent(provider)}`);
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.message || "Gagal memuat deposit");
+          const rows = data.topups || [];
+          body.innerHTML = rows.length ? rows.map((row) => {
+            const isMidtrans = row.provider === "midtrans";
+            const action = row.status === "pending" && isMidtrans
+              ? `<div class="row-action-group"><button class="small-btn" data-id="${escapeHtml(row.id)}" onclick="syncWalletTopup(this.dataset.id)">Cek</button><button class="small-btn danger" data-id="${escapeHtml(row.id)}" onclick="cancelWalletTopup(this.dataset.id)">Batalkan</button></div>`
+              : row.status === "pending"
+                ? `<div class="row-action-group"><button class="small-btn" data-id="${escapeHtml(row.id)}" onclick="approveWalletTopup(this.dataset.id)">Setujui</button><button class="small-btn danger" data-id="${escapeHtml(row.id)}" onclick="rejectWalletTopup(this.dataset.id)">Tolak</button></div>`
+                : `<small>${escapeHtml(row.admin_note || row.reviewed_by || "Selesai")}</small>`;
+            return `<tr><td data-label="Reseller"><strong>${escapeHtml(row.username || `User #${row.user_id}`)}</strong><br><small>#${escapeHtml(row.user_id)}</small></td>
+              <td data-label="Deposit"><strong>${formatRupiah(row.amount || 0)}</strong><br><small>${isMidtrans ? "Midtrans" : "QRIS manual"}</small></td>
+              <td data-label="Status"><span class="badge ${escapeHtml(row.status)}">${row.status === "approved" ? "Berhasil" : row.status === "pending" ? "Menunggu" : "Gagal"}</span></td>
+              <td data-label="Waktu">${formatTanggal(row.paid_at || row.reviewed_at || row.created_at)}</td><td data-label="Aksi">${action}</td></tr>`;
+          }).join("") : `<tr><td class="empty" colspan="5">Tidak ada deposit yang cocok.</td></tr>`;
+        } catch (err) { body.innerHTML = `<tr><td class="empty" colspan="5">${escapeHtml(err.message)}</td></tr>`; }
+      }
+
+      async function openResellerDetail(userId) {
+        activeResellerId = Number(userId);
+        const dialog = document.getElementById("resellerDetailDialog");
+        const content = document.getElementById("resellerDetailContent");
+        if (!dialog || !content) return;
+        content.innerHTML = `<div class="empty">Memuat catatan akun...</div>`;
+        if (!dialog.open) dialog.showModal();
+        try {
+          const res = await fetch(`/api/admin/resellers/${encodeURIComponent(userId)}`);
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.message || "Gagal memuat akun reseller");
+          const reseller = data.reseller || {};
+          const orders = data.orders || [];
+          const revenue = orders.filter((row) => row.payment_status === "paid").reduce((sum, row) => sum + Number(row.price || 0), 0);
+          const profit = orders.filter((row) => row.payment_status === "paid").reduce((sum, row) => sum + Number(row.gross_profit || 0), 0);
+          document.getElementById("resellerDetailTitle").textContent = reseller.username || "Detail reseller";
+          document.getElementById("resellerDetailMeta").textContent = `Reseller #${reseller.id} · ${reseller.reseller_status === "approved" ? "aktif" : "ditangguhkan"}`;
+          const ledgerRows = (data.ledger || []).map((row) => `<tr><td data-label="Waktu">${formatTanggal(row.created_at)}</td><td data-label="Mutasi"><span class="reseller-direction ${escapeHtml(row.direction)}">${row.direction === "credit" ? "+" : "−"} ${formatRupiah(row.amount)}</span><br><small>${escapeHtml(row.description || row.entry_type)}</small></td><td data-label="Saldo">${formatRupiah(row.balance_before)} → <strong>${formatRupiah(row.balance_after)}</strong><br><small>${escapeHtml(row.admin_username || "sistem")}</small></td></tr>`).join("");
+          const topupRows = (data.topups || []).map((row) => `<tr><td data-label="Waktu">${formatTanggal(row.paid_at || row.reviewed_at || row.created_at)}</td><td data-label="Nominal"><strong>${formatRupiah(row.amount)}</strong><br><small>${row.provider === "midtrans" ? "Midtrans" : "QRIS manual"}</small></td><td data-label="Status"><span class="badge ${escapeHtml(row.status)}">${escapeHtml(row.status)}</span></td></tr>`).join("");
+          const orderRows = orders.map((row) => `<tr><td data-label="Order"><strong>${escapeHtml(row.game || "-")}</strong><br><small>${escapeHtml(row.product || row.id)}</small></td><td data-label="Bayar">${formatRupiah(row.price)}<br><small>${Number(row.quantity || 1)} key</small></td><td data-label="Laba"><strong>${formatRupiah(row.gross_profit)}</strong><br><small>${escapeHtml(row.payment_status || "-")}</small></td></tr>`).join("");
+          content.innerHTML = `<div class="reseller-detail-summary"><div><span>Saldo</span><strong>${formatRupiah(reseller.balance)}</strong></div><div><span>Order terbaru</span><strong>${orders.length}</strong></div><div><span>Omzet terbaru</span><strong>${formatRupiah(revenue)}</strong></div><div><span>Laba terbaru</span><strong>${formatRupiah(profit)}</strong></div></div>
+            <form class="reseller-adjustment-form" onsubmit="adjustResellerBalance(event)"><div class="field"><label for="resellerAdjustmentDirection">Penyesuaian</label><select id="resellerAdjustmentDirection"><option value="credit">Tambah saldo</option><option value="debit">Kurangi saldo</option></select></div><div class="field"><label for="resellerAdjustmentAmount">Nominal</label><input id="resellerAdjustmentAmount" type="number" min="1000" max="2000000" step="1000" required placeholder="Rp 50.000"></div><div class="field"><label for="resellerAdjustmentReason">Alasan</label><input id="resellerAdjustmentReason" type="text" minlength="4" maxlength="300" required placeholder="Contoh: koreksi deposit"></div><button type="submit">Simpan mutasi</button></form>
+            <div class="reseller-detail-ledger-grid"><section class="reseller-detail-block"><h3>Mutasi saldo</h3><div class="table-wrap"><table><thead><tr><th>Waktu</th><th>Mutasi</th><th>Saldo</th></tr></thead><tbody>${ledgerRows || `<tr><td class="empty" colspan="3">Belum ada mutasi.</td></tr>`}</tbody></table></div></section><section class="reseller-detail-block"><h3>Deposit</h3><div class="table-wrap"><table><thead><tr><th>Waktu</th><th>Nominal</th><th>Status</th></tr></thead><tbody>${topupRows || `<tr><td class="empty" colspan="3">Belum ada deposit.</td></tr>`}</tbody></table></div></section><section class="reseller-detail-block"><h3>Order reseller</h3><div class="table-wrap"><table><thead><tr><th>Order</th><th>Bayar</th><th>Laba</th></tr></thead><tbody>${orderRows || `<tr><td class="empty" colspan="3">Belum ada order.</td></tr>`}</tbody></table></div></section></div>`;
+        } catch (err) { content.innerHTML = `<div class="empty">${escapeHtml(err.message)}</div>`; }
+      }
+
+      async function adjustResellerBalance(event) {
+        event.preventDefault();
+        if (!activeResellerId) return;
+        const direction = document.getElementById("resellerAdjustmentDirection")?.value;
+        const amount = Number(document.getElementById("resellerAdjustmentAmount")?.value || 0);
+        const reason = document.getElementById("resellerAdjustmentReason")?.value.trim();
+        const confirmation = await Swal.fire({ title: direction === "credit" ? "Tambah saldo reseller?" : "Kurangi saldo reseller?", html: `<p><strong>${formatRupiah(amount)}</strong></p><p>${escapeHtml(reason || "")}</p>`, icon: "warning", showCancelButton: true, confirmButtonText: "Simpan mutasi", cancelButtonText: "Batal" });
+        if (!confirmation.isConfirmed) return;
+        try {
+          const res = await fetch(`/api/admin/resellers/${encodeURIComponent(activeResellerId)}/balance`, { method: "POST", headers: { "Content-Type": "application/json", "x-csrf-token": getCsrfToken() }, body: JSON.stringify({ direction, amount, reason }) });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.message || "Mutasi gagal disimpan");
+          await Swal.fire("Tersimpan", `${data.message}. Saldo ${formatRupiah(data.balance)}.`, "success");
+          await Promise.all([openResellerDetail(activeResellerId), loadResellerControl()]);
+        } catch (err) { Swal.fire("Gagal", err.message, "error"); }
+      }
+
       async function loadWalletTopups() {
         const status = document.getElementById("walletStatusFilter")?.value || "all";
         const provider = document.getElementById("walletProviderFilter")?.value || "all";
@@ -8785,6 +9182,7 @@
         if (!res.ok) return Swal.fire("Gagal", data.message || "Approve gagal", "error");
         await Swal.fire("Berhasil", data.message, "success");
         loadWalletTopups();
+        loadResellerDeposits();
       }
 
       async function rejectWalletTopup(id) {
@@ -8794,6 +9192,7 @@
         const data = await res.json();
         if (!res.ok) return Swal.fire("Gagal", data.message || "Reject gagal", "error");
         loadWalletTopups();
+        loadResellerDeposits();
       }
 
       async function syncWalletTopup(id) {
@@ -8802,6 +9201,7 @@
         if (!res.ok) return Swal.fire("Gagal", data.message || "Status gagal dicek", "error");
         await Swal.fire("Status diperbarui", data.message, data.status === "pending" ? "info" : "success");
         loadWalletTopups();
+        loadResellerDeposits();
       }
 
       async function cancelWalletTopup(id) {
@@ -8812,6 +9212,7 @@
         if (!res.ok) return Swal.fire("Tidak dapat dibatalkan", data.message || "Pembatalan gagal", "error");
         await Swal.fire("Dibatalkan", data.message, "success");
         loadWalletTopups();
+        loadResellerDeposits();
       }
 
       async function deleteWalletTopup(id) {
@@ -8822,6 +9223,7 @@
         if (!res.ok) return Swal.fire("Gagal", data.message || "Riwayat gagal dihapus", "error");
         await Swal.fire("Terhapus", data.message, "success");
         loadWalletTopups();
+        loadResellerDeposits();
       }
 
       async function grantWalletCredit() {
@@ -8861,6 +9263,7 @@
           keys: "Game Key",
           vouchers: "Voucher",
           "vip-discounts": "Prestige Discount",
+          resellers: "Reseller",
           wallet: "AE Credit",
         };
         const activeLabel = sectionLabels[sectionName] || "Admin Panel";
@@ -8927,6 +9330,8 @@
           loadVipDiscountProductOptions();
           loadVipDiscounts();
         }
+
+        if (sectionName === "resellers") loadResellerControl();
 
         if (sectionName === "wallet") loadWalletTopups();
 
@@ -10382,6 +10787,9 @@
           const data = await res.json();
           if (!res.ok) throw new Error(data.message || "Gagal mengubah status reseller");
           await loadUsers();
+          if (document.getElementById("section-resellers")?.classList.contains("active")) {
+            await loadResellerControl();
+          }
           Swal.fire("Berhasil", data.message, "success");
         } catch (err) {
           Swal.fire("Gagal", err.message, "error");

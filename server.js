@@ -7866,6 +7866,157 @@ app.post(
   },
 );
 
+function getAdminResellerPeriodCutoff(period) {
+  if (period === "all") return null;
+  const days = period === "7d" ? 7 : period === "90d" ? 90 : 30;
+  return new Date(Date.now() - days * 86400000).toISOString();
+}
+
+app.get("/api/admin/resellers", requireAdminAuth, async (req, res) => {
+  const period = ["7d", "30d", "90d", "all"].includes(String(req.query.period || ""))
+    ? String(req.query.period) : "30d";
+  const cutoff = getAdminResellerPeriodCutoff(period);
+  try {
+    const [resellersResult, profitResult, depositResult] = await Promise.all([
+      query(`SELECT u.id, u.username, u.created_at, u.reseller_status, u.reseller_approved_at,
+          COALESCE(w.balance, 0)::bigint AS balance,
+          COUNT(o.id) FILTER (WHERE o.payment_status = 'paid' AND o.pricing_tier = 'reseller'
+            AND ($1::text IS NULL OR o.created_at >= $1))::int AS paid_orders,
+          COALESCE(SUM(o.price) FILTER (WHERE o.payment_status = 'paid' AND o.pricing_tier = 'reseller'
+            AND ($1::text IS NULL OR o.created_at >= $1)), 0)::bigint AS revenue,
+          COALESCE(SUM(o.supplier_cost) FILTER (WHERE o.payment_status = 'paid' AND o.pricing_tier = 'reseller'
+            AND ($1::text IS NULL OR o.created_at >= $1)), 0)::bigint AS supplier_cost,
+          COALESCE(SUM(o.gross_profit) FILTER (WHERE o.payment_status = 'paid' AND o.pricing_tier = 'reseller'
+            AND ($1::text IS NULL OR o.created_at >= $1)), 0)::bigint AS gross_profit
+        FROM users u
+        LEFT JOIN wallet_accounts w ON w.user_id = u.id
+        LEFT JOIN orders o ON o.user_id = u.id
+        WHERE u.reseller_status IN ('approved', 'suspended')
+        GROUP BY u.id, w.balance
+        ORDER BY CASE WHEN u.reseller_status = 'approved' THEN 0 ELSE 1 END,
+          gross_profit DESC, LOWER(u.username) ASC`, [cutoff]),
+      query(`SELECT COALESCE(NULLIF(game, ''), 'Tanpa nama') AS game,
+          COALESCE(NULLIF(product, ''), 'Produk') AS product,
+          COUNT(*)::int AS paid_orders, COALESCE(SUM(quantity), 0)::int AS keys_sold,
+          COALESCE(SUM(price), 0)::bigint AS revenue,
+          COALESCE(SUM(supplier_cost), 0)::bigint AS supplier_cost,
+          COALESCE(SUM(gross_profit), 0)::bigint AS gross_profit
+        FROM orders
+        WHERE payment_status = 'paid' AND pricing_tier = 'reseller'
+          AND ($1::text IS NULL OR created_at >= $1)
+        GROUP BY game, product
+        ORDER BY gross_profit DESC, LOWER(game) ASC, LOWER(product) ASC LIMIT 40`, [cutoff]),
+      query(`SELECT COUNT(*) FILTER (WHERE t.status = 'pending')::int AS pending,
+          COALESCE(SUM(t.amount) FILTER (WHERE t.status = 'approved'
+            AND ($1::text IS NULL OR COALESCE(t.paid_at, t.reviewed_at, t.created_at) >= $1)), 0)::bigint AS approved_amount
+        FROM wallet_topup_requests t JOIN users u ON u.id = t.user_id
+        WHERE u.reseller_status IN ('approved', 'suspended')`, [cutoff]),
+    ]);
+    const numberFields = (row, fields) => {
+      const output = { ...row };
+      fields.forEach((field) => { output[field] = Number(row[field] || 0); });
+      return output;
+    };
+    const resellerFields = ["balance", "paid_orders", "revenue", "supplier_cost", "gross_profit"];
+    const profitFields = ["paid_orders", "keys_sold", "revenue", "supplier_cost", "gross_profit"];
+    const resellers = resellersResult.rows.map((row) => numberFields(row, resellerFields));
+    const profits = profitResult.rows.map((row) => numberFields(row, profitFields));
+    const deposit = depositResult.rows[0] || {};
+    return res.json({ period, summary: {
+      active: resellers.filter((row) => row.reseller_status === "approved").length,
+      suspended: resellers.filter((row) => row.reseller_status === "suspended").length,
+      balance: resellers.reduce((sum, row) => sum + row.balance, 0),
+      paid_orders: resellers.reduce((sum, row) => sum + row.paid_orders, 0),
+      revenue: resellers.reduce((sum, row) => sum + row.revenue, 0),
+      supplier_cost: resellers.reduce((sum, row) => sum + row.supplier_cost, 0),
+      gross_profit: resellers.reduce((sum, row) => sum + row.gross_profit, 0),
+      pending_deposits: Number(deposit.pending || 0),
+      approved_deposits: Number(deposit.approved_amount || 0),
+    }, resellers, profits });
+  } catch (err) {
+    console.error("ERROR ADMIN RESELLERS:", err);
+    return res.status(500).json({ message: "Gagal memuat data reseller" });
+  }
+});
+
+app.get("/api/admin/resellers/:id", requireAdminAuth, async (req, res) => {
+  const userId = Number(req.params.id);
+  if (!Number.isInteger(userId) || userId <= 0) return res.status(400).json({ message: "ID reseller tidak valid" });
+  try {
+    const [userResult, ledgerResult, topupResult, orderResult] = await Promise.all([
+      query(`SELECT u.id, u.username, u.created_at, u.reseller_status, u.reseller_approved_at,
+          COALESCE(w.balance, 0)::bigint AS balance
+        FROM users u LEFT JOIN wallet_accounts w ON w.user_id = u.id
+        WHERE u.id = $1 AND u.reseller_status IN ('approved', 'suspended') LIMIT 1`, [userId]),
+      query(`SELECT id, entry_type, direction, amount, balance_before, balance_after,
+          reference_type, reference_id, description, admin_username, created_at
+        FROM wallet_ledger WHERE user_id = $1 ORDER BY created_at DESC, id DESC LIMIT 30`, [userId]),
+      query(`SELECT id, amount, payment_amount, status, provider, provider_order_id,
+          payment_reference, admin_note, reviewed_by, created_at, reviewed_at, paid_at
+        FROM wallet_topup_requests WHERE user_id = $1 ORDER BY created_at DESC LIMIT 12`, [userId]),
+      query(`SELECT id, game, product, quantity, price, supplier_cost, gross_profit,
+          payment_status, delivery_status, created_at
+        FROM orders WHERE user_id = $1 AND pricing_tier = 'reseller'
+        ORDER BY created_at DESC LIMIT 12`, [userId]),
+    ]);
+    const user = userResult.rows[0];
+    if (!user) return res.status(404).json({ message: "Reseller tidak ditemukan" });
+    const toNumbers = (row, fields) => {
+      const output = { ...row };
+      fields.forEach((field) => { output[field] = Number(row[field] || 0); });
+      return output;
+    };
+    return res.json({
+      reseller: toNumbers(user, ["balance"]),
+      ledger: ledgerResult.rows.map((row) => toNumbers(row, ["amount", "balance_before", "balance_after"])),
+      topups: topupResult.rows.map((row) => toNumbers(row, ["amount", "payment_amount"])),
+      orders: orderResult.rows.map((row) => toNumbers(row, ["quantity", "price", "supplier_cost", "gross_profit"])),
+    });
+  } catch (err) {
+    console.error("ERROR ADMIN RESELLER DETAIL:", err);
+    return res.status(500).json({ message: "Gagal memuat detail reseller" });
+  }
+});
+
+app.post("/api/admin/resellers/:id/balance", requireAdminAuth, requireAdminCsrf, async (req, res) => {
+  const userId = Number(req.params.id);
+  const direction = String(req.body?.direction || "").trim().toLowerCase();
+  const amount = parseWalletAmount(req.body?.amount);
+  const reason = String(req.body?.reason || "").trim().slice(0, 300);
+  if (!Number.isInteger(userId) || userId <= 0) return res.status(400).json({ message: "ID reseller tidak valid" });
+  if (!["credit", "debit"].includes(direction)) return res.status(400).json({ message: "Jenis penyesuaian tidak valid" });
+  if (amount < 1000 || amount > WALLET_MAX_TOPUP) return res.status(400).json({ message: "Nominal harus Rp1.000 sampai Rp2.000.000" });
+  if (reason.length < 4) return res.status(400).json({ message: "Alasan minimal 4 karakter" });
+  const adminUsername = await getAdminSessionUsername(req).catch(() => "admin");
+  const client = await db.connect();
+  try {
+    await client.query("BEGIN");
+    const user = (await client.query(`SELECT id, username FROM users
+      WHERE id = $1 AND reseller_status IN ('approved', 'suspended') FOR UPDATE`, [userId])).rows[0];
+    if (!user) { await client.query("ROLLBACK"); return res.status(404).json({ message: "Reseller tidak ditemukan" }); }
+    await ensureWalletAccount(client, userId);
+    const wallet = (await client.query(`SELECT balance FROM wallet_accounts WHERE user_id = $1 FOR UPDATE`, [userId])).rows[0];
+    const before = Number(wallet?.balance || 0);
+    const after = direction === "credit" ? before + amount : before - amount;
+    if (after < 0) { await client.query("ROLLBACK"); return res.status(409).json({ message: "Saldo reseller tidak mencukupi" }); }
+    if (after > WALLET_MAX_BALANCE) { await client.query("ROLLBACK"); return res.status(400).json({ message: "Saldo reseller melewati batas maksimum" }); }
+    const now = new Date().toISOString();
+    const referenceId = `RESELLER-ADJ-${crypto.randomUUID()}`;
+    await client.query(`UPDATE wallet_accounts SET balance = $1, updated_at = $2 WHERE user_id = $3`, [after, now, userId]);
+    await client.query(`INSERT INTO wallet_ledger
+      (user_id, entry_type, direction, amount, balance_before, balance_after, reference_type,
+       reference_id, description, admin_username, created_at)
+      VALUES ($1, 'admin_adjustment', $2, $3, $4, $5, 'admin_reseller_adjustment', $6, $7, $8, $9)`,
+      [userId, direction, amount, before, after, referenceId, reason, adminUsername, now]);
+    await client.query("COMMIT");
+    return res.json({ message: `Saldo ${user.username} berhasil diperbarui`, balance: after });
+  } catch (err) {
+    await client.query("ROLLBACK").catch(() => {});
+    console.error("ERROR ADMIN RESELLER BALANCE:", err);
+    return res.status(500).json({ message: "Gagal menyesuaikan saldo reseller" });
+  } finally { client.release(); }
+});
+
 app.post(
   "/users/:id/reset-password",
   requireAdminAuth,
@@ -10435,6 +10586,7 @@ app.post("/api/wallet/topups/midtrans", walletTopupLimiter, requireUserCsrf, asy
 app.get("/api/admin/wallet/topups", requireAdminAuth, async (req, res) => {
   const status = ["all", "pending", "approved", "rejected"].includes(String(req.query.status || "")) ? String(req.query.status) : "all";
   const provider = ["all", "midtrans", "manual_qris"].includes(String(req.query.provider || "")) ? String(req.query.provider) : "all";
+  const scope = String(req.query.scope || "") === "reseller" ? "reseller" : "all";
   try {
     const result = await query(`SELECT t.id, t.user_id, u.username, t.amount, t.status, t.buyer_note,
       t.payment_reference, t.admin_note, t.reviewed_by, t.created_at, t.reviewed_at,
@@ -10444,12 +10596,14 @@ app.get("/api/admin/wallet/topups", requireAdminAuth, async (req, res) => {
       LEFT JOIN wallet_accounts w ON w.user_id = t.user_id
       WHERE ($1 = 'all' OR t.status = $1)
         AND ($2 = 'all' OR t.provider = $2)
+        AND ($3 = 'all' OR u.reseller_status IN ('approved', 'suspended'))
       ORDER BY CASE WHEN t.status = 'pending' THEN 0 ELSE 1 END,
         COALESCE(t.paid_at, t.reviewed_at, t.created_at) DESC
-      LIMIT 100`, [status, provider]);
+      LIMIT 100`, [status, provider, scope]);
     return res.json({
       status,
       provider,
+      scope,
       topups: result.rows.map((row) => ({
         ...row,
         amount: Number(row.amount || 0),

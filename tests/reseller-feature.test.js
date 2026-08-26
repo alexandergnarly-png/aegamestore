@@ -18,7 +18,7 @@ const inlineScripts = (html) =>
     ([, source]) => source,
   );
 
-[page, login].forEach((html) =>
+[page, login, admin].forEach((html) =>
   inlineScripts(html).forEach((source) =>
     assert.doesNotThrow(() => new Function(source)),
   ),
@@ -180,6 +180,32 @@ assert.ok(admin.includes('id="resellerBadgeTableBody"'));
 assert.ok(admin.includes("renderResellerBadgeMatches"));
 assert.ok(admin.includes("Modal Supplier"));
 assert.ok(admin.includes("Laba Kotor"));
+[
+  'id="section-resellers"',
+  'id="resellerControlTableBody"',
+  'id="resellerDepositTableBody"',
+  'id="resellerProfitTableBody"',
+  'id="resellerDetailDialog"',
+  "loadResellerControl",
+  "openResellerDetail",
+  "adjustResellerBalance",
+].forEach((marker) => assert.ok(admin.includes(marker), `Missing reseller admin UI marker: ${marker}`));
+[
+  'app.get("/api/admin/resellers"',
+  'app.get("/api/admin/resellers/:id"',
+  'app.post("/api/admin/resellers/:id/balance"',
+  "admin_reseller_adjustment",
+  "balance_before",
+  "balance_after",
+  "scope = String(req.query.scope",
+].forEach((marker) => assert.ok(server.includes(marker), `Missing reseller admin API marker: ${marker}`));
+[
+  "section-resellers",
+  "resellerControlTableBody",
+  "resellerDepositTableBody",
+  "resellerProfitTableBody",
+  "resellerDetailDialog",
+].forEach((id) => assert.equal((admin.match(new RegExp(`id="${id}"`, "g")) || []).length, 1, `Duplicate reseller admin ID: ${id}`));
 assert.ok(!page.includes("linear-gradient"));
 assert.ok(!login.includes("linear-gradient"));
 assert.ok(!login.includes("Periksa badge & masuk"));
