@@ -75,6 +75,9 @@ const midtransQrisFeeRate = paymentConfigNumber("MIDTRANS_QRIS_FEE_RATE", 0.007,
 const usdIdrRate = getSafeUsdtIdrRate(
   paymentConfigNumber("USD_IDR_RATE", 18000, { min: 1 }),
 );
+const resellerDiscountRate = paymentConfigNumber("RESELLER_DISCOUNT_RATE", 0.08, {
+  max: 0.5,
+});
 const binancePayUid = String(process.env.BINANCE_PAY_UID || "").trim();
 const telegramBotToken = String(process.env.TELEGRAM_BOT_TOKEN || "").trim();
 const telegramChatId = String(process.env.TELEGRAM_CHAT_ID || "").trim();
@@ -337,7 +340,7 @@ function stopRateLimitCleanup() {
   rateLimitCleanupTimer = null;
 }
 
-db.query(
+const usersTableReady = db.query(
   `
   CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
@@ -347,14 +350,9 @@ db.query(
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )
 `,
-  (err) => {
-    if (err) {
-      console.error("CREATE TABLE users ERROR:", err);
-    } else {
-      console.log("Table users ready");
-    }
-  },
-);
+).then(() => {
+  console.log("Table users ready");
+});
 db.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS badge_override TEXT`);
 db.query(
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS badge_override_expires_at TEXT`,
@@ -362,6 +360,18 @@ db.query(
 db.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS default_name TEXT`);
 db.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS default_contact TEXT`);
 db.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS email TEXT`);
+const resellerUserSchemaReady = usersTableReady.then(() =>
+  Promise.all([
+    db.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS reseller_status TEXT NOT NULL DEFAULT 'none'`,
+    ),
+    db.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS reseller_business_name TEXT`),
+    db.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS reseller_phone TEXT`),
+    db.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS reseller_channel TEXT`),
+    db.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS reseller_applied_at TEXT`),
+    db.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS reseller_approved_at TEXT`),
+  ]),
+);
 db.query(
   `ALTER TABLE users ADD COLUMN IF NOT EXISTS token_version INTEGER NOT NULL DEFAULT 0`,
 );
@@ -392,6 +402,15 @@ db.query(
   `ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_fee INTEGER DEFAULT 0`,
 );
 db.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS voucher_code TEXT`);
+const resellerOrderSchemaReady = ordersTableReady.then(() =>
+  db.query(
+    `ALTER TABLE orders ADD COLUMN IF NOT EXISTS pricing_tier TEXT NOT NULL DEFAULT 'retail'`,
+  ),
+);
+const resellerSchemaReady = Promise.all([
+  resellerUserSchemaReady,
+  resellerOrderSchemaReady,
+]);
 db.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS cancel_reason TEXT`);
 db.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS cancelled_at TEXT`);
 db.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivered_at TEXT`);
@@ -2661,6 +2680,24 @@ function calculateUsdtAmount(idrAmount, product) {
   );
 }
 
+function getResellerPricing(product) {
+  const retailIdr = Number(product?.price || 0);
+  const unitIdr = Math.max(1000, Math.floor(retailIdr * (1 - resellerDiscountRate)));
+  return {
+    retail_idr: retailIdr,
+    unit_idr: unitIdr,
+    unit_usd: Math.ceil((unitIdr / usdIdrRate) * 100) / 100,
+    savings_idr: Math.max(retailIdr - unitIdr, 0),
+  };
+}
+
+function normalizeResellerStatus(value) {
+  const status = String(value || "none").trim().toLowerCase();
+  return ["none", "pending", "approved", "suspended"].includes(status)
+    ? status
+    : "none";
+}
+
 async function notifyTelegram(text) {
   if (!telegramBotToken || !telegramChatId) {
     console.warn("TELEGRAM PAYMENT NOTICE SKIPPED: bot belum dikonfigurasi");
@@ -4203,6 +4240,166 @@ app.get("/auth", (req, res) => {
 
 app.get("/account", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "account.html"));
+});
+
+app.get("/reseller", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "reseller.html"));
+});
+
+app.get("/api/reseller", async (req, res) => {
+  const loggedInUser = await getLoggedInUserFromRequest(req);
+  if (!loggedInUser) return res.status(401).json({ message: "Kamu harus login dulu" });
+
+  try {
+    const userResult = await query(
+      `SELECT id, username, reseller_status, reseller_business_name,
+              reseller_phone, reseller_channel, reseller_applied_at, reseller_approved_at
+       FROM users WHERE id = $1 LIMIT 1`,
+      [loggedInUser.id],
+    );
+    const user = userResult.rows[0];
+    if (!user) return res.status(401).json({ message: "Akun tidak ditemukan" });
+
+    await ensureWalletAccount(db, user.id);
+    const walletResult = await query(
+      `SELECT balance FROM wallet_accounts WHERE user_id = $1 LIMIT 1`,
+      [user.id],
+    );
+    const walletIdr = Number(walletResult.rows[0]?.balance || 0);
+    const status = normalizeResellerStatus(user.reseller_status);
+    let products = [];
+    let orders = [];
+
+    if (status === "approved") {
+      const productsResult = await query(`
+        SELECT p.id, p.game, p.brand, p.duration, p.price,
+               COALESCE(NULLIF(p.platform, ''), 'android') AS platform,
+               COALESCE(p.play_status, 'safe') AS play_status,
+               CASE
+                 WHEN LOWER(COALESCE(p.delivery_type, 'auto')) = 'manual' THEN 1
+                 WHEN LOWER(COALESCE(p.delivery_type, 'auto')) IN ('vipstore_api', 'cheatgame_api') THEN
+                   CASE WHEN COALESCE(p.supplier_maintenance, 0) = 1 THEN 0
+                        ELSE GREATEST(COALESCE(p.supplier_stock, 0), 0) END
+                 ELSE (SELECT COUNT(*)::int FROM keys k WHERE k.product_id = p.id AND k.used = 0
+                       AND (k.reserved_order_id IS NULL OR k.reserved_until IS NULL OR k.reserved_until <= TO_CHAR(CURRENT_TIMESTAMP AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"')))
+               END AS available_keys
+        FROM products p
+        WHERE p.active = 1 AND COALESCE(p.play_status, 'safe') <> 'maintenance'
+        ORDER BY p.game ASC, p.price ASC, p.id ASC
+      `);
+      products = productsResult.rows.map((product) => ({
+        id: Number(product.id),
+        game: product.game,
+        brand: product.brand,
+        duration: product.duration,
+        platform: normalizePlatform(product.platform),
+        play_status: normalizePlayStatus(product.play_status),
+        available_keys: Number(product.available_keys || 0),
+        ...getResellerPricing(product),
+      }));
+
+      const ordersResult = await query(
+        `SELECT id, game, product, quantity, price, payment_status, delivery_status, created_at
+         FROM orders WHERE user_id = $1 AND pricing_tier = 'reseller'
+         ORDER BY created_at DESC LIMIT 6`,
+        [user.id],
+      );
+      orders = ordersResult.rows;
+    }
+
+    return res.json({
+      reseller: {
+        status,
+        business_name: user.reseller_business_name || "",
+        phone: user.reseller_phone || "",
+        channel: user.reseller_channel || "",
+        applied_at: user.reseller_applied_at || null,
+        approved_at: user.reseller_approved_at || null,
+      },
+      balance: {
+        idr: walletIdr,
+        usd: Math.floor((walletIdr / usdIdrRate) * 100) / 100,
+        usd_idr_rate: usdIdrRate,
+      },
+      discount_percent: Math.round(resellerDiscountRate * 100),
+      max_quantity: MAX_ORDER_QUANTITY,
+      products,
+      orders,
+    });
+  } catch (err) {
+    console.error("ERROR GET RESELLER:", err);
+    return res.status(500).json({ message: "Gagal memuat Reseller Desk" });
+  }
+});
+
+app.post("/api/reseller/apply", requireUserCsrf, async (req, res) => {
+  const loggedInUser = await getLoggedInUserFromRequest(req);
+  if (!loggedInUser) return res.status(401).json({ message: "Kamu harus login dulu" });
+
+  const businessName = String(req.body?.business_name || "").trim();
+  const phone = String(req.body?.phone || "").trim();
+  const channel = String(req.body?.channel || "").trim();
+  if (businessName.length < 2 || businessName.length > 80) {
+    return res.status(400).json({ message: "Nama usaha harus 2 sampai 80 karakter" });
+  }
+  if (phone.length < 6 || phone.length > 30 || !/^[0-9+() .-]+$/.test(phone)) {
+    return res.status(400).json({ message: "Nomor WhatsApp tidak valid" });
+  }
+  if (channel.length < 2 || channel.length > 80) {
+    return res.status(400).json({ message: "Channel penjualan harus 2 sampai 80 karakter" });
+  }
+
+  try {
+    const result = await query(
+      `UPDATE users SET reseller_status = 'pending', reseller_business_name = $1,
+              reseller_phone = $2, reseller_channel = $3, reseller_applied_at = $4
+       WHERE id = $5 AND COALESCE(reseller_status, 'none') IN ('none', 'suspended')
+       RETURNING id`,
+      [businessName, phone, channel, new Date().toISOString(), loggedInUser.id],
+    );
+    if (!result.rows.length) {
+      return res.status(409).json({ message: "Pengajuan reseller sudah aktif atau sedang diperiksa" });
+    }
+    return res.json({ message: "Pengajuan reseller berhasil dikirim" });
+  } catch (err) {
+    console.error("ERROR APPLY RESELLER:", err);
+    return res.status(500).json({ message: "Gagal mengirim pengajuan reseller" });
+  }
+});
+
+app.get("/api/reseller/preview", async (req, res) => {
+  const loggedInUser = await getLoggedInUserFromRequest(req);
+  if (!loggedInUser) return res.status(401).json({ message: "Kamu harus login dulu" });
+  const productId = Number(req.query.product_id);
+  const quantity = parseOrderQuantity(req.query.quantity);
+  if (!Number.isInteger(productId) || productId <= 0 || !quantity) {
+    return res.status(400).json({ message: "Produk atau jumlah key tidak valid" });
+  }
+  try {
+    const result = await query(
+      `SELECT p.* FROM products p JOIN users u ON u.id = $1
+       WHERE p.id = $2 AND p.active = 1 AND u.reseller_status = 'approved' LIMIT 1`,
+      [loggedInUser.id, productId],
+    );
+    const product = result.rows[0];
+    if (!product) return res.status(403).json({ message: "Harga reseller tidak tersedia" });
+    const pricing = getResellerPricing(product);
+    const subtotal = pricing.unit_idr * quantity;
+    const finalPrice = calculatePaymentPrice(subtotal, "midtrans");
+    return res.json({
+      quantity,
+      unit_idr: pricing.unit_idr,
+      unit_usd: pricing.unit_usd,
+      subtotal_idr: subtotal,
+      payment_fee: finalPrice - subtotal,
+      final_idr: finalPrice,
+      final_usd: Math.ceil((finalPrice / usdIdrRate) * 100) / 100,
+      usd_idr_rate: usdIdrRate,
+    });
+  } catch (err) {
+    console.error("ERROR PREVIEW RESELLER:", err);
+    return res.status(500).json({ message: "Gagal menghitung harga reseller" });
+  }
 });
 
 app.get("/ae-auth", (req, res) => {
@@ -5997,6 +6194,7 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
     });
   }
   const { product_id, name, voucher_code, quantity } = req.body;
+  const resellerOrder = req.body?.reseller_order === true || req.body?.reseller_order === "true";
   const paymentMethod = String(req.body?.payment_method || "midtrans").trim().toLowerCase();
   if (!["midtrans", "ae_credit", "binance_manual"].includes(paymentMethod)) {
     return res.status(400).json({ message: "Metode pembayaran tidak valid" });
@@ -6005,6 +6203,12 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
     return res.status(503).json({
       message: "Pembayaran USDT belum dikonfigurasi. Pilih QRIS atau AE Credit.",
     });
+  }
+  if (resellerOrder && paymentMethod !== "midtrans") {
+    return res.status(400).json({ message: "Order reseller dibayar melalui Midtrans" });
+  }
+  if (resellerOrder && normalizeVoucherCode(voucher_code)) {
+    return res.status(400).json({ message: "Voucher tidak dapat digabung dengan harga reseller" });
   }
 
   const cleanProductId = Number(product_id);
@@ -6025,13 +6229,17 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
 
   try {
     const defaultResult = await query(
-      `SELECT username, default_name, default_contact, email
+      `SELECT username, default_name, default_contact, email, reseller_status
        FROM users
        WHERE id = $1
        LIMIT 1`,
       [loggedInUser.id],
     );
     const defaultUser = defaultResult.rows[0] || {};
+
+    if (resellerOrder && normalizeResellerStatus(defaultUser.reseller_status) !== "approved") {
+      return res.status(403).json({ message: "Akun reseller belum disetujui" });
+    }
 
     if (!cleanName) {
       cleanName = String(
@@ -6144,15 +6352,19 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
     const orderProductName = cleanQuantity > 1
       ? `${productName} (${cleanQuantity} key)`
       : productName;
-    const unitPrice = Number(productRow.price);
+    const unitPrice = resellerOrder
+      ? getResellerPricing(productRow).unit_idr
+      : Number(productRow.price);
 
-    const discountCheck = await getBestCheckoutDiscount({
-      userId: loggedInUser.id,
-      productId: cleanProductId,
-      productRow,
-      voucherCode: voucher_code,
-      quantity: cleanQuantity,
-    });
+    const discountCheck = resellerOrder
+      ? { valid: true, code: null, discountAmount: 0 }
+      : await getBestCheckoutDiscount({
+          userId: loggedInUser.id,
+          productId: cleanProductId,
+          productRow,
+          voucherCode: voucher_code,
+          quantity: cleanQuantity,
+        });
 
     if (!discountCheck.valid) {
       return res.status(400).json({
@@ -6331,6 +6543,13 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
         );
       }
 
+      if (resellerOrder) {
+        await client.query(
+          `UPDATE orders SET pricing_tier = 'reseller' WHERE id = $1`,
+          [orderId],
+        );
+      }
+
       await client.query("COMMIT");
     } catch (transactionErr) {
       await client.query("ROLLBACK");
@@ -6442,7 +6661,9 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
       midtransClientKey: process.env.MIDTRANS_CLIENT_KEY || "",
       midtransIsProduction: isMidtransProduction,
       finalPrice: price,
-      finalPriceUsd: calculateUsdtAmount(price, productRow),
+      finalPriceUsd: resellerOrder
+        ? Math.ceil((price / usdIdrRate) * 100) / 100
+        : calculateUsdtAmount(price, productRow),
       usdIdrRate,
     });
   } catch (err) {
@@ -7291,6 +7512,12 @@ app.get("/users", requireAdminAuth, async (req, res) => {
         u.created_at,
         u.badge_override,
         u.badge_override_expires_at,
+        u.reseller_status,
+        u.reseller_business_name,
+        u.reseller_phone,
+        u.reseller_channel,
+        u.reseller_applied_at,
+        u.reseller_approved_at,
         COUNT(o.id) FILTER (WHERE o.payment_status = 'paid')::int AS paid_order_count,
         COALESCE(SUM(o.price) FILTER (WHERE o.payment_status = 'paid'), 0)::int AS total_spend,
         CASE WHEN MAX(r.id) IS NULL THEN false ELSE true END AS has_review
@@ -7465,6 +7692,36 @@ app.delete(
       return res.status(500).json({
         message: "Gagal reset badge override",
       });
+    }
+  },
+);
+
+app.post(
+  "/users/:id/reseller-status",
+  requireAdminAuth,
+  requireAdminCsrf,
+  async (req, res) => {
+    const userId = Number(req.params.id);
+    const status = normalizeResellerStatus(req.body?.status);
+    if (!Number.isInteger(userId) || userId <= 0 || status === "none") {
+      return res.status(400).json({ message: "Status reseller tidak valid" });
+    }
+    try {
+      const approvedAt = status === "approved" ? new Date().toISOString() : null;
+      const result = await query(
+        `UPDATE users SET reseller_status = $1, reseller_approved_at = $2
+         WHERE id = $3 RETURNING id, username, reseller_status`,
+        [status, approvedAt, userId],
+      );
+      const user = result.rows[0];
+      if (!user) return res.status(404).json({ message: "User tidak ditemukan" });
+      return res.json({
+        message: `Status reseller ${user.username} menjadi ${status}`,
+        reseller_status: status,
+      });
+    } catch (err) {
+      console.error("ERROR SET RESELLER STATUS:", err);
+      return res.status(500).json({ message: "Gagal mengubah status reseller" });
     }
   },
 );
@@ -10466,6 +10723,7 @@ let server = null;
 async function startApplication() {
   await Promise.all([
     bulkOrderSchemaReady,
+    resellerSchemaReady,
     keysTableReady,
     ordersTableReady,
     adminSessionsTableReady,

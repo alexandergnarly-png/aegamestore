@@ -10204,6 +10204,7 @@
   <td data-label="Username">
     ${escapeHtml(item.username || "-")}
     <small class="user-id-mobile">BUYER #${escapeHtml(item.id)}</small>
+    ${item.reseller_status && item.reseller_status !== "none" ? `<span class="badge ${item.reseller_status === "approved" ? "active" : item.reseller_status === "pending" ? "warning" : "danger"}">Reseller ${escapeHtml(item.reseller_status)}</span>` : ""}
   </td>
   <td data-label="Badge">
   ${buyerBadge(item.badge)}
@@ -10217,6 +10218,7 @@
   <td data-label="Total Belanja">${formatRupiah(item.total_spend || 0)}</td>
   <td data-label="Daftar">${formatTanggal(item.created_at)}</td>
   <td data-label="Aksi" class="action-cell">
+            ${item.reseller_status === "pending" ? `<button data-id="${escapeHtml(item.id)}" data-status="approved" onclick="setResellerStatus(this.dataset.id, this.dataset.status)">Setujui Reseller</button>` : item.reseller_status === "approved" ? `<button class="ghost-btn" data-id="${escapeHtml(item.id)}" data-status="suspended" onclick="setResellerStatus(this.dataset.id, this.dataset.status)">Suspend Reseller</button>` : item.reseller_status === "suspended" ? `<button data-id="${escapeHtml(item.id)}" data-status="approved" onclick="setResellerStatus(this.dataset.id, this.dataset.status)">Aktifkan Reseller</button>` : ""}
             <button class="ghost-btn" data-id="${escapeHtml(item.id)}" onclick="resetUserPassword(this.dataset.id)">
               Reset Password
             </button>
@@ -10228,6 +10230,35 @@
       `,
           )
           .join("");
+      }
+
+      async function setResellerStatus(userId, status) {
+        const action = status === "approved" ? "mengaktifkan" : "menangguhkan";
+        const confirmation = await Swal.fire({
+          title: `${status === "approved" ? "Aktifkan" : "Suspend"} reseller?`,
+          text: `Admin akan ${action} harga khusus untuk akun ini.`,
+          icon: "question",
+          showCancelButton: true,
+          confirmButtonText: "Lanjutkan",
+          cancelButtonText: "Batal",
+        });
+        if (!confirmation.isConfirmed) return;
+        try {
+          const res = await fetch(`/users/${userId}/reseller-status`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-csrf-token": getCsrfToken(),
+            },
+            body: JSON.stringify({ status }),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.message || "Gagal mengubah status reseller");
+          await loadUsers();
+          Swal.fire("Berhasil", data.message, "success");
+        } catch (err) {
+          Swal.fire("Gagal", err.message, "error");
+        }
       }
 
       function getBadgeOverrideMatches() {
