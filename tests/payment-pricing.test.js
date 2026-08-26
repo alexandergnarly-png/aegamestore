@@ -1,5 +1,6 @@
 const assert = require("node:assert/strict");
 const {
+  calculateResellerPrice,
   calculateUsdtPayment,
   getSafeUsdtIdrRate,
   grossUpPaymentPrice,
@@ -22,6 +23,14 @@ assert.equal(calculateUsdtPayment(45000, 1.5, 25000, 18000), 2.7);
 assert.equal(getSafeUsdtIdrRate(16000), 18000);
 assert.equal(getSafeUsdtIdrRate(19500), 19500);
 assert.equal(getSafeUsdtIdrRate(undefined, 0), 18000);
+assert.deepEqual(calculateResellerPrice(18000, 18000), {
+  unit_idr: 23400,
+  unit_usd: 1.3,
+  profit_idr: 5400,
+  profit_usd: 0.3,
+});
+assert.equal(calculateResellerPrice(90000, 18000).profit_usd, 0.5);
+assert.equal(calculateResellerPrice(360000, 18000).profit_usd, 0.8);
 assert.equal(normalizeProductGameName("  Pubg M "), "PUBG Mobile");
 assert.equal(normalizeProductGameName("8Ball   Pool"), "8 Ball Pool");
 assert.equal(normalizeProductGameName("Game Baru"), "Game Baru");

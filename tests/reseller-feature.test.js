@@ -38,7 +38,7 @@ const inlineScripts = (html) =>
   "supplier_cost = $2, gross_profit = $3",
   "bukan produk API",
   "LOWER(COALESCE(p.delivery_type, '')) IN ('vipstore_api', 'cheatgame_api')",
-  "RESELLER_DISCOUNT_RATE",
+  "calculateResellerPrice(supplierUnitCost, usdIdrRate)",
 ].forEach((marker) =>
   assert.ok(
     server.includes(marker),
@@ -90,6 +90,10 @@ assert.match(page, /class=["'][^"']*\bbrand-block\b[^"']*["']/);
 assert.match(page, /Produk API/);
 assert.match(page, /key supplier/);
 assert.match(page, /Order dari saldo/);
+assert.match(page, /Modal API/);
+assert.match(page, /Harga reseller/);
+assert.doesNotMatch(page, /% off/);
+assert.doesNotMatch(server, /RESELLER_DISCOUNT_RATE/);
 
 assert.match(pageJs, /fetch\(\s*["']\/api\/reseller["']/);
 assert.match(pageJs, /fetch\(\s*["']\/api\/reseller\/preview\?/);

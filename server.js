@@ -22,6 +22,7 @@ const {
 const { ensureBulkOrderSchema, ensureWalletSchema } = require("./server/database-migrations");
 const { parseMidtransAmount, verifyMidtransSignature } = require("./server/midtrans-utils");
 const {
+  calculateResellerPrice,
   calculateUsdtPayment,
   getSafeUsdtIdrRate,
   grossUpPaymentPrice,
@@ -76,9 +77,6 @@ const midtransQrisFeeRate = paymentConfigNumber("MIDTRANS_QRIS_FEE_RATE", 0.007,
 const usdIdrRate = getSafeUsdtIdrRate(
   paymentConfigNumber("USD_IDR_RATE", 18000, { min: 1 }),
 );
-const resellerDiscountRate = paymentConfigNumber("RESELLER_DISCOUNT_RATE", 0.08, {
-  max: 0.5,
-});
 const RESELLER_MIN_DEPOSIT_USD = 10;
 const resellerMinDepositIdr = Math.ceil(RESELLER_MIN_DEPOSIT_USD * usdIdrRate);
 const MIDTRANS_QRIS_EXPIRY_MINUTES = 15;
@@ -2689,12 +2687,12 @@ function calculateUsdtAmount(idrAmount, product) {
 
 function getResellerPricing(product) {
   const retailIdr = Number(product?.price || 0);
-  const unitIdr = Math.max(1000, Math.floor(retailIdr * (1 - resellerDiscountRate)));
+  const supplierUnitCost = Number(product?.supplier_price || 0);
+  const resellerPrice = calculateResellerPrice(supplierUnitCost, usdIdrRate);
   return {
     retail_idr: retailIdr,
-    unit_idr: unitIdr,
-    unit_usd: Math.ceil((unitIdr / usdIdrRate) * 100) / 100,
-    savings_idr: Math.max(retailIdr - unitIdr, 0),
+    ...resellerPrice,
+    savings_idr: Math.max(retailIdr - resellerPrice.unit_idr, 0),
   };
 }
 
@@ -4450,7 +4448,6 @@ app.get("/api/reseller", async (req, res) => {
         min_topup_usd: RESELLER_MIN_DEPOSIT_USD,
         usd_idr_rate: usdIdrRate,
       },
-      discount_percent: Math.round(resellerDiscountRate * 100),
       max_quantity: MAX_ORDER_QUANTITY,
       products,
       orders,

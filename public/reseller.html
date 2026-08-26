@@ -1847,7 +1847,7 @@
                 <span>Stok aktif</span><strong id="metricStock">0</strong>
               </article>
               <article class="metric-card">
-                <span>Harga khusus</span><strong id="metricDiscount">0%</strong>
+                <span>Basis harga</span><strong id="metricDiscount">Modal API</strong>
               </article>
             </div>
           </div>
@@ -1995,7 +1995,7 @@
                 <h2>Order key</h2>
                 <p>Total langsung dipotong dari saldo reseller.</p>
               </div>
-              <span class="discount-badge" id="discountPercent">0% off</span>
+              <span class="discount-badge" id="discountPercent">Harga reseller</span>
             </header>
             <div class="selection-flow">
               <div class="selection-field">
@@ -2326,10 +2326,6 @@
         document.getElementById("metricGames").textContent = groups.length;
         document.getElementById("metricStock").textContent =
           compactNumber(stock);
-        document.getElementById("metricDiscount").textContent =
-          Number(data.discount_percent || 0) + "%";
-        document.getElementById("discountPercent").textContent =
-          Number(data.discount_percent || 0) + "% off";
         const amount = document.getElementById("depositAmount");
         amount.min = data.limits.min_topup;
         amount.max = data.limits.max_topup;
