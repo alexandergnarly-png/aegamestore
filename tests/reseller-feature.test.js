@@ -41,6 +41,8 @@ const admin = fs.readFileSync("views/admin.html", "utf8");
   'reseller_login: true',
   'location.replace("/reseller")',
   'Badge check',
+  'rel="icon" href="/favicon.svg"',
+  '<h1><span>RESELLER</span><span>ENTRY.</span></h1>',
 ].forEach((marker) => assert.ok(login.includes(marker), `Missing reseller login marker: ${marker}`));
 
 assert.ok(admin.includes("setResellerStatus"));
