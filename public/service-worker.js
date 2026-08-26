@@ -3,7 +3,7 @@
 // always return a valid Response object so the browser doesn't fall back
 // to the offline page on transient sub-resource fails.
 
-const CACHE_VERSION = "20260826-reseller-desk-v1";
+const CACHE_VERSION = "20260826-reseller-login-v1";
 const CACHE_NAME = `ae-game-store-auto-${CACHE_VERSION}`;
 
 const STATIC_ASSETS = [
@@ -14,7 +14,7 @@ const STATIC_ASSETS = [
   "/manifest.json",
   "/offline.html",
   "/account.html",
-  "/reseller",
+  "/reseller-login",
   "/result.html",
 ];
 

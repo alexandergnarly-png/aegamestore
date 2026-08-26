@@ -24,7 +24,7 @@ scripts.forEach(([, source]) => assert.doesNotThrow(() => new Function(source)))
   'width: 44px;',
   'border-radius: 13px;',
   '<svg width="22" height="22" viewBox="0 0 24 24" fill="none">',
-  'class="btn btn-primary" href="/reseller"',
+  'class="btn btn-primary" href="/reseller-login"',
   'flex-wrap: nowrap;',
   'minlength="6"',
   'newPassword.length < 6 || newPassword.length > 72',

@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#111111" />
+    <title>Reseller Login — AE Game Store</title>
+    <style>
+      :root{--ink:#111;--paper:#f4f4ef;--card:#fff;--line:#d8d8d0;--muted:#6c6c66;--error:#9f2525}
+      *{box-sizing:border-box}body{margin:0;min-height:100dvh;background:var(--paper);color:var(--ink);font-family:Inter,Arial,sans-serif}button,input{font:inherit}.skip{position:fixed;top:-80px;left:12px;z-index:10;background:#111;color:#fff;padding:12px}.skip:focus{top:12px}.shell{min-height:100dvh;display:grid;grid-template-columns:minmax(280px,.8fr) minmax(420px,1.2fr)}.identity{padding:clamp(28px,5vw,72px);background:#111;color:#fff;display:flex;flex-direction:column;justify-content:space-between}.brand{display:flex;align-items:center;gap:12px;color:inherit;text-decoration:none}.brand-mark{width:48px;height:48px;border:1px solid #555;border-radius:15px;display:grid;place-items:center;font:900 18px ui-monospace,monospace}.brand strong{display:block}.brand small,.eyebrow{color:#bdbdb5;font:800 10px/1.4 ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase}.statement{max-width:520px}.statement h1{margin:16px 0 18px;font-size:clamp(46px,7vw,92px);line-height:.88;letter-spacing:-.075em}.statement p{max-width:450px;margin:0;color:#cfcfc8;font-size:16px;line-height:1.6}.access-note{border-top:1px solid #555;padding-top:18px;color:#cfcfc8;font:700 11px/1.6 ui-monospace,monospace}.login-side{padding:clamp(20px,6vw,84px);display:grid;place-items:center}.login-card{width:min(470px,100%);padding:clamp(24px,5vw,46px);border:1px solid var(--ink);border-radius:28px;background:var(--card);box-shadow:8px 8px 0 rgba(17,17,17,.14)}.login-head{display:flex;align-items:start;justify-content:space-between;gap:16px;padding-bottom:24px;border-bottom:1px solid var(--line)}.login-head h2{margin:8px 0 6px;font-size:34px;letter-spacing:-.055em}.login-head p{margin:0;color:var(--muted);line-height:1.5}.back{width:46px;height:46px;flex:none;border:1px solid var(--line);border-radius:14px;color:#111;text-decoration:none;display:grid;place-items:center;font-size:23px}.form{display:grid;gap:16px;padding-top:24px}.field{display:grid;gap:8px}.field label{font:850 11px ui-monospace,monospace;letter-spacing:.06em;text-transform:uppercase}.control{position:relative}.control input{width:100%;min-height:58px;padding:0 52px 0 16px;border:1px solid var(--line);border-radius:15px;background:#fff;color:#111;font-weight:700}.control input:focus{outline:3px solid rgba(17,17,17,.14);border-color:#111}.reveal{position:absolute;right:7px;top:7px;width:44px;height:44px;border:0;border-radius:11px;background:#f0f0eb;font-weight:900;cursor:pointer}.submit{min-height:58px;border:1px solid #111;border-radius:15px;background:#111;color:#fff;font-weight:900;cursor:pointer}.submit:disabled{cursor:wait;opacity:.55}.message{min-height:22px;margin:0;color:var(--muted);font-size:13px;line-height:1.5}.message.error{color:var(--error)}.rule{display:flex;gap:10px;align-items:center;color:var(--muted);font:750 10px ui-monospace,monospace;text-transform:uppercase}.rule::before{content:"";width:22px;height:1px;background:#111}
+      @media(max-width:780px){.shell{display:block}.identity{min-height:230px;padding:24px 20px}.statement h1{font-size:48px;margin-block:38px 10px}.statement p,.access-note{display:none}.login-side{padding:0 12px 32px;margin-top:-26px}.login-card{padding:24px 18px;border-radius:23px;box-shadow:6px 6px 0 rgba(17,17,17,.14)}.login-head h2{font-size:30px}}
+      @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+    </style>
+  </head>
+  <body>
+    <a class="skip" href="#loginForm">Lewati ke form login</a>
+    <main class="shell">
+      <section class="identity" aria-label="AE Reseller">
+        <a class="brand" href="/"><span class="brand-mark">AE</span><span><strong>AE Game Store</strong><small>Reseller Operations</small></span></a>
+        <div class="statement"><div class="eyebrow">Approved access only</div><h1>RESELLER<br />ENTRY.</h1><p>Satu pintu untuk harga khusus, restock key, dan pembayaran Midtrans.</p></div>
+        <div class="access-note">Akses mengikuti badge reseller pada akun buyer. Tidak ada akun kedua.</div>
+      </section>
+      <section class="login-side">
+        <div class="login-card">
+          <div class="login-head">
+            <div><div class="rule">Badge check</div><h2>Masuk reseller</h2><p>Gunakan username dan password akun AE.</p></div>
+            <a class="back" href="/" aria-label="Kembali ke toko">←</a>
+          </div>
+          <form class="form" id="loginForm" novalidate>
+            <div class="field"><label for="username">Username</label><div class="control"><input id="username" name="username" autocomplete="username" minlength="3" maxlength="20" required autofocus /></div></div>
+            <div class="field"><label for="password">Password</label><div class="control"><input id="password" name="password" type="password" autocomplete="current-password" minlength="6" maxlength="72" required /><button class="reveal" id="reveal" type="button" aria-label="Tampilkan password">○</button></div></div>
+            <button class="submit" id="submitButton" type="submit">Periksa badge & masuk</button>
+            <p class="message" id="message" role="status">Hanya akun dengan badge reseller aktif yang dapat masuk.</p>
+          </form>
+        </div>
+      </section>
+    </main>
+    <script>
+      const form = document.getElementById("loginForm");
+      const password = document.getElementById("password");
+      const reveal = document.getElementById("reveal");
+      const button = document.getElementById("submitButton");
+      const message = document.getElementById("message");
+
+      reveal.addEventListener("click", () => {
+        const visible = password.type === "text";
+        password.type = visible ? "password" : "text";
+        reveal.textContent = visible ? "○" : "●";
+        reveal.setAttribute("aria-label", visible ? "Tampilkan password" : "Sembunyikan password");
+      });
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        if (!form.reportValidity()) return;
+        button.disabled = true;
+        message.className = "message";
+        message.textContent = "Memeriksa akun dan badge reseller…";
+        try {
+          const response = await fetch("/user-login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              username: document.getElementById("username").value.trim(),
+              password: password.value,
+              reseller_login: true,
+            }),
+          });
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.message || "Login reseller gagal");
+          location.replace("/reseller");
+        } catch (err) {
+          message.className = "message error";
+          message.textContent = err.message;
+          button.disabled = false;
+          password.focus();
+        }
+      });
+
+      if (new URLSearchParams(location.search).has("denied")) {
+        message.className = "message error";
+        message.textContent = "Akun yang sedang aktif belum memiliki badge reseller.";
+      }
+    </script>
+  </body>
+</html>

@@ -10,12 +10,12 @@
       :root{--ink:#111;--paper:#f4f4ef;--card:#fff;--soft:#ededE7;--line:#d8d8d0;--muted:#6c6c66;--green:#17663b;--green-bg:#e8f5ec;--amber:#8a5a00;--amber-bg:#fff4d8;--red:#9f2525;--shadow:7px 7px 0 rgba(17,17,17,.14)}
       *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,Arial,sans-serif}button,input,select{font:inherit}button,a{touch-action:manipulation}button{cursor:pointer}.skip{position:fixed;left:12px;top:-80px;z-index:100;background:#111;color:#fff;padding:12px}.skip:focus{top:12px}
       .site-header{position:sticky;top:0;z-index:30;border-bottom:1px solid var(--line);background:rgba(244,244,239,.94);backdrop-filter:blur(14px)}.header-inner{width:min(1120px,100%);min-height:76px;margin:auto;padding:10px 18px;display:flex;align-items:center;gap:12px}.brand{display:flex;align-items:center;gap:11px;color:inherit;text-decoration:none}.brand-logo{width:42px;height:42px;border-radius:14px;background:#111;color:#fff;display:grid;place-items:center}.brand strong{display:block;font-size:14px}.brand small{display:block;color:var(--muted);font:700 9px/1.4 ui-monospace,monospace;letter-spacing:.08em;text-transform:uppercase}.header-actions{margin-left:auto;display:flex;gap:7px}.icon-btn{width:44px;height:44px;border:1px solid var(--line);border-radius:14px;background:#fff;color:#111;display:grid;place-items:center;font-size:20px;text-decoration:none}.icon-btn.primary{background:#111;color:#fff;border-color:#111}
-      main{width:min(1120px,calc(100% - 28px));margin:28px auto 80px;display:grid;gap:18px}.hero{min-height:290px;padding:34px;border:1px solid var(--ink);border-radius:28px;background:var(--card);box-shadow:var(--shadow);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:28px;align-items:end}.eyebrow{font:800 11px/1 ui-monospace,monospace;letter-spacing:.13em;text-transform:uppercase}.hero h1{max-width:700px;margin:18px 0 12px;font-size:clamp(40px,7vw,76px);line-height:.92;letter-spacing:-.07em}.hero p{max-width:590px;margin:0;color:var(--muted);font-size:16px;line-height:1.6}.rate-card{min-width:230px;padding:20px;border-radius:20px;background:#111;color:#fff}.rate-card small{color:#bdbdb5;font:700 10px ui-monospace,monospace;text-transform:uppercase}.rate-card strong{display:block;margin:10px 0 4px;font-size:26px}.rate-card span{font:700 11px ui-monospace,monospace;color:#d7d7d0}
+      main{width:min(1120px,calc(100% - 28px));margin:28px auto 80px;display:grid;gap:18px}.hero{min-height:290px;padding:34px;border:1px solid var(--ink);border-radius:28px;background:var(--card);box-shadow:var(--shadow);display:flex;align-items:end}.eyebrow{font:800 11px/1 ui-monospace,monospace;letter-spacing:.13em;text-transform:uppercase}.hero h1{max-width:700px;margin:18px 0 12px;font-size:clamp(40px,7vw,76px);line-height:.92;letter-spacing:-.07em}.hero p{max-width:590px;margin:0;color:var(--muted);font-size:16px;line-height:1.6}
       .panel{padding:24px;border:1px solid var(--line);border-radius:24px;background:var(--card)}.panel-head{display:flex;justify-content:space-between;gap:16px;align-items:start;margin-bottom:18px}.panel-head h2{margin:0;font-size:24px;letter-spacing:-.04em}.panel-head p{margin:5px 0 0;color:var(--muted);font-size:13px}.status{display:inline-flex;align-items:center;min-height:30px;padding:6px 10px;border-radius:999px;font:850 10px ui-monospace,monospace;text-transform:uppercase}.status.approved{background:var(--green-bg);color:var(--green)}.status.pending{background:var(--amber-bg);color:var(--amber)}.status.suspended{background:#fae7e7;color:var(--red)}
-      .application{max-width:680px;margin:auto}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.field{display:grid;gap:7px}.field.wide{grid-column:1/-1}.field label{font:800 11px ui-monospace,monospace;text-transform:uppercase}.field input,.field select{width:100%;min-height:52px;padding:0 15px;border:1px solid var(--line);border-radius:14px;background:#fff;color:#111}.field input:focus,.field select:focus{outline:3px solid rgba(17,17,17,.16);border-color:#111}.btn{min-height:50px;padding:0 18px;border:1px solid #111;border-radius:14px;background:#fff;color:#111;font-weight:900}.btn.primary{background:#111;color:#fff}.btn:disabled{cursor:not-allowed;opacity:.45}.form-message{min-height:20px;color:var(--muted);font-size:12px}
+      .field{display:grid;gap:7px}.field label{font:800 11px ui-monospace,monospace;text-transform:uppercase}.field select{width:100%;min-height:52px;padding:0 15px;border:1px solid var(--line);border-radius:14px;background:#fff;color:#111}.field select:focus{outline:3px solid rgba(17,17,17,.16);border-color:#111}.btn{min-height:50px;padding:0 18px;border:1px solid #111;border-radius:14px;background:#fff;color:#111;font-weight:900}.btn.primary{background:#111;color:#fff}.btn:disabled{cursor:not-allowed;opacity:.45}.form-message{min-height:20px;color:var(--muted);font-size:12px}
       .desk[hidden],.state-panel[hidden]{display:none}.stats{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:12px}.stat{min-height:135px;padding:19px;border:1px solid var(--line);border-radius:20px;background:#fff}.stat.primary{background:#111;color:#fff;border-color:#111}.stat small{font:750 10px ui-monospace,monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.stat.primary small{color:#bdbdb5}.stat strong{display:block;margin-top:22px;font-size:32px;letter-spacing:-.05em}.stat span{display:block;margin-top:5px;color:var(--muted);font-size:12px}.stat.primary span{color:#d0d0c9}
       .workspace{display:grid;grid-template-columns:340px minmax(0,1fr);gap:18px;align-items:start}.restock{position:sticky;top:94px}.selection{display:grid;gap:12px}.summary{margin-top:15px;padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--soft);display:grid;gap:9px}.summary-row{display:flex;justify-content:space-between;gap:12px;color:var(--muted);font-size:12px}.summary-row strong{color:#111}.summary-row.total{padding-top:10px;border-top:1px solid var(--line);font-size:15px}.summary-row.total strong{font-size:19px}.catalog-tools{display:flex;gap:9px;margin-bottom:13px}.catalog-tools input{width:100%;min-height:46px;padding:0 14px;border:1px solid var(--line);border-radius:13px}.catalog{display:grid;gap:9px}.product{width:100%;padding:15px;border:1px solid var(--line);border-radius:17px;background:#fff;text-align:left;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px}.product:hover,.product.selected{border-color:#111;box-shadow:4px 4px 0 #111}.product h3{margin:0;font-size:16px}.product p{margin:5px 0 0;color:var(--muted);font-size:11px}.product-price{text-align:right}.product-price strong{display:block;font:850 19px ui-monospace,monospace}.product-price small{color:var(--muted)}.stock{display:inline-flex;margin-top:7px;color:var(--green);font:800 9px ui-monospace,monospace;text-transform:uppercase}.empty{padding:22px;border:1px dashed var(--line);border-radius:16px;color:var(--muted);text-align:center}.orders{display:grid;gap:8px}.order{padding:14px;border:1px solid var(--line);border-radius:15px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px}.order strong{font-size:13px}.order small{display:block;margin-top:4px;color:var(--muted);font-size:10px}.order-price{text-align:right;font:800 12px ui-monospace,monospace}.loading{min-height:55vh;display:grid;place-items:center;color:var(--muted);font:800 12px ui-monospace,monospace}.notice{padding:18px;border:1px solid var(--line);border-radius:18px;background:var(--soft);line-height:1.6}.notice a{color:inherit;font-weight:900}
-      @media(max-width:760px){.header-inner{min-height:60px;padding:6px 10px;gap:4px}.brand{min-width:44px;min-height:44px;justify-content:center}.brand-logo{width:38px;height:38px;border-radius:13px}.brand-copy{display:none}.header-actions{gap:4px}.icon-btn{width:44px;height:44px;border-radius:13px}main{width:calc(100% - 20px);margin:14px auto 78px;gap:12px}.hero{min-height:0;padding:24px 18px;border-radius:22px;grid-template-columns:1fr;gap:20px}.hero h1{font-size:43px}.rate-card{min-width:0}.panel{padding:16px;border-radius:20px}.form-grid,.workspace{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.stat.primary{grid-column:1/-1}.stat{min-height:120px;padding:15px}.restock{position:static}.product{padding:13px}.product-price strong{font-size:16px}}
+      @media(max-width:760px){.header-inner{min-height:60px;padding:6px 10px;gap:4px}.brand{min-width:44px;min-height:44px;justify-content:center}.brand-logo{width:38px;height:38px;border-radius:13px}.brand-copy{display:none}.header-actions{gap:4px}.icon-btn{width:44px;height:44px;border-radius:13px}main{width:calc(100% - 20px);margin:14px auto 78px;gap:12px}.hero{min-height:0;padding:24px 18px;border-radius:22px}.hero h1{font-size:43px}.panel{padding:16px;border-radius:20px}.workspace{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.stat.primary{grid-column:1/-1}.stat{min-height:120px;padding:15px}.restock{position:static}.product{padding:13px}.product-price strong{font-size:16px}}
       @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
     </style>
   </head>
@@ -36,25 +36,13 @@
     <main id="main">
       <div class="loading" id="loading">MEMUAT RESELLER DESK…</div>
       <section class="hero state-panel" id="hero" hidden>
-        <div><div class="eyebrow">AE / RESELLER DESK</div><h1>Restock key. Tanpa ribet.</h1><p>Harga reseller dibaca dalam USD, dikonversi dengan kurs toko, lalu pembayaran tetap diproses aman dalam rupiah melalui Midtrans.</p></div>
-        <div class="rate-card"><small>Kurs checkout</small><strong id="heroRate">—</strong><span>USD hanya tampilan harga · tagihan Midtrans tetap IDR</span></div>
-      </section>
-      <section class="panel state-panel application" id="application" hidden>
-        <div class="panel-head"><div><h2>Ajukan akun reseller</h2><p>Admin akan memeriksa profil penjualanmu.</p></div><span class="status" id="applicationStatus">Baru</span></div>
-        <form class="form-grid" id="applicationForm">
-          <div class="field wide"><label for="businessName">Nama usaha / toko</label><input id="businessName" maxlength="80" required /></div>
-          <div class="field"><label for="phone">WhatsApp</label><input id="phone" inputmode="tel" maxlength="30" required /></div>
-          <div class="field"><label for="channel">Channel penjualan</label><input id="channel" maxlength="80" placeholder="WhatsApp, Discord, marketplace…" required /></div>
-          <button class="btn primary wide" id="applyButton" type="submit">Kirim pengajuan</button>
-          <div class="form-message wide" id="applicationMessage" role="status"></div>
-        </form>
-        <div class="notice" id="waitingNotice" hidden></div>
+        <div><div class="eyebrow">AE / RESELLER DESK</div><h1>Restock key. Tanpa ribet.</h1><p>Harga reseller ditampilkan dalam USD. Pembayaran tetap diproses aman melalui Midtrans.</p></div>
       </section>
       <div class="desk" id="desk" hidden>
         <section class="stats">
-          <div class="stat primary"><small>Balance reseller</small><strong id="balanceUsd">$0.00</strong><span id="balanceIdr">Setara Rp0</span></div>
+          <div class="stat primary"><small>Balance reseller</small><strong id="balanceUsd">$0.00</strong><span>Saldo akun reseller aktif</span></div>
           <div class="stat"><small>Harga khusus</small><strong id="discountPercent">0%</strong><span>Dari harga retail</span></div>
-          <div class="stat"><small>Kurs aktif</small><strong id="rateShort">—</strong><span>Dikunci ulang saat checkout</span></div>
+          <div class="stat"><small>Pembayaran</small><strong>Midtrans</strong><span>Tagihan dibayar dalam IDR</span></div>
         </section>
         <section class="workspace">
           <aside class="panel restock">
@@ -89,46 +77,22 @@
       async function loadDesk() {
         try {
           const res = await fetch("/api/reseller", { cache: "no-store" });
-          if (res.status === 401) { location.href = "/auth"; return; }
+          if (res.status === 401 || res.status === 403) { location.href = "/reseller-login"; return; }
           const data = await res.json();
           if (!res.ok) throw new Error(data.message || "Gagal memuat halaman");
           resellerData = data;
           document.getElementById("loading").hidden = true;
           document.getElementById("hero").hidden = false;
-          document.getElementById("heroRate").textContent = `1 USD = ${rupiah(data.balance.usd_idr_rate)}`;
-          if (data.reseller.status === "approved") renderDesk(data); else renderApplication(data);
+          renderDesk(data);
         } catch (err) {
           document.getElementById("loading").textContent = err.message;
-        }
-      }
-
-      function renderApplication(data) {
-        const status = data.reseller.status;
-        const panel = document.getElementById("application");
-        const form = document.getElementById("applicationForm");
-        const notice = document.getElementById("waitingNotice");
-        const badge = document.getElementById("applicationStatus");
-        panel.hidden = false;
-        badge.className = `status ${status}`;
-        badge.textContent = status === "pending" ? "Sedang diperiksa" : status === "suspended" ? "Ditangguhkan" : "Pendaftaran";
-        if (status === "pending") {
-          form.hidden = true; notice.hidden = false;
-          notice.textContent = "Pengajuanmu sudah masuk. Harga reseller akan terbuka setelah disetujui admin.";
-        } else {
-          form.hidden = false; notice.hidden = status !== "suspended";
-          if (status === "suspended") notice.textContent = "Akses reseller sedang ditangguhkan. Perbarui data lalu kirim ulang pengajuan.";
-          document.getElementById("businessName").value = data.reseller.business_name || "";
-          document.getElementById("phone").value = data.reseller.phone || "";
-          document.getElementById("channel").value = data.reseller.channel || "";
         }
       }
 
       function renderDesk(data) {
         document.getElementById("desk").hidden = false;
         document.getElementById("balanceUsd").textContent = usd(data.balance.usd);
-        document.getElementById("balanceIdr").textContent = `Setara ${rupiah(data.balance.idr)} · top up di halaman akun`;
         document.getElementById("discountPercent").textContent = `${data.discount_percent}%`;
-        document.getElementById("rateShort").textContent = rupiah(data.balance.usd_idr_rate).replace("Rp", "Rp ");
         const select = document.getElementById("selectedProduct");
         select.innerHTML = data.products.map((p) => `<option value="${p.id}">${esc(p.game)} · ${esc(p.brand)} · ${esc(p.duration)}</option>`).join("");
         const quantity = document.getElementById("quantity");
@@ -170,13 +134,6 @@
         }
       }
 
-      document.getElementById("applicationForm").addEventListener("submit", async (event) => {
-        event.preventDefault(); const button = document.getElementById("applyButton"); button.disabled = true;
-        try {
-          const res = await fetch("/api/reseller/apply", { method:"POST", headers:{"Content-Type":"application/json","x-user-csrf-token":decodeURIComponent(cookie("user_csrf"))}, body:JSON.stringify({business_name:document.getElementById("businessName").value,phone:document.getElementById("phone").value,channel:document.getElementById("channel").value}) });
-          const data = await res.json(); if(!res.ok) throw new Error(data.message || "Gagal mengirim pengajuan"); location.reload();
-        } catch(err) { document.getElementById("applicationMessage").textContent=err.message; button.disabled=false; }
-      });
       document.getElementById("selectedProduct").addEventListener("change",()=>{renderCatalog(resellerData.products);preview()});
       document.getElementById("quantity").addEventListener("change",preview);
       document.getElementById("search").addEventListener("input",()=>renderCatalog(resellerData.products));

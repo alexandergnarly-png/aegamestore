@@ -365,10 +365,6 @@ const resellerUserSchemaReady = usersTableReady.then(() =>
     db.query(
       `ALTER TABLE users ADD COLUMN IF NOT EXISTS reseller_status TEXT NOT NULL DEFAULT 'none'`,
     ),
-    db.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS reseller_business_name TEXT`),
-    db.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS reseller_phone TEXT`),
-    db.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS reseller_channel TEXT`),
-    db.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS reseller_applied_at TEXT`),
     db.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS reseller_approved_at TEXT`),
   ]),
 );
@@ -4242,8 +4238,27 @@ app.get("/account", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "account.html"));
 });
 
-app.get("/reseller", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "reseller.html"));
+app.get("/reseller-login", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "reseller-login.html"));
+});
+
+app.get("/reseller", async (req, res) => {
+  const loggedInUser = await getLoggedInUserFromRequest(req);
+  if (!loggedInUser) return res.redirect("/reseller-login");
+
+  try {
+    const result = await query(
+      "SELECT reseller_status FROM users WHERE id = $1 LIMIT 1",
+      [loggedInUser.id],
+    );
+    if (normalizeResellerStatus(result.rows[0]?.reseller_status) !== "approved") {
+      return res.redirect("/reseller-login?denied=1");
+    }
+    return res.sendFile(path.join(__dirname, "public", "reseller.html"));
+  } catch (err) {
+    console.error("ERROR OPEN RESELLER DESK:", err);
+    return res.status(500).send("Gagal membuka Reseller Desk");
+  }
 });
 
 app.get("/api/reseller", async (req, res) => {
@@ -4252,13 +4267,16 @@ app.get("/api/reseller", async (req, res) => {
 
   try {
     const userResult = await query(
-      `SELECT id, username, reseller_status, reseller_business_name,
-              reseller_phone, reseller_channel, reseller_applied_at, reseller_approved_at
+      `SELECT id, username, reseller_status, reseller_approved_at
        FROM users WHERE id = $1 LIMIT 1`,
       [loggedInUser.id],
     );
     const user = userResult.rows[0];
     if (!user) return res.status(401).json({ message: "Akun tidak ditemukan" });
+    const status = normalizeResellerStatus(user.reseller_status);
+    if (status !== "approved") {
+      return res.status(403).json({ message: "Akun ini belum memiliki akses reseller" });
+    }
 
     await ensureWalletAccount(db, user.id);
     const walletResult = await query(
@@ -4266,12 +4284,8 @@ app.get("/api/reseller", async (req, res) => {
       [user.id],
     );
     const walletIdr = Number(walletResult.rows[0]?.balance || 0);
-    const status = normalizeResellerStatus(user.reseller_status);
-    let products = [];
-    let orders = [];
 
-    if (status === "approved") {
-      const productsResult = await query(`
+    const productsResult = await query(`
         SELECT p.id, p.game, p.brand, p.duration, p.price,
                COALESCE(NULLIF(p.platform, ''), 'android') AS platform,
                COALESCE(p.play_status, 'safe') AS play_status,
@@ -4287,7 +4301,7 @@ app.get("/api/reseller", async (req, res) => {
         WHERE p.active = 1 AND COALESCE(p.play_status, 'safe') <> 'maintenance'
         ORDER BY p.game ASC, p.price ASC, p.id ASC
       `);
-      products = productsResult.rows.map((product) => ({
+    const products = productsResult.rows.map((product) => ({
         id: Number(product.id),
         game: product.game,
         brand: product.brand,
@@ -4298,28 +4312,21 @@ app.get("/api/reseller", async (req, res) => {
         ...getResellerPricing(product),
       }));
 
-      const ordersResult = await query(
+    const ordersResult = await query(
         `SELECT id, game, product, quantity, price, payment_status, delivery_status, created_at
          FROM orders WHERE user_id = $1 AND pricing_tier = 'reseller'
          ORDER BY created_at DESC LIMIT 6`,
         [user.id],
       );
-      orders = ordersResult.rows;
-    }
+    const orders = ordersResult.rows;
 
     return res.json({
       reseller: {
         status,
-        business_name: user.reseller_business_name || "",
-        phone: user.reseller_phone || "",
-        channel: user.reseller_channel || "",
-        applied_at: user.reseller_applied_at || null,
         approved_at: user.reseller_approved_at || null,
       },
       balance: {
-        idr: walletIdr,
         usd: Math.floor((walletIdr / usdIdrRate) * 100) / 100,
-        usd_idr_rate: usdIdrRate,
       },
       discount_percent: Math.round(resellerDiscountRate * 100),
       max_quantity: MAX_ORDER_QUANTITY,
@@ -4329,41 +4336,6 @@ app.get("/api/reseller", async (req, res) => {
   } catch (err) {
     console.error("ERROR GET RESELLER:", err);
     return res.status(500).json({ message: "Gagal memuat Reseller Desk" });
-  }
-});
-
-app.post("/api/reseller/apply", requireUserCsrf, async (req, res) => {
-  const loggedInUser = await getLoggedInUserFromRequest(req);
-  if (!loggedInUser) return res.status(401).json({ message: "Kamu harus login dulu" });
-
-  const businessName = String(req.body?.business_name || "").trim();
-  const phone = String(req.body?.phone || "").trim();
-  const channel = String(req.body?.channel || "").trim();
-  if (businessName.length < 2 || businessName.length > 80) {
-    return res.status(400).json({ message: "Nama usaha harus 2 sampai 80 karakter" });
-  }
-  if (phone.length < 6 || phone.length > 30 || !/^[0-9+() .-]+$/.test(phone)) {
-    return res.status(400).json({ message: "Nomor WhatsApp tidak valid" });
-  }
-  if (channel.length < 2 || channel.length > 80) {
-    return res.status(400).json({ message: "Channel penjualan harus 2 sampai 80 karakter" });
-  }
-
-  try {
-    const result = await query(
-      `UPDATE users SET reseller_status = 'pending', reseller_business_name = $1,
-              reseller_phone = $2, reseller_channel = $3, reseller_applied_at = $4
-       WHERE id = $5 AND COALESCE(reseller_status, 'none') IN ('none', 'suspended')
-       RETURNING id`,
-      [businessName, phone, channel, new Date().toISOString(), loggedInUser.id],
-    );
-    if (!result.rows.length) {
-      return res.status(409).json({ message: "Pengajuan reseller sudah aktif atau sedang diperiksa" });
-    }
-    return res.json({ message: "Pengajuan reseller berhasil dikirim" });
-  } catch (err) {
-    console.error("ERROR APPLY RESELLER:", err);
-    return res.status(500).json({ message: "Gagal mengirim pengajuan reseller" });
   }
 });
 
@@ -4394,7 +4366,6 @@ app.get("/api/reseller/preview", async (req, res) => {
       payment_fee: finalPrice - subtotal,
       final_idr: finalPrice,
       final_usd: Math.ceil((finalPrice / usdIdrRate) * 100) / 100,
-      usd_idr_rate: usdIdrRate,
     });
   } catch (err) {
     console.error("ERROR PREVIEW RESELLER:", err);
@@ -7513,10 +7484,6 @@ app.get("/users", requireAdminAuth, async (req, res) => {
         u.badge_override,
         u.badge_override_expires_at,
         u.reseller_status,
-        u.reseller_business_name,
-        u.reseller_phone,
-        u.reseller_channel,
-        u.reseller_applied_at,
         u.reseller_approved_at,
         COUNT(o.id) FILTER (WHERE o.payment_status = 'paid')::int AS paid_order_count,
         COALESCE(SUM(o.price) FILTER (WHERE o.payment_status = 'paid'), 0)::int AS total_spend,
@@ -9578,6 +9545,7 @@ app.post("/register", registerLimiter, async (req, res) => {
 
 app.post("/user-login", userAuthLimiter, async (req, res) => {
   const { username, password } = req.body;
+  const resellerLogin = req.body?.reseller_login === true;
 
   try {
     const result = await query(
@@ -9594,6 +9562,12 @@ app.post("/user-login", userAuthLimiter, async (req, res) => {
 
     if (!isMatch) {
       return res.status(400).json({ message: "Username atau password salah" });
+    }
+
+    if (resellerLogin && normalizeResellerStatus(user.reseller_status) !== "approved") {
+      return res.status(403).json({
+        message: "Akun ini belum memiliki badge reseller aktif",
+      });
     }
 
     // Buat "tiket masuk" (Token) untuk user

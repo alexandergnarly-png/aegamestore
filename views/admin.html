@@ -10218,7 +10218,7 @@
   <td data-label="Total Belanja">${formatRupiah(item.total_spend || 0)}</td>
   <td data-label="Daftar">${formatTanggal(item.created_at)}</td>
   <td data-label="Aksi" class="action-cell">
-            ${item.reseller_status === "pending" ? `<button data-id="${escapeHtml(item.id)}" data-status="approved" onclick="setResellerStatus(this.dataset.id, this.dataset.status)">Setujui Reseller</button>` : item.reseller_status === "approved" ? `<button class="ghost-btn" data-id="${escapeHtml(item.id)}" data-status="suspended" onclick="setResellerStatus(this.dataset.id, this.dataset.status)">Suspend Reseller</button>` : item.reseller_status === "suspended" ? `<button data-id="${escapeHtml(item.id)}" data-status="approved" onclick="setResellerStatus(this.dataset.id, this.dataset.status)">Aktifkan Reseller</button>` : ""}
+            ${item.reseller_status === "approved" ? `<button class="ghost-btn" data-id="${escapeHtml(item.id)}" data-status="suspended" onclick="setResellerStatus(this.dataset.id, this.dataset.status)">Suspend Reseller</button>` : `<button data-id="${escapeHtml(item.id)}" data-status="approved" onclick="setResellerStatus(this.dataset.id, this.dataset.status)">${item.reseller_status === "suspended" ? "Aktifkan" : "Jadikan"} Reseller</button>`}
             <button class="ghost-btn" data-id="${escapeHtml(item.id)}" onclick="resetUserPassword(this.dataset.id)">
               Reset Password
             </button>
