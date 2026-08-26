@@ -30,7 +30,20 @@ const server = fs.readFileSync("server.js", "utf8");
   `itemDetails.push({ id: "MIDTRANS-FEE"`,
   `error.code = "TOPUP_PENDING"`,
   `err.paymentUrl ? { paymentUrl: err.paymentUrl }`,
+  `async function syncPendingMidtransWalletTopup(userId)`,
+  `await snap.transaction.status(providerOrderId)`,
+  `await syncPendingMidtransWalletTopup(user.id)`,
+  `["expire", "cancel", "deny"].includes(transactionStatus)`,
 ].forEach((marker) => assert.ok(server.includes(marker), `Missing wallet webhook guard: ${marker}`));
+
+const walletMidtransRoute = server.slice(
+  server.indexOf('app.post("/api/wallet/topups/midtrans"'),
+  server.indexOf('app.get("/api/admin/wallet/topups"'),
+);
+assert.ok(
+  walletMidtransRoute.includes("await syncPendingMidtransWalletTopup(user.id)"),
+  "Midtrans top-up must synchronize an existing transaction before creating another",
+);
 
 const admin = fs.readFileSync("views/admin.html", "utf8");
 [...admin.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)]

@@ -2822,6 +2822,20 @@ async function createPendingWalletTopup({
   }
 }
 
+function getMidtransTransactionState(notification) {
+  const transactionStatus = String(notification?.transaction_status || "").toLowerCase();
+  const fraudStatus = String(notification?.fraud_status || "").toLowerCase();
+  const statusCode = String(notification?.status_code || "");
+  const fraudAccepted = !fraudStatus || fraudStatus === "accept";
+  return {
+    isPaid: statusCode === "200" && fraudAccepted && (
+      transactionStatus === "settlement" ||
+      (transactionStatus === "capture" && fraudStatus === "accept")
+    ),
+    isExpiredOrFailed: ["expire", "cancel", "deny"].includes(transactionStatus),
+  };
+}
+
 async function processMidtransWalletNotification(notification, isPaid, isExpiredOrFailed) {
   const providerOrderId = String(notification.order_id || "").trim();
   const paidAmount = parseMidtransAmount(notification.gross_amount);
@@ -2929,6 +2943,27 @@ async function processMidtransWalletNotification(notification, isPaid, isExpired
     throw error;
   } finally {
     client.release();
+  }
+}
+
+async function syncPendingMidtransWalletTopup(userId) {
+  const result = await query(
+    `SELECT provider_order_id FROM wallet_topup_requests
+     WHERE user_id = $1 AND provider = 'midtrans' AND status = 'pending'
+     ORDER BY created_at DESC LIMIT 1`,
+    [userId],
+  );
+  const providerOrderId = String(result.rows[0]?.provider_order_id || "").trim();
+  if (!providerOrderId) return;
+
+  try {
+    const notification = await snap.transaction.status(providerOrderId);
+    const state = getMidtransTransactionState(notification);
+    if (state.isPaid || state.isExpiredOrFailed) {
+      await processMidtransWalletNotification(notification, state.isPaid, state.isExpiredOrFailed);
+    }
+  } catch (error) {
+    console.warn("MIDTRANS WALLET STATUS SYNC FAILED:", providerOrderId, error.message || error);
   }
 }
 
@@ -6838,27 +6873,11 @@ app.post("/midtrans-notification", webhookLimiter, async (req, res) => {
     }
 
     const orderId = String(notification.order_id || "").trim();
-    const transactionStatus = String(
-      notification.transaction_status || "",
-    ).toLowerCase();
-    const fraudStatus = String(notification.fraud_status || "").toLowerCase();
-    const statusCode = String(notification.status_code || "");
-
     if (!orderId) {
       return res.status(400).send("ORDER ID TIDAK VALID");
     }
 
-    const fraudAccepted = !fraudStatus || fraudStatus === "accept";
-    const isPaid =
-      statusCode === "200" &&
-      fraudAccepted &&
-      (transactionStatus === "settlement" ||
-        (transactionStatus === "capture" && fraudStatus === "accept"));
-
-    const isExpiredOrFailed =
-      transactionStatus === "expire" ||
-      transactionStatus === "cancel" ||
-      transactionStatus === "deny";
+    const { isPaid, isExpiredOrFailed } = getMidtransTransactionState(notification);
 
     if (orderId.startsWith("WALLET-")) {
       const result = await processMidtransWalletNotification(
@@ -10219,6 +10238,7 @@ app.post("/api/wallet/topups/midtrans", walletTopupLimiter, requireUserCsrf, asy
   let topupId = "";
 
   try {
+    await syncPendingMidtransWalletTopup(user.id);
     const userResult = await query(
       `SELECT username, default_name, default_contact, email FROM users WHERE id = $1 LIMIT 1`,
       [user.id],
