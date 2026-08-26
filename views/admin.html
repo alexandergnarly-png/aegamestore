@@ -7017,6 +7017,259 @@
         }
       }
 
+      /* Reseller operations desk: scoped overrides keep shared admin tables intact. */
+      #section-resellers { --reseller-accent: #2563eb; }
+      #section-resellers .reseller-control-hero { position: relative; overflow: hidden; }
+      #section-resellers .reseller-control-hero::after {
+        content: "RSLR";
+        position: absolute;
+        right: 18px;
+        bottom: -18px;
+        color: color-mix(in srgb, var(--ink) 5%, transparent);
+        font-family: "JetBrains Mono", monospace;
+        font-size: clamp(54px, 9vw, 92px);
+        font-weight: 900;
+        letter-spacing: -.08em;
+        pointer-events: none;
+      }
+      #section-resellers .reseller-control-hero > * { position: relative; z-index: 1; }
+      #section-resellers .reseller-search-row {
+        max-width: none;
+        margin-bottom: 16px;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 17px;
+        background: var(--surface-2);
+      }
+      #section-resellers .reseller-search-row input { min-height: 48px; background: var(--surface); }
+      #section-resellers .reseller-list-table tbody td:first-child strong { font-size: 14px; }
+      #section-resellers .reseller-list-table tbody td:first-child small {
+        display: inline-block;
+        max-width: 30rem;
+        margin-top: 3px;
+        color: var(--muted);
+        line-height: 1.35;
+      }
+      .reseller-detail-head { position: sticky; top: 0; z-index: 5; }
+      .reseller-detail-content { scrollbar-gutter: stable; }
+      .reseller-adjustment-form { background: var(--surface-2); }
+      .reseller-detail-block h3 { display: flex; align-items: center; gap: 8px; }
+      .reseller-detail-block h3::before {
+        width: 8px;
+        height: 8px;
+        content: "";
+        border-radius: 50%;
+        background: var(--reseller-accent, #2563eb);
+      }
+
+      @media (max-width: 768px) {
+        #section-resellers { padding-bottom: 104px; }
+        #section-resellers .reseller-control-hero {
+          gap: 16px;
+          margin-bottom: 10px;
+          padding: 18px;
+          border-radius: 24px;
+          box-shadow: 5px 5px 0 color-mix(in srgb, var(--ink) 13%, transparent);
+        }
+        #section-resellers .reseller-control-hero::after { right: 12px; bottom: -10px; font-size: 58px; }
+        #section-resellers .reseller-control-hero h1 { font-size: 36px; }
+        #section-resellers .reseller-control-hero-actions { grid-template-columns: minmax(0, 1fr) auto; }
+        #section-resellers .reseller-control-hero-actions button {
+          width: 48px;
+          min-width: 48px;
+          padding: 0;
+          font-size: 0;
+        }
+        #section-resellers .reseller-control-hero-actions button .ui-icon { width: 19px; height: 19px; margin: auto; }
+        #section-resellers .reseller-metric-strip {
+          gap: 1px;
+          margin-bottom: 12px;
+          border-radius: 22px;
+          background: var(--line);
+        }
+        #section-resellers .reseller-metric-strip > div {
+          min-height: 112px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          padding: 14px;
+          border: 0;
+          background: var(--surface);
+        }
+        #section-resellers .reseller-metric-strip > div:first-child { border-radius: 21px 0 0; }
+        #section-resellers .reseller-metric-strip > div:nth-child(2) { border-radius: 0 21px 0 0; }
+        #section-resellers .reseller-metric-strip > div:nth-child(3) { border-radius: 0 0 0 21px; }
+        #section-resellers .reseller-metric-strip > div:last-child { border-radius: 0 0 21px; }
+        #section-resellers .reseller-metric-strip > div.is-profit { background: var(--ink); }
+        #section-resellers .reseller-metric-strip strong {
+          margin: auto 0 2px;
+          font-size: 24px;
+          line-height: 1;
+          overflow-wrap: normal;
+        }
+        #section-resellers .card { padding: 16px; border-radius: 24px; }
+        #section-resellers .card-header { align-items: flex-start; gap: 10px; margin-bottom: 15px; }
+        #section-resellers .card-title-wrap { min-width: 0; }
+        #section-resellers .card-title-wrap h2 { font-size: 24px; letter-spacing: -.045em; }
+        #section-resellers .card-subtitle { max-width: 28rem; margin-top: 5px; font-size: 12px; line-height: 1.5; }
+        #section-resellers .section-badge { flex: 0 0 auto; }
+        #section-resellers .reseller-search-row { margin-bottom: 12px; padding: 0; border: 0; background: transparent; }
+        #section-resellers .reseller-search-row label {
+          margin-bottom: 2px;
+          font-family: "JetBrains Mono", monospace;
+          font-size: 9px;
+        }
+        #section-resellers .reseller-search-row input {
+          width: 100%;
+          min-height: 50px;
+          padding: 0 14px;
+          border: 1px solid var(--line-strong);
+          border-radius: 14px;
+          font-size: 16px;
+        }
+        #section-resellers .reseller-list-table tbody tr {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 0;
+          padding: 0;
+          overflow: hidden;
+          border: 1px solid var(--line-strong);
+          border-radius: 20px;
+          box-shadow: 4px 4px 0 color-mix(in srgb, var(--ink) 10%, transparent);
+        }
+        #section-resellers .reseller-list-table tbody td {
+          min-width: 0;
+          min-height: 68px;
+          display: block;
+          padding: 12px;
+          border-right: 1px solid var(--line);
+          border-bottom: 1px solid var(--line);
+          text-align: left;
+          overflow-wrap: anywhere;
+          word-break: normal;
+        }
+        #section-resellers .reseller-list-table tbody td:nth-child(even) { border-right: 0; }
+        #section-resellers .reseller-list-table tbody td::before {
+          display: block;
+          margin-bottom: 8px;
+          font-family: "JetBrains Mono", monospace;
+          font-size: 8px;
+        }
+        #section-resellers .reseller-list-table tbody td:first-child,
+        #section-resellers .reseller-list-table tbody td:last-child,
+        #section-resellers .reseller-list-table tbody td.empty { grid-column: 1 / -1; border-right: 0; }
+        #section-resellers .reseller-list-table tbody td:first-child {
+          min-height: auto;
+          padding: 15px 12px;
+          background: var(--surface-2);
+        }
+        #section-resellers .reseller-list-table tbody td:first-child strong { font-size: 18px; letter-spacing: -.025em; }
+        #section-resellers .reseller-list-table tbody td:first-child small { overflow-wrap: normal; }
+        #section-resellers .reseller-list-table tbody td:last-child { min-height: auto; padding: 10px; border-bottom: 0; }
+        #section-resellers .reseller-list-table tbody td:last-child::before { display: none; }
+        #section-resellers .reseller-list-table tbody td:last-child button {
+          width: 100%;
+          min-height: 44px;
+          border-radius: 12px;
+          background: var(--ink);
+          color: var(--surface);
+        }
+        #section-resellers .reseller-profit-summary { grid-template-columns: repeat(3, minmax(0, 1fr)); border-radius: 16px; }
+        #section-resellers .reseller-profit-summary > div {
+          min-height: 74px;
+          padding: 10px;
+          border-right: 1px solid var(--line);
+          border-bottom: 0;
+        }
+        #section-resellers .reseller-profit-summary strong { font-size: 11px; }
+        #section-resellers .reseller-profit-table tbody tr,
+        #section-resellers .reseller-deposit-table tbody tr { border-radius: 18px; box-shadow: none; }
+        .reseller-detail-dialog {
+          width: calc(100vw - 12px);
+          max-height: calc(100dvh - 16px);
+          margin: auto 6px 0;
+          border-radius: 26px 26px 0 0;
+        }
+        .reseller-detail-head {
+          padding: 16px 16px 14px;
+          background: color-mix(in srgb, var(--surface) 94%, transparent);
+          backdrop-filter: blur(14px);
+        }
+        .reseller-detail-head h2 {
+          max-width: 220px;
+          overflow: hidden;
+          font-size: 28px;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .reseller-detail-close { width: 46px; height: 46px; border-radius: 15px; }
+        .reseller-detail-content { padding: 12px 12px 28px; }
+        .reseller-detail-summary { gap: 8px; margin-bottom: 12px; }
+        .reseller-detail-summary > div {
+          min-height: 104px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          padding: 13px;
+          border-radius: 17px;
+        }
+        .reseller-detail-summary strong {
+          margin-top: auto;
+          padding-top: 14px;
+          font-size: 20px;
+          line-height: 1.05;
+          overflow-wrap: normal;
+        }
+        .reseller-adjustment-form { gap: 11px; margin-bottom: 18px; padding: 14px; border-radius: 19px; }
+        .reseller-adjustment-form::before {
+          content: "Penyesuaian saldo";
+          color: var(--ink);
+          font-size: 16px;
+          font-weight: 900;
+        }
+        .reseller-adjustment-form input,
+        .reseller-adjustment-form select { min-height: 50px; border-radius: 13px; background: var(--surface); }
+        .reseller-adjustment-form button { min-height: 50px; border-radius: 13px; }
+        .reseller-detail-ledger-grid { gap: 20px; }
+        .reseller-detail-block h3 { margin: 0 0 9px 2px; font-size: 17px; }
+        .reseller-detail-block .table-wrap { max-height: none; overflow: visible; }
+        .reseller-detail-block tbody tr {
+          display: block;
+          margin-bottom: 8px;
+          padding: 0 12px;
+          border-radius: 17px;
+          box-shadow: none;
+        }
+        .reseller-detail-block tbody td {
+          min-width: 0;
+          min-height: 44px;
+          display: grid;
+          grid-template-columns: 76px minmax(0, 1fr);
+          gap: 10px;
+          padding: 10px 0;
+          text-align: right;
+          overflow-wrap: anywhere;
+          word-break: normal;
+        }
+        .reseller-detail-block tbody td::before {
+          align-self: start;
+          padding-top: 2px;
+          font-family: "JetBrains Mono", monospace;
+          font-size: 8px;
+        }
+        .reseller-detail-block tbody td:last-child { border-bottom: 0; }
+        .reseller-detail-block tbody td:last-child::before { display: block; margin: 0; }
+        .reseller-direction { justify-content: flex-end; font-size: 16px; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        #section-resellers *,
+        .reseller-detail-dialog * {
+          scroll-behavior: auto !important;
+          transition-duration: .01ms !important;
+        }
+      }
+
     </style>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </head>
@@ -8656,7 +8909,7 @@
           <div class="reseller-search-row">
             <div class="field"><label for="resellerControlSearch">Cari reseller</label><input id="resellerControlSearch" type="search" autocomplete="off" placeholder="Username atau ID" oninput="renderResellerControlList()"></div>
           </div>
-          <div class="table-wrap"><table><thead><tr><th>Reseller</th><th>Status</th><th>Saldo</th><th>Order</th><th>Laba</th><th>Aksi</th></tr></thead><tbody id="resellerControlTableBody"><tr><td class="empty" colspan="6">Pilih menu Reseller untuk memuat data.</td></tr></tbody></table></div>
+          <div class="table-wrap"><table class="reseller-list-table"><thead><tr><th>Reseller</th><th>Status</th><th>Saldo</th><th>Order</th><th>Laba</th><th>Aksi</th></tr></thead><tbody id="resellerControlTableBody"><tr><td class="empty" colspan="6">Pilih menu Reseller untuk memuat data.</td></tr></tbody></table></div>
         </article>
 
         <article class="card reseller-profit-card delay-2">
@@ -8669,7 +8922,7 @@
             <div><span>Modal API</span><strong id="resellerProfitCost">Rp0</strong></div>
             <div><span>Laba</span><strong id="resellerProfitGross">Rp0</strong></div>
           </div>
-          <div class="table-wrap"><table><thead><tr><th>Produk</th><th>Terjual</th><th>Modal</th><th>Laba</th></tr></thead><tbody id="resellerProfitTableBody"><tr><td class="empty" colspan="4">Belum ada data.</td></tr></tbody></table></div>
+          <div class="table-wrap"><table class="reseller-profit-table"><thead><tr><th>Produk</th><th>Terjual</th><th>Modal</th><th>Laba</th></tr></thead><tbody id="resellerProfitTableBody"><tr><td class="empty" colspan="4">Belum ada data.</td></tr></tbody></table></div>
         </article>
 
         <article class="card reseller-deposit-card delay-2">
@@ -8681,7 +8934,7 @@
             <div class="field"><label for="resellerDepositStatus">Status</label><select id="resellerDepositStatus" onchange="loadResellerDeposits()"><option value="all">Semua</option><option value="pending">Menunggu</option><option value="approved">Berhasil</option><option value="rejected">Gagal</option></select></div>
             <div class="field"><label for="resellerDepositProvider">Metode</label><select id="resellerDepositProvider" onchange="loadResellerDeposits()"><option value="all">Semua</option><option value="midtrans">Midtrans</option><option value="manual_qris">QRIS manual</option></select></div>
           </div>
-          <div class="table-wrap"><table><thead><tr><th>Reseller</th><th>Deposit</th><th>Status</th><th>Waktu</th><th>Aksi</th></tr></thead><tbody id="resellerDepositTableBody"><tr><td class="empty" colspan="5">Belum ada data.</td></tr></tbody></table></div>
+          <div class="table-wrap"><table class="reseller-deposit-table"><thead><tr><th>Reseller</th><th>Deposit</th><th>Status</th><th>Waktu</th><th>Aksi</th></tr></thead><tbody id="resellerDepositTableBody"><tr><td class="empty" colspan="5">Belum ada data.</td></tr></tbody></table></div>
         </article>
       </div>
 
