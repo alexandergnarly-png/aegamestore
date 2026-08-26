@@ -78,6 +78,8 @@ const usdIdrRate = getSafeUsdtIdrRate(
 const resellerDiscountRate = paymentConfigNumber("RESELLER_DISCOUNT_RATE", 0.08, {
   max: 0.5,
 });
+const RESELLER_MIN_DEPOSIT_USD = 10;
+const resellerMinDepositIdr = Math.ceil(RESELLER_MIN_DEPOSIT_USD * usdIdrRate);
 const binancePayUid = String(process.env.BINANCE_PAY_UID || "").trim();
 const telegramBotToken = String(process.env.TELEGRAM_BOT_TOKEN || "").trim();
 const telegramChatId = String(process.env.TELEGRAM_CHAT_ID || "").trim();
@@ -4330,8 +4332,10 @@ app.get("/api/reseller", async (req, res) => {
         usd: Math.floor((walletIdr / usdIdrRate) * 100) / 100,
       },
       limits: {
-        min_topup: WALLET_MIN_TOPUP,
+        min_topup: resellerMinDepositIdr,
         max_topup: WALLET_MAX_TOPUP,
+        min_topup_usd: RESELLER_MIN_DEPOSIT_USD,
+        usd_idr_rate: usdIdrRate,
       },
       discount_percent: Math.round(resellerDiscountRate * 100),
       max_quantity: MAX_ORDER_QUANTITY,
@@ -10153,16 +10157,22 @@ app.post("/api/wallet/topups/midtrans", walletTopupLimiter, requireUserCsrf, asy
   const user = await getLoggedInUserFromRequest(req);
   if (!user) return res.status(401).json({ message: "Kamu harus login dulu" });
 
+  const returnToReseller = req.body?.return_to === "reseller";
+  const minimumAmount = returnToReseller ? resellerMinDepositIdr : WALLET_MIN_TOPUP;
   const amount = parseWalletAmount(req.body?.amount);
-  if (amount < WALLET_MIN_TOPUP || amount > WALLET_MAX_TOPUP) {
-    return res.status(400).json({ message: `Nominal top up harus Rp${WALLET_MIN_TOPUP.toLocaleString("id-ID")} sampai Rp${WALLET_MAX_TOPUP.toLocaleString("id-ID")}` });
+  if (amount < minimumAmount || amount > WALLET_MAX_TOPUP) {
+    const minimumLabel = returnToReseller
+      ? `$${RESELLER_MIN_DEPOSIT_USD} (Rp${minimumAmount.toLocaleString("id-ID")})`
+      : `Rp${minimumAmount.toLocaleString("id-ID")}`;
+    return res.status(400).json({ message: `Nominal top up harus ${minimumLabel} sampai Rp${WALLET_MAX_TOPUP.toLocaleString("id-ID")}` });
   }
   if (!process.env.MIDTRANS_SERVER_KEY || !process.env.MIDTRANS_CLIENT_KEY) {
     return res.status(503).json({ message: "Pembayaran Midtrans sedang tidak tersedia" });
   }
 
   const providerOrderId = `WALLET-${crypto.randomUUID()}`;
-  const returnToReseller = req.body?.return_to === "reseller";
+  const paymentAmount = returnToReseller ? calculatePaymentPrice(amount, "midtrans") : amount;
+  const paymentFee = paymentAmount - amount;
   let topupId = "";
 
   try {
@@ -10177,7 +10187,7 @@ app.post("/api/wallet/topups/midtrans", walletTopupLimiter, requireUserCsrf, asy
       userId: user.id,
       amount,
       provider: "midtrans",
-      paymentAmount: amount,
+      paymentAmount,
       providerOrderId,
     });
 
@@ -10186,19 +10196,23 @@ app.post("/api/wallet/topups/midtrans", walletTopupLimiter, requireUserCsrf, asy
     const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact);
     const baseUrl = getAppBaseUrl(req);
     const accountUrl = `${baseUrl}/${returnToReseller ? "reseller" : "account"}?wallet_topup=${encodeURIComponent(topupId)}`;
+    const itemDetails = [{
+      id: "AE-CREDIT",
+      price: amount,
+      quantity: 1,
+      name: `${returnToReseller ? "Reseller Deposit" : "AE Credit"} ${formatWalletAmountForMessage(amount)}`,
+    }];
+    if (paymentFee > 0) {
+      itemDetails.push({ id: "MIDTRANS-FEE", price: paymentFee, quantity: 1, name: "Biaya Midtrans" });
+    }
     const transaction = await snap.createTransaction({
-      transaction_details: { order_id: providerOrderId, gross_amount: amount },
+      transaction_details: { order_id: providerOrderId, gross_amount: paymentAmount },
       customer_details: {
         first_name: name,
         email: isValidEmail ? contact : "customer@example.com",
         phone: isValidEmail ? "" : contact.replace(/[^0-9+]/g, ""),
       },
-      item_details: [{
-        id: "AE-CREDIT",
-        price: amount,
-        quantity: 1,
-        name: `${returnToReseller ? "Reseller Deposit" : "AE Credit"} ${formatWalletAmountForMessage(amount)}`,
-      }],
+      item_details: itemDetails,
       custom_field1: `wallet_topup:${topupId}`,
       callbacks: { finish: accountUrl, pending: accountUrl, error: accountUrl },
     });
@@ -10214,7 +10228,8 @@ app.post("/api/wallet/topups/midtrans", walletTopupLimiter, requireUserCsrf, asy
       message: "Pembayaran Midtrans berhasil dibuat",
       id: topupId,
       creditAmount: amount,
-      paymentAmount: amount,
+      paymentAmount,
+      paymentFee,
       paymentUrl: transaction.redirect_url,
     });
   } catch (err) {

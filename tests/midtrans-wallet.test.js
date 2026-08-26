@@ -26,6 +26,8 @@ const server = fs.readFileSync("server.js", "utf8");
   `LIMIT 1 FOR UPDATE`,
   `paidAmount !== Number(request.payment_amount || request.amount)`,
   `ON CONFLICT (reference_type, reference_id, direction) DO NOTHING`,
+  `const paymentFee = paymentAmount - amount`,
+  `itemDetails.push({ id: "MIDTRANS-FEE"`,
 ].forEach((marker) => assert.ok(server.includes(marker), `Missing wallet webhook guard: ${marker}`));
 
 const admin = fs.readFileSync("views/admin.html", "utf8");

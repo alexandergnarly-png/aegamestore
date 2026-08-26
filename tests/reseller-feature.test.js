@@ -2,6 +2,9 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 
 const server = fs.readFileSync("server.js", "utf8");
+
+assert.ok(server.includes("const RESELLER_MIN_DEPOSIT_USD = 10"));
+assert.ok(server.includes("min_topup: resellerMinDepositIdr"));
 const page = fs.readFileSync("public/reseller.html", "utf8");
 const login = fs.readFileSync("public/reseller-login.html", "utf8");
 const admin = fs.readFileSync("views/admin.html", "utf8");
@@ -36,11 +39,13 @@ const admin = fs.readFileSync("views/admin.html", "utf8");
   'id="depositForm"',
   'id="depositAmount"',
   'id="depositButton"',
+  'data-usd="10"',
+  'Fee Midtrans ditambahkan ke tagihan.',
   'id="checkoutButton"',
   'payment_method:"ae_credit"',
   'reseller_order:true',
   'return_to:"reseller"',
-  'Ambil key dari deposit',
+  'Order dari saldo',
   '/(^|\\.)midtrans\\.com$/i',
   '.loading[hidden],.desk[hidden]{display:none}',
 ].forEach((marker) => assert.ok(page.includes(marker), `Missing reseller UI marker: ${marker}`));
@@ -65,6 +70,8 @@ assert.ok(!login.includes("Periksa badge & masuk"));
 assert.ok(!page.includes("1 USD"));
 assert.ok(!page.includes("Ajukan akun reseller"));
 assert.ok(!page.includes("Biaya Midtrans"));
+assert.ok(!page.includes("Fund reseller wallet"));
+assert.ok(!page.includes("Ready to spend"));
 assert.ok(!server.includes('app.post("/api/reseller/apply"'));
 
 const resellerLoginRoute = server.slice(
