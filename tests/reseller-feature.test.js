@@ -33,6 +33,7 @@ const admin = fs.readFileSync("views/admin.html", "utf8");
   'payment_method:"midtrans"',
   'reseller_order:true',
   '/(^|\\.)midtrans\\.com$/i',
+  '.loading[hidden],.desk[hidden],.state-panel[hidden]{display:none}',
 ].forEach((marker) => assert.ok(page.includes(marker), `Missing reseller UI marker: ${marker}`));
 
 [
