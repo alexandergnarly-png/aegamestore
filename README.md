@@ -51,8 +51,11 @@ File lokal tersebut disimpan di `private/` yang diabaikan Git.
   ```
 
 - Pertahankan `APP_BASE_URL=https://aegamestore.com`.
+- Isi `GAME_KEY_ENCRYPTION_SECRET` dengan nilai acak minimal 32 karakter yang berbeda dari `JWT_SECRET`. Setelah deploy, server akan memigrasikan key lama ke kunci khusus ini.
 - Gunakan Internal Database URL Render. Untuk URL eksternal, jangan set `DATABASE_SSL_REJECT_UNAUTHORIZED=false`.
 - Jangan rotasi `JWT_SECRET` tanpa migrasi key game; secret itu juga menurunkan kunci enkripsi data game key.
+- Jalankan `npm audit --omit=dev` setelah mengubah dependency dan sebelum deploy.
+- Jika secret pernah tampil di chat, log, atau commit, revoke dan ganti dari dashboard penyedia; jangan hanya menghapus teksnya.
 
 ### Tampilan harga IDR / USD
 

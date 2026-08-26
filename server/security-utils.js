@@ -83,6 +83,26 @@ function verifyTotp(secret, candidate, timestamp = Date.now()) {
   });
 }
 
+function timingSafeTextEqual(left, right) {
+  const leftBuffer = Buffer.from(String(left || ""));
+  const rightBuffer = Buffer.from(String(right || ""));
+  return (
+    leftBuffer.length > 0 &&
+    leftBuffer.length === rightBuffer.length &&
+    crypto.timingSafeEqual(leftBuffer, rightBuffer)
+  );
+}
+
+function isTrustedMutationOrigin({ fetchSite, sourceOrigin, targetOrigin }) {
+  if (String(fetchSite || "").toLowerCase() === "cross-site") return false;
+  if (!sourceOrigin) return true;
+  try {
+    return new URL(sourceOrigin).origin === new URL(targetOrigin).origin;
+  } catch (_) {
+    return false;
+  }
+}
+
 function escapeCsvFormula(value) {
   if (value === null || value === undefined) return "";
   let text = String(value);
@@ -95,7 +115,9 @@ module.exports = {
   decryptSecretWithKeys,
   encryptSecret,
   escapeCsvFormula,
+  isTrustedMutationOrigin,
   rotateEncryptedSecret,
+  timingSafeTextEqual,
   totp,
   verifyTotp,
 };

@@ -16,6 +16,7 @@ const source = fs.readFileSync("server.js", "utf8");
 const helperCalls = source.match(/getLoggedInUserFromRequest\(req\)/g) || [];
 const awaitedCalls = source.match(/await getLoggedInUserFromRequest\(req\)/g) || [];
 assert.equal(awaitedCalls.length, helperCalls.length - 1, "Every user auth check must await token revocation lookup");
-assert.equal((source.match(/jwt\.verify\(token, jwtSecret\)/g) || []).length, 1, "JWT verification must stay centralized");
+assert.equal((source.match(/jwt\.verify\(token, jwtSecret, userJwtOptions\)/g) || []).length, 1, "JWT verification must stay centralized");
+assert.ok(source.includes('{ algorithm: "HS256", expiresIn: "7d" }'));
 
 console.log("User JWT revocation check passed.");

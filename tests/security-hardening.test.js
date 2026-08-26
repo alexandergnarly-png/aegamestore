@@ -6,7 +6,9 @@ const {
   decryptSecretWithKeys,
   encryptSecret,
   escapeCsvFormula,
+  isTrustedMutationOrigin,
   rotateEncryptedSecret,
+  timingSafeTextEqual,
   totp,
   verifyTotp,
 } = require("../server/security-utils");
@@ -49,6 +51,14 @@ assert.ok(server.includes("verifyTotp(adminTotpSecret, otp)"));
 assert.ok(server.includes('code: "ADMIN_AUTH_UNAVAILABLE"'));
 assert.ok(server.includes('code: "ADMIN_AUTH_REQUIRED"'));
 assert.ok(!server.includes("result.ok ? 200 : result.http_code || 502"));
+assert.ok(server.includes("isTrustedMutationOrigin"));
+assert.ok(server.includes('res.vary("Sec-Fetch-Site")'));
+assert.ok(server.includes("requireTrustedBrowserMutation"));
+assert.ok(server.includes("requireJsonRequest"));
+assert.ok(server.includes('userJwtOptions = { algorithms: ["HS256"] }'));
+assert.ok(server.includes('["CONNECT", "TRACE", "TRACK"]'));
+assert.ok(server.includes('req.path.startsWith("/api/reseller")'));
+assert.ok(server.includes("UNHANDLED REQUEST ERROR:"));
 assert.ok(!/"script-src": \[[\s\S]{0,120}"'unsafe-inline'"/.test(server));
 assert.ok(!server.includes('"script-src-attr": ["\'unsafe-inline\'"]'));
 assert.ok(server.includes('"script-src-attr": ["\'unsafe-hashes\'", ...inlineEventHandlerHashes]'));
@@ -69,6 +79,13 @@ const adminSessionCheck = server.slice(
 );
 assert.ok(!adminSessionCheck.includes("user_agent = $3"));
 assert.ok(server.includes("ip_address, user_agent"));
+assert.ok(timingSafeTextEqual("same-token", "same-token"));
+assert.ok(!timingSafeTextEqual("same-token", "other-token"));
+assert.ok(!timingSafeTextEqual("", ""));
+assert.ok(isTrustedMutationOrigin({ fetchSite: "same-origin", sourceOrigin: "https://aegamestore.com", targetOrigin: "https://aegamestore.com/path" }));
+assert.ok(!isTrustedMutationOrigin({ fetchSite: "cross-site", sourceOrigin: "https://aegamestore.com", targetOrigin: "https://aegamestore.com" }));
+assert.ok(!isTrustedMutationOrigin({ fetchSite: "same-site", sourceOrigin: "https://evil.aegamestore.com", targetOrigin: "https://aegamestore.com" }));
+assert.ok(isTrustedMutationOrigin({ fetchSite: "", sourceOrigin: "", targetOrigin: "https://aegamestore.com" }));
 
 (async () => {
   const calls = [];

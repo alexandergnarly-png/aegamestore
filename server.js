@@ -51,7 +51,9 @@ const {
   decryptSecretWithKeys,
   encryptSecret,
   escapeCsvFormula,
+  isTrustedMutationOrigin,
   rotateEncryptedSecret,
+  timingSafeTextEqual,
   totp,
   verifyTotp,
 } = require("./server/security-utils");
@@ -59,6 +61,7 @@ const {
 const app = express();
 app.disable("x-powered-by");
 app.set("trust proxy", 1);
+app.set("query parser", "simple");
 const port = process.env.PORT || 3000;
 const isMidtransProduction = process.env.MIDTRANS_IS_PRODUCTION === "true";
 
@@ -85,6 +88,8 @@ const telegramBotToken = String(process.env.TELEGRAM_BOT_TOKEN || "").trim();
 const telegramChatId = String(process.env.TELEGRAM_CHAT_ID || "").trim();
 const autoPromoEnabled = process.env.AUTO_PROMO_ENABLED !== "false";
 const jwtSecret = String(process.env.JWT_SECRET || "").trim();
+const userJwtOptions = { algorithms: ["HS256"] };
+const dummyPasswordHash = "$2b$12$iPVEzJyqE/QKFZWKrIzV1.wnRe0WrGiv2NCjA1VzbSeW7RbI44Viy";
 const adminTotpSecret = String(process.env.ADMIN_TOTP_SECRET || "").trim();
 const gameKeyEncryptionSecret = String(
   process.env.GAME_KEY_ENCRYPTION_SECRET || "",
@@ -2626,7 +2631,7 @@ async function getLoggedInUserFromRequest(req) {
   if (!token) return null;
 
   try {
-    const decoded = jwt.verify(token, jwtSecret);
+    const decoded = jwt.verify(token, jwtSecret, userJwtOptions);
     const result = await query(
       `SELECT id, username, token_version FROM users WHERE id = $1 LIMIT 1`,
       [decoded.id],
@@ -3873,51 +3878,67 @@ async function getVoucherDiscount({
   };
 }
 
-function requireAdminCsrf(req, res, next) {
-  const csrfFromCookie = String(req.cookies.admin_csrf || "").trim();
-  const csrfFromHeader = String(req.headers["x-csrf-token"] || "").trim();
-
-  if (!csrfFromCookie || !csrfFromHeader || csrfFromCookie !== csrfFromHeader) {
-    return res.status(403).json({
-      message: "Invalid CSRF token",
+function isTrustedBrowserMutation(req) {
+  try {
+    return isTrustedMutationOrigin({
+      fetchSite: req.headers["sec-fetch-site"],
+      sourceOrigin: String(req.headers.origin || "").trim(),
+      targetOrigin: getAppBaseUrl(req),
     });
+  } catch (_) {
+    return false;
   }
-
-  next();
 }
 
-function requireUserCsrf(req, res, next) {
-  const csrfFromCookie = String(req.cookies.user_csrf || "").trim();
-  const csrfFromHeader = String(req.headers["x-user-csrf-token"] || "").trim();
-
-  if (!csrfFromCookie || !csrfFromHeader || csrfFromCookie !== csrfFromHeader) {
-    return res.status(403).json({
-      message: "Invalid user CSRF token",
-    });
+function requireTrustedBrowserMutation(req, res, next) {
+  res.vary("Origin");
+  res.vary("Sec-Fetch-Site");
+  if (!isTrustedBrowserMutation(req)) {
+    return res.status(403).json({ message: "Cross-site request blocked" });
   }
-
-  next();
+  return next();
 }
 
-function requireSafeAdminAction(req, res, next) {
-  const isWriteMethod = ["POST", "PUT", "PATCH", "DELETE"].includes(
-    String(req.method || "").toUpperCase(),
-  );
-
-  if (!isWriteMethod) {
-    return next();
+function requireJsonRequest(req, res, next) {
+  if (!req.is("application/json")) {
+    return res.status(415).json({ message: "Content-Type must be application/json" });
   }
+  return next();
+}
 
-  const csrfFromCookie = String(req.cookies.admin_csrf || "").trim();
-  const csrfFromHeader = String(req.headers["x-csrf-token"] || "").trim();
+function requireCsrf(req, res, next, cookieName, headerName, message) {
+  res.vary("Origin");
+  res.vary("Sec-Fetch-Site");
+  const cookieToken = String(req.cookies[cookieName] || "").trim();
+  const headerToken = String(req.headers[headerName] || "").trim();
 
-  if (!csrfFromCookie || !csrfFromHeader || csrfFromCookie !== csrfFromHeader) {
-    return res.status(403).json({
-      message: "Invalid CSRF token",
-    });
+  if (!isTrustedBrowserMutation(req) || !timingSafeTextEqual(cookieToken, headerToken)) {
+    return res.status(403).json({ message });
   }
 
   return next();
+}
+
+function requireAdminCsrf(req, res, next) {
+  return requireCsrf(
+    req,
+    res,
+    next,
+    "admin_csrf",
+    "x-csrf-token",
+    "Invalid CSRF token",
+  );
+}
+
+function requireUserCsrf(req, res, next) {
+  return requireCsrf(
+    req,
+    res,
+    next,
+    "user_csrf",
+    "x-user-csrf-token",
+    "Invalid user CSRF token",
+  );
 }
 
 async function requireAdminAuth(req, res, next) {
@@ -4010,6 +4031,16 @@ app.use(
   }),
 );
 
+app.use((req, res, next) => {
+  if (["CONNECT", "TRACE", "TRACK"].includes(req.method)) {
+    return res.status(405).json({ message: "Method not allowed" });
+  }
+  if (String(req.originalUrl || "").length > 4096) {
+    return res.status(414).json({ message: "Request URL too long" });
+  }
+  return next();
+});
+
 app.use(express.json({
   limit: "50kb",
   verify: (req, _res, buffer) => {
@@ -4079,8 +4110,12 @@ app.use((req, res, next) => {
     req.path.startsWith("/vip-discounts") ||
     req.path.startsWith("/products") ||
     req.path.startsWith("/security-audit") ||
+    req.path.startsWith("/admin-") ||
+    req.path.startsWith("/user/") ||
     req.path.startsWith("/api/user") ||
-    req.path.startsWith("/api/admin")
+    req.path.startsWith("/api/admin") ||
+    req.path.startsWith("/api/reseller") ||
+    req.path.startsWith("/api/wallet")
   ) {
     res.setHeader(
       "Cache-Control",
@@ -4387,16 +4422,27 @@ app.get("/ae-auth", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "admin-login.html"));
 });
 
-app.post("/admin-login", loginLimiter, async (req, res) => {
+app.post(
+  "/admin-login",
+  loginLimiter,
+  requireTrustedBrowserMutation,
+  requireJsonRequest,
+  async (req, res) => {
   const { username, password, otp } = req.body;
+  const cleanUsername = String(username || "").trim();
+  const cleanPassword = String(password || "");
 
   const envUsername = String(process.env.ADMIN_USERNAME || "").trim();
   const envPasswordHash = String(process.env.ADMIN_PASSWORD_HASH || "").trim();
 
-  if (!username || !password) {
+  if (!cleanUsername || !cleanPassword) {
     return res.status(400).json({
       message: "Username dan password wajib diisi",
     });
+  }
+
+  if (cleanUsername.length > 64 || cleanPassword.length > 128) {
+    return res.status(400).json({ message: "Username atau password tidak valid" });
   }
 
   if (!envUsername || !envPasswordHash) {
@@ -4408,10 +4454,9 @@ app.post("/admin-login", loginLimiter, async (req, res) => {
   try {
     await deleteExpiredAdminSessions();
 
-    const cleanUsername = String(username).trim();
     const isUsernameMatch = cleanUsername === envUsername;
     const isPasswordMatch = await bcrypt.compare(
-      String(password),
+      cleanPassword,
       envPasswordHash,
     );
 
@@ -4426,10 +4471,7 @@ app.post("/admin-login", loginLimiter, async (req, res) => {
       const createdAt = new Date();
       const expiresAt = new Date(createdAt.getTime() + 1000 * 60 * 60 * 8);
 
-      const ipAddress =
-        req.headers["x-forwarded-for"]?.split(",")[0]?.trim() ||
-        req.socket.remoteAddress ||
-        "";
+      const ipAddress = String(req.ip || req.socket.remoteAddress || "").slice(0, 64);
 
       const userAgent = String(req.headers["user-agent"] || "").slice(0, 255);
 
@@ -4479,7 +4521,8 @@ app.post("/admin-login", loginLimiter, async (req, res) => {
       message: "Terjadi error server",
     });
   }
-});
+  },
+);
 
 app.post(
   "/admin-logout",
@@ -9518,7 +9561,12 @@ app.get("/admin-login", (req, res) => {
 });
 
 // --- API USER REGISTER & LOGIN ---
-app.post("/register", registerLimiter, async (req, res) => {
+app.post(
+  "/register",
+  registerLimiter,
+  requireTrustedBrowserMutation,
+  requireJsonRequest,
+  async (req, res) => {
   const { username, password } = req.body;
   const cleanUsername = String(username || "").trim();
   const cleanPassword = String(password || "");
@@ -9555,26 +9603,29 @@ app.post("/register", registerLimiter, async (req, res) => {
     }
     return res.status(500).json({ message: "Terjadi error server" });
   }
-});
+  },
+);
 
-app.post("/user-login", userAuthLimiter, async (req, res) => {
+app.post("/user-login", userAuthLimiter, requireTrustedBrowserMutation, requireJsonRequest, async (req, res) => {
   const { username, password } = req.body;
   const resellerLogin = req.body?.reseller_login === true;
+  const cleanUsername = String(username || "").trim();
+  const cleanPassword = String(password || "");
+
+  if (!cleanUsername || !cleanPassword || cleanUsername.length > 64 || cleanPassword.length > 128) {
+    return res.status(400).json({ message: "Username atau password salah" });
+  }
 
   try {
     const result = await query(
       "SELECT * FROM users WHERE username = $1 LIMIT 1",
-      [username],
+      [cleanUsername],
     );
     const user = result.rows[0];
 
-    if (!user) {
-      return res.status(400).json({ message: "Username atau password salah" });
-    }
+    const isMatch = await bcrypt.compare(cleanPassword, user?.password || dummyPasswordHash);
 
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
+    if (!user || !isMatch) {
       return res.status(400).json({ message: "Username atau password salah" });
     }
 
@@ -9592,7 +9643,7 @@ app.post("/user-login", userAuthLimiter, async (req, res) => {
         token_version: Number(user.token_version || 0),
       },
       jwtSecret,
-      { expiresIn: "7d" },
+      { algorithm: "HS256", expiresIn: "7d" },
     );
 
     // Simpan tiket di cookie browser
@@ -10586,6 +10637,7 @@ app.get("/security-audit", requireAdminAuth, async (req, res) => {
   return res.json({
     helmet: true,
     csrf_admin_actions: true,
+    csrf_origin_validation: true,
     rate_limit: true,
     rate_limit_store: "postgresql",
     password_hashing: true,
@@ -10594,6 +10646,8 @@ app.get("/security-audit", requireAdminAuth, async (req, res) => {
     dedicated_game_key_secret: Boolean(gameKeyEncryptionSecret),
     admin_session_tokens_hashed: true,
     csp_inline_handlers_hashed: true,
+    jwt_algorithm_allowlist: true,
+    sensitive_response_cache_disabled: true,
     jwt_secret_configured: Boolean(jwtSecret && jwtSecret.length >= 32),
     midtrans_production: isMidtransProduction,
     notes: [
@@ -10716,6 +10770,23 @@ app.get("/admin-sessions", requireAdminAuth, async (req, res) => {
       message: "Gagal mengambil admin sessions",
     });
   }
+});
+
+app.use((req, res) => {
+  const wantsJson = req.path.startsWith("/api/") || req.accepts(["json", "html"]) === "json";
+  if (wantsJson) return res.status(404).json({ message: "Not found" });
+  return res.status(404).type("text").send("Not found");
+});
+
+app.use((err, req, res, next) => {
+  if (res.headersSent) return next(err);
+  const errorStatus = Number(err?.status || err?.statusCode);
+  const status = errorStatus >= 400 && errorStatus < 500 ? errorStatus : 500;
+  const message = status === 413 ? "Request body too large" : status < 500 ? "Invalid request" : "Internal server error";
+  if (status >= 500) console.error("UNHANDLED REQUEST ERROR:", err);
+  const wantsJson = req.path.startsWith("/api/") || req.accepts(["json", "html"]) === "json";
+  if (wantsJson) return res.status(status).json({ message });
+  return res.status(status).type("text").send(message);
 });
 
 let server = null;
