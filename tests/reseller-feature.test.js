@@ -7,7 +7,11 @@ const login = fs.readFileSync("public/reseller-login.html", "utf8");
 const admin = fs.readFileSync("views/admin.html", "utf8");
 
 assert.ok(server.includes("const RESELLER_MIN_DEPOSIT_USD = 10"));
-assert.ok(server.includes("min_topup: resellerMinDepositIdr"));
+assert.ok(server.includes("https://api.frankfurter.dev/v2/rate/USD/IDR"));
+assert.ok(server.includes("getResellerUsdIdrRate()"));
+assert.ok(server.includes("AbortSignal.timeout(5000)"));
+assert.ok(server.includes("min_topup: Math.ceil(RESELLER_MIN_DEPOSIT_USD * resellerRate)"));
+assert.ok(!server.includes("resellerMinDepositIdr"));
 
 const inlineScripts = (html) =>
   [...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)].map(
@@ -33,12 +37,12 @@ const inlineScripts = (html) =>
   'calculatePaymentPrice(subtotal, "ae_credit")',
   'returnToReseller ? "reseller" : "account"',
   "Voucher tidak dapat digabung dengan harga reseller",
-  "getResellerPricing(productRow).unit_idr",
-  "getResellerFinancials(productRow, cleanQuantity)",
+  "getResellerPricing(productRow, resellerRate).unit_idr",
+  "getResellerFinancials(productRow, cleanQuantity, resellerRate)",
   "supplier_cost = $2, gross_profit = $3",
   "bukan produk API",
   "LOWER(COALESCE(p.delivery_type, '')) IN ('vipstore_api', 'cheatgame_api')",
-  "calculateResellerPrice(supplierUnitCost, usdIdrRate)",
+  "calculateResellerPrice(supplierUnitCost, exchangeRate)",
 ].forEach((marker) =>
   assert.ok(
     server.includes(marker),

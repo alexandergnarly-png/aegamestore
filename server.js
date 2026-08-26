@@ -26,6 +26,7 @@ const {
   calculateUsdtPayment,
   getSafeUsdtIdrRate,
   grossUpPaymentPrice,
+  parseMarketUsdIdrRate,
   recommendUsdtPrice,
 } = require("./server/payment-pricing");
 const { normalizeCatalogLabel, verifyCheatGameWebhook } = require("./server/cheatgame-utils");
@@ -78,7 +79,9 @@ const usdIdrRate = getSafeUsdtIdrRate(
   paymentConfigNumber("USD_IDR_RATE", 18000, { min: 1 }),
 );
 const RESELLER_MIN_DEPOSIT_USD = 10;
-const resellerMinDepositIdr = Math.ceil(RESELLER_MIN_DEPOSIT_USD * usdIdrRate);
+const RESELLER_RATE_URL = "https://api.frankfurter.dev/v2/rate/USD/IDR";
+const RESELLER_RATE_CACHE_MS = 60 * 60 * 1000;
+let resellerRateCache = { rate: 0, expiresAt: 0 };
 const MIDTRANS_QRIS_EXPIRY_MINUTES = 15;
 const MIDTRANS_PENDING_GRACE_MINUTES = MIDTRANS_QRIS_EXPIRY_MINUTES + 5;
 const binancePayUid = String(process.env.BINANCE_PAY_UID || "").trim();
@@ -2685,10 +2688,38 @@ function calculateUsdtAmount(idrAmount, product) {
   );
 }
 
-function getResellerPricing(product) {
+async function getResellerUsdIdrRate() {
+  const now = Date.now();
+  if (resellerRateCache.rate && resellerRateCache.expiresAt > now) {
+    return resellerRateCache.rate;
+  }
+
+  try {
+    const response = await fetch(RESELLER_RATE_URL, {
+      headers: { accept: "application/json" },
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const data = await response.json();
+    const rate = parseMarketUsdIdrRate(data?.rate);
+    if (!rate) throw new Error("kurs di luar batas aman");
+
+    resellerRateCache = {
+      rate,
+      expiresAt: now + RESELLER_RATE_CACHE_MS,
+    };
+    return rate;
+  } catch (error) {
+    console.warn("RESELLER RATE: memakai kurs cadangan.", error.message);
+    return resellerRateCache.rate || usdIdrRate;
+  }
+}
+
+function getResellerPricing(product, exchangeRate = usdIdrRate) {
   const retailIdr = Number(product?.price || 0);
   const supplierUnitCost = Number(product?.supplier_price || 0);
-  const resellerPrice = calculateResellerPrice(supplierUnitCost, usdIdrRate);
+  const resellerPrice = calculateResellerPrice(supplierUnitCost, exchangeRate);
   return {
     retail_idr: retailIdr,
     ...resellerPrice,
@@ -2696,8 +2727,8 @@ function getResellerPricing(product) {
   };
 }
 
-function getResellerFinancials(product, quantity = 1) {
-  const pricing = getResellerPricing(product);
+function getResellerFinancials(product, quantity = 1, exchangeRate = usdIdrRate) {
+  const pricing = getResellerPricing(product, exchangeRate);
   const cleanQuantity = Math.max(1, Number(quantity) || 1);
   const supplierUnitCost = Math.max(0, Math.round(Number(product?.supplier_price || 0)));
   const supplierCost = supplierUnitCost * cleanQuantity;
@@ -4391,6 +4422,7 @@ app.get("/api/reseller", async (req, res) => {
       [user.id],
     );
     const walletIdr = Number(walletResult.rows[0]?.balance || 0);
+    const resellerRate = await getResellerUsdIdrRate();
 
     const productsResult = await query(`
         SELECT p.id, p.game, p.brand, p.duration, p.price, p.supplier_price,
@@ -4413,7 +4445,7 @@ app.get("/api/reseller", async (req, res) => {
         ORDER BY p.game ASC, p.price ASC, p.id ASC
       `);
     const products = productsResult.rows
-      .filter((product) => getResellerFinancials(product).gross_profit > 0)
+      .filter((product) => getResellerFinancials(product, 1, resellerRate).gross_profit > 0)
       .map((product) => ({
         id: Number(product.id),
         game: product.game,
@@ -4422,7 +4454,7 @@ app.get("/api/reseller", async (req, res) => {
         platform: normalizePlatform(product.platform),
         play_status: normalizePlayStatus(product.play_status),
         available_keys: Number(product.available_keys || 0),
-        ...getResellerPricing(product),
+        ...getResellerPricing(product, resellerRate),
       }));
 
     const ordersResult = await query(
@@ -4440,13 +4472,13 @@ app.get("/api/reseller", async (req, res) => {
       },
       balance: {
         idr: walletIdr,
-        usd: Math.floor((walletIdr / usdIdrRate) * 100) / 100,
+        usd: Math.floor((walletIdr / resellerRate) * 100) / 100,
       },
       limits: {
-        min_topup: resellerMinDepositIdr,
+        min_topup: Math.ceil(RESELLER_MIN_DEPOSIT_USD * resellerRate),
         max_topup: WALLET_MAX_TOPUP,
         min_topup_usd: RESELLER_MIN_DEPOSIT_USD,
-        usd_idr_rate: usdIdrRate,
+        usd_idr_rate: resellerRate,
       },
       max_quantity: MAX_ORDER_QUANTITY,
       products,
@@ -4480,7 +4512,8 @@ app.get("/api/reseller/preview", async (req, res) => {
     );
     const product = result.rows[0];
     if (!product) return res.status(403).json({ message: "Harga reseller tidak tersedia" });
-    const pricing = getResellerFinancials(product, quantity);
+    const resellerRate = await getResellerUsdIdrRate();
+    const pricing = getResellerFinancials(product, quantity, resellerRate);
     if (pricing.gross_profit <= 0) {
       return res.status(409).json({ message: "Harga reseller belum aman untuk dijual" });
     }
@@ -4493,8 +4526,8 @@ app.get("/api/reseller/preview", async (req, res) => {
       subtotal_idr: subtotal,
       payment_fee: finalPrice - subtotal,
       final_idr: finalPrice,
-      final_usd: Math.ceil((finalPrice / usdIdrRate) * 100) / 100,
-      usd_idr_rate: usdIdrRate,
+      final_usd: Math.ceil((finalPrice / resellerRate) * 100) / 100,
+      usd_idr_rate: resellerRate,
     });
   } catch (err) {
     console.error("ERROR PREVIEW RESELLER:", err);
@@ -6450,8 +6483,9 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
       });
     }
 
+    const resellerRate = resellerOrder ? await getResellerUsdIdrRate() : usdIdrRate;
     const resellerFinancials = resellerOrder
-      ? getResellerFinancials(productRow, cleanQuantity)
+      ? getResellerFinancials(productRow, cleanQuantity, resellerRate)
       : null;
     if (
       resellerOrder &&
@@ -6473,7 +6507,7 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
       ? `${productName} (${cleanQuantity} key)`
       : productName;
     const unitPrice = resellerOrder
-      ? getResellerPricing(productRow).unit_idr
+      ? getResellerPricing(productRow, resellerRate).unit_idr
       : Number(productRow.price);
 
     const discountCheck = resellerOrder
@@ -10301,7 +10335,10 @@ app.post("/api/wallet/topups/midtrans", walletTopupLimiter, requireUserCsrf, asy
   if (!user) return res.status(401).json({ message: "Kamu harus login dulu" });
 
   const returnToReseller = req.body?.return_to === "reseller";
-  const minimumAmount = returnToReseller ? resellerMinDepositIdr : WALLET_MIN_TOPUP;
+  const resellerRate = returnToReseller ? await getResellerUsdIdrRate() : usdIdrRate;
+  const minimumAmount = returnToReseller
+    ? Math.ceil(RESELLER_MIN_DEPOSIT_USD * resellerRate)
+    : WALLET_MIN_TOPUP;
   const amount = parseWalletAmount(req.body?.amount);
   if (amount < minimumAmount || amount > WALLET_MAX_TOPUP) {
     const minimumLabel = returnToReseller

@@ -35,6 +35,13 @@ function getSafeUsdtIdrRate(...rates) {
   );
 }
 
+function parseMarketUsdIdrRate(value) {
+  const rate = Math.round(Number(value));
+  return Number.isFinite(rate) && rate >= 10000 && rate <= 30000
+    ? rate
+    : null;
+}
+
 function calculateResellerPrice(supplierCostIdr, usdIdrRate = 18000) {
   const cost = Math.max(0, Math.round(Number(supplierCostIdr) || 0));
   if (!cost) {
@@ -59,6 +66,7 @@ module.exports = {
   calculateUsdtPayment,
   getSafeUsdtIdrRate,
   grossUpPaymentPrice,
+  parseMarketUsdIdrRate,
   recommendUsdtPrice,
   toUsd,
 };

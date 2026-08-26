@@ -4,6 +4,7 @@ const {
   calculateUsdtPayment,
   getSafeUsdtIdrRate,
   grossUpPaymentPrice,
+  parseMarketUsdIdrRate,
   recommendUsdtPrice,
   toUsd,
 } = require("../server/payment-pricing");
@@ -23,6 +24,10 @@ assert.equal(calculateUsdtPayment(45000, 1.5, 25000, 18000), 2.7);
 assert.equal(getSafeUsdtIdrRate(16000), 18000);
 assert.equal(getSafeUsdtIdrRate(19500), 19500);
 assert.equal(getSafeUsdtIdrRate(undefined, 0), 18000);
+assert.equal(parseMarketUsdIdrRate(17694.4), 17694);
+assert.equal(parseMarketUsdIdrRate("20000"), 20000);
+assert.equal(parseMarketUsdIdrRate(5000), null);
+assert.equal(parseMarketUsdIdrRate("invalid"), null);
 assert.deepEqual(calculateResellerPrice(18000, 18000), {
   unit_idr: 23400,
   unit_usd: 1.3,
