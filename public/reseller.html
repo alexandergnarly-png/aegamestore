@@ -3,75 +3,2893 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#111111" />
+    <meta name="theme-color" content="#111318" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <title>Reseller Desk — AE Game Store</title>
     <style>
-      :root{--ink:#111;--paper:#f4f4ef;--card:#fff;--soft:#ecece6;--line:#d7d7cf;--muted:#686862;--green:#17663b;--green-bg:#e7f4eb;--red:#9f2525;--shadow:6px 6px 0 rgba(17,17,17,.13)}
-      *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,Arial,sans-serif}button,input,select{font:inherit}button,a{touch-action:manipulation}button{cursor:pointer}.skip{position:fixed;left:12px;top:-80px;z-index:100;background:#111;color:#fff;padding:12px}.skip:focus{top:12px}
-      .site-header{position:sticky;top:0;z-index:30;border-bottom:1px solid var(--line);background:rgba(244,244,239,.96);backdrop-filter:blur(12px)}.header-inner{width:min(1120px,100%);min-height:68px;margin:auto;padding:8px 16px;display:flex;align-items:center;gap:10px}.brand{display:flex;align-items:center;gap:10px;color:inherit;text-decoration:none}.brand-logo{width:42px;height:42px;border-radius:14px;background:#111;color:#fff;display:grid;place-items:center;font:900 13px ui-monospace,monospace}.brand strong{display:block;font-size:14px}.brand small{display:block;color:var(--muted);font:750 9px/1.4 ui-monospace,monospace;letter-spacing:.08em;text-transform:uppercase}.header-actions{margin-left:auto;display:flex;gap:6px}.icon-btn{width:44px;height:44px;border:1px solid var(--line);border-radius:14px;background:#fff;color:#111;display:grid;place-items:center;text-decoration:none}.icon-btn.primary{background:#111;color:#fff;border-color:#111}.icon-btn svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-      main{width:min(1120px,calc(100% - 28px));margin:22px auto 72px;display:grid;gap:16px}.loading{min-height:55vh;display:grid;place-items:center;color:var(--muted);font:800 12px ui-monospace,monospace}.loading[hidden],.desk[hidden]{display:none}.desk{display:grid;gap:16px}
-      .balance-pass{position:relative;min-height:220px;padding:30px;border:1px solid var(--ink);border-radius:26px;background:#111;color:#fff;box-shadow:var(--shadow);display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:24px;overflow:hidden}.balance-pass::before,.balance-pass::after{content:"";position:absolute;top:50%;width:26px;height:26px;border-radius:50%;background:var(--paper);border:1px solid var(--ink)}.balance-pass::before{left:-14px}.balance-pass::after{right:-14px}.pass-kicker{font:800 10px/1.3 ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase;color:#bdbdb5}.balance-pass h1{margin:15px 0 7px;font:900 clamp(42px,8vw,78px)/.9 ui-monospace,monospace;letter-spacing:-.07em}.balance-pass p{margin:0;color:#cfcfc8}.pass-state{align-self:start;padding:9px 11px;border:1px solid #555;border-radius:999px;color:#d8f1df;font:800 9px ui-monospace,monospace;text-transform:uppercase}.balance-idr{margin-top:13px;color:#bdbdb5;font:750 11px ui-monospace,monospace}
-      .panel{padding:22px;border:1px solid var(--line);border-radius:22px;background:var(--card)}.panel-head{display:flex;justify-content:space-between;gap:14px;align-items:start;margin-bottom:16px}.panel-head h2{margin:0;font-size:23px;letter-spacing:-.04em}.panel-head p{margin:5px 0 0;color:var(--muted);font-size:12px;line-height:1.45}.status{display:inline-flex;align-items:center;min-height:28px;padding:6px 9px;border-radius:999px;background:var(--green-bg);color:var(--green);font:850 9px ui-monospace,monospace;text-transform:uppercase}
-      .deposit-panel{position:relative;overflow:hidden;display:grid;grid-template-columns:minmax(0,.72fr) minmax(360px,1.28fr);gap:28px;align-items:center;border-color:#111;box-shadow:var(--shadow)}.deposit-panel::before{content:"TOP UP / MIDTRANS";position:absolute;right:-37px;top:28px;padding:6px 40px;background:#111;color:#fff;transform:rotate(45deg);font:800 8px ui-monospace,monospace;letter-spacing:.08em}.section-kicker{display:block;margin-bottom:9px;color:var(--green);font:850 9px ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase}.deposit-copy h2{margin:0 0 8px;font-size:32px;letter-spacing:-.06em}.deposit-copy p{max-width:28ch;margin:0;color:var(--muted);line-height:1.55}.deposit-form{display:grid;gap:10px;padding:16px;border:1px solid var(--line);border-radius:17px;background:var(--soft)}.amount-label{display:flex;justify-content:space-between;gap:10px;font:800 9px ui-monospace,monospace;text-transform:uppercase}.amount-label span{color:var(--muted);font-weight:700}.amount-wrap{position:relative}.amount-wrap>span{position:absolute;inset:0 auto 0 0;width:58px;border-right:1px solid var(--line);display:grid;place-items:center;font:900 14px ui-monospace,monospace}.amount-wrap input{width:100%;min-height:64px;padding:0 16px 0 76px;border:1px solid var(--line);border-radius:14px;background:#fff;font:900 23px ui-monospace,monospace;letter-spacing:-.05em}.quick-amounts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}.amount-chip{min-height:48px;padding:7px 4px;border:1px solid var(--line);border-radius:12px;background:#fff;font:900 12px ui-monospace,monospace}.amount-chip:hover{border-color:#111}.amount-chip.active{background:#111;color:#fff;border-color:#111;box-shadow:2px 2px 0 rgba(17,17,17,.2)}.btn{min-height:50px;padding:0 17px;border:1px solid #111;border-radius:14px;background:#fff;color:#111;font-weight:900}.btn.primary{background:#111;color:#fff}.deposit-form .btn.primary{min-height:56px;display:flex;align-items:center;justify-content:center;gap:12px}.deposit-form .btn.primary::after{content:"→";font-size:19px}.btn:disabled{cursor:not-allowed;opacity:.45}.form-message{min-height:17px;margin:0;color:var(--muted);font-size:11px}.deposit-form .form-message{padding-top:9px;border-top:1px solid var(--line)}.form-message.error{color:var(--red)}
-      .workspace{display:grid;grid-template-columns:360px minmax(0,1fr);gap:16px;align-items:start}.restock{position:sticky;top:86px;overflow:hidden;padding-top:0;border-color:#111;box-shadow:var(--shadow)}.restock .panel-head{margin:0 -22px 18px;padding:20px 22px 18px;background:#111;color:#fff;align-items:center}.restock .panel-head h2{font-size:27px}.restock .panel-head p{color:#bdbdb5}.restock .status{background:#fff;color:#111}.selection{counter-reset:reseller-step;display:grid;gap:16px}.selection>.field{counter-increment:reseller-step;display:grid;gap:8px}.selection>.field>label{display:flex;align-items:center;gap:8px;font:800 9px ui-monospace,monospace;letter-spacing:.05em;text-transform:uppercase}.selection>.field>label::before{content:counter(reseller-step);width:21px;height:21px;border-radius:50%;background:#111;color:#fff;display:grid;place-items:center;font-size:9px}.native-value{display:none}.game-picker{position:relative}.game-picker summary{list-style:none;min-height:68px;padding:9px 44px 9px 9px;border:1px solid var(--line);border-radius:15px;background:#fff;display:flex;align-items:center;gap:11px;cursor:pointer}.game-picker summary::-webkit-details-marker{display:none}.game-picker summary::after{content:"";position:absolute;right:18px;top:28px;width:9px;height:9px;border-right:2px solid;border-bottom:2px solid;transform:rotate(45deg)}.game-picker[open] summary{border-color:#111;border-radius:15px 15px 8px 8px;box-shadow:3px 3px 0 #111}.picker-thumb{width:48px;height:48px;flex:0 0 48px;border-radius:11px;object-fit:cover;background:var(--soft)}.picker-copy{min-width:0}.picker-copy strong,.picker-copy small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.picker-copy strong{font-size:15px}.picker-copy small{margin-top:3px;color:var(--muted);font-size:9px}.game-menu{position:absolute;z-index:20;top:76px;left:0;right:0;max-height:310px;padding:7px;border:1px solid #111;border-radius:11px;background:#fff;box-shadow:6px 6px 0 #111;overflow:auto;display:grid;gap:5px}.game-option{width:100%;padding:7px;border:1px solid transparent;border-radius:10px;background:#fff;text-align:left;display:grid;grid-template-columns:44px minmax(0,1fr) auto;align-items:center;gap:9px}.game-option:hover,.game-option.active{background:#111;color:#fff}.game-option img{width:44px;height:44px;border-radius:9px;object-fit:cover}.game-option strong{font-size:12px}.game-option small{display:block;margin-top:2px;color:inherit;opacity:.65;font-size:9px}.game-option span:last-child{font:800 9px ui-monospace,monospace}.variant-picker,.quantity-picker{display:grid;gap:6px}.brand-block{display:grid;gap:5px}.brand-block+.brand-block{margin-top:4px;padding-top:9px;border-top:1px solid var(--line)}.brand-title{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 3px;color:var(--muted);font:800 9px ui-monospace,monospace;text-transform:uppercase}.brand-title span{font-size:8px}.variant-option{width:100%;min-height:52px;padding:10px 12px;border:1px solid var(--line);border-radius:13px;background:#fff;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:10px}.variant-option strong{display:block;font-size:12px}.variant-option small{display:block;margin-top:3px;color:var(--muted);font-size:9px}.variant-option>span:last-child{font:850 12px ui-monospace,monospace}.variant-option.active,.quantity-option.active{border-color:#111;background:#111;color:#fff}.variant-option.active{box-shadow:3px 3px 0 var(--line)}.variant-option.active small{color:#cfcfc8}.quantity-picker{grid-template-columns:repeat(5,minmax(0,1fr))}.quantity-option{min-height:48px;border:1px solid var(--line);border-radius:11px;background:#fff;font:900 16px ui-monospace,monospace}.game-picker summary:focus-visible,.game-option:focus-visible,.variant-option:focus-visible,.quantity-option:focus-visible,.amount-wrap input:focus{outline:3px solid rgba(23,102,59,.22);outline-offset:2px}.summary{margin-top:18px;padding:16px;border:1px solid #111;border-radius:15px;background:#111;color:#fff;display:grid;gap:9px}.summary::before{content:"RINGKASAN ORDER";color:#9d9d96;font:800 8px ui-monospace,monospace;letter-spacing:.1em}.summary-row{display:flex;justify-content:space-between;gap:12px;color:#bdbdb5;font-size:11px}.summary-row strong{color:#fff;text-align:right}.summary-row.total{padding-top:11px;border-top:1px solid #444;color:#fff;font-size:13px}.summary-row.total strong{color:#bce4c8;font-size:18px}.restock>#checkoutButton{min-height:56px;border-radius:14px}.content-stack{display:grid;gap:16px}.catalog-tools{display:flex;gap:8px;margin-bottom:12px}.catalog-tools input{width:100%;min-height:44px;padding:0 13px;border:1px solid var(--line);border-radius:12px}.catalog{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.game-group{border:1px solid var(--line);border-radius:18px;background:var(--soft);overflow:hidden}.game-cover{position:relative;height:136px;background:#111}.game-cover img{width:100%;height:100%;object-fit:cover}.game-cover::after{content:"";position:absolute;inset:48% 0 0;background:rgba(0,0,0,.68)}.game-cover-copy{position:absolute;z-index:1;left:14px;right:14px;bottom:12px;color:#fff;display:flex;align-items:end;justify-content:space-between;gap:10px}.game-cover h3{margin:0;font-size:18px;letter-spacing:-.04em}.game-cover span{font:800 8px ui-monospace,monospace;text-transform:uppercase}.variant-list{padding:8px;display:grid;gap:8px}.product{width:100%;padding:10px;border:1px solid transparent;border-radius:11px;background:#fff;text-align:left;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px}.product:hover,.product.selected{border-color:#111;box-shadow:2px 2px 0 #111}.product strong{font-size:11px}.product p{margin:3px 0 0;color:var(--muted);font-size:9px}.product-price{text-align:right}.product-price strong{display:block;font:850 13px ui-monospace,monospace}.product-price small{color:var(--muted);font-size:8px}.stock{display:inline-flex;margin-top:4px;color:var(--green);font:800 7px ui-monospace,monospace;text-transform:uppercase}.empty{padding:20px;border:1px dashed var(--line);border-radius:14px;color:var(--muted);text-align:center}.orders{display:grid;gap:7px}.order{padding:13px;border:1px solid var(--line);border-radius:14px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px}.order strong{font-size:12px}.order small{display:block;margin-top:4px;color:var(--muted);font-size:9px}.order-price{text-align:right;font:800 11px ui-monospace,monospace}
-      @media(max-width:760px){.header-inner{min-height:60px;padding:6px 10px}.brand{min-width:44px;min-height:44px;justify-content:center}.brand-logo{width:38px;height:38px;border-radius:13px}.brand-copy{display:none}.header-actions{gap:4px}.icon-btn{border-radius:13px}main{width:calc(100% - 20px);margin:12px auto 62px;gap:11px}.desk{gap:11px}.balance-pass{min-height:178px;padding:21px 20px;border-radius:21px;grid-template-columns:1fr;gap:8px}.balance-pass h1{margin:12px 0 4px;font-size:43px}.balance-pass p{font-size:12px}.balance-idr{margin-top:9px}.pass-state{position:absolute;right:18px;top:18px}.panel{padding:16px;border-radius:19px}.panel-head{margin-bottom:14px}.panel-head h2{font-size:21px}.deposit-panel{grid-template-columns:1fr;gap:16px;padding-top:22px}.deposit-panel::before{display:none}.deposit-copy h2{font-size:28px}.deposit-copy p{font-size:12px}.deposit-form{margin:0 -4px -4px;padding:13px}.amount-label span{display:none}.amount-wrap input{min-height:60px;font-size:21px}.quick-amounts{grid-template-columns:repeat(2,minmax(0,1fr))}.amount-chip{min-height:52px}.workspace{grid-template-columns:1fr;gap:11px}.restock{position:static;padding-top:0}.restock .panel-head{margin:0 -16px 17px;padding:18px 16px 16px}.restock .panel-head h2{font-size:25px}.selection{gap:17px}.game-picker summary{min-height:70px}.quantity-option{min-height:54px}.summary{margin-top:19px}.catalog{grid-template-columns:1fr}.product{padding:12px}.content-stack{gap:11px}}
-      .restock .section-kicker{margin-bottom:7px;color:#9dd7ae}
-      body{background:#f2f2ed}.desk-rail{min-height:58px;padding:8px 10px 8px 18px;border:1px solid #111;border-radius:18px;background:#fff;display:flex;align-items:center;gap:16px}.desk-rail>span{font:850 9px ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}.desk-rail>div{margin-left:auto;display:flex;gap:4px}.desk-rail a{min-height:40px;padding:0 14px;border-radius:11px;color:#111;display:flex;align-items:center;text-decoration:none;font-size:11px;font-weight:850}.desk-rail a:hover{background:var(--soft)}
-      .deposit-panel{padding:0;grid-template-columns:minmax(0,.82fr) minmax(390px,1.18fr);gap:0;background:#111;color:#fff;border-radius:26px;box-shadow:8px 8px 0 #d2d2ca}.deposit-panel::before{content:"WALLET CREDIT";right:-32px;top:24px;background:#315efb}.deposit-copy{padding:32px 30px}.deposit-copy .section-kicker{color:#9eb2ff}.deposit-copy h2{font-size:38px}.deposit-copy p{color:#c8c8c1}.deposit-trust{margin-top:28px;padding-top:18px;border-top:1px solid #444;display:flex;align-items:center;gap:11px}.deposit-trust svg{width:29px;height:29px;padding:6px;border:1px solid #5d5d58;border-radius:9px;fill:none;stroke:#fff;stroke-width:1.8;flex:0 0 29px}.deposit-trust>span{font-size:11px;font-weight:800}.deposit-trust small{display:block;margin-top:3px;color:#9f9f99;font-size:9px;font-weight:500;line-height:1.35}.deposit-form{margin:10px;padding:18px;background:#fff;color:#111;border:0;border-radius:19px}.deposit-form-head{display:flex;align-items:end;justify-content:space-between;gap:12px}.deposit-form-head>strong{color:#315efb;font:850 10px ui-monospace,monospace;white-space:nowrap}.amount-wrap input{background:#f5f5f1;border-color:#c9c9c2}.quick-amounts{gap:8px}.amount-chip{min-height:62px;padding:9px 10px;text-align:left;display:flex;flex-direction:column;justify-content:center;gap:4px;transition:background-color .18s ease,border-color .18s ease,color .18s ease}.amount-chip-usd{font-size:15px}.amount-chip-idr{color:var(--muted);font:700 8px ui-monospace,monospace}.amount-chip.active{background:#315efb;border-color:#315efb;box-shadow:3px 3px 0 #c8d2ff}.amount-chip.active .amount-chip-idr{color:#dfe5ff}.deposit-form .btn.primary{background:#111;transition:background-color .18s ease}.deposit-form .btn.primary:hover{background:#315efb}.deposit-form .form-message{display:flex;align-items:center;gap:7px}.deposit-form .form-message::before{content:"";width:6px;height:6px;border-radius:50%;background:#315efb;flex:0 0 6px}
-      .restock{border-radius:24px}.content-stack>.panel{box-shadow:4px 4px 0 rgba(17,17,17,.08)}.catalog-tools input:focus{outline:3px solid rgba(49,94,251,.18);border-color:#315efb}.order{background:#f8f8f5;transition:border-color .18s ease,background-color .18s ease}.order:hover{border-color:#111;background:#fff}
-      @media(max-width:760px){.desk-rail{min-height:auto;padding:7px;overflow-x:auto;scrollbar-width:none}.desk-rail::-webkit-scrollbar{display:none}.desk-rail>span{display:none}.desk-rail>div{margin:0;min-width:max-content}.desk-rail a{min-height:42px;padding:0 13px}.deposit-panel{padding:0;gap:0}.deposit-panel::before{display:block;right:20px;top:24px;padding:0;background:transparent;color:#9eb2ff;transform:none;font-size:7px}.deposit-copy{padding:24px 22px 21px}.deposit-copy h2{font-size:34px}.deposit-copy p{max-width:24ch}.deposit-trust{margin-top:21px;padding-top:15px}.deposit-form{margin:0 7px 7px;padding:15px;border-radius:17px}.deposit-form-head{align-items:start}.amount-label span{display:block;margin-top:4px}.amount-wrap input{font-size:20px}.amount-chip{min-height:61px}.restock{border-radius:21px}.content-stack>.panel{box-shadow:none}}
-      @media(max-width:760px){.deposit-panel{grid-template-columns:minmax(0,1fr)}.deposit-copy,.deposit-form,.deposit-form-head,.amount-wrap,.quick-amounts{min-width:0}.amount-wrap input{min-width:0}.deposit-form-head{flex-wrap:wrap}.deposit-form-head>strong{margin-left:auto}}
-      .desk-rail a:focus-visible,.amount-chip:focus-visible,.btn:focus-visible{outline:3px solid rgba(49,94,251,.28);outline-offset:2px}.deposit-form .form-message.error::before{background:var(--red)}
-      @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important}}
+      :root {
+        color-scheme: light;
+        --ink: #111318;
+        --paper: #f3f3ee;
+        --surface: #fff;
+        --soft: #ecece5;
+        --line: #d5d4cb;
+        --muted: #666960;
+        --blue: #315efb;
+        --blue-soft: #e9edff;
+        --green: #0b7042;
+        --green-soft: #e4f3ea;
+        --red: #a32626;
+        --shadow: 7px 7px 0 #d3d2ca;
+        --sans: "Segoe UI Variable", "Segoe UI", Helvetica, Arial, sans-serif;
+        --mono: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+        scroll-padding-top: 88px;
+      }
+      body {
+        margin: 0;
+        min-width: 280px;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: var(--sans);
+        text-rendering: optimizeLegibility;
+      }
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+      button,
+      a,
+      summary {
+        touch-action: manipulation;
+      }
+      button {
+        cursor: pointer;
+      }
+      img,
+      svg {
+        display: block;
+      }
+      [hidden],
+      .loading[hidden],
+      .desk[hidden] {
+        display: none !important;
+      }
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+      .skip-link {
+        position: fixed;
+        top: -80px;
+        left: 12px;
+        z-index: 100;
+        padding: 12px 16px;
+        border-radius: 10px;
+        background: var(--ink);
+        color: #fff;
+        font-weight: 800;
+        text-decoration: none;
+      }
+      .skip-link:focus {
+        top: 12px;
+      }
+      :focus-visible {
+        outline: 3px solid rgba(49, 94, 251, 0.3);
+        outline-offset: 3px;
+      }
+
+      .site-header {
+        position: sticky;
+        top: 0;
+        z-index: 40;
+        border-bottom: 1px solid var(--line);
+        background: rgba(243, 243, 238, 0.96);
+        backdrop-filter: blur(14px);
+      }
+      .header-inner {
+        width: min(1180px, 100%);
+        min-height: 72px;
+        margin: auto;
+        padding: 9px 18px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .brand {
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        color: inherit;
+        text-decoration: none;
+      }
+      .brand-logo {
+        width: 44px;
+        height: 44px;
+        flex: 0 0 44px;
+        border-radius: 14px;
+        background: var(--ink);
+        color: #fff;
+        display: grid;
+        place-items: center;
+        font: 900 13px/1 var(--mono);
+        box-shadow: 3px 3px 0 var(--blue);
+      }
+      .brand-copy strong,
+      .brand-copy small {
+        display: block;
+      }
+      .brand-copy strong {
+        font-size: 14px;
+        letter-spacing: -0.02em;
+      }
+      .brand-copy small {
+        margin-top: 2px;
+        color: var(--muted);
+        font: 750 9px/1.3 var(--mono);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+      .header-status {
+        margin-left: 16px;
+        padding-left: 16px;
+        border-left: 1px solid var(--line);
+        color: var(--muted);
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font: 750 10px/1 var(--mono);
+        text-transform: uppercase;
+      }
+      .header-status::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--green);
+        box-shadow: 0 0 0 4px var(--green-soft);
+      }
+      .header-actions {
+        margin-left: auto;
+        display: flex;
+        gap: 7px;
+      }
+      .icon-button {
+        width: 46px;
+        height: 46px;
+        flex: 0 0 46px;
+        padding: 0;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--surface);
+        color: var(--ink);
+        display: grid;
+        place-items: center;
+        text-decoration: none;
+        transition:
+          transform 160ms ease,
+          border-color 160ms ease,
+          background-color 160ms ease;
+      }
+      .icon-button:hover {
+        border-color: var(--ink);
+        transform: translateY(-2px);
+      }
+      .icon-button.primary {
+        border-color: var(--ink);
+        background: var(--ink);
+        color: #fff;
+      }
+      .icon-button svg {
+        width: 21px;
+        height: 21px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .icon-button.is-busy svg {
+        animation: spin 700ms linear infinite;
+      }
+
+      main {
+        width: min(1180px, calc(100% - 32px));
+        margin: 22px auto 76px;
+      }
+      .loading {
+        min-height: 65vh;
+        padding: 32px;
+        border: 1px solid var(--line);
+        border-radius: 28px;
+        background: var(--surface);
+        display: grid;
+        place-items: center;
+        text-align: center;
+      }
+      .loading-card {
+        max-width: 360px;
+        display: grid;
+        justify-items: center;
+        gap: 12px;
+      }
+      .loading-mark {
+        width: 58px;
+        height: 58px;
+        border: 1px solid var(--ink);
+        border-radius: 18px;
+        background: var(--ink);
+        color: #fff;
+        display: grid;
+        place-items: center;
+        font: 900 15px/1 var(--mono);
+        box-shadow: 5px 5px 0 var(--blue);
+      }
+      .loading-spinner {
+        width: 26px;
+        height: 26px;
+        border: 3px solid var(--line);
+        border-top-color: var(--blue);
+        border-radius: 50%;
+        animation: spin 800ms linear infinite;
+      }
+      .loading h1 {
+        margin: 6px 0 0;
+        font-size: 24px;
+        letter-spacing: -0.04em;
+      }
+      .loading p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.55;
+      }
+      .desk {
+        display: grid;
+        gap: 16px;
+      }
+
+      .dashboard-hero {
+        display: grid;
+        grid-template-columns: minmax(0, 0.84fr) minmax(420px, 1.16fr);
+        gap: 16px;
+      }
+      .hero-intro {
+        min-width: 0;
+        min-height: 300px;
+        padding: 30px;
+        border: 1px solid var(--ink);
+        border-radius: 28px;
+        background: var(--surface);
+        box-shadow: var(--shadow);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        color: var(--blue);
+        font: 850 10px/1.35 var(--mono);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      .eyebrow::before {
+        content: "";
+        width: 24px;
+        height: 3px;
+        background: currentColor;
+      }
+      .hero-intro h1 {
+        max-width: 9ch;
+        margin: 26px 0 16px;
+        font-size: clamp(48px, 6.3vw, 82px);
+        line-height: 0.88;
+        letter-spacing: -0.075em;
+      }
+      .hero-intro > div > p {
+        max-width: 34ch;
+        margin: 0;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.6;
+      }
+      .hero-note {
+        margin-top: 30px;
+        padding-top: 18px;
+        border-top: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+      }
+      .hero-note span {
+        color: var(--muted);
+        font: 750 9px/1.4 var(--mono);
+        text-transform: uppercase;
+      }
+      .hero-note strong {
+        font: 850 11px/1.3 var(--mono);
+        text-align: right;
+      }
+      .wallet-board {
+        min-width: 0;
+        display: grid;
+        grid-template-rows: minmax(0, 1fr) auto;
+        gap: 12px;
+      }
+      .wallet-card {
+        position: relative;
+        min-width: 0;
+        min-height: 216px;
+        padding: 28px 30px;
+        border: 1px solid var(--ink);
+        border-radius: 28px;
+        background: var(--ink);
+        color: #fff;
+        overflow: hidden;
+        box-shadow: 7px 7px 0 var(--blue);
+      }
+      .wallet-card::before,
+      .wallet-card::after {
+        content: "";
+        position: absolute;
+        top: 54%;
+        width: 28px;
+        height: 28px;
+        border: 1px solid var(--ink);
+        border-radius: 50%;
+        background: var(--paper);
+      }
+      .wallet-card::before {
+        left: -15px;
+      }
+      .wallet-card::after {
+        right: -15px;
+      }
+      .wallet-watermark {
+        position: absolute;
+        right: 20px;
+        bottom: -8px;
+        color: #fff;
+        font: 900 74px/1 var(--mono);
+        letter-spacing: -0.08em;
+        opacity: 0.045;
+        user-select: none;
+      }
+      .wallet-top {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .wallet-label {
+        color: #aeb2bb;
+        font: 800 10px/1.4 var(--mono);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      .wallet-state {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 7px 10px;
+        border: 1px solid #3d414b;
+        border-radius: 999px;
+        color: #c6f1d8;
+        font: 800 9px/1 var(--mono);
+        text-transform: uppercase;
+      }
+      .wallet-state::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #57d991;
+      }
+      .wallet-amount {
+        position: relative;
+        z-index: 1;
+        margin-top: 34px;
+      }
+      .wallet-amount strong {
+        display: block;
+        font: 900 clamp(46px, 6vw, 76px)/0.9 var(--mono);
+        letter-spacing: -0.075em;
+        white-space: nowrap;
+      }
+      .wallet-amount span {
+        display: block;
+        margin-top: 12px;
+        color: #b7bbc4;
+        font: 750 11px/1.3 var(--mono);
+      }
+      .wallet-cta {
+        position: absolute;
+        z-index: 2;
+        right: 30px;
+        bottom: 28px;
+        min-height: 42px;
+        padding: 0 15px;
+        border: 1px solid #454a55;
+        border-radius: 12px;
+        background: #20232a;
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 11px;
+        font-weight: 850;
+        text-decoration: none;
+      }
+      .wallet-cta:hover {
+        border-color: var(--blue);
+        background: var(--blue);
+      }
+      .metric-strip {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+      }
+      .metric-card {
+        min-width: 0;
+        min-height: 78px;
+        padding: 13px 14px;
+        border: 1px solid var(--line);
+        border-radius: 17px;
+        background: var(--surface);
+      }
+      .metric-card span,
+      .metric-card strong {
+        display: block;
+      }
+      .metric-card span {
+        color: var(--muted);
+        font: 750 8px/1.3 var(--mono);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .metric-card strong {
+        margin-top: 8px;
+        overflow: hidden;
+        font: 900 19px/1 var(--mono);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .desk-nav {
+        min-width: 0;
+        padding: 7px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: var(--surface);
+        display: grid;
+        grid-template-columns: auto repeat(4, minmax(0, 1fr));
+        align-items: center;
+        gap: 5px;
+      }
+      .desk-nav > span {
+        padding: 0 13px;
+        color: var(--muted);
+        font: 800 9px/1 var(--mono);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+      .desk-nav a {
+        min-height: 42px;
+        padding: 0 12px;
+        border-radius: 11px;
+        color: var(--ink);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-size: 11px;
+        font-weight: 850;
+        text-decoration: none;
+      }
+      .desk-nav a:hover {
+        background: var(--soft);
+      }
+      .desk-nav svg {
+        width: 16px;
+        height: 16px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .operations-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 0.88fr) minmax(420px, 1.12fr);
+        gap: 16px;
+        align-items: start;
+      }
+      .surface {
+        min-width: 0;
+        border: 1px solid var(--line);
+        border-radius: 22px;
+        background: var(--surface);
+      }
+      .surface-header {
+        padding: 22px 22px 18px;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+      }
+      .section-number {
+        min-width: 34px;
+        height: 26px;
+        padding: 0 8px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: var(--muted);
+        display: inline-grid;
+        place-items: center;
+        font: 800 9px/1 var(--mono);
+      }
+      .section-kicker {
+        display: block;
+        margin-bottom: 7px;
+        color: var(--blue);
+        font: 850 9px/1.3 var(--mono);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      .surface-header h2,
+      .catalog-header h2 {
+        margin: 0;
+        font-size: 27px;
+        line-height: 1;
+        letter-spacing: -0.055em;
+      }
+      .surface-header p,
+      .catalog-header p {
+        margin: 8px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.5;
+      }
+      .deposit-panel {
+        overflow: hidden;
+        box-shadow: var(--shadow);
+      }
+      .deposit-intro {
+        padding: 22px;
+        background: var(--blue-soft);
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 14px;
+        align-items: center;
+      }
+      .deposit-intro strong {
+        display: block;
+        font-size: 14px;
+      }
+      .deposit-intro span {
+        display: block;
+        margin-top: 4px;
+        color: #50566c;
+        font-size: 11px;
+        line-height: 1.45;
+      }
+      .secure-mark {
+        width: 44px;
+        height: 44px;
+        border: 1px solid #b9c4ff;
+        border-radius: 14px;
+        background: var(--surface);
+        color: var(--blue);
+        display: grid;
+        place-items: center;
+      }
+      .secure-mark svg {
+        width: 22px;
+        height: 22px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .deposit-form {
+        padding: 22px;
+        display: grid;
+        gap: 13px;
+      }
+      .field-label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        font: 850 9px/1.3 var(--mono);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      .field-label span {
+        color: var(--muted);
+        font-weight: 700;
+        letter-spacing: 0;
+      }
+      .amount-field {
+        position: relative;
+        min-width: 0;
+      }
+      .amount-prefix {
+        position: absolute;
+        inset: 1px auto 1px 1px;
+        width: 58px;
+        border-right: 1px solid var(--line);
+        border-radius: 13px 0 0 13px;
+        background: var(--soft);
+        display: grid;
+        place-items: center;
+        font: 900 14px/1 var(--mono);
+      }
+      .amount-field input {
+        width: 100%;
+        min-width: 0;
+        height: 68px;
+        padding: 0 16px 0 75px;
+        border: 1px solid #b9b8ae;
+        border-radius: 14px;
+        background: var(--surface);
+        color: var(--ink);
+        font: 900 21px/1 var(--mono);
+        letter-spacing: -0.045em;
+      }
+      .amount-field input:focus {
+        border-color: var(--blue);
+        outline: 3px solid rgba(49, 94, 251, 0.16);
+      }
+      .deposit-estimate {
+        min-height: 18px;
+        color: var(--blue);
+        font: 800 10px/1.4 var(--mono);
+        text-align: right;
+      }
+      .quick-amounts {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+      .amount-chip {
+        min-width: 0;
+        min-height: 66px;
+        padding: 11px 12px;
+        border: 1px solid var(--line);
+        border-radius: 13px;
+        background: var(--surface);
+        color: var(--ink);
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 5px;
+        text-align: left;
+        transition:
+          transform 150ms ease,
+          border-color 150ms ease,
+          background-color 150ms ease;
+      }
+      .amount-chip:hover {
+        border-color: var(--ink);
+        transform: translateY(-2px);
+      }
+      .amount-chip[aria-pressed="true"] {
+        border-color: var(--blue);
+        background: var(--blue);
+        color: #fff;
+        box-shadow: 3px 3px 0 #b8c4ff;
+      }
+      .amount-chip-usd {
+        font: 900 16px/1 var(--mono);
+      }
+      .amount-chip-idr {
+        max-width: 100%;
+        overflow: hidden;
+        color: var(--muted);
+        font: 700 9px/1.2 var(--mono);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .amount-chip[aria-pressed="true"] .amount-chip-idr {
+        color: #dfe5ff;
+      }
+      .button {
+        min-height: 52px;
+        padding: 0 17px;
+        border: 1px solid var(--ink);
+        border-radius: 14px;
+        background: var(--surface);
+        color: var(--ink);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        font-weight: 900;
+        text-decoration: none;
+        transition:
+          transform 150ms ease,
+          background-color 150ms ease,
+          border-color 150ms ease;
+      }
+      .button:hover:not(:disabled) {
+        transform: translateY(-2px);
+      }
+      .button.primary {
+        border-color: var(--ink);
+        background: var(--ink);
+        color: #fff;
+      }
+      .button.primary:hover:not(:disabled) {
+        border-color: var(--blue);
+        background: var(--blue);
+      }
+      .button:disabled {
+        cursor: not-allowed;
+        opacity: 0.48;
+      }
+      .button svg {
+        width: 18px;
+        height: 18px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.9;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .deposit-submit,
+      .checkout-button {
+        width: 100%;
+        min-height: 58px;
+      }
+      .form-message {
+        min-height: 18px;
+        margin: 0;
+        color: var(--muted);
+        font-size: 11px;
+        line-height: 1.5;
+      }
+      .form-message::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        margin-right: 7px;
+        border-radius: 50%;
+        background: var(--blue);
+        display: inline-block;
+        vertical-align: 1px;
+      }
+      .form-message.error {
+        color: var(--red);
+      }
+      .form-message.error::before {
+        background: var(--red);
+      }
+
+      .order-panel {
+        overflow: hidden;
+        border-color: var(--ink);
+      }
+      .order-panel .surface-header {
+        border-color: #30333a;
+        background: var(--ink);
+        color: #fff;
+      }
+      .order-panel .surface-header p {
+        color: #aeb2bb;
+      }
+      .order-panel .section-kicker {
+        color: #9fb1ff;
+      }
+      .discount-badge,
+      .status-badge {
+        min-height: 30px;
+        padding: 7px 10px;
+        border-radius: 999px;
+        background: var(--green-soft);
+        color: var(--green);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font: 850 9px/1 var(--mono);
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+      .selection-flow {
+        counter-reset: step;
+        padding: 22px;
+        display: grid;
+        gap: 21px;
+      }
+      .selection-field {
+        min-width: 0;
+        counter-increment: step;
+        display: grid;
+        gap: 9px;
+      }
+      .selection-field > label {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        font: 850 9px/1.3 var(--mono);
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+      }
+      .selection-field > label::before {
+        content: "0" counter(step);
+        width: 28px;
+        height: 24px;
+        border-radius: 999px;
+        background: var(--soft);
+        display: grid;
+        place-items: center;
+        font-size: 8px;
+      }
+      .native-value {
+        display: none;
+      }
+      .game-picker {
+        position: relative;
+        min-width: 0;
+      }
+      .game-picker summary {
+        position: relative;
+        min-width: 0;
+        min-height: 76px;
+        padding: 10px 48px 10px 10px;
+        border: 1px solid var(--line);
+        border-radius: 15px;
+        background: var(--surface);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        list-style: none;
+        cursor: pointer;
+      }
+      .game-picker summary::-webkit-details-marker,
+      .game-group > summary::-webkit-details-marker {
+        display: none;
+      }
+      .game-picker summary::after {
+        content: "";
+        position: absolute;
+        top: 30px;
+        right: 20px;
+        width: 9px;
+        height: 9px;
+        border-right: 2px solid currentColor;
+        border-bottom: 2px solid currentColor;
+        transform: rotate(45deg);
+        transition: transform 160ms ease;
+      }
+      .game-picker[open] summary {
+        border-color: var(--ink);
+        box-shadow: 3px 3px 0 var(--ink);
+      }
+      .game-picker[open] summary::after {
+        transform: rotate(225deg) translate(-3px, -3px);
+      }
+      .picker-thumb {
+        width: 54px;
+        height: 54px;
+        flex: 0 0 54px;
+        border-radius: 12px;
+        background: var(--soft);
+        object-fit: cover;
+      }
+      .picker-copy {
+        min-width: 0;
+      }
+      .picker-copy strong,
+      .picker-copy small {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .picker-copy strong {
+        font-size: 16px;
+      }
+      .picker-copy small {
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 10px;
+      }
+      .game-menu {
+        position: absolute;
+        z-index: 30;
+        top: calc(100% + 8px);
+        left: 0;
+        right: 0;
+        max-height: 334px;
+        padding: 8px;
+        border: 1px solid var(--ink);
+        border-radius: 14px;
+        background: var(--surface);
+        box-shadow: 7px 7px 0 var(--ink);
+        display: grid;
+        gap: 5px;
+        overflow: auto;
+        overscroll-behavior: contain;
+      }
+      .game-option {
+        width: 100%;
+        min-width: 0;
+        padding: 8px;
+        border: 1px solid transparent;
+        border-radius: 11px;
+        background: var(--surface);
+        color: var(--ink);
+        display: grid;
+        grid-template-columns: 44px minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 10px;
+        text-align: left;
+      }
+      .game-option:hover,
+      .game-option[aria-pressed="true"] {
+        background: var(--ink);
+        color: #fff;
+      }
+      .game-option img {
+        width: 44px;
+        height: 44px;
+        border-radius: 9px;
+        object-fit: cover;
+      }
+      .game-option span {
+        min-width: 0;
+      }
+      .game-option strong,
+      .game-option small {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .game-option strong {
+        font-size: 12px;
+      }
+      .game-option small {
+        margin-top: 3px;
+        color: inherit;
+        font-size: 9px;
+        opacity: 0.68;
+      }
+      .game-option em {
+        font: 800 8px/1.2 var(--mono);
+        font-style: normal;
+        text-align: right;
+      }
+      .variant-picker {
+        min-width: 0;
+        display: grid;
+        gap: 12px;
+      }
+      .brand-block {
+        min-width: 0;
+        padding: 10px;
+        border: 1px solid var(--line);
+        border-radius: 15px;
+        background: var(--soft);
+        display: grid;
+        gap: 7px;
+      }
+      .brand-title {
+        min-width: 0;
+        padding: 0 3px 3px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        color: var(--muted);
+        font: 850 9px/1.2 var(--mono);
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+      }
+      .brand-title strong {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .brand-title span {
+        flex: 0 0 auto;
+        font-size: 8px;
+      }
+      .variant-option {
+        width: 100%;
+        min-width: 0;
+        min-height: 58px;
+        padding: 11px 12px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--surface);
+        color: var(--ink);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        text-align: left;
+      }
+      .variant-option:hover {
+        border-color: var(--ink);
+      }
+      .variant-option[aria-pressed="true"] {
+        border-color: var(--blue);
+        background: var(--ink);
+        color: #fff;
+        box-shadow: 3px 3px 0 var(--blue);
+      }
+      .variant-option > span {
+        min-width: 0;
+      }
+      .variant-option strong,
+      .variant-option small {
+        display: block;
+      }
+      .variant-option strong {
+        overflow: hidden;
+        font-size: 12px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .variant-option small {
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 9px;
+      }
+      .variant-option[aria-pressed="true"] small {
+        color: #bdc1cb;
+      }
+      .variant-price {
+        flex: 0 0 auto;
+        font: 900 12px/1 var(--mono);
+      }
+      .quantity-picker {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 7px;
+      }
+      .quantity-option {
+        min-width: 0;
+        min-height: 50px;
+        padding: 0;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--surface);
+        color: var(--ink);
+        font: 900 16px/1 var(--mono);
+      }
+      .quantity-option:hover {
+        border-color: var(--ink);
+      }
+      .quantity-option[aria-pressed="true"] {
+        border-color: var(--blue);
+        background: var(--blue);
+        color: #fff;
+        box-shadow: 2px 2px 0 #bbc6ff;
+      }
+      .order-summary {
+        padding: 17px;
+        border-radius: 16px;
+        background: var(--ink);
+        color: #fff;
+        display: grid;
+        gap: 11px;
+      }
+      .order-summary-label {
+        color: #8f95a1;
+        font: 800 8px/1.2 var(--mono);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+      .summary-row {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+        color: #aeb2bb;
+        font-size: 11px;
+      }
+      .summary-row strong {
+        color: #fff;
+        font-family: var(--mono);
+        text-align: right;
+      }
+      .summary-row.total {
+        padding-top: 12px;
+        border-top: 1px solid #3a3d45;
+        color: #fff;
+        font-size: 12px;
+      }
+      .summary-row.total strong {
+        color: #a8b9ff;
+        font-size: 18px;
+      }
+
+      .catalog-shell,
+      .activity-shell {
+        overflow: hidden;
+      }
+      .catalog-header {
+        padding: 24px;
+        border-bottom: 1px solid var(--line);
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 18px;
+        align-items: end;
+      }
+      .catalog-heading-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+      }
+      .catalog-tools {
+        width: min(500px, 100%);
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 9px;
+      }
+      .search-field {
+        position: relative;
+      }
+      .search-field svg {
+        position: absolute;
+        top: 50%;
+        left: 14px;
+        width: 18px;
+        height: 18px;
+        fill: none;
+        stroke: var(--muted);
+        stroke-width: 1.8;
+        transform: translateY(-50%);
+      }
+      .search-field input {
+        width: 100%;
+        height: 48px;
+        padding: 0 14px 0 42px;
+        border: 1px solid var(--line);
+        border-radius: 13px;
+        background: var(--soft);
+        color: var(--ink);
+      }
+      .search-field input:focus {
+        border-color: var(--blue);
+        background: var(--surface);
+        outline: 3px solid rgba(49, 94, 251, 0.14);
+      }
+      .catalog {
+        padding: 18px;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 13px;
+      }
+      .game-group {
+        min-width: 0;
+        border: 1px solid var(--line);
+        border-radius: 19px;
+        background: var(--soft);
+        overflow: hidden;
+      }
+      .game-group > summary {
+        position: relative;
+        min-height: 154px;
+        padding: 0;
+        background: var(--ink);
+        color: #fff;
+        list-style: none;
+        cursor: pointer;
+        overflow: hidden;
+      }
+      .game-cover-image {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0.63;
+        transition: transform 250ms ease;
+      }
+      .game-group:hover .game-cover-image {
+        transform: scale(1.035);
+      }
+      .game-cover-scrim {
+        position: absolute;
+        inset: auto 0 0;
+        height: 68%;
+        background: rgba(17, 19, 24, 0.82);
+      }
+      .game-cover-copy {
+        position: absolute;
+        inset: auto 14px 13px;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: end;
+        gap: 12px;
+      }
+      .game-cover-copy h3 {
+        min-width: 0;
+        margin: 0;
+        overflow: hidden;
+        font-size: 19px;
+        letter-spacing: -0.04em;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .game-cover-copy p {
+        margin: 4px 0 0;
+        color: #c3c6ce;
+        font-size: 9px;
+      }
+      .game-cover-copy > span:last-child {
+        padding: 6px 8px;
+        border: 1px solid #666b75;
+        border-radius: 999px;
+        font: 800 8px/1 var(--mono);
+        text-transform: uppercase;
+      }
+      .game-group > summary::after {
+        content: "+";
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 28px;
+        height: 28px;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 50%;
+        background: rgba(17, 19, 24, 0.65);
+        display: grid;
+        place-items: center;
+        font: 900 16px/1 var(--mono);
+      }
+      .game-group[open] > summary::after {
+        content: "−";
+      }
+      .variant-list {
+        padding: 9px;
+        display: grid;
+        gap: 9px;
+      }
+      .catalog .brand-block {
+        padding: 8px;
+        background: #f8f8f5;
+      }
+      .product {
+        width: 100%;
+        min-width: 0;
+        padding: 10px;
+        border: 1px solid transparent;
+        border-radius: 11px;
+        background: var(--surface);
+        color: var(--ink);
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 9px;
+        text-align: left;
+      }
+      .product:hover {
+        border-color: var(--ink);
+      }
+      .product[aria-pressed="true"] {
+        border-color: var(--blue);
+        box-shadow: 2px 2px 0 var(--blue);
+      }
+      .product > span {
+        min-width: 0;
+      }
+      .product strong {
+        display: block;
+        overflow: hidden;
+        font-size: 11px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .product p {
+        margin: 4px 0 0;
+        color: var(--muted);
+        font-size: 9px;
+      }
+      .product-price {
+        text-align: right;
+      }
+      .product-price strong {
+        font: 900 12px/1.2 var(--mono);
+      }
+      .product-price small {
+        display: block;
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 8px;
+        white-space: nowrap;
+      }
+      .stock {
+        color: var(--green);
+        font: 800 8px/1 var(--mono);
+        text-transform: uppercase;
+      }
+
+      .activity-list {
+        padding: 10px 18px 18px;
+        display: grid;
+      }
+      .order {
+        min-width: 0;
+        padding: 15px 2px;
+        border-bottom: 1px solid var(--line);
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 14px;
+        align-items: center;
+      }
+      .order:last-child {
+        border-bottom: 0;
+      }
+      .order-main {
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        gap: 11px;
+      }
+      .order-icon {
+        width: 38px;
+        height: 38px;
+        flex: 0 0 38px;
+        border-radius: 12px;
+        background: var(--soft);
+        color: var(--green);
+        display: grid;
+        place-items: center;
+      }
+      .order-icon svg {
+        width: 18px;
+        height: 18px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .order-meta {
+        min-width: 0;
+      }
+      .order strong,
+      .order small {
+        display: block;
+      }
+      .order strong {
+        overflow: hidden;
+        font-size: 12px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .order small {
+        margin-top: 4px;
+        overflow: hidden;
+        color: var(--muted);
+        font-size: 9px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .order-price {
+        text-align: right;
+      }
+      .order-price strong {
+        font: 900 12px/1.2 var(--mono);
+      }
+      .order-price span {
+        display: inline-flex;
+        margin-top: 5px;
+        padding: 5px 7px;
+        border-radius: 999px;
+        background: var(--green-soft);
+        color: var(--green);
+        font: 800 8px/1 var(--mono);
+        text-transform: uppercase;
+      }
+      .empty-state {
+        grid-column: 1 / -1;
+        min-height: 150px;
+        padding: 26px;
+        border: 1px dashed #b9b8ae;
+        border-radius: 16px;
+        background: var(--surface);
+        display: grid;
+        place-items: center;
+        text-align: center;
+      }
+      .empty-state svg {
+        width: 30px;
+        height: 30px;
+        margin: 0 auto 11px;
+        fill: none;
+        stroke: var(--muted);
+        stroke-width: 1.6;
+      }
+      .empty-state strong {
+        display: block;
+        font-size: 14px;
+      }
+      .empty-state p {
+        max-width: 34ch;
+        margin: 6px auto 0;
+        color: var(--muted);
+        font-size: 11px;
+        line-height: 1.5;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @media (max-width: 980px) {
+        .dashboard-hero,
+        .operations-grid {
+          grid-template-columns: 1fr;
+        }
+        .hero-intro {
+          min-height: 260px;
+        }
+        .catalog {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+      @media (max-width: 680px) {
+        html {
+          scroll-padding-top: 74px;
+        }
+        .header-inner {
+          min-height: 62px;
+          padding: 7px 10px;
+        }
+        .brand-logo {
+          width: 40px;
+          height: 40px;
+          flex-basis: 40px;
+          border-radius: 13px;
+          box-shadow: 2px 2px 0 var(--blue);
+        }
+        .brand-copy small,
+        .header-status {
+          display: none;
+        }
+        .brand-copy strong {
+          font-size: 12px;
+        }
+        .header-actions {
+          gap: 5px;
+        }
+        .icon-button {
+          width: 44px;
+          height: 44px;
+          flex-basis: 44px;
+          border-radius: 13px;
+        }
+        main {
+          width: calc(100% - 20px);
+          margin: 12px auto 56px;
+        }
+        .desk,
+        .dashboard-hero,
+        .operations-grid {
+          gap: 11px;
+        }
+        .hero-intro {
+          min-height: 0;
+          padding: 18px;
+          border-radius: 20px;
+          box-shadow: 4px 4px 0 #d3d2ca;
+        }
+        .hero-intro h1 {
+          max-width: none;
+          margin: 13px 0 8px;
+          font-size: clamp(34px, 11vw, 44px);
+          line-height: 0.94;
+        }
+        .hero-intro > div > p {
+          font-size: 12px;
+          line-height: 1.5;
+        }
+        .hero-note {
+          display: none;
+        }
+        .wallet-board {
+          order: -1;
+          gap: 10px;
+        }
+        .wallet-card {
+          min-height: 168px;
+          padding: 21px;
+          border-radius: 22px;
+          box-shadow: 5px 5px 0 var(--blue);
+        }
+        .wallet-amount {
+          margin-top: 24px;
+        }
+        .wallet-amount strong {
+          font-size: clamp(39px, 13vw, 54px);
+        }
+        .wallet-cta {
+          right: 20px;
+          bottom: 20px;
+          min-height: 38px;
+          padding: 0 11px;
+          font-size: 10px;
+        }
+        .wallet-watermark {
+          font-size: 58px;
+        }
+        .metric-strip {
+          gap: 7px;
+        }
+        .metric-card {
+          min-height: 72px;
+          padding: 11px 10px;
+          border-radius: 14px;
+        }
+        .metric-card span {
+          font-size: 7px;
+        }
+        .metric-card strong {
+          font-size: 16px;
+        }
+        .desk-nav {
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          padding: 5px;
+          border-radius: 15px;
+        }
+        .desk-nav > span {
+          display: none;
+        }
+        .desk-nav a {
+          min-width: 0;
+          min-height: 44px;
+          padding: 0 4px;
+          gap: 5px;
+          font-size: 9px;
+        }
+        .desk-nav svg {
+          width: 14px;
+          height: 14px;
+        }
+        .surface {
+          border-radius: 19px;
+        }
+        .surface-header {
+          padding: 18px 17px 15px;
+        }
+        .surface-header h2,
+        .catalog-header h2 {
+          font-size: 24px;
+        }
+        .deposit-panel {
+          box-shadow: none;
+        }
+        .deposit-intro,
+        .deposit-form,
+        .selection-flow {
+          padding: 17px;
+        }
+        .amount-field input {
+          height: 64px;
+          padding-left: 68px;
+          padding-right: 12px;
+          font-size: 18px;
+        }
+        .amount-prefix {
+          width: 54px;
+        }
+        .amount-chip {
+          min-height: 64px;
+        }
+        .game-picker summary {
+          min-height: 72px;
+        }
+        .picker-thumb {
+          width: 50px;
+          height: 50px;
+          flex-basis: 50px;
+        }
+        .game-menu {
+          position: static;
+          max-height: 286px;
+          margin-top: 8px;
+          box-shadow: none;
+        }
+        .quantity-picker {
+          gap: 6px;
+        }
+        .quantity-option {
+          min-height: 48px;
+        }
+        .catalog-header {
+          padding: 19px 17px 17px;
+          grid-template-columns: 1fr;
+          gap: 15px;
+        }
+        .catalog-tools {
+          width: 100%;
+          justify-content: stretch;
+        }
+        .catalog-tools .search-field {
+          min-width: 0;
+          flex: 1;
+        }
+        .catalog {
+          padding: 10px;
+          grid-template-columns: 1fr;
+          gap: 10px;
+        }
+        .game-group > summary {
+          min-height: 142px;
+        }
+        .activity-list {
+          padding: 5px 17px 12px;
+        }
+      }
+      @media (max-width: 370px) {
+        .brand-copy {
+          display: none;
+        }
+        .hero-intro,
+        .wallet-card {
+          padding: 18px;
+        }
+        .hero-intro h1 {
+          font-size: 39px;
+        }
+        .wallet-state {
+          padding: 6px 8px;
+          font-size: 8px;
+        }
+        .wallet-amount strong {
+          font-size: 38px;
+        }
+        .wallet-cta {
+          right: 17px;
+          bottom: 17px;
+        }
+        .metric-card {
+          padding: 10px 7px;
+        }
+        .metric-card strong {
+          font-size: 15px;
+        }
+        .desk-nav a {
+          flex-direction: column;
+          gap: 3px;
+          font-size: 8px;
+        }
+        .surface-header,
+        .deposit-form,
+        .selection-flow,
+        .deposit-intro {
+          padding-left: 15px;
+          padding-right: 15px;
+        }
+        .quick-amounts {
+          gap: 6px;
+        }
+        .amount-chip {
+          padding: 10px;
+        }
+        .game-option {
+          grid-template-columns: 40px minmax(0, 1fr);
+        }
+        .game-option img {
+          width: 40px;
+          height: 40px;
+        }
+        .game-option em {
+          display: none;
+        }
+        .order {
+          grid-template-columns: 1fr;
+          gap: 8px;
+        }
+        .order-price {
+          padding-left: 49px;
+          text-align: left;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
     </style>
   </head>
   <body>
-    <a class="skip" href="#main">Lewati ke konten</a>
-    <header class="site-header"><div class="header-inner"><a class="brand" href="/" aria-label="AE Game Store"><span class="brand-logo">AE</span><span class="brand-copy"><strong>AE Game Store</strong><small>Reseller operations</small></span></a><div class="header-actions"><a class="icon-btn" href="/account" aria-label="Akun"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.6-4 3-6 7-6s6.4 2 7 6"/></svg></a><a class="icon-btn primary" href="/" aria-label="Kembali ke toko"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/><path d="M9 12h10"/></svg></a></div></div></header>
+    <a class="skip-link" href="#main">Lewati ke konten</a>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="/" aria-label="AE Game Store">
+          <span class="brand-logo">AE</span>
+          <span class="brand-copy"
+            ><strong>AE Game Store</strong
+            ><small>Reseller operations</small></span
+          >
+        </a>
+        <span class="header-status">API catalog aktif</span>
+        <div class="header-actions">
+          <button
+            class="icon-button"
+            id="refreshDesk"
+            type="button"
+            aria-label="Muat ulang data reseller"
+            title="Muat ulang data"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 11a8 8 0 1 0-2.3 5.7" />
+              <path d="M20 5v6h-6" />
+            </svg>
+          </button>
+          <a class="icon-button" href="/account" aria-label="Buka akun">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="8" r="3.5" />
+              <path d="M5 20c.6-4 3-6 7-6s6.4 2 7 6" />
+            </svg>
+          </a>
+          <a class="icon-button primary" href="/" aria-label="Kembali ke toko">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m15 18-6-6 6-6" />
+              <path d="M9 12h10" />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </header>
+
     <main id="main">
-      <div class="loading" id="loading">MEMUAT RESELLER DESK…</div>
+      <section class="loading" id="loading" role="status" aria-live="polite">
+        <div class="loading-card">
+          <div class="loading-mark">AE</div>
+          <div
+            class="loading-spinner"
+            id="loadingSpinner"
+            aria-hidden="true"
+          ></div>
+          <h1 id="loadingTitle">Menyiapkan Reseller Desk</h1>
+          <p id="loadingText">
+            Mengambil saldo, stok API, dan aktivitas terakhirmu.
+          </p>
+          <button class="button" id="retryLoad" type="button" hidden>
+            Coba lagi
+          </button>
+        </div>
+      </section>
+
       <div class="desk" id="desk" hidden>
-        <section class="balance-pass" aria-labelledby="balanceLabel"><div><div class="pass-kicker" id="balanceLabel">Saldo reseller</div><h1 id="balanceUsd">$0.00</h1><p>Saldo tersedia</p><div class="balance-idr" id="balanceIdr">Rp0</div></div><div class="pass-state">Aktif</div></section>
-        <nav class="desk-rail" aria-label="Navigasi Reseller Desk"><span>Reseller desk</span><div><a href="#deposit">Deposit</a><a href="#orderKey">Order key</a><a href="#catalogSection">Katalog</a><a href="#activitySection">Aktivitas</a></div></nav>
-        <section class="panel deposit-panel" id="deposit"><div class="deposit-copy"><span class="section-kicker">Deposit reseller</span><h2>Tambah saldo</h2><p>Isi sekali, pakai berkali-kali untuk mengambil key.</p><div class="deposit-trust"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.6 2.8 8.1 7 10 4.2-1.9 7-5.4 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg><span>Diproses Midtrans<small>Saldo masuk setelah pembayaran terverifikasi</small></span></div></div><form class="deposit-form" id="depositForm"><div class="deposit-form-head"><label class="amount-label" for="depositAmount">Nominal pembayaran <span>Minimum $10</span></label><strong id="depositEstimate">Pilih nominal</strong></div><div class="amount-wrap"><span>Rp</span><input id="depositAmount" type="number" inputmode="numeric" step="1000" aria-label="Nominal deposit" required /></div><div class="quick-amounts" id="quickAmounts"><button class="amount-chip" type="button" data-usd="10"><span class="amount-chip-usd">$10</span><small class="amount-chip-idr">—</small></button><button class="amount-chip" type="button" data-usd="25"><span class="amount-chip-usd">$25</span><small class="amount-chip-idr">—</small></button><button class="amount-chip" type="button" data-usd="50"><span class="amount-chip-usd">$50</span><small class="amount-chip-idr">—</small></button><button class="amount-chip" type="button" data-usd="100"><span class="amount-chip-usd">$100</span><small class="amount-chip-idr">—</small></button></div><button class="btn primary" id="depositButton" type="submit"><span>Bayar deposit</span></button><p class="form-message" id="depositMessage" role="status">Fee Midtrans ditambahkan ke tagihan.</p></form></section>
-        <section class="workspace">
-          <aside class="panel restock"><div class="panel-head"><div><span class="section-kicker">Ambil stok</span><h2>Order key</h2><p>Langsung dipotong dari saldo.</p></div><span class="status" id="discountPercent">0% off</span></div><div class="selection"><div class="field"><label>Pilih game</label><details class="game-picker" id="gamePicker"><summary id="gamePickerSummary"></summary><div class="game-menu" id="gamePickerMenu"></div></details><select class="native-value" id="selectedProduct" aria-hidden="true" tabindex="-1"></select></div><div class="field"><label>Pilih varian</label><div class="variant-picker" id="variantPicker"></div></div><div class="field"><label>Tentukan jumlah</label><div class="quantity-picker" id="quantityPicker"></div><select class="native-value" id="quantity" aria-hidden="true" tabindex="-1"></select></div></div><div class="summary" aria-live="polite"><div class="summary-row"><span>Harga per key</span><strong id="unitPrice">—</strong></div><div class="summary-row"><span>Total order</span><strong id="subtotal">—</strong></div><div class="summary-row total"><span>Sisa saldo</span><strong id="balanceAfter">—</strong></div></div><button class="btn primary" id="checkoutButton" type="button" style="width:100%;margin-top:11px">Order dari saldo</button><p class="form-message" id="checkoutMessage" role="status"></p></aside>
-          <div class="content-stack"><section class="panel"><div class="panel-head"><div><h2>Produk API</h2><p>Harga reseller dan stok supplier.</p></div><span class="status" id="productCount">0 produk</span></div><div class="catalog-tools"><input id="search" type="search" placeholder="Cari game, brand, atau durasi" /></div><div class="catalog" id="catalog"></div></section><section class="panel"><div class="panel-head"><div><h2>Aktivitas</h2><p>Order terakhir.</p></div></div><div class="orders" id="orders"></div></section></div>
+        <section class="dashboard-hero" aria-labelledby="deskTitle">
+          <article class="hero-intro">
+            <div>
+              <span class="eyebrow">Reseller / Operations</span>
+              <h1 id="deskTitle">Stok cepat. Margin jelas.</h1>
+              <p>
+                Isi deposit sekali, pilih produk API, lalu ambil key saat
+                dibutuhkan.
+              </p>
+            </div>
+            <div class="hero-note">
+              <span>Alur transaksi</span
+              ><strong>Deposit → Pilih stok → Jual</strong>
+            </div>
+          </article>
+          <div class="wallet-board">
+            <article class="wallet-card" aria-labelledby="balanceLabel">
+              <span class="wallet-watermark" aria-hidden="true">AE/R</span>
+              <div class="wallet-top">
+                <span class="wallet-label" id="balanceLabel"
+                  >Saldo reseller</span
+                ><span class="wallet-state">Aktif</span>
+              </div>
+              <div class="wallet-amount">
+                <strong id="balanceUsd">$0.00</strong
+                ><span id="balanceIdr">Rp0</span>
+              </div>
+              <a class="wallet-cta" href="#deposit"
+                >Tambah saldo
+                <svg
+                  viewBox="0 0 24 24"
+                  width="16"
+                  height="16"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M5 12h14m-5-5 5 5-5 5"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </a>
+            </article>
+            <div class="metric-strip" aria-label="Ringkasan reseller">
+              <article class="metric-card">
+                <span>Game API</span><strong id="metricGames">0</strong>
+              </article>
+              <article class="metric-card">
+                <span>Stok aktif</span><strong id="metricStock">0</strong>
+              </article>
+              <article class="metric-card">
+                <span>Harga khusus</span><strong id="metricDiscount">0%</strong>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <nav class="desk-nav" aria-label="Navigasi Reseller Desk">
+          <span>Quick access</span>
+          <a href="#deposit"
+            ><svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 7h14v11H5z" />
+              <path d="M8 7V5h8v2M8 12h8" /></svg
+            >Deposit</a
+          >
+          <a href="#orderKey"
+            ><svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="8" cy="15" r="3" />
+              <path d="m10.2 12.8 7-7M15 5h4v4" /></svg
+            >Order</a
+          >
+          <a href="#catalogSection"
+            ><svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 6h16v14H4zM8 6V4h8v2" />
+              <path d="M8 11h8M8 15h5" /></svg
+            >Katalog</a
+          >
+          <a href="#activitySection"
+            ><svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 19V9m5 10V5m5 14v-7m5 7V3" /></svg
+            >Aktivitas</a
+          >
+        </nav>
+
+        <section class="operations-grid" aria-label="Transaksi reseller">
+          <article class="surface deposit-panel" id="deposit">
+            <header class="surface-header">
+              <div>
+                <span class="section-kicker">Deposit reseller</span>
+                <h2>Tambah saldo</h2>
+                <p>Bayar lewat Midtrans. Saldo masuk setelah terverifikasi.</p>
+              </div>
+              <span class="section-number">01</span>
+            </header>
+            <div class="deposit-intro">
+              <div>
+                <strong>Satu deposit untuk banyak order</strong
+                ><span
+                  >Minimum $10. Fee pembayaran ditambahkan saat checkout.</span
+                >
+              </div>
+              <span class="secure-mark" aria-hidden="true"
+                ><svg viewBox="0 0 24 24">
+                  <path
+                    d="M12 3 5 6v5c0 4.6 2.8 8.1 7 10 4.2-1.9 7-5.4 7-10V6l-7-3Z"
+                  />
+                  <path d="m9 12 2 2 4-4" /></svg
+              ></span>
+            </div>
+            <form class="deposit-form" id="depositForm">
+              <label class="field-label" for="depositAmount"
+                >Nominal pembayaran
+                <span id="depositLimit">Minimum $10</span></label
+              >
+              <div class="amount-field">
+                <span class="amount-prefix">Rp</span
+                ><input
+                  id="depositAmount"
+                  type="number"
+                  inputmode="numeric"
+                  step="1000"
+                  autocomplete="off"
+                  aria-describedby="depositEstimate depositMessage"
+                  required
+                />
+              </div>
+              <div class="deposit-estimate" id="depositEstimate">
+                Pilih nominal
+              </div>
+              <div
+                class="quick-amounts"
+                id="quickAmounts"
+                aria-label="Pilihan cepat deposit"
+              >
+                <button
+                  class="amount-chip"
+                  type="button"
+                  data-usd="10"
+                  aria-pressed="false"
+                >
+                  <span class="amount-chip-usd">$10</span
+                  ><small class="amount-chip-idr">—</small>
+                </button>
+                <button
+                  class="amount-chip"
+                  type="button"
+                  data-usd="25"
+                  aria-pressed="false"
+                >
+                  <span class="amount-chip-usd">$25</span
+                  ><small class="amount-chip-idr">—</small>
+                </button>
+                <button
+                  class="amount-chip"
+                  type="button"
+                  data-usd="50"
+                  aria-pressed="false"
+                >
+                  <span class="amount-chip-usd">$50</span
+                  ><small class="amount-chip-idr">—</small>
+                </button>
+                <button
+                  class="amount-chip"
+                  type="button"
+                  data-usd="100"
+                  aria-pressed="false"
+                >
+                  <span class="amount-chip-usd">$100</span
+                  ><small class="amount-chip-idr">—</small>
+                </button>
+              </div>
+              <button
+                class="button primary deposit-submit"
+                id="depositButton"
+                type="submit"
+              >
+                <span>Bayar deposit</span
+                ><svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M5 12h14m-5-5 5 5-5 5" />
+                </svg>
+              </button>
+              <p
+                class="form-message"
+                id="depositMessage"
+                role="status"
+                aria-live="polite"
+              >
+                Fee Midtrans ditambahkan ke tagihan.
+              </p>
+            </form>
+          </article>
+
+          <aside class="surface order-panel" id="orderKey">
+            <header class="surface-header">
+              <div>
+                <span class="section-kicker">Stok API</span>
+                <h2>Order key</h2>
+                <p>Total langsung dipotong dari saldo reseller.</p>
+              </div>
+              <span class="discount-badge" id="discountPercent">0% off</span>
+            </header>
+            <div class="selection-flow">
+              <div class="selection-field">
+                <label id="gamePickerLabel">Pilih game</label>
+                <details class="game-picker" id="gamePicker">
+                  <summary
+                    id="gamePickerSummary"
+                    aria-labelledby="gamePickerLabel"
+                  ></summary>
+                  <div class="game-menu" id="gamePickerMenu"></div>
+                </details>
+                <select
+                  class="native-value"
+                  id="selectedProduct"
+                  aria-hidden="true"
+                  tabindex="-1"
+                ></select>
+              </div>
+              <div class="selection-field">
+                <label>Brand dan durasi</label>
+                <div class="variant-picker" id="variantPicker"></div>
+              </div>
+              <div class="selection-field">
+                <label>Jumlah key</label>
+                <div class="quantity-picker" id="quantityPicker"></div>
+                <select
+                  class="native-value"
+                  id="quantity"
+                  aria-hidden="true"
+                  tabindex="-1"
+                ></select>
+              </div>
+              <div class="order-summary" aria-live="polite">
+                <span class="order-summary-label">Ringkasan order</span>
+                <div class="summary-row">
+                  <span>Harga per key</span><strong id="unitPrice">—</strong>
+                </div>
+                <div class="summary-row">
+                  <span>Total order</span><strong id="subtotal">—</strong>
+                </div>
+                <div class="summary-row total">
+                  <span>Sisa saldo</span><strong id="balanceAfter">—</strong>
+                </div>
+              </div>
+              <button
+                class="button primary checkout-button"
+                id="checkoutButton"
+                type="button"
+              >
+                <span>Order dari saldo</span
+                ><svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 3v18M7 8l5-5 5 5M7 16l5 5 5-5" />
+                </svg>
+              </button>
+              <p
+                class="form-message"
+                id="checkoutMessage"
+                role="status"
+                aria-live="polite"
+              ></p>
+            </div>
+          </aside>
+        </section>
+
+        <section class="surface catalog-shell" id="catalogSection">
+          <header class="catalog-header">
+            <div class="catalog-heading-row">
+              <span class="section-number">02</span>
+              <div>
+                <span class="section-kicker">Produk API</span>
+                <h2>Katalog reseller</h2>
+                <p>Dikelompokkan per game, lalu brand dan durasi.</p>
+              </div>
+            </div>
+            <div class="catalog-tools">
+              <span class="status-badge" id="productCount">0 produk</span
+              ><label class="sr-only" for="search">Cari produk reseller</label>
+              <div class="search-field">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="11" cy="11" r="6" />
+                  <path d="m16 16 4 4" /></svg
+                ><input
+                  id="search"
+                  type="search"
+                  autocomplete="off"
+                  placeholder="Cari game, brand, atau durasi"
+                />
+              </div>
+            </div>
+          </header>
+          <div class="catalog" id="catalog"></div>
+        </section>
+
+        <section class="surface activity-shell" id="activitySection">
+          <header class="catalog-header">
+            <div class="catalog-heading-row">
+              <span class="section-number">03</span>
+              <div>
+                <span class="section-kicker">Riwayat saldo</span>
+                <h2>Aktivitas terakhir</h2>
+                <p>Enam order reseller terbaru.</p>
+              </div>
+            </div>
+            <span class="status-badge" id="orderCount">0 order</span>
+          </header>
+          <div class="activity-list" id="orders"></div>
         </section>
       </div>
     </main>
+
     <script>
-      let resellerData=null;
-      const rupiah=(value)=>new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",maximumFractionDigits:0}).format(Number(value||0));
-      const usd=(value)=>`$${Number(value||0).toFixed(2)}`;
-      const esc=(value)=>String(value??"").replace(/[&<>"']/g,(c)=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]);
-      const cookie=(name)=>document.cookie.split("; ").find((row)=>row.startsWith(`${name}=`))?.split("=").slice(1).join("=")||"";
-      const csrf=()=>decodeURIComponent(cookie("user_csrf"));
-      const midtransUrl=(value)=>{const target=new URL(value,location.origin);if(!/(^|\.)midtrans\.com$/i.test(target.hostname))throw new Error("URL pembayaran Midtrans tidak valid");return target.href};
-      document.querySelector(".restock").id="orderKey";const contentSections=document.querySelectorAll(".content-stack>.panel");contentSections[0].id="catalogSection";contentSections[1].id="activitySection";
-      const gameImages={"8bp":"/images/games/8-ball-pool.jpg","8ballpool":"/images/games/8-ball-pool.jpg",pubgmobile:"/images/games/pubg.webp",pubgm:"/images/games/pubg.webp",mobilelegends:"/images/games/mlbb.webp",mobilelegend:"/images/games/mlbb.webp",mlbb:"/images/games/mlbb.webp",freefire:"/images/games/free-fire.webp",ff:"/images/games/free-fire.webp",codm:"/images/games/codm.webp",callofdutymobile:"/images/games/codm.webp",callofduty:"/images/games/codm.webp",bloodstrike:"/images/games/blood-strike.webp",deltaforce:"/images/games/delta-force.webp",arenabreakout:"/images/games/arena-breakout.webp",goldandglory:"/images/games/gold-and-glory.webp",oxide:"/images/games/oxide.png",oxidesurvivalisland:"/images/games/oxide.png",valorant:"/images/games/valorant.webp"};
-      const fallbackImage="/og-ae-game-store.jpg";
-      const gameImage=(name)=>gameImages[String(name||"").toLowerCase().replace(/[^a-z0-9]/g,"")]||fallbackImage;
-      const durationValue=(duration)=>{const value=Number(String(duration||"").match(/[\d.,]+/)?.[0]?.replace(",",".")||0);return /jam/i.test(duration)?value:/hari/i.test(duration)?value*24:Number.MAX_SAFE_INTEGER};
-      const sortVariants=(products)=>products.slice().sort((a,b)=>a.brand.localeCompare(b.brand,"id",{numeric:true,sensitivity:"base"})||durationValue(a.duration)-durationValue(b.duration)||Number(a.unit_idr)-Number(b.unit_idr));
-      const groupProducts=(products)=>Array.from(products.reduce((groups,product)=>{const group=groups.get(product.game)||[];group.push(product);groups.set(product.game,group);return groups},new Map())).sort(([a],[b])=>a.localeCompare(b,"id",{numeric:true,sensitivity:"base"})).map(([game,variants])=>[game,sortVariants(variants)]);
-      const groupBrands=(products)=>Array.from(products.reduce((groups,product)=>{const group=groups.get(product.brand)||[];group.push(product);groups.set(product.brand,group);return groups},new Map()));
-      async function loadDesk(){try{const res=await fetch("/api/reseller",{cache:"no-store"});if(res.status===401||res.status===403){location.href="/reseller-login";return}const data=await res.json();if(!res.ok)throw new Error(data.message||"Gagal memuat halaman");resellerData=data;document.getElementById("loading").hidden=true;document.getElementById("desk").hidden=false;renderDesk(data);renderDepositOptions()}catch(err){document.getElementById("loading").textContent=err.message}}
-      function renderDepositOptions(){const rate=Number(resellerData?.limits?.usd_idr_rate||0);document.querySelectorAll(".amount-chip").forEach((chip)=>{chip.querySelector(".amount-chip-idr").textContent=rupiah(Number(chip.dataset.usd)*rate)});renderDepositEstimate()}
-      function renderDepositEstimate(){const amount=Number(document.getElementById("depositAmount").value||0);const rate=Number(resellerData?.limits?.usd_idr_rate||0);document.getElementById("depositEstimate").textContent=amount&&rate?`${usd(amount/rate)} saldo`:`Minimum ${usd(resellerData?.limits?.min_topup_usd||10)}`}
-      function renderDesk(data){document.getElementById("balanceUsd").textContent=usd(data.balance.usd);document.getElementById("balanceIdr").textContent=rupiah(data.balance.idr);document.getElementById("discountPercent").textContent=`${data.discount_percent}% off`;const amount=document.getElementById("depositAmount");amount.min=data.limits.min_topup;amount.max=data.limits.max_topup;amount.placeholder=`Minimum $${data.limits.min_topup_usd} · ${rupiah(data.limits.min_topup)}`;const select=document.getElementById("selectedProduct");select.innerHTML=data.products.map((p)=>`<option value="${p.id}">${esc(p.game)} · ${esc(p.brand)} · ${esc(p.duration)}</option>`).join("");const quantity=document.getElementById("quantity");quantity.innerHTML=Array.from({length:data.max_quantity},(_,i)=>`<option value="${i+1}">${i+1} key</option>`).join("");renderPicker();renderCatalog(data.products);renderOrders(data.orders);preview();if(new URLSearchParams(location.search).has("wallet_topup"))document.getElementById("depositMessage").textContent="Pembayaran sedang dicek. Muat ulang jika saldo belum berubah."}
-      function renderPicker(){const selected=resellerData.products.find((product)=>product.id===Number(document.getElementById("selectedProduct").value));if(!selected){document.getElementById("gamePickerSummary").textContent="Produk belum tersedia";return}const groups=groupProducts(resellerData.products);const variants=groups.find(([name])=>name===selected.game)?.[1]||[];document.getElementById("gamePickerSummary").innerHTML=`<img class="picker-thumb" src="${gameImage(selected.game)}" alt="" /><span class="picker-copy"><strong>${esc(selected.game)}</strong><small>${variants.length} varian tersedia</small></span>`;document.getElementById("gamePickerMenu").innerHTML=groups.map(([game,products])=>`<button class="game-option ${game===selected.game?"active":""}" type="button" data-game="${esc(game)}"><img src="${gameImage(game)}" alt="" loading="lazy" /><span><strong>${esc(game)}</strong><small>${products.reduce((total,p)=>total+Number(p.available_keys||0),0)} key tersedia</small></span><span>${products.length} varian</span></button>`).join("");document.getElementById("variantPicker").innerHTML=groupBrands(variants).map(([brand,products])=>`<section class="brand-block"><div class="brand-title"><strong>${esc(brand)}</strong><span>${products.length} durasi</span></div>${products.map((product)=>`<button class="variant-option ${product.id===selected.id?"active":""}" type="button" data-product-id="${product.id}"><span><strong>${esc(product.duration)}</strong><small>${esc(product.platform.toUpperCase())} · ${product.available_keys} key</small></span><span>${usd(product.unit_usd)}</span></button>`).join("")}</section>`).join("");renderQuantity()}
-      function renderQuantity(){const quantity=document.getElementById("quantity");document.getElementById("quantityPicker").innerHTML=Array.from(quantity.options,(option)=>`<button class="quantity-option ${option.value===quantity.value?"active":""}" type="button" data-quantity="${option.value}" aria-label="${option.value} key">${option.value}</button>`).join("")}
-      function chooseProduct(id){document.getElementById("selectedProduct").value=id;document.getElementById("gamePicker").open=false;renderPicker();renderCatalog(resellerData.products);preview()}
-      function renderCatalog(products){const q=document.getElementById("search").value.trim().toLowerCase();const selected=Number(document.getElementById("selectedProduct").value);const items=products.filter((p)=>`${p.game} ${p.brand} ${p.duration} ${p.platform}`.toLowerCase().includes(q));const groups=groupProducts(items);document.getElementById("productCount").textContent=`${groups.length} game · ${items.length} produk`;document.getElementById("catalog").innerHTML=items.length?groups.map(([game,variants])=>`<section class="game-group"><div class="game-cover"><img src="${gameImage(game)}" alt="Cover ${esc(game)}" loading="lazy" /><div class="game-cover-copy"><h3>${esc(game)}</h3><span>${variants.length} varian</span></div></div><div class="variant-list">${groupBrands(variants).map(([brand,brandVariants])=>`<section class="brand-block"><div class="brand-title"><strong>${esc(brand)}</strong><span>${brandVariants.length} durasi</span></div>${brandVariants.map((p)=>`<button class="product ${p.id===selected?"selected":""}" type="button" data-product-id="${p.id}"><span><strong>${esc(p.duration)}</strong><p>${esc(p.platform.toUpperCase())} · <span class="stock">${p.available_keys} key</span></p></span><span class="product-price"><strong>${usd(p.unit_usd)}</strong><small>${rupiah(p.unit_idr)}</small></span></button>`).join("")}</section>`).join("")}</div></section>`).join(""):`<div class="empty">Produk tidak ditemukan.</div>`}
-      function renderOrders(orders){document.getElementById("orders").innerHTML=orders.length?orders.map((o)=>`<div class="order"><div><strong>${esc(o.game)} · ${esc(o.product)}</strong><small>${esc(o.id)} · ${new Date(o.created_at).toLocaleString("id-ID")}</small></div><div class="order-price">-${rupiah(o.price)}<small>${esc(o.delivery_status)}</small></div></div>`).join(""):`<div class="empty">Belum ada pemakaian deposit.</div>`}
-      async function preview(){const productId=document.getElementById("selectedProduct").value;const quantity=document.getElementById("quantity").value;const button=document.getElementById("checkoutButton");const message=document.getElementById("checkoutMessage");message.className="form-message";if(!productId){button.disabled=true;message.textContent="Belum ada produk yang tersedia.";return}button.disabled=true;message.textContent="";try{const res=await fetch(`/api/reseller/preview?product_id=${encodeURIComponent(productId)}&quantity=${encodeURIComponent(quantity)}`,{cache:"no-store"});const data=await res.json();if(!res.ok)throw new Error(data.message||"Gagal menghitung harga");const after=Number(resellerData.balance.idr)-Number(data.final_idr);document.getElementById("unitPrice").textContent=`${usd(data.unit_usd)} / ${rupiah(data.unit_idr)}`;document.getElementById("subtotal").textContent=`${usd(data.final_usd)} / ${rupiah(data.final_idr)}`;document.getElementById("balanceAfter").textContent=after>=0?usd(after/data.usd_idr_rate):"Deposit kurang";button.disabled=after<0;if(after<0)message.textContent="Isi deposit sebelum mengambil key."}catch(err){message.className="form-message error";message.textContent=err.message}}
-      document.getElementById("quickAmounts").addEventListener("click",(event)=>{const item=event.target.closest("[data-usd]");if(!item)return;document.getElementById("depositAmount").value=Math.ceil(Number(item.dataset.usd)*resellerData.limits.usd_idr_rate);document.querySelectorAll(".amount-chip").forEach((chip)=>chip.classList.toggle("active",chip===item));renderDepositEstimate()});
-      document.getElementById("depositAmount").addEventListener("input",()=>{document.querySelectorAll(".amount-chip").forEach((chip)=>chip.classList.remove("active"));renderDepositEstimate()});
-      document.getElementById("depositForm").addEventListener("submit",async(event)=>{event.preventDefault();const button=document.getElementById("depositButton");const message=document.getElementById("depositMessage");const amount=Number(document.getElementById("depositAmount").value);if(amount<resellerData.limits.min_topup||amount>resellerData.limits.max_topup){message.className="form-message error";message.textContent=`Minimum $${resellerData.limits.min_topup_usd} (${rupiah(resellerData.limits.min_topup)}).`;return}button.disabled=true;message.className="form-message";message.textContent="Membuka Midtrans…";try{const res=await fetch("/api/wallet/topups/midtrans",{method:"POST",headers:{"Content-Type":"application/json","x-user-csrf-token":csrf()},body:JSON.stringify({amount,return_to:"reseller"})});const data=await res.json();if(res.status===409&&data.code==="TOPUP_PENDING"&&data.paymentUrl){message.textContent="Melanjutkan pembayaran sebelumnya…";location.assign(midtransUrl(data.paymentUrl));return}if(!res.ok)throw new Error(data.message||"Gagal membuat deposit");location.assign(midtransUrl(data.paymentUrl))}catch(err){message.className="form-message error";message.textContent=err.message;button.disabled=false}});
-      document.getElementById("gamePickerMenu").addEventListener("click",(event)=>{const item=event.target.closest("[data-game]");if(!item)return;const product=resellerData.products.find((entry)=>entry.game===item.dataset.game);if(product)chooseProduct(product.id)});document.getElementById("variantPicker").addEventListener("click",(event)=>{const item=event.target.closest("[data-product-id]");if(item)chooseProduct(item.dataset.productId)});document.getElementById("quantityPicker").addEventListener("click",(event)=>{const item=event.target.closest("[data-quantity]");if(!item)return;document.getElementById("quantity").value=item.dataset.quantity;renderQuantity();preview()});document.getElementById("search").addEventListener("input",()=>renderCatalog(resellerData.products));document.getElementById("catalog").addEventListener("click",(event)=>{const item=event.target.closest("[data-product-id]");if(!item)return;chooseProduct(item.dataset.productId);document.querySelector(".restock").scrollIntoView({behavior:"smooth",block:"start"})});
-      document.getElementById("checkoutButton").addEventListener("click",async()=>{const button=document.getElementById("checkoutButton");const message=document.getElementById("checkoutMessage");button.disabled=true;message.className="form-message";message.textContent="Memotong deposit dan menyiapkan key…";try{const res=await fetch("/create-order",{method:"POST",headers:{"Content-Type":"application/json","x-user-csrf-token":csrf()},body:JSON.stringify({product_id:Number(document.getElementById("selectedProduct").value),quantity:Number(document.getElementById("quantity").value),payment_method:"ae_credit",reseller_order:true})});const data=await res.json();if(!res.ok)throw new Error(data.message||"Gagal mengambil key");location.assign(data.resultUrl)}catch(err){message.className="form-message error";message.textContent=err.message;button.disabled=false}});
+      let resellerData = null;
+      let previewController = null;
+
+      const rupiah = (value) =>
+        new Intl.NumberFormat("id-ID", {
+          style: "currency",
+          currency: "IDR",
+          maximumFractionDigits: 0,
+        }).format(Number(value || 0));
+      const compactNumber = (value) =>
+        new Intl.NumberFormat("id-ID", {
+          notation: "compact",
+          maximumFractionDigits: 1,
+        }).format(Number(value || 0));
+      const usd = (value) => "$" + Number(value || 0).toFixed(2);
+      const esc = (value) =>
+        String(value == null ? "" : value).replace(
+          /[&<>"']/g,
+          (character) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[character],
+        );
+      const cookie = (name) =>
+        document.cookie
+          .split("; ")
+          .find((row) => row.startsWith(name + "="))
+          ?.split("=")
+          .slice(1)
+          .join("=") || "";
+      const csrf = () => decodeURIComponent(cookie("user_csrf"));
+      const midtransUrl = (value) => {
+        const target = new URL(value, location.origin);
+        if (
+          target.protocol !== "https:" ||
+          !/(^|\.)midtrans\.com$/i.test(target.hostname)
+        )
+          throw new Error("URL pembayaran Midtrans tidak valid");
+        return target.href;
+      };
+      const resultUrl = (value) => {
+        const target = new URL(value, location.origin);
+        if (target.origin !== location.origin)
+          throw new Error("URL hasil order tidak valid");
+        return target.href;
+      };
+      const readJson = async (response) => {
+        const type = response.headers.get("content-type") || "";
+        if (!type.includes("application/json"))
+          throw new Error("Server mengirim respons yang tidak valid");
+        return response.json();
+      };
+
+      const gameImages = {
+        "8bp": "/images/games/8-ball-pool.jpg",
+        "8ballpool": "/images/games/8-ball-pool.jpg",
+        pubgmobile: "/images/games/pubg.webp",
+        pubgm: "/images/games/pubg.webp",
+        mobilelegends: "/images/games/mlbb.webp",
+        mobilelegend: "/images/games/mlbb.webp",
+        mlbb: "/images/games/mlbb.webp",
+        freefire: "/images/games/free-fire.webp",
+        ff: "/images/games/free-fire.webp",
+        codm: "/images/games/codm.webp",
+        callofdutymobile: "/images/games/codm.webp",
+        callofduty: "/images/games/codm.webp",
+        bloodstrike: "/images/games/blood-strike.webp",
+        deltaforce: "/images/games/delta-force.webp",
+        arenabreakout: "/images/games/arena-breakout.webp",
+        goldandglory: "/images/games/gold-and-glory.webp",
+        oxide: "/images/games/oxide.png",
+        oxidesurvivalisland: "/images/games/oxide.png",
+        valorant: "/images/games/valorant.webp",
+      };
+      const fallbackImage = "/og-ae-game-store.jpg";
+      const gameImage = (name) =>
+        gameImages[
+          String(name || "")
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, "")
+        ] || fallbackImage;
+      const durationValue = (duration) => {
+        const value = Number(
+          String(duration || "")
+            .match(/[\d.,]+/)?.[0]
+            ?.replace(",", ".") || 0,
+        );
+        if (/jam/i.test(duration)) return value;
+        if (/hari/i.test(duration)) return value * 24;
+        return Number.MAX_SAFE_INTEGER;
+      };
+      const sortVariants = (products) =>
+        products.slice().sort(
+          (a, b) =>
+            a.brand.localeCompare(b.brand, "id", {
+              numeric: true,
+              sensitivity: "base",
+            }) ||
+            durationValue(a.duration) - durationValue(b.duration) ||
+            Number(a.unit_idr) - Number(b.unit_idr),
+        );
+      const groupProducts = (products) =>
+        Array.from(
+          products.reduce((groups, product) => {
+            const group = groups.get(product.game) || [];
+            group.push(product);
+            groups.set(product.game, group);
+            return groups;
+          }, new Map()),
+        )
+          .sort(([a], [b]) =>
+            a.localeCompare(b, "id", { numeric: true, sensitivity: "base" }),
+          )
+          .map(([game, variants]) => [game, sortVariants(variants)]);
+      const groupBrands = (products) =>
+        Array.from(
+          products.reduce((groups, product) => {
+            const group = groups.get(product.brand) || [];
+            group.push(product);
+            groups.set(product.brand, group);
+            return groups;
+          }, new Map()),
+        ).sort(([a], [b]) =>
+          a.localeCompare(b, "id", { numeric: true, sensitivity: "base" }),
+        );
+      const emptyState = (title, description) =>
+        '<div class="empty-state"><div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v14H4zM8 6V4h8v2M8 11h8M8 15h5"/></svg><strong>' +
+        esc(title) +
+        "</strong><p>" +
+        esc(description) +
+        "</p></div></div>";
+      const setButtonBusy = (button, busy, busyText, idleText) => {
+        button.disabled = busy;
+        const label = button.querySelector("span");
+        if (label) label.textContent = busy ? busyText : idleText;
+      };
+      const showLoadError = (message) => {
+        document.getElementById("loadingSpinner").hidden = true;
+        document.getElementById("loadingTitle").textContent =
+          "Data belum bisa dimuat";
+        document.getElementById("loadingText").textContent = message;
+        document.getElementById("retryLoad").hidden = false;
+      };
+
+      async function loadDesk(options) {
+        const silent = Boolean(options && options.silent);
+        const refreshButton = document.getElementById("refreshDesk");
+        if (silent) refreshButton.classList.add("is-busy");
+        try {
+          const response = await fetch("/api/reseller", { cache: "no-store" });
+          if (response.status === 401 || response.status === 403) {
+            location.href = "/reseller-login";
+            return;
+          }
+          const data = await readJson(response);
+          if (!response.ok)
+            throw new Error(data.message || "Gagal memuat halaman");
+          resellerData = data;
+          document.getElementById("loading").hidden = true;
+          document.getElementById("desk").hidden = false;
+          renderDesk(data);
+          renderDepositOptions();
+          if (silent) {
+            const message = document.getElementById("checkoutMessage");
+            message.classList.remove("error");
+            message.textContent = "Saldo dan stok sudah diperbarui.";
+          }
+        } catch (error) {
+          if (silent) {
+            const message = document.getElementById("checkoutMessage");
+            message.classList.add("error");
+            message.textContent = error.message;
+          } else showLoadError(error.message);
+        } finally {
+          refreshButton.classList.remove("is-busy");
+        }
+      }
+
+      function renderDepositOptions() {
+        const rate = Number(resellerData?.limits?.usd_idr_rate || 0);
+        document.querySelectorAll(".amount-chip").forEach((chip) => {
+          chip.querySelector(".amount-chip-idr").textContent = rupiah(
+            Number(chip.dataset.usd) * rate,
+          );
+        });
+        renderDepositEstimate();
+      }
+      function renderDepositEstimate() {
+        const amount = Number(
+          document.getElementById("depositAmount").value || 0,
+        );
+        const rate = Number(resellerData?.limits?.usd_idr_rate || 0);
+        const minimum = Number(resellerData?.limits?.min_topup_usd || 10);
+        document.getElementById("depositEstimate").textContent =
+          amount && rate
+            ? usd(amount / rate) + " masuk ke saldo"
+            : "Minimum " + usd(minimum);
+      }
+      function renderDesk(data) {
+        const products = Array.isArray(data.products) ? data.products : [];
+        const orders = Array.isArray(data.orders) ? data.orders : [];
+        const groups = groupProducts(products);
+        const stock = products.reduce(
+          (total, product) => total + Number(product.available_keys || 0),
+          0,
+        );
+        document.getElementById("balanceUsd").textContent = usd(
+          data.balance.usd,
+        );
+        document.getElementById("balanceIdr").textContent = rupiah(
+          data.balance.idr,
+        );
+        document.getElementById("metricGames").textContent = groups.length;
+        document.getElementById("metricStock").textContent =
+          compactNumber(stock);
+        document.getElementById("metricDiscount").textContent =
+          Number(data.discount_percent || 0) + "%";
+        document.getElementById("discountPercent").textContent =
+          Number(data.discount_percent || 0) + "% off";
+        const amount = document.getElementById("depositAmount");
+        amount.min = data.limits.min_topup;
+        amount.max = data.limits.max_topup;
+        amount.placeholder = rupiah(data.limits.min_topup);
+        document.getElementById("depositLimit").textContent =
+          "Minimum " + usd(data.limits.min_topup_usd);
+        const productSelect = document.getElementById("selectedProduct");
+        const currentProductId = Number(productSelect.value || 0);
+        productSelect.innerHTML = products
+          .map(
+            (product) =>
+              '<option value="' +
+              product.id +
+              '">' +
+              esc(product.game) +
+              " · " +
+              esc(product.brand) +
+              " · " +
+              esc(product.duration) +
+              "</option>",
+          )
+          .join("");
+        if (products.some((product) => product.id === currentProductId))
+          productSelect.value = String(currentProductId);
+        renderPicker();
+        renderCatalog(products);
+        renderOrders(orders);
+        preview();
+        if (new URLSearchParams(location.search).has("wallet_topup"))
+          document.getElementById("depositMessage").textContent =
+            "Pembayaran sedang dicek. Muat ulang data jika saldo belum berubah.";
+      }
+
+      function renderPicker() {
+        const products = resellerData?.products || [];
+        const selected = products.find(
+          (product) =>
+            product.id ===
+            Number(document.getElementById("selectedProduct").value),
+        );
+        const summary = document.getElementById("gamePickerSummary");
+        const menu = document.getElementById("gamePickerMenu");
+        const variantsRoot = document.getElementById("variantPicker");
+        if (!selected) {
+          summary.innerHTML =
+            '<span class="picker-copy"><strong>Belum ada produk API</strong><small>Coba muat ulang nanti</small></span>';
+          menu.innerHTML = emptyState(
+            "Katalog kosong",
+            "Produk API aktif akan muncul di sini.",
+          );
+          variantsRoot.innerHTML = emptyState(
+            "Varian belum tersedia",
+            "Pilih produk setelah stok API tersedia.",
+          );
+          renderQuantity();
+          return;
+        }
+        const groups = groupProducts(products);
+        const variants =
+          groups.find(([name]) => name === selected.game)?.[1] || [];
+        const available = variants.reduce(
+          (total, product) => total + Number(product.available_keys || 0),
+          0,
+        );
+        summary.innerHTML =
+          '<img class="picker-thumb" src="' +
+          gameImage(selected.game) +
+          '" alt="" /><span class="picker-copy"><strong>' +
+          esc(selected.game) +
+          "</strong><small>" +
+          variants.length +
+          " varian · " +
+          available +
+          " key</small></span>";
+        menu.innerHTML = groups
+          .map(([game, gameProducts]) => {
+            const active = game === selected.game;
+            const gameStock = gameProducts.reduce(
+              (total, product) => total + Number(product.available_keys || 0),
+              0,
+            );
+            return (
+              '<button class="game-option" type="button" data-game="' +
+              esc(game) +
+              '" aria-pressed="' +
+              String(active) +
+              '"><img src="' +
+              gameImage(game) +
+              '" alt="" loading="lazy" /><span><strong>' +
+              esc(game) +
+              "</strong><small>" +
+              gameStock +
+              " key tersedia</small></span><em>" +
+              gameProducts.length +
+              " varian</em></button>"
+            );
+          })
+          .join("");
+        variantsRoot.innerHTML = groupBrands(variants)
+          .map(
+            ([brand, brandProducts]) =>
+              '<section class="brand-block"><div class="brand-title"><strong>' +
+              esc(brand) +
+              "</strong><span>" +
+              brandProducts.length +
+              " durasi</span></div>" +
+              brandProducts
+                .map((product) => {
+                  const active = product.id === selected.id;
+                  return (
+                    '<button class="variant-option" type="button" data-product-id="' +
+                    product.id +
+                    '" aria-pressed="' +
+                    String(active) +
+                    '"><span><strong>' +
+                    esc(product.duration) +
+                    "</strong><small>" +
+                    esc(String(product.platform || "").toUpperCase()) +
+                    " · " +
+                    Number(product.available_keys || 0) +
+                    ' key</small></span><span class="variant-price">' +
+                    usd(product.unit_usd) +
+                    "</span></button>"
+                  );
+                })
+                .join("") +
+              "</section>",
+          )
+          .join("");
+        renderQuantity();
+      }
+      function renderQuantity() {
+        const quantity = document.getElementById("quantity");
+        const selected = resellerData?.products?.find(
+          (product) =>
+            product.id ===
+            Number(document.getElementById("selectedProduct").value),
+        );
+        const maxAllowed = Math.min(
+          Number(resellerData?.max_quantity || 1),
+          Math.max(0, Number(selected?.available_keys || 0)),
+        );
+        const current = Math.min(
+          Math.max(Number(quantity.value || 1), 1),
+          Math.max(maxAllowed, 1),
+        );
+        quantity.innerHTML = Array.from(
+          { length: maxAllowed },
+          (_, index) =>
+            '<option value="' +
+            (index + 1) +
+            '">' +
+            (index + 1) +
+            " key</option>",
+        ).join("");
+        quantity.value = maxAllowed ? String(current) : "";
+        if (!maxAllowed) {
+          document.getElementById("quantityPicker").innerHTML = emptyState(
+            "Stok habis",
+            "Pilih varian lain yang masih tersedia.",
+          );
+          return;
+        }
+        document.getElementById("quantityPicker").innerHTML = Array.from(
+          quantity.options,
+          (option) => {
+            const active = option.value === quantity.value;
+            return (
+              '<button class="quantity-option" type="button" data-quantity="' +
+              option.value +
+              '" aria-label="' +
+              option.value +
+              ' key" aria-pressed="' +
+              String(active) +
+              '">' +
+              option.value +
+              "</button>"
+            );
+          },
+        ).join("");
+      }
+      function chooseProduct(id) {
+        document.getElementById("selectedProduct").value = String(id);
+        document.getElementById("gamePicker").open = false;
+        renderPicker();
+        renderCatalog(resellerData.products);
+        preview();
+      }
+
+      function renderCatalog(products) {
+        const query = document
+          .getElementById("search")
+          .value.trim()
+          .toLowerCase();
+        const selectedId = Number(
+          document.getElementById("selectedProduct").value,
+        );
+        const selectedProduct = products.find(
+          (product) => product.id === selectedId,
+        );
+        const items = products.filter((product) =>
+          [product.game, product.brand, product.duration, product.platform]
+            .join(" ")
+            .toLowerCase()
+            .includes(query),
+        );
+        const groups = groupProducts(items);
+        document.getElementById("productCount").textContent =
+          groups.length + " game · " + items.length + " produk";
+        document.getElementById("catalog").innerHTML = items.length
+          ? groups
+              .map(([game, variants], groupIndex) => {
+                const gameStock = variants.reduce(
+                  (total, product) =>
+                    total + Number(product.available_keys || 0),
+                  0,
+                );
+                const open =
+                  Boolean(query) ||
+                  game === selectedProduct?.game ||
+                  (groupIndex === 0 && !selectedProduct);
+                return (
+                  '<details class="game-group"' +
+                  (open ? " open" : "") +
+                  '><summary><img class="game-cover-image" src="' +
+                  gameImage(game) +
+                  '" alt="" loading="lazy" /><span class="game-cover-scrim" aria-hidden="true"></span><span class="game-cover-copy"><span><h3>' +
+                  esc(game) +
+                  "</h3><p>" +
+                  gameStock +
+                  " key supplier</p></span><span>" +
+                  variants.length +
+                  ' varian</span></span></summary><div class="variant-list">' +
+                  groupBrands(variants)
+                    .map(
+                      ([brand, brandVariants]) =>
+                        '<section class="brand-block"><div class="brand-title"><strong>' +
+                        esc(brand) +
+                        "</strong><span>" +
+                        brandVariants.length +
+                        " durasi</span></div>" +
+                        brandVariants
+                          .map((product) => {
+                            const active = product.id === selectedId;
+                            return (
+                              '<button class="product" type="button" data-product-id="' +
+                              product.id +
+                              '" aria-pressed="' +
+                              String(active) +
+                              '"><span><strong>' +
+                              esc(product.duration) +
+                              "</strong><p>" +
+                              esc(
+                                String(product.platform || "").toUpperCase(),
+                              ) +
+                              ' · <span class="stock">' +
+                              Number(product.available_keys || 0) +
+                              ' key</span></p></span><span class="product-price"><strong>' +
+                              usd(product.unit_usd) +
+                              "</strong><small>" +
+                              rupiah(product.unit_idr) +
+                              "</small></span></button>"
+                            );
+                          })
+                          .join("") +
+                        "</section>",
+                    )
+                    .join("") +
+                  "</div></details>"
+                );
+              })
+              .join("")
+          : emptyState(
+              "Produk tidak ditemukan",
+              "Coba kata kunci game, brand, atau durasi lain.",
+            );
+      }
+      function renderOrders(orders) {
+        document.getElementById("orderCount").textContent =
+          orders.length + " order";
+        document.getElementById("orders").innerHTML = orders.length
+          ? orders
+              .map((order) => {
+                const date = new Date(order.created_at);
+                const dateLabel = Number.isNaN(date.getTime())
+                  ? "Waktu tidak tersedia"
+                  : date.toLocaleString("id-ID", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    });
+                return (
+                  '<article class="order"><div class="order-main"><span class="order-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m7 12 3 3 7-7"/><circle cx="12" cy="12" r="9"/></svg></span><div class="order-meta"><strong>' +
+                  esc(order.game) +
+                  " · " +
+                  esc(order.product) +
+                  "</strong><small>" +
+                  esc(order.id) +
+                  " · " +
+                  esc(dateLabel) +
+                  '</small></div></div><div class="order-price"><strong>−' +
+                  rupiah(order.price) +
+                  "</strong><span>" +
+                  esc(order.delivery_status) +
+                  "</span></div></article>"
+                );
+              })
+              .join("")
+          : emptyState(
+              "Belum ada order",
+              "Order dari saldo reseller akan tercatat di sini.",
+            );
+      }
+
+      async function preview() {
+        const productId = document.getElementById("selectedProduct").value;
+        const quantity = document.getElementById("quantity").value;
+        const button = document.getElementById("checkoutButton");
+        const message = document.getElementById("checkoutMessage");
+        message.classList.remove("error");
+        if (!productId || !quantity) {
+          button.disabled = true;
+          ["unitPrice", "subtotal", "balanceAfter"].forEach(
+            (id) => (document.getElementById(id).textContent = "—"),
+          );
+          message.textContent = productId
+            ? "Stok varian ini sedang habis."
+            : "Produk API belum tersedia.";
+          return;
+        }
+        if (previewController) previewController.abort();
+        previewController = new AbortController();
+        button.disabled = true;
+        ["unitPrice", "subtotal", "balanceAfter"].forEach(
+          (id) => (document.getElementById(id).textContent = "Menghitung…"),
+        );
+        message.textContent = "";
+        try {
+          const response = await fetch(
+            "/api/reseller/preview?product_id=" +
+              encodeURIComponent(productId) +
+              "&quantity=" +
+              encodeURIComponent(quantity),
+            { cache: "no-store", signal: previewController.signal },
+          );
+          if (response.status === 401 || response.status === 403) {
+            location.href = "/reseller-login";
+            return;
+          }
+          const data = await readJson(response);
+          if (!response.ok)
+            throw new Error(data.message || "Gagal menghitung harga");
+          const after =
+            Number(resellerData.balance.idr) - Number(data.final_idr);
+          document.getElementById("unitPrice").textContent =
+            usd(data.unit_usd) + " / " + rupiah(data.unit_idr);
+          document.getElementById("subtotal").textContent =
+            usd(data.final_usd) + " / " + rupiah(data.final_idr);
+          document.getElementById("balanceAfter").textContent =
+            after >= 0 ? usd(after / data.usd_idr_rate) : "Deposit kurang";
+          button.disabled = after < 0;
+          if (after < 0)
+            message.textContent = "Tambah deposit sebelum mengambil key.";
+        } catch (error) {
+          if (error.name === "AbortError") return;
+          message.classList.add("error");
+          message.textContent = error.message;
+          ["unitPrice", "subtotal", "balanceAfter"].forEach(
+            (id) => (document.getElementById(id).textContent = "—"),
+          );
+        }
+      }
+
+      document.getElementById("retryLoad").addEventListener("click", () => {
+        document.getElementById("retryLoad").hidden = true;
+        document.getElementById("loadingSpinner").hidden = false;
+        document.getElementById("loadingTitle").textContent =
+          "Menyiapkan Reseller Desk";
+        document.getElementById("loadingText").textContent =
+          "Mengambil saldo, stok API, dan aktivitas terakhirmu.";
+        loadDesk();
+      });
+      document
+        .getElementById("refreshDesk")
+        .addEventListener(
+          "click",
+          () => resellerData && loadDesk({ silent: true }),
+        );
+      document
+        .getElementById("quickAmounts")
+        .addEventListener("click", (event) => {
+          const item = event.target.closest("[data-usd]");
+          if (!item || !resellerData) return;
+          document.getElementById("depositAmount").value = Math.ceil(
+            Number(item.dataset.usd) * resellerData.limits.usd_idr_rate,
+          );
+          document
+            .querySelectorAll(".amount-chip")
+            .forEach((chip) =>
+              chip.setAttribute("aria-pressed", String(chip === item)),
+            );
+          renderDepositEstimate();
+        });
+      document.getElementById("depositAmount").addEventListener("input", () => {
+        document
+          .querySelectorAll(".amount-chip")
+          .forEach((chip) => chip.setAttribute("aria-pressed", "false"));
+        renderDepositEstimate();
+      });
+      document
+        .getElementById("depositForm")
+        .addEventListener("submit", async (event) => {
+          event.preventDefault();
+          const button = document.getElementById("depositButton");
+          const message = document.getElementById("depositMessage");
+          const amount = Number(document.getElementById("depositAmount").value);
+          if (
+            amount < resellerData.limits.min_topup ||
+            amount > resellerData.limits.max_topup
+          ) {
+            message.classList.add("error");
+            message.textContent =
+              "Minimum " +
+              usd(resellerData.limits.min_topup_usd) +
+              " (" +
+              rupiah(resellerData.limits.min_topup) +
+              ").";
+            return;
+          }
+          setButtonBusy(button, true, "Membuka Midtrans…", "Bayar deposit");
+          message.classList.remove("error");
+          message.textContent = "Membuat tagihan deposit…";
+          try {
+            const response = await fetch("/api/wallet/topups/midtrans", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "x-user-csrf-token": csrf(),
+              },
+              body: JSON.stringify({ amount: amount, return_to: "reseller" }),
+            });
+            if (response.status === 401 || response.status === 403) {
+              location.href = "/reseller-login";
+              return;
+            }
+            const data = await readJson(response);
+            if (
+              response.status === 409 &&
+              data.code === "TOPUP_PENDING" &&
+              data.paymentUrl
+            ) {
+              message.textContent = "Melanjutkan pembayaran sebelumnya…";
+              location.assign(midtransUrl(data.paymentUrl));
+              return;
+            }
+            if (!response.ok)
+              throw new Error(data.message || "Gagal membuat deposit");
+            location.assign(midtransUrl(data.paymentUrl));
+          } catch (error) {
+            message.classList.add("error");
+            message.textContent = error.message;
+            setButtonBusy(button, false, "Membuka Midtrans…", "Bayar deposit");
+          }
+        });
+      document
+        .getElementById("gamePickerMenu")
+        .addEventListener("click", (event) => {
+          const item = event.target.closest("[data-game]");
+          if (!item) return;
+          const product = resellerData.products.find(
+            (entry) => entry.game === item.dataset.game,
+          );
+          if (product) chooseProduct(product.id);
+        });
+      document
+        .getElementById("variantPicker")
+        .addEventListener("click", (event) => {
+          const item = event.target.closest("[data-product-id]");
+          if (item) chooseProduct(item.dataset.productId);
+        });
+      document
+        .getElementById("quantityPicker")
+        .addEventListener("click", (event) => {
+          const item = event.target.closest("[data-quantity]");
+          if (!item) return;
+          document.getElementById("quantity").value = item.dataset.quantity;
+          renderQuantity();
+          preview();
+        });
+      document
+        .getElementById("search")
+        .addEventListener("input", () => renderCatalog(resellerData.products));
+      document.getElementById("catalog").addEventListener("click", (event) => {
+        const item = event.target.closest("[data-product-id]");
+        if (!item) return;
+        chooseProduct(item.dataset.productId);
+        document
+          .getElementById("orderKey")
+          .scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+      document.addEventListener("click", (event) => {
+        const picker = document.getElementById("gamePicker");
+        if (picker.open && !picker.contains(event.target)) picker.open = false;
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape")
+          document.getElementById("gamePicker").open = false;
+      });
+      document.addEventListener(
+        "error",
+        (event) => {
+          const image = event.target;
+          if (
+            !(image instanceof HTMLImageElement) ||
+            image.dataset.fallbackApplied
+          )
+            return;
+          image.dataset.fallbackApplied = "true";
+          image.src = fallbackImage;
+        },
+        true,
+      );
+      document
+        .getElementById("checkoutButton")
+        .addEventListener("click", async () => {
+          const button = document.getElementById("checkoutButton");
+          const message = document.getElementById("checkoutMessage");
+          setButtonBusy(button, true, "Menyiapkan key…", "Order dari saldo");
+          message.classList.remove("error");
+          message.textContent =
+            "Saldo sedang dipotong dan key sedang disiapkan…";
+          try {
+            const response = await fetch("/create-order", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "x-user-csrf-token": csrf(),
+              },
+              body: JSON.stringify({
+                product_id: Number(
+                  document.getElementById("selectedProduct").value,
+                ),
+                quantity: Number(document.getElementById("quantity").value),
+                payment_method: "ae_credit",
+                reseller_order: true,
+              }),
+            });
+            if (response.status === 401 || response.status === 403) {
+              location.href = "/reseller-login";
+              return;
+            }
+            const data = await readJson(response);
+            if (!response.ok)
+              throw new Error(data.message || "Gagal mengambil key");
+            location.assign(resultUrl(data.resultUrl));
+          } catch (error) {
+            message.classList.add("error");
+            message.textContent = error.message;
+            setButtonBusy(button, false, "Menyiapkan key…", "Order dari saldo");
+          }
+        });
       loadDesk();
     </script>
   </body>
