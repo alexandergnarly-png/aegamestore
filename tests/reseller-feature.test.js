@@ -53,6 +53,8 @@ const admin = fs.readFileSync("views/admin.html", "utf8");
   'payment_method:"ae_credit"',
   'reseller_order:true',
   'return_to:"reseller"',
+  'res.status===409&&data.code==="TOPUP_PENDING"&&data.paymentUrl',
+  'Melanjutkan pembayaran sebelumnya…',
   'Order dari saldo',
   '/(^|\\.)midtrans\\.com$/i',
   '.loading[hidden],.desk[hidden]{display:none}',

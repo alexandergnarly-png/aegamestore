@@ -2770,13 +2770,17 @@ async function createPendingWalletTopup({
     }
 
     const pending = await client.query(
-      `SELECT id FROM wallet_topup_requests
+      `SELECT id, provider, snap_redirect_url FROM wallet_topup_requests
        WHERE user_id = $1 AND status = 'pending' LIMIT 1`,
       [userId],
     );
     if (pending.rows.length) {
       const error = new Error("Masih ada top up yang menunggu pembayaran atau verifikasi");
       error.statusCode = 409;
+      error.code = "TOPUP_PENDING";
+      if (pending.rows[0].provider === "midtrans" && pending.rows[0].snap_redirect_url) {
+        error.paymentUrl = pending.rows[0].snap_redirect_url;
+      }
       throw error;
     }
 
@@ -10281,7 +10285,11 @@ app.post("/api/wallet/topups/midtrans", walletTopupLimiter, requireUserCsrf, asy
       ).catch(() => {});
     }
     console.error("ERROR CREATE MIDTRANS WALLET TOPUP:", err.response?.data || err.message || err);
-    return res.status(err.statusCode || 500).json({ message: err.statusCode ? err.message : "Gagal membuat pembayaran Midtrans" });
+    return res.status(err.statusCode || 500).json({
+      message: err.statusCode ? err.message : "Gagal membuat pembayaran Midtrans",
+      ...(err.code ? { code: err.code } : {}),
+      ...(err.paymentUrl ? { paymentUrl: err.paymentUrl } : {}),
+    });
   }
 });
 
