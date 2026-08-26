@@ -2142,15 +2142,6 @@
           .slice(1)
           .join("=") || "";
       const csrf = () => decodeURIComponent(cookie("user_csrf"));
-      const midtransUrl = (value) => {
-        const target = new URL(value, location.origin);
-        if (
-          target.protocol !== "https:" ||
-          !/(^|\.)midtrans\.com$/i.test(target.hostname)
-        )
-          throw new Error("URL pembayaran Midtrans tidak valid");
-        return target.href;
-      };
       const resultUrl = (value) => {
         const target = new URL(value, location.origin);
         if (target.origin !== location.origin)
@@ -2774,15 +2765,15 @@
             if (
               response.status === 409 &&
               data.code === "TOPUP_PENDING" &&
-              data.paymentUrl
+              data.checkoutUrl
             ) {
               message.textContent = "Melanjutkan pembayaran sebelumnya…";
-              location.assign(midtransUrl(data.paymentUrl));
+              location.assign(data.checkoutUrl);
               return;
             }
             if (!response.ok)
               throw new Error(data.message || "Gagal membuat deposit");
-            location.assign(midtransUrl(data.paymentUrl));
+            location.assign(data.checkoutUrl);
           } catch (error) {
             message.classList.add("error");
             message.textContent = error.message;

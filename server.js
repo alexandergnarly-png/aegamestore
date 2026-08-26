@@ -2834,6 +2834,7 @@ async function createPendingWalletTopup({
       const error = new Error("Masih ada top up yang menunggu pembayaran atau verifikasi");
       error.statusCode = 409;
       error.code = "TOPUP_PENDING";
+      error.topupId = pending.rows[0].id;
       if (pending.rows[0].provider === "midtrans" && pending.rows[0].snap_redirect_url) {
         error.paymentUrl = pending.rows[0].snap_redirect_url;
       }
@@ -4396,6 +4397,25 @@ app.get("/reseller", async (req, res) => {
   } catch (err) {
     console.error("ERROR OPEN RESELLER DESK:", err);
     return res.status(500).send("Gagal membuka Reseller Desk");
+  }
+});
+
+app.get("/reseller-checkout", async (req, res) => {
+  const loggedInUser = await getLoggedInUserFromRequest(req);
+  if (!loggedInUser) return res.redirect("/reseller-login");
+
+  try {
+    const result = await query(
+      "SELECT reseller_status FROM users WHERE id = $1 LIMIT 1",
+      [loggedInUser.id],
+    );
+    if (normalizeResellerStatus(result.rows[0]?.reseller_status) !== "approved") {
+      return res.redirect("/reseller-login?denied=1");
+    }
+    return res.sendFile(path.join(__dirname, "public", "reseller-checkout.html"));
+  } catch (err) {
+    console.error("ERROR OPEN RESELLER CHECKOUT:", err);
+    return res.status(500).send("Gagal membuka checkout deposit");
   }
 });
 
@@ -10564,6 +10584,7 @@ app.post("/api/wallet/topups/midtrans", walletTopupLimiter, requireUserCsrf, asy
       paymentAmount,
       paymentFee,
       paymentUrl: transaction.redirect_url,
+      checkoutUrl: `/reseller-checkout?topup=${encodeURIComponent(topupId)}`,
     });
   } catch (err) {
     if (topupId) {
@@ -10579,7 +10600,56 @@ app.post("/api/wallet/topups/midtrans", walletTopupLimiter, requireUserCsrf, asy
       message: err.statusCode ? err.message : "Gagal membuat pembayaran Midtrans",
       ...(err.code ? { code: err.code } : {}),
       ...(err.paymentUrl ? { paymentUrl: err.paymentUrl } : {}),
+      ...(err.topupId && err.paymentUrl ? {
+        id: err.topupId,
+        checkoutUrl: `/reseller-checkout?topup=${encodeURIComponent(err.topupId)}`,
+      } : {}),
     });
+  }
+});
+
+app.get("/api/wallet/topups/:id/checkout", async (req, res) => {
+  const user = await getLoggedInUserFromRequest(req);
+  if (!user) return res.status(401).json({ message: "Kamu harus login dulu" });
+
+  const topupId = String(req.params.id || "").trim();
+  if (!/^TOPUP-[0-9a-f-]{36}$/i.test(topupId)) {
+    return res.status(400).json({ message: "ID deposit tidak valid" });
+  }
+
+  try {
+    if (req.query.sync === "1") await syncPendingMidtransWalletTopup(user.id);
+    const result = await query(
+      `SELECT id, amount, payment_amount, status, provider, provider_order_id,
+              snap_token, snap_redirect_url, created_at, paid_at, admin_note
+       FROM wallet_topup_requests
+       WHERE id = $1 AND user_id = $2 AND provider = 'midtrans'
+       LIMIT 1`,
+      [topupId, user.id],
+    );
+    const topup = result.rows[0];
+    if (!topup) return res.status(404).json({ message: "Deposit tidak ditemukan" });
+
+    const creditAmount = Number(topup.amount || 0);
+    const paymentAmount = Number(topup.payment_amount || topup.amount || 0);
+    return res.json({
+      id: topup.id,
+      orderId: topup.provider_order_id,
+      status: topup.status,
+      creditAmount,
+      paymentAmount,
+      paymentFee: Math.max(0, paymentAmount - creditAmount),
+      snapToken: topup.status === "pending" ? topup.snap_token : "",
+      paymentUrl: topup.status === "pending" ? topup.snap_redirect_url : "",
+      midtransClientKey: process.env.MIDTRANS_CLIENT_KEY || "",
+      midtransIsProduction: isMidtransProduction,
+      createdAt: topup.created_at,
+      paidAt: topup.paid_at,
+      note: topup.admin_note || "",
+    });
+  } catch (err) {
+    console.error("ERROR LOAD RESELLER CHECKOUT:", err);
+    return res.status(500).json({ message: "Gagal memuat checkout deposit" });
   }
 });
 

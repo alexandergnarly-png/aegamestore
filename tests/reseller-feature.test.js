@@ -4,6 +4,7 @@ const fs = require("node:fs");
 const server = fs.readFileSync("server.js", "utf8");
 const page = fs.readFileSync("public/reseller.html", "utf8");
 const login = fs.readFileSync("public/reseller-login.html", "utf8");
+const checkout = fs.readFileSync("public/reseller-checkout.html", "utf8");
 const admin = fs.readFileSync("views/admin.html", "utf8");
 
 assert.ok(server.includes("const RESELLER_MIN_DEPOSIT_USD = 10"));
@@ -18,7 +19,7 @@ const inlineScripts = (html) =>
     ([, source]) => source,
   );
 
-[page, login, admin].forEach((html) =>
+[page, login, checkout, admin].forEach((html) =>
   inlineScripts(html).forEach((source) =>
     assert.doesNotThrow(() => new Function(source)),
   ),
@@ -108,8 +109,7 @@ assert.match(pageJs, /payment_method\s*:\s*["']ae_credit["']/);
 assert.match(pageJs, /reseller_order\s*:\s*true/);
 assert.match(pageJs, /return_to\s*:\s*["']reseller["']/);
 assert.match(pageJs, /status\s*===\s*409[\s\S]*TOPUP_PENDING/);
-assert.match(pageJs, /midtrans\\\.com/);
-assert.match(pageJs, /protocol\s*!==\s*["']https:["']/);
+assert.match(pageJs, /location\.assign\(data\.checkoutUrl\)/);
 assert.match(pageJs, /status\s*===\s*401[\s\S]*status\s*===\s*403/);
 assert.match(page, /Midtrans/i);
 assert.match(page, /(?:fee|tagihan)/i);
@@ -218,6 +218,26 @@ assert.ok(!page.includes("Biaya Midtrans"));
 assert.ok(!page.includes("Fund reseller wallet"));
 assert.ok(!page.includes("Ready to spend"));
 assert.ok(!server.includes('app.post("/api/reseller/apply"'));
+
+[
+  'id="checkout"',
+  'id="statusCard"',
+  'id="payButton"',
+  'id="checkButton"',
+  'id="fallbackLink"',
+  "Snap resmi Midtrans",
+  "Selesaikan deposit.",
+].forEach((marker) => assert.ok(checkout.includes(marker), `Missing reseller checkout UI marker: ${marker}`));
+assert.match(checkout, /<meta[^>]+name=["']viewport["']/i);
+assert.match(checkout, /:focus-visible/);
+assert.match(checkout, /prefers-reduced-motion\s*:\s*reduce/);
+assert.match(checkout, /aria-live=["']polite["']/);
+assert.match(checkout, /window\.snap\.pay\(/);
+assert.match(checkout, /\/api\/wallet\/topups\/\$\{encodeURIComponent\(topupId\)\}\/checkout/);
+assert.match(checkout, /\(\^\|\\\.\)midtrans\\\.com\$/);
+assert.match(checkout, /protocol\s*!==\s*["']https:["']/);
+assert.doesNotMatch(checkout, /linear-gradient/);
+assert.doesNotMatch(checkout, /(?:Ãƒ.|Ã‚.|Ã¢â‚¬Â¦|Ã¢â‚¬â€|Ã¯Â¿Â½|ï¿½)/u);
 
 const resellerLoginRoute = server.slice(
   server.indexOf('app.post("/user-login"'),

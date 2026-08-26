@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#111214" />
+    <title>Checkout Deposit — AE Game Store</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #111214;
+        --paper: #f4f3ee;
+        --card: #ffffff;
+        --muted: #686962;
+        --line: #d7d5cc;
+        --soft: #ecebe4;
+        --blue: #355efb;
+        --green: #087849;
+        --red: #b42318;
+        --shadow: 10px 10px 0 #d8d7d0;
+      }
+
+      * { box-sizing: border-box; }
+
+      html { min-width: 300px; background: var(--paper); }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        min-height: 100dvh;
+        color: var(--ink);
+        background: var(--paper);
+        font-family: "Plus Jakarta Sans", sans-serif;
+      }
+
+      button, a { -webkit-tap-highlight-color: transparent; }
+
+      button { font: inherit; touch-action: manipulation; }
+
+      button:focus-visible, a:focus-visible {
+        outline: 3px solid var(--blue);
+        outline-offset: 3px;
+      }
+
+      .skip-link {
+        position: fixed;
+        z-index: 100;
+        top: 12px;
+        left: 12px;
+        padding: 10px 14px;
+        color: #fff;
+        background: var(--ink);
+        transform: translateY(-160%);
+      }
+
+      .skip-link:focus { transform: translateY(0); }
+
+      .topbar {
+        min-height: 88px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 16px clamp(18px, 5vw, 72px);
+        border-bottom: 1px solid var(--line);
+        background: rgba(244, 243, 238, 0.95);
+      }
+
+      .brand { display: flex; align-items: center; gap: 12px; }
+
+      .brand-mark {
+        width: 52px;
+        height: 52px;
+        display: grid;
+        place-items: center;
+        border-radius: 16px;
+        color: #fff;
+        background: var(--ink);
+        font-weight: 800;
+      }
+
+      .brand-copy strong { display: block; font-size: 16px; }
+
+      .brand-copy span,
+      .eyebrow,
+      .meta-label,
+      .status-label,
+      .rail-step span {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.11em;
+        text-transform: uppercase;
+      }
+
+      .brand-copy span { color: var(--muted); }
+
+      .back-link {
+        min-height: 50px;
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        padding: 0 18px;
+        border: 1px solid var(--line);
+        border-radius: 15px;
+        color: var(--ink);
+        background: var(--card);
+        font-weight: 800;
+        text-decoration: none;
+      }
+
+      .back-link svg { width: 20px; height: 20px; }
+
+      .shell {
+        width: min(1180px, calc(100% - 36px));
+        margin: clamp(28px, 5vw, 68px) auto;
+        display: grid;
+        grid-template-columns: minmax(0, 0.88fr) minmax(420px, 1.12fr);
+        gap: 28px;
+        align-items: start;
+      }
+
+      .docket,
+      .station {
+        border: 1px solid var(--ink);
+        border-radius: 30px;
+        background: var(--card);
+        overflow: hidden;
+      }
+
+      .docket { box-shadow: var(--shadow); }
+
+      .docket-head { padding: clamp(24px, 4vw, 42px); }
+
+      .eyebrow { color: var(--blue); }
+
+      h1 {
+        margin: 16px 0 12px;
+        max-width: 650px;
+        font-size: clamp(36px, 6vw, 72px);
+        line-height: 0.95;
+        letter-spacing: -0.055em;
+      }
+
+      .intro { margin: 0; color: var(--muted); line-height: 1.65; }
+
+      .status-card {
+        margin-top: 28px;
+        padding: 22px;
+        border-radius: 21px;
+        color: #fff;
+        background: var(--ink);
+      }
+
+      .status-top { display: flex; justify-content: space-between; gap: 14px; }
+
+      .status-dot {
+        width: 12px;
+        height: 12px;
+        border: 3px solid #fff;
+        border-radius: 50%;
+        background: #ffc83d;
+        box-shadow: 0 0 0 3px rgba(255, 200, 61, 0.25);
+      }
+
+      .status-card[data-status="approved"] .status-dot { background: #48d597; }
+      .status-card[data-status="rejected"] .status-dot { background: #ff7268; }
+
+      .status-title { margin: 20px 0 5px; font-size: 24px; }
+      .status-copy { margin: 0; color: #c9c9c4; line-height: 1.55; }
+
+      .receipt { border-top: 1px dashed var(--line); padding: 7px 28px 28px; }
+
+      .receipt-row {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 18px 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .receipt-row span { color: var(--muted); }
+      .receipt-row strong { text-align: right; }
+
+      .receipt-row.total { border-bottom: 0; padding-bottom: 0; }
+      .receipt-row.total strong { font-size: 25px; }
+
+      .station { min-height: 640px; }
+
+      .station-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 28px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .station h2 { margin: 8px 0 0; font-size: clamp(25px, 4vw, 38px); }
+
+      .secure-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 9px 12px;
+        border-radius: 999px;
+        color: var(--green);
+        background: #e4f4eb;
+        font-size: 12px;
+        font-weight: 800;
+        white-space: nowrap;
+      }
+
+      .secure-chip svg { width: 16px; height: 16px; }
+
+      .payment-stage {
+        min-height: 430px;
+        display: grid;
+        place-items: center;
+        padding: clamp(28px, 6vw, 72px);
+        text-align: center;
+      }
+
+      .stage-icon {
+        width: 86px;
+        height: 86px;
+        margin: 0 auto 24px;
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--ink);
+        border-radius: 24px;
+        background: var(--soft);
+        box-shadow: 7px 7px 0 var(--ink);
+      }
+
+      .stage-icon svg { width: 38px; height: 38px; }
+      .payment-stage h3 { margin: 0 0 9px; font-size: 25px; }
+      .payment-stage p { max-width: 420px; margin: 0 auto; color: var(--muted); line-height: 1.55; }
+
+      .stage-actions {
+        width: min(390px, 100%);
+        display: grid;
+        gap: 11px;
+        margin: 28px auto 0;
+      }
+
+      .primary,
+      .secondary {
+        min-height: 58px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 0 20px;
+        border-radius: 17px;
+        font-weight: 800;
+        cursor: pointer;
+      }
+
+      .primary { border: 1px solid var(--ink); color: #fff; background: var(--ink); }
+      .primary:hover { background: #292b2f; }
+      .primary:active, .secondary:active, .back-link:active { opacity: 0.72; }
+      .primary:disabled { cursor: wait; opacity: 0.55; }
+      .secondary { border: 1px solid var(--line); color: var(--ink); background: var(--card); text-decoration: none; }
+      .secondary[hidden] { display: none; }
+
+      .station-foot {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        border-top: 1px solid var(--line);
+      }
+
+      .rail-step { min-height: 94px; padding: 18px; border-right: 1px solid var(--line); }
+      .rail-step:last-child { border-right: 0; }
+      .rail-step b { display: block; margin-top: 8px; font-size: 13px; }
+
+      .spinner {
+        width: 28px;
+        height: 28px;
+        border: 3px solid #d2d1cb;
+        border-top-color: var(--ink);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+
+      @keyframes spin { to { transform: rotate(360deg); } }
+
+      @media (max-width: 850px) {
+        .shell { grid-template-columns: 1fr; }
+        .station { min-height: auto; }
+      }
+
+      @media (max-width: 520px) {
+        .topbar { min-height: 74px; padding: 10px 14px; }
+        .brand-copy { display: none; }
+        .brand-mark { width: 48px; height: 48px; border-radius: 14px; }
+        .back-link { min-height: 48px; width: 48px; justify-content: center; padding: 0; }
+        .back-link span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
+        .shell { width: calc(100% - 22px); margin: 18px auto 30px; gap: 18px; }
+        .docket, .station { border-radius: 23px; }
+        .docket { box-shadow: 6px 6px 0 #d8d7d0; }
+        .docket-head, .station-head { padding: 22px; }
+        h1 { font-size: 43px; }
+        .receipt { padding-inline: 22px; }
+        .payment-stage { min-height: 400px; padding: 34px 20px; }
+        .station-head { align-items: center; }
+        .secure-chip span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
+        .station-foot { grid-template-columns: 1fr; }
+        .rail-step { min-height: 70px; border-right: 0; border-bottom: 1px solid var(--line); }
+        .rail-step:last-child { border-bottom: 0; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" href="#checkout">Lewati ke pembayaran</a>
+    <header class="topbar">
+      <div class="brand" aria-label="AE Game Store Reseller">
+        <div class="brand-mark">AE</div>
+        <div class="brand-copy"><strong>AE Game Store</strong><span>Reseller operations</span></div>
+      </div>
+      <a class="back-link" href="/reseller#deposit">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m15 18-6-6 6-6"/><path d="M9 12h10"/></svg>
+        <span>Kembali ke Reseller Desk</span>
+      </a>
+    </header>
+
+    <main class="shell" id="checkout">
+      <section class="docket" aria-labelledby="pageTitle">
+        <div class="docket-head">
+          <div class="eyebrow">Deposit docket / Midtrans</div>
+          <h1 id="pageTitle">Selesaikan deposit.</h1>
+          <p class="intro">Pilih metode pembayaran di panel Midtrans. Saldo masuk otomatis setelah pembayaran terverifikasi.</p>
+          <div class="status-card" id="statusCard" data-status="pending">
+            <div class="status-top"><span class="status-label">Status transaksi</span><span class="status-dot" aria-hidden="true"></span></div>
+            <h2 class="status-title" id="statusTitle">Menyiapkan pembayaran</h2>
+            <p class="status-copy" id="statusCopy" role="status" aria-live="polite">Memuat detail deposit dan koneksi Midtrans.</p>
+          </div>
+        </div>
+        <div class="receipt" aria-label="Ringkasan deposit">
+          <div class="receipt-row"><span>Masuk ke saldo</span><strong id="creditAmount">—</strong></div>
+          <div class="receipt-row"><span>Fee pembayaran</span><strong id="paymentFee">—</strong></div>
+          <div class="receipt-row total"><span>Total tagihan</span><strong id="paymentAmount">—</strong></div>
+        </div>
+      </section>
+
+      <section class="station" aria-labelledby="stationTitle">
+        <div class="station-head">
+          <div><div class="meta-label">Payment station</div><h2 id="stationTitle">Bayar via Midtrans</h2></div>
+          <div class="secure-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg>
+            <span>Koneksi aman</span>
+          </div>
+        </div>
+        <div class="payment-stage" id="paymentStage">
+          <div>
+            <div class="stage-icon" id="stageIcon">
+              <div class="spinner" aria-hidden="true"></div>
+            </div>
+            <h3 id="stageTitle">Menghubungkan Midtrans</h3>
+            <p id="stageCopy">Metode pembayaran akan tampil sebagai Snap resmi Midtrans di atas halaman ini.</p>
+            <div class="stage-actions">
+              <button class="primary" id="payButton" type="button" disabled>Buka metode pembayaran</button>
+              <button class="secondary" id="checkButton" type="button">Cek status</button>
+              <a class="secondary" id="fallbackLink" href="#" target="_blank" rel="noopener noreferrer" hidden>Buka halaman Midtrans</a>
+            </div>
+          </div>
+        </div>
+        <div class="station-foot" aria-label="Alur deposit">
+          <div class="rail-step"><span>01 / Bayar</span><b>Pilih QRIS, VA, atau metode lain</b></div>
+          <div class="rail-step"><span>02 / Verifikasi</span><b>Midtrans memeriksa transaksi</b></div>
+          <div class="rail-step"><span>03 / Saldo</span><b>Deposit masuk otomatis</b></div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      (() => {
+        "use strict";
+        const params = new URLSearchParams(location.search);
+        const topupId = params.get("topup") || "";
+        const els = {
+          card: document.getElementById("statusCard"),
+          statusTitle: document.getElementById("statusTitle"),
+          statusCopy: document.getElementById("statusCopy"),
+          credit: document.getElementById("creditAmount"),
+          fee: document.getElementById("paymentFee"),
+          payment: document.getElementById("paymentAmount"),
+          stageIcon: document.getElementById("stageIcon"),
+          stageTitle: document.getElementById("stageTitle"),
+          stageCopy: document.getElementById("stageCopy"),
+          pay: document.getElementById("payButton"),
+          check: document.getElementById("checkButton"),
+          fallback: document.getElementById("fallbackLink"),
+        };
+        let checkout = null;
+        let snapReady = false;
+
+        const rupiah = (value) => "Rp " + Number(value || 0).toLocaleString("id-ID");
+
+        function setStage(title, copy) {
+          els.stageTitle.textContent = title;
+          els.stageCopy.textContent = copy;
+        }
+
+        function safeMidtransUrl(value) {
+          try {
+            const url = new URL(String(value || ""));
+            if (url.protocol !== "https:" || !/(^|\.)midtrans\.com$/i.test(url.hostname)) return "";
+            return url.href;
+          } catch (_) { return ""; }
+        }
+
+        function renderStatus(data) {
+          checkout = data;
+          els.credit.textContent = rupiah(data.creditAmount);
+          els.fee.textContent = data.paymentFee > 0 ? rupiah(data.paymentFee) : "Rp 0";
+          els.payment.textContent = rupiah(data.paymentAmount);
+          els.card.dataset.status = data.status;
+          const fallback = safeMidtransUrl(data.paymentUrl);
+          if (fallback) {
+            els.fallback.href = fallback;
+            els.fallback.hidden = false;
+          }
+
+          if (data.status === "approved") {
+            els.stageIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>';
+            els.statusTitle.textContent = "Deposit berhasil";
+            els.statusCopy.textContent = "Saldo reseller sudah diperbarui.";
+            setStage("Pembayaran selesai", "Deposit sudah tercatat. Kamu bisa kembali dan mulai mengambil stok.");
+            els.pay.disabled = true;
+            els.pay.textContent = "Deposit sudah masuk";
+            els.fallback.hidden = true;
+            return;
+          }
+          if (data.status === "rejected") {
+            els.stageIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 2.9 1.8 17a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 2.9a2 2 0 0 0-3.4 0Z"/></svg>';
+            els.statusTitle.textContent = "Pembayaran tidak aktif";
+            els.statusCopy.textContent = data.note || "Tagihan ini batal atau sudah kedaluwarsa.";
+            setStage("Buat deposit baru", "Kembali ke Reseller Desk untuk membuat tagihan yang baru.");
+            els.pay.disabled = true;
+            els.pay.textContent = "Tagihan ditutup";
+            els.fallback.hidden = true;
+            return;
+          }
+
+          els.statusTitle.textContent = "Menunggu pembayaran";
+          els.statusCopy.textContent = "Tagihan aktif. Selesaikan pembayaran sebelum waktunya habis.";
+          els.pay.disabled = !snapReady || !data.snapToken;
+        }
+
+        async function loadCheckout(sync = false) {
+          if (!/^TOPUP-[0-9a-f-]{36}$/i.test(topupId)) throw new Error("Link checkout tidak valid.");
+          const response = await fetch(`/api/wallet/topups/${encodeURIComponent(topupId)}/checkout${sync ? "?sync=1" : ""}`);
+          if (response.status === 401 || response.status === 403) {
+            location.replace("/reseller-login");
+            return null;
+          }
+          const data = await response.json().catch(() => ({}));
+          if (!response.ok) throw new Error(data.message || "Checkout tidak dapat dimuat.");
+          renderStatus(data);
+          return data;
+        }
+
+        function loadSnap(clientKey, production) {
+          if (window.snap) return Promise.resolve();
+          return new Promise((resolve, reject) => {
+            const script = document.createElement("script");
+            script.src = production
+              ? "https://app.midtrans.com/snap/snap.js"
+              : "https://app.sandbox.midtrans.com/snap/snap.js";
+            script.dataset.clientKey = clientKey;
+            script.onload = resolve;
+            script.onerror = () => reject(new Error("Snap Midtrans gagal dimuat."));
+            document.head.appendChild(script);
+          });
+        }
+
+        async function refreshStatus(sync = false) {
+          els.check.disabled = true;
+          els.check.textContent = "Mengecek…";
+          try {
+            await loadCheckout(sync);
+          } catch (error) {
+            showError(error.message);
+          } finally {
+            els.check.disabled = false;
+            els.check.textContent = "Cek status";
+          }
+        }
+
+        function openPayment() {
+          if (!checkout?.snapToken || !window.snap || checkout.status !== "pending") return;
+          els.pay.disabled = true;
+          els.pay.textContent = "Membuka Midtrans…";
+          window.snap.pay(checkout.snapToken, {
+            onSuccess: () => refreshStatus(true),
+            onPending: () => refreshStatus(true),
+            onError: () => {
+              setStage("Pembayaran belum selesai", "Pilih metode lain atau coba buka kembali Midtrans.");
+              els.pay.disabled = false;
+              els.pay.textContent = "Buka metode pembayaran";
+            },
+            onClose: () => {
+              els.pay.disabled = false;
+              els.pay.textContent = "Buka metode pembayaran";
+              refreshStatus(false);
+            },
+          });
+        }
+
+        function showError(message) {
+          els.card.dataset.status = "rejected";
+          els.statusTitle.textContent = "Checkout tidak siap";
+          els.statusCopy.textContent = message;
+          els.stageIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 2.9 1.8 17a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 2.9a2 2 0 0 0-3.4 0Z"/></svg>';
+          setStage("Tidak dapat membuka pembayaran", message);
+          els.pay.disabled = true;
+        }
+
+        els.pay.addEventListener("click", openPayment);
+        els.check.addEventListener("click", () => refreshStatus(true));
+
+        (async () => {
+          try {
+            const data = await loadCheckout(false);
+            if (!data || data.status !== "pending") return;
+            if (!data.snapToken || !data.midtransClientKey) throw new Error("Data pembayaran Midtrans belum lengkap.");
+            await loadSnap(data.midtransClientKey, data.midtransIsProduction);
+            snapReady = true;
+            els.stageIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect width="20" height="14" x="2" y="5" rx="2"/><path d="M2 10h20"/></svg>';
+            setStage("Pilih metode pembayaran", "Snap Midtrans akan tampil di atas halaman ini. Setelah selesai, status deposit diperbarui otomatis.");
+            els.pay.disabled = false;
+            openPayment();
+          } catch (error) {
+            showError(error.message);
+          }
+        })();
+      })();
+    </script>
+  </body>
+</html>
