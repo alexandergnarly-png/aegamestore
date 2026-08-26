@@ -6109,6 +6109,23 @@
         line-height: 1.55;
       }
 
+      #section-users .reseller-badge-lab {
+        border-color: var(--line-strong);
+      }
+
+      #section-users .reseller-badge-lab > summary {
+        background: var(--ink);
+        color: var(--surface);
+      }
+
+      #section-users .reseller-badge-lab > summary::after {
+        border-color: #666;
+      }
+
+      #section-users .reseller-badge-lab .user-badge-summary-copy small {
+        color: #c8c8c2;
+      }
+
       @media (max-width: 768px) {
         #section-users .card {
           padding-bottom: calc(104px + var(--safe-bottom));
@@ -7747,6 +7764,54 @@
               </button>
             </div>
           </div>
+
+          <details class="user-badge-lab reseller-badge-lab" open>
+            <summary>
+              <span class="user-badge-summary-copy">
+                <strong>Badge reseller</strong>
+                <small>Kontrol akses login dan harga reseller</small>
+              </span>
+            </summary>
+
+            <div class="user-badge-body">
+              <div class="user-badge-grid">
+                <div class="field user-badge-search">
+                  <label class="user-control-label" for="resellerBadgeSearchInput">Cari akun</label>
+                  <input
+                    type="text"
+                    id="resellerBadgeSearchInput"
+                    placeholder="Username reseller"
+                    autocomplete="off"
+                    oninput="renderResellerBadgeMatches()"
+                  />
+                </div>
+              </div>
+
+              <p class="info user-badge-note">
+                Badge reseller bersifat permanen sampai admin menangguhkannya.
+              </p>
+
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>User</th>
+                      <th>Badge Reseller</th>
+                      <th>Order Paid</th>
+                      <th>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="resellerBadgeTableBody">
+                    <tr>
+                      <td colspan="4" class="empty">
+                        Cari username untuk mengatur badge reseller.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </details>
 
           <details class="user-badge-lab">
             <summary>
@@ -10132,6 +10197,7 @@
 
           ADMIN_USERS_CACHE = data;
           renderUserTable();
+          renderResellerBadgeMatches();
         } catch (err) {
           statusText.innerText = "Gagal memuat daftar user.";
           tableBody.innerHTML = `
@@ -10159,14 +10225,27 @@
         return ADMIN_USERS_CACHE.filter((item) => {
           const username = String(item.username || "").toLowerCase();
           const badge = String(item.badge?.label || "").toLowerCase();
+          const reseller = String(item.reseller_status || "").toLowerCase();
           const id = String(item.id || "").toLowerCase();
 
           return (
             username.includes(keyword) ||
             badge.includes(keyword) ||
+            reseller.includes(keyword) ||
             id.includes(keyword)
           );
         });
+      }
+
+      function resellerBadge(status) {
+        const normalized = String(status || "none").toLowerCase();
+        if (normalized === "approved") {
+          return '<span class="badge available">Reseller aktif</span>';
+        }
+        if (normalized === "suspended") {
+          return '<span class="badge used">Reseller suspend</span>';
+        }
+        return '<span class="badge entry">Belum reseller</span>';
       }
 
       function renderUserTable() {
@@ -10204,10 +10283,10 @@
   <td data-label="Username">
     ${escapeHtml(item.username || "-")}
     <small class="user-id-mobile">BUYER #${escapeHtml(item.id)}</small>
-    ${item.reseller_status && item.reseller_status !== "none" ? `<span class="badge ${item.reseller_status === "approved" ? "active" : item.reseller_status === "pending" ? "warning" : "danger"}">Reseller ${escapeHtml(item.reseller_status)}</span>` : ""}
   </td>
   <td data-label="Badge">
   ${buyerBadge(item.badge)}
+  ${resellerBadge(item.reseller_status)}
   ${
     item.badge_is_override
       ? `<span class="badge vip badge-override">Override</span>`
@@ -10218,7 +10297,6 @@
   <td data-label="Total Belanja">${formatRupiah(item.total_spend || 0)}</td>
   <td data-label="Daftar">${formatTanggal(item.created_at)}</td>
   <td data-label="Aksi" class="action-cell">
-            ${item.reseller_status === "approved" ? `<button class="ghost-btn" data-id="${escapeHtml(item.id)}" data-status="suspended" onclick="setResellerStatus(this.dataset.id, this.dataset.status)">Suspend Reseller</button>` : `<button data-id="${escapeHtml(item.id)}" data-status="approved" onclick="setResellerStatus(this.dataset.id, this.dataset.status)">${item.reseller_status === "suspended" ? "Aktifkan" : "Jadikan"} Reseller</button>`}
             <button class="ghost-btn" data-id="${escapeHtml(item.id)}" onclick="resetUserPassword(this.dataset.id)">
               Reset Password
             </button>
@@ -10230,6 +10308,35 @@
       `,
           )
           .join("");
+      }
+
+      function getUserMatches(inputId) {
+        const keyword = String(document.getElementById(inputId)?.value || "")
+          .trim()
+          .toLowerCase();
+        if (!keyword) return [];
+        return ADMIN_USERS_CACHE.filter((item) =>
+          String(item.username || "").toLowerCase().includes(keyword),
+        ).slice(0, 8);
+      }
+
+      function renderResellerBadgeMatches() {
+        const tableBody = document.getElementById("resellerBadgeTableBody");
+        if (!tableBody) return;
+        const users = getUserMatches("resellerBadgeSearchInput");
+        if (!users.length) {
+          tableBody.innerHTML = `<tr><td colspan="4" class="empty">Cari username untuk mengatur badge reseller.</td></tr>`;
+          return;
+        }
+        tableBody.innerHTML = users.map((item) => {
+          const active = item.reseller_status === "approved";
+          return `<tr>
+            <td data-label="User">${escapeHtml(item.username || "-")}<small class="user-id-mobile">BUYER #${escapeHtml(item.id)}</small></td>
+            <td data-label="Badge Reseller">${resellerBadge(item.reseller_status)}</td>
+            <td data-label="Order Paid">${Number(item.paid_order_count || 0)} order</td>
+            <td data-label="Aksi" class="action-cell"><button class="${active ? "ghost-btn" : ""}" data-id="${escapeHtml(item.id)}" data-status="${active ? "suspended" : "approved"}" onclick="setResellerStatus(this.dataset.id, this.dataset.status)">${active ? "Suspend" : "Aktifkan"} Badge</button></td>
+          </tr>`;
+        }).join("");
       }
 
       async function setResellerStatus(userId, status) {
@@ -10262,19 +10369,7 @@
       }
 
       function getBadgeOverrideMatches() {
-        const keyword = String(
-          document.getElementById("badgeOverrideSearchInput")?.value || "",
-        )
-          .trim()
-          .toLowerCase();
-
-        if (!keyword) return [];
-
-        return ADMIN_USERS_CACHE.filter((item) =>
-          String(item.username || "")
-            .toLowerCase()
-            .includes(keyword),
-        ).slice(0, 8);
+        return getUserMatches("badgeOverrideSearchInput");
       }
 
       function renderBadgeOverrideMatches() {

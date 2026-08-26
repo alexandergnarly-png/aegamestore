@@ -7670,7 +7670,11 @@ app.post(
   async (req, res) => {
     const userId = Number(req.params.id);
     const status = normalizeResellerStatus(req.body?.status);
-    if (!Number.isInteger(userId) || userId <= 0 || status === "none") {
+    if (
+      !Number.isInteger(userId) ||
+      userId <= 0 ||
+      !["approved", "suspended"].includes(status)
+    ) {
       return res.status(400).json({ message: "Status reseller tidak valid" });
     }
     try {

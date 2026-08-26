@@ -19,6 +19,7 @@ const admin = fs.readFileSync("views/admin.html", "utf8");
   'app.get("/api/reseller/preview"',
   'reseller_status = \'approved\'',
   'resellerLogin && normalizeResellerStatus(user.reseller_status) !== "approved"',
+  '!["approved", "suspended"].includes(status)',
   'resellerOrder && paymentMethod !== "midtrans"',
   'Voucher tidak dapat digabung dengan harga reseller',
   "getResellerPricing(productRow).unit_idr",
@@ -36,6 +37,7 @@ const admin = fs.readFileSync("views/admin.html", "utf8");
 
 [
   'id="loginForm"',
+  'id="submitButton" type="submit">Login</button>',
   'reseller_login: true',
   'location.replace("/reseller")',
   'Badge check',
@@ -43,7 +45,11 @@ const admin = fs.readFileSync("views/admin.html", "utf8");
 
 assert.ok(admin.includes("setResellerStatus"));
 assert.ok(admin.includes("/users/${userId}/reseller-status"));
+assert.ok(admin.includes('id="resellerBadgeSearchInput"'));
+assert.ok(admin.includes('id="resellerBadgeTableBody"'));
+assert.ok(admin.includes("renderResellerBadgeMatches"));
 assert.ok(!page.includes("linear-gradient"));
+assert.ok(!login.includes("Periksa badge & masuk"));
 assert.ok(!page.includes("1 USD"));
 assert.ok(!page.includes("Ajukan akun reseller"));
 assert.ok(!server.includes('app.post("/api/reseller/apply"'));
