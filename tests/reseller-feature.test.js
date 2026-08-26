@@ -76,6 +76,7 @@ assert.ok(admin.includes('id="resellerBadgeSearchInput"'));
 assert.ok(admin.includes('id="resellerBadgeTableBody"'));
 assert.ok(admin.includes("renderResellerBadgeMatches"));
 assert.ok(!page.includes("linear-gradient"));
+assert.ok(page.includes(".deposit-panel{grid-template-columns:minmax(0,1fr)}"));
 assert.ok(!login.includes("Periksa badge & masuk"));
 assert.ok(!page.includes("1 USD"));
 assert.ok(!page.includes("Ajukan akun reseller"));
