@@ -49,7 +49,7 @@ function calculateResellerPrice(supplierCostIdr, usdIdrRate = 18000) {
   }
 
   const rate = Math.max(1, Number(usdIdrRate) || 18000);
-  const profitUsd = Math.min(0.8, Math.max(0.3, (cost / rate) * 0.1));
+  const profitUsd = Math.min(1.5, Math.max(0.3, (cost / rate) * 0.1));
   const profitIdr = Math.round(profitUsd * rate);
   const unitIdr = cost + profitIdr;
 

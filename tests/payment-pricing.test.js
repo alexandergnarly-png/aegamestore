@@ -35,7 +35,7 @@ assert.deepEqual(calculateResellerPrice(18000, 18000), {
   profit_usd: 0.3,
 });
 assert.equal(calculateResellerPrice(90000, 18000).profit_usd, 0.5);
-assert.equal(calculateResellerPrice(360000, 18000).profit_usd, 0.8);
+assert.equal(calculateResellerPrice(360000, 18000).profit_usd, 1.5);
 assert.equal(normalizeProductGameName("  Pubg M "), "PUBG Mobile");
 assert.equal(normalizeProductGameName("8Ball   Pool"), "8 Ball Pool");
 assert.equal(normalizeProductGameName("Game Baru"), "Game Baru");
