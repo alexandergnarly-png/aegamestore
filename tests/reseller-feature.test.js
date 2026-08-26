@@ -20,7 +20,10 @@ const admin = fs.readFileSync("views/admin.html", "utf8");
   'reseller_status = \'approved\'',
   'resellerLogin && normalizeResellerStatus(user.reseller_status) !== "approved"',
   '!["approved", "suspended"].includes(status)',
-  'resellerOrder && paymentMethod !== "midtrans"',
+  'resellerOrder && paymentMethod !== "ae_credit"',
+  'Order reseller dibayar dari deposit',
+  'calculatePaymentPrice(subtotal, "ae_credit")',
+  'returnToReseller ? "reseller" : "account"',
   'Voucher tidak dapat digabung dengan harga reseller',
   "getResellerPricing(productRow).unit_idr",
   "UPDATE orders SET pricing_tier = 'reseller'",
@@ -29,11 +32,17 @@ const admin = fs.readFileSync("views/admin.html", "utf8");
 
 [
   'id="balanceUsd"',
+  'id="balanceIdr"',
+  'id="depositForm"',
+  'id="depositAmount"',
+  'id="depositButton"',
   'id="checkoutButton"',
-  'payment_method:"midtrans"',
+  'payment_method:"ae_credit"',
   'reseller_order:true',
+  'return_to:"reseller"',
+  'Ambil key dari deposit',
   '/(^|\\.)midtrans\\.com$/i',
-  '.loading[hidden],.desk[hidden],.state-panel[hidden]{display:none}',
+  '.loading[hidden],.desk[hidden]{display:none}',
 ].forEach((marker) => assert.ok(page.includes(marker), `Missing reseller UI marker: ${marker}`));
 
 [
@@ -55,6 +64,7 @@ assert.ok(!page.includes("linear-gradient"));
 assert.ok(!login.includes("Periksa badge & masuk"));
 assert.ok(!page.includes("1 USD"));
 assert.ok(!page.includes("Ajukan akun reseller"));
+assert.ok(!page.includes("Biaya Midtrans"));
 assert.ok(!server.includes('app.post("/api/reseller/apply"'));
 
 const resellerLoginRoute = server.slice(

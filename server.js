@@ -4326,7 +4326,12 @@ app.get("/api/reseller", async (req, res) => {
         approved_at: user.reseller_approved_at || null,
       },
       balance: {
+        idr: walletIdr,
         usd: Math.floor((walletIdr / usdIdrRate) * 100) / 100,
+      },
+      limits: {
+        min_topup: WALLET_MIN_TOPUP,
+        max_topup: WALLET_MAX_TOPUP,
       },
       discount_percent: Math.round(resellerDiscountRate * 100),
       max_quantity: MAX_ORDER_QUANTITY,
@@ -4357,7 +4362,7 @@ app.get("/api/reseller/preview", async (req, res) => {
     if (!product) return res.status(403).json({ message: "Harga reseller tidak tersedia" });
     const pricing = getResellerPricing(product);
     const subtotal = pricing.unit_idr * quantity;
-    const finalPrice = calculatePaymentPrice(subtotal, "midtrans");
+    const finalPrice = calculatePaymentPrice(subtotal, "ae_credit");
     return res.json({
       quantity,
       unit_idr: pricing.unit_idr,
@@ -4366,6 +4371,7 @@ app.get("/api/reseller/preview", async (req, res) => {
       payment_fee: finalPrice - subtotal,
       final_idr: finalPrice,
       final_usd: Math.ceil((finalPrice / usdIdrRate) * 100) / 100,
+      usd_idr_rate: usdIdrRate,
     });
   } catch (err) {
     console.error("ERROR PREVIEW RESELLER:", err);
@@ -6175,8 +6181,8 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
       message: "Pembayaran USDT belum dikonfigurasi. Pilih QRIS atau AE Credit.",
     });
   }
-  if (resellerOrder && paymentMethod !== "midtrans") {
-    return res.status(400).json({ message: "Order reseller dibayar melalui Midtrans" });
+  if (resellerOrder && paymentMethod !== "ae_credit") {
+    return res.status(400).json({ message: "Order reseller dibayar dari deposit" });
   }
   if (resellerOrder && normalizeVoucherCode(voucher_code)) {
     return res.status(400).json({ message: "Voucher tidak dapat digabung dengan harga reseller" });
@@ -10156,6 +10162,7 @@ app.post("/api/wallet/topups/midtrans", walletTopupLimiter, requireUserCsrf, asy
   }
 
   const providerOrderId = `WALLET-${crypto.randomUUID()}`;
+  const returnToReseller = req.body?.return_to === "reseller";
   let topupId = "";
 
   try {
@@ -10178,7 +10185,7 @@ app.post("/api/wallet/topups/midtrans", walletTopupLimiter, requireUserCsrf, asy
     const contact = String(buyer.email || buyer.default_contact || "").trim();
     const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact);
     const baseUrl = getAppBaseUrl(req);
-    const accountUrl = `${baseUrl}/account?wallet_topup=${encodeURIComponent(topupId)}`;
+    const accountUrl = `${baseUrl}/${returnToReseller ? "reseller" : "account"}?wallet_topup=${encodeURIComponent(topupId)}`;
     const transaction = await snap.createTransaction({
       transaction_details: { order_id: providerOrderId, gross_amount: amount },
       customer_details: {
@@ -10190,7 +10197,7 @@ app.post("/api/wallet/topups/midtrans", walletTopupLimiter, requireUserCsrf, asy
         id: "AE-CREDIT",
         price: amount,
         quantity: 1,
-        name: `AE Credit ${formatWalletAmountForMessage(amount)}`,
+        name: `${returnToReseller ? "Reseller Deposit" : "AE Credit"} ${formatWalletAmountForMessage(amount)}`,
       }],
       custom_field1: `wallet_topup:${topupId}`,
       callbacks: { finish: accountUrl, pending: accountUrl, error: accountUrl },
