@@ -50,6 +50,9 @@ adminScripts.forEach(([, source]) =>
   assert.doesNotThrow(() => new Function(source)),
 );
 
+assert.ok(!admin.includes('id="otp"'), "Admin login must not request an authenticator code");
+assert.ok(!admin.includes("MFA_REQUIRED"), "Admin login must not contain the removed MFA flow");
+
 [
   'id="loginForm"',
   'aria-describedby="usernameError"',

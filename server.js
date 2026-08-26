@@ -54,8 +54,6 @@ const {
   isTrustedMutationOrigin,
   rotateEncryptedSecret,
   timingSafeTextEqual,
-  totp,
-  verifyTotp,
 } = require("./server/security-utils");
 
 const app = express();
@@ -90,7 +88,6 @@ const autoPromoEnabled = process.env.AUTO_PROMO_ENABLED !== "false";
 const jwtSecret = String(process.env.JWT_SECRET || "").trim();
 const userJwtOptions = { algorithms: ["HS256"] };
 const dummyPasswordHash = "$2b$12$iPVEzJyqE/QKFZWKrIzV1.wnRe0WrGiv2NCjA1VzbSeW7RbI44Viy";
-const adminTotpSecret = String(process.env.ADMIN_TOTP_SECRET || "").trim();
 const gameKeyEncryptionSecret = String(
   process.env.GAME_KEY_ENCRYPTION_SECRET || "",
 ).trim();
@@ -153,9 +150,6 @@ const inlineEventHandlerHashes = getInlineEventHandlerHashes();
 
 if (!jwtSecret || jwtSecret.length < 32) {
   throw new Error("JWT_SECRET wajib diisi minimal 32 karakter");
-}
-if (adminTotpSecret && !totp(adminTotpSecret)) {
-  throw new Error("ADMIN_TOTP_SECRET harus berupa Base32 yang valid");
 }
 if (gameKeyEncryptionSecret && gameKeyEncryptionSecret.length < 32) {
   throw new Error("GAME_KEY_ENCRYPTION_SECRET wajib minimal 32 karakter");
@@ -4428,7 +4422,7 @@ app.post(
   requireTrustedBrowserMutation,
   requireJsonRequest,
   async (req, res) => {
-  const { username, password, otp } = req.body;
+  const { username, password } = req.body;
   const cleanUsername = String(username || "").trim();
   const cleanPassword = String(password || "");
 
@@ -4461,12 +4455,6 @@ app.post(
     );
 
     if (isUsernameMatch && isPasswordMatch) {
-      if (adminTotpSecret && !verifyTotp(adminTotpSecret, otp)) {
-        return res.status(401).json({
-          code: "MFA_REQUIRED",
-          message: otp ? "Kode autentikator salah atau kedaluwarsa" : "Masukkan kode autentikator",
-        });
-      }
       const sessionToken = crypto.randomBytes(48).toString("hex");
       const createdAt = new Date();
       const expiresAt = new Date(createdAt.getTime() + 1000 * 60 * 60 * 8);
@@ -10641,7 +10629,6 @@ app.get("/security-audit", requireAdminAuth, async (req, res) => {
     rate_limit: true,
     rate_limit_store: "postgresql",
     password_hashing: true,
-    admin_mfa_configured: Boolean(adminTotpSecret),
     game_keys_encrypted: true,
     dedicated_game_key_secret: Boolean(gameKeyEncryptionSecret),
     admin_session_tokens_hashed: true,

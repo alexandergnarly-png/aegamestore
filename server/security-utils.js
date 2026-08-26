@@ -52,37 +52,6 @@ function rotateEncryptedSecret(value, primaryKey, fallbackKeys = []) {
   return encryptSecret(plaintext, primaryKey);
 }
 
-function decodeBase32(value) {
-  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-  const input = String(value || "").toUpperCase().replace(/[\s-]/g, "").replace(/=+$/, "");
-  if (!input || /[^A-Z2-7]/.test(input)) return null;
-  let bits = "";
-  for (const char of input) bits += alphabet.indexOf(char).toString(2).padStart(5, "0");
-  const bytes = [];
-  for (let i = 0; i + 8 <= bits.length; i += 8) bytes.push(parseInt(bits.slice(i, i + 8), 2));
-  return Buffer.from(bytes);
-}
-
-function totp(secret, timestamp = Date.now()) {
-  const key = decodeBase32(secret);
-  if (!key?.length) return null;
-  const counter = Buffer.alloc(8);
-  counter.writeBigUInt64BE(BigInt(Math.floor(timestamp / 30000)));
-  const digest = crypto.createHmac("sha1", key).update(counter).digest();
-  const offset = digest[digest.length - 1] & 15;
-  const code = (digest.readUInt32BE(offset) & 0x7fffffff) % 1000000;
-  return String(code).padStart(6, "0");
-}
-
-function verifyTotp(secret, candidate, timestamp = Date.now()) {
-  const value = String(candidate || "").trim();
-  if (!/^\d{6}$/.test(value)) return false;
-  return [-30000, 0, 30000].some((offset) => {
-    const expected = totp(secret, timestamp + offset);
-    return expected && crypto.timingSafeEqual(Buffer.from(value), Buffer.from(expected));
-  });
-}
-
 function timingSafeTextEqual(left, right) {
   const leftBuffer = Buffer.from(String(left || ""));
   const rightBuffer = Buffer.from(String(right || ""));
@@ -118,6 +87,4 @@ module.exports = {
   isTrustedMutationOrigin,
   rotateEncryptedSecret,
   timingSafeTextEqual,
-  totp,
-  verifyTotp,
 };

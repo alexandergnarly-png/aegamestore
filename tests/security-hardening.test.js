@@ -9,8 +9,6 @@ const {
   isTrustedMutationOrigin,
   rotateEncryptedSecret,
   timingSafeTextEqual,
-  totp,
-  verifyTotp,
 } = require("../server/security-utils");
 const { PostgresRateLimitStore } = require("../server/postgres-rate-limit-store");
 
@@ -38,16 +36,12 @@ const rotated = rotateEncryptedSecret(oldEncrypted, newKey, [oldKey]);
 assert.notStrictEqual(rotated, oldEncrypted);
 assert.strictEqual(decryptSecret(rotated, newKey), "LEGACY-KEY");
 
-const secret = "GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ";
-assert.strictEqual(totp(secret, 59000), "287082");
-assert.ok(verifyTotp(secret, "287082", 59000));
-assert.ok(!verifyTotp(secret, "000000", 59000));
-
 assert.strictEqual(escapeCsvFormula("=1+1"), "'=1+1");
 assert.strictEqual(escapeCsvFormula("safe"), "safe");
 assert.ok(server.includes("cleanPassword.length < 6"));
 assert.ok(server.includes("cleanNewPassword.length < 6"));
-assert.ok(server.includes("verifyTotp(adminTotpSecret, otp)"));
+assert.ok(!server.includes("ADMIN_TOTP_SECRET"));
+assert.ok(!server.includes("MFA_REQUIRED"));
 assert.ok(server.includes('code: "ADMIN_AUTH_UNAVAILABLE"'));
 assert.ok(server.includes('code: "ADMIN_AUTH_REQUIRED"'));
 assert.ok(!server.includes("result.ok ? 200 : result.http_code || 502"));
