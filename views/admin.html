@@ -11069,6 +11069,12 @@
 
         const gameKey = order.gameKey || order.gamekey || "";
         const orderId = String(order.id || "");
+        const isResellerPricing = order.pricing_tier === "reseller";
+        const resellerRevenue = Math.max(Number(order.price || 0), 0);
+        const resellerProfit = Number(order.gross_profit || 0);
+        const resellerMargin = resellerRevenue > 0
+          ? ((resellerProfit / resellerRevenue) * 100).toFixed(1)
+          : "0.0";
 
         body.innerHTML = `
           <div class="order-drawer-brief">
@@ -11162,6 +11168,22 @@
               <span class="label">Metode</span>
               <span class="value">${escapeHtml(order.payment_method || "-")}</span>
             </div>
+            ${
+              isResellerPricing
+                ? `<div class="order-drawer-field">
+                    <span class="label">Tier Harga</span>
+                    <span class="value">Reseller</span>
+                  </div>
+                  <div class="order-drawer-field">
+                    <span class="label">Modal Supplier</span>
+                    <span class="value">${formatRupiah(order.supplier_cost || 0)}</span>
+                  </div>
+                  <div class="order-drawer-field is-total">
+                    <span class="label">Laba Kotor</span>
+                    <span class="value">${formatRupiah(resellerProfit)} (${resellerMargin}%)</span>
+                  </div>`
+                : ""
+            }
             ${
               order.payment_method === "binance_manual"
                 ? `<div class="order-drawer-field">

@@ -29,7 +29,10 @@ const admin = fs.readFileSync("views/admin.html", "utf8");
   'returnToReseller ? "reseller" : "account"',
   'Voucher tidak dapat digabung dengan harga reseller',
   "getResellerPricing(productRow).unit_idr",
-  "UPDATE orders SET pricing_tier = 'reseller'",
+  "getResellerFinancials(productRow, cleanQuantity)",
+  "supplier_cost = $2, gross_profit = $3",
+  "bukan produk API",
+  "LOWER(COALESCE(p.delivery_type, '')) IN ('vipstore_api', 'cheatgame_api')",
   'RESELLER_DISCOUNT_RATE',
 ].forEach((marker) => assert.ok(server.includes(marker), `Missing reseller server marker: ${marker}`));
 
@@ -58,6 +61,8 @@ const admin = fs.readFileSync("views/admin.html", "utf8");
   'Order dari saldo',
   '/(^|\\.)midtrans\\.com$/i',
   '.loading[hidden],.desk[hidden]{display:none}',
+  'Produk API',
+  'stok supplier',
 ].forEach((marker) => assert.ok(page.includes(marker), `Missing reseller UI marker: ${marker}`));
 
 [
@@ -75,6 +80,8 @@ assert.ok(admin.includes("/users/${userId}/reseller-status"));
 assert.ok(admin.includes('id="resellerBadgeSearchInput"'));
 assert.ok(admin.includes('id="resellerBadgeTableBody"'));
 assert.ok(admin.includes("renderResellerBadgeMatches"));
+assert.ok(admin.includes('Modal Supplier'));
+assert.ok(admin.includes('Laba Kotor'));
 assert.ok(!page.includes("linear-gradient"));
 assert.ok(page.includes(".deposit-panel{grid-template-columns:minmax(0,1fr)}"));
 assert.ok(!login.includes("Periksa badge & masuk"));

@@ -402,9 +402,17 @@ db.query(
 );
 db.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS voucher_code TEXT`);
 const resellerOrderSchemaReady = ordersTableReady.then(() =>
-  db.query(
-    `ALTER TABLE orders ADD COLUMN IF NOT EXISTS pricing_tier TEXT NOT NULL DEFAULT 'retail'`,
-  ),
+  Promise.all([
+    db.query(
+      `ALTER TABLE orders ADD COLUMN IF NOT EXISTS pricing_tier TEXT NOT NULL DEFAULT 'retail'`,
+    ),
+    db.query(
+      `ALTER TABLE orders ADD COLUMN IF NOT EXISTS supplier_cost INTEGER DEFAULT 0`,
+    ),
+    db.query(
+      `ALTER TABLE orders ADD COLUMN IF NOT EXISTS gross_profit INTEGER DEFAULT 0`,
+    ),
+  ]),
 );
 const resellerSchemaReady = Promise.all([
   resellerUserSchemaReady,
@@ -2690,6 +2698,23 @@ function getResellerPricing(product) {
   };
 }
 
+function getResellerFinancials(product, quantity = 1) {
+  const pricing = getResellerPricing(product);
+  const cleanQuantity = Math.max(1, Number(quantity) || 1);
+  const supplierUnitCost = Math.max(0, Math.round(Number(product?.supplier_price || 0)));
+  const supplierCost = supplierUnitCost * cleanQuantity;
+  const revenue = pricing.unit_idr * cleanQuantity;
+  const grossProfit = revenue - supplierCost;
+
+  return {
+    ...pricing,
+    supplier_cost: supplierCost,
+    gross_profit: grossProfit,
+    gross_margin_percent:
+      revenue > 0 ? Math.round((grossProfit / revenue) * 10000) / 100 : 0,
+  };
+}
+
 function normalizeResellerStatus(value) {
   const status = String(value || "none").trim().toLowerCase();
   return ["none", "pending", "approved", "suspended"].includes(status)
@@ -4370,7 +4395,7 @@ app.get("/api/reseller", async (req, res) => {
     const walletIdr = Number(walletResult.rows[0]?.balance || 0);
 
     const productsResult = await query(`
-        SELECT p.id, p.game, p.brand, p.duration, p.price,
+        SELECT p.id, p.game, p.brand, p.duration, p.price, p.supplier_price,
                COALESCE(NULLIF(p.platform, ''), 'android') AS platform,
                COALESCE(p.play_status, 'safe') AS play_status,
                CASE
@@ -4382,10 +4407,16 @@ app.get("/api/reseller", async (req, res) => {
                        AND (k.reserved_order_id IS NULL OR k.reserved_until IS NULL OR k.reserved_until <= TO_CHAR(CURRENT_TIMESTAMP AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"')))
                END AS available_keys
         FROM products p
-        WHERE p.active = 1 AND COALESCE(p.play_status, 'safe') <> 'maintenance'
+        WHERE p.active = 1
+          AND COALESCE(p.play_status, 'safe') <> 'maintenance'
+          AND LOWER(COALESCE(p.delivery_type, '')) IN ('vipstore_api', 'cheatgame_api')
+          AND COALESCE(p.supplier_product_id, '') <> ''
+          AND COALESCE(p.supplier_price, 0) > 0
         ORDER BY p.game ASC, p.price ASC, p.id ASC
       `);
-    const products = productsResult.rows.map((product) => ({
+    const products = productsResult.rows
+      .filter((product) => getResellerFinancials(product).gross_profit > 0)
+      .map((product) => ({
         id: Number(product.id),
         game: product.game,
         brand: product.brand,
@@ -4441,12 +4472,21 @@ app.get("/api/reseller/preview", async (req, res) => {
   try {
     const result = await query(
       `SELECT p.* FROM products p JOIN users u ON u.id = $1
-       WHERE p.id = $2 AND p.active = 1 AND u.reseller_status = 'approved' LIMIT 1`,
+       WHERE p.id = $2
+         AND p.active = 1
+         AND u.reseller_status = 'approved'
+         AND LOWER(COALESCE(p.delivery_type, '')) IN ('vipstore_api', 'cheatgame_api')
+         AND COALESCE(p.supplier_product_id, '') <> ''
+         AND COALESCE(p.supplier_price, 0) > 0
+       LIMIT 1`,
       [loggedInUser.id, productId],
     );
     const product = result.rows[0];
     if (!product) return res.status(403).json({ message: "Harga reseller tidak tersedia" });
-    const pricing = getResellerPricing(product);
+    const pricing = getResellerFinancials(product, quantity);
+    if (pricing.gross_profit <= 0) {
+      return res.status(409).json({ message: "Harga reseller belum aman untuk dijual" });
+    }
     const subtotal = pricing.unit_idr * quantity;
     const finalPrice = calculatePaymentPrice(subtotal, "ae_credit");
     return res.json({
@@ -6355,6 +6395,12 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
 
     const productDeliveryType = normalizeProductDeliveryType(productRow.delivery_type);
 
+    if (resellerOrder && !isSupplierDeliveryType(productDeliveryType)) {
+      return res.status(400).json({
+        message: "Produk ini tidak tersedia untuk reseller karena bukan produk API",
+      });
+    }
+
     if (isSupplierDeliveryType(productDeliveryType)) {
       const supplierProductId = normalizeSupplierProductId(productRow.supplier_product_id);
       const supplierStatus = String(productRow.supplier_status || "").toLowerCase();
@@ -6404,6 +6450,18 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
     } else if (productDeliveryType === "manual" && cleanQuantity > 1) {
       return res.status(400).json({
         message: "Bulk key belum tersedia untuk produk manual",
+      });
+    }
+
+    const resellerFinancials = resellerOrder
+      ? getResellerFinancials(productRow, cleanQuantity)
+      : null;
+    if (
+      resellerOrder &&
+      (!resellerFinancials.supplier_cost || resellerFinancials.gross_profit <= 0)
+    ) {
+      return res.status(409).json({
+        message: "Harga modal supplier belum menghasilkan profit reseller",
       });
     }
 
@@ -6610,8 +6668,10 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
 
       if (resellerOrder) {
         await client.query(
-          `UPDATE orders SET pricing_tier = 'reseller' WHERE id = $1`,
-          [orderId],
+          `UPDATE orders
+           SET pricing_tier = 'reseller', supplier_cost = $2, gross_profit = $3
+           WHERE id = $1`,
+          [orderId, resellerFinancials.supplier_cost, resellerFinancials.gross_profit],
         );
       }
 
@@ -7999,7 +8059,11 @@ app.get("/admin-orders/export", requireAdminAuth, async (req, res) => {
 
   try {
     const result = await query(
-      `SELECT id, name, contact, game, product, quantity, unit_price, price, original_price, discount_amount, payment_fee, voucher_code, payment_status, delivery_status, gameKey, created_at, delivered_at, cancelled_at, cancel_reason FROM orders ${where} ORDER BY created_at DESC, id DESC LIMIT 5000`,
+      `SELECT id, name, contact, game, product, quantity, unit_price, price, original_price,
+              discount_amount, payment_fee, voucher_code, pricing_tier, supplier_cost,
+              gross_profit, payment_status, delivery_status, gameKey, created_at,
+              delivered_at, cancelled_at, cancel_reason
+       FROM orders ${where} ORDER BY created_at DESC, id DESC LIMIT 5000`,
       params,
     );
 
@@ -8016,6 +8080,9 @@ app.get("/admin-orders/export", requireAdminAuth, async (req, res) => {
       "Diskon",
       "Fee",
       "Voucher",
+      "Tier Harga",
+      "Modal Supplier",
+      "Laba Kotor",
       "Status Bayar",
       "Status Kirim",
       "Game Key",
@@ -8042,6 +8109,9 @@ app.get("/admin-orders/export", requireAdminAuth, async (req, res) => {
           row.discount_amount,
           row.payment_fee,
           row.voucher_code,
+          row.pricing_tier,
+          row.supplier_cost,
+          row.gross_profit,
           row.payment_status,
           row.delivery_status,
           row.gamekey || row.gameKey || "",
