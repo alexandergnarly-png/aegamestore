@@ -33,7 +33,10 @@ const server = fs.readFileSync("server.js", "utf8");
   `async function syncPendingMidtransWalletTopup(userId)`,
   `await snap.transaction.status(providerOrderId)`,
   `await syncPendingMidtransWalletTopup(user.id)`,
-  `["expire", "cancel", "deny"].includes(transactionStatus)`,
+  `["expire", "cancel", "deny", "failure"].includes(transactionStatus)`,
+  `custom_expiry: { expiry_duration: MIDTRANS_QRIS_EXPIRY_MINUTES, unit: "minute" }`,
+  `MIDTRANS_PENDING_GRACE_MINUTES`,
+  `!["pending", "rejected"].includes(request.status)`,
 ].forEach((marker) => assert.ok(server.includes(marker), `Missing wallet webhook guard: ${marker}`));
 
 const walletMidtransRoute = server.slice(
@@ -54,6 +57,8 @@ const admin = fs.readFileSync("views/admin.html", "utf8");
   "row.provider_transaction_id",
   "row.paid_at || row.reviewed_at || row.created_at",
   "deleteWalletTopup",
+  "syncWalletTopup",
+  "cancelWalletTopup",
   'id="vipResetProductSelect"',
   'id="vipResetKeyInput"',
   "loadVipStoreResetProducts",
@@ -76,6 +81,8 @@ assert.doesNotMatch(sidebarNav + bottomNav, /[📊📦🧾👥🔑🎟👑]/u, "
 
 [
   `app.delete("/api/admin/wallet/topups/:id", requireAdminAuth, requireAdminCsrf`,
+  `app.post("/api/admin/wallet/topups/:id/sync", requireAdminAuth, requireAdminCsrf`,
+  `app.post("/api/admin/wallet/topups/:id/cancel", requireAdminAuth, requireAdminCsrf`,
   `WHERE id = $1 AND status = 'rejected'`,
   `reset-products.php`,
   `reset-key.php`,

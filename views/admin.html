@@ -8760,8 +8760,10 @@
             const transaction = isMidtrans ? row.provider_transaction_id : "";
             const action = row.status === "pending" && !isMidtrans
               ? `<div class="row-action-group"><button class="small-btn" data-id="${escapeHtml(row.id)}" onclick="approveWalletTopup(this.dataset.id)">Setujui</button><button class="small-btn danger" data-id="${escapeHtml(row.id)}" onclick="rejectWalletTopup(this.dataset.id)">Tolak</button></div>`
+              : row.status === "pending" && isMidtrans
+                ? `<div class="row-action-group"><button class="small-btn" data-id="${escapeHtml(row.id)}" onclick="syncWalletTopup(this.dataset.id)">Cek Status</button><button class="small-btn danger" data-id="${escapeHtml(row.id)}" onclick="cancelWalletTopup(this.dataset.id)">Batalkan Pembayaran</button></div>`
               : row.status === "rejected"
-                ? `<div class="row-action-group"><small>${escapeHtml(row.admin_note || row.reviewed_by || "Gagal")}</small><button class="danger-btn" data-id="${escapeHtml(row.id)}" onclick="deleteWalletTopup(this.dataset.id)">Hapus</button></div>`
+                ? `<div class="row-action-group"><small>${escapeHtml(row.admin_note || row.reviewed_by || "Gagal")}</small>${isMidtrans ? "" : `<button class="danger-btn" data-id="${escapeHtml(row.id)}" onclick="deleteWalletTopup(this.dataset.id)">Hapus</button>`}</div>`
                 : escapeHtml(row.admin_note || (row.status === "pending" ? "Menunggu webhook Midtrans" : row.reviewed_by || "-"));
             return `<tr>
               <td data-label="Buyer"><strong>${escapeHtml(row.username || `User #${row.user_id}`)}</strong><br><small>User #${escapeHtml(row.user_id)}</small></td>
@@ -8791,6 +8793,24 @@
         const res = await fetch(`/api/admin/wallet/topups/${encodeURIComponent(id)}/reject`, { method: "POST", headers: { "Content-Type": "application/json", "x-csrf-token": getCsrfToken() }, body: JSON.stringify({ admin_note: result.value || "" }) });
         const data = await res.json();
         if (!res.ok) return Swal.fire("Gagal", data.message || "Reject gagal", "error");
+        loadWalletTopups();
+      }
+
+      async function syncWalletTopup(id) {
+        const res = await fetch(`/api/admin/wallet/topups/${encodeURIComponent(id)}/sync`, { method: "POST", headers: { "x-csrf-token": getCsrfToken() } });
+        const data = await res.json();
+        if (!res.ok) return Swal.fire("Gagal", data.message || "Status gagal dicek", "error");
+        await Swal.fire("Status diperbarui", data.message, data.status === "pending" ? "info" : "success");
+        loadWalletTopups();
+      }
+
+      async function cancelWalletTopup(id) {
+        const result = await Swal.fire({ title: "Batalkan pembayaran?", text: "Link pembayaran akan dinonaktifkan dan user dapat membuat deposit baru.", icon: "warning", showCancelButton: true, confirmButtonText: "Batalkan pembayaran", cancelButtonText: "Kembali", confirmButtonColor: "#8f1d1d" });
+        if (!result.isConfirmed) return;
+        const res = await fetch(`/api/admin/wallet/topups/${encodeURIComponent(id)}/cancel`, { method: "POST", headers: { "x-csrf-token": getCsrfToken() } });
+        const data = await res.json();
+        if (!res.ok) return Swal.fire("Tidak dapat dibatalkan", data.message || "Pembatalan gagal", "error");
+        await Swal.fire("Dibatalkan", data.message, "success");
         loadWalletTopups();
       }
 

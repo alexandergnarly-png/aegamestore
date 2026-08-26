@@ -81,6 +81,8 @@ const resellerDiscountRate = paymentConfigNumber("RESELLER_DISCOUNT_RATE", 0.08,
 });
 const RESELLER_MIN_DEPOSIT_USD = 10;
 const resellerMinDepositIdr = Math.ceil(RESELLER_MIN_DEPOSIT_USD * usdIdrRate);
+const MIDTRANS_QRIS_EXPIRY_MINUTES = 15;
+const MIDTRANS_PENDING_GRACE_MINUTES = MIDTRANS_QRIS_EXPIRY_MINUTES + 5;
 const binancePayUid = String(process.env.BINANCE_PAY_UID || "").trim();
 const telegramBotToken = String(process.env.TELEGRAM_BOT_TOKEN || "").trim();
 const telegramChatId = String(process.env.TELEGRAM_CHAT_ID || "").trim();
@@ -2832,7 +2834,7 @@ function getMidtransTransactionState(notification) {
       transactionStatus === "settlement" ||
       (transactionStatus === "capture" && fraudStatus === "accept")
     ),
-    isExpiredOrFailed: ["expire", "cancel", "deny"].includes(transactionStatus),
+    isExpiredOrFailed: ["expire", "cancel", "deny", "failure"].includes(transactionStatus),
   };
 }
 
@@ -2870,7 +2872,9 @@ async function processMidtransWalletNotification(notification, isPaid, isExpired
         await client.query("COMMIT");
         return { status: 200, body: "OK" };
       }
-      if (request.status !== "pending") {
+      // A late settlement must still credit the wallet after a local/admin cancel.
+      // The unique ledger reference keeps this idempotent.
+      if (!["pending", "rejected"].includes(request.status)) {
         await client.query("COMMIT");
         return { status: 200, body: "IGNORED" };
       }
@@ -2948,7 +2952,7 @@ async function processMidtransWalletNotification(notification, isPaid, isExpired
 
 async function syncPendingMidtransWalletTopup(userId) {
   const result = await query(
-    `SELECT provider_order_id FROM wallet_topup_requests
+    `SELECT id, provider_order_id, created_at FROM wallet_topup_requests
      WHERE user_id = $1 AND provider = 'midtrans' AND status = 'pending'
      ORDER BY created_at DESC LIMIT 1`,
     [userId],
@@ -2964,6 +2968,16 @@ async function syncPendingMidtransWalletTopup(userId) {
     }
   } catch (error) {
     console.warn("MIDTRANS WALLET STATUS SYNC FAILED:", providerOrderId, error.message || error);
+    const createdAt = new Date(result.rows[0]?.created_at || 0).getTime();
+    const staleAfter = MIDTRANS_PENDING_GRACE_MINUTES * 60 * 1000;
+    if (Number.isFinite(createdAt) && Date.now() - createdAt >= staleAfter) {
+      await query(
+        `UPDATE wallet_topup_requests
+         SET status = 'rejected', reviewed_by = 'system', reviewed_at = $1, admin_note = $2
+         WHERE id = $3 AND status = 'pending'`,
+        [new Date().toISOString(), "Pembayaran Midtrans kedaluwarsa", result.rows[0].id],
+      );
+    }
   }
 }
 
@@ -10278,6 +10292,7 @@ app.post("/api/wallet/topups/midtrans", walletTopupLimiter, requireUserCsrf, asy
       item_details: itemDetails,
       custom_field1: `wallet_topup:${topupId}`,
       callbacks: { finish: accountUrl, pending: accountUrl, error: accountUrl },
+      custom_expiry: { expiry_duration: MIDTRANS_QRIS_EXPIRY_MINUTES, unit: "minute" },
     });
 
     await query(
@@ -10392,6 +10407,72 @@ app.post("/api/admin/wallet/topups/:id/reject", requireAdminAuth, requireAdminCs
   }
 });
 
+app.post("/api/admin/wallet/topups/:id/sync", requireAdminAuth, requireAdminCsrf, async (req, res) => {
+  const topupId = String(req.params.id || "").trim();
+  try {
+    const request = (await query(
+      `SELECT user_id, status, provider FROM wallet_topup_requests WHERE id = $1 LIMIT 1`,
+      [topupId],
+    )).rows[0];
+    if (!request) return res.status(404).json({ message: "Pembayaran tidak ditemukan" });
+    if (request.provider !== "midtrans") return res.status(409).json({ message: "Pengecekan ini hanya untuk Midtrans" });
+    if (request.status === "pending") await syncPendingMidtransWalletTopup(request.user_id);
+    const current = (await query(`SELECT status, admin_note FROM wallet_topup_requests WHERE id = $1`, [topupId])).rows[0];
+    return res.json({ message: current.status === "pending" ? "Pembayaran masih menunggu" : `Status pembayaran: ${current.status}`, ...current });
+  } catch (err) {
+    console.error("ERROR SYNC MIDTRANS TOPUP:", err);
+    return res.status(500).json({ message: "Gagal mengecek status pembayaran" });
+  }
+});
+
+app.post("/api/admin/wallet/topups/:id/cancel", requireAdminAuth, requireAdminCsrf, async (req, res) => {
+  const topupId = String(req.params.id || "").trim();
+  const adminUsername = await getAdminSessionUsername(req).catch(() => "admin");
+  try {
+    const request = (await query(
+      `SELECT * FROM wallet_topup_requests WHERE id = $1 LIMIT 1`,
+      [topupId],
+    )).rows[0];
+    if (!request) return res.status(404).json({ message: "Pembayaran tidak ditemukan" });
+    if (request.provider !== "midtrans" || request.status !== "pending") {
+      return res.status(409).json({ message: "Hanya pembayaran Midtrans yang masih menunggu yang dapat dibatalkan" });
+    }
+
+    let remoteState = "dibatalkan admin";
+    try {
+      const notification = await snap.transaction.status(request.provider_order_id);
+      const state = getMidtransTransactionState(notification);
+      if (state.isPaid) {
+        await processMidtransWalletNotification(notification, true, false);
+        return res.status(409).json({ message: "Pembayaran sudah berhasil dan saldo telah ditambahkan" });
+      }
+      if (!state.isExpiredOrFailed) {
+        try {
+          await snap.transaction.cancel(request.provider_order_id);
+        } catch {
+          await snap.transaction.expire(request.provider_order_id);
+        }
+      }
+      remoteState = state.isExpiredOrFailed ? "sudah kedaluwarsa" : "dibatalkan di Midtrans";
+    } catch (error) {
+      console.warn("MIDTRANS CANCEL FALLBACK:", request.provider_order_id, error.message || error);
+      remoteState = "dibatalkan lokal; status Midtrans akan tetap dipantau";
+    }
+
+    const result = await query(
+      `UPDATE wallet_topup_requests
+       SET status = 'rejected', reviewed_by = $1, reviewed_at = $2, admin_note = $3
+       WHERE id = $4 AND status = 'pending' RETURNING id`,
+      [adminUsername, new Date().toISOString(), `Pembayaran ${remoteState}`, topupId],
+    );
+    if (!result.rowCount) return res.status(409).json({ message: "Status pembayaran sudah berubah" });
+    return res.json({ message: "Pembayaran dibatalkan. User dapat membuat deposit baru." });
+  } catch (err) {
+    console.error("ERROR CANCEL MIDTRANS TOPUP:", err);
+    return res.status(500).json({ message: "Gagal membatalkan pembayaran" });
+  }
+});
+
 app.delete("/api/admin/wallet/topups/:id", requireAdminAuth, requireAdminCsrf, async (req, res) => {
   const topupId = String(req.params.id || "").trim();
   if (!topupId || topupId.length > 80) {
@@ -10400,12 +10481,12 @@ app.delete("/api/admin/wallet/topups/:id", requireAdminAuth, requireAdminCsrf, a
   try {
     const result = await query(
       `DELETE FROM wallet_topup_requests
-       WHERE id = $1 AND status = 'rejected'
+       WHERE id = $1 AND status = 'rejected' AND provider = 'manual_qris'
        RETURNING id`,
       [topupId],
     );
     if (!result.rowCount) {
-      return res.status(409).json({ message: "Hanya riwayat gagal yang dapat dihapus" });
+      return res.status(409).json({ message: "Hanya riwayat QRIS manual yang gagal yang dapat dihapus" });
     }
     return res.json({ message: "Riwayat gagal berhasil dihapus" });
   } catch (err) {
