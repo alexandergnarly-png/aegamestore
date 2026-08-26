@@ -47,7 +47,9 @@ const inlineScripts = (html) =>
 );
 
 const pageJs = inlineScripts(page).join("\n");
+const loginJs = inlineScripts(login).join("\n");
 const hasId = (id) => new RegExp(`\\bid=["']${id}["']`).test(page);
+const hasLoginId = (id) => new RegExp(`\\bid=["']${id}["']`).test(login);
 
 [
   "balanceUsd",
@@ -111,16 +113,57 @@ const pageIds = [...page.matchAll(/\bid=["']([^"']+)["']/g)].map(
 assert.equal(pageIds.length, new Set(pageIds).size, "Duplicate HTML id found");
 
 [
-  'id="loginForm"',
-  'id="submitButton" type="submit">Login</button>',
-  "reseller_login: true",
-  'location.replace("/reseller")',
-  "Badge check",
-  'rel="icon" href="/favicon.svg"',
-  "<h1><span>RESELLER</span><span>ENTRY.</span></h1>",
-].forEach((marker) =>
-  assert.ok(login.includes(marker), `Missing reseller login marker: ${marker}`),
+  "loginForm",
+  "username",
+  "password",
+  "reveal",
+  "submitButton",
+  "submitLabel",
+  "message",
+].forEach((id) =>
+  assert.ok(hasLoginId(id), `Missing reseller login control #${id}`),
 );
+
+assert.match(login, /<meta[^>]+name=["']viewport["']/i);
+assert.match(login, /href=["']\/favicon\.svg["']/i);
+assert.match(login, /href=["']#loginForm["']/i);
+assert.match(login, /:focus-visible/);
+assert.match(login, /prefers-reduced-motion\s*:\s*reduce/);
+assert.match(login, /aria-live=["']polite["']/);
+assert.match(login, /role=["']status["']/);
+assert.match(login, /<label[^>]+for=["']username["']/i);
+assert.match(login, /<label[^>]+for=["']password["']/i);
+assert.match(login, /autocomplete=["']username["']/i);
+assert.match(login, /autocomplete=["']current-password["']/i);
+assert.match(login, /id=["']password["'][\s\S]*?type=["']password["']/i);
+assert.match(login, /id=["']reveal["'][\s\S]*?aria-pressed=["']false["']/i);
+assert.match(login, /id=["']submitButton["'][^>]*type=["']submit["']/i);
+assert.match(login, /Masuk ke Reseller Desk/);
+
+assert.match(loginJs, /fetch\(\s*["']\/user-login["']/);
+assert.match(loginJs, /["']Content-Type["']\s*:\s*["']application\/json["']/);
+assert.match(loginJs, /username\s*:\s*username\.value\.trim\(\)/);
+assert.match(loginJs, /password\s*:\s*password\.value/);
+assert.match(loginJs, /reseller_login\s*:\s*true/);
+assert.match(loginJs, /location\.replace\(["']\/reseller["']\)/);
+assert.match(loginJs, /form\.reportValidity\(\)/);
+assert.match(
+  loginJs,
+  /new URLSearchParams\(location\.search\)\.has\(["']denied["']\)/,
+);
+assert.match(loginJs, /button\.disabled\s*=\s*busy/);
+assert.match(loginJs, /password\.focus\(\)/);
+assert.match(loginJs, /setAttribute\([\s\S]*?["']aria-pressed["']/);
+
+const loginIds = [...login.matchAll(/\bid=["']([^"']+)["']/g)].map(
+  ([, id]) => id,
+);
+assert.equal(
+  loginIds.length,
+  new Set(loginIds).size,
+  "Duplicate reseller login id found",
+);
+assert.doesNotMatch(login, /(?:Ãƒ.|Ã‚.|Ã¢â‚¬Â¦|Ã¢â‚¬â€|Ã¯Â¿Â½|ï¿½)/u);
 
 assert.ok(admin.includes("setResellerStatus"));
 assert.ok(admin.includes("/users/${userId}/reseller-status"));
@@ -130,7 +173,11 @@ assert.ok(admin.includes("renderResellerBadgeMatches"));
 assert.ok(admin.includes("Modal Supplier"));
 assert.ok(admin.includes("Laba Kotor"));
 assert.ok(!page.includes("linear-gradient"));
+assert.ok(!login.includes("linear-gradient"));
 assert.ok(!login.includes("Periksa badge & masuk"));
+assert.ok(!login.includes("Badge check"));
+assert.ok(!login.includes("Approved access only"));
+assert.ok(!login.includes("RESELLER ENTRY."));
 assert.ok(!page.includes("1 USD"));
 assert.ok(!page.includes("Ajukan akun reseller"));
 assert.ok(!page.includes("Biaya Midtrans"));

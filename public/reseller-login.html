@@ -3,83 +3,940 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#111111" />
+    <meta name="theme-color" content="#f3f3ee" />
+    <meta name="color-scheme" content="light" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <title>Reseller Login — AE Game Store</title>
+    <title>Masuk Reseller — AE Game Store</title>
     <style>
-      :root{--ink:#111;--paper:#f4f4ef;--card:#fff;--line:#d8d8d0;--muted:#6c6c66;--error:#9f2525}
-      *{box-sizing:border-box}body{margin:0;min-height:100dvh;background:var(--paper);color:var(--ink);font-family:Inter,Arial,sans-serif}button,input{font:inherit}.skip{position:fixed;top:-80px;left:12px;z-index:10;background:#111;color:#fff;padding:12px}.skip:focus{top:12px}.shell{min-height:100dvh;display:grid;grid-template-columns:minmax(280px,.8fr) minmax(420px,1.2fr)}.identity{padding:clamp(28px,5vw,72px);background:#111;color:#fff;display:flex;flex-direction:column;justify-content:space-between}.brand{display:flex;align-items:center;gap:12px;color:inherit;text-decoration:none}.brand-mark{width:48px;height:48px;border:1px solid #555;border-radius:15px;display:grid;place-items:center;font:900 18px ui-monospace,monospace}.brand strong{display:block}.brand small,.eyebrow{display:block;color:#bdbdb5;font:800 10px/1.4 ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase}.statement{max-width:520px}.statement h1{margin:16px 0 18px;font-size:clamp(46px,7vw,92px);line-height:.88;letter-spacing:-.075em}.statement h1 span{display:block}.statement p{max-width:450px;margin:0;color:#cfcfc8;font-size:16px;line-height:1.6}.access-note{border-top:1px solid #555;padding-top:18px;color:#cfcfc8;font:700 11px/1.6 ui-monospace,monospace}.login-side{padding:clamp(20px,6vw,84px);display:grid;place-items:center}.login-card{width:min(470px,100%);padding:clamp(24px,5vw,44px);border:1px solid var(--ink);border-radius:26px;background:var(--card);box-shadow:8px 8px 0 rgba(17,17,17,.14)}.login-head{display:flex;align-items:start;justify-content:space-between;gap:16px;padding-bottom:21px;border-bottom:1px solid var(--line)}.login-head h2{margin:8px 0 5px;font-size:34px;letter-spacing:-.055em}.login-head p{margin:0;color:var(--muted);line-height:1.5}.back{width:44px;height:44px;flex:none;border:1px solid var(--line);border-radius:14px;color:#111;text-decoration:none;display:grid;place-items:center;font-size:23px}.form{display:grid;gap:14px;padding-top:21px}.field{display:grid;gap:7px}.field label{font:850 10px ui-monospace,monospace;letter-spacing:.07em;text-transform:uppercase}.control{position:relative}.control input{width:100%;min-height:54px;padding:0 52px 0 15px;border:1px solid var(--line);border-radius:14px;background:#fff;color:#111;font-weight:700}.control input:focus{outline:3px solid rgba(17,17,17,.14);border-color:#111}.reveal{position:absolute;right:5px;top:5px;width:44px;height:44px;border:0;border-radius:11px;background:#f0f0eb;display:grid;place-items:center;cursor:pointer}.reveal svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8}.submit{min-height:54px;border:1px solid #111;border-radius:14px;background:#111;color:#fff;font-weight:900;cursor:pointer}.submit:disabled{cursor:wait;opacity:.55}.message{min-height:20px;margin:0;color:var(--muted);font-size:12px;line-height:1.5}.message.error{color:var(--error)}.rule{display:flex;gap:10px;align-items:center;color:var(--muted);font:750 10px ui-monospace,monospace;text-transform:uppercase}.rule::before{content:"";width:22px;height:1px;background:#111}
-      @media(max-width:780px){.shell{display:block}.identity{min-height:112px;padding:13px 16px;justify-content:flex-start;gap:13px}.brand{gap:9px}.brand-mark{width:36px;height:36px;border-radius:11px;font-size:15px}.brand strong{font-size:14px}.brand small{font-size:8px;letter-spacing:.1em}.statement h1{display:flex;gap:7px;margin:0;font:900 20px/.9 ui-monospace,monospace;letter-spacing:-.055em}.statement h1 span{display:inline}.statement p,.access-note,.eyebrow{display:none}.login-side{padding:0 10px 14px;margin-top:-13px}.login-card{padding:15px 14px 13px;border-radius:20px;box-shadow:5px 5px 0 rgba(17,17,17,.14)}.login-head{padding-bottom:12px}.login-head h2{margin:5px 0 3px;font-size:24px}.login-head p{font-size:12px;line-height:1.35}.back{width:40px;height:40px;border-radius:12px}.rule{font-size:8px}.rule::before{width:16px}.form{padding-top:13px;gap:9px}.field{gap:5px}.field label{font-size:9px}.control input,.submit{min-height:48px}.control input{padding-left:13px;border-radius:12px}.reveal{top:4px;right:4px;width:40px;height:40px;border-radius:9px}.submit{border-radius:12px}.message{min-height:16px;font-size:10px;line-height:1.35}}
-      @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+      :root {
+        --ink: #111318;
+        --paper: #f3f3ee;
+        --surface: #ffffff;
+        --soft: #ecece5;
+        --line: #d5d4cb;
+        --muted: #666861;
+        --blue: #315efb;
+        --green: #0b7042;
+        --red: #a32626;
+        --shadow: #d3d3cb;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        min-width: 280px;
+        background: var(--paper);
+      }
+
+      body {
+        min-height: 100dvh;
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: "Segoe UI Variable", "Segoe UI", Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      button,
+      input {
+        font: inherit;
+      }
+
+      a,
+      button {
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .skip-link {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 100;
+        padding: 11px 14px;
+        border-radius: 10px;
+        background: var(--ink);
+        color: #fff;
+        font-weight: 800;
+        text-decoration: none;
+        transform: translateY(-160%);
+      }
+
+      .skip-link:focus {
+        transform: translateY(0);
+      }
+
+      .site-header {
+        min-height: 76px;
+        border-bottom: 1px solid var(--line);
+        background: var(--paper);
+      }
+
+      .header-inner {
+        width: min(1120px, 100%);
+        min-height: 76px;
+        margin: 0 auto;
+        padding: 10px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .brand {
+        min-width: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .brand-mark {
+        width: 48px;
+        height: 48px;
+        flex: 0 0 auto;
+        display: grid;
+        place-items: center;
+        border-radius: 15px;
+        background: var(--ink);
+        color: #fff;
+        font:
+          800 17px/1 "Cascadia Mono",
+          Consolas,
+          monospace;
+        letter-spacing: -0.08em;
+      }
+
+      .brand-copy {
+        min-width: 0;
+      }
+
+      .brand-copy strong,
+      .brand-copy small {
+        display: block;
+      }
+
+      .brand-copy strong {
+        font-size: 17px;
+        line-height: 1.2;
+        letter-spacing: -0.02em;
+      }
+
+      .brand-copy small {
+        margin-top: 3px;
+        color: var(--muted);
+        font:
+          700 10px/1.2 "Cascadia Mono",
+          Consolas,
+          monospace;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .back-link {
+        min-height: 48px;
+        padding: 0 17px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        border: 1px solid var(--line);
+        border-radius: 15px;
+        background: var(--surface);
+        color: inherit;
+        font-weight: 800;
+        text-decoration: none;
+      }
+
+      .back-link svg {
+        width: 19px;
+        height: 19px;
+        fill: none;
+        stroke: currentColor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 2;
+      }
+
+      .auth-layout {
+        width: min(1120px, 100%);
+        margin: 0 auto;
+        padding: clamp(28px, 6vw, 72px) 24px;
+        display: grid;
+        grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+        grid-template-areas: "pass form";
+        gap: 18px;
+        align-items: stretch;
+      }
+
+      .auth-card,
+      .access-pass {
+        min-width: 0;
+        border-radius: 28px;
+      }
+
+      .auth-card {
+        grid-area: form;
+        padding: clamp(28px, 5vw, 56px);
+        border: 1px solid var(--ink);
+        background: var(--surface);
+        box-shadow: 9px 9px 0 var(--shadow);
+      }
+
+      .eyebrow {
+        margin: 0 0 19px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--blue);
+        font:
+          800 11px/1.2 "Cascadia Mono",
+          Consolas,
+          monospace;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .eyebrow::before {
+        width: 25px;
+        height: 2px;
+        background: currentColor;
+        content: "";
+      }
+
+      .auth-card h1 {
+        max-width: 520px;
+        margin: 0;
+        font-size: clamp(38px, 5vw, 62px);
+        line-height: 0.95;
+        letter-spacing: -0.065em;
+      }
+
+      .lead {
+        max-width: 450px;
+        margin: 20px 0 0;
+        color: var(--muted);
+        font-size: 17px;
+        line-height: 1.55;
+      }
+
+      .form-fields {
+        margin-top: 34px;
+        padding-top: 29px;
+        display: grid;
+        gap: 19px;
+        border-top: 1px solid var(--line);
+      }
+
+      .field {
+        display: grid;
+        gap: 8px;
+      }
+
+      .field label {
+        font:
+          800 11px/1.2 "Cascadia Mono",
+          Consolas,
+          monospace;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .input-shell {
+        position: relative;
+      }
+
+      .field-icon {
+        position: absolute;
+        top: 50%;
+        left: 17px;
+        width: 21px;
+        height: 21px;
+        pointer-events: none;
+        transform: translateY(-50%);
+        fill: none;
+        stroke: var(--muted);
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.8;
+      }
+
+      .input-shell input {
+        width: 100%;
+        min-height: 60px;
+        padding: 0 56px 0 51px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: #fafaf7;
+        color: var(--ink);
+        font-size: 16px;
+        font-weight: 750;
+        outline: 0;
+        transition:
+          border-color 160ms ease,
+          box-shadow 160ms ease,
+          background 160ms ease;
+      }
+
+      .input-shell input::placeholder {
+        color: #92948d;
+        font-weight: 600;
+      }
+
+      .input-shell input:focus {
+        border-color: var(--blue);
+        background: #fff;
+        box-shadow: 0 0 0 4px rgba(49, 94, 251, 0.13);
+      }
+
+      .input-shell input[aria-invalid="true"] {
+        border-color: var(--red);
+        box-shadow: 0 0 0 4px rgba(163, 38, 38, 0.1);
+      }
+
+      .reveal-button {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        width: 48px;
+        height: 48px;
+        display: grid;
+        place-items: center;
+        border: 0;
+        border-radius: 12px;
+        background: var(--soft);
+        color: var(--ink);
+        cursor: pointer;
+      }
+
+      .reveal-button svg {
+        width: 21px;
+        height: 21px;
+        fill: none;
+        stroke: currentColor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.8;
+      }
+
+      .reveal-button .slash {
+        opacity: 0;
+      }
+
+      .reveal-button.is-visible .slash {
+        opacity: 1;
+      }
+
+      .submit-button {
+        position: relative;
+        min-height: 60px;
+        margin-top: 3px;
+        padding: 0 22px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        overflow: hidden;
+        border: 1px solid var(--ink);
+        border-radius: 16px;
+        background: var(--ink);
+        color: #fff;
+        font-size: 17px;
+        font-weight: 850;
+        cursor: pointer;
+        transition:
+          transform 160ms ease,
+          background 160ms ease;
+      }
+
+      .submit-button:hover:not(:disabled) {
+        background: #22252b;
+        transform: translateY(-1px);
+      }
+
+      .submit-button:disabled {
+        cursor: wait;
+        opacity: 0.72;
+      }
+
+      .submit-arrow {
+        font-size: 24px;
+        line-height: 1;
+      }
+
+      .submit-button[data-loading="true"] .submit-arrow {
+        width: 17px;
+        height: 17px;
+        border: 2px solid rgba(255, 255, 255, 0.38);
+        border-top-color: #fff;
+        border-radius: 50%;
+        font-size: 0;
+        animation: spin 700ms linear infinite;
+      }
+
+      .form-message {
+        min-height: 21px;
+        margin: 0;
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .form-message::before {
+        width: 7px;
+        height: 7px;
+        flex: 0 0 auto;
+        margin-top: 6px;
+        border-radius: 50%;
+        background: var(--green);
+        content: "";
+      }
+
+      .form-message.error {
+        color: var(--red);
+        font-weight: 700;
+      }
+
+      .form-message.error::before {
+        background: var(--red);
+      }
+
+      .access-pass {
+        grid-area: pass;
+        position: relative;
+        min-height: 100%;
+        padding: clamp(28px, 5vw, 52px);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        border: 1px solid var(--ink);
+        background: var(--ink);
+        color: #fff;
+      }
+
+      .access-pass::before,
+      .access-pass::after {
+        position: absolute;
+        top: 46%;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--paper);
+        content: "";
+      }
+
+      .access-pass::before {
+        left: -15px;
+      }
+
+      .access-pass::after {
+        right: -15px;
+      }
+
+      .pass-topline {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        font:
+          800 11px/1.2 "Cascadia Mono",
+          Consolas,
+          monospace;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .pass-number {
+        color: #9eaeff;
+      }
+
+      .access-pass h2 {
+        max-width: 410px;
+        margin: clamp(70px, 10vw, 116px) 0 0;
+        font-size: clamp(46px, 6vw, 75px);
+        line-height: 0.91;
+        letter-spacing: -0.07em;
+      }
+
+      .pass-copy {
+        max-width: 380px;
+        margin: 22px 0 0;
+        color: #c7c9c3;
+        font-size: 16px;
+        line-height: 1.55;
+      }
+
+      .pass-details {
+        margin: auto 0 0;
+        padding: 27px 0 0;
+        display: grid;
+        border-top: 1px dashed #5d6066;
+      }
+
+      .pass-row {
+        min-height: 54px;
+        display: grid;
+        grid-template-columns: 0.8fr 1.2fr;
+        align-items: center;
+        gap: 14px;
+        border-bottom: 1px solid #34373d;
+      }
+
+      .pass-row span {
+        color: #999c97;
+        font:
+          700 10px/1.3 "Cascadia Mono",
+          Consolas,
+          monospace;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      .pass-row strong {
+        font-size: 14px;
+      }
+
+      .pass-status {
+        margin: 22px 0 0;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        color: #d7d8d3;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .pass-status::before {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: #4bd18a;
+        box-shadow: 0 0 0 4px rgba(75, 209, 138, 0.13);
+        content: "";
+      }
+
+      :focus-visible {
+        outline: 3px solid var(--blue);
+        outline-offset: 3px;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @media (max-width: 760px) {
+        .site-header,
+        .header-inner {
+          min-height: 68px;
+        }
+
+        .header-inner {
+          padding: 8px 12px;
+        }
+
+        .brand {
+          gap: 9px;
+        }
+
+        .brand-mark {
+          width: 44px;
+          height: 44px;
+          border-radius: 13px;
+          font-size: 15px;
+        }
+
+        .brand-copy strong {
+          font-size: 14px;
+        }
+
+        .brand-copy small {
+          font-size: 8px;
+        }
+
+        .back-link {
+          width: 44px;
+          min-height: 44px;
+          padding: 0;
+          border-radius: 13px;
+          background: var(--ink);
+          color: #fff;
+        }
+
+        .back-label {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          overflow: hidden;
+          clip: rect(0 0 0 0);
+          clip-path: inset(50%);
+          white-space: nowrap;
+        }
+
+        .auth-layout {
+          padding: 12px 10px 24px;
+          grid-template-columns: minmax(0, 1fr);
+          grid-template-areas:
+            "form"
+            "pass";
+          gap: 12px;
+        }
+
+        .auth-card,
+        .access-pass {
+          border-radius: 22px;
+        }
+
+        .auth-card {
+          padding: 24px 18px 19px;
+          box-shadow: 5px 5px 0 var(--shadow);
+        }
+
+        .eyebrow {
+          margin-bottom: 14px;
+          font-size: 9px;
+        }
+
+        .eyebrow::before {
+          width: 18px;
+        }
+
+        .auth-card h1 {
+          max-width: 270px;
+          font-size: clamp(34px, 11vw, 43px);
+          line-height: 0.98;
+        }
+
+        .lead {
+          margin-top: 14px;
+          font-size: 14px;
+          line-height: 1.5;
+        }
+
+        .form-fields {
+          margin-top: 22px;
+          padding-top: 21px;
+          gap: 15px;
+        }
+
+        .input-shell input,
+        .submit-button {
+          min-height: 56px;
+        }
+
+        .input-shell input {
+          border-radius: 14px;
+        }
+
+        .reveal-button {
+          top: 5px;
+          right: 5px;
+          width: 46px;
+          height: 46px;
+        }
+
+        .submit-button {
+          border-radius: 14px;
+        }
+
+        .form-message {
+          font-size: 12px;
+        }
+
+        .access-pass {
+          min-height: 0;
+          padding: 23px 20px;
+        }
+
+        .access-pass::before,
+        .access-pass::after {
+          top: 52%;
+          width: 22px;
+          height: 22px;
+        }
+
+        .access-pass::before {
+          left: -12px;
+        }
+
+        .access-pass::after {
+          right: -12px;
+        }
+
+        .access-pass h2 {
+          margin-top: 37px;
+          font-size: 39px;
+        }
+
+        .pass-copy {
+          margin-top: 14px;
+          font-size: 13px;
+        }
+
+        .pass-details {
+          margin-top: 30px;
+          padding-top: 16px;
+        }
+
+        .pass-row {
+          min-height: 45px;
+        }
+
+        .pass-status {
+          margin-top: 17px;
+          font-size: 11px;
+        }
+      }
+
+      @media (max-width: 355px) {
+        .brand-copy strong {
+          max-width: 122px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .auth-layout {
+          padding-right: 8px;
+          padding-left: 8px;
+        }
+
+        .auth-card {
+          padding-right: 14px;
+          padding-left: 14px;
+        }
+
+        .pass-row {
+          grid-template-columns: 0.72fr 1.28fr;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
     </style>
   </head>
   <body>
-    <a class="skip" href="#loginForm">Lewati ke form login</a>
-    <main class="shell">
-      <section class="identity" aria-label="AE Reseller">
-        <a class="brand" href="/"><span class="brand-mark">AE</span><span><strong>AE Game Store</strong><small>Reseller Operations</small></span></a>
-        <div class="statement"><div class="eyebrow">Approved access only</div><h1><span>RESELLER</span><span>ENTRY.</span></h1><p>Satu pintu untuk harga khusus, restock key, dan pembayaran Midtrans.</p></div>
-        <div class="access-note">Akses mengikuti badge reseller pada akun buyer. Tidak ada akun kedua.</div>
-      </section>
-      <section class="login-side">
-        <div class="login-card">
-          <div class="login-head">
-            <div><div class="rule">Badge check</div><h2>Masuk reseller</h2><p>Gunakan username dan password akun AE.</p></div>
-            <a class="back" href="/" aria-label="Kembali ke toko">←</a>
+    <a class="skip-link" href="#loginForm">Langsung ke form login</a>
+
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="/" aria-label="AE Game Store">
+          <span class="brand-mark" aria-hidden="true">AE</span>
+          <span class="brand-copy">
+            <strong>Reseller Desk</strong>
+            <small>AE Game Store</small>
+          </span>
+        </a>
+        <a class="back-link" href="/">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m15 18-6-6 6-6" />
+          </svg>
+          <span class="back-label">Kembali ke toko</span>
+        </a>
+      </div>
+    </header>
+
+    <main class="auth-layout">
+      <form class="auth-card" id="loginForm" novalidate>
+        <p class="eyebrow">AE / Reseller Access</p>
+        <h1>Masuk ke Reseller Desk</h1>
+        <p class="lead">Gunakan akun AE yang sudah memiliki akses reseller.</p>
+
+        <div class="form-fields">
+          <div class="field">
+            <label for="username">Username AE</label>
+            <div class="input-shell">
+              <svg class="field-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="8" r="3.5" />
+                <path d="M5 20c.5-4 3-6 7-6s6.5 2 7 6" />
+              </svg>
+              <input
+                id="username"
+                name="username"
+                autocomplete="username"
+                minlength="3"
+                maxlength="20"
+                placeholder="Username"
+                required
+              />
+            </div>
           </div>
-          <form class="form" id="loginForm" novalidate>
-            <div class="field"><label for="username">Username</label><div class="control"><input id="username" name="username" autocomplete="username" minlength="3" maxlength="20" required autofocus /></div></div>
-            <div class="field"><label for="password">Password</label><div class="control"><input id="password" name="password" type="password" autocomplete="current-password" minlength="6" maxlength="72" required /><button class="reveal" id="reveal" type="button" aria-label="Tampilkan password"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.4-5 9.5-5 9.5 5 9.5 5-3.4 5-9.5 5-9.5-5-9.5-5Z"/><circle cx="12" cy="12" r="2.5"/></svg></button></div></div>
-            <button class="submit" id="submitButton" type="submit">Login</button>
-            <p class="message" id="message" role="status">Akses khusus akun reseller aktif.</p>
-          </form>
+
+          <div class="field">
+            <label for="password">Password</label>
+            <div class="input-shell">
+              <svg class="field-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="5" y="10" width="14" height="10" rx="2" />
+                <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+              </svg>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autocomplete="current-password"
+                minlength="6"
+                maxlength="72"
+                placeholder="Password"
+                required
+              />
+              <button
+                class="reveal-button"
+                id="reveal"
+                type="button"
+                aria-label="Tampilkan password"
+                aria-pressed="false"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M2.5 12s3.4-5 9.5-5 9.5 5 9.5 5-3.4 5-9.5 5-9.5-5-9.5-5Z"
+                  />
+                  <circle cx="12" cy="12" r="2.5" />
+                  <path class="slash" d="m4 4 16 16" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <button class="submit-button" id="submitButton" type="submit">
+            <span id="submitLabel">Masuk</span>
+            <span class="submit-arrow" aria-hidden="true">→</span>
+          </button>
+
+          <p
+            class="form-message"
+            id="message"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            Hanya akun reseller aktif yang dapat masuk.
+          </p>
         </div>
-      </section>
+      </form>
+
+      <aside class="access-pass" aria-labelledby="passTitle">
+        <div class="pass-topline">
+          <span>Access docket</span>
+          <span class="pass-number">AE / RSLR</span>
+        </div>
+        <h2 id="passTitle">Akses reseller</h2>
+        <p class="pass-copy">
+          Login memakai akun AE yang sama. Tidak perlu membuat akun baru.
+        </p>
+
+        <div class="pass-details" aria-label="Syarat akses">
+          <div class="pass-row">
+            <span>Akun</span>
+            <strong>AE buyer</strong>
+          </div>
+          <div class="pass-row">
+            <span>Syarat</span>
+            <strong>Badge reseller aktif</strong>
+          </div>
+          <div class="pass-row">
+            <span>Masuk</span>
+            <strong>Username + password</strong>
+          </div>
+        </div>
+        <p class="pass-status">Badge diperiksa oleh server</p>
+      </aside>
     </main>
+
     <script>
       const form = document.getElementById("loginForm");
+      const username = document.getElementById("username");
       const password = document.getElementById("password");
       const reveal = document.getElementById("reveal");
       const button = document.getElementById("submitButton");
+      const buttonLabel = document.getElementById("submitLabel");
       const message = document.getElementById("message");
 
+      const setBusy = (busy) => {
+        button.disabled = busy;
+        button.dataset.loading = String(busy);
+        buttonLabel.textContent = busy ? "Memproses…" : "Masuk";
+        form.setAttribute("aria-busy", String(busy));
+      };
+
+      const setMessage = (text, type = "") => {
+        message.className = type ? `form-message ${type}` : "form-message";
+        message.textContent = text;
+      };
+
+      const readJson = async (response) => {
+        const contentType = response.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) return {};
+        return response.json();
+      };
+
       reveal.addEventListener("click", () => {
-        const visible = password.type === "text";
-        password.type = visible ? "password" : "text";
-        reveal.style.opacity = visible ? "1" : ".55";
-        reveal.setAttribute("aria-label", visible ? "Tampilkan password" : "Sembunyikan password");
+        const showPassword = password.type === "password";
+        password.type = showPassword ? "text" : "password";
+        reveal.classList.toggle("is-visible", showPassword);
+        reveal.setAttribute("aria-pressed", String(showPassword));
+        reveal.setAttribute(
+          "aria-label",
+          showPassword ? "Sembunyikan password" : "Tampilkan password",
+        );
+      });
+
+      [username, password].forEach((input) => {
+        input.addEventListener("input", () => {
+          input.removeAttribute("aria-invalid");
+          if (message.classList.contains("error")) {
+            setMessage("Hanya akun reseller aktif yang dapat masuk.");
+          }
+        });
       });
 
       form.addEventListener("submit", async (event) => {
         event.preventDefault();
         if (!form.reportValidity()) return;
-        button.disabled = true;
-        message.className = "message";
-        message.textContent = "Memeriksa akun dan badge reseller…";
+
+        setBusy(true);
+        setMessage("Memeriksa akun…");
+
         try {
           const response = await fetch("/user-login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              username: document.getElementById("username").value.trim(),
+              username: username.value.trim(),
               password: password.value,
               reseller_login: true,
             }),
           });
-          const data = await response.json();
-          if (!response.ok) throw new Error(data.message || "Login reseller gagal");
+          const data = await readJson(response);
+          if (!response.ok) {
+            throw new Error(data.message || "Login reseller gagal. Coba lagi.");
+          }
           location.replace("/reseller");
-        } catch (err) {
-          message.className = "message error";
-          message.textContent = err.message;
-          button.disabled = false;
+        } catch (error) {
+          password.setAttribute("aria-invalid", "true");
+          setMessage(error.message, "error");
+          setBusy(false);
           password.focus();
         }
       });
 
+      window.addEventListener("pageshow", () => setBusy(false));
+
       if (new URLSearchParams(location.search).has("denied")) {
-        message.className = "message error";
-        message.textContent = "Akun yang sedang aktif belum memiliki badge reseller.";
+        setMessage("Akun ini belum memiliki akses reseller.", "error");
       }
     </script>
   </body>

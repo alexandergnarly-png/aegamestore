@@ -174,7 +174,7 @@ assert.match(css, /AE patch 20260825-support-deck-v1/);
 assert.match(css, /\.ae-ai-disclosure\[open\] \{[\s\S]*?flex: 1 1 auto/);
 assert.match(css, /grid-template-rows: minmax\(0, 1fr\) auto auto auto/);
 assert.match(html, /keysystem-ui\.css\?v=20260815-compact-header-1/);
-assert.match(serviceWorker, /CACHE_VERSION = "20260826-reseller-login-v3"/);
+assert.match(serviceWorker, /CACHE_VERSION = "20260826-reseller-login-v4"/);
 assert.match(serviceWorker, /DYNAMIC_PREFIXES = \[[\s\S]*?"\/products"/);
 assert.match(serviceWorker, /if \(cached\) return cached;/);
 assert.doesNotMatch(serviceWorker, /networkFetch\.catch/);
