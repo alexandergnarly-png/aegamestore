@@ -91,6 +91,8 @@ async function ensureWalletSchema(db) {
     `ALTER TABLE wallet_topup_requests ADD COLUMN IF NOT EXISTS snap_redirect_url TEXT`,
     `ALTER TABLE wallet_topup_requests ADD COLUMN IF NOT EXISTS provider_transaction_id TEXT`,
     `ALTER TABLE wallet_topup_requests ADD COLUMN IF NOT EXISTS paid_at TEXT`,
+    `ALTER TABLE wallet_topup_requests ADD COLUMN IF NOT EXISTS archived_at TEXT`,
+    `ALTER TABLE wallet_topup_requests ADD COLUMN IF NOT EXISTS archived_by TEXT`,
     `CREATE TABLE IF NOT EXISTS wallet_ledger (
       id BIGSERIAL PRIMARY KEY,
       user_id INTEGER NOT NULL,

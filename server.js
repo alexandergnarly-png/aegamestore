@@ -2971,7 +2971,8 @@ async function processMidtransWalletNotification(notification, isPaid, isExpired
       await client.query(
         `UPDATE wallet_topup_requests
          SET status = 'approved', reviewed_by = 'midtrans', reviewed_at = $1,
-             paid_at = $1, provider_transaction_id = $2, admin_note = $3
+             paid_at = $1, provider_transaction_id = $2, admin_note = $3,
+             archived_at = NULL, archived_by = NULL
          WHERE id = $4`,
         [now, transactionId || null, "Pembayaran terverifikasi otomatis", request.id],
       );
@@ -7973,7 +7974,9 @@ app.get("/api/admin/resellers/:id", requireAdminAuth, async (req, res) => {
         FROM wallet_ledger WHERE user_id = $1 ORDER BY created_at DESC, id DESC LIMIT 30`, [userId]),
       query(`SELECT id, amount, payment_amount, status, provider, provider_order_id,
           payment_reference, admin_note, reviewed_by, created_at, reviewed_at, paid_at
-        FROM wallet_topup_requests WHERE user_id = $1 ORDER BY created_at DESC LIMIT 12`, [userId]),
+        FROM wallet_topup_requests
+        WHERE user_id = $1 AND archived_at IS NULL
+        ORDER BY created_at DESC LIMIT 12`, [userId]),
       query(`SELECT id, game, product, quantity, price, supplier_cost, gross_profit,
           payment_status, delivery_status, created_at
         FROM orders WHERE user_id = $1 AND pricing_tier = 'reseller'
@@ -10446,7 +10449,9 @@ app.get("/api/wallet", async (req, res) => {
       query(`SELECT balance, updated_at FROM wallet_accounts WHERE user_id = $1`, [user.id]),
       query(`SELECT id, amount, status, buyer_note, payment_reference, admin_note,
                     provider, payment_amount, snap_redirect_url, created_at, reviewed_at, paid_at
-             FROM wallet_topup_requests WHERE user_id = $1 ORDER BY created_at DESC LIMIT 10`, [user.id]),
+             FROM wallet_topup_requests
+             WHERE user_id = $1 AND archived_at IS NULL
+             ORDER BY created_at DESC LIMIT 10`, [user.id]),
       query(`SELECT entry_type, direction, amount, balance_before, balance_after, description, created_at
              FROM wallet_ledger WHERE user_id = $1 ORDER BY created_at DESC, id DESC LIMIT 15`, [user.id]),
     ]);
@@ -10664,7 +10669,8 @@ app.get("/api/admin/wallet/topups", requireAdminAuth, async (req, res) => {
       COALESCE(w.balance, 0) AS balance
       FROM wallet_topup_requests t LEFT JOIN users u ON u.id = t.user_id
       LEFT JOIN wallet_accounts w ON w.user_id = t.user_id
-      WHERE ($1 = 'all' OR t.status = $1)
+      WHERE t.archived_at IS NULL
+        AND ($1 = 'all' OR t.status = $1)
         AND ($2 = 'all' OR t.provider = $2)
         AND ($3 = 'all' OR u.reseller_status IN ('approved', 'suspended'))
       ORDER BY CASE WHEN t.status = 'pending' THEN 0 ELSE 1 END,
@@ -10807,16 +10813,18 @@ app.delete("/api/admin/wallet/topups/:id", requireAdminAuth, requireAdminCsrf, a
     return res.status(400).json({ message: "ID riwayat tidak valid" });
   }
   try {
+    const adminUsername = await getAdminSessionUsername(req).catch(() => "admin");
     const result = await query(
-      `DELETE FROM wallet_topup_requests
-       WHERE id = $1 AND status = 'rejected' AND provider = 'manual_qris'
+      `UPDATE wallet_topup_requests
+       SET archived_at = $1, archived_by = $2
+       WHERE id = $3 AND status = 'rejected' AND archived_at IS NULL
        RETURNING id`,
-      [topupId],
+      [new Date().toISOString(), adminUsername, topupId],
     );
     if (!result.rowCount) {
-      return res.status(409).json({ message: "Hanya riwayat QRIS manual yang gagal yang dapat dihapus" });
+      return res.status(409).json({ message: "Hanya riwayat deposit gagal yang dapat dihapus" });
     }
-    return res.json({ message: "Riwayat gagal berhasil dihapus" });
+    return res.json({ message: "Riwayat deposit gagal dihapus dari daftar" });
   } catch (err) {
     console.error("ERROR DELETE WALLET TOPUP:", err);
     return res.status(500).json({ message: "Gagal menghapus riwayat top up" });

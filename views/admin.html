@@ -9338,7 +9338,9 @@
               ? `<div class="row-action-group"><button class="small-btn" data-id="${escapeHtml(row.id)}" onclick="syncWalletTopup(this.dataset.id)">Cek</button><button class="small-btn danger" data-id="${escapeHtml(row.id)}" onclick="cancelWalletTopup(this.dataset.id)">Batalkan</button></div>`
               : row.status === "pending"
                 ? `<div class="row-action-group"><button class="small-btn" data-id="${escapeHtml(row.id)}" onclick="approveWalletTopup(this.dataset.id)">Setujui</button><button class="small-btn danger" data-id="${escapeHtml(row.id)}" onclick="rejectWalletTopup(this.dataset.id)">Tolak</button></div>`
-                : `<small>${escapeHtml(row.admin_note || row.reviewed_by || "Selesai")}</small>`;
+                : row.status === "rejected"
+                  ? `<div class="row-action-group"><small>${escapeHtml(row.admin_note || row.reviewed_by || "Gagal")}</small><button class="danger-btn" data-id="${escapeHtml(row.id)}" onclick="deleteWalletTopup(this.dataset.id)">Hapus riwayat</button></div>`
+                  : `<small>${escapeHtml(row.admin_note || row.reviewed_by || "Selesai")}</small>`;
             return `<tr><td data-label="Reseller"><strong>${escapeHtml(row.username || `User #${row.user_id}`)}</strong><br><small>#${escapeHtml(row.user_id)}</small></td>
               <td data-label="Deposit"><strong>${formatRupiah(row.amount || 0)}</strong><br><small>${isMidtrans ? "Midtrans" : "QRIS manual"}</small></td>
               <td data-label="Status"><span class="badge ${escapeHtml(row.status)}">${row.status === "approved" ? "Berhasil" : row.status === "pending" ? "Menunggu" : "Gagal"}</span></td>
@@ -9365,7 +9367,7 @@
           document.getElementById("resellerDetailTitle").textContent = reseller.username || "Detail reseller";
           document.getElementById("resellerDetailMeta").textContent = `Reseller #${reseller.id} · ${reseller.reseller_status === "approved" ? "aktif" : "ditangguhkan"}`;
           const ledgerRows = (data.ledger || []).map((row) => `<tr><td data-label="Waktu">${formatTanggal(row.created_at)}</td><td data-label="Mutasi"><span class="reseller-direction ${escapeHtml(row.direction)}">${row.direction === "credit" ? "+" : "−"} ${formatRupiah(row.amount)}</span><br><small>${escapeHtml(row.description || row.entry_type)}</small></td><td data-label="Saldo">${formatRupiah(row.balance_before)} → <strong>${formatRupiah(row.balance_after)}</strong><br><small>${escapeHtml(row.admin_username || "sistem")}</small></td></tr>`).join("");
-          const topupRows = (data.topups || []).map((row) => `<tr><td data-label="Waktu">${formatTanggal(row.paid_at || row.reviewed_at || row.created_at)}</td><td data-label="Nominal"><strong>${formatRupiah(row.amount)}</strong><br><small>${row.provider === "midtrans" ? "Midtrans" : "QRIS manual"}</small></td><td data-label="Status"><span class="badge ${escapeHtml(row.status)}">${escapeHtml(row.status)}</span></td></tr>`).join("");
+          const topupRows = (data.topups || []).map((row) => `<tr><td data-label="Waktu">${formatTanggal(row.paid_at || row.reviewed_at || row.created_at)}</td><td data-label="Nominal"><strong>${formatRupiah(row.amount)}</strong><br><small>${row.provider === "midtrans" ? "Midtrans" : "QRIS manual"}</small></td><td data-label="Status"><span class="badge ${escapeHtml(row.status)}">${escapeHtml(row.status)}</span>${row.status === "rejected" ? `<br><button class="danger-btn" data-id="${escapeHtml(row.id)}" onclick="deleteWalletTopup(this.dataset.id, true)">Hapus riwayat</button>` : ""}</td></tr>`).join("");
           const orderRows = orders.map((row) => `<tr><td data-label="Order"><strong>${escapeHtml(row.game || "-")}</strong><br><small>${escapeHtml(row.product || row.id)}</small></td><td data-label="Bayar">${formatRupiah(row.price)}<br><small>${Number(row.quantity || 1)} key</small></td><td data-label="Laba"><strong>${formatRupiah(row.gross_profit)}</strong><br><small>${escapeHtml(row.payment_status || "-")}</small></td></tr>`).join("");
           content.innerHTML = `<div class="reseller-detail-summary"><div><span>Saldo</span><strong>${formatRupiah(reseller.balance)}</strong></div><div><span>Order terbaru</span><strong>${orders.length}</strong></div><div><span>Omzet terbaru</span><strong>${formatRupiah(revenue)}</strong></div><div><span>Laba terbaru</span><strong>${formatRupiah(profit)}</strong></div></div>
             <form class="reseller-adjustment-form" onsubmit="adjustResellerBalance(event)"><div class="field"><label for="resellerAdjustmentDirection">Penyesuaian</label><select id="resellerAdjustmentDirection"><option value="credit">Tambah saldo</option><option value="debit">Kurangi saldo</option></select></div><div class="field"><label for="resellerAdjustmentAmount">Nominal</label><input id="resellerAdjustmentAmount" type="number" min="1000" max="2000000" step="1000" required placeholder="Rp 50.000"></div><div class="field"><label for="resellerAdjustmentReason">Alasan</label><input id="resellerAdjustmentReason" type="text" minlength="4" maxlength="300" required placeholder="Contoh: koreksi deposit"></div><button type="submit">Simpan mutasi</button></form>
@@ -9413,7 +9415,7 @@
               : row.status === "pending" && isMidtrans
                 ? `<div class="row-action-group"><button class="small-btn" data-id="${escapeHtml(row.id)}" onclick="syncWalletTopup(this.dataset.id)">Cek Status</button><button class="small-btn danger" data-id="${escapeHtml(row.id)}" onclick="cancelWalletTopup(this.dataset.id)">Batalkan Pembayaran</button></div>`
               : row.status === "rejected"
-                ? `<div class="row-action-group"><small>${escapeHtml(row.admin_note || row.reviewed_by || "Gagal")}</small>${isMidtrans ? "" : `<button class="danger-btn" data-id="${escapeHtml(row.id)}" onclick="deleteWalletTopup(this.dataset.id)">Hapus</button>`}</div>`
+                ? `<div class="row-action-group"><small>${escapeHtml(row.admin_note || row.reviewed_by || "Gagal")}</small><button class="danger-btn" data-id="${escapeHtml(row.id)}" onclick="deleteWalletTopup(this.dataset.id)">Hapus riwayat</button></div>`
                 : escapeHtml(row.admin_note || (row.status === "pending" ? "Menunggu webhook Midtrans" : row.reviewed_by || "-"));
             return `<tr>
               <td data-label="Buyer"><strong>${escapeHtml(row.username || `User #${row.user_id}`)}</strong><br><small>User #${escapeHtml(row.user_id)}</small></td>
@@ -9468,8 +9470,8 @@
         loadResellerDeposits();
       }
 
-      async function deleteWalletTopup(id) {
-        const result = await Swal.fire({ title: "Hapus riwayat gagal?", text: "Riwayat yang dihapus tidak dapat dikembalikan.", icon: "warning", showCancelButton: true, confirmButtonText: "Ya, hapus", cancelButtonText: "Batal", confirmButtonColor: "#8f1d1d" });
+      async function deleteWalletTopup(id, refreshDetail = false) {
+        const result = await Swal.fire({ title: "Hapus riwayat gagal?", text: "Riwayat disembunyikan dari daftar, tetapi tetap disimpan untuk audit pembayaran.", icon: "warning", showCancelButton: true, confirmButtonText: "Ya, hapus", cancelButtonText: "Batal", confirmButtonColor: "#8f1d1d" });
         if (!result.isConfirmed) return;
         const res = await fetch(`/api/admin/wallet/topups/${encodeURIComponent(id)}`, { method: "DELETE", headers: { "x-csrf-token": getCsrfToken() } });
         const data = await res.json();
@@ -9477,6 +9479,7 @@
         await Swal.fire("Terhapus", data.message, "success");
         loadWalletTopups();
         loadResellerDeposits();
+        if (refreshDetail && activeResellerId) openResellerDetail(activeResellerId);
       }
 
       async function grantWalletCredit() {
