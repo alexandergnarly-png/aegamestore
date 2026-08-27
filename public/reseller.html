@@ -168,6 +168,29 @@
         display: flex;
         gap: 7px;
       }
+      .lang-switch {
+        padding: 3px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--surface);
+        display: flex;
+        align-items: center;
+      }
+      .lang-button {
+        min-width: 38px;
+        height: 38px;
+        padding: 0 8px;
+        border: 0;
+        border-radius: 10px;
+        background: transparent;
+        color: var(--muted);
+        font: 800 10px/1 var(--mono);
+        cursor: pointer;
+      }
+      .lang-button[aria-pressed="true"] {
+        background: var(--ink);
+        color: #fff;
+      }
       .icon-button {
         width: 46px;
         height: 46px;
@@ -1474,6 +1497,7 @@
           border-radius: 13px;
           box-shadow: 2px 2px 0 var(--blue);
         }
+        .brand-copy,
         .brand-copy small,
         .header-status {
           display: none;
@@ -1483,6 +1507,11 @@
         }
         .header-actions {
           gap: 5px;
+        }
+        .lang-button {
+          min-width: 34px;
+          height: 36px;
+          padding: 0 6px;
         }
         .icon-button {
           width: 44px;
@@ -1733,23 +1762,28 @@
     </style>
   </head>
   <body>
-    <a class="skip-link" href="#main">Lewati ke konten</a>
+    <a class="skip-link" href="#main" data-i18n="skipLink">Lewati ke konten</a>
     <header class="site-header">
       <div class="header-inner">
         <a class="brand" href="/" aria-label="AE Game Store">
           <span class="brand-logo">AE</span>
           <span class="brand-copy"
             ><strong>AE Game Store</strong
-            ><small>Reseller operations</small></span
+            ><small data-i18n="resellerOperations">Reseller operations</small></span
           >
         </a>
-        <span class="header-status">API catalog aktif</span>
+        <span class="header-status" data-i18n="apiActive">API catalog aktif</span>
         <div class="header-actions">
+          <div class="lang-switch" role="group" aria-label="Pilihan bahasa" data-i18n-aria="languageChoice">
+            <button class="lang-button" type="button" data-lang="id" aria-pressed="true">ID</button>
+            <button class="lang-button" type="button" data-lang="en" aria-pressed="false">EN</button>
+          </div>
           <button
             class="icon-button"
             id="refreshDesk"
             type="button"
             aria-label="Muat ulang data reseller"
+            data-i18n-aria="refreshAria"
             title="Muat ulang data"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -1757,13 +1791,13 @@
               <path d="M20 5v6h-6" />
             </svg>
           </button>
-          <a class="icon-button" href="/account" aria-label="Buka akun">
+          <a class="icon-button" href="/account" aria-label="Buka akun" data-i18n-aria="accountAria">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <circle cx="12" cy="8" r="3.5" />
               <path d="M5 20c.6-4 3-6 7-6s6.4 2 7 6" />
             </svg>
           </a>
-          <a class="icon-button primary" href="/" aria-label="Kembali ke toko">
+          <a class="icon-button primary" href="/" aria-label="Kembali ke toko" data-i18n-aria="backAria">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="m15 18-6-6 6-6" />
               <path d="M9 12h10" />
@@ -1782,12 +1816,12 @@
             id="loadingSpinner"
             aria-hidden="true"
           ></div>
-          <h1 id="loadingTitle">Menyiapkan Reseller Desk</h1>
-          <p id="loadingText">
+          <h1 id="loadingTitle" data-i18n="loadingTitle">Menyiapkan Reseller Desk</h1>
+          <p id="loadingText" data-i18n="loadingText">
             Mengambil saldo, stok API, dan aktivitas terakhirmu.
           </p>
           <button class="button" id="retryLoad" type="button" hidden>
-            Coba lagi
+            <span data-i18n="retry">Coba lagi</span>
           </button>
         </div>
       </section>
@@ -1797,15 +1831,15 @@
           <article class="hero-intro">
             <div>
               <span class="eyebrow">Reseller / Operations</span>
-              <h1 id="deskTitle">Stok cepat. Margin jelas.</h1>
-              <p>
+              <h1 id="deskTitle" data-i18n="heroTitle">Stok cepat. Margin jelas.</h1>
+              <p data-i18n="heroCopy">
                 Isi deposit sekali, pilih produk API, lalu ambil key saat
                 dibutuhkan.
               </p>
             </div>
             <div class="hero-note">
-              <span>Alur transaksi</span
-              ><strong>Deposit → Pilih stok → Jual</strong>
+              <span data-i18n="flowLabel">Alur transaksi</span
+              ><strong data-i18n="flowValue">Deposit → Pilih stok → Jual</strong>
             </div>
           </article>
           <div class="wallet-board">
@@ -1813,15 +1847,15 @@
               <span class="wallet-watermark" aria-hidden="true">AE/R</span>
               <div class="wallet-top">
                 <span class="wallet-label" id="balanceLabel"
-                  >Saldo reseller</span
-                ><span class="wallet-state">Aktif</span>
+                  data-i18n="balanceLabel">Saldo reseller</span
+                ><span class="wallet-state" data-i18n="active">Aktif</span>
               </div>
               <div class="wallet-amount">
                 <strong id="balanceUsd">$0.00</strong
                 ><span id="balanceIdr">Rp0</span>
               </div>
               <a class="wallet-cta" href="#deposit"
-                >Tambah saldo
+                ><span data-i18n="addBalance">Tambah saldo</span>
                 <svg
                   viewBox="0 0 24 24"
                   width="16"
@@ -1841,42 +1875,42 @@
             </article>
             <div class="metric-strip" aria-label="Ringkasan reseller">
               <article class="metric-card">
-                <span>Game API</span><strong id="metricGames">0</strong>
+                <span data-i18n="apiGames">Game API</span><strong id="metricGames">0</strong>
               </article>
               <article class="metric-card">
-                <span>Stok aktif</span><strong id="metricStock">0</strong>
+                <span data-i18n="activeStock">Stok aktif</span><strong id="metricStock">0</strong>
               </article>
               <article class="metric-card">
-                <span>Basis harga</span><strong id="metricDiscount">Modal API</strong>
+                <span data-i18n="priceBasis">Basis harga</span><strong id="metricDiscount" data-i18n="apiCost">Modal API</strong>
               </article>
             </div>
           </div>
         </section>
 
         <nav class="desk-nav" aria-label="Navigasi Reseller Desk">
-          <span>Quick access</span>
+          <span data-i18n="quickAccess">Quick access</span>
           <a href="#deposit"
             ><svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M5 7h14v11H5z" />
               <path d="M8 7V5h8v2M8 12h8" /></svg
-            >Deposit</a
+            ><span data-i18n="depositNav">Deposit</span></a
           >
           <a href="#orderKey"
             ><svg viewBox="0 0 24 24" aria-hidden="true">
               <circle cx="8" cy="15" r="3" />
               <path d="m10.2 12.8 7-7M15 5h4v4" /></svg
-            >Order</a
+            ><span data-i18n="orderNav">Order</span></a
           >
           <a href="#catalogSection"
             ><svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M4 6h16v14H4zM8 6V4h8v2" />
               <path d="M8 11h8M8 15h5" /></svg
-            >Katalog</a
+            ><span data-i18n="catalogNav">Katalog</span></a
           >
           <a href="#activitySection"
             ><svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M4 19V9m5 10V5m5 14v-7m5 7V3" /></svg
-            >Aktivitas</a
+            ><span data-i18n="activityNav">Aktivitas</span></a
           >
         </nav>
 
@@ -1884,16 +1918,16 @@
           <article class="surface deposit-panel" id="deposit">
             <header class="surface-header">
               <div>
-                <span class="section-kicker">Deposit reseller</span>
-                <h2>Tambah saldo</h2>
-                <p>Bayar lewat Midtrans. Saldo masuk setelah terverifikasi.</p>
+                <span class="section-kicker" data-i18n="depositKicker">Deposit reseller</span>
+                <h2 data-i18n="depositTitle">Tambah saldo</h2>
+                <p data-i18n="depositCopy">Bayar lewat Midtrans. Saldo masuk setelah terverifikasi.</p>
               </div>
               <span class="section-number">01</span>
             </header>
             <div class="deposit-intro">
               <div>
-                <strong>Satu deposit untuk banyak order</strong
-                ><span
+                <strong data-i18n="depositIntroTitle">Satu deposit untuk banyak order</strong
+                ><span data-i18n="depositIntroCopy"
                   >Minimum $10. Fee pembayaran ditambahkan saat checkout.</span
                 >
               </div>
@@ -1907,7 +1941,7 @@
             </div>
             <form class="deposit-form" id="depositForm">
               <label class="field-label" for="depositAmount"
-                >Nominal pembayaran
+                ><span data-i18n="paymentAmount">Nominal pembayaran</span>
                 <span id="depositLimit">Minimum $10</span></label
               >
               <div class="amount-field">
@@ -1929,6 +1963,7 @@
                 class="quick-amounts"
                 id="quickAmounts"
                 aria-label="Pilihan cepat deposit"
+                data-i18n-aria="quickDepositAria"
               >
                 <button
                   class="amount-chip"
@@ -1972,7 +2007,7 @@
                 id="depositButton"
                 type="submit"
               >
-                <span>Bayar deposit</span
+                <span data-i18n="payDeposit">Bayar deposit</span
                 ><svg viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M5 12h14m-5-5 5 5-5 5" />
                 </svg>
@@ -1983,7 +2018,7 @@
                 role="status"
                 aria-live="polite"
               >
-                Fee Midtrans ditambahkan ke tagihan.
+                <span data-i18n="midtransFee">Fee Midtrans ditambahkan ke tagihan.</span>
               </p>
             </form>
           </article>
@@ -1991,15 +2026,15 @@
           <aside class="surface order-panel" id="orderKey">
             <header class="surface-header">
               <div>
-                <span class="section-kicker">Stok API</span>
-                <h2>Order key</h2>
-                <p>Total langsung dipotong dari saldo reseller.</p>
+                <span class="section-kicker" data-i18n="stockKicker">Stok API</span>
+                <h2 data-i18n="orderTitle">Order key</h2>
+                <p data-i18n="orderCopy">Total langsung dipotong dari saldo reseller.</p>
               </div>
-              <span class="discount-badge" id="discountPercent">Harga reseller</span>
+              <span class="discount-badge" id="discountPercent" data-i18n="resellerPrice">Harga reseller</span>
             </header>
             <div class="selection-flow">
               <div class="selection-field">
-                <label id="gamePickerLabel">Pilih game</label>
+                <label id="gamePickerLabel" data-i18n="chooseGame">Pilih game</label>
                 <details class="game-picker" id="gamePicker">
                   <summary
                     id="gamePickerSummary"
@@ -2015,11 +2050,11 @@
                 ></select>
               </div>
               <div class="selection-field">
-                <label>Brand dan durasi</label>
+                <label data-i18n="brandDuration">Brand dan durasi</label>
                 <div class="variant-picker" id="variantPicker"></div>
               </div>
               <div class="selection-field">
-                <label>Jumlah key</label>
+                <label data-i18n="keyQuantity">Jumlah key</label>
                 <div class="quantity-picker" id="quantityPicker"></div>
                 <select
                   class="native-value"
@@ -2029,15 +2064,15 @@
                 ></select>
               </div>
               <div class="order-summary" aria-live="polite">
-                <span class="order-summary-label">Ringkasan order</span>
+                <span class="order-summary-label" data-i18n="orderSummary">Ringkasan order</span>
                 <div class="summary-row">
-                  <span>Harga per key</span><strong id="unitPrice">—</strong>
+                  <span data-i18n="pricePerKey">Harga per key</span><strong id="unitPrice">—</strong>
                 </div>
                 <div class="summary-row">
-                  <span>Total order</span><strong id="subtotal">—</strong>
+                  <span data-i18n="orderTotal">Total order</span><strong id="subtotal">—</strong>
                 </div>
                 <div class="summary-row total">
-                  <span>Sisa saldo</span><strong id="balanceAfter">—</strong>
+                  <span data-i18n="balanceAfter">Sisa saldo</span><strong id="balanceAfter">—</strong>
                 </div>
               </div>
               <button
@@ -2045,7 +2080,7 @@
                 id="checkoutButton"
                 type="button"
               >
-                <span>Order dari saldo</span
+                <span data-i18n="orderFromBalance">Order dari saldo</span
                 ><svg viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M12 3v18M7 8l5-5 5 5M7 16l5 5 5-5" />
                 </svg>
@@ -2065,14 +2100,14 @@
             <div class="catalog-heading-row">
               <span class="section-number">02</span>
               <div>
-                <span class="section-kicker">Produk API</span>
-                <h2>Katalog reseller</h2>
-                <p>Dikelompokkan per game, lalu brand dan durasi.</p>
+                <span class="section-kicker" data-i18n="productsKicker">Produk API</span>
+                <h2 data-i18n="catalogTitle">Katalog reseller</h2>
+                <p data-i18n="catalogCopy">Dikelompokkan per game, lalu brand dan durasi.</p>
               </div>
             </div>
             <div class="catalog-tools">
               <span class="status-badge" id="productCount">0 produk</span
-              ><label class="sr-only" for="search">Cari produk reseller</label>
+              ><label class="sr-only" for="search" data-i18n="searchLabel">Cari produk reseller</label>
               <div class="search-field">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <circle cx="11" cy="11" r="6" />
@@ -2082,6 +2117,7 @@
                   type="search"
                   autocomplete="off"
                   placeholder="Cari game, brand, atau durasi"
+                  data-i18n-placeholder="searchPlaceholder"
                 />
               </div>
             </div>
@@ -2094,9 +2130,9 @@
             <div class="catalog-heading-row">
               <span class="section-number">03</span>
               <div>
-                <span class="section-kicker">Riwayat saldo</span>
-                <h2>Aktivitas terakhir</h2>
-                <p>Enam order reseller terbaru.</p>
+                <span class="section-kicker" data-i18n="historyKicker">Riwayat saldo</span>
+                <h2 data-i18n="activityTitle">Aktivitas terakhir</h2>
+                <p data-i18n="activityCopy">Enam order reseller terbaru.</p>
               </div>
             </div>
             <span class="status-badge" id="orderCount">0 order</span>
@@ -2110,14 +2146,79 @@
       let resellerData = null;
       let previewController = null;
 
+      const translations = {
+        id: {
+          pageTitle: "Reseller Desk — AE Game Store", skipLink: "Lewati ke konten", resellerOperations: "Reseller operations",
+          apiActive: "API catalog aktif", languageChoice: "Pilihan bahasa", refreshAria: "Muat ulang data reseller", accountAria: "Buka akun",
+          backAria: "Kembali ke toko", loadingTitle: "Menyiapkan Reseller Desk", loadingText: "Mengambil saldo, stok API, dan aktivitas terakhirmu.",
+          retry: "Coba lagi", heroTitle: "Stok cepat. Margin jelas.", heroCopy: "Isi deposit sekali, pilih produk API, lalu ambil key saat dibutuhkan.",
+          flowLabel: "Alur transaksi", flowValue: "Deposit → Pilih stok → Jual", balanceLabel: "Saldo reseller", active: "Aktif", addBalance: "Tambah saldo",
+          apiGames: "Game API", activeStock: "Stok aktif", priceBasis: "Basis harga", apiCost: "Modal API", quickAccess: "Akses cepat",
+          depositNav: "Deposit", orderNav: "Order", catalogNav: "Katalog", activityNav: "Aktivitas", depositKicker: "Deposit reseller",
+          depositTitle: "Tambah saldo", depositCopy: "Bayar lewat Midtrans. Saldo masuk setelah terverifikasi.", depositIntroTitle: "Satu deposit untuk banyak order",
+          depositIntroCopy: "Minimum $10. Fee pembayaran ditambahkan saat checkout.", paymentAmount: "Nominal pembayaran", quickDepositAria: "Pilihan cepat deposit",
+          payDeposit: "Bayar deposit", midtransFee: "Fee Midtrans ditambahkan ke tagihan.", stockKicker: "Stok API", orderTitle: "Order key",
+          orderCopy: "Total langsung dipotong dari saldo reseller.", resellerPrice: "Harga reseller", chooseGame: "Pilih game", brandDuration: "Brand dan durasi",
+          keyQuantity: "Jumlah key", orderSummary: "Ringkasan order", pricePerKey: "Harga per key", orderTotal: "Total order", balanceAfter: "Sisa saldo",
+          orderFromBalance: "Order dari saldo", productsKicker: "Produk API", catalogTitle: "Katalog reseller", catalogCopy: "Dikelompokkan per game, lalu brand dan durasi.",
+          searchLabel: "Cari produk reseller", searchPlaceholder: "Cari game, brand, atau durasi", historyKicker: "Riwayat saldo", activityTitle: "Aktivitas terakhir",
+          activityCopy: "Enam order reseller terbaru.", invalidResultUrl: "URL hasil order tidak valid", invalidResponse: "Server mengirim respons yang tidak valid",
+          loadFailed: "Gagal memuat halaman", dataUnavailable: "Data belum bisa dimuat", refreshed: "Saldo dan stok sudah diperbarui.", minimum: "Minimum {amount}",
+          credited: "{amount} masuk ke saldo", noApiProduct: "Belum ada produk API", reloadLater: "Coba muat ulang nanti", emptyCatalog: "Katalog kosong",
+          apiWillAppear: "Produk API aktif akan muncul di sini.", noVariant: "Varian belum tersedia", chooseAfterStock: "Pilih produk setelah stok API tersedia.",
+          variantsKeys: "{variants} varian · {keys} key", keysAvailable: "{count} key tersedia", variants: "{count} varian", durations: "{count} durasi",
+          soldOut: "Stok habis", chooseOtherVariant: "Pilih varian lain yang masih tersedia.", gamesProducts: "{games} game · {products} produk",
+          supplierKeys: "{count} key supplier", productNotFound: "Produk tidak ditemukan", tryOtherSearch: "Coba kata kunci game, brand, atau durasi lain.",
+          orders: "{count} order", timeUnavailable: "Waktu tidak tersedia", noOrders: "Belum ada order", ordersAppear: "Order dari saldo reseller akan tercatat di sini.",
+          variantOut: "Stok varian ini sedang habis.", apiUnavailable: "Produk API belum tersedia.", calculating: "Menghitung…", priceFailed: "Gagal menghitung harga",
+          insufficient: "Deposit kurang", addDepositFirst: "Tambah deposit sebelum mengambil key.", checkingPayment: "Pembayaran sedang dicek. Muat ulang data jika saldo belum berubah.",
+          openingMidtrans: "Membuka Midtrans…", creatingInvoice: "Membuat tagihan deposit…", previousPayment: "Melanjutkan pembayaran sebelumnya…", depositFailed: "Gagal membuat deposit",
+          preparingKey: "Menyiapkan key…", preparingOrder: "Saldo sedang dipotong dan key sedang disiapkan…", keyFailed: "Gagal mengambil key",
+        },
+        en: {
+          pageTitle: "Reseller Desk — AE Game Store", skipLink: "Skip to content", resellerOperations: "Reseller operations",
+          apiActive: "API catalog active", languageChoice: "Language selection", refreshAria: "Refresh reseller data", accountAria: "Open account",
+          backAria: "Back to store", loadingTitle: "Preparing Reseller Desk", loadingText: "Loading your balance, API stock, and recent activity.",
+          retry: "Try again", heroTitle: "Fast stock. Clear margins.", heroCopy: "Deposit once, choose an API product, and claim keys whenever you need them.",
+          flowLabel: "How it works", flowValue: "Deposit → Choose stock → Resell", balanceLabel: "Reseller balance", active: "Active", addBalance: "Add funds",
+          apiGames: "API games", activeStock: "Active stock", priceBasis: "Price basis", apiCost: "API cost", quickAccess: "Quick access",
+          depositNav: "Deposit", orderNav: "Order", catalogNav: "Catalog", activityNav: "Activity", depositKicker: "Reseller deposit",
+          depositTitle: "Add funds", depositCopy: "Pay with Midtrans. Funds are credited after verification.", depositIntroTitle: "One deposit for multiple orders",
+          depositIntroCopy: "Minimum $10. Payment fees are added at checkout.", paymentAmount: "Payment amount", quickDepositAria: "Quick deposit amounts",
+          payDeposit: "Pay deposit", midtransFee: "Midtrans fees are added to the invoice.", stockKicker: "API stock", orderTitle: "Order keys",
+          orderCopy: "The total is deducted directly from your reseller balance.", resellerPrice: "Reseller price", chooseGame: "Choose game", brandDuration: "Brand and duration",
+          keyQuantity: "Key quantity", orderSummary: "Order summary", pricePerKey: "Price per key", orderTotal: "Order total", balanceAfter: "Balance after",
+          orderFromBalance: "Order from balance", productsKicker: "API products", catalogTitle: "Reseller catalog", catalogCopy: "Grouped by game, then brand and duration.",
+          searchLabel: "Search reseller products", searchPlaceholder: "Search game, brand, or duration", historyKicker: "Balance history", activityTitle: "Recent activity",
+          activityCopy: "Your six latest reseller orders.", invalidResultUrl: "Invalid order result URL", invalidResponse: "The server returned an invalid response",
+          loadFailed: "Failed to load the page", dataUnavailable: "Data could not be loaded", refreshed: "Balance and stock have been refreshed.", minimum: "Minimum {amount}",
+          credited: "{amount} will be added to your balance", noApiProduct: "No API products available", reloadLater: "Try refreshing again later", emptyCatalog: "Catalog is empty",
+          apiWillAppear: "Active API products will appear here.", noVariant: "No variants available", chooseAfterStock: "Choose a product when API stock is available.",
+          variantsKeys: "{variants} variants · {keys} keys", keysAvailable: "{count} keys available", variants: "{count} variants", durations: "{count} durations",
+          soldOut: "Out of stock", chooseOtherVariant: "Choose another variant that is still available.", gamesProducts: "{games} games · {products} products",
+          supplierKeys: "{count} supplier keys", productNotFound: "No products found", tryOtherSearch: "Try another game, brand, or duration.",
+          orders: "{count} orders", timeUnavailable: "Time unavailable", noOrders: "No orders yet", ordersAppear: "Orders paid from your reseller balance will appear here.",
+          variantOut: "This variant is out of stock.", apiUnavailable: "API products are not available yet.", calculating: "Calculating…", priceFailed: "Failed to calculate price",
+          insufficient: "Insufficient deposit", addDepositFirst: "Add funds before claiming keys.", checkingPayment: "Payment is being checked. Refresh if your balance has not changed.",
+          openingMidtrans: "Opening Midtrans…", creatingInvoice: "Creating deposit invoice…", previousPayment: "Continuing your previous payment…", depositFailed: "Failed to create deposit",
+          preparingKey: "Preparing keys…", preparingOrder: "Deducting your balance and preparing the keys…", keyFailed: "Failed to claim keys",
+        },
+      };
+      let currentLang = localStorage.getItem("ae_lang") === "en" ? "en" : "id";
+      const t = (key, values = {}) => {
+        const template = translations[currentLang][key] || translations.id[key] || key;
+        return template.replace(/\{(\w+)\}/g, (_, name) => values[name] ?? "");
+      };
+      const locale = () => currentLang === "en" ? "en-US" : "id-ID";
+
       const rupiah = (value) =>
-        new Intl.NumberFormat("id-ID", {
+        new Intl.NumberFormat(locale(), {
           style: "currency",
           currency: "IDR",
           maximumFractionDigits: 0,
         }).format(Number(value || 0));
       const compactNumber = (value) =>
-        new Intl.NumberFormat("id-ID", {
+        new Intl.NumberFormat(locale(), {
           notation: "compact",
           maximumFractionDigits: 1,
         }).format(Number(value || 0));
@@ -2142,16 +2243,28 @@
           .slice(1)
           .join("=") || "";
       const csrf = () => decodeURIComponent(cookie("user_csrf"));
+      const applyLanguage = () => {
+        document.documentElement.lang = currentLang;
+        document.title = t("pageTitle");
+        document.querySelectorAll("[data-i18n]").forEach((element) => { element.textContent = t(element.dataset.i18n); });
+        document.querySelectorAll("[data-i18n-placeholder]").forEach((element) => { element.placeholder = t(element.dataset.i18nPlaceholder); });
+        document.querySelectorAll("[data-i18n-aria]").forEach((element) => { element.setAttribute("aria-label", t(element.dataset.i18nAria)); });
+        document.querySelectorAll("[data-lang]").forEach((element) => { element.setAttribute("aria-pressed", String(element.dataset.lang === currentLang)); });
+        if (resellerData) {
+          renderDesk(resellerData);
+          renderDepositOptions();
+        }
+      };
       const resultUrl = (value) => {
         const target = new URL(value, location.origin);
         if (target.origin !== location.origin)
-          throw new Error("URL hasil order tidak valid");
+          throw new Error(t("invalidResultUrl"));
         return target.href;
       };
       const readJson = async (response) => {
         const type = response.headers.get("content-type") || "";
         if (!type.includes("application/json"))
-          throw new Error("Server mengirim respons yang tidak valid");
+          throw new Error(t("invalidResponse"));
         return response.json();
       };
 
@@ -2241,7 +2354,7 @@
       const showLoadError = (message) => {
         document.getElementById("loadingSpinner").hidden = true;
         document.getElementById("loadingTitle").textContent =
-          "Data belum bisa dimuat";
+          t("dataUnavailable");
         document.getElementById("loadingText").textContent = message;
         document.getElementById("retryLoad").hidden = false;
       };
@@ -2258,7 +2371,7 @@
           }
           const data = await readJson(response);
           if (!response.ok)
-            throw new Error(data.message || "Gagal memuat halaman");
+            throw new Error(currentLang === "en" ? t("loadFailed") : (data.message || t("loadFailed")));
           resellerData = data;
           document.getElementById("loading").hidden = true;
           document.getElementById("desk").hidden = false;
@@ -2267,7 +2380,7 @@
           if (silent) {
             const message = document.getElementById("checkoutMessage");
             message.classList.remove("error");
-            message.textContent = "Saldo dan stok sudah diperbarui.";
+            message.textContent = t("refreshed");
           }
         } catch (error) {
           if (silent) {
@@ -2297,8 +2410,8 @@
         const minimum = Number(resellerData?.limits?.min_topup_usd || 10);
         document.getElementById("depositEstimate").textContent =
           amount && rate
-            ? usd(amount / rate) + " masuk ke saldo"
-            : "Minimum " + usd(minimum);
+            ? t("credited", { amount: usd(amount / rate) })
+            : t("minimum", { amount: usd(minimum) });
       }
       function renderDesk(data) {
         const products = Array.isArray(data.products) ? data.products : [];
@@ -2322,7 +2435,7 @@
         amount.max = data.limits.max_topup;
         amount.placeholder = rupiah(data.limits.min_topup);
         document.getElementById("depositLimit").textContent =
-          "Minimum " + usd(data.limits.min_topup_usd);
+          t("minimum", { amount: usd(data.limits.min_topup_usd) });
         const productSelect = document.getElementById("selectedProduct");
         const currentProductId = Number(productSelect.value || 0);
         productSelect.innerHTML = products
@@ -2347,7 +2460,7 @@
         preview();
         if (new URLSearchParams(location.search).has("wallet_topup"))
           document.getElementById("depositMessage").textContent =
-            "Pembayaran sedang dicek. Muat ulang data jika saldo belum berubah.";
+            t("checkingPayment");
       }
 
       function renderPicker() {
@@ -2362,14 +2475,14 @@
         const variantsRoot = document.getElementById("variantPicker");
         if (!selected) {
           summary.innerHTML =
-            '<span class="picker-copy"><strong>Belum ada produk API</strong><small>Coba muat ulang nanti</small></span>';
+            '<span class="picker-copy"><strong>' + esc(t("noApiProduct")) + '</strong><small>' + esc(t("reloadLater")) + '</small></span>';
           menu.innerHTML = emptyState(
-            "Katalog kosong",
-            "Produk API aktif akan muncul di sini.",
+            t("emptyCatalog"),
+            t("apiWillAppear"),
           );
           variantsRoot.innerHTML = emptyState(
-            "Varian belum tersedia",
-            "Pilih produk setelah stok API tersedia.",
+            t("noVariant"),
+            t("chooseAfterStock"),
           );
           renderQuantity();
           return;
@@ -2387,10 +2500,8 @@
           '" alt="" /><span class="picker-copy"><strong>' +
           esc(selected.game) +
           "</strong><small>" +
-          variants.length +
-          " varian · " +
-          available +
-          " key</small></span>";
+          esc(t("variantsKeys", { variants: variants.length, keys: available })) +
+          "</small></span>";
         menu.innerHTML = groups
           .map(([game, gameProducts]) => {
             const active = game === selected.game;
@@ -2408,10 +2519,10 @@
               '" alt="" loading="lazy" /><span><strong>' +
               esc(game) +
               "</strong><small>" +
-              gameStock +
-              " key tersedia</small></span><em>" +
-              gameProducts.length +
-              " varian</em></button>"
+              esc(t("keysAvailable", { count: gameStock })) +
+              "</small></span><em>" +
+              esc(t("variants", { count: gameProducts.length })) +
+              "</em></button>"
             );
           })
           .join("");
@@ -2421,8 +2532,8 @@
               '<section class="brand-block"><div class="brand-title"><strong>' +
               esc(brand) +
               "</strong><span>" +
-              brandProducts.length +
-              " durasi</span></div>" +
+              esc(t("durations", { count: brandProducts.length })) +
+              "</span></div>" +
               brandProducts
                 .map((product) => {
                   const active = product.id === selected.id;
@@ -2475,8 +2586,8 @@
         quantity.value = maxAllowed ? String(current) : "";
         if (!maxAllowed) {
           document.getElementById("quantityPicker").innerHTML = emptyState(
-            "Stok habis",
-            "Pilih varian lain yang masih tersedia.",
+            t("soldOut"),
+            t("chooseOtherVariant"),
           );
           return;
         }
@@ -2525,7 +2636,7 @@
         );
         const groups = groupProducts(items);
         document.getElementById("productCount").textContent =
-          groups.length + " game · " + items.length + " produk";
+          t("gamesProducts", { games: groups.length, products: items.length });
         document.getElementById("catalog").innerHTML = items.length
           ? groups
               .map(([game, variants], groupIndex) => {
@@ -2546,18 +2657,18 @@
                   '" alt="" loading="lazy" /><span class="game-cover-scrim" aria-hidden="true"></span><span class="game-cover-copy"><span><h3>' +
                   esc(game) +
                   "</h3><p>" +
-                  gameStock +
-                  " key supplier</p></span><span>" +
-                  variants.length +
-                  ' varian</span></span></summary><div class="variant-list">' +
+                  esc(t("supplierKeys", { count: gameStock })) +
+                  "</p></span><span>" +
+                  esc(t("variants", { count: variants.length })) +
+                  '</span></span></summary><div class="variant-list">' +
                   groupBrands(variants)
                     .map(
                       ([brand, brandVariants]) =>
                         '<section class="brand-block"><div class="brand-title"><strong>' +
                         esc(brand) +
                         "</strong><span>" +
-                        brandVariants.length +
-                        " durasi</span></div>" +
+                        esc(t("durations", { count: brandVariants.length })) +
+                        "</span></div>" +
                         brandVariants
                           .map((product) => {
                             const active = product.id === selectedId;
@@ -2590,20 +2701,20 @@
               })
               .join("")
           : emptyState(
-              "Produk tidak ditemukan",
-              "Coba kata kunci game, brand, atau durasi lain.",
+              t("productNotFound"),
+              t("tryOtherSearch"),
             );
       }
       function renderOrders(orders) {
         document.getElementById("orderCount").textContent =
-          orders.length + " order";
+          t("orders", { count: orders.length });
         document.getElementById("orders").innerHTML = orders.length
           ? orders
               .map((order) => {
                 const date = new Date(order.created_at);
                 const dateLabel = Number.isNaN(date.getTime())
-                  ? "Waktu tidak tersedia"
-                  : date.toLocaleString("id-ID", {
+                  ? t("timeUnavailable")
+                  : date.toLocaleString(locale(), {
                       dateStyle: "medium",
                       timeStyle: "short",
                     });
@@ -2625,8 +2736,8 @@
               })
               .join("")
           : emptyState(
-              "Belum ada order",
-              "Order dari saldo reseller akan tercatat di sini.",
+              t("noOrders"),
+              t("ordersAppear"),
             );
       }
 
@@ -2642,15 +2753,15 @@
             (id) => (document.getElementById(id).textContent = "—"),
           );
           message.textContent = productId
-            ? "Stok varian ini sedang habis."
-            : "Produk API belum tersedia.";
+            ? t("variantOut")
+            : t("apiUnavailable");
           return;
         }
         if (previewController) previewController.abort();
         previewController = new AbortController();
         button.disabled = true;
         ["unitPrice", "subtotal", "balanceAfter"].forEach(
-          (id) => (document.getElementById(id).textContent = "Menghitung…"),
+          (id) => (document.getElementById(id).textContent = t("calculating")),
         );
         message.textContent = "";
         try {
@@ -2667,7 +2778,7 @@
           }
           const data = await readJson(response);
           if (!response.ok)
-            throw new Error(data.message || "Gagal menghitung harga");
+            throw new Error(currentLang === "en" ? t("priceFailed") : (data.message || t("priceFailed")));
           const after =
             Number(resellerData.balance.idr) - Number(data.final_idr);
           document.getElementById("unitPrice").textContent =
@@ -2675,10 +2786,10 @@
           document.getElementById("subtotal").textContent =
             usd(data.final_usd) + " / " + rupiah(data.final_idr);
           document.getElementById("balanceAfter").textContent =
-            after >= 0 ? usd(after / data.usd_idr_rate) : "Deposit kurang";
+            after >= 0 ? usd(after / data.usd_idr_rate) : t("insufficient");
           button.disabled = after < 0;
           if (after < 0)
-            message.textContent = "Tambah deposit sebelum mengambil key.";
+            message.textContent = t("addDepositFirst");
         } catch (error) {
           if (error.name === "AbortError") return;
           message.classList.add("error");
@@ -2693,9 +2804,9 @@
         document.getElementById("retryLoad").hidden = true;
         document.getElementById("loadingSpinner").hidden = false;
         document.getElementById("loadingTitle").textContent =
-          "Menyiapkan Reseller Desk";
+          t("loadingTitle");
         document.getElementById("loadingText").textContent =
-          "Mengambil saldo, stok API, dan aktivitas terakhirmu.";
+          t("loadingText");
         loadDesk();
       });
       document
@@ -2704,6 +2815,13 @@
           "click",
           () => resellerData && loadDesk({ silent: true }),
         );
+      document.querySelectorAll("[data-lang]").forEach((control) => {
+        control.addEventListener("click", () => {
+          currentLang = control.dataset.lang;
+          localStorage.setItem("ae_lang", currentLang);
+          applyLanguage();
+        });
+      });
       document
         .getElementById("quickAmounts")
         .addEventListener("click", (event) => {
@@ -2738,16 +2856,15 @@
           ) {
             message.classList.add("error");
             message.textContent =
-              "Minimum " +
-              usd(resellerData.limits.min_topup_usd) +
+              t("minimum", { amount: usd(resellerData.limits.min_topup_usd) }) +
               " (" +
               rupiah(resellerData.limits.min_topup) +
               ").";
             return;
           }
-          setButtonBusy(button, true, "Membuka Midtrans…", "Bayar deposit");
+          setButtonBusy(button, true, t("openingMidtrans"), t("payDeposit"));
           message.classList.remove("error");
-          message.textContent = "Membuat tagihan deposit…";
+          message.textContent = t("creatingInvoice");
           try {
             const response = await fetch("/api/wallet/topups/midtrans", {
               method: "POST",
@@ -2767,17 +2884,17 @@
               data.code === "TOPUP_PENDING" &&
               data.checkoutUrl
             ) {
-              message.textContent = "Melanjutkan pembayaran sebelumnya…";
+              message.textContent = t("previousPayment");
               location.assign(data.checkoutUrl);
               return;
             }
             if (!response.ok)
-              throw new Error(data.message || "Gagal membuat deposit");
+              throw new Error(currentLang === "en" ? t("depositFailed") : (data.message || t("depositFailed")));
             location.assign(data.checkoutUrl);
           } catch (error) {
             message.classList.add("error");
             message.textContent = error.message;
-            setButtonBusy(button, false, "Membuka Midtrans…", "Bayar deposit");
+            setButtonBusy(button, false, t("openingMidtrans"), t("payDeposit"));
           }
         });
       document
@@ -2843,10 +2960,10 @@
         .addEventListener("click", async () => {
           const button = document.getElementById("checkoutButton");
           const message = document.getElementById("checkoutMessage");
-          setButtonBusy(button, true, "Menyiapkan key…", "Order dari saldo");
+          setButtonBusy(button, true, t("preparingKey"), t("orderFromBalance"));
           message.classList.remove("error");
           message.textContent =
-            "Saldo sedang dipotong dan key sedang disiapkan…";
+            t("preparingOrder");
           try {
             const response = await fetch("/create-order", {
               method: "POST",
@@ -2869,14 +2986,15 @@
             }
             const data = await readJson(response);
             if (!response.ok)
-              throw new Error(data.message || "Gagal mengambil key");
+              throw new Error(currentLang === "en" ? t("keyFailed") : (data.message || t("keyFailed")));
             location.assign(resultUrl(data.resultUrl));
           } catch (error) {
             message.classList.add("error");
             message.textContent = error.message;
-            setButtonBusy(button, false, "Menyiapkan key…", "Order dari saldo");
+            setButtonBusy(button, false, t("preparingKey"), t("orderFromBalance"));
           }
         });
+      applyLanguage();
       loadDesk();
     </script>
   </body>

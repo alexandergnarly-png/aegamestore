@@ -113,6 +113,9 @@ assert.match(pageJs, /location\.assign\(data\.checkoutUrl\)/);
 assert.match(pageJs, /status\s*===\s*401[\s\S]*status\s*===\s*403/);
 assert.match(page, /Midtrans/i);
 assert.match(page, /(?:fee|tagihan)/i);
+assert.match(page, /data-lang=["']en["']/);
+assert.match(page, /Fast stock\. Clear margins\./);
+assert.match(pageJs, /localStorage\.getItem\(["']ae_lang["']\)/);
 assert.doesNotMatch(page, /(?:Ã.|Â.|â€¦|â€”|ï¿½|�)/u);
 
 const pageIds = [...page.matchAll(/\bid=["']([^"']+)["']/g)].map(
@@ -147,6 +150,9 @@ assert.match(login, /id=["']password["'][\s\S]*?type=["']password["']/i);
 assert.match(login, /id=["']reveal["'][\s\S]*?aria-pressed=["']false["']/i);
 assert.match(login, /id=["']submitButton["'][^>]*type=["']submit["']/i);
 assert.match(login, /Masuk ke Reseller Desk/);
+assert.match(login, /data-lang=["']en["']/);
+assert.match(login, /Sign in to Reseller Desk/);
+assert.match(loginJs, /localStorage\.getItem\(["']ae_lang["']\)/);
 
 assert.match(loginJs, /fetch\(\s*["']\/user-login["']/);
 assert.match(loginJs, /["']Content-Type["']\s*:\s*["']application\/json["']/);
