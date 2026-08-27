@@ -1884,7 +1884,9 @@ async function claimVipStoreKeyForOrder(order, options = {}) {
       status: "failed",
       message,
     });
-    throw new Error(message);
+    const error = new Error(message);
+    error.code = "VIPSTORE_PRODUCT_NOT_MAPPED";
+    throw error;
   }
 
   try {
@@ -2034,7 +2036,11 @@ async function fulfillCheatGameOrder(order, source = "auto", payload = null) {
   }
 
   if (!result.ok || result.data?.success === false) {
-    throw new Error(result.data?.message || result.data?.error || `Order CHEATGAME gagal. HTTP ${result.http_code || "-"}`);
+    const error = new Error(result.data?.message || result.data?.error || `Order CHEATGAME gagal. HTTP ${result.http_code || "-"}`);
+    if (!supplierOrderId && result.data?.success === false) {
+      error.code = "CHEATGAME_ORDER_REJECTED";
+    }
+    throw error;
   }
 
   supplierOrderId = supplierOrderId || extractCheatGameOrderId(result.data);
@@ -3048,6 +3054,103 @@ async function getAdminSessionUsername(req) {
   return String(result.rows[0]?.username || "admin").slice(0, 120);
 }
 
+const CONFIRMED_PRE_DELIVERY_SUPPLIER_FAILURES = new Set([
+  "VIPSTORE_NOT_CONFIGURED",
+  "VIPSTORE_PRODUCT_NOT_MAPPED",
+  "VIPSTORE_CLAIM_REJECTED",
+  "CHEATGAME_NOT_CONFIGURED",
+  "CHEATGAME_CUSTOMER_EMAIL_REQUIRED",
+  "CHEATGAME_ORDER_REJECTED",
+]);
+
+async function refundConfirmedResellerSupplierFailure(orderId, error) {
+  if (!CONFIRMED_PRE_DELIVERY_SUPPLIER_FAILURES.has(String(error?.code || ""))) {
+    return false;
+  }
+
+  const client = await db.connect();
+  try {
+    await client.query("BEGIN");
+    const order = (await client.query(
+      `SELECT o.id, o.user_id, o.price, o.payment_method, o.payment_status,
+              o.delivery_status, o.pricing_tier, o.supplier_order_id,
+              COALESCE(o.gameKey, '') AS game_key_value,
+              EXISTS (SELECT 1 FROM order_keys ok WHERE ok.order_id = o.id) AS has_keys
+         FROM orders o
+        WHERE o.id = $1
+        FOR UPDATE`,
+      [orderId],
+    )).rows[0];
+
+    const refundable = order
+      && order.payment_method === "ae_credit"
+      && order.payment_status === "paid"
+      && order.delivery_status === "processing_supplier"
+      && order.pricing_tier === "reseller"
+      && !order.has_keys
+      && !String(order.game_key_value || "").trim()
+      && !String(order.supplier_order_id || "").trim()
+      && Number(order.price) > 0;
+
+    if (!refundable) {
+      await client.query("ROLLBACK");
+      return false;
+    }
+
+    await ensureWalletAccount(client, order.user_id);
+    const wallet = (await client.query(
+      "SELECT balance FROM wallet_accounts WHERE user_id = $1 FOR UPDATE",
+      [order.user_id],
+    )).rows[0];
+    const before = Number(wallet?.balance || 0);
+    const amount = Number(order.price);
+    const after = before + amount;
+    const now = new Date().toISOString();
+
+    await client.query(
+      `INSERT INTO wallet_ledger
+       (user_id, entry_type, direction, amount, balance_before, balance_after,
+        reference_type, reference_id, description, created_at)
+       VALUES ($1, 'supplier_refund', 'credit', $2, $3, $4,
+               'order_refund', $5, $6, $7)`,
+      [
+        order.user_id,
+        amount,
+        before,
+        after,
+        order.id,
+        `Refund otomatis: supplier menolak order (${String(error.code)})`,
+        now,
+      ],
+    );
+    await client.query(
+      "UPDATE wallet_accounts SET balance = $1, updated_at = $2 WHERE user_id = $3",
+      [after, now, order.user_id],
+    );
+    await client.query(
+      `UPDATE orders
+          SET payment_status = 'refunded', delivery_status = 'cancelled',
+              gross_profit = 0, cancel_reason = $2, cancelled_at = $3,
+              admin_note = COALESCE(NULLIF(admin_note, '') || E'\n', '') || $4
+        WHERE id = $1`,
+      [
+        order.id,
+        "Supplier menolak order sebelum key diterima",
+        now,
+        `Saldo dikembalikan otomatis (${String(error.code)}).`,
+      ],
+    );
+    await client.query("COMMIT");
+    return true;
+  } catch (refundError) {
+    await client.query("ROLLBACK").catch(() => {});
+    if (refundError?.code === "23505") return false;
+    throw refundError;
+  } finally {
+    client.release();
+  }
+}
+
 async function settleWalletVipOrder(orderId) {
   try {
     const result = await query(
@@ -3074,7 +3177,13 @@ async function settleWalletVipOrder(orderId) {
     await query(`UPDATE products SET supplier_stock = GREATEST(COALESCE(supplier_stock, 0) - $1, 0), supplier_last_sync = $2 WHERE id = $3 AND LOWER(COALESCE(delivery_type, 'auto')) = 'vipstore_api'`, [getOrderQuantity(order.quantity), deliveredAt, order.product_id]);
   } catch (err) {
     console.error("AE CREDIT VIPSTORE CLAIM ERROR:", err.message);
-    await query(`UPDATE orders SET delivery_status = 'problem', gameKey = $1, admin_note = $2 WHERE id = $3 AND delivery_status = 'processing_supplier'`, ["KEY BELUM TERSEDIA - HUBUNGI ADMIN", `Supplier claim failed: ${String(err.message || "Unknown error").slice(0, 500)}`, orderId]).catch(() => {});
+    const refunded = await refundConfirmedResellerSupplierFailure(orderId, err).catch((refundError) => {
+      console.error("RESELLER SUPPLIER REFUND ERROR:", refundError.message);
+      return false;
+    });
+    if (!refunded) {
+      await query(`UPDATE orders SET delivery_status = 'problem', gameKey = $1, admin_note = $2 WHERE id = $3 AND delivery_status = 'processing_supplier'`, ["KEY BELUM TERSEDIA - HUBUNGI ADMIN", `Supplier claim failed: ${String(err.message || "Unknown error").slice(0, 500)}`, orderId]).catch(() => {});
+    }
   }
 }
 

@@ -41,4 +41,31 @@ assert.ok(
   "VIP Store claim must use qty, not the ignored quantity field",
 );
 
+const refundPolicy = server.slice(
+  server.indexOf("const CONFIRMED_PRE_DELIVERY_SUPPLIER_FAILURES"),
+  server.indexOf("async function settleWalletVipOrder"),
+);
+[
+  '"VIPSTORE_CLAIM_REJECTED"',
+  '"CHEATGAME_ORDER_REJECTED"',
+  'order.payment_status === "paid"',
+  'order.delivery_status === "processing_supplier"',
+  'order.pricing_tier === "reseller"',
+  "!order.has_keys",
+  '!String(order.game_key_value || "").trim()',
+  '!String(order.supplier_order_id || "").trim()',
+  "FOR UPDATE",
+  "'supplier_refund'",
+  "'order_refund'",
+  "payment_status = 'refunded'",
+].forEach((marker) =>
+  assert.ok(refundPolicy.includes(marker), `Missing guarded refund marker: ${marker}`),
+);
+assert.ok(!refundPolicy.includes("VIPSTORE_TIMEOUT"), "Timeout must require manual review");
+assert.ok(!refundPolicy.includes("VIPSTORE_REQUEST_FAILED"), "Network errors must require manual review");
+assert.ok(
+  migrations.includes("UNIQUE(reference_type, reference_id, direction)"),
+  "Wallet refund must be idempotent at database level",
+);
+
 console.log("VIP Store multi-key recovery check passed.");
