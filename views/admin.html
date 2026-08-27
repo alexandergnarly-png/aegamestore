@@ -820,6 +820,38 @@
         margin-top: 2px;
       }
 
+      .wallet-usd-tools {
+        display: grid;
+        gap: 8px;
+        margin-top: 2px;
+        padding: 10px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: var(--surface-2);
+      }
+
+      .wallet-usd-quick {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 6px;
+      }
+
+      .wallet-grant-form .wallet-usd-quick button {
+        min-height: 40px;
+        margin: 0;
+        padding: 8px 6px;
+        border-radius: 12px;
+        font-size: 12px;
+      }
+
+      .wallet-usd-estimate {
+        margin: 0;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 750;
+        line-height: 1.4;
+      }
+
       .wallet-note {
         margin: -2px 0 14px;
         padding: 11px 12px;
@@ -8972,7 +9004,7 @@
           <div class="wallet-note">Setiap grant tercatat di ledger beserta alasan dan akun admin.</div>
           <div class="toolbar wallet-grant-form">
             <div class="field"><label for="walletGrantUsername">Username buyer</label><input id="walletGrantUsername" type="text" maxlength="80" autocomplete="off" placeholder="Contoh: zahir"></div>
-            <div class="field"><label for="walletGrantAmount">Nominal credit</label><input id="walletGrantAmount" type="number" min="1000" max="2000000" step="1000" inputmode="numeric" placeholder="Contoh: 50000"></div>
+            <div class="field"><label for="walletGrantAmount">Nominal credit</label><input id="walletGrantAmount" type="number" min="1000" max="2000000" step="1000" inputmode="numeric" placeholder="Contoh: 50000" oninput="updateWalletGrantUsdEstimate()"><div class="wallet-usd-tools"><div class="wallet-usd-quick" aria-label="Pilih nominal USD"><button type="button" onclick="setWalletGrantUsd(10)">$10</button><button type="button" onclick="setWalletGrantUsd(25)">$25</button><button type="button" onclick="setWalletGrantUsd(50)">$50</button><button type="button" onclick="setWalletGrantUsd(100)">$100</button></div><p class="wallet-usd-estimate" id="walletGrantUsdEstimate">Memuat kurs USD...</p></div></div>
             <div class="field"><label for="walletGrantReason">Alasan grant</label><input id="walletGrantReason" type="text" maxlength="300" placeholder="Contoh: bonus owner"></div>
             <button type="button" onclick="grantWalletCredit()">Tambah AE Credit</button>
           </div>
@@ -9191,6 +9223,7 @@
       let adminResellers = [];
       let adminResellerProfits = [];
       let activeResellerId = null;
+      let adminWalletUsdIdrRate = 0;
 
       function toggleSidebar() {
         const isCollapsed = document.body.classList.toggle("sidebar-collapsed");
@@ -9402,6 +9435,8 @@
           const res = await fetch(`/api/admin/wallet/topups?status=${encodeURIComponent(status)}&provider=${encodeURIComponent(provider)}`);
           const data = await res.json();
           if (!res.ok) throw new Error(data.message || "Gagal memuat");
+          adminWalletUsdIdrRate = Number(data.usd_idr_rate || 0);
+          updateWalletGrantUsdEstimate();
           const rows = data.topups || [];
           const pendingBadge = document.getElementById("walletPendingBadge");
           if (pendingBadge) pendingBadge.textContent = `${rows.length} data`;
@@ -9497,7 +9532,30 @@
           document.getElementById("walletGrantUsername").value = "";
           document.getElementById("walletGrantAmount").value = "";
           document.getElementById("walletGrantReason").value = "";
+          updateWalletGrantUsdEstimate();
         } catch (err) { Swal.fire("Gagal", err.message, "error"); }
+      }
+
+      function updateWalletGrantUsdEstimate() {
+        const estimate = document.getElementById("walletGrantUsdEstimate");
+        if (!estimate) return;
+        if (adminWalletUsdIdrRate <= 0) {
+          estimate.textContent = "Memuat kurs USD...";
+          return;
+        }
+        const amount = Number(document.getElementById("walletGrantAmount")?.value || 0);
+        const rateLabel = `${formatRupiah(adminWalletUsdIdrRate)}/USD`;
+        estimate.textContent = amount > 0
+          ? `Setara $${(amount / adminWalletUsdIdrRate).toFixed(2)} · kurs ${rateLabel}`
+          : `Kurs reseller saat ini ${rateLabel}`;
+      }
+
+      function setWalletGrantUsd(usdAmount) {
+        if (adminWalletUsdIdrRate <= 0) return Swal.fire("Kurs belum siap", "Muat ulang data lalu coba lagi.", "info");
+        const amountInput = document.getElementById("walletGrantAmount");
+        if (!amountInput) return;
+        amountInput.value = Math.ceil(Number(usdAmount) * adminWalletUsdIdrRate);
+        updateWalletGrantUsdEstimate();
       }
 
       function showSection(sectionName, buttonEl = null) {

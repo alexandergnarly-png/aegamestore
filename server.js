@@ -10663,7 +10663,7 @@ app.get("/api/admin/wallet/topups", requireAdminAuth, async (req, res) => {
   const provider = ["all", "midtrans", "manual_qris"].includes(String(req.query.provider || "")) ? String(req.query.provider) : "all";
   const scope = String(req.query.scope || "") === "reseller" ? "reseller" : "all";
   try {
-    const result = await query(`SELECT t.id, t.user_id, u.username, t.amount, t.status, t.buyer_note,
+    const [result, usdIdrRate] = await Promise.all([query(`SELECT t.id, t.user_id, u.username, t.amount, t.status, t.buyer_note,
       t.payment_reference, t.admin_note, t.reviewed_by, t.created_at, t.reviewed_at,
       t.provider, t.provider_order_id, t.provider_transaction_id, t.payment_amount, t.paid_at,
       COALESCE(w.balance, 0) AS balance
@@ -10675,11 +10675,12 @@ app.get("/api/admin/wallet/topups", requireAdminAuth, async (req, res) => {
         AND ($3 = 'all' OR u.reseller_status IN ('approved', 'suspended'))
       ORDER BY CASE WHEN t.status = 'pending' THEN 0 ELSE 1 END,
         COALESCE(t.paid_at, t.reviewed_at, t.created_at) DESC
-      LIMIT 100`, [status, provider, scope]);
+      LIMIT 100`, [status, provider, scope]), getResellerUsdIdrRate()]);
     return res.json({
       status,
       provider,
       scope,
+      usd_idr_rate: usdIdrRate,
       topups: result.rows.map((row) => ({
         ...row,
         amount: Number(row.amount || 0),
