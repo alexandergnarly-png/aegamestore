@@ -61,7 +61,16 @@ function calculateResellerPrice(supplierCostIdr, usdIdrRate = 18000) {
   };
 }
 
+function calculateNetProfit(revenue, paymentFee = 0, supplierCost = 0) {
+  return Math.round(
+    (Number(revenue) || 0) -
+      (Number(paymentFee) || 0) -
+      (Number(supplierCost) || 0),
+  );
+}
+
 module.exports = {
+  calculateNetProfit,
   calculateResellerPrice,
   calculateUsdtPayment,
   getSafeUsdtIdrRate,

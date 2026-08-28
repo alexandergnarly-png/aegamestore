@@ -40,7 +40,7 @@ const inlineScripts = (html) =>
   "Voucher tidak dapat digabung dengan harga reseller",
   "getResellerPricing(productRow, resellerRate).unit_idr",
   "getResellerFinancials(productRow, cleanQuantity, resellerRate)",
-  "supplier_cost = $2, gross_profit = $3",
+  "SET pricing_tier = $2, supplier_cost = $3, gross_profit = $4",
   "bukan produk API",
   "LOWER(COALESCE(p.delivery_type, '')) IN ('vipstore_api', 'cheatgame_api')",
   "calculateResellerPrice(supplierUnitCost, exchangeRate)",

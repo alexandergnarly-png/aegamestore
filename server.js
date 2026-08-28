@@ -22,6 +22,7 @@ const {
 const { ensureBulkOrderSchema, ensureWalletSchema } = require("./server/database-migrations");
 const { parseMidtransAmount, verifyMidtransSignature } = require("./server/midtrans-utils");
 const {
+  calculateNetProfit,
   calculateResellerPrice,
   calculateUsdtPayment,
   getSafeUsdtIdrRate,
@@ -6666,6 +6667,12 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
     const netPrice = bulkTotals.netPrice;
     const price = calculatePaymentPrice(netPrice, paymentMethod);
     const paymentFee = price - netPrice;
+    const supplierCost =
+      Math.max(0, Math.round(Number(productRow.supplier_price) || 0)) *
+      cleanQuantity;
+    const grossProfit = supplierCost
+      ? calculateNetProfit(price, paymentFee, supplierCost)
+      : 0;
     const appliedVoucherCode = discountCheck.code || null;
 
     const baseUrl = getAppBaseUrl(req);
@@ -6827,12 +6834,17 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
         );
       }
 
-      if (resellerOrder) {
+      if (resellerOrder || supplierCost > 0) {
         await client.query(
           `UPDATE orders
-           SET pricing_tier = 'reseller', supplier_cost = $2, gross_profit = $3
+           SET pricing_tier = $2, supplier_cost = $3, gross_profit = $4
            WHERE id = $1`,
-          [orderId, resellerFinancials.supplier_cost, resellerFinancials.gross_profit],
+          [
+            orderId,
+            resellerOrder ? "reseller" : "retail",
+            resellerOrder ? resellerFinancials.supplier_cost : supplierCost,
+            resellerOrder ? resellerFinancials.gross_profit : grossProfit,
+          ],
         );
       }
 
@@ -11227,6 +11239,26 @@ app.get("/admin-stats", requireAdminAuth, async (req, res) => {
       [`${month}%`],
     );
 
+    const monthProfit = await query(
+      `
+      SELECT COALESCE(SUM(
+        o.price
+        - COALESCE(o.payment_fee, 0)
+        - COALESCE(
+            NULLIF(o.supplier_cost, 0),
+            ROUND(COALESCE(p.supplier_price, 0) * COALESCE(NULLIF(o.quantity, 0), 1))
+          )
+      ), 0)::bigint AS total
+      FROM orders o
+      LEFT JOIN products p ON p.id = o.product_id
+      WHERE o.payment_status = 'paid'
+        AND o.delivery_status = 'delivered'
+        AND o.created_at LIKE $1
+        AND (COALESCE(o.supplier_cost, 0) > 0 OR COALESCE(p.supplier_price, 0) > 0)
+      `,
+      [`${month}%`],
+    );
+
     const paidToday = await query(
       `
       SELECT COUNT(*)::int AS total
@@ -11248,6 +11280,7 @@ app.get("/admin-stats", requireAdminAuth, async (req, res) => {
     return res.json({
       revenue_today: Number(todayRevenue.rows[0]?.total || 0),
       revenue_month: Number(monthRevenue.rows[0]?.total || 0),
+      net_profit_month: Number(monthProfit.rows[0]?.total || 0),
       paid_today: Number(paidToday.rows[0]?.total || 0),
       pending_orders: Number(pendingOrders.rows[0]?.total || 0),
     });

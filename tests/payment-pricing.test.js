@@ -1,5 +1,6 @@
 const assert = require("node:assert/strict");
 const {
+  calculateNetProfit,
   calculateResellerPrice,
   calculateUsdtPayment,
   getSafeUsdtIdrRate,
@@ -28,6 +29,9 @@ assert.equal(parseMarketUsdIdrRate(17694.4), 17694);
 assert.equal(parseMarketUsdIdrRate("20000"), 20000);
 assert.equal(parseMarketUsdIdrRate(5000), null);
 assert.equal(parseMarketUsdIdrRate("invalid"), null);
+assert.equal(calculateNetProfit(100784, 784, 80000), 20000);
+assert.equal(calculateNetProfit(23400, 0, 18000), 5400);
+assert.equal(calculateNetProfit(100, 10, 120), -30);
 assert.deepEqual(calculateResellerPrice(18000, 18000), {
   unit_idr: 23400,
   unit_usd: 1.3,

@@ -48,6 +48,8 @@ scripts.forEach(([, source]) =>
   'class="stats dashboard-metrics delay-1"',
   'class="dashboard-metric-rail"',
   'class="stat-card dashboard-primary-metric"',
+  'class="stat-card dashboard-metric-profit"',
+  'id="netProfitMonthStat"',
   'class="dashboard-session-panel"',
   "Muat Ulang Data",
   "Pocket Log: useful actions and live order context fill the dashboard tail.",
@@ -138,6 +140,11 @@ assert.ok(
     server.includes("AS manual_count") &&
     server.includes("AS delivered_count"),
   "Order control counts must come from the full filtered query",
+);
+assert.ok(
+  server.includes("net_profit_month") &&
+    server.includes("o.delivery_status = 'delivered'"),
+  "Dashboard profit must only include paid, delivered orders",
 );
 assert.match(
   server,

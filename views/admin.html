@@ -618,6 +618,15 @@
         display: contents;
       }
 
+      .dashboard-metric-profit {
+        border-color: var(--success-border);
+        background: var(--success-bg);
+      }
+
+      .dashboard-metric-profit .stat-icon {
+        color: var(--success-text);
+      }
+
       .stat-card {
         min-height: 142px;
         padding: 17px;
@@ -7508,6 +7517,15 @@
           </div>
 
           <div class="dashboard-metric-rail" aria-label="Metrik operasional lainnya">
+          <div class="stat-card dashboard-metric-profit">
+            <div class="stat-top">
+              <div class="stat-label">Keuntungan Bersih Bulan Ini</div>
+              <div class="stat-icon"><svg class="ui-icon" aria-hidden="true"><use href="#icon-trend"></use></svg></div>
+            </div>
+            <div class="stat-value" id="netProfitMonthStat">Rp 0</div>
+            <div class="stat-note">Order terkirim setelah modal supplier dan fee.</div>
+          </div>
+
           <div class="stat-card dashboard-metric-revenue-today">
             <div class="stat-top">
               <div class="stat-label">Revenue Hari Ini</div>
@@ -13317,6 +13335,9 @@
           );
           document.getElementById("revenueMonthStat").innerText = formatRupiah(
             data.revenue_month || 0,
+          );
+          document.getElementById("netProfitMonthStat").innerText = formatRupiah(
+            data.net_profit_month || 0,
           );
           document.getElementById("paidTodayStat").innerText =
             data.paid_today || 0;
