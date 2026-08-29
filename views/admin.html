@@ -4886,6 +4886,22 @@
         line-height: 1.35;
       }
 
+      #section-vouchers .voucher-ticket-code strong {
+        font-family: var(--font-mono);
+        font-size: 13px;
+        letter-spacing: 0.035em;
+      }
+
+      #section-vouchers .voucher-ticket-kicker {
+        display: none;
+      }
+
+      #section-vouchers .voucher-ticket-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+      }
+
       .voucher-target-head {
         display: flex;
         align-items: flex-start;
@@ -4968,7 +4984,7 @@
 
       @media (max-width: 768px) {
         #section-vouchers .card {
-          padding: 12px;
+          padding: 12px 12px calc(104px + var(--safe-bottom));
         }
 
         #section-vouchers .card-header {
@@ -5136,19 +5152,178 @@
           margin-top: 14px;
         }
 
-        #section-vouchers tbody tr {
-          border-radius: 18px;
-          box-shadow: none;
+        #section-vouchers .voucher-ledger-wrap {
+          overflow: visible;
         }
 
-        #section-vouchers tbody td:last-child {
+        #section-vouchers tbody tr.voucher-ticket-card {
+          position: relative;
           display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 7px;
+          gap: 0;
+          overflow: hidden;
+          margin-bottom: 14px;
+          padding: 0;
+          border: 2px solid var(--ink);
+          border-radius: 20px;
+          background: var(--surface);
+          box-shadow: 4px 4px 0 color-mix(in srgb, var(--ink) 18%, transparent);
         }
 
-        #section-vouchers tbody td:last-child::before,
-        #section-vouchers tbody td:last-child .danger-btn {
+        #section-vouchers tbody tr.voucher-ticket-card.is-inactive {
+          opacity: 0.72;
+        }
+
+        #section-vouchers .voucher-ticket-card td {
+          width: auto;
+          min-height: 0;
+          padding: 11px 12px;
+          border-bottom: 1px solid var(--line);
+          text-align: left;
+        }
+
+        #section-vouchers .voucher-ticket-card td::before {
+          font-family: var(--font-mono);
+          font-size: 8px;
+        }
+
+        #section-vouchers .voucher-ticket-id {
+          position: absolute;
+          z-index: 2;
+          top: 13px;
+          right: 13px;
+          display: block;
+          width: auto !important;
+          padding: 5px 8px !important;
+          border: 1px solid #444 !important;
+          border-radius: 999px;
+          background: #242424;
+          color: #fff;
+          font-family: var(--font-mono);
+          font-size: 9px;
+        }
+
+        #section-vouchers .voucher-ticket-id::before {
+          display: none;
+        }
+
+        #section-vouchers .voucher-ticket-code {
+          grid-column: 1 / -1;
+          display: grid;
+          gap: 3px;
+          padding: 15px 72px 14px 14px;
+          border-bottom-color: #333;
+          background: var(--ink);
+          color: var(--surface);
+        }
+
+        #section-vouchers .voucher-ticket-code::before {
+          display: none;
+        }
+
+        #section-vouchers .voucher-ticket-code strong {
+          font-size: 21px;
+          line-height: 1.05;
+        }
+
+        #section-vouchers .voucher-ticket-kicker {
+          display: block;
+          color: #bdbdb8;
+          font-family: var(--font-mono);
+          font-size: 8px;
+          font-weight: 900;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+        }
+
+        #section-vouchers .voucher-target-cell {
+          grid-column: 1 / -1;
+          align-items: flex-start;
+          padding-block: 13px;
+        }
+
+        #section-vouchers .voucher-target-cell::before {
+          margin-top: 2px;
+        }
+
+        #section-vouchers .voucher-scope-cell {
+          justify-items: end;
+          max-width: 70%;
+          text-align: right;
+        }
+
+        #section-vouchers .voucher-scope-chip {
+          font-size: 13px;
+        }
+
+        #section-vouchers .voucher-scope-detail {
+          display: -webkit-box;
+          overflow: hidden;
+          -webkit-box-orient: vertical;
+          -webkit-line-clamp: 2;
+          font-size: 9px;
+        }
+
+        #section-vouchers .voucher-ticket-meta,
+        #section-vouchers .voucher-ticket-state {
+          align-content: start;
+          display: grid;
+          gap: 6px;
+        }
+
+        #section-vouchers .voucher-ticket-meta + .voucher-ticket-meta,
+        #section-vouchers .voucher-ticket-state + .voucher-ticket-state {
+          border-left: 1px solid var(--line);
+        }
+
+        #section-vouchers .voucher-ticket-discount {
+          grid-column: 1 / -1;
+          font-family: var(--font-mono);
+          font-size: 18px;
+          font-weight: 900;
+        }
+
+        #section-vouchers .voucher-ticket-state .badge {
+          width: fit-content;
+          max-width: 100%;
+          padding: 6px 9px;
+          font-size: 9px;
+        }
+
+        #section-vouchers .voucher-ticket-expiry {
+          grid-column: 1 / -1;
+          color: var(--muted);
+          font-size: 11px;
+        }
+
+        #section-vouchers .voucher-ticket-action-cell {
+          grid-column: 1 / -1;
+          display: grid;
+          padding: 10px;
+          border-bottom: 0;
+          background: var(--surface-2);
+        }
+
+        #section-vouchers .voucher-ticket-action-cell::before {
+          margin-bottom: 0;
+        }
+
+        #section-vouchers .voucher-ticket-actions {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          width: 100%;
+        }
+
+        #section-vouchers .voucher-ticket-actions button {
+          width: 100%;
+          min-width: 0;
+          min-height: 42px;
+          margin: 0;
+          border-radius: 11px;
+          font-size: 10px;
+        }
+
+        #section-vouchers .voucher-ticket-actions .danger-btn {
           grid-column: 1 / -1;
         }
       }
@@ -8710,8 +8885,8 @@
             <div class="info" id="voucherStatusText" aria-live="polite">Memuat daftar voucher...</div>
           </div>
 
-          <div class="table-wrap">
-            <table>
+          <div class="table-wrap voucher-ledger-wrap">
+            <table class="voucher-ledger-table">
               <thead>
                 <tr>
                   <th style="width: 80px">ID</th>
@@ -9228,6 +9403,7 @@
       let selectedOrderIds = new Set();
       let allProducts = [];
       let allVouchers = [];
+      let voucherLoadVersion = 0;
       let allVoucherProducts = [];
       let selectedVoucherProductIds = new Set();
       let allKeys = [];
@@ -9708,6 +9884,7 @@
             loadVipStoreSafetyAlerts(),
             loadAdminSessions(),
             loadDashboardActivity(),
+            loadVouchers(),
           ]);
           announceAdmin(results.some((result) => result.status === "rejected")
             ? "Sebagian data gagal diperbarui"
@@ -14048,6 +14225,7 @@
       async function loadVouchers(resetFilters = false) {
         const statusText = document.getElementById("voucherStatusText");
         const tableBody = document.getElementById("voucherTableBody");
+        const loadVersion = ++voucherLoadVersion;
 
         if (resetFilters) {
           document.getElementById("voucherSearchInput").value = "";
@@ -14056,16 +14234,23 @@
         }
 
         statusText.innerText = "Memuat daftar voucher...";
-        tableBody.innerHTML = "";
+        statusText.setAttribute("aria-busy", "true");
 
         try {
-          const res = await fetch("/vouchers", { cache: "no-store" });
+          const res = await fetch(
+            `/vouchers?fresh=${Date.now()}-${loadVersion}`,
+            { cache: "no-store" },
+          );
           if (res.status === 401) {
             window.location.href = "/ae-auth";
             return;
           }
 
           const data = await res.json();
+          if (loadVersion !== voucherLoadVersion) return;
+          if (!res.ok) {
+            throw new Error(data.message || "Gagal memuat voucher");
+          }
 
           if (!Array.isArray(data) || data.length === 0) {
             allVouchers = [];
@@ -14081,12 +14266,17 @@
           allVouchers = data;
           applyVoucherFilters();
         } catch (err) {
+          if (loadVersion !== voucherLoadVersion) return;
           statusText.innerText = "Gagal memuat daftar voucher.";
           tableBody.innerHTML = `
       <tr>
         <td colspan="10" class="empty">Terjadi error saat mengambil voucher.</td>
       </tr>
     `;
+        } finally {
+          if (loadVersion === voucherLoadVersion) {
+            statusText.removeAttribute("aria-busy");
+          }
         }
       }
 
@@ -14185,39 +14375,44 @@
             ])));
             const itemId = escapeHtml(item.id);
             return `
-        <tr>
-          <td>${item.id}</td>
-          <td><b>${escapeHtml(item.code || "-")}</b></td>
-          <td class="voucher-target-cell" title="${escapeHtml(targetTooltip)}">
+        <tr class="voucher-ticket-card ${active ? "is-active" : "is-inactive"}">
+          <td data-label="ID" class="voucher-ticket-id">#${itemId}</td>
+          <td data-label="Kode" class="voucher-ticket-code">
+            <span class="voucher-ticket-kicker">Kode voucher</span>
+            <strong>${escapeHtml(item.code || "-")}</strong>
+          </td>
+          <td data-label="Produk" class="voucher-target-cell" title="${escapeHtml(targetTooltip)}">
             <div class="voucher-scope-cell">
               <span class="voucher-scope-chip">${escapeHtml(targetLabel)}</span>
               <small class="voucher-scope-detail">${escapeHtml(targetDetail)}</small>
             </div>
           </td>
-          <td>${escapeHtml(item.brand_name || (productCount > 0 ? "Multi" : "Semua"))}</td>
-          <td>${escapeHtml(item.duration_name || (productCount > 0 ? "Multi" : "Semua"))}</td>
-          <td>${formatVoucherDiscount(item)}</td>
-         <td>
+          <td data-label="Brand" class="voucher-ticket-meta">${escapeHtml(item.brand_name || (productCount > 0 ? "Multi" : "Semua"))}</td>
+          <td data-label="Durasi" class="voucher-ticket-meta">${escapeHtml(item.duration_name || (productCount > 0 ? "Multi" : "Semua"))}</td>
+          <td data-label="Diskon" class="voucher-ticket-discount">${formatVoucherDiscount(item)}</td>
+         <td data-label="Status" class="voucher-ticket-state">
   ${
     active
       ? '<span class="badge available">Aktif</span>'
       : '<span class="badge used">Nonaktif</span>'
   }
 </td>
-<td>
+<td data-label="Scope" class="voucher-ticket-state">
   ${
     String(item.visibility || "public") === "private"
       ? `<span class="badge used">Privat<br><small>Pakai kode</small></span>`
       : `<span class="badge available">Publik</span>`
   }
 </td>
-<td>${escapeHtml(item.expires_at || "-")}</td>
-          <td>
-            <button data-args="${editArgs}" onclick="editVoucher(...JSON.parse(decodeURIComponent(this.dataset.args)))">Edit</button>
-            <button class="ghost-btn" data-id="${itemId}" data-active="${active ? 0 : 1}" onclick="toggleVoucherActive(this.dataset.id, Number(this.dataset.active))">
+<td data-label="Kedaluwarsa" class="voucher-ticket-expiry">${escapeHtml(item.expires_at || "Tanpa batas")}</td>
+          <td data-label="Aksi" class="action-cell voucher-ticket-action-cell">
+            <div class="voucher-ticket-actions">
+            <button type="button" data-args="${editArgs}" onclick="editVoucher(...JSON.parse(decodeURIComponent(this.dataset.args)))">Edit</button>
+            <button type="button" class="ghost-btn" data-id="${itemId}" data-active="${active ? 0 : 1}" onclick="toggleVoucherActive(this.dataset.id, Number(this.dataset.active))">
               ${active ? "Nonaktifkan" : "Aktifkan"}
             </button>
-            <button class="danger-btn" data-id="${itemId}" onclick="deleteVoucher(this.dataset.id)">Hapus</button>
+            <button type="button" class="danger-btn" data-id="${itemId}" onclick="deleteVoucher(this.dataset.id)">Hapus</button>
+            </div>
           </td>
         </tr>
       `;
@@ -14378,9 +14573,9 @@
             return;
           }
 
-          await Swal.fire(data.message || "Voucher berhasil disimpan");
           resetVoucherForm();
           await loadVouchers(true);
+          await Swal.fire(data.message || "Voucher berhasil disimpan");
         } catch (err) {
           Swal.fire("Terjadi error server saat menyimpan voucher");
         }
@@ -14405,8 +14600,8 @@
             return;
           }
 
+          await loadVouchers();
           Swal.fire(data.message || "Status voucher berhasil diubah");
-          loadVouchers();
         } catch (err) {
           Swal.fire("Terjadi error server saat mengubah status voucher");
         }
@@ -14440,8 +14635,8 @@
             return;
           }
 
+          await loadVouchers();
           Swal.fire(data.message || "Voucher berhasil dihapus");
-          loadVouchers();
         } catch (err) {
           Swal.fire("Terjadi error server saat menghapus voucher");
         }

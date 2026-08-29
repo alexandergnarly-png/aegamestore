@@ -3,7 +3,7 @@
 // always return a valid Response object so the browser doesn't fall back
 // to the offline page on transient sub-resource fails.
 
-const CACHE_VERSION = "20260827-reseller-margin-v1";
+const CACHE_VERSION = "20260829-voucher-refresh-v1";
 const CACHE_NAME = `ae-game-store-auto-${CACHE_VERSION}`;
 
 const STATIC_ASSETS = [
@@ -32,6 +32,7 @@ const SW_BYPASS_PREFIXES = [
 // Dynamic API paths: always go to network, never cached by SW.
 const DYNAMIC_PREFIXES = [
   "/products",
+  "/vouchers",
   "/public-products",
   "/public-vouchers",
   "/auto-promo",
