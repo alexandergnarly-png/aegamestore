@@ -3168,6 +3168,146 @@
         .admin-loading-bar { transition: none; }
       }
 
+      .admin-success-popup {
+        width: min(410px, calc(100vw - 24px)) !important;
+        padding: 0 20px 20px !important;
+        overflow: hidden !important;
+        border: 2px solid var(--ink) !important;
+        border-radius: 24px !important;
+        box-shadow: 8px 8px 0 color-mix(in srgb, var(--ink) 22%, transparent) !important;
+      }
+
+      .admin-success-popup .swal2-html-container {
+        margin: 0 -20px !important;
+        padding: 0 !important;
+        overflow: visible !important;
+        text-align: left !important;
+      }
+
+      .admin-success-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 18px;
+        background: var(--ink);
+        color: #fff;
+        font-family: var(--font-mono);
+        font-size: 9px;
+        font-weight: 900;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .admin-success-state {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        color: #b7f7d1;
+      }
+
+      .admin-success-state::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #4ade80;
+        box-shadow: 0 0 0 4px rgb(74 222 128 / 15%);
+      }
+
+      .admin-success-body {
+        padding: 22px 20px 18px;
+      }
+
+      .admin-success-lead {
+        display: grid;
+        grid-template-columns: 52px minmax(0, 1fr);
+        align-items: center;
+        gap: 14px;
+      }
+
+      .admin-success-mark {
+        display: grid;
+        width: 52px;
+        height: 52px;
+        place-items: center;
+        border: 1px solid #9adab3;
+        border-radius: 16px;
+        background: #eaf8ef;
+        color: #167245;
+      }
+
+      .admin-success-mark svg {
+        width: 25px;
+        height: 25px;
+        stroke: currentColor;
+        stroke-width: 2.5;
+        fill: none;
+      }
+
+      .admin-success-kicker {
+        display: block;
+        margin-bottom: 5px;
+        color: #167245;
+        font-family: var(--font-mono);
+        font-size: 9px;
+        font-weight: 900;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .admin-success-title {
+        margin: 0;
+        font-size: clamp(25px, 7vw, 34px);
+        font-weight: 950;
+        letter-spacing: -0.05em;
+        line-height: 1;
+      }
+
+      .admin-success-copy {
+        margin: 18px 0;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.55;
+      }
+
+      .admin-success-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding-top: 13px;
+        border-top: 1px solid var(--line);
+        font-size: 12px;
+      }
+
+      .admin-success-meta span {
+        color: var(--muted);
+        font-family: var(--font-mono);
+        font-size: 9px;
+        font-weight: 900;
+        letter-spacing: 0.1em;
+      }
+
+      .admin-success-meta strong {
+        color: #167245;
+        font-weight: 900;
+      }
+
+      .admin-success-popup .swal2-actions {
+        width: 100% !important;
+        margin: 0 !important;
+      }
+
+      .admin-success-confirm {
+        width: 100% !important;
+        min-height: 54px !important;
+        margin: 0 !important;
+        border-radius: 15px !important;
+        background: var(--ink) !important;
+        color: #fff !important;
+      }
+
       .admin-key-popup {
         width: min(440px, calc(100vw - 24px)) !important;
         padding: 24px !important;
@@ -13749,7 +13889,6 @@
           await finishAdminLoading("Produk tersimpan");
           const savedMessage = data.message || "Produk berhasil disimpan";
           const savedUsdtNote = price_usdt ? ` Harga manual ${formatUsdt(price_usdt)} tersimpan.` : "";
-          Swal.fire("Berhasil", `${savedMessage}${savedUsdtNote}`, "success");
           if (!isEditMode) {
             resetProductForm();
             if (window.matchMedia("(max-width: 768px)").matches) {
@@ -13758,6 +13897,11 @@
           }
           await loadProducts();
           loadKeyProductOptions();
+          showAdminSuccess(
+            isEditMode ? "Produk diperbarui" : "Produk ditambahkan",
+            `${savedMessage}${savedUsdtNote}`,
+            isEditMode ? "Update produk" : "Produk baru",
+          );
         } catch (err) {
           Swal.fire("Terjadi error server saat menyimpan produk");
         }
@@ -13800,10 +13944,14 @@
                 return;
               }
 
-              Swal.fire("Terhapus!", "Produk berhasil dihapus", "success");
               resetProductForm();
-              loadProducts();
+              await loadProducts();
               loadKeyProductOptions();
+              showAdminSuccess(
+                "Produk dihapus",
+                "Produk sudah dikeluarkan dari katalog.",
+                "Katalog diperbarui",
+              );
             } catch (err) {
               Swal.fire(
                 "Error!",
@@ -13844,9 +13992,13 @@
             return;
           }
 
-          Swal.fire(data.message || "Status produk berhasil diubah");
-          loadProducts();
+          await loadProducts();
           loadKeyProductOptions();
+          showAdminSuccess(
+            active === 1 ? "Produk diaktifkan" : "Produk dinonaktifkan",
+            data.message || "Status produk berhasil diubah.",
+            "Status produk",
+          );
         } catch (err) {
           Swal.fire("Terjadi error server saat mengubah status produk");
         }
@@ -13895,13 +14047,12 @@
           }
 
           await finishAdminLoading("Stok terbaru tersimpan");
-          Swal.fire(
-            "Sync selesai",
-            `${data.message || "Stok supplier berhasil disync."}\nReady: ${data.ready || 0}, Out: ${data.out_of_stock || 0}, Maintenance: ${data.maintenance || 0}, Not found: ${data.not_found || 0}`,
-            "success",
+          await loadProducts();
+          showAdminSuccess(
+            "Stok sudah sinkron",
+            `${data.message || "Stok supplier berhasil disinkronkan."} Ready ${data.ready || 0}, habis ${data.out_of_stock || 0}, maintenance ${data.maintenance || 0}, tidak ditemukan ${data.not_found || 0}.`,
+            "Sinkron supplier",
           );
-
-          loadProducts();
         } catch (err) {
           Swal.fire("Sync gagal", "Terjadi error saat sync stok supplier.", "error");
         }
@@ -13975,6 +14126,40 @@
         if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
           await new Promise((resolve) => setTimeout(resolve, 180));
         }
+      }
+
+      function showAdminSuccess(title, text, kicker = "Perubahan tersimpan") {
+        return Swal.fire({
+          html: `
+            <div class="admin-success-receipt">
+              <div class="admin-success-head">
+                <span>AE / Operation receipt</span>
+                <span class="admin-success-state">Selesai</span>
+              </div>
+              <div class="admin-success-body">
+                <div class="admin-success-lead">
+                  <span class="admin-success-mark" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6" /></svg>
+                  </span>
+                  <div>
+                    <span class="admin-success-kicker">${escapeHtml(kicker)}</span>
+                    <h2 class="admin-success-title">${escapeHtml(title)}</h2>
+                  </div>
+                </div>
+                <p class="admin-success-copy">${escapeHtml(text)}</p>
+                <div class="admin-success-meta">
+                  <span>Status server</span>
+                  <strong>Tersimpan</strong>
+                </div>
+              </div>
+            </div>
+          `,
+          customClass: {
+            popup: "admin-success-popup",
+            confirmButton: "admin-success-confirm",
+          },
+          confirmButtonText: "Kembali ke produk",
+        });
       }
 
       function populateProductFilters(products) {
