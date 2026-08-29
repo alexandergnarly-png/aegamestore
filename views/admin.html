@@ -3027,6 +3027,147 @@
         touch-action: manipulation;
       }
 
+      .admin-loading-popup {
+        width: min(410px, calc(100vw - 24px)) !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+        border: 2px solid var(--ink) !important;
+        border-radius: 24px !important;
+        box-shadow: 8px 8px 0 color-mix(in srgb, var(--ink) 22%, transparent) !important;
+      }
+
+      .admin-loading-popup .swal2-html-container {
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+        text-align: left !important;
+      }
+
+      .admin-loading-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 18px;
+        background: var(--ink);
+        color: #fff;
+        font-family: var(--font-mono);
+        font-size: 9px;
+        font-weight: 900;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .admin-loading-live {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        color: #cbd5ff;
+      }
+
+      .admin-loading-live::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #5f7cff;
+        box-shadow: 0 0 0 4px rgb(95 124 255 / 18%);
+        animation: adminLoadingPulse 1.2s ease-in-out infinite;
+      }
+
+      .admin-loading-body {
+        padding: 25px 22px 22px;
+      }
+
+      .admin-loading-kicker {
+        display: block;
+        margin-bottom: 8px;
+        color: #315dff;
+        font-family: var(--font-mono);
+        font-size: 9px;
+        font-weight: 900;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .admin-loading-title {
+        margin: 0;
+        font-size: clamp(27px, 8vw, 38px);
+        font-weight: 950;
+        letter-spacing: -0.055em;
+        line-height: 1;
+      }
+
+      .admin-loading-copy {
+        max-width: 31ch;
+        margin: 11px 0 24px;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .admin-loading-meter-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .admin-loading-track {
+        height: 14px;
+        overflow: hidden;
+        border: 1px solid var(--ink);
+        border-radius: 999px;
+        background: #e7e6e0;
+      }
+
+      .admin-loading-bar {
+        display: block;
+        width: 8%;
+        height: 100%;
+        border-radius: inherit;
+        background: repeating-linear-gradient(
+          120deg,
+          #315dff 0,
+          #315dff 12px,
+          #7390ff 12px,
+          #7390ff 20px
+        );
+        transition: width 320ms ease;
+      }
+
+      .admin-loading-percent {
+        min-width: 58px;
+        color: var(--ink);
+        font-family: var(--font-mono);
+        font-size: 22px;
+        font-weight: 950;
+        letter-spacing: -0.04em;
+        text-align: right;
+      }
+
+      .admin-loading-stage {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 11px;
+        color: var(--muted);
+        font-family: var(--font-mono);
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+      }
+
+      @keyframes adminLoadingPulse {
+        50% { opacity: 0.38; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .admin-loading-live::before { animation: none; }
+        .admin-loading-bar { transition: none; }
+      }
+
       .admin-key-popup {
         width: min(440px, calc(100vw - 24px)) !important;
         padding: 24px !important;
@@ -10225,6 +10366,7 @@
           const data = await res.json().catch(() => ({}));
           if (res.status === 401) return void (window.location.href = "/ae-auth");
           if (!res.ok) throw new Error(data.message || "Aksi supplier gagal");
+          await finishAdminLoading("Data supplier siap");
           Swal.close();
           supplierCompareData = data;
           showSupplierCompareModal();
@@ -13604,6 +13746,7 @@
             return;
           }
 
+          await finishAdminLoading("Produk tersimpan");
           const savedMessage = data.message || "Produk berhasil disimpan";
           const savedUsdtNote = price_usdt ? ` Harga manual ${formatUsdt(price_usdt)} tersimpan.` : "";
           Swal.fire("Berhasil", `${savedMessage}${savedUsdtNote}`, "success");
@@ -13751,6 +13894,7 @@
             return;
           }
 
+          await finishAdminLoading("Stok terbaru tersimpan");
           Swal.fire(
             "Sync selesai",
             `${data.message || "Stok supplier berhasil disync."}\nReady: ${data.ready || 0}, Out: ${data.out_of_stock || 0}, Maintenance: ${data.maintenance || 0}, Not found: ${data.not_found || 0}`,
@@ -13763,15 +13907,74 @@
         }
       }
 
+      let adminLoadingTimer = null;
+
+      function setAdminLoadingProgress(value, stageText) {
+        const progress = Math.max(0, Math.min(100, Number(value) || 0));
+        const bar = document.getElementById("adminLoadingBar");
+        const percent = document.getElementById("adminLoadingPercent");
+        const stage = document.getElementById("adminLoadingStage");
+        if (bar) bar.style.width = `${progress}%`;
+        if (bar) bar.parentElement?.setAttribute("aria-valuenow", String(progress));
+        if (percent) percent.textContent = `${progress}%`;
+        if (stage && stageText) stage.textContent = stageText;
+      }
+
       function showAdminLoading(title, text) {
+        clearInterval(adminLoadingTimer);
+        const cleanTitle = String(title || "Memproses").replace(/[.…]+$/, "");
         Swal.fire({
-          title,
-          text,
+          html: `
+            <div class="admin-loading-docket">
+              <div class="admin-loading-head">
+                <span>AE / Admin process</span>
+                <span class="admin-loading-live">Berjalan</span>
+              </div>
+              <div class="admin-loading-body">
+                <span class="admin-loading-kicker">Perubahan produk</span>
+                <h2 class="admin-loading-title">${escapeHtml(cleanTitle)}</h2>
+                <p class="admin-loading-copy">${escapeHtml(text || "Menunggu konfirmasi server.")}</p>
+                <div class="admin-loading-meter-row">
+                  <div class="admin-loading-track" role="progressbar" aria-label="Progres proses admin" aria-valuemin="0" aria-valuemax="100" aria-valuenow="8">
+                    <span class="admin-loading-bar" id="adminLoadingBar"></span>
+                  </div>
+                  <strong class="admin-loading-percent" id="adminLoadingPercent">8%</strong>
+                </div>
+                <div class="admin-loading-stage">
+                  <span id="adminLoadingStage" aria-live="polite">Memvalidasi data</span>
+                  <span>Jangan tutup halaman</span>
+                </div>
+              </div>
+            </div>
+          `,
+          customClass: { popup: "admin-loading-popup" },
           allowOutsideClick: false,
           allowEscapeKey: false,
           showConfirmButton: false,
-          didOpen: () => Swal.showLoading(),
+          didOpen: () => {
+            const checkpoints = [18, 31, 47, 62, 74, 83, 89, 92];
+            let index = 0;
+            adminLoadingTimer = setInterval(() => {
+              if (index >= checkpoints.length) return clearInterval(adminLoadingTimer);
+              const progress = checkpoints[index++];
+              const stage = progress < 40
+                ? "Menghubungi server"
+                : progress < 75
+                  ? "Menyimpan perubahan"
+                  : "Menunggu konfirmasi";
+              setAdminLoadingProgress(progress, stage);
+            }, 420);
+          },
+          willClose: () => clearInterval(adminLoadingTimer),
         });
+      }
+
+      async function finishAdminLoading(stageText = "Selesai") {
+        clearInterval(adminLoadingTimer);
+        setAdminLoadingProgress(100, stageText);
+        if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          await new Promise((resolve) => setTimeout(resolve, 180));
+        }
       }
 
       function populateProductFilters(products) {
