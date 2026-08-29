@@ -51,6 +51,8 @@
         --radius-md: 18px;
         --radius-sm: 14px;
         --pill: 999px;
+        --accent: #315dff;
+        --accent-soft: #e8ecff;
         --safe-bottom: env(safe-area-inset-bottom, 0px);
         --sidebar-w: 272px;
         --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -87,6 +89,8 @@
         --gold-bg: rgba(234, 179, 8, 0.14);
         --gold-text: #fde68a;
         --gold-border: rgba(253, 230, 138, 0.22);
+        --accent: #7692ff;
+        --accent-soft: rgba(75, 103, 255, 0.16);
         --shadow: 0 22px 60px rgba(0, 0, 0, 0.45);
         --shadow-sm: 0 10px 28px rgba(0, 0, 0, 0.34);
         --shadow-xs: 0 4px 12px rgba(0, 0, 0, 0.24);
@@ -6625,17 +6629,10 @@
         }
       }
 
-      /* User Monitor: compact Nothing UI control surface. */
+      /* User controls shared by the directory and access tools. */
       #section-users .user-control-deck {
         display: grid;
-        grid-template-columns: minmax(260px, 1fr) auto;
         align-items: end;
-        gap: 8px;
-        margin-bottom: 12px;
-        padding: 8px;
-        border: 1px solid var(--line);
-        border-radius: 3px;
-        background: var(--surface-2);
       }
 
       #section-users .user-control-label {
@@ -6654,22 +6651,15 @@
       #section-users .user-badge-grid select {
         width: 100%;
         min-width: 0;
-        min-height: 48px;
-        border-radius: 2px;
-        background: var(--surface);
       }
 
       #section-users .user-control-actions {
         display: grid;
-        grid-template-columns: repeat(2, minmax(112px, auto));
-        gap: 8px;
       }
 
       #section-users .user-control-actions button {
         width: auto;
-        min-height: 48px;
         margin: 0;
-        border-radius: 2px;
         white-space: nowrap;
       }
 
@@ -6678,8 +6668,6 @@
         align-items: center;
         justify-content: center;
         gap: 8px;
-        background: var(--ink);
-        color: var(--surface);
       }
 
       #section-users .user-refresh-btn .ui-icon {
@@ -6700,33 +6688,13 @@
       }
 
       @keyframes user-refresh-spin {
-        to {
-          transform: rotate(360deg);
-        }
-      }
-
-      @media (prefers-reduced-motion: reduce) {
-        #section-users .user-refresh-btn[aria-busy="true"] .ui-icon {
-          animation: none;
-        }
-      }
-
-      #section-users .user-badge-lab {
-        margin-bottom: 16px;
-        overflow: hidden;
-        border: 1px solid var(--line);
-        border-radius: 3px;
-        background: var(--surface);
+        to { transform: rotate(360deg); }
       }
 
       #section-users .user-badge-lab > summary {
-        min-height: 56px;
         display: flex;
-        align-items: center;
         justify-content: space-between;
         gap: 16px;
-        padding: 12px 14px;
-        color: var(--ink);
         cursor: pointer;
         list-style: none;
         touch-action: manipulation;
@@ -6738,13 +6706,9 @@
 
       #section-users .user-badge-lab > summary::after {
         content: "+";
-        width: 32px;
-        height: 32px;
-        flex: 0 0 32px;
         display: grid;
         place-items: center;
         border: 1px solid var(--line-strong);
-        border-radius: 2px;
         font-family: "JetBrains Mono", monospace;
         font-size: 18px;
         font-weight: 800;
@@ -6757,103 +6721,35 @@
       #section-users .user-badge-summary-copy {
         min-width: 0;
         display: grid;
-        gap: 3px;
-      }
-
-      #section-users .user-badge-summary-copy strong {
-        font-size: 14px;
-        font-weight: 900;
-      }
-
-      #section-users .user-badge-summary-copy small {
-        color: var(--muted);
-        font-size: 11px;
-        line-height: 1.4;
-      }
-
-      #section-users .user-badge-body {
-        padding: 14px;
-        border-top: 1px solid var(--line);
       }
 
       #section-users .user-badge-grid {
         display: grid;
-        grid-template-columns: minmax(220px, 1fr) repeat(2, minmax(160px, 0.45fr));
         gap: 8px;
       }
 
-      #section-users .user-badge-note {
-        margin: 10px 0 12px;
-        padding-left: 10px;
-        border-left: 2px solid var(--line-strong);
-        font-size: 12px;
-        line-height: 1.55;
-      }
-
-      #section-users .reseller-badge-lab {
-        border-color: var(--line-strong);
-      }
-
-      #section-users .reseller-badge-lab > summary {
-        background: var(--ink);
-        color: var(--surface);
-      }
-
-      #section-users .reseller-badge-lab > summary::after {
-        border-color: #666;
-      }
-
-      #section-users .reseller-badge-lab .user-badge-summary-copy small {
-        color: #c8c8c2;
+      @media (prefers-reduced-motion: reduce) {
+        #section-users .user-refresh-btn[aria-busy="true"] .ui-icon {
+          animation: none;
+        }
       }
 
       @media (max-width: 768px) {
-        #section-users .card {
-          padding-bottom: calc(104px + var(--safe-bottom));
-          border-radius: 3px;
-        }
-
-        #section-users .user-control-deck {
-          grid-template-columns: 1fr;
-        }
-
-        #section-users .user-control-actions,
-        #section-users .user-badge-grid {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-
         #section-users .user-control-actions button {
           width: 100%;
           min-width: 0;
         }
 
-        #section-users .user-badge-search {
-          grid-column: 1 / -1;
+        #section-users .user-ledger-table thead {
+          display: none;
         }
 
-        #section-users .user-badge-body {
-          padding: 12px;
-        }
-
-        /* Buyer Ledger: compact mobile account cards. */
         #section-users .user-ledger-table tbody tr {
           position: relative;
           display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: 0 12px;
-          padding: 16px 14px 14px;
           overflow: hidden;
-          border: 1px solid var(--line-strong);
-          border-radius: 18px;
-          box-shadow: 4px 4px 0 var(--ink);
-        }
-
-        #section-users .user-ledger-table tbody tr::before {
-          content: "";
-          position: absolute;
-          inset: 0 0 auto;
-          height: 5px;
-          background: var(--ink);
         }
 
         #section-users .user-ledger-table tbody td {
@@ -6880,13 +6776,6 @@
         #section-users .user-ledger-table tbody td[data-label="Daftar"],
         #section-users .user-ledger-table tbody td[data-label="Aksi"] {
           grid-column: 1 / -1;
-        }
-
-        #section-users .user-ledger-table tbody td[data-label="Username"] {
-          padding-top: 12px;
-          font-size: 18px;
-          font-weight: 900;
-          letter-spacing: -0.035em;
         }
 
         #section-users .user-id-mobile {
@@ -6920,10 +6809,8 @@
 
         #section-users .user-ledger-table tbody td[data-label="Badge"] {
           display: flex;
-          flex-direction: row;
           flex-wrap: wrap;
           align-items: center;
-          justify-content: flex-start;
           gap: 7px;
         }
 
@@ -6934,11 +6821,7 @@
         #section-users .user-ledger-table tbody td[data-label="Order Paid"],
         #section-users .user-ledger-table tbody td[data-label="Total Belanja"] {
           border-bottom: 0;
-          padding: 11px;
-          border-radius: 12px;
           background: var(--surface-2);
-          font-size: 15px;
-          font-weight: 850;
         }
 
         #section-users .user-ledger-table tbody td[data-label="Daftar"] {
@@ -6955,15 +6838,659 @@
 
         #section-users .user-ledger-table tbody td[data-label="Aksi"]::before {
           grid-column: 1 / -1;
-          margin-bottom: 0;
+        }
+      }
+
+      /* Buyer Registry: account-first operations with access tools on demand. */
+      #section-users .user-registry-hero {
+        position: relative;
+        margin-bottom: 18px;
+        padding: 28px 28px 0;
+        overflow: hidden;
+        border: 2px solid #101114;
+        border-radius: 28px;
+        background: #101114;
+        color: #fff;
+        box-shadow: 7px 7px 0 color-mix(in srgb, #101114 20%, transparent);
+      }
+
+      #section-users .user-registry-hero::before {
+        content: "";
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 8px;
+        background: var(--accent);
+      }
+
+      #section-users .user-registry-copy {
+        max-width: 620px;
+        padding: 2px 4px 25px;
+      }
+
+      #section-users .user-registry-copy small,
+      #section-users .user-directory-head small,
+      #section-users .user-access-head small {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--accent);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      #section-users .user-registry-copy h1 {
+        margin: 0;
+        font-size: clamp(38px, 6vw, 72px);
+        font-weight: 900;
+        letter-spacing: -0.065em;
+        line-height: 0.95;
+      }
+
+      #section-users .user-registry-copy p {
+        max-width: 53ch;
+        margin: 15px 0 0;
+        color: #c9cad1;
+        font-size: 15px;
+        line-height: 1.6;
+      }
+
+      #section-users .user-registry-stats {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        margin-inline: -28px;
+        border-top: 1px solid #34363d;
+      }
+
+      #section-users .user-registry-stat {
+        min-width: 0;
+        display: grid;
+        gap: 5px;
+        padding: 18px 20px;
+        border-right: 1px solid #34363d;
+      }
+
+      #section-users .user-registry-stat:last-child {
+        border-right: 0;
+      }
+
+      #section-users .user-registry-stat.is-primary {
+        background: var(--accent);
+      }
+
+      #section-users .user-registry-stat span,
+      #section-users .user-registry-stat small {
+        overflow: hidden;
+        color: #aeb0b8;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.07em;
+        text-overflow: ellipsis;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+
+      #section-users .user-registry-stat.is-primary span,
+      #section-users .user-registry-stat.is-primary small {
+        color: #fff;
+      }
+
+      #section-users .user-registry-stat strong {
+        overflow: hidden;
+        color: #fff;
+        font-family: "JetBrains Mono", monospace;
+        font-size: clamp(20px, 3vw, 30px);
+        font-weight: 900;
+        letter-spacing: -0.055em;
+        line-height: 1.1;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      #section-users .user-directory-card {
+        padding: 24px;
+        border: 2px solid var(--line-strong);
+        border-radius: 28px;
+        box-shadow: 5px 5px 0 color-mix(in srgb, var(--ink) 14%, transparent);
+      }
+
+      #section-users .user-directory-card[aria-busy="true"] {
+        cursor: progress;
+      }
+
+      #section-users .user-directory-head {
+        align-items: flex-end;
+        margin-bottom: 18px;
+        padding-bottom: 18px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      #section-users .user-directory-head h2,
+      #section-users .user-access-head h2 {
+        margin: 0;
+        font-size: clamp(26px, 4vw, 40px);
+        font-weight: 900;
+        letter-spacing: -0.035em;
+        line-height: 1;
+        word-spacing: 0.12em;
+      }
+
+      #section-users .user-directory-head p,
+      #section-users .user-access-head p {
+        margin: 8px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      #section-users .user-directory-count {
+        flex: 0 0 auto;
+        padding: 9px 12px;
+        border: 1px solid color-mix(in srgb, var(--accent) 42%, var(--line));
+        border-radius: 999px;
+        background: var(--accent-soft);
+        color: var(--accent);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+      }
+
+      #section-users .user-control-deck {
+        grid-template-columns: minmax(260px, 1fr) auto;
+        gap: 12px;
+        margin-bottom: 12px;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        background: var(--surface-2);
+      }
+
+      #section-users .user-control-deck input,
+      #section-users .user-badge-grid input,
+      #section-users .user-badge-grid select {
+        min-height: 52px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--surface);
+        font-size: 16px;
+      }
+
+      #section-users .user-control-deck input:focus,
+      #section-users .user-badge-grid input:focus,
+      #section-users .user-badge-grid select:focus {
+        border-color: var(--accent);
+        outline: 3px solid color-mix(in srgb, var(--accent) 18%, transparent);
+        outline-offset: 1px;
+      }
+
+      #section-users .user-control-actions {
+        grid-template-columns: repeat(2, minmax(140px, auto));
+        gap: 8px;
+      }
+
+      #section-users .user-control-actions button {
+        min-height: 52px;
+        border-radius: 14px;
+      }
+
+      #section-users .user-refresh-btn {
+        border: 1px solid #101114;
+        background: #101114;
+        color: #fff;
+      }
+
+      #section-users .user-refresh-btn:disabled {
+        cursor: wait;
+        opacity: 0.58;
+      }
+
+      #section-users .user-directory-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin: 14px 0 10px;
+      }
+
+      #section-users .user-directory-meta .info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: var(--ink);
+        font-size: 12px;
+        font-weight: 750;
+      }
+
+      #section-users .user-directory-meta .info::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        flex: 0 0 8px;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 0 4px var(--accent-soft);
+      }
+
+      #section-users .user-directory-meta > span {
+        color: var(--muted);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      #section-users .user-ledger-wrap {
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+      }
+
+      #section-users .user-ledger-table {
+        margin: 0;
+      }
+
+      #section-users .user-ledger-table thead {
+        background: var(--surface-2);
+      }
+
+      #section-users .user-ledger-table tbody tr {
+        transition: background-color 180ms ease;
+      }
+
+      #section-users .user-ledger-table tbody tr:hover {
+        background: color-mix(in srgb, var(--accent) 5%, var(--surface));
+      }
+
+      #section-users .user-identity {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        min-width: 0;
+      }
+
+      #section-users .user-avatar {
+        width: 42px;
+        height: 42px;
+        flex: 0 0 42px;
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--line-strong);
+        border-radius: 13px;
+        background: var(--ink);
+        color: var(--surface);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 15px;
+        font-weight: 900;
+      }
+
+      #section-users .user-identity-copy {
+        min-width: 0;
+        display: grid;
+        gap: 3px;
+      }
+
+      #section-users .user-identity-copy strong {
+        overflow-wrap: anywhere;
+        color: var(--ink);
+        font-size: 14px;
+        font-weight: 900;
+      }
+
+      #section-users .user-number {
+        display: block;
+        color: var(--ink);
+        font-family: "JetBrains Mono", monospace;
+        font-weight: 800;
+        font-variant-numeric: tabular-nums;
+      }
+
+      #section-users .user-data-note {
+        display: block;
+        margin-top: 3px;
+        color: var(--muted);
+        font-size: 10px;
+      }
+
+      #section-users .user-state-row:hover {
+        background: transparent;
+      }
+
+      #section-users .user-state-row .empty {
+        padding: 0 !important;
+      }
+
+      #section-users .user-state-row .empty::before {
+        display: none;
+      }
+
+      #section-users .user-state-card {
+        display: grid;
+        justify-items: center;
+        gap: 7px;
+        padding: 24px;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      #section-users .user-state-card strong {
+        color: var(--ink);
+        font-size: 15px;
+      }
+
+      #section-users .user-inline-loader {
+        display: block;
+        width: 24px;
+        height: 24px;
+        border: 3px solid var(--line);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: user-refresh-spin 0.75s linear infinite;
+      }
+
+      #section-users .user-access-section {
+        margin-top: 24px;
+        padding-top: 22px;
+        border-top: 1px solid var(--line);
+      }
+
+      #section-users .user-access-head {
+        margin-bottom: 14px;
+      }
+
+      #section-users .user-access-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: start;
+        gap: 12px;
+      }
+
+      #section-users .user-badge-lab {
+        margin: 0;
+        overflow: hidden;
+        border: 1px solid var(--line-strong);
+        border-radius: 20px;
+        background: var(--surface);
+      }
+
+      #section-users .user-badge-lab > summary {
+        min-height: 116px;
+        align-items: flex-start;
+        padding: 18px;
+        background: var(--surface-2);
+      }
+
+      #section-users .reseller-badge-lab > summary {
+        background: #101114;
+        color: #fff;
+      }
+
+      #section-users .user-badge-lab > summary::after {
+        width: 38px;
+        height: 38px;
+        flex-basis: 38px;
+        border-radius: 12px;
+      }
+
+      #section-users .user-badge-lab[open] > summary {
+        border-bottom: 1px solid var(--line);
+      }
+
+      #section-users .user-badge-summary-copy {
+        gap: 4px;
+      }
+
+      #section-users .user-badge-summary-copy > small {
+        margin: 0;
+        color: var(--accent);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      #section-users .user-badge-summary-copy strong {
+        font-size: 21px;
+        letter-spacing: -0.04em;
+      }
+
+      #section-users .user-badge-summary-copy > span {
+        max-width: 38ch;
+        color: var(--muted);
+        font-size: 11px;
+        line-height: 1.45;
+      }
+
+      #section-users .reseller-badge-lab .user-badge-summary-copy > span {
+        color: #c8c9cf;
+      }
+
+      #section-users .user-badge-body {
+        padding: 16px;
+      }
+
+      #section-users .user-badge-grid {
+        grid-template-columns: minmax(170px, 1fr) repeat(2, minmax(130px, 0.58fr));
+      }
+
+      #section-users .user-badge-note {
+        margin: 10px 0 12px;
+        padding: 10px 12px;
+        border: 1px solid var(--line);
+        border-left: 4px solid var(--accent);
+        border-radius: 10px;
+        background: var(--surface-2);
+      }
+
+      #section-users .user-tool-table-wrap {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+      }
+
+      #section-users .user-tool-table {
+        margin: 0;
+        font-size: 12px;
+      }
+
+      #section-users button:focus-visible,
+      #section-users summary:focus-visible {
+        outline: 3px solid var(--accent);
+        outline-offset: 3px;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        #section-users .user-inline-loader { animation: none; }
+        #section-users .user-ledger-table tbody tr { transition: none; }
+      }
+
+      @media (max-width: 768px) {
+        #section-users {
+          padding-bottom: calc(100px + var(--safe-bottom));
+        }
+
+        #section-users .user-registry-hero {
+          margin-inline: -2px;
+          padding: 22px 18px 0;
+          border-radius: 24px;
+          box-shadow: 5px 5px 0 color-mix(in srgb, #101114 18%, transparent);
+        }
+
+        #section-users .user-registry-copy {
+          padding: 0 2px 21px;
+        }
+
+        #section-users .user-registry-copy h1 {
+          font-size: clamp(36px, 13vw, 50px);
+        }
+
+        #section-users .user-registry-copy p {
+          font-size: 14px;
+        }
+
+        #section-users .user-registry-stats {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          margin-inline: -18px;
+        }
+
+        #section-users .user-registry-stat {
+          min-height: 94px;
+          padding: 14px 13px;
+          border-bottom: 1px solid #34363d;
+        }
+
+        #section-users .user-registry-stat:nth-child(2) {
+          border-right: 0;
+        }
+
+        #section-users .user-registry-stat:nth-child(n + 3) {
+          border-bottom: 0;
+        }
+
+        #section-users .user-registry-stat strong {
+          font-size: clamp(18px, 6vw, 24px);
+        }
+
+        #section-users #userSpendStat {
+          font-size: clamp(15px, 4.5vw, 20px);
+        }
+
+        #section-users .user-directory-card {
+          padding: 18px 16px 20px;
+          border-radius: 24px;
+        }
+
+        #section-users .user-directory-head {
+          align-items: flex-start;
+          gap: 12px;
+        }
+
+        #section-users .user-directory-head h2,
+        #section-users .user-access-head h2 {
+          font-size: 28px;
+        }
+
+        #section-users .user-directory-count {
+          padding: 7px 9px;
+          font-size: 9px;
+        }
+
+        #section-users .user-control-deck {
+          grid-template-columns: 1fr;
+          padding: 12px;
+          border-radius: 18px;
+        }
+
+        #section-users .user-control-actions {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        #section-users .user-control-actions button {
+          font-size: 11px;
+        }
+
+        #section-users .user-directory-meta {
+          align-items: flex-start;
+          flex-direction: column;
+          gap: 5px;
+        }
+
+        #section-users .user-ledger-wrap {
+          overflow: visible;
+          border: 0;
+          border-radius: 0;
+        }
+
+        #section-users .user-ledger-table tbody {
+          display: grid;
+          gap: 14px;
+        }
+
+        #section-users .user-ledger-table tbody tr {
+          padding: 15px 14px 14px;
+          border: 1px solid var(--line-strong);
+          border-radius: 18px;
+          box-shadow: 4px 4px 0 var(--ink);
+        }
+
+        #section-users .user-ledger-table tbody tr:hover {
+          background: var(--surface);
+        }
+
+        #section-users .user-ledger-table tbody tr::before {
+          height: 4px;
+          background: var(--accent);
+        }
+
+        #section-users .user-ledger-table tbody td[data-label="Username"] {
+          padding-top: 13px;
+        }
+
+        #section-users .user-avatar {
+          width: 46px;
+          height: 46px;
+          flex-basis: 46px;
+          border-radius: 14px;
+          background: #101114;
+          color: #fff;
+        }
+
+        #section-users .user-identity-copy strong {
+          font-size: 18px;
+        }
+
+        #section-users .user-ledger-table tbody td[data-label="Order Paid"],
+        #section-users .user-ledger-table tbody td[data-label="Total Belanja"] {
+          padding: 12px;
+          border: 1px solid var(--line);
+          border-radius: 13px;
         }
 
         #section-users .user-ledger-table tbody td[data-label="Aksi"] button {
-          width: 100%;
-          min-width: 0;
-          min-height: 44px;
-          padding-inline: 8px;
-          font-size: 11px;
+          min-height: 48px;
+          border-radius: 13px;
+        }
+
+        #section-users .user-state-row {
+          display: block;
+          box-shadow: none !important;
+        }
+
+        #section-users .user-state-row::before {
+          display: none;
+        }
+
+        #section-users .user-access-section {
+          margin-top: 22px;
+          padding-top: 20px;
+        }
+
+        #section-users .user-access-grid {
+          grid-template-columns: 1fr;
+        }
+
+        #section-users .user-badge-lab > summary {
+          min-height: 106px;
+          padding: 16px;
+        }
+
+        #section-users .user-badge-body {
+          padding: 14px;
+        }
+
+        #section-users .user-badge-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        #section-users .user-badge-search {
+          grid-column: 1 / -1;
         }
       }
 
@@ -8671,23 +9198,56 @@
         </div>
       </section>
       <section id="section-users" class="admin-section">
-        <div class="card delay-1">
-          <div class="card-header">
-            <div class="card-title-wrap">
-              <h2>Daftar User Buyer</h2>
-              <p class="card-subtitle">Lihat akun buyer yang sudah daftar.</p>
+        <div class="user-registry-hero delay-1">
+          <div class="user-registry-copy">
+            <small>Accounts / Buyer registry</small>
+            <h1>Buyer Control</h1>
+            <p>Cari akun, cek aktivitas belanja, dan atur akses reseller.</p>
+          </div>
+          <div class="user-registry-stats" aria-label="Ringkasan akun buyer">
+            <div class="user-registry-stat is-primary">
+              <span>Buyer terdaftar</span>
+              <strong id="userTotalStat">0</strong>
+              <small>Semua akun</small>
             </div>
-            <div class="section-badge">User Monitor</div>
+            <div class="user-registry-stat">
+              <span>Reseller aktif</span>
+              <strong id="userResellerStat">0</strong>
+              <small>Akses khusus</small>
+            </div>
+            <div class="user-registry-stat">
+              <span>Order dibayar</span>
+              <strong id="userPaidOrderStat">0</strong>
+              <small>Semua order</small>
+            </div>
+            <div class="user-registry-stat">
+              <span>Total belanja</span>
+              <strong id="userSpendStat">Rp 0</strong>
+              <small>Akumulasi</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="card user-directory-card delay-2" aria-busy="true">
+          <div class="card-header user-directory-head">
+            <div class="card-title-wrap">
+              <small>Buyer directory</small>
+              <h2>Daftar akun</h2>
+              <p class="card-subtitle">Cari username, ID, badge, atau status reseller.</p>
+            </div>
+            <div class="user-directory-count" id="userDirectoryCountBadge">Memuat</div>
           </div>
 
           <div class="user-control-deck">
             <div class="field user-search-field">
-              <label class="user-control-label" for="userSearchInput">Cari buyer</label>
+              <label class="user-control-label" for="userSearchInput">Cari akun buyer</label>
               <input
-                type="text"
+                type="search"
                 id="userSearchInput"
-                placeholder="Username buyer"
+                placeholder="Username, ID, atau badge"
                 autocomplete="off"
+                aria-controls="userTableBody"
+                aria-describedby="userStatusText"
                 oninput="renderUserTable()"
               />
             </div>
@@ -8704,19 +9264,62 @@
               </button>
               <button
                 type="button"
-                class="ghost-btn"
+                class="ghost-btn user-clear-btn"
                 onclick="clearUserSearch()"
               >
-                Bersihkan
+                Hapus pencarian
               </button>
             </div>
           </div>
 
-          <details class="user-badge-lab reseller-badge-lab" open>
+          <div class="user-directory-meta">
+            <div class="info" id="userStatusText" role="status" aria-live="polite">
+              Memuat daftar user...
+            </div>
+            <span>Server AE</span>
+          </div>
+
+          <div class="table-wrap user-ledger-wrap">
+            <table class="user-ledger-table">
+              <thead>
+                <tr>
+                  <th style="width: 90px">ID</th>
+                  <th>Username</th>
+                  <th>Badge</th>
+                  <th>Order Paid</th>
+                  <th>Total Belanja</th>
+                  <th>Waktu Daftar</th>
+                  <th style="width: 220px">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="userTableBody">
+                <tr class="user-state-row">
+                  <td colspan="7" class="empty">
+                    <div class="user-state-card">
+                      <span class="user-inline-loader" aria-hidden="true"></span>
+                      <strong>Menyiapkan daftar buyer</strong>
+                      <span>Mengambil data akun terbaru.</span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="user-access-section">
+            <div class="user-access-head">
+              <small>Access tools</small>
+              <h2>Akses &amp; badge</h2>
+              <p>Buka hanya saat mengubah akses akun.</p>
+            </div>
+            <div class="user-access-grid">
+
+          <details class="user-badge-lab reseller-badge-lab">
             <summary>
               <span class="user-badge-summary-copy">
-                <strong>Badge reseller</strong>
-                <small>Kontrol akses login dan harga reseller</small>
+                <small>Akses penjualan</small>
+                <strong>Reseller</strong>
+                <span>Aktifkan login dan harga khusus pada akun terpilih.</span>
               </span>
             </summary>
 
@@ -8725,9 +9328,9 @@
                 <div class="field user-badge-search">
                   <label class="user-control-label" for="resellerBadgeSearchInput">Cari akun</label>
                   <input
-                    type="text"
+                    type="search"
                     id="resellerBadgeSearchInput"
-                    placeholder="Username reseller"
+                    placeholder="Ketik username"
                     autocomplete="off"
                     oninput="renderResellerBadgeMatches()"
                   />
@@ -8735,11 +9338,11 @@
               </div>
 
               <p class="info user-badge-note">
-                Badge reseller bersifat permanen sampai admin menangguhkannya.
+                Akses tetap aktif sampai admin menangguhkannya.
               </p>
 
-              <div class="table-wrap">
-                <table>
+              <div class="table-wrap user-tool-table-wrap">
+                <table class="user-tool-table">
                   <thead>
                     <tr>
                       <th>User</th>
@@ -8763,8 +9366,9 @@
           <details class="user-badge-lab">
             <summary>
               <span class="user-badge-summary-copy">
-                <strong>Test badge sementara</strong>
-                <small>Owner only · buka saat diperlukan</small>
+                <small>Preview akun</small>
+                <strong>Badge sementara</strong>
+                <span>Uji tampilan badge tanpa mengubah progres buyer.</span>
               </span>
             </summary>
 
@@ -8773,9 +9377,9 @@
                 <div class="field user-badge-search">
                   <label class="user-control-label" for="badgeOverrideSearchInput">Akun test</label>
                   <input
-                    type="text"
+                    type="search"
                     id="badgeOverrideSearchInput"
-                    placeholder="Username untuk test badge"
+                    placeholder="Ketik username buyer"
                     autocomplete="off"
                     oninput="renderBadgeOverrideMatches()"
                   />
@@ -8804,12 +9408,11 @@
               </div>
 
               <p class="info user-badge-note">
-                Gunakan hanya untuk akun test. Override akan berakhir otomatis
-                sesuai masa berlaku.
+                Pakai untuk preview. Badge kembali normal setelah masa berlaku habis.
               </p>
 
-              <div class="table-wrap">
-                <table>
+              <div class="table-wrap user-tool-table-wrap">
+                <table class="user-tool-table">
                   <thead>
                     <tr>
                       <th>User</th>
@@ -8829,28 +9432,7 @@
               </div>
             </div>
           </details>
-
-          <div class="info-row">
-            <div class="info" id="userStatusText" role="status" aria-live="polite">
-              Memuat daftar user...
             </div>
-          </div>
-
-          <div class="table-wrap">
-            <table class="user-ledger-table">
-              <thead>
-                <tr>
-                  <th style="width: 90px">ID</th>
-                  <th>Username</th>
-                  <th>Badge</th>
-                  <th>Order Paid</th>
-                  <th>Total Belanja</th>
-                  <th>Waktu Daftar</th>
-                  <th style="width: 220px">Aksi</th>
-                </tr>
-              </thead>
-              <tbody id="userTableBody"></tbody>
-            </table>
           </div>
         </div>
       </section>
@@ -11373,14 +11955,58 @@
         }
       }
       let ADMIN_USERS_CACHE = [];
+
+      function updateUserRegistryStats() {
+        const totalUsers = ADMIN_USERS_CACHE.length;
+        const activeResellers = ADMIN_USERS_CACHE.filter(
+          (item) => item.reseller_status === "approved",
+        ).length;
+        const paidOrders = ADMIN_USERS_CACHE.reduce(
+          (total, item) => total + Number(item.paid_order_count || 0),
+          0,
+        );
+        const totalSpend = ADMIN_USERS_CACHE.reduce(
+          (total, item) => total + Number(item.total_spend || 0),
+          0,
+        );
+
+        const values = {
+          userTotalStat: totalUsers,
+          userResellerStat: activeResellers,
+          userPaidOrderStat: paidOrders,
+          userSpendStat: formatRupiah(totalSpend),
+        };
+
+        Object.entries(values).forEach(([id, value]) => {
+          const element = document.getElementById(id);
+          if (element) element.textContent = value;
+        });
+      }
+
       async function loadUsers() {
         const statusText = document.getElementById("userStatusText");
         const tableBody = document.getElementById("userTableBody");
         const refreshButton = document.getElementById("userRefreshButton");
         const refreshLabel = refreshButton?.querySelector("[data-user-refresh-label]");
+        const directoryCard = document.querySelector("#section-users .user-directory-card");
+        const countBadge = document.getElementById("userDirectoryCountBadge");
+
+        if (!statusText || !tableBody) return;
 
         statusText.innerText = "Memuat daftar user...";
-        tableBody.innerHTML = "";
+        tableBody.innerHTML = `
+          <tr class="user-state-row">
+            <td colspan="7" class="empty">
+              <div class="user-state-card">
+                <span class="user-inline-loader" aria-hidden="true"></span>
+                <strong>Menyiapkan daftar buyer</strong>
+                <span>Mengambil data akun terbaru.</span>
+              </div>
+            </td>
+          </tr>
+        `;
+        directoryCard?.setAttribute("aria-busy", "true");
+        if (countBadge) countBadge.textContent = "Memuat";
         if (refreshButton) {
           refreshButton.disabled = true;
           refreshButton.setAttribute("aria-busy", "true");
@@ -11402,26 +12028,41 @@
 
           if (data.length === 0) {
             ADMIN_USERS_CACHE = [];
+            updateUserRegistryStats();
             statusText.innerText = "Belum ada user buyer.";
+            if (countBadge) countBadge.textContent = "0 akun";
             tableBody.innerHTML = `
-        <tr>
-          <td colspan="7" class="empty">Belum ada user yang daftar.</td>
-        </tr>
-      `;
+              <tr class="user-state-row">
+                <td colspan="7" class="empty">
+                  <div class="user-state-card">
+                    <strong>Belum ada buyer</strong>
+                    <span>Akun baru akan muncul setelah buyer mendaftar.</span>
+                  </div>
+                </td>
+              </tr>
+            `;
             return;
           }
 
           ADMIN_USERS_CACHE = data;
+          updateUserRegistryStats();
           renderUserTable();
           renderResellerBadgeMatches();
         } catch (err) {
           statusText.innerText = "Gagal memuat daftar user.";
+          if (countBadge) countBadge.textContent = "Gagal memuat";
           tableBody.innerHTML = `
-      <tr>
-        <td colspan="7" class="empty">Terjadi error saat mengambil user.</td>
-      </tr>
-    `;
+            <tr class="user-state-row">
+              <td colspan="7" class="empty">
+                <div class="user-state-card">
+                  <strong>Daftar buyer belum termuat</strong>
+                  <span>Periksa koneksi, lalu tekan Muat ulang.</span>
+                </div>
+              </td>
+            </tr>
+          `;
         } finally {
+          directoryCard?.setAttribute("aria-busy", "false");
           if (refreshButton) {
             refreshButton.disabled = false;
             refreshButton.removeAttribute("aria-busy");
@@ -11467,6 +12108,7 @@
       function renderUserTable() {
         const statusText = document.getElementById("userStatusText");
         const tableBody = document.getElementById("userTableBody");
+        const countBadge = document.getElementById("userDirectoryCountBadge");
         if (!statusText || !tableBody) return;
 
         const users = getFilteredUsers();
@@ -11478,18 +12120,29 @@
           statusText.innerText = keyword
             ? `Tidak ada user cocok untuk "${keyword}".`
             : "Belum ada user buyer.";
+          if (countBadge) countBadge.textContent = "0 akun";
 
           tableBody.innerHTML = `
-      <tr>
-        <td colspan="7" class="empty">User tidak ditemukan.</td>
-      </tr>
-    `;
+            <tr class="user-state-row">
+              <td colspan="7" class="empty">
+                <div class="user-state-card">
+                  <strong>${keyword ? "Akun tidak ditemukan" : "Belum ada buyer"}</strong>
+                  <span>${keyword ? "Coba username, ID, atau badge lain." : "Akun baru akan muncul setelah buyer mendaftar."}</span>
+                </div>
+              </td>
+            </tr>
+          `;
           return;
         }
 
         statusText.innerText = keyword
           ? `Menampilkan ${users.length} dari ${ADMIN_USERS_CACHE.length} user.`
           : `Total user: ${ADMIN_USERS_CACHE.length}`;
+        if (countBadge) {
+          countBadge.textContent = keyword
+            ? `${users.length}/${ADMIN_USERS_CACHE.length} akun`
+            : `${ADMIN_USERS_CACHE.length} akun`;
+        }
 
         tableBody.innerHTML = users
           .map(
@@ -11497,8 +12150,13 @@
         <tr>
   <td data-label="ID">${item.id}</td>
   <td data-label="Username">
-    ${escapeHtml(item.username || "-")}
-    <small class="user-id-mobile">BUYER #${escapeHtml(item.id)}</small>
+    <div class="user-identity">
+      <span class="user-avatar" aria-hidden="true">${escapeHtml(String(item.username || "?").trim().charAt(0).toUpperCase() || "?")}</span>
+      <span class="user-identity-copy">
+        <strong>${escapeHtml(item.username || "-")}</strong>
+        <small class="user-id-mobile">BUYER #${escapeHtml(item.id)}</small>
+      </span>
+    </div>
   </td>
   <td data-label="Badge">
   ${buyerBadge(item.badge)}
@@ -11509,15 +12167,15 @@
       : ""
   }
 </td>
-  <td data-label="Order Paid">${Number(item.paid_order_count || 0)} order</td>
-  <td data-label="Total Belanja">${formatRupiah(item.total_spend || 0)}</td>
+  <td data-label="Order Paid"><strong class="user-number">${Number(item.paid_order_count || 0)}</strong><small class="user-data-note">order sukses</small></td>
+  <td data-label="Total Belanja"><strong class="user-number">${formatRupiah(item.total_spend || 0)}</strong><small class="user-data-note">lifetime</small></td>
   <td data-label="Daftar">${formatTanggal(item.created_at)}</td>
   <td data-label="Aksi" class="action-cell">
             <button class="ghost-btn" data-id="${escapeHtml(item.id)}" onclick="resetUserPassword(this.dataset.id)">
-              Reset Password
+              Reset sandi
             </button>
             <button class="danger-btn" data-id="${escapeHtml(item.id)}" onclick="deleteUser(this.dataset.id)">
-              Hapus
+              Hapus akun
             </button>
           </td>
         </tr>
@@ -11581,7 +12239,12 @@
           if (document.getElementById("section-resellers")?.classList.contains("active")) {
             await loadResellerControl();
           }
-          Swal.fire("Berhasil", data.message, "success");
+          showAdminSuccess(
+            status === "approved" ? "Akses reseller aktif" : "Reseller ditangguhkan",
+            data.message || "Status reseller berhasil diubah.",
+            "Akses reseller",
+            "Kembali ke user",
+          );
         } catch (err) {
           Swal.fire("Gagal", err.message, "error");
         }
@@ -11668,9 +12331,14 @@
             return;
           }
 
-          Swal.fire(data.message || "Badge override berhasil diterapkan");
           await loadUsers();
           renderBadgeOverrideMatches();
+          showAdminSuccess(
+            "Badge preview aktif",
+            data.message || "Badge sementara berhasil diterapkan.",
+            "Preview badge",
+            "Kembali ke user",
+          );
         } catch (err) {
           Swal.fire("Terjadi error server saat menerapkan badge override");
         }
@@ -11704,9 +12372,14 @@
             return;
           }
 
-          Swal.fire(data.message || "Badge override berhasil direset");
           await loadUsers();
           renderBadgeOverrideMatches();
+          showAdminSuccess(
+            "Badge kembali normal",
+            data.message || "Badge sementara berhasil dihapus.",
+            "Preview badge",
+            "Kembali ke user",
+          );
         } catch (err) {
           Swal.fire("Terjadi error server saat reset badge override");
         }
@@ -11714,7 +12387,10 @@
 
       function clearUserSearch() {
         const input = document.getElementById("userSearchInput");
-        if (input) input.value = "";
+        if (input) {
+          input.value = "";
+          input.focus();
+        }
         renderUserTable();
       }
       async function resetUserPassword(userId) {
@@ -11794,8 +12470,13 @@
             return;
           }
 
-          Swal.fire(data.message || "User berhasil dihapus");
-          loadUsers();
+          await loadUsers();
+          showAdminSuccess(
+            "Akun dihapus",
+            data.message || "User sudah dihapus dan tidak dapat login.",
+            "Direktori buyer",
+            "Kembali ke user",
+          );
         } catch (err) {
           Swal.fire("Terjadi error server saat hapus user");
         }
@@ -14128,7 +14809,12 @@
         }
       }
 
-      function showAdminSuccess(title, text, kicker = "Perubahan tersimpan") {
+      function showAdminSuccess(
+        title,
+        text,
+        kicker = "Perubahan tersimpan",
+        confirmText = "Kembali ke produk",
+      ) {
         return Swal.fire({
           html: `
             <div class="admin-success-receipt">
@@ -14158,7 +14844,7 @@
             popup: "admin-success-popup",
             confirmButton: "admin-success-confirm",
           },
-          confirmButtonText: "Kembali ke produk",
+          confirmButtonText: confirmText,
         });
       }
 

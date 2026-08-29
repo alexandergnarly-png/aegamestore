@@ -33,7 +33,7 @@ scripts.forEach(([, source]) =>
   'id="adminLoadingPercent">8%</strong>',
   "async function finishAdminLoading",
   'await finishAdminLoading("Produk tersimpan")',
-  "function showAdminSuccess(title, text, kicker",
+  "function showAdminSuccess(",
   'class="admin-success-receipt"',
   'popup: "admin-success-popup"',
   'confirmButton: "admin-success-confirm"',
@@ -115,11 +115,21 @@ scripts.forEach(([, source]) =>
   'class="user-control-deck"',
   'class="user-badge-lab"',
   'for="userSearchInput"',
+  "Buyer Registry: account-first operations with access tools on demand.",
+  'class="user-registry-hero delay-1"',
+  'id="userTotalStat"',
+  'id="userResellerStat"',
+  'id="userPaidOrderStat"',
+  'id="userSpendStat"',
+  'id="userDirectoryCountBadge"',
+  'class="user-access-grid"',
+  "function updateUserRegistryStats()",
+  'class="user-state-card"',
+  'class="user-identity"',
   "#section-users .user-control-actions",
   'id="userRefreshButton"',
   'refreshButton.setAttribute("aria-busy", "true")',
   'fetch("/users", { cache: "no-store" })',
-  "Buyer Ledger: compact mobile account cards.",
   'class="voucher-filter-card"',
   'id="voucherEditorPanel" open',
   'class="voucher-form-grid"',
@@ -138,9 +148,13 @@ scripts.forEach(([, source]) =>
   'class="voucher-ticket-card ${active ? "is-active" : "is-inactive"}"',
   'class="voucher-ticket-actions"',
   'document.getElementById("voucherEditorPanel")',
-  "padding-bottom: calc(104px + var(--safe-bottom))",
+  "padding-bottom: calc(100px + var(--safe-bottom))",
 ].forEach((marker) =>
   assert.ok(admin.includes(marker), `Missing admin popup marker: ${marker}`),
+);
+assert.ok(
+  !admin.includes('class="user-badge-lab reseller-badge-lab" open'),
+  "Reseller access tools should stay collapsed until requested",
 );
 assert.ok(
   !admin.includes('label for="voucherGameName"') &&
