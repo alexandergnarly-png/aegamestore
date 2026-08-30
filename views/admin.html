@@ -743,14 +743,15 @@
       }
 
       .wallet-hero {
-        display: flex;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
         align-items: center;
-        justify-content: space-between;
-        gap: 18px;
+        gap: 22px;
+        overflow: hidden;
         margin-bottom: 18px;
-        padding: 20px;
+        padding: 22px;
         border: 1px solid var(--line-strong);
-        border-radius: 30px;
+        border-radius: 30px 30px 10px 30px;
         background: var(--ink);
         color: var(--surface);
         box-shadow: var(--shadow);
@@ -760,48 +761,81 @@
         min-width: 0;
         display: flex;
         align-items: center;
-        gap: 15px;
+        gap: 16px;
       }
 
       .wallet-hero-icon {
-        width: 56px;
-        height: 56px;
-        flex: 0 0 56px;
+        width: 58px;
+        height: 58px;
+        flex: 0 0 58px;
         display: grid;
         place-items: center;
-        border: 1px solid color-mix(in srgb, var(--surface) 28%, transparent);
-        border-radius: 20px;
-        background: color-mix(in srgb, var(--surface) 12%, transparent);
+        border: 1px solid color-mix(in srgb, var(--surface) 30%, transparent);
+        border-radius: 20px 20px 7px 20px;
+        background: color-mix(in srgb, var(--surface) 11%, transparent);
       }
 
       .wallet-hero-icon .ui-icon {
-        width: 27px;
-        height: 27px;
+        width: 28px;
+        height: 28px;
+      }
+
+      .wallet-kicker,
+      .wallet-card-kicker,
+      .wallet-recipient-proof small,
+      .wallet-rate-card span,
+      .wallet-rate-card small {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .wallet-kicker {
+        display: block;
+        margin-bottom: 6px;
+        color: color-mix(in srgb, var(--surface) 62%, transparent);
       }
 
       .wallet-hero h1 {
-        font-size: clamp(24px, 4vw, 34px);
-        line-height: 1;
-        letter-spacing: -0.055em;
+        font-size: clamp(27px, 4vw, 38px);
+        line-height: 0.98;
+        letter-spacing: -0.06em;
       }
 
       .wallet-hero p {
-        margin-top: 6px;
-        color: color-mix(in srgb, var(--surface) 68%, transparent);
+        max-width: 52ch;
+        margin-top: 8px;
+        color: color-mix(in srgb, var(--surface) 70%, transparent);
         font-size: 12px;
         font-weight: 700;
       }
 
-      .wallet-hero .section-badge {
-        flex: 0 0 auto;
-        border-color: color-mix(in srgb, var(--surface) 25%, transparent);
-        background: color-mix(in srgb, var(--surface) 12%, transparent);
-        color: var(--surface);
+      .wallet-rate-card {
+        min-width: 198px;
+        display: grid;
+        gap: 3px;
+        padding: 14px 16px;
+        border: 1px solid color-mix(in srgb, var(--surface) 24%, transparent);
+        border-radius: 18px 18px 6px 18px;
+        background: color-mix(in srgb, var(--surface) 10%, transparent);
+      }
+
+      .wallet-rate-card span,
+      .wallet-rate-card small {
+        color: color-mix(in srgb, var(--surface) 58%, transparent);
+      }
+
+      .wallet-rate-card strong {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 18px;
+        line-height: 1.25;
       }
 
       .wallet-grid {
         display: grid;
-        grid-template-columns: minmax(0, 1.45fr) minmax(300px, 0.75fr);
+        grid-template-columns: minmax(320px, 0.78fr) minmax(0, 1.42fr);
         gap: 18px;
         align-items: start;
       }
@@ -810,71 +844,388 @@
         margin-bottom: 0;
       }
 
+      .wallet-grant-card {
+        border: 1px solid var(--line-strong);
+        border-radius: 30px 30px 10px 30px;
+        box-shadow: 7px 7px 0 color-mix(in srgb, var(--ink) 13%, transparent);
+      }
+
+      .wallet-history-card {
+        min-width: 0;
+      }
+
+      .wallet-card-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 14px;
+        margin-bottom: 14px;
+      }
+
+      .wallet-card-kicker {
+        display: block;
+        margin-bottom: 5px;
+        color: var(--success-text);
+      }
+
+      .wallet-card-head h2 {
+        font-size: clamp(22px, 3vw, 29px);
+        line-height: 1.05;
+        letter-spacing: -0.045em;
+      }
+
+      .wallet-card-head p {
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 650;
+      }
+
       .wallet-filter-toolbar {
         display: grid;
         grid-template-columns: repeat(2, minmax(160px, 1fr)) auto;
         align-items: end;
+        margin-bottom: 16px;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        background: var(--surface-2);
       }
 
       .wallet-filter-toolbar .field,
       .wallet-grant-form .field {
         display: grid;
-        gap: 6px;
+        gap: 7px;
+      }
+
+      .wallet-filter-toolbar button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+      }
+
+      .wallet-filter-toolbar .ui-icon {
+        width: 16px;
+        height: 16px;
+      }
+
+      .wallet-note {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: -1px 0 16px;
+        padding: 11px 12px;
+        border: 1px solid var(--success-border);
+        border-radius: 16px;
+        background: var(--success-bg);
+        color: var(--success-text);
+        font-size: 11px;
+        font-weight: 800;
+        line-height: 1.45;
+      }
+
+      .wallet-note .ui-icon {
+        width: 18px;
+        height: 18px;
+        flex: 0 0 18px;
       }
 
       .wallet-grant-form {
         display: grid;
-        gap: 12px;
-        margin-bottom: 0;
+        gap: 14px;
+        margin: 0;
       }
 
-      .wallet-grant-form button {
+      .wallet-user-control,
+      .wallet-amount-control {
+        position: relative;
+      }
+
+      .wallet-user-control > .ui-icon {
+        position: absolute;
+        z-index: 1;
+        top: 50%;
+        left: 14px;
+        width: 19px;
+        height: 19px;
+        color: var(--muted);
+        pointer-events: none;
+        transform: translateY(-50%);
+      }
+
+      .wallet-user-control input {
+        min-height: 52px;
+        padding-left: 44px;
+        border-color: var(--line-strong);
+        font-size: 15px;
+      }
+
+      .wallet-user-options {
+        position: absolute;
+        z-index: 35;
+        top: calc(100% + 7px);
+        right: 0;
+        left: 0;
+        max-height: 286px;
+        display: grid;
+        gap: 5px;
+        overflow-y: auto;
+        padding: 7px;
+        border: 1px solid var(--line-strong);
+        border-radius: 18px 18px 7px 18px;
+        background: var(--surface);
+        box-shadow: 8px 8px 0 color-mix(in srgb, var(--ink) 16%, transparent);
+      }
+
+      .wallet-user-options[hidden] {
+        display: none;
+      }
+
+      .wallet-user-option {
         width: 100%;
-        margin-top: 2px;
+        min-height: 52px;
+        display: grid;
+        grid-template-columns: 36px minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 10px;
+        padding: 7px 9px;
+        border-color: transparent;
+        border-radius: 13px;
+        background: transparent;
+        color: var(--ink);
+        text-align: left;
+      }
+
+      .wallet-user-option:hover,
+      .wallet-user-option.is-active {
+        border-color: var(--ink);
+        background: var(--ink);
+        color: var(--surface);
+        opacity: 1;
+        transform: none;
+      }
+
+      .wallet-user-option-avatar {
+        width: 36px;
+        height: 36px;
+        display: grid;
+        place-items: center;
+        border: 1px solid currentColor;
+        border-radius: 12px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+
+      .wallet-user-option-copy {
+        min-width: 0;
+        display: grid;
+        gap: 1px;
+      }
+
+      .wallet-user-option-copy strong,
+      .wallet-user-option-copy small {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .wallet-user-option-copy strong {
+        font-size: 12px;
+      }
+
+      .wallet-user-option-copy small,
+      .wallet-user-option-id {
+        color: inherit;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 9px;
+        font-weight: 700;
+        opacity: 0.68;
+      }
+
+      .wallet-user-status {
+        min-height: 17px;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 750;
+      }
+
+      .wallet-recipient-proof {
+        display: grid;
+        grid-template-columns: 42px minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 10px;
+        min-height: 72px;
+        padding: 11px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: var(--surface-2);
+        transition:
+          border-color 0.18s var(--ease),
+          background 0.18s var(--ease);
+      }
+
+      .wallet-recipient-icon {
+        width: 42px;
+        height: 42px;
+        display: grid;
+        place-items: center;
+        border-radius: 14px;
+        background: var(--surface);
+        color: var(--muted);
+      }
+
+      .wallet-recipient-icon .ui-icon {
+        width: 20px;
+        height: 20px;
+      }
+
+      .wallet-recipient-copy {
+        min-width: 0;
+        display: grid;
+        gap: 1px;
+      }
+
+      .wallet-recipient-copy small {
+        color: var(--muted);
+      }
+
+      .wallet-recipient-copy strong,
+      .wallet-recipient-copy span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .wallet-recipient-copy strong {
+        font-size: 13px;
+      }
+
+      .wallet-recipient-copy span {
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 700;
+      }
+
+      .wallet-recipient-state {
+        padding: 6px 8px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: var(--muted);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 9px;
+        font-weight: 800;
+        white-space: nowrap;
+      }
+
+      .wallet-recipient-proof[data-state="ready"] {
+        border-color: color-mix(in srgb, var(--accent) 70%, var(--line));
+        background: var(--accent-soft);
+      }
+
+      .wallet-recipient-proof[data-state="ready"] .wallet-recipient-icon {
+        background: var(--accent);
+        color: #ffffff;
+      }
+
+      .wallet-recipient-proof[data-state="ready"] .wallet-recipient-state {
+        border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+        background: var(--accent);
+        color: #ffffff;
+      }
+
+      .wallet-amount-control {
+        display: grid;
+        grid-template-columns: 54px minmax(0, 1fr);
+      }
+
+      .wallet-amount-prefix {
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--line-strong);
+        border-right: 0;
+        border-radius: 17px 0 0 17px;
+        background: var(--surface-2);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      .wallet-amount-control input {
+        min-height: 54px;
+        border-color: var(--line-strong);
+        border-radius: 0 17px 17px 0;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 16px;
       }
 
       .wallet-usd-tools {
         display: grid;
-        gap: 8px;
+        gap: 9px;
         margin-top: 2px;
         padding: 10px;
         border: 1px solid var(--line);
-        border-radius: 16px;
+        border-radius: 18px;
         background: var(--surface-2);
       }
 
       .wallet-usd-quick {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 6px;
+        gap: 7px;
       }
 
       .wallet-grant-form .wallet-usd-quick button {
-        min-height: 40px;
+        min-height: 44px;
         margin: 0;
         padding: 8px 6px;
-        border-radius: 12px;
+        border-color: var(--line);
+        border-radius: 13px;
+        background: var(--surface);
+        color: var(--ink);
+        font-family: "JetBrains Mono", monospace;
         font-size: 12px;
+      }
+
+      .wallet-grant-form .wallet-usd-quick button.is-active {
+        border-color: var(--accent);
+        background: var(--accent);
+        color: #ffffff;
       }
 
       .wallet-usd-estimate {
         margin: 0;
         color: var(--muted);
-        font-size: 11px;
+        font-size: 10px;
         font-weight: 750;
-        line-height: 1.4;
+        line-height: 1.45;
       }
 
-      .wallet-note {
-        margin: -2px 0 14px;
-        padding: 11px 12px;
-        border: 1px solid var(--line);
-        border-radius: 16px;
-        background: var(--surface-2);
-        color: var(--muted);
-        font-size: 11px;
-        font-weight: 750;
-        line-height: 1.5;
+      .wallet-grant-form textarea {
+        min-height: 76px;
+      }
+
+      .wallet-submit-btn {
+        width: 100%;
+        min-height: 54px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 2px;
+        padding-inline: 18px;
+        border-radius: 17px 17px 5px 17px;
+      }
+
+      .wallet-submit-btn .ui-icon {
+        width: 20px;
+        height: 20px;
+      }
+
+      .wallet-history-card .table-wrap {
+        border-radius: 20px;
       }
 
       .reseller-control-hero {
@@ -3549,24 +3900,76 @@
         }
 
         .wallet-hero {
-          align-items: flex-start;
+          grid-template-columns: 1fr;
+          align-items: stretch;
+          gap: 14px;
           padding: 16px;
-          border-radius: 25px;
+          border-radius: 25px 25px 8px 25px;
         }
 
         .wallet-hero-icon {
           width: 48px;
           height: 48px;
           flex-basis: 48px;
-          border-radius: 17px;
+          border-radius: 17px 17px 6px 17px;
         }
 
-        .wallet-hero .section-badge {
-          display: none;
+        .wallet-rate-card {
+          min-width: 0;
+          grid-template-columns: minmax(0, 1fr) auto;
+          align-items: center;
+          column-gap: 10px;
+          padding: 12px 14px;
+        }
+
+        .wallet-rate-card strong {
+          grid-row: span 2;
+          grid-column: 2;
+          font-size: 15px;
+          text-align: right;
         }
 
         .wallet-filter-toolbar {
           grid-template-columns: 1fr;
+        }
+
+        #section-wallet {
+          padding-bottom: calc(100px + var(--safe-bottom));
+        }
+
+        .wallet-grant-card {
+          border-radius: 26px 26px 8px 26px;
+          box-shadow: 5px 5px 0 color-mix(in srgb, var(--ink) 12%, transparent);
+        }
+
+        .wallet-card-head {
+          gap: 9px;
+        }
+
+        .wallet-card-head .section-badge {
+          padding-inline: 9px;
+          font-size: 9px;
+        }
+
+        .wallet-usd-quick {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .wallet-grant-form .wallet-usd-quick button {
+          min-height: 48px;
+        }
+
+        .wallet-recipient-proof {
+          grid-template-columns: 42px minmax(0, 1fr);
+        }
+
+        .wallet-recipient-state {
+          grid-column: 2;
+          justify-self: start;
+        }
+
+        .wallet-history-card .wallet-card-head {
+          align-items: center;
         }
 
         .reseller-control-hero { align-items: stretch; padding: 17px; flex-direction: column; border-radius: 26px 26px 8px 26px; }
@@ -10131,30 +10534,44 @@
       <div class="wallet-hero delay-1">
         <div class="wallet-hero-copy">
           <div class="wallet-hero-icon" aria-hidden="true"><svg class="ui-icon"><use href="#icon-wallet"></use></svg></div>
-          <div><h1>AE Credit</h1><p>Verifikasi top up dan kelola saldo buyer dari satu tempat.</p></div>
+          <div><span class="wallet-kicker">OWNER CREDIT DESK</span><h1>AE Credit</h1><p>Tambah saldo buyer dan cek pembayaran deposit dari satu halaman.</p></div>
         </div>
-        <div class="section-badge">Owner Wallet</div>
+        <div class="wallet-rate-card"><span>Kurs grant</span><strong id="walletHeroRate">Memuat...</strong><small>USD / IDR reseller</small></div>
       </div>
       <div class="wallet-grid">
-        <div class="card delay-1">
-          <div class="card-header"><div class="card-title-wrap"><h2>Top Up & Riwayat</h2><p class="card-subtitle">Pantau pembayaran Midtrans otomatis dan verifikasi QRIS manual.</p></div><div class="section-badge" id="walletPendingBadge">0 data</div></div>
+        <article class="card wallet-grant-card delay-1">
+          <div class="wallet-card-head"><div><span class="wallet-card-kicker">CREDIT ENTRY</span><h2>Tambah saldo</h2><p>Pilih buyer, tentukan nominal, lalu catat alasannya.</p></div><div class="section-badge">Owner only</div></div>
+          <div class="wallet-note"><svg class="ui-icon" aria-hidden="true"><use href="#icon-check"></use></svg><span>Setiap grant masuk ke mutasi akun beserta nama admin.</span></div>
+          <form class="wallet-grant-form" onsubmit="grantWalletCredit(event)">
+            <input id="walletGrantUserId" type="hidden" />
+            <div class="field">
+              <label for="walletGrantUsername">Akun penerima</label>
+              <div class="wallet-user-control"><svg class="ui-icon" aria-hidden="true"><use href="#icon-users"></use></svg><input id="walletGrantUsername" type="text" role="combobox" aria-autocomplete="list" aria-controls="walletGrantUserOptions" aria-expanded="false" maxlength="80" autocomplete="off" placeholder="Ketik username buyer" aria-describedby="walletGrantUserStatus" onfocus="loadWalletGrantUsers(); renderWalletGrantUserOptions()" oninput="syncWalletGrantUserSelection()" onkeydown="handleWalletGrantUserKeydown(event)" onblur="window.setTimeout(closeWalletGrantUserOptions, 120)" required /><div class="wallet-user-options" id="walletGrantUserOptions" role="listbox" aria-label="Hasil pencarian buyer" hidden></div></div>
+              <p class="wallet-user-status" id="walletGrantUserStatus" aria-live="polite">Memuat daftar buyer...</p>
+              <div class="wallet-recipient-proof" id="walletGrantRecipient" data-state="empty">
+                <span class="wallet-recipient-icon" aria-hidden="true"><svg class="ui-icon"><use href="#icon-users"></use></svg></span>
+                <span class="wallet-recipient-copy"><small>Penerima</small><strong id="walletGrantRecipientName">Belum dipilih</strong><span id="walletGrantRecipientMeta">Ketik nama lalu pilih dari daftar.</span></span>
+                <span class="wallet-recipient-state" id="walletGrantRecipientState">Belum siap</span>
+              </div>
+            </div>
+            <div class="field">
+              <label for="walletGrantAmount">Nominal credit</label>
+              <div class="wallet-amount-control"><span class="wallet-amount-prefix">Rp</span><input id="walletGrantAmount" type="number" min="1000" max="2000000" step="1" inputmode="numeric" placeholder="50000" oninput="updateWalletGrantUsdEstimate()" required /></div>
+              <div class="wallet-usd-tools"><div class="wallet-usd-quick" aria-label="Pilih nominal USD"><button type="button" data-wallet-usd="10" onclick="setWalletGrantUsd(10)">$10</button><button type="button" data-wallet-usd="25" onclick="setWalletGrantUsd(25)">$25</button><button type="button" data-wallet-usd="50" onclick="setWalletGrantUsd(50)">$50</button><button type="button" data-wallet-usd="100" onclick="setWalletGrantUsd(100)">$100</button></div><p class="wallet-usd-estimate" id="walletGrantUsdEstimate" aria-live="polite">Memuat kurs USD...</p></div>
+            </div>
+            <div class="field"><label for="walletGrantReason">Catatan grant</label><textarea id="walletGrantReason" maxlength="300" rows="2" placeholder="Contoh: deposit reseller luar negeri" required></textarea></div>
+            <button class="wallet-submit-btn" id="walletGrantSubmit" type="submit" disabled><span>Tambah AE Credit</span><svg class="ui-icon" aria-hidden="true"><use href="#icon-wallet"></use></svg></button>
+          </form>
+        </article>
+        <article class="card wallet-history-card delay-2">
+          <div class="wallet-card-head"><div><span class="wallet-card-kicker">PAYMENT LEDGER</span><h2>Top up & riwayat</h2><p>Midtrans otomatis dan verifikasi QRIS manual.</p></div><div class="section-badge" id="walletPendingBadge">0 data</div></div>
           <div class="toolbar wallet-filter-toolbar">
             <div class="field"><label for="walletStatusFilter">Status</label><select id="walletStatusFilter" onchange="loadWalletTopups()"><option value="all">Semua status</option><option value="pending">Menunggu pembayaran/verifikasi</option><option value="approved">Berhasil</option><option value="rejected">Gagal / ditolak</option></select></div>
             <div class="field"><label for="walletProviderFilter">Metode</label><select id="walletProviderFilter" onchange="loadWalletTopups()"><option value="all">Semua metode</option><option value="midtrans">Midtrans otomatis</option><option value="manual_qris">QRIS manual</option></select></div>
-            <button type="button" onclick="loadWalletTopups()">Refresh Data</button>
+            <button type="button" onclick="loadWalletTopups()"><svg class="ui-icon" aria-hidden="true"><use href="#icon-refresh"></use></svg><span>Muat ulang</span></button>
           </div>
-          <div class="table-wrap"><table><thead><tr><th>Buyer</th><th>Nominal</th><th>Metode</th><th>Status</th><th>Waktu</th><th>Detail</th></tr></thead><tbody id="walletTopupTableBody"><tr><td class="empty" colspan="6">Memuat...</td></tr></tbody></table></div>
-        </div>
-        <div class="card delay-2">
-          <div class="card-header"><div class="card-title-wrap"><h2>Grant Credit</h2><p class="card-subtitle">Tambahkan saldo internal langsung ke akun yang dipilih.</p></div><div class="section-badge">Owner Only</div></div>
-          <div class="wallet-note">Setiap grant tercatat di ledger beserta alasan dan akun admin.</div>
-          <div class="toolbar wallet-grant-form">
-            <div class="field"><label for="walletGrantUsername">Username buyer</label><input id="walletGrantUsername" type="text" maxlength="80" autocomplete="off" placeholder="Contoh: zahir"></div>
-            <div class="field"><label for="walletGrantAmount">Nominal credit</label><input id="walletGrantAmount" type="number" min="1000" max="2000000" step="1000" inputmode="numeric" placeholder="Contoh: 50000" oninput="updateWalletGrantUsdEstimate()"><div class="wallet-usd-tools"><div class="wallet-usd-quick" aria-label="Pilih nominal USD"><button type="button" onclick="setWalletGrantUsd(10)">$10</button><button type="button" onclick="setWalletGrantUsd(25)">$25</button><button type="button" onclick="setWalletGrantUsd(50)">$50</button><button type="button" onclick="setWalletGrantUsd(100)">$100</button></div><p class="wallet-usd-estimate" id="walletGrantUsdEstimate">Memuat kurs USD...</p></div></div>
-            <div class="field"><label for="walletGrantReason">Alasan grant</label><input id="walletGrantReason" type="text" maxlength="300" placeholder="Contoh: bonus owner"></div>
-            <button type="button" onclick="grantWalletCredit()">Tambah AE Credit</button>
-          </div>
-        </div>
+          <div class="table-wrap"><table class="wallet-history-table"><thead><tr><th>Buyer</th><th>Nominal</th><th>Metode</th><th>Status</th><th>Waktu</th><th>Detail</th></tr></thead><tbody id="walletTopupTableBody"><tr><td class="empty" colspan="6">Memuat...</td></tr></tbody></table></div>
+        </article>
       </div>
     </section>
 
@@ -10371,6 +10788,11 @@
       let adminResellerProfits = [];
       let activeResellerId = null;
       let adminWalletUsdIdrRate = 0;
+      let walletGrantUsersReady = false;
+      let walletGrantUsersRequest = null;
+      let walletGrantUserMatches = [];
+      let walletGrantUserActiveIndex = -1;
+      let walletGrantInFlight = false;
 
       function toggleSidebar() {
         const isCollapsed = document.body.classList.toggle("sidebar-collapsed");
@@ -10674,33 +11096,273 @@
         if (refreshDetail && activeResellerId) openResellerDetail(activeResellerId);
       }
 
-      async function grantWalletCredit() {
-        const username = document.getElementById("walletGrantUsername")?.value.trim();
-        const amount = document.getElementById("walletGrantAmount")?.value;
-        const reason = document.getElementById("walletGrantReason")?.value.trim();
-        if (!username || !amount || !reason) return Swal.fire("Data belum lengkap", "Username, nominal, dan alasan wajib diisi.", "warning");
-        const confirm = await Swal.fire({ title: "Tambah saldo buyer?", html: `<p>Username: <strong>${escapeHtml(username)}</strong></p><p>Nominal: <strong>${formatRupiah(amount)}</strong></p><p>Alasan: ${escapeHtml(reason)}</p>`, icon: "warning", showCancelButton: true, confirmButtonText: "Ya, tambahkan", cancelButtonText: "Batal" });
-        if (!confirm.isConfirmed) return;
+      function closeWalletGrantUserOptions() {
+        const list = document.getElementById("walletGrantUserOptions");
+        const input = document.getElementById("walletGrantUsername");
+        if (list) list.hidden = true;
+        input?.setAttribute("aria-expanded", "false");
+        input?.removeAttribute("aria-activedescendant");
+        walletGrantUserActiveIndex = -1;
+      }
+
+      function setWalletGrantUserActiveIndex(index) {
+        if (!walletGrantUserMatches.length) return;
+        const options = [...document.querySelectorAll("#walletGrantUserOptions .wallet-user-option")];
+        walletGrantUserActiveIndex = (index + walletGrantUserMatches.length) % walletGrantUserMatches.length;
+        options.forEach((option, optionIndex) => {
+          const active = optionIndex === walletGrantUserActiveIndex;
+          option.classList.toggle("is-active", active);
+          option.setAttribute("aria-selected", active ? "true" : "false");
+          if (active) {
+            document.getElementById("walletGrantUsername")?.setAttribute("aria-activedescendant", option.id);
+            option.scrollIntoView({ block: "nearest" });
+          }
+        });
+      }
+
+      function selectWalletGrantUser(userId) {
+        const selected = ADMIN_USERS_CACHE.find((item) => Number(item.id) === Number(userId));
+        const input = document.getElementById("walletGrantUsername");
+        if (!selected || !input) return;
+        input.value = String(selected.username || "");
+        syncWalletGrantUserSelection();
+        closeWalletGrantUserOptions();
+        input.focus({ preventScroll: true });
+      }
+
+      function renderWalletGrantUserOptions() {
+        const list = document.getElementById("walletGrantUserOptions");
+        const input = document.getElementById("walletGrantUsername");
+        if (!list || !input) return;
+        const keyword = input.value.trim().toLowerCase();
+        if (!walletGrantUsersReady || !keyword) {
+          walletGrantUserMatches = [];
+          closeWalletGrantUserOptions();
+          return;
+        }
+
+        walletGrantUserMatches = ADMIN_USERS_CACHE
+          .filter((item) => String(item.username || "").toLowerCase().includes(keyword))
+          .sort((a, b) => {
+            const usernameA = String(a.username || "");
+            const usernameB = String(b.username || "");
+            const startsA = usernameA.toLowerCase().startsWith(keyword) ? 0 : 1;
+            const startsB = usernameB.toLowerCase().startsWith(keyword) ? 0 : 1;
+            return startsA - startsB || usernameA.localeCompare(usernameB, "id", { sensitivity: "base" });
+          })
+          .slice(0, 8);
+        walletGrantUserActiveIndex = -1;
+        list.replaceChildren();
+
+        if (!walletGrantUserMatches.length) {
+          closeWalletGrantUserOptions();
+          return;
+        }
+
+        walletGrantUserMatches.forEach((item, index) => {
+          const option = document.createElement("button");
+          option.type = "button";
+          option.id = `walletGrantUserOption-${item.id}`;
+          option.className = "wallet-user-option";
+          option.tabIndex = -1;
+          option.setAttribute("role", "option");
+          option.setAttribute("aria-selected", "false");
+
+          const avatar = document.createElement("span");
+          avatar.className = "wallet-user-option-avatar";
+          avatar.textContent = String(item.username || "?").slice(0, 1);
+          const copy = document.createElement("span");
+          copy.className = "wallet-user-option-copy";
+          const username = document.createElement("strong");
+          username.textContent = String(item.username || "-");
+          const meta = document.createElement("small");
+          meta.textContent = `${item.reseller_status === "approved" ? "Reseller" : "Buyer"} · ${Number(item.paid_order_count || 0)} order dibayar`;
+          copy.append(username, meta);
+          const id = document.createElement("span");
+          id.className = "wallet-user-option-id";
+          id.textContent = `#${item.id}`;
+          option.append(avatar, copy, id);
+          option.addEventListener("mousedown", (event) => event.preventDefault());
+          option.addEventListener("click", () => selectWalletGrantUser(item.id));
+          option.addEventListener("mouseenter", () => setWalletGrantUserActiveIndex(index));
+          list.append(option);
+        });
+
+        list.hidden = false;
+        input.setAttribute("aria-expanded", "true");
+        input.removeAttribute("aria-activedescendant");
+      }
+
+      function handleWalletGrantUserKeydown(event) {
+        if (event.key === "Escape") {
+          closeWalletGrantUserOptions();
+          return;
+        }
+        if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+          event.preventDefault();
+          if (document.getElementById("walletGrantUserOptions")?.hidden) renderWalletGrantUserOptions();
+          if (!walletGrantUserMatches.length) return;
+          const direction = event.key === "ArrowDown" ? 1 : -1;
+          const nextIndex = walletGrantUserActiveIndex < 0
+            ? (direction > 0 ? 0 : walletGrantUserMatches.length - 1)
+            : walletGrantUserActiveIndex + direction;
+          setWalletGrantUserActiveIndex(nextIndex);
+          return;
+        }
+        if (event.key === "Enter" && walletGrantUserActiveIndex >= 0) {
+          event.preventDefault();
+          selectWalletGrantUser(walletGrantUserMatches[walletGrantUserActiveIndex]?.id);
+        }
+      }
+
+      async function loadWalletGrantUsers(force = false) {
+        const status = document.getElementById("walletGrantUserStatus");
+        if (!document.getElementById("walletGrantUserOptions")) return;
+        if (walletGrantUsersReady && !force) {
+          syncWalletGrantUserSelection();
+          return;
+        }
+        if (status) status.textContent = "Memuat daftar buyer...";
         try {
-          const res = await fetch("/api/admin/wallet/grant", { method: "POST", headers: { "Content-Type": "application/json", "x-csrf-token": getCsrfToken() }, body: JSON.stringify({ username, amount, reason }) });
+          if (!walletGrantUsersRequest) {
+            walletGrantUsersRequest = fetch("/users", { cache: "no-store" }).then(async (res) => {
+              if (res.status === 401) {
+                window.location.href = "/ae-auth";
+                throw new Error("Sesi admin berakhir");
+              }
+              if (!res.ok) throw new Error(`Gagal memuat buyer (${res.status})`);
+              const data = await res.json();
+              if (!Array.isArray(data)) throw new Error("Respons buyer tidak valid");
+              return data;
+            });
+          }
+          ADMIN_USERS_CACHE = await walletGrantUsersRequest;
+          walletGrantUsersReady = true;
+          syncWalletGrantUserSelection();
+        } catch (err) {
+          walletGrantUsersReady = false;
+          ADMIN_USERS_CACHE = [];
+          walletGrantUserMatches = [];
+          document.getElementById("walletGrantUserOptions")?.replaceChildren();
+          closeWalletGrantUserOptions();
+          const userId = document.getElementById("walletGrantUserId");
+          const proof = document.getElementById("walletGrantRecipient");
+          if (userId) userId.value = "";
+          if (proof) proof.dataset.state = "empty";
+          const name = document.getElementById("walletGrantRecipientName");
+          const meta = document.getElementById("walletGrantRecipientMeta");
+          const state = document.getElementById("walletGrantRecipientState");
+          const submit = document.getElementById("walletGrantSubmit");
+          if (name) name.textContent = "Belum dipilih";
+          if (meta) meta.textContent = "Daftar buyer belum termuat.";
+          if (state) state.textContent = "Belum siap";
+          if (submit) submit.disabled = true;
+          if (status) status.textContent = "Daftar buyer gagal dimuat. Coba buka ulang menu ini.";
+        } finally {
+          walletGrantUsersRequest = null;
+        }
+      }
+
+      function syncWalletGrantUserSelection() {
+        const input = document.getElementById("walletGrantUsername");
+        const userId = document.getElementById("walletGrantUserId");
+        const status = document.getElementById("walletGrantUserStatus");
+        const proof = document.getElementById("walletGrantRecipient");
+        const name = document.getElementById("walletGrantRecipientName");
+        const meta = document.getElementById("walletGrantRecipientMeta");
+        const state = document.getElementById("walletGrantRecipientState");
+        const submit = document.getElementById("walletGrantSubmit");
+        if (!input || !userId || !proof || !name || !meta || !state || !submit) return;
+
+        const rawUsername = input.value.trim();
+        const keyword = rawUsername.toLowerCase();
+        renderWalletGrantUserOptions();
+        const selected = ADMIN_USERS_CACHE.find((item) => String(item.username || "") === rawUsername);
+        userId.value = selected ? String(selected.id) : "";
+        proof.dataset.state = selected ? "ready" : "empty";
+        submit.disabled = !selected;
+
+        if (selected) {
+          const paidOrders = Number(selected.paid_order_count || 0);
+          const badgeLabel = String(selected.badge?.label || (selected.reseller_status === "approved" ? "Reseller" : "Buyer"));
+          name.textContent = selected.username;
+          meta.textContent = `Buyer #${selected.id} · ${badgeLabel} · ${paidOrders} order dibayar`;
+          state.textContent = "Siap";
+          if (status) status.textContent = "Akun cocok. Grant akan dikirim ke ID buyer ini.";
+          return;
+        }
+
+        const matchCount = keyword
+          ? ADMIN_USERS_CACHE.filter((item) => String(item.username || "").toLowerCase().includes(keyword)).length
+          : ADMIN_USERS_CACHE.length;
+        name.textContent = keyword ? "Pilih hasil pencarian" : "Belum dipilih";
+        meta.textContent = keyword
+          ? (matchCount ? `${matchCount} nama cocok tersedia.` : "Nama tidak ditemukan.")
+          : "Ketik nama lalu pilih dari daftar.";
+        state.textContent = "Belum siap";
+        if (status) {
+          status.textContent = keyword
+            ? (matchCount ? `${matchCount} akun cocok. Pilih username yang tepat.` : "Tidak ada username yang cocok.")
+            : `${ADMIN_USERS_CACHE.length} akun siap dicari.`;
+        }
+        if (!walletGrantUsersReady) loadWalletGrantUsers();
+      }
+
+      async function grantWalletCredit(event) {
+        event?.preventDefault();
+        if (walletGrantInFlight) return;
+        const userId = Number(document.getElementById("walletGrantUserId")?.value || 0);
+        const selectedUser = ADMIN_USERS_CACHE.find((item) => Number(item.id) === userId);
+        const amount = Number(document.getElementById("walletGrantAmount")?.value || 0);
+        const reason = document.getElementById("walletGrantReason")?.value.trim();
+        const submit = document.getElementById("walletGrantSubmit");
+        if (!selectedUser) return Swal.fire("Pilih akun buyer", "Ketik nama lalu pilih username dari daftar yang muncul.", "warning");
+        if (!amount || !reason) return Swal.fire("Data belum lengkap", "Nominal dan catatan grant wajib diisi.", "warning");
+        walletGrantInFlight = true;
+        if (submit) {
+          submit.disabled = true;
+          submit.setAttribute("aria-busy", "true");
+        }
+        try {
+          const confirm = await Swal.fire({ title: "Tambah saldo buyer?", html: `<p><strong>${escapeHtml(selectedUser.username)}</strong> · Buyer #${escapeHtml(selectedUser.id)}</p><p>Nominal: <strong>${formatRupiah(amount)}</strong></p><p>Catatan: ${escapeHtml(reason)}</p>`, icon: "warning", showCancelButton: true, confirmButtonText: "Tambah saldo", cancelButtonText: "Batal" });
+          if (!confirm.isConfirmed) return;
+          const res = await fetch("/api/admin/wallet/grant", { method: "POST", headers: { "Content-Type": "application/json", "x-csrf-token": getCsrfToken() }, body: JSON.stringify({ user_id: userId, amount, reason }) });
           const data = await res.json();
           if (!res.ok) throw new Error(data.message || "Grant gagal");
-          await Swal.fire("Berhasil", `${data.message}. Saldo sekarang ${formatRupiah(data.balance)}.`, "success");
+          await Swal.fire("Saldo ditambahkan", `${data.message}. Saldo sekarang ${formatRupiah(data.balance)}.`, "success");
           document.getElementById("walletGrantUsername").value = "";
+          document.getElementById("walletGrantUserId").value = "";
           document.getElementById("walletGrantAmount").value = "";
           document.getElementById("walletGrantReason").value = "";
+          syncWalletGrantUserSelection();
           updateWalletGrantUsdEstimate();
-        } catch (err) { Swal.fire("Gagal", err.message, "error"); }
+        } catch (err) {
+          Swal.fire("Grant gagal", err.message, "error");
+        } finally {
+          walletGrantInFlight = false;
+          if (submit) {
+            submit.disabled = !document.getElementById("walletGrantUserId")?.value;
+            submit.removeAttribute("aria-busy");
+          }
+        }
       }
 
       function updateWalletGrantUsdEstimate() {
         const estimate = document.getElementById("walletGrantUsdEstimate");
+        const heroRate = document.getElementById("walletHeroRate");
+        const amount = Number(document.getElementById("walletGrantAmount")?.value || 0);
+        if (heroRate) heroRate.textContent = adminWalletUsdIdrRate > 0
+          ? `$1 = ${formatRupiah(adminWalletUsdIdrRate)}`
+          : "Menunggu kurs";
+        document.querySelectorAll("[data-wallet-usd]").forEach((button) => {
+          const preset = Math.ceil(Number(button.dataset.walletUsd || 0) * adminWalletUsdIdrRate);
+          button.classList.toggle("is-active", adminWalletUsdIdrRate > 0 && amount === preset);
+        });
         if (!estimate) return;
         if (adminWalletUsdIdrRate <= 0) {
           estimate.textContent = "Memuat kurs USD...";
           return;
         }
-        const amount = Number(document.getElementById("walletGrantAmount")?.value || 0);
         const rateLabel = `${formatRupiah(adminWalletUsdIdrRate)}/USD`;
         estimate.textContent = amount > 0
           ? `Setara $${(amount / adminWalletUsdIdrRate).toFixed(2)} · kurs ${rateLabel}`
@@ -10804,7 +11466,9 @@
 
         if (sectionName === "resellers") loadResellerControl();
 
-        if (sectionName === "wallet") loadWalletTopups();
+        if (sectionName === "wallet") {
+          Promise.allSettled([loadWalletTopups(), loadWalletGrantUsers(true)]);
+        }
 
         if (sectionName === "dashboard") {
           loadStockSummary();

@@ -64,6 +64,19 @@ const admin = fs.readFileSync("views/admin.html", "utf8");
   "syncWalletTopup",
   "cancelWalletTopup",
   'id="walletGrantUsdEstimate"',
+  'id="walletGrantUserOptions"',
+  'id="walletGrantUserId"',
+  'aria-controls="walletGrantUserOptions"',
+  'role="combobox"',
+  "handleWalletGrantUserKeydown",
+  "walletGrantInFlight",
+  'class="wallet-rate-card"',
+  'class="card wallet-grant-card',
+  'class="wallet-recipient-proof"',
+  'class="card wallet-history-card',
+  "loadWalletGrantUsers",
+  "syncWalletGrantUserSelection",
+  "JSON.stringify({ user_id: userId, amount, reason })",
   "setWalletGrantUsd(10)",
   "updateWalletGrantUsdEstimate",
   'id="vipResetProductSelect"',
@@ -98,5 +111,18 @@ assert.doesNotMatch(sidebarNav + bottomNav, /[📊📦🧾👥🔑🎟👑]/u, "
   `reset-key.php`,
   `"/api/admin/vipstore/reset-key"`,
 ].forEach((marker) => assert.ok(server.includes(marker), `Missing failed-history delete guard: ${marker}`));
+
+[
+  `const userId = Number(req.body?.user_id)`,
+  `const amount = Number(req.body?.amount)`,
+  `!Number.isSafeInteger(amount)`,
+  `SELECT id, username FROM users WHERE id = $1 FOR UPDATE`,
+].forEach((marker) => assert.ok(server.includes(marker), `Missing wallet grant guard: ${marker}`));
+
+const walletGrantRoute = server.slice(
+  server.indexOf('app.post("/api/admin/wallet/grant"'),
+  server.indexOf('// ----------------------------------------------', server.indexOf('app.post("/api/admin/wallet/grant"')),
+);
+assert.doesNotMatch(walletGrantRoute, /LOWER\(username\)/, "Wallet grant must target the selected buyer ID, not an ambiguous username");
 
 console.log("Midtrans wallet security check passed.");

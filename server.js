@@ -10954,18 +10954,18 @@ app.delete("/api/admin/wallet/topups/:id", requireAdminAuth, requireAdminCsrf, a
 });
 
 app.post("/api/admin/wallet/grant", requireAdminAuth, requireAdminCsrf, async (req, res) => {
-  const username = String(req.body?.username || "").trim();
-  const amount = parseWalletAmount(req.body?.amount);
+  const userId = Number(req.body?.user_id);
+  const amount = Number(req.body?.amount);
   const reason = String(req.body?.reason || "").trim().slice(0, 300);
-  if (!username || username.length > 80) return res.status(400).json({ message: "Username buyer tidak valid" });
-  if (amount < 1000 || amount > WALLET_MAX_TOPUP) return res.status(400).json({ message: "Nominal grant harus Rp1.000 sampai Rp2.000.000" });
+  if (!Number.isSafeInteger(userId) || userId <= 0) return res.status(400).json({ message: "Pilih akun buyer yang valid" });
+  if (!Number.isSafeInteger(amount) || amount < 1000 || amount > WALLET_MAX_TOPUP) return res.status(400).json({ message: "Nominal grant harus Rp1.000 sampai Rp2.000.000" });
   if (!reason) return res.status(400).json({ message: "Alasan grant wajib diisi" });
 
   const adminUsername = await getAdminSessionUsername(req).catch(() => "admin");
   const client = await db.connect();
   try {
     await client.query("BEGIN");
-    const userResult = await client.query(`SELECT id, username FROM users WHERE LOWER(username) = LOWER($1) LIMIT 1 FOR UPDATE`, [username]);
+    const userResult = await client.query(`SELECT id, username FROM users WHERE id = $1 FOR UPDATE`, [userId]);
     const targetUser = userResult.rows[0];
     if (!targetUser) { await client.query("ROLLBACK"); return res.status(404).json({ message: "Buyer tidak ditemukan" }); }
     await ensureWalletAccount(client, targetUser.id);
