@@ -130,6 +130,14 @@ scripts.forEach(([, source]) =>
   'id="userRefreshButton"',
   'refreshButton.setAttribute("aria-busy", "true")',
   'fetch("/users", { cache: "no-store" })',
+  'aria-describedby="resellerDetailMeta"',
+  'class="reseller-detail-heading"',
+  'class="reseller-detail-summary"><div class="is-balance"',
+  'class="reseller-adjustment-head"',
+  'class="reseller-detail-loading" role="status"',
+  "grid-template-rows: auto minmax(0, 1fr)",
+  "overscroll-behavior: contain",
+  "height: min(760px, calc(100dvh - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom)))",
   'class="voucher-filter-card"',
   'id="voucherEditorPanel" open',
   'class="voucher-form-grid"',
@@ -155,6 +163,16 @@ scripts.forEach(([, source]) =>
 assert.ok(
   !admin.includes('class="user-badge-lab reseller-badge-lab" open'),
   "Reseller access tools should stay collapsed until requested",
+);
+assert.ok(
+  !admin.includes("margin: auto 6px 0") &&
+    !admin.includes("margin: auto 0 0"),
+  "Reseller detail dialog must stay centered instead of becoming a bottom sheet",
+);
+assert.match(
+  admin,
+  /\.reseller-detail-dialog\s*\{\s*position:\s*fixed;\s*inset:\s*0;/,
+  "Reseller detail dialog must be positioned against the viewport",
 );
 assert.ok(
   !admin.includes('label for="voucherGameName"') &&

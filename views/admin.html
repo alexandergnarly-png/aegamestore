@@ -987,11 +987,15 @@
       .reseller-deposit-toolbar { display: grid; grid-template-columns: repeat(2, minmax(180px, 280px)); }
 
       .reseller-detail-dialog {
-        width: min(1040px, calc(100vw - 28px));
-        max-height: min(88vh, 900px);
+        position: fixed;
+        inset: 0;
+        width: min(1040px, calc(100vw - 32px));
+        height: min(880px, calc(100dvh - 32px));
+        max-height: none;
         margin: auto;
         padding: 0;
         overflow: hidden;
+        box-sizing: border-box;
         color: var(--ink);
         border: 1px solid var(--line-strong);
         border-radius: 30px;
@@ -999,7 +1003,7 @@
         box-shadow: 14px 14px 0 rgba(0,0,0,.22);
       }
       .reseller-detail-dialog::backdrop { background: rgba(10,10,10,.62); backdrop-filter: blur(4px); }
-      .reseller-detail-shell { max-height: inherit; display: flex; flex-direction: column; }
+      .reseller-detail-shell { height: 100%; min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr); }
       .reseller-detail-head {
         display: flex;
         align-items: start;
@@ -1022,12 +1026,15 @@
         color: var(--ink);
         font-size: 24px;
       }
-      .reseller-detail-content { padding: 18px; overflow: auto; }
-      .reseller-detail-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 16px; }
+      .reseller-detail-content { min-height: 0; padding: 18px; overflow-y: auto; overscroll-behavior: contain; }
+      .reseller-detail-summary { display: grid; grid-template-columns: minmax(220px, 1.4fr) repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 16px; }
       .reseller-detail-summary > div { min-width: 0; padding: 14px; border: 1px solid var(--line); border-radius: 18px; background: var(--surface-2); }
       .reseller-detail-summary span { color: var(--muted); font-size: 10px; font-weight: 850; text-transform: uppercase; letter-spacing: .05em; }
       .reseller-detail-summary strong { display: block; margin-top: 5px; overflow-wrap: anywhere; font-size: 18px; }
       .reseller-adjustment-form { display: grid; grid-template-columns: 150px 180px minmax(220px, 1fr) auto; gap: 10px; align-items: end; margin-bottom: 18px; padding: 14px; border: 1px solid var(--line-strong); border-radius: 20px; }
+      .reseller-adjustment-head { grid-column: 1 / -1; display: flex; align-items: end; justify-content: space-between; gap: 12px; }
+      .reseller-adjustment-head strong { font-size: 18px; letter-spacing: -.025em; }
+      .reseller-adjustment-head span { color: var(--muted); font-size: 11px; font-weight: 700; }
       .reseller-adjustment-form .field { display: grid; gap: 6px; }
       .reseller-adjustment-form button { min-height: 46px; }
       .reseller-detail-ledger-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
@@ -3573,7 +3580,6 @@
         .reseller-profit-summary > div { border-right: 0; border-bottom: 1px solid var(--line); }
         .reseller-profit-summary > div:last-child { border-bottom: 0; }
         .reseller-deposit-toolbar { grid-template-columns: 1fr; }
-        .reseller-detail-dialog { width: 100vw; max-height: 92vh; margin: auto 0 0; border-radius: 28px 28px 0 0; box-shadow: none; }
         .reseller-detail-head { padding: 16px; }
         .reseller-detail-content { padding: 13px; }
         .reseller-detail-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -8074,9 +8080,85 @@
         color: var(--muted);
         line-height: 1.35;
       }
-      .reseller-detail-head { position: sticky; top: 0; z-index: 5; }
+      body:has(.reseller-detail-dialog[open]) { overflow: hidden; }
+      .reseller-detail-dialog { --reseller-accent: var(--accent); isolation: isolate; }
+      .reseller-detail-head {
+        position: relative;
+        padding-left: 26px;
+        overflow: hidden;
+      }
+      .reseller-detail-head::before {
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 6px;
+        content: "";
+        background: var(--reseller-accent);
+      }
+      .reseller-detail-heading { min-width: 0; }
+      .reseller-detail-head .reseller-control-kicker { color: var(--reseller-accent); }
+      .reseller-detail-head p {
+        width: fit-content;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 8px;
+        padding: 5px 8px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: var(--surface-2);
+      }
+      .reseller-detail-head p::before {
+        width: 7px;
+        height: 7px;
+        flex: 0 0 auto;
+        content: "";
+        border-radius: 50%;
+        background: var(--muted);
+      }
+      .reseller-detail-head p[data-status="approved"]::before { background: var(--success-text); }
+      .reseller-detail-head p[data-status="suspended"],
+      .reseller-detail-head p[data-status="error"] { color: var(--danger-text); }
+      .reseller-detail-head p[data-status="suspended"]::before,
+      .reseller-detail-head p[data-status="error"]::before { background: var(--danger-text); }
+      .reseller-detail-head form { flex: 0 0 auto; margin: 0; }
+      .reseller-detail-close { transition: background .18s ease, color .18s ease, border-color .18s ease; }
+      .reseller-detail-close:hover { border-color: var(--reseller-accent); background: var(--accent-soft); color: var(--reseller-accent); }
+      .reseller-detail-close:focus-visible { outline: 3px solid color-mix(in srgb, var(--reseller-accent) 36%, transparent); outline-offset: 2px; }
       .reseller-detail-content { scrollbar-gutter: stable; }
+      .reseller-detail-loading {
+        min-height: 230px;
+        display: grid;
+        place-content: center;
+        justify-items: center;
+        gap: 8px;
+        color: var(--muted);
+        text-align: center;
+      }
+      .reseller-detail-loader {
+        width: 42px;
+        height: 42px;
+        margin-bottom: 8px;
+        border: 4px solid var(--surface-3);
+        border-top-color: var(--reseller-accent);
+        border-radius: 50%;
+        animation: reseller-detail-spin .8s linear infinite;
+      }
+      .reseller-detail-loading strong { color: var(--ink); font-size: 18px; }
+      .reseller-detail-loading small { max-width: 250px; line-height: 1.5; }
+      @keyframes reseller-detail-spin { to { transform: rotate(360deg); } }
+      .reseller-detail-summary > div { display: flex; flex-direction: column; justify-content: space-between; }
+      .reseller-detail-summary > div > small { margin-top: 16px; color: var(--muted); font-size: 10px; font-weight: 700; }
+      .reseller-detail-summary .is-balance {
+        border-color: var(--ink);
+        background: var(--ink);
+        color: var(--surface);
+      }
+      .reseller-detail-summary .is-balance span,
+      .reseller-detail-summary .is-balance small { color: color-mix(in srgb, var(--surface) 68%, transparent); }
+      .reseller-detail-summary .is-balance strong { font-size: clamp(24px, 3.2vw, 34px); letter-spacing: -.055em; }
       .reseller-adjustment-form { background: var(--surface-2); }
+      .reseller-adjustment-form input,
+      .reseller-adjustment-form select { background: var(--surface); }
       .reseller-detail-block h3 { display: flex; align-items: center; gap: 8px; }
       .reseller-detail-block h3::before {
         width: 8px;
@@ -8209,15 +8291,16 @@
         #section-resellers .reseller-profit-table tbody tr,
         #section-resellers .reseller-deposit-table tbody tr { border-radius: 18px; box-shadow: none; }
         .reseller-detail-dialog {
-          width: calc(100vw - 12px);
-          max-height: calc(100dvh - 16px);
-          margin: auto 6px 0;
-          border-radius: 26px 26px 0 0;
+          width: min(420px, calc(100vw - 20px));
+          height: min(760px, calc(100dvh - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom)));
+          max-height: none;
+          margin: auto;
+          border-radius: 26px;
+          box-shadow: 5px 5px 0 color-mix(in srgb, var(--ink) 18%, transparent);
         }
         .reseller-detail-head {
-          padding: 16px 16px 14px;
-          background: color-mix(in srgb, var(--surface) 94%, transparent);
-          backdrop-filter: blur(14px);
+          padding: 16px 16px 14px 22px;
+          background: var(--surface);
         }
         .reseller-detail-head h2 {
           max-width: 220px;
@@ -8226,31 +8309,36 @@
           text-overflow: ellipsis;
           white-space: nowrap;
         }
-        .reseller-detail-close { width: 46px; height: 46px; border-radius: 15px; }
-        .reseller-detail-content { padding: 12px 12px 28px; }
-        .reseller-detail-summary { gap: 8px; margin-bottom: 12px; }
+        .reseller-detail-close { width: 48px; height: 48px; border-radius: 15px; }
+        .reseller-detail-content {
+          padding: 12px 12px calc(20px + env(safe-area-inset-bottom));
+          scrollbar-gutter: auto;
+        }
+        .reseller-detail-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-bottom: 12px; }
         .reseller-detail-summary > div {
-          min-height: 104px;
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
+          min-height: 98px;
           padding: 13px;
           border-radius: 17px;
+        }
+        .reseller-detail-summary .is-balance { min-height: 112px; grid-column: 1 / -1; }
+        .reseller-detail-summary .is-balance strong { font-size: 30px; }
+        .reseller-detail-summary > div:last-child {
+          min-height: 76px;
+          grid-column: 1 / -1;
+          flex-direction: row;
+          align-items: center;
+          gap: 12px;
         }
         .reseller-detail-summary strong {
           margin-top: auto;
           padding-top: 14px;
-          font-size: 20px;
+          font-size: 18px;
           line-height: 1.05;
           overflow-wrap: normal;
         }
+        .reseller-detail-summary > div:last-child strong { margin: 0; padding: 0; font-size: 23px; text-align: right; }
         .reseller-adjustment-form { gap: 11px; margin-bottom: 18px; padding: 14px; border-radius: 19px; }
-        .reseller-adjustment-form::before {
-          content: "Penyesuaian saldo";
-          color: var(--ink);
-          font-size: 16px;
-          font-weight: 900;
-        }
+        .reseller-adjustment-head { display: grid; gap: 4px; }
         .reseller-adjustment-form input,
         .reseller-adjustment-form select { min-height: 50px; border-radius: 13px; background: var(--surface); }
         .reseller-adjustment-form button { min-height: 50px; border-radius: 13px; }
@@ -8292,6 +8380,7 @@
           scroll-behavior: auto !important;
           transition-duration: .01ms !important;
         }
+        .reseller-detail-loader { animation: none !important; }
       }
 
     </style>
@@ -8315,6 +8404,7 @@
       <symbol id="icon-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/></symbol>
       <symbol id="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"/></symbol>
       <symbol id="icon-refresh" viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M6.1 9a7 7 0 0 1 11.4-2.6L20 9M4 15l2.5 2.6A7 7 0 0 0 17.9 15"/></symbol>
+      <symbol id="icon-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
       <symbol id="icon-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
       <symbol id="icon-money" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M7 9H6v1M17 15h1v-1"/></symbol>
       <symbol id="icon-trend" viewBox="0 0 24 24"><path d="m3 17 6-6 4 4 8-8"/><path d="M15 7h6v6"/></symbol>
@@ -10026,11 +10116,11 @@
         </article>
       </div>
 
-      <dialog id="resellerDetailDialog" class="reseller-detail-dialog" aria-labelledby="resellerDetailTitle">
+      <dialog id="resellerDetailDialog" class="reseller-detail-dialog" aria-labelledby="resellerDetailTitle" aria-describedby="resellerDetailMeta">
         <div class="reseller-detail-shell">
           <header class="reseller-detail-head">
-            <div><div class="reseller-control-kicker">ACCOUNT LEDGER</div><h2 id="resellerDetailTitle">Detail reseller</h2><p id="resellerDetailMeta">Memuat data...</p></div>
-            <form method="dialog"><button class="reseller-detail-close" aria-label="Tutup detail reseller">&times;</button></form>
+            <div class="reseller-detail-heading"><div class="reseller-control-kicker">ACCOUNT LEDGER</div><h2 id="resellerDetailTitle">Detail reseller</h2><p id="resellerDetailMeta" data-status="loading">Memuat data...</p></div>
+            <form method="dialog"><button type="submit" class="reseller-detail-close" aria-label="Tutup detail reseller"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"></use></svg></button></form>
           </header>
           <div id="resellerDetailContent" class="reseller-detail-content"></div>
         </div>
@@ -10443,8 +10533,13 @@
         activeResellerId = Number(userId);
         const dialog = document.getElementById("resellerDetailDialog");
         const content = document.getElementById("resellerDetailContent");
-        if (!dialog || !content) return;
-        content.innerHTML = `<div class="empty">Memuat catatan akun...</div>`;
+        const title = document.getElementById("resellerDetailTitle");
+        const meta = document.getElementById("resellerDetailMeta");
+        if (!dialog || !content || !title || !meta) return;
+        title.textContent = "Detail reseller";
+        meta.textContent = "Memuat data...";
+        meta.dataset.status = "loading";
+        content.innerHTML = `<div class="reseller-detail-loading" role="status"><span class="reseller-detail-loader" aria-hidden="true"></span><strong>Menyiapkan data akun</strong><small>Memuat saldo, order, dan mutasi reseller.</small></div>`;
         if (!dialog.open) dialog.showModal();
         try {
           const res = await fetch(`/api/admin/resellers/${encodeURIComponent(userId)}`);
@@ -10454,15 +10549,20 @@
           const orders = data.orders || [];
           const revenue = orders.filter((row) => row.payment_status === "paid").reduce((sum, row) => sum + Number(row.price || 0), 0);
           const profit = orders.filter((row) => row.payment_status === "paid").reduce((sum, row) => sum + Number(row.gross_profit || 0), 0);
-          document.getElementById("resellerDetailTitle").textContent = reseller.username || "Detail reseller";
-          document.getElementById("resellerDetailMeta").textContent = `Reseller #${reseller.id} · ${reseller.reseller_status === "approved" ? "aktif" : "ditangguhkan"}`;
+          title.textContent = reseller.username || "Detail reseller";
+          meta.textContent = `Reseller #${reseller.id} · ${reseller.reseller_status === "approved" ? "aktif" : "ditangguhkan"}`;
+          meta.dataset.status = reseller.reseller_status === "approved" ? "approved" : "suspended";
           const ledgerRows = (data.ledger || []).map((row) => `<tr><td data-label="Waktu">${formatTanggal(row.created_at)}</td><td data-label="Mutasi"><span class="reseller-direction ${escapeHtml(row.direction)}">${row.direction === "credit" ? "+" : "−"} ${formatRupiah(row.amount)}</span><br><small>${escapeHtml(row.description || row.entry_type)}</small></td><td data-label="Saldo">${formatRupiah(row.balance_before)} → <strong>${formatRupiah(row.balance_after)}</strong><br><small>${escapeHtml(row.admin_username || "sistem")}</small></td></tr>`).join("");
           const topupRows = (data.topups || []).map((row) => `<tr><td data-label="Waktu">${formatTanggal(row.paid_at || row.reviewed_at || row.created_at)}</td><td data-label="Nominal"><strong>${formatRupiah(row.amount)}</strong><br><small>${row.provider === "midtrans" ? "Midtrans" : "QRIS manual"}</small></td><td data-label="Status"><span class="badge ${escapeHtml(row.status)}">${escapeHtml(row.status)}</span>${row.status === "rejected" ? `<br><button class="danger-btn" data-id="${escapeHtml(row.id)}" onclick="deleteWalletTopup(this.dataset.id, true)">Hapus riwayat</button>` : ""}</td></tr>`).join("");
           const orderRows = orders.map((row) => `<tr><td data-label="Order"><strong>${escapeHtml(row.game || "-")}</strong><br><small>${escapeHtml(row.product || row.id)}</small></td><td data-label="Bayar">${formatRupiah(row.price)}<br><small>${Number(row.quantity || 1)} key</small></td><td data-label="Laba"><strong>${formatRupiah(row.gross_profit)}</strong><br><small>${escapeHtml(row.payment_status || "-")}</small></td></tr>`).join("");
-          content.innerHTML = `<div class="reseller-detail-summary"><div><span>Saldo</span><strong>${formatRupiah(reseller.balance)}</strong></div><div><span>Order terbaru</span><strong>${orders.length}</strong></div><div><span>Omzet terbaru</span><strong>${formatRupiah(revenue)}</strong></div><div><span>Laba terbaru</span><strong>${formatRupiah(profit)}</strong></div></div>
-            <form class="reseller-adjustment-form" onsubmit="adjustResellerBalance(event)"><div class="field"><label for="resellerAdjustmentDirection">Penyesuaian</label><select id="resellerAdjustmentDirection"><option value="credit">Tambah saldo</option><option value="debit">Kurangi saldo</option></select></div><div class="field"><label for="resellerAdjustmentAmount">Nominal</label><input id="resellerAdjustmentAmount" type="number" min="1000" max="2000000" step="1000" required placeholder="Rp 50.000"></div><div class="field"><label for="resellerAdjustmentReason">Alasan</label><input id="resellerAdjustmentReason" type="text" minlength="4" maxlength="300" required placeholder="Contoh: koreksi deposit"></div><button type="submit">Simpan mutasi</button></form>
+          content.innerHTML = `<div class="reseller-detail-summary"><div class="is-balance"><span>Saldo tersedia</span><strong>${formatRupiah(reseller.balance)}</strong><small>Siap dipakai untuk order</small></div><div><span>Order terbaru</span><strong>${orders.length}</strong></div><div><span>Omzet terbaru</span><strong>${formatRupiah(revenue)}</strong></div><div><span>Laba terbaru</span><strong>${formatRupiah(profit)}</strong></div></div>
+            <form class="reseller-adjustment-form" onsubmit="adjustResellerBalance(event)"><div class="reseller-adjustment-head"><strong>Penyesuaian saldo</strong><span>Setiap perubahan masuk ke mutasi akun.</span></div><div class="field"><label for="resellerAdjustmentDirection">Penyesuaian</label><select id="resellerAdjustmentDirection"><option value="credit">Tambah saldo</option><option value="debit">Kurangi saldo</option></select></div><div class="field"><label for="resellerAdjustmentAmount">Nominal</label><input id="resellerAdjustmentAmount" type="number" inputmode="numeric" min="1000" max="2000000" step="1000" required placeholder="Rp 50.000"></div><div class="field"><label for="resellerAdjustmentReason">Alasan</label><input id="resellerAdjustmentReason" type="text" minlength="4" maxlength="300" required placeholder="Contoh: koreksi deposit"></div><button type="submit">Simpan mutasi</button></form>
             <div class="reseller-detail-ledger-grid"><section class="reseller-detail-block"><h3>Mutasi saldo</h3><div class="table-wrap"><table><thead><tr><th>Waktu</th><th>Mutasi</th><th>Saldo</th></tr></thead><tbody>${ledgerRows || `<tr><td class="empty" colspan="3">Belum ada mutasi.</td></tr>`}</tbody></table></div></section><section class="reseller-detail-block"><h3>Deposit</h3><div class="table-wrap"><table><thead><tr><th>Waktu</th><th>Nominal</th><th>Status</th></tr></thead><tbody>${topupRows || `<tr><td class="empty" colspan="3">Belum ada deposit.</td></tr>`}</tbody></table></div></section><section class="reseller-detail-block"><h3>Order reseller</h3><div class="table-wrap"><table><thead><tr><th>Order</th><th>Bayar</th><th>Laba</th></tr></thead><tbody>${orderRows || `<tr><td class="empty" colspan="3">Belum ada order.</td></tr>`}</tbody></table></div></section></div>`;
-        } catch (err) { content.innerHTML = `<div class="empty">${escapeHtml(err.message)}</div>`; }
+        } catch (err) {
+          meta.textContent = "Data tidak tersedia";
+          meta.dataset.status = "error";
+          content.innerHTML = `<div class="empty">${escapeHtml(err.message)}</div>`;
+        }
       }
 
       async function adjustResellerBalance(event) {
