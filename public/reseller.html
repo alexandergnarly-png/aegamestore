@@ -2145,6 +2145,7 @@
     <script>
       let resellerData = null;
       let previewController = null;
+      let currentQuote = null;
 
       const translations = {
         id: {
@@ -2174,6 +2175,7 @@
           insufficient: "Deposit kurang", addDepositFirst: "Tambah deposit sebelum mengambil key.", checkingPayment: "Pembayaran sedang dicek. Muat ulang data jika saldo belum berubah.",
           openingMidtrans: "Membuka Midtrans…", creatingInvoice: "Membuat tagihan deposit…", previousPayment: "Melanjutkan pembayaran sebelumnya…", depositFailed: "Gagal membuat deposit",
           preparingKey: "Menyiapkan key…", preparingOrder: "Saldo sedang dipotong dan key sedang disiapkan…", keyFailed: "Gagal mengambil key",
+          quoteRefreshRequired: "Harga perlu dimuat ulang sebelum order.", quoteChanged: "Harga supplier berubah. Cek total terbaru lalu tekan Order lagi.",
         },
         en: {
           pageTitle: "Reseller Desk — AE Game Store", skipLink: "Skip to content", resellerOperations: "Reseller operations",
@@ -2202,6 +2204,7 @@
           insufficient: "Insufficient deposit", addDepositFirst: "Add funds before claiming keys.", checkingPayment: "Payment is being checked. Refresh if your balance has not changed.",
           openingMidtrans: "Opening Midtrans…", creatingInvoice: "Creating deposit invoice…", previousPayment: "Continuing your previous payment…", depositFailed: "Failed to create deposit",
           preparingKey: "Preparing keys…", preparingOrder: "Deducting your balance and preparing the keys…", keyFailed: "Failed to claim keys",
+          quoteRefreshRequired: "Refresh the price before ordering.", quoteChanged: "The supplier price changed. Check the new total, then place the order again.",
         },
       };
       let currentLang = localStorage.getItem("ae_lang") === "en" ? "en" : "id";
@@ -2746,6 +2749,7 @@
         const quantity = document.getElementById("quantity").value;
         const button = document.getElementById("checkoutButton");
         const message = document.getElementById("checkoutMessage");
+        currentQuote = null;
         message.classList.remove("error");
         if (!productId || !quantity) {
           button.disabled = true;
@@ -2779,6 +2783,11 @@
           const data = await readJson(response);
           if (!response.ok)
             throw new Error(currentLang === "en" ? t("priceFailed") : (data.message || t("priceFailed")));
+          currentQuote = {
+            productId: Number(productId),
+            quantity: Number(quantity),
+            totalIdr: Number(data.final_idr),
+          };
           const after =
             Number(resellerData.balance.idr) - Number(data.final_idr);
           document.getElementById("unitPrice").textContent =
@@ -2960,6 +2969,22 @@
         .addEventListener("click", async () => {
           const button = document.getElementById("checkoutButton");
           const message = document.getElementById("checkoutMessage");
+          const productId = Number(
+            document.getElementById("selectedProduct").value,
+          );
+          const quantity = Number(document.getElementById("quantity").value);
+          if (
+            !currentQuote ||
+            currentQuote.productId !== productId ||
+            currentQuote.quantity !== quantity ||
+            !Number.isSafeInteger(currentQuote.totalIdr) ||
+            currentQuote.totalIdr <= 0
+          ) {
+            await preview();
+            message.classList.add("error");
+            message.textContent = t("quoteRefreshRequired");
+            return;
+          }
           setButtonBusy(button, true, t("preparingKey"), t("orderFromBalance"));
           message.classList.remove("error");
           message.textContent =
@@ -2972,12 +2997,11 @@
                 "x-user-csrf-token": csrf(),
               },
               body: JSON.stringify({
-                product_id: Number(
-                  document.getElementById("selectedProduct").value,
-                ),
-                quantity: Number(document.getElementById("quantity").value),
+                product_id: productId,
+                quantity: quantity,
                 payment_method: "ae_credit",
                 reseller_order: true,
+                expected_total_idr: currentQuote.totalIdr,
               }),
             });
             if (response.status === 401 || response.status === 403) {
@@ -2985,6 +3009,15 @@
               return;
             }
             const data = await readJson(response);
+            if (
+              response.status === 409 &&
+              ["RESELLER_PRICE_CHANGED", "RESELLER_QUOTE_REQUIRED"].includes(
+                data.code,
+              )
+            ) {
+              await preview();
+              throw new Error(t("quoteChanged"));
+            }
             if (!response.ok)
               throw new Error(currentLang === "en" ? t("keyFailed") : (data.message || t("keyFailed")));
             location.assign(resultUrl(data.resultUrl));
@@ -2992,6 +3025,9 @@
             message.classList.add("error");
             message.textContent = error.message;
             setButtonBusy(button, false, t("preparingKey"), t("orderFromBalance"));
+            button.disabled =
+              !currentQuote ||
+              Number(resellerData?.balance?.idr || 0) < currentQuote.totalIdr;
           }
         });
       applyLanguage();

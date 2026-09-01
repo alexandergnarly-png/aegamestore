@@ -27,6 +27,7 @@ const {
   calculateUsdtPayment,
   getSafeUsdtIdrRate,
   grossUpPaymentPrice,
+  isResellerQuoteAccepted,
   parseMarketUsdIdrRate,
   recommendUsdtPrice,
 } = require("./server/payment-pricing");
@@ -2645,7 +2646,7 @@ async function getLoggedInUserFromRequest(req) {
   try {
     const decoded = jwt.verify(token, jwtSecret, userJwtOptions);
     const result = await query(
-      `SELECT id, username, token_version FROM users WHERE id = $1 LIMIT 1`,
+      `SELECT id, username, token_version, reseller_status FROM users WHERE id = $1 LIMIT 1`,
       [decoded.id],
     );
     const user = result.rows[0];
@@ -4577,16 +4578,22 @@ app.get("/api/reseller", async (req, res) => {
       `);
     const products = productsResult.rows
       .filter((product) => getResellerFinancials(product, 1, resellerRate).gross_profit > 0)
-      .map((product) => ({
-        id: Number(product.id),
-        game: product.game,
-        brand: product.brand,
-        duration: product.duration,
-        platform: normalizePlatform(product.platform),
-        play_status: normalizePlayStatus(product.play_status),
-        available_keys: Number(product.available_keys || 0),
-        ...getResellerPricing(product, resellerRate),
-      }));
+      .map((product) => {
+        const pricing = getResellerPricing(product, resellerRate);
+        return {
+          id: Number(product.id),
+          game: product.game,
+          brand: product.brand,
+          duration: product.duration,
+          platform: normalizePlatform(product.platform),
+          play_status: normalizePlayStatus(product.play_status),
+          available_keys: Number(product.available_keys || 0),
+          retail_idr: pricing.retail_idr,
+          unit_idr: pricing.unit_idr,
+          unit_usd: pricing.unit_usd,
+          savings_idr: pricing.savings_idr,
+        };
+      });
 
     const ordersResult = await query(
         `SELECT id, game, product, quantity, price, payment_status, delivery_status, created_at
@@ -6461,6 +6468,7 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
   }
   const { product_id, name, voucher_code, quantity } = req.body;
   const resellerOrder = req.body?.reseller_order === true || req.body?.reseller_order === "true";
+  const expectedResellerTotalIdr = Number(req.body?.expected_total_idr);
   const paymentMethod = String(req.body?.payment_method || "midtrans").trim().toLowerCase();
   if (!["midtrans", "ae_credit", "binance_manual"].includes(paymentMethod)) {
     return res.status(400).json({ message: "Metode pembayaran tidak valid" });
@@ -6475,6 +6483,12 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
   }
   if (resellerOrder && normalizeVoucherCode(voucher_code)) {
     return res.status(400).json({ message: "Voucher tidak dapat digabung dengan harga reseller" });
+  }
+  if (
+    resellerOrder &&
+    normalizeResellerStatus(loggedInUser.reseller_status) !== "approved"
+  ) {
+    return res.status(403).json({ message: "Akun reseller belum disetujui" });
   }
 
   const cleanProductId = Number(product_id);
@@ -6495,17 +6509,13 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
 
   try {
     const defaultResult = await query(
-      `SELECT username, default_name, default_contact, email, reseller_status
+      `SELECT username, default_name, default_contact, email
        FROM users
        WHERE id = $1
        LIMIT 1`,
       [loggedInUser.id],
     );
     const defaultUser = defaultResult.rows[0] || {};
-
-    if (resellerOrder && normalizeResellerStatus(defaultUser.reseller_status) !== "approved") {
-      return res.status(403).json({ message: "Akun reseller belum disetujui" });
-    }
 
     if (!cleanName) {
       cleanName = String(
@@ -6537,12 +6547,51 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
       [cleanProductId],
     );
 
-    const productRow = productResult.rows[0];
+    let productRow = productResult.rows[0];
 
     if (!productRow) {
       return res
         .status(404)
         .json({ message: "Produk tidak ditemukan atau tidak aktif" });
+    }
+
+    let productDeliveryType = normalizeProductDeliveryType(productRow.delivery_type);
+
+    if (resellerOrder && !isSupplierDeliveryType(productDeliveryType)) {
+      return res.status(400).json({
+        message: "Produk ini tidak tersedia untuk reseller karena bukan produk API",
+      });
+    }
+
+    if (resellerOrder) {
+      try {
+        const supplierSync = await syncSupplierMappedProducts(productDeliveryType, {
+          productId: cleanProductId,
+        });
+        if (
+          Number(supplierSync.total_mapped || 0) !== 1 ||
+          Number(supplierSync.synced || 0) !== 1 ||
+          Number(supplierSync.failed || 0) > 0
+        ) {
+          throw new Error("Supplier tidak mengembalikan snapshot produk yang lengkap");
+        }
+
+        const refreshedProductResult = await query(
+          "SELECT * FROM products WHERE id = $1 AND active = 1 LIMIT 1",
+          [cleanProductId],
+        );
+        productRow = refreshedProductResult.rows[0];
+        productDeliveryType = normalizeProductDeliveryType(productRow?.delivery_type);
+        if (!productRow || !isSupplierDeliveryType(productDeliveryType)) {
+          throw new Error("Produk reseller berubah saat harga supplier diperiksa");
+        }
+      } catch (error) {
+        console.warn("RESELLER SUPPLIER CHECK FAILED:", error.message);
+        return res.status(503).json({
+          code: "RESELLER_SUPPLIER_CHECK_FAILED",
+          message: "Harga supplier terbaru belum bisa diverifikasi. Coba lagi sebentar.",
+        });
+      }
     }
 
     const playStatus = normalizePlayStatus(productRow.play_status);
@@ -6551,14 +6600,6 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
       return res.status(400).json({
         message:
           "Produk sedang maintenance. Produk tetap tersedia di katalog, tapi belum bisa dibeli saat ini.",
-      });
-    }
-
-    const productDeliveryType = normalizeProductDeliveryType(productRow.delivery_type);
-
-    if (resellerOrder && !isSupplierDeliveryType(productDeliveryType)) {
-      return res.status(400).json({
-        message: "Produk ini tidak tersedia untuk reseller karena bukan produk API",
       });
     }
 
@@ -6625,6 +6666,30 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
       return res.status(409).json({
         message: "Harga modal supplier belum menghasilkan profit reseller",
       });
+    }
+    if (resellerOrder) {
+      const currentTotalIdr = resellerFinancials.unit_idr * cleanQuantity;
+      if (!isResellerQuoteAccepted(expectedResellerTotalIdr, currentTotalIdr)) {
+        const quoteProvided =
+          Number.isSafeInteger(expectedResellerTotalIdr) &&
+          expectedResellerTotalIdr > 0;
+        return res.status(409).json({
+          code: quoteProvided
+            ? "RESELLER_PRICE_CHANGED"
+            : "RESELLER_QUOTE_REQUIRED",
+          message: quoteProvided
+            ? "Harga supplier berubah. Periksa total terbaru lalu order lagi."
+            : "Muat ulang harga sebelum membuat order reseller.",
+          quote: {
+            unit_idr: resellerFinancials.unit_idr,
+            unit_usd: resellerFinancials.unit_usd,
+            total_idr: currentTotalIdr,
+            total_usd:
+              Math.ceil((currentTotalIdr / resellerRate) * 100) / 100,
+            usd_idr_rate: resellerRate,
+          },
+        });
+      }
     }
 
     const orderId = "ORDER-" + crypto.randomUUID();
@@ -10579,6 +10644,8 @@ app.get("/api/wallet", async (req, res) => {
     return res.json({
       balance: Number(account.rows[0]?.balance || 0),
       updatedAt: account.rows[0]?.updated_at || null,
+      resellerDepositOnly:
+        normalizeResellerStatus(user.reseller_status) === "approved",
       topups: topups.rows.map((row) => ({ ...row, amount: Number(row.amount || 0) })),
       ledger: ledger.rows.map((row) => ({
         ...row,
@@ -10603,6 +10670,12 @@ const walletTopupLimiter = persistentRateLimit("wallet-topup", {
 app.post("/api/wallet/topups", walletTopupLimiter, requireUserCsrf, async (req, res) => {
   const user = await getLoggedInUserFromRequest(req);
   if (!user) return res.status(401).json({ message: "Kamu harus login dulu" });
+  if (normalizeResellerStatus(user.reseller_status) === "approved") {
+    return res.status(403).json({
+      code: "RESELLER_MANUAL_TOPUP_DISABLED",
+      message: "Deposit reseller diproses otomatis lewat Reseller Desk.",
+    });
+  }
 
   const amount = parseWalletAmount(req.body?.amount);
   const buyerNote = String(req.body?.buyer_note || "").trim().slice(0, 300);
@@ -10631,14 +10704,19 @@ app.post("/api/wallet/topups/midtrans", walletTopupLimiter, requireUserCsrf, asy
   const user = await getLoggedInUserFromRequest(req);
   if (!user) return res.status(401).json({ message: "Kamu harus login dulu" });
 
-  const returnToReseller = req.body?.return_to === "reseller";
-  const resellerRate = returnToReseller ? await getResellerUsdIdrRate() : usdIdrRate;
-  const minimumAmount = returnToReseller
+  const isResellerDeposit =
+    normalizeResellerStatus(user.reseller_status) === "approved";
+  const returnToReseller =
+    isResellerDeposit && req.body?.return_to === "reseller";
+  const resellerRate = isResellerDeposit
+    ? await getResellerUsdIdrRate()
+    : usdIdrRate;
+  const minimumAmount = isResellerDeposit
     ? Math.ceil(RESELLER_MIN_DEPOSIT_USD * resellerRate)
     : WALLET_MIN_TOPUP;
   const amount = parseWalletAmount(req.body?.amount);
   if (amount < minimumAmount || amount > WALLET_MAX_TOPUP) {
-    const minimumLabel = returnToReseller
+    const minimumLabel = isResellerDeposit
       ? `$${RESELLER_MIN_DEPOSIT_USD} (Rp${minimumAmount.toLocaleString("id-ID")})`
       : `Rp${minimumAmount.toLocaleString("id-ID")}`;
     return res.status(400).json({ message: `Nominal top up harus ${minimumLabel} sampai Rp${WALLET_MAX_TOPUP.toLocaleString("id-ID")}` });
@@ -10648,7 +10726,9 @@ app.post("/api/wallet/topups/midtrans", walletTopupLimiter, requireUserCsrf, asy
   }
 
   const providerOrderId = `WALLET-${crypto.randomUUID()}`;
-  const paymentAmount = returnToReseller ? calculatePaymentPrice(amount, "midtrans") : amount;
+  const paymentAmount = isResellerDeposit
+    ? calculatePaymentPrice(amount, "midtrans")
+    : amount;
   const paymentFee = paymentAmount - amount;
   let topupId = "";
 
@@ -10678,7 +10758,7 @@ app.post("/api/wallet/topups/midtrans", walletTopupLimiter, requireUserCsrf, asy
       id: "AE-CREDIT",
       price: amount,
       quantity: 1,
-      name: `${returnToReseller ? "Reseller Deposit" : "AE Credit"} ${formatWalletAmountForMessage(amount)}`,
+      name: `${isResellerDeposit ? "Reseller Deposit" : "AE Credit"} ${formatWalletAmountForMessage(amount)}`,
     }];
     if (paymentFee > 0) {
       itemDetails.push({ id: "MIDTRANS-FEE", price: paymentFee, quantity: 1, name: "Biaya Midtrans" });
@@ -10694,6 +10774,7 @@ app.post("/api/wallet/topups/midtrans", walletTopupLimiter, requireUserCsrf, asy
       custom_field1: `wallet_topup:${topupId}`,
       callbacks: { finish: accountUrl, pending: accountUrl, error: accountUrl },
       custom_expiry: { expiry_duration: MIDTRANS_QRIS_EXPIRY_MINUTES, unit: "minute" },
+      ...(isResellerDeposit ? getMidtransPaymentOptions() : {}),
     });
 
     await query(

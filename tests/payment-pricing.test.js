@@ -5,6 +5,7 @@ const {
   calculateUsdtPayment,
   getSafeUsdtIdrRate,
   grossUpPaymentPrice,
+  isResellerQuoteAccepted,
   parseMarketUsdIdrRate,
   recommendUsdtPrice,
   toUsd,
@@ -39,7 +40,22 @@ assert.deepEqual(calculateResellerPrice(18000, 18000), {
   profit_usd: 0.3,
 });
 assert.equal(calculateResellerPrice(90000, 18000).profit_usd, 0.5);
-assert.equal(calculateResellerPrice(360000, 18000).profit_usd, 1.5);
+assert.deepEqual(calculateResellerPrice(360000, 18000), {
+  unit_idr: 396000,
+  unit_usd: 22,
+  profit_idr: 36000,
+  profit_usd: 2,
+});
+assert.deepEqual(calculateResellerPrice(900000, 18000), {
+  unit_idr: 990000,
+  unit_usd: 55,
+  profit_idr: 90000,
+  profit_usd: 5,
+});
+assert.equal(isResellerQuoteAccepted(396000, 396000), true);
+assert.equal(isResellerQuoteAccepted(396000, 390000), true);
+assert.equal(isResellerQuoteAccepted(396000, 396001), false);
+assert.equal(isResellerQuoteAccepted(undefined, 396000), false);
 assert.equal(normalizeProductGameName("  Pubg M "), "PUBG Mobile");
 assert.equal(normalizeProductGameName("8Ball   Pool"), "8 Ball Pool");
 assert.equal(normalizeProductGameName("Game Baru"), "Game Baru");

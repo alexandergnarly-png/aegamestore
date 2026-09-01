@@ -49,7 +49,7 @@ function calculateResellerPrice(supplierCostIdr, usdIdrRate = 18000) {
   }
 
   const rate = Math.max(1, Number(usdIdrRate) || 18000);
-  const profitUsd = Math.min(1.5, Math.max(0.3, (cost / rate) * 0.1));
+  const profitUsd = Math.max(0.3, (cost / rate) * 0.1);
   const profitIdr = Math.round(profitUsd * rate);
   const unitIdr = cost + profitIdr;
 
@@ -59,6 +59,18 @@ function calculateResellerPrice(supplierCostIdr, usdIdrRate = 18000) {
     profit_idr: profitIdr,
     profit_usd: Math.round((profitIdr / rate) * 100) / 100,
   };
+}
+
+function isResellerQuoteAccepted(expectedTotalIdr, actualTotalIdr) {
+  const expected = Number(expectedTotalIdr);
+  const actual = Number(actualTotalIdr);
+  return (
+    Number.isSafeInteger(expected) &&
+    expected > 0 &&
+    Number.isSafeInteger(actual) &&
+    actual > 0 &&
+    actual <= expected
+  );
 }
 
 function calculateNetProfit(revenue, paymentFee = 0, supplierCost = 0) {
@@ -75,6 +87,7 @@ module.exports = {
   calculateUsdtPayment,
   getSafeUsdtIdrRate,
   grossUpPaymentPrice,
+  isResellerQuoteAccepted,
   parseMarketUsdIdrRate,
   recommendUsdtPrice,
   toUsd,

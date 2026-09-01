@@ -47,9 +47,33 @@ const walletMidtransRoute = server.slice(
   server.indexOf('app.post("/api/wallet/topups/midtrans"'),
   server.indexOf('app.get("/api/admin/wallet/topups"'),
 );
+const walletManualRoute = server.slice(
+  server.indexOf('app.post("/api/wallet/topups"'),
+  server.indexOf('app.post("/api/wallet/topups/midtrans"'),
+);
+assert.ok(
+  walletManualRoute.includes("RESELLER_MANUAL_TOPUP_DISABLED"),
+  "Approved resellers must not bypass deposit rules through manual top-up",
+);
 assert.ok(
   walletMidtransRoute.includes("await syncPendingMidtransWalletTopup(user.id)"),
   "Midtrans top-up must synchronize an existing transaction before creating another",
+);
+assert.ok(
+  walletMidtransRoute.includes(
+    'normalizeResellerStatus(user.reseller_status) === "approved"',
+  ),
+  "Reseller deposit rules must come from the authenticated account",
+);
+assert.ok(
+  walletMidtransRoute.includes(
+    "...(isResellerDeposit ? getMidtransPaymentOptions() : {})",
+  ),
+  "Approved reseller deposits must only enable QRIS",
+);
+assert.ok(
+  walletMidtransRoute.includes("const paymentAmount = isResellerDeposit"),
+  "Approved reseller deposits must include the configured payment fee",
 );
 
 const admin = fs.readFileSync("views/admin.html", "utf8");

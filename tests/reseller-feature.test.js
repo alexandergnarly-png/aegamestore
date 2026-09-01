@@ -34,6 +34,7 @@ const inlineScripts = (html) =>
   'resellerLogin && normalizeResellerStatus(user.reseller_status) !== "approved"',
   '!["approved", "suspended"].includes(status)',
   'resellerOrder && paymentMethod !== "ae_credit"',
+  'normalizeResellerStatus(loggedInUser.reseller_status) !== "approved"',
   "Order reseller dibayar dari deposit",
   'calculatePaymentPrice(subtotal, "ae_credit")',
   'returnToReseller ? "reseller" : "account"',
@@ -107,6 +108,8 @@ assert.match(pageJs, /fetch\(\s*["']\/create-order["']/);
 assert.match(pageJs, /["']x-user-csrf-token["']\s*:/);
 assert.match(pageJs, /payment_method\s*:\s*["']ae_credit["']/);
 assert.match(pageJs, /reseller_order\s*:\s*true/);
+assert.match(pageJs, /expected_total_idr\s*:\s*currentQuote\.totalIdr/);
+assert.match(pageJs, /RESELLER_PRICE_CHANGED/);
 assert.match(pageJs, /return_to\s*:\s*["']reseller["']/);
 assert.match(pageJs, /status\s*===\s*409[\s\S]*TOPUP_PENDING/);
 assert.match(pageJs, /location\.assign\(data\.checkoutUrl\)/);
@@ -117,6 +120,35 @@ assert.match(page, /data-lang=["']en["']/);
 assert.match(page, /Fast stock\. Clear margins\./);
 assert.match(pageJs, /localStorage\.getItem\(["']ae_lang["']\)/);
 assert.doesNotMatch(page, /(?:Ã.|Â.|â€¦|â€”|ï¿½|�)/u);
+
+const resellerApiRoute = server.slice(
+  server.indexOf('app.get("/api/reseller"'),
+  server.indexOf('app.get("/api/reseller/preview"'),
+);
+assert.doesNotMatch(
+  resellerApiRoute,
+  /\.\.\.getResellerPricing/,
+  "Reseller API must not expose the store profit fields",
+);
+assert.match(resellerApiRoute, /unit_idr: pricing\.unit_idr/);
+
+const resellerCheckoutRoute = server.slice(
+  server.indexOf('app.post("/create-order"'),
+  server.indexOf('"/orders/:id/binance-payment"'),
+);
+const supplierRefreshIndex = resellerCheckoutRoute.indexOf(
+  "syncSupplierMappedProducts(productDeliveryType",
+);
+const walletDebitIndex = resellerCheckoutRoute.indexOf(
+  "SELECT balance FROM wallet_accounts",
+);
+assert.ok(supplierRefreshIndex >= 0, "Reseller checkout must refresh supplier data");
+assert.ok(
+  walletDebitIndex > supplierRefreshIndex,
+  "Supplier price must be refreshed before the reseller wallet is locked and debited",
+);
+assert.match(resellerCheckoutRoute, /RESELLER_QUOTE_REQUIRED/);
+assert.match(resellerCheckoutRoute, /isResellerQuoteAccepted/);
 
 const pageIds = [...page.matchAll(/\bid=["']([^"']+)["']/g)].map(
   ([, id]) => id,
