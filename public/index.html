@@ -79,7 +79,7 @@
       href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/style.css?v=20260825-checkout-docket-v4" />
+    <link rel="stylesheet" href="/style.css?v=20260902-key-dispatch-v5" />
     <link rel="stylesheet" href="/keysystem-ui.css?v=20260815-compact-header-1" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#f4f3ee" />
@@ -824,8 +824,10 @@
       id="orderModal"
       role="dialog"
       aria-modal="true"
+      aria-hidden="true"
       aria-labelledby="modalGameTitle"
       aria-describedby="modalOrderDescription"
+      inert
     >
       <div class="order-modal-backdrop" onclick="closeOrderModal()"></div>
 
@@ -834,10 +836,9 @@
           type="button"
           class="modal-close-btn"
           id="closeOrderModalBtn"
-          onclick="closeOrderModal()"
           aria-label="Tutup popup order"
         >
-          ×
+          <iconify-icon icon="ph:x-bold" aria-hidden="true"></iconify-icon>
         </button>
 
         <div class="modal-game-banner" id="modalGameBanner" hidden>
@@ -862,7 +863,7 @@
             <span class="summary-badge" data-i18n="orderGameBadge">
               ORDER GAME
             </span>
-            <h2 id="modalGameTitle">Pilih Game</h2>
+            <h2 id="modalGameTitle" data-i18n="orderModalTitle">Selesaikan order</h2>
             <p id="modalOrderDescription" data-i18n="modalOrderDesc">
               Lengkapi data order kamu di bawah ini.
             </p>
@@ -888,10 +889,15 @@
           </li>
         </ol>
 
+        <div class="checkout-modal-layout">
+          <section
+            class="checkout-build-pane"
+            aria-labelledby="checkoutBuildTitle"
+          >
         <div class="checkout-section-heading">
           <span aria-hidden="true">01</span>
           <div>
-            <strong data-i18n="orderProductTitle">Pilih produk</strong>
+            <strong id="checkoutBuildTitle" data-i18n="orderProductTitle">Pilih produk</strong>
             <small data-i18n="orderProductDesc">Tentukan platform, brand, dan nominal.</small>
           </div>
         </div>
@@ -903,6 +909,8 @@
               id="platform"
               class="native-order-select"
               aria-label="Platform"
+              aria-hidden="true"
+              tabindex="-1"
             ></select>
             <div
               class="order-platform-pills"
@@ -918,6 +926,8 @@
               id="brand"
               class="native-order-select"
               aria-label="Brand"
+              aria-hidden="true"
+              tabindex="-1"
             ></select>
             <div
               class="order-brand-pills"
@@ -935,6 +945,8 @@
               id="product"
               class="native-order-select"
               aria-label="Nominal atau durasi"
+              aria-hidden="true"
+              tabindex="-1"
             ></select>
             <div
               class="order-product-cards"
@@ -990,10 +1002,17 @@
           </div>
         </div>
 
+          </section>
+
+          <aside
+            class="checkout-settlement-pane"
+            aria-labelledby="checkoutSettlementTitle"
+          >
+
         <div class="checkout-section-heading">
           <span aria-hidden="true">03</span>
           <div>
-            <strong data-i18n="orderSummaryTitle">Ringkasan &amp; pembayaran</strong>
+            <strong id="checkoutSettlementTitle" data-i18n="orderSummaryTitle">Ringkasan &amp; pembayaran</strong>
             <small data-i18n="orderSummaryDesc">Periksa pesanan sebelum melanjutkan.</small>
           </div>
         </div>
@@ -1005,7 +1024,9 @@
               <b data-i18n="voucherToggleTitle">Punya voucher?</b>
             </span>
             <small data-i18n="voucherToggleDesc">Masukkan kode jika ada</small>
-            <span class="voucher-toggle-arrow" aria-hidden="true">⌄</span>
+            <span class="voucher-toggle-arrow" aria-hidden="true">
+              <iconify-icon icon="ph:caret-down-bold"></iconify-icon>
+            </span>
           </summary>
 
           <div class="voucher-panel-body">
@@ -1078,15 +1099,72 @@
           </div>
         </div>
 
-        <div class="checkout-payment-choice" aria-label="Pilih metode pembayaran">
-          <button type="button" class="checkout-payment-option active" data-payment-method="midtrans" onclick="selectCheckoutPaymentMethod('midtrans', this)">
-            <strong data-i18n="gatewayPaymentTitle">QRIS Indonesia</strong><small data-i18n="gatewayPaymentDesc">0,7% + pajak biaya</small>
+        <div
+          class="checkout-payment-choice"
+          role="radiogroup"
+          aria-label="Pilih metode pembayaran"
+        >
+          <button
+            type="button"
+            class="checkout-payment-option active"
+            role="radio"
+            aria-checked="true"
+            tabindex="0"
+            data-payment-method="midtrans"
+            onclick="selectCheckoutPaymentMethod('midtrans', this)"
+          >
+            <span class="checkout-payment-icon" aria-hidden="true">
+              <iconify-icon icon="mdi:qrcode-scan"></iconify-icon>
+            </span>
+            <span class="checkout-payment-copy">
+              <strong data-i18n="gatewayPaymentTitle">QRIS Indonesia</strong>
+              <small data-i18n="gatewayPaymentDesc">Biaya 0,7% + pajak</small>
+            </span>
+            <span class="checkout-payment-mark" aria-hidden="true">
+              <iconify-icon icon="ph:check-bold"></iconify-icon>
+            </span>
           </button>
-          <button type="button" class="checkout-payment-option" data-payment-method="ae_credit" onclick="selectCheckoutPaymentMethod('ae_credit', this)">
-            <strong data-i18n="walletPaymentTitle">AE Credit</strong><small id="checkoutWalletBalance">Saldo: Rp0</small>
+          <button
+            type="button"
+            class="checkout-payment-option"
+            role="radio"
+            aria-checked="false"
+            tabindex="-1"
+            data-payment-method="ae_credit"
+            onclick="selectCheckoutPaymentMethod('ae_credit', this)"
+          >
+            <span class="checkout-payment-icon" aria-hidden="true">
+              <iconify-icon icon="mdi:wallet-outline"></iconify-icon>
+            </span>
+            <span class="checkout-payment-copy">
+              <strong data-i18n="walletPaymentTitle">AE Credit</strong>
+              <small id="checkoutWalletBalance">Saldo: Rp0</small>
+            </span>
+            <span class="checkout-payment-mark" aria-hidden="true">
+              <iconify-icon icon="ph:check-bold"></iconify-icon>
+            </span>
           </button>
-          <button type="button" class="checkout-payment-option" id="binancePaymentOption" data-payment-method="binance_manual" onclick="selectCheckoutPaymentMethod('binance_manual', this)" disabled>
-            <strong data-i18n="binancePaymentTitle">USDT International</strong><small data-i18n="binancePaymentDesc">Verifikasi manual via Binance</small>
+          <button
+            type="button"
+            class="checkout-payment-option"
+            id="binancePaymentOption"
+            role="radio"
+            aria-checked="false"
+            tabindex="-1"
+            data-payment-method="binance_manual"
+            onclick="selectCheckoutPaymentMethod('binance_manual', this)"
+            disabled
+          >
+            <span class="checkout-payment-icon" aria-hidden="true">
+              <iconify-icon icon="simple-icons:tether"></iconify-icon>
+            </span>
+            <span class="checkout-payment-copy">
+              <strong data-i18n="binancePaymentTitle">USDT International</strong>
+              <small data-i18n="binancePaymentDesc">Verifikasi manual via Binance</small>
+            </span>
+            <span class="checkout-payment-mark" aria-hidden="true">
+              <iconify-icon icon="ph:check-bold"></iconify-icon>
+            </span>
           </button>
         </div>
 
@@ -1107,7 +1185,7 @@
         <div class="checkout-sticky-bar" id="checkoutStickyBar">
           <div class="checkout-sticky-total">
             <small data-i18n="finalPriceLabel">Total Bayar</small>
-            <strong id="stickyFinalPrice">Rp 0</strong>
+            <strong id="stickyFinalPrice" aria-live="polite" aria-atomic="true">Rp 0</strong>
           </div>
           <button id="buyBtn" onclick="buy()" data-i18n="buyNow">
             Beli Sekarang
@@ -1141,13 +1219,21 @@
             </span>
           </div>
         </div>
-        <div class="loading" id="loading" data-i18n="processingOrder">
+        <div
+          class="loading"
+          id="loading"
+          role="status"
+          aria-live="polite"
+          data-i18n="processingOrder"
+        >
           Memproses pesanan...
         </div>
 
         <p class="trust-text" data-i18n="trustText">
           Pembayaran aman via QRIS GoPay Merchant • Pengiriman instan
         </p>
+          </aside>
+        </div>
       </div>
     </div>
 
@@ -1647,6 +1733,6 @@
 </div>
     </footer>
 
-    <script src="/script.js?v=20260825-checkout-docket-v4" defer></script>
+    <script src="/script.js?v=20260902-key-dispatch-v5" defer></script>
   </body>
 </html>

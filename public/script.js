@@ -44,6 +44,7 @@ const translations = {
     filterVoucher: "Voucher",
     orderGameBadge: "Order Game",
     modalOrderDesc: "Pilih produk, cek total, lalu lanjut bayar.",
+    orderModalTitle: "Selesaikan order",
     platformLabel: "Platform",
     brandLabel: "Brand",
     durationLabel: "Nominal / Durasi",
@@ -242,7 +243,7 @@ const translations = {
     quantitySelected: "1 key dipilih",
     discountVipLabel: "Diskon Voucher / VIP",
     gatewayPaymentTitle: "QRIS Indonesia",
-    gatewayPaymentDesc: "0,7% + pajak biaya",
+    gatewayPaymentDesc: "Biaya 0,7% + pajak",
     paymentFeeLabel: "Biaya pembayaran + pajak",
     walletPaymentTitle: "AE Credit",
     walletBalanceLabel: "Saldo",
@@ -332,6 +333,7 @@ const translations = {
     filterVoucher: "Voucher",
     orderGameBadge: "Order Game",
     modalOrderDesc: "Choose product, review total, then continue payment.",
+    orderModalTitle: "Complete your order",
     platformLabel: "Platform",
     brandLabel: "Brand",
     durationLabel: "Nominal / Duration",
@@ -529,7 +531,7 @@ const translations = {
     quantitySelected: "1 key selected",
     discountVipLabel: "Voucher / VIP Discount",
     gatewayPaymentTitle: "Indonesia QRIS",
-    gatewayPaymentDesc: "0.7% + fee tax",
+    gatewayPaymentDesc: "0.7% fee + tax",
     paymentFeeLabel: "Payment fee + tax",
     walletPaymentTitle: "AE Credit",
     walletBalanceLabel: "Balance",
@@ -830,6 +832,7 @@ let selectedOrderQuantity = 1;
 let selectedCheckoutPaymentMethod = "midtrans";
 let checkoutWalletBalance = 0;
 let lastCheckoutPricing = null;
+let lastOrderModalTrigger = null;
 let paymentPricingConfig = {
   usd_idr_rate: 18000,
   vat_rate: 0.11,
@@ -1712,6 +1715,7 @@ function updateOrderModalBanner(game) {
 }
 
 async function openOrderModal(game) {
+  lastOrderModalTrigger = document.activeElement;
   document.getElementById("checkoutStickyBar")?.classList.remove("is-visible");
   selectedOrderQuantity = 1;
   selectedCheckoutPaymentMethod = "midtrans";
@@ -1756,7 +1760,12 @@ async function openOrderModal(game) {
     checkoutWalletBalance = Number(data.wallet?.balance || 0);
     const walletBalance = document.getElementById("checkoutWalletBalance");
     if (walletBalance) walletBalance.innerText = `${tr("walletBalanceLabel")}: ${formatRupiah(checkoutWalletBalance)}`;
-    document.querySelectorAll(".checkout-payment-option").forEach((btn) => btn.classList.toggle("active", btn.dataset.paymentMethod === "midtrans"));
+    document.querySelectorAll(".checkout-payment-option").forEach((btn) => {
+      const isActive = btn.dataset.paymentMethod === "midtrans";
+      btn.classList.toggle("active", isActive);
+      btn.setAttribute("aria-checked", isActive ? "true" : "false");
+      btn.tabIndex = isActive ? 0 : -1;
+    });
   } catch (err) {
     Swal.fire({
       icon: "error",
@@ -1778,13 +1787,19 @@ async function openOrderModal(game) {
   const title = document.getElementById("modalGameTitle");
 
   if (title) {
-    title.innerText = game;
+    title.innerText = tr("orderModalTitle");
   }
 
   if (modal) {
+    modal.removeAttribute("inert");
+    modal.setAttribute("aria-hidden", "false");
     modal.classList.add("show");
     document.body.classList.add("order-modal-open");
     document.body.style.overflow = "hidden";
+
+    setTimeout(() => {
+      document.getElementById("closeOrderModalBtn")?.focus();
+    }, 50);
   }
 
   setTimeout(() => {
@@ -1813,6 +1828,11 @@ function setOrderStep(step) {
     const stepNumber = index + 1;
     node.classList.toggle("is-active", stepNumber === step);
     node.classList.toggle("is-done", stepNumber < step);
+    if (stepNumber === step) {
+      node.setAttribute("aria-current", "step");
+    } else {
+      node.removeAttribute("aria-current");
+    }
   });
 }
 
@@ -1830,11 +1850,16 @@ function updateOrderStepFromForm() {
   }
 }
 
-function closeOrderModal() {
+function closeOrderModal(restoreFocus = true) {
   const modal = document.getElementById("orderModal");
 
   if (modal) {
+    if (modal.contains(document.activeElement)) {
+      document.activeElement.blur();
+    }
     modal.classList.remove("show");
+    modal.setAttribute("aria-hidden", "true");
+    modal.setAttribute("inert", "");
     document.body.classList.remove("order-modal-open");
     document.body.style.overflow = "";
   }
@@ -1845,6 +1870,36 @@ function closeOrderModal() {
   if (voucherPanel) voucherPanel.open = false;
 
   resetVoucherPreview();
+
+  if (!restoreFocus) {
+    lastOrderModalTrigger = null;
+    return;
+  }
+
+  setTimeout(() => {
+    if (document.querySelector(".payment-modal.show, .swal2-container")) {
+      lastOrderModalTrigger = null;
+      return;
+    }
+    if (lastOrderModalTrigger?.isConnected) {
+      lastOrderModalTrigger.focus();
+    }
+    lastOrderModalTrigger = null;
+  }, 50);
+}
+
+function syncCheckoutRadioTabStops(group) {
+  if (!group) return;
+  const radios = Array.from(group.querySelectorAll('[role="radio"]'));
+  const enabled = radios.filter((radio) => !radio.disabled);
+  const selected = enabled.find(
+    (radio) => radio.getAttribute("aria-checked") === "true",
+  );
+  const tabbable = selected || enabled[0];
+
+  radios.forEach((radio) => {
+    radio.tabIndex = radio === tabbable ? 0 : -1;
+  });
 }
 
 function renderOrderPlatformPills(platforms) {
@@ -1894,6 +1949,8 @@ function renderOrderPlatformPills(platforms) {
 
     wrap.appendChild(btn);
   });
+
+  syncCheckoutRadioTabStops(wrap);
 }
 
 function syncOrderPlatformPillsActive() {
@@ -1902,6 +1959,7 @@ function syncOrderPlatformPillsActive() {
     btn.classList.toggle("active", active);
     btn.setAttribute("aria-checked", active ? "true" : "false");
   });
+  syncCheckoutRadioTabStops(document.getElementById("platformPills"));
 }
 
 function renderOrderBrandPills(brands) {
@@ -1946,6 +2004,8 @@ function renderOrderBrandPills(brands) {
 
     wrap.appendChild(btn);
   });
+
+  syncCheckoutRadioTabStops(wrap);
 }
 
 function syncOrderBrandPillsActive() {
@@ -1954,6 +2014,7 @@ function syncOrderBrandPillsActive() {
     btn.classList.toggle("active", active);
     btn.setAttribute("aria-checked", active ? "true" : "false");
   });
+  syncCheckoutRadioTabStops(document.getElementById("brandPills"));
 }
 
 function renderOrderProductCards(products) {
@@ -2026,6 +2087,8 @@ function renderOrderProductCards(products) {
 
     wrap.appendChild(btn);
   });
+
+  syncCheckoutRadioTabStops(wrap);
 }
 
 function syncOrderProductCardsActive() {
@@ -2034,6 +2097,7 @@ function syncOrderProductCardsActive() {
     btn.classList.toggle("active", active);
     btn.setAttribute("aria-checked", active ? "true" : "false");
   });
+  syncCheckoutRadioTabStops(document.getElementById("productCards"));
 }
 
 function loadPlatforms() {
@@ -2416,7 +2480,7 @@ async function buy() {
   }
 
   if (availableKeys < selectedOrderQuantity) {
-    closeOrderModal();
+    closeOrderModal(false);
     loadAllProducts();
 
     Swal.fire({
@@ -2465,7 +2529,7 @@ async function buy() {
     }
 
     if (data.binanceManual) {
-      closeOrderModal();
+      closeOrderModal(false);
       setLoading(false);
       await showBinancePaymentModal(data);
       return;
@@ -2490,7 +2554,7 @@ async function buy() {
         ? `${productNameForModal} (${selectedOrderQuantity} key)`
         : productNameForModal;
 
-      closeOrderModal();
+      closeOrderModal(false);
       setLoading(false);
 
       try {
@@ -2530,7 +2594,7 @@ async function buy() {
     }
 
     if (data.paidWithBalance) {
-      closeOrderModal();
+      closeOrderModal(false);
       setLoading(false);
       await Swal.fire({ icon: "success", title: "Pembayaran berhasil", text: "Saldo AE Credit sudah terpakai. Order kamu sedang diproses.", confirmButtonColor: "#0a0a0a" });
       window.location.href = data.resultUrl || `/result?order_id=${encodeURIComponent(data.orderId || "")}`;
@@ -2566,7 +2630,7 @@ async function buy() {
       normalizedError.includes("stok supplier tidak cukup");
 
     if (isOutOfStock) {
-      closeOrderModal();
+      closeOrderModal(false);
       loadAllProducts();
 
       Swal.fire({
@@ -3006,7 +3070,12 @@ function selectCheckoutPaymentMethod(method, button) {
   selectedCheckoutPaymentMethod = ["midtrans", "ae_credit", "binance_manual"].includes(method)
     ? method
     : "midtrans";
-  document.querySelectorAll(".checkout-payment-option").forEach((item) => item.classList.toggle("active", item === button || item.dataset.paymentMethod === selectedCheckoutPaymentMethod));
+  document.querySelectorAll(".checkout-payment-option").forEach((item) => {
+    const isActive = item === button || item.dataset.paymentMethod === selectedCheckoutPaymentMethod;
+    item.classList.toggle("active", isActive);
+    item.setAttribute("aria-checked", isActive ? "true" : "false");
+    item.tabIndex = isActive ? 0 : -1;
+  });
   if (lastCheckoutPricing) {
     const netPrice = lastCheckoutPricing.netPrice;
     showPriceBreakdown({
@@ -3221,9 +3290,63 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && modal && modal.classList.contains("show")) {
+    if (!modal?.classList.contains("show")) return;
+
+    if (e.key === "Escape") {
+      e.preventDefault();
       closeOrderModal();
       resetVoucherPreview();
+      return;
+    }
+
+    const currentRadio = e.target.closest('[role="radio"]');
+    const radioGroup = currentRadio?.closest('[role="radiogroup"]');
+    const radioKeys = [
+      "ArrowLeft",
+      "ArrowRight",
+      "ArrowUp",
+      "ArrowDown",
+      "Home",
+      "End",
+    ];
+    if (radioGroup && radioKeys.includes(e.key)) {
+      const radios = Array.from(
+        radioGroup.querySelectorAll('[role="radio"]:not([disabled])'),
+      ).filter((radio) => radio.offsetParent !== null);
+      const currentIndex = radios.indexOf(currentRadio);
+      if (currentIndex >= 0 && radios.length) {
+        e.preventDefault();
+        const nextIndex =
+          e.key === "Home"
+            ? 0
+            : e.key === "End"
+              ? radios.length - 1
+              : (currentIndex +
+                  (e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : 1) +
+                  radios.length) %
+                radios.length;
+        radios[nextIndex].focus();
+        radios[nextIndex].click();
+      }
+      return;
+    }
+
+    if (e.key !== "Tab") return;
+    const focusable = Array.from(
+      modal.querySelectorAll(
+        'button:not([disabled]), input:not([disabled]), select:not([disabled]):not(.native-order-select), details > summary, [tabindex]:not([tabindex="-1"])',
+      ),
+    ).filter((element) => element.offsetParent !== null);
+    if (!focusable.length) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
     }
   });
 });

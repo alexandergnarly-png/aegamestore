@@ -6,6 +6,13 @@ const script = fs.readFileSync("public/script.js", "utf8");
 const css = fs.readFileSync("public/style.css", "utf8");
 const keysystemCss = fs.readFileSync("public/keysystem-ui.css", "utf8");
 const serviceWorker = fs.readFileSync("public/service-worker.js", "utf8");
+const checkout = html.slice(
+  html.indexOf('id="orderModal"'),
+  html.indexOf('id="chatAdminBtn"'),
+);
+const checkoutCss = css.slice(
+  css.indexOf("AE patch 20260902-key-dispatch-v5"),
+);
 
 assert.doesNotThrow(() => new Function(script));
 
@@ -52,8 +59,9 @@ assert.match(keysystemCss, /body\.keysystem-ui \.promo-slider \{[\s\S]*?height: 
 assert.match(css, /body\.review-section-visible \.back-to-top,[\s\S]*?pointer-events: none !important/);
 assert.match(script, /IntersectionObserver[\s\S]*?review-section-visible/);
 assert.match(html, /aria-describedby="modalOrderDescription"/);
-assert.match(css, /\.order-modal-card \{[\s\S]*?scroll-padding-bottom: 156px/);
-assert.match(css, /\.checkout-payment-option \{[\s\S]*?min-height: 64px/);
+assert.match(checkout, /aria-hidden="true"[\s\S]*?inert/);
+assert.match(checkoutCss, /scroll-padding-bottom: 112px/);
+assert.match(checkoutCss, /\.checkout-payment-option \{[\s\S]*?min-height: 60px/);
 assert.match(script, /class="ae-guide-list"/);
 assert.match(script, /popup: "ae-guide-popup"/);
 assert.match(css, /\.swal2-close \{[\s\S]*?width: 44px/);
@@ -62,18 +70,57 @@ assert.match(script, /function updateCheckoutStickyVisibility\(\)/);
 assert.match(script, /quantity\.offsetTop \+ quantity\.offsetHeight - 16/);
 assert.match(css, /\.checkout-sticky-bar\.is-visible \{/);
 assert.match(script, /voucherPanel\.open = false/);
-assert.match(css, /AE patch 20260825-checkout-docket-v4/);
-assert.match(css, /\.order-modal \.modal-head \{[\s\S]*?position: relative/);
-assert.match(css, /\.order-modal \.order-steps \{[\s\S]*?position: relative !important/);
-assert.match(css, /\.order-modal \.order-product-cards \{[\s\S]*?grid-template-columns: 1fr !important/);
-assert.match(css, /\.order-modal \.voucher-toggle-main > span \{[\s\S]*?border: 1px dashed var\(--checkout-ink\)/);
-assert.match(css, /\.order-modal \.order-step\.is-done \.order-step-dot::after \{[\s\S]*?content: "\\2713"/);
-assert.match(css, /\.order-modal \.order-step\.is-active \.order-step-dot \{[\s\S]*?background: var\(--checkout-ink\) !important/);
+assert.match(css, /AE patch 20260902-key-dispatch-v5/);
+assert.match(checkout, /class="checkout-modal-layout"/);
+assert.match(checkout, /class="checkout-build-pane"/);
+assert.match(checkout, /class="checkout-settlement-pane"/);
+assert.match(checkoutCss, /grid-template-columns: minmax\(0, 1\.5fr\) minmax\(330px, 0\.9fr\)/);
+assert.match(checkoutCss, /\.order-modal \.order-steps \{[\s\S]*?position: relative !important/);
+assert.match(checkoutCss, /@media \(max-width: 760px\)[\s\S]*?\.order-modal \.order-product-cards \{[\s\S]*?grid-template-columns: 1fr !important/);
+assert.match(checkoutCss, /\.order-modal \.voucher-toggle-main > span \{[\s\S]*?border: 1px dashed var\(--checkout-ink\)/);
+assert.match(checkoutCss, /\.order-modal \.order-step\.is-done \.order-step-dot::after \{[\s\S]*?content: "✓"/);
+assert.match(checkoutCss, /\.order-modal \.order-step\.is-active \.order-step-dot \{[\s\S]*?background: var\(--checkout-accent\) !important/);
 assert.match(script, /normalizedPlatform === "ios"[\s\S]*?"mdi:apple"/);
 assert.match(script, /normalizedPlatform === "android"[\s\S]*?"mdi:android"/);
 assert.match(script, /<iconify-icon icon="\$\{platformIcon\}" aria-hidden="true"><\/iconify-icon>/);
 assert.match(css, /\.order-modal \.order-platform-pill iconify-icon \{[\s\S]*?font-size: 20px/);
-assert.match(css, /\.order-modal \.checkout-sticky-bar \{[\s\S]*?grid-template-columns: minmax\(0, 1fr\) minmax\(132px, 0\.9fr\)/);
+assert.match(checkoutCss, /grid-template-columns: minmax\(0, 1fr\) minmax\(126px, 42%\)/);
+[
+  "platform",
+  "brand",
+  "product",
+  "name",
+  "voucherCodeInput",
+  "priceBreakdown",
+  "originalPriceText",
+  "discountText",
+  "paymentFeeText",
+  "finalPriceText",
+  "checkoutWalletBalance",
+  "stickyFinalPrice",
+  "buyBtn",
+  "loading",
+].forEach((id) => {
+  assert.ok(checkout.includes(`id="${id}"`), `Missing checkout hook: ${id}`);
+});
+assert.deepEqual(
+  [...checkout.matchAll(/data-payment-method="([^"]+)"/g)].map((match) => match[1]),
+  ["midtrans", "ae_credit", "binance_manual"],
+);
+assert.match(checkout, /checkout-payment-choice[\s\S]*?role="radiogroup"/);
+assert.match(checkout, /checkout-payment-option active[\s\S]*?role="radio"[\s\S]*?aria-checked="true"/);
+assert.equal(
+  (checkout.match(/class="native-order-select"[\s\S]*?aria-hidden="true"[\s\S]*?tabindex="-1"/g) || [])
+    .length,
+  3,
+);
+assert.match(checkout, /id="loading"[\s\S]*?role="status"[\s\S]*?aria-live="polite"/);
+assert.match(script, /setAttribute\("aria-checked", isActive \? "true" : "false"\)/);
+assert.match(script, /function syncCheckoutRadioTabStops\(group\)/);
+assert.match(script, /"ArrowLeft"[\s\S]*?"ArrowRight"[\s\S]*?"Home"[\s\S]*?"End"/);
+assert.match(script, /select:not\(\[disabled\]\):not\(\.native-order-select\)/);
+assert.match(script, /setAttribute\("aria-current", "step"\)/);
+assert.match(checkoutCss, /prefers-reduced-motion: reduce[\s\S]*?\.order-modal/);
 assert.match(css, /Compact mobile game cards/);
 assert.match(css, /grid-template-areas:[\s\S]*?"meta cta"/);
 assert.match(css, /\.game-card-cta::after \{[\s\S]*?width: 24px/);
@@ -144,6 +191,7 @@ assert.match(css, /prefers-reduced-motion: reduce[\s\S]*?account-orbit-icon/);
   "promoBuyerTitle",
   "reviewLoading",
   "orderProductTitle",
+  "orderModalTitle",
   "orderBuyerTitle",
   "orderSummaryTitle",
   "gatewayPaymentDesc",
@@ -158,8 +206,8 @@ assert.match(css, /prefers-reduced-motion: reduce[\s\S]*?account-orbit-icon/);
     `Missing Indonesian/English translations for: ${key}`,
   );
 });
-assert.match(html, /script\.js\?v=20260825-checkout-docket-v4/);
-assert.match(html, /style\.css\?v=20260825-checkout-docket-v4/);
+assert.match(html, /script\.js\?v=20260902-key-dispatch-v5/);
+assert.match(html, /style\.css\?v=20260902-key-dispatch-v5/);
 assert.match(html, /class="install-prompt-meta"/);
 assert.match(html, /AE SUPPORT DECK/);
 assert.match(html, /aria-labelledby="installPromptTitle"/);
