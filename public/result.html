@@ -818,155 +818,228 @@
       }
 
     </style>
+    <link rel="stylesheet" href="/result-redesign.css?v=20260902-result-v1" />
   </head>
-  <body>
+  <body data-result-state="loading">
+    <a class="skip-link" href="#main-content" data-result-i18n="skipToResult">Lewati ke hasil order</a>
     <header class="site-header">
       <div class="header-inner">
-        <a href="/" class="brand" aria-label="AE Game Store - Beranda">
+        <a href="/" class="brand" aria-label="AE Game Store">
           <span class="brand-logo" aria-hidden="true">AE</span>
           <span class="brand-copy">
             <strong>AE Game Store</strong>
-            <span data-result-i18n="brandTagline">Premium Digital Keys</span>
+            <span data-result-i18n="brandTagline">Digital delivery desk</span>
           </span>
         </a>
+        <span class="header-status" data-result-i18n="headerStatus">Secure order access</span>
         <div class="header-actions">
           <div class="lang-switch" role="group" aria-label="Language switcher">
             <button type="button" id="btn-id" class="lang-btn" onclick="setResultLanguage('id')" aria-pressed="true">ID</button>
             <button type="button" id="btn-en" class="lang-btn" onclick="setResultLanguage('en')" aria-pressed="false">EN</button>
           </div>
-          <button type="button" id="theme-toggle" class="icon-btn" onclick="toggleResultTheme()" aria-label="Toggle dark mode">🌙</button>
+          <button type="button" id="theme-toggle" class="icon-btn" onclick="toggleResultTheme()" aria-label="Gunakan mode gelap" aria-pressed="false">
+            <iconify-icon id="themeIcon" icon="mdi:weather-night" aria-hidden="true"></iconify-icon>
+            <span class="sr-only" id="themeLabel">Gunakan mode gelap</span>
+          </button>
         </div>
       </div>
     </header>
 
-    <main class="page">
-      <div class="result-wrapper">
-        <section class="card" aria-label="Status pesanan">
-          <div class="card-head">
-            <div class="logo-badge" aria-hidden="true">AE</div>
-            <div>
-              <h1 data-result-i18n="title">Status Pesanan</h1>
-              <p class="subtitle" data-result-i18n="subtitle">Berikut adalah detail pembayaran dan hasil pengiriman produk digital kamu.</p>
+    <main class="page" id="main-content" tabindex="-1">
+      <div class="result-wrapper" id="resultShell">
+        <section class="card outcome-panel" id="outcomePanel" aria-labelledby="outcomeTitle" aria-busy="true">
+          <div class="panel-meta">
+            <span data-result-i18n="deliveryDesk">AE / Pengiriman digital</span>
+            <span class="order-ref" id="orderRef">ID / -</span>
+          </div>
+
+          <header class="outcome-head">
+            <div class="outcome-mark" id="outcomeIcon" aria-hidden="true">
+              <iconify-icon icon="mdi:progress-clock"></iconify-icon>
             </div>
+            <div>
+              <p class="outcome-kicker" id="outcomeKicker" data-result-i18n="checkingKicker">Mengecek order</p>
+              <h1 id="outcomeTitle" data-result-i18n="checkingTitle">Sebentar, ya.</h1>
+            </div>
+          </header>
+
+          <div class="status-row" id="statusRow">
+            <span class="badge waiting_payment" data-result-i18n="loadingStatus">Memuat status</span>
           </div>
 
-          <div class="status-row" id="statusRow" aria-live="polite" aria-atomic="true">
-            <span class="badge waiting_payment" data-result-i18n="loadingStatus">Memuat status...</span>
-          </div>
-
-          <p class="helper-text" id="statusText" data-result-i18n="loadingOrder">Memuat data order...</p>
-
-          <div class="progress-track" id="progressTrack" aria-hidden="true">
-            <ol class="progress-steps">
-              <li class="progress-step done" data-step="created">
-                <span class="step-dot"><iconify-icon icon="mdi:cart-outline"></iconify-icon></span>
-                <span class="step-label" data-result-i18n="stepCreated">Order</span>
-              </li>
-              <li class="progress-step" data-step="payment">
-                <span class="step-dot"><iconify-icon icon="mdi:credit-card-outline"></iconify-icon></span>
-                <span class="step-label" data-result-i18n="stepPayment">Pembayaran</span>
-              </li>
-              <li class="progress-step" data-step="delivery">
-                <span class="step-dot"><iconify-icon icon="mdi:gift-outline"></iconify-icon></span>
-                <span class="step-label" data-result-i18n="stepDelivery">Pengiriman</span>
-              </li>
-            </ol>
-            <span class="progress-fill" id="progressFill"></span>
-          </div>
-
-          <div class="timeline-mini" id="timelineMini" aria-live="polite">
-            <div class="timeline-item is-current"><strong data-result-i18n="timelineCreated">Order Created</strong><span data-result-i18n="timelineWaiting">Menunggu data...</span></div>
-            <div class="timeline-item"><strong data-result-i18n="timelinePayment">Payment</strong><span data-result-i18n="timelineWaiting">Menunggu data...</span></div>
-            <div class="timeline-item"><strong data-result-i18n="timelineDelivery">Delivery</strong><span data-result-i18n="timelineWaiting">Menunggu data...</span></div>
-          </div>
-
-          <div class="summary" id="summary">
-            <div class="summary-item" id="nameText"><span class="skeleton-line long"></span><span class="skeleton-line short"></span></div>
-            <div class="summary-item" id="gameText"><span class="skeleton-line long"></span><span class="skeleton-line short"></span></div>
-            <div class="summary-item" id="productText"><span class="skeleton-line long"></span><span class="skeleton-line short"></span></div>
-            <div class="summary-item" id="priceText"><span class="skeleton-line long"></span><span class="skeleton-line short"></span></div>
-          </div>
-
-          <div class="compatible-box" id="compatibleBox">
-            <div class="compatible-title"><iconify-icon icon="mdi:gamepad-variant-outline" aria-hidden="true"></iconify-icon><span data-result-i18n="compatibleTitle">Kompatibel Dengan</span></div>
-            <div class="compatible-list" id="compatibleList"></div>
-            <div class="compatible-note" data-result-i18n="compatibleNote">Key ini dapat digunakan untuk beberapa game yang didukung brand tersebut.</div>
+          <div class="status-copy" id="statusText" role="status" aria-live="polite" aria-atomic="true" data-result-i18n="loadingOrder">
+            Memuat data order...
           </div>
 
           <div class="key-box">
-            <span class="key-title"><iconify-icon icon="mdi:key-variant" aria-hidden="true"></iconify-icon><span data-result-i18n="keyTitle">Game Key / Voucher</span></span>
-            <div id="keyBox" data-result-i18n="awaitingKey">Menunggu key...</div>
-            <button class="btn copy-btn" id="copyBtn" type="button" onclick="copyKey()" style="display:none" data-result-i18n="copyKey">Copy Kode</button>
+            <span class="key-title">
+              <iconify-icon icon="mdi:key-variant" aria-hidden="true"></iconify-icon>
+              <span data-result-i18n="keyTitle">Key vault</span>
+            </span>
+            <div id="keyBox" role="status" aria-live="polite" aria-atomic="true" data-result-i18n="awaitingKey">Menunggu key...</div>
+            <button class="btn copy-btn" id="copyBtn" type="button" onclick="copyKey()" style="display:none">
+              <iconify-icon icon="mdi:content-copy" aria-hidden="true"></iconify-icon>
+              <span data-result-i18n="copyKey">Copy key</span>
+            </button>
           </div>
 
           <div class="order-tools" id="orderTools">
-            <button class="tool-btn" id="copyDetailBtn" type="button" onclick="copyOrderDetail()">
+            <button class="tool-btn" id="copyDetailBtn" type="button" onclick="copyOrderDetail()" disabled>
               <iconify-icon icon="mdi:content-copy" aria-hidden="true"></iconify-icon>
-              <span data-result-i18n="copyOrderDetail">Copy Order Detail</span>
+              <span data-result-i18n="copyOrderDetail">Copy detail order</span>
             </button>
             <button class="tool-btn primary" id="continuePayBtn" type="button" onclick="continuePayment()" hidden>
               <iconify-icon icon="mdi:credit-card-fast-outline" aria-hidden="true"></iconify-icon>
-              <span data-result-i18n="continuePayment">Continue Payment</span>
+              <span data-result-i18n="continuePayment">Lanjut bayar</span>
             </button>
           </div>
 
           <div class="security-note" id="securityNote">
-            <strong data-result-i18n="securityTitle">Security Note</strong>
-            <span data-result-i18n="securityNote">Never share your key before redeeming. AE Game Store will never ask for your game password.</span>
-          </div>
-
-          <div class="howto-box" id="howtoBox">
-            <div class="howto-title"><iconify-icon icon="mdi:book-open-page-variant-outline" aria-hidden="true"></iconify-icon><span data-result-i18n="howtoTitle">Cara Pakai Key</span></div>
-            <ol class="howto-list">
-              <li data-result-i18n="howtoStep1">Copy kode key yang sudah muncul.</li>
-              <li data-result-i18n="howtoStep2">Buka game atau panel brand terkait.</li>
-              <li data-result-i18n="howtoStep3">Redeem / login sesuai instruksi brand.</li>
-            </ol>
-          </div>
-
-          <div class="private-group-box" id="privateGroupBox" hidden>
-            <div class="private-group-icon"><iconify-icon icon="mdi:telegram" aria-hidden="true"></iconify-icon></div>
-            <div class="private-group-copy">
-              <span class="private-group-kicker" data-result-i18n="privateGroupKicker">Buyer Access</span>
-              <strong data-result-i18n="privateGroupTitle">Join Private Buyer Group</strong>
-              <p data-result-i18n="privateGroupDesc">Dapatkan update stok, info maintenance, voucher, dan announcement khusus buyer.</p>
+            <iconify-icon icon="mdi:shield-key-outline" aria-hidden="true"></iconify-icon>
+            <div>
+              <strong data-result-i18n="securityTitle">Simpan untuk dirimu</strong>
+              <span data-result-i18n="securityNote">Jangan kirim key ke siapa pun sebelum kamu redeem. Kami tidak pernah meminta password game.</span>
             </div>
-            <a class="btn private-group-btn" href="https://t.me/+xzf51S3w6XJjZWQ9" target="_blank" rel="noopener noreferrer" data-result-i18n="privateGroupBtn">Join Group</a>
-          </div>
-
-          <div class="result-help" id="resultHelp" style="display:none">
-            <p data-result-i18n="needHelp">Butuh bantuan? Hubungi admin.</p>
-            <a href="https://t.me/narlyax" target="_blank" rel="noopener noreferrer" class="btn secondary-btn" data-result-i18n="chatAdmin">Chat Admin</a>
-          </div>
-
-          <div class="result-actions">
-            <button type="button" class="btn secondary-btn" onclick="refreshOrder()" data-result-i18n="refresh"><iconify-icon icon="mdi:refresh" aria-hidden="true"></iconify-icon><span>Refresh Status</span></button>
-            <a href="/account.html" class="btn secondary-btn" data-result-i18n="myAccount"><iconify-icon icon="mdi:account-circle-outline" aria-hidden="true"></iconify-icon><span>Akun Saya</span></a>
-            <a class="btn home-btn span-2" href="/#store-section" data-result-i18n="backToCatalog"><iconify-icon icon="mdi:storefront-outline" aria-hidden="true"></iconify-icon><span>Kembali ke Katalog</span></a>
           </div>
         </section>
+
+        <aside class="side-stack" aria-labelledby="receiptTitle">
+          <section class="receipt-card" aria-labelledby="receiptTitle">
+            <div class="receipt-head">
+              <div>
+                <span class="receipt-kicker" data-result-i18n="orderLog">Order log</span>
+                <h2 class="receipt-title" id="receiptTitle" data-result-i18n="orderDetails">Rincian order</h2>
+              </div>
+              <button type="button" class="tool-btn refresh-btn" id="refreshBtn" onclick="refreshOrder()" aria-label="Muat ulang status" aria-busy="false">
+                <iconify-icon icon="mdi:refresh" aria-hidden="true"></iconify-icon>
+                <span class="sr-only" id="refreshLabel" data-result-i18n="refresh">Muat ulang status</span>
+              </button>
+            </div>
+
+            <div class="progress-track" id="progressTrack">
+              <ol class="progress-steps">
+                <li class="progress-step active" data-step="created">
+                  <span class="step-dot" aria-hidden="true">01</span>
+                  <span class="step-copy">
+                    <span class="step-label" data-result-i18n="stepCreated">Order dibuat</span>
+                    <span class="step-meta" id="createdStepMeta" data-result-i18n="timelineWaiting">Menunggu data...</span>
+                  </span>
+                </li>
+                <li class="progress-step" data-step="payment">
+                  <span class="step-dot" aria-hidden="true">02</span>
+                  <span class="step-copy">
+                    <span class="step-label" data-result-i18n="stepPayment">Pembayaran</span>
+                    <span class="step-meta" id="paymentStepMeta" data-result-i18n="timelineWaiting">Menunggu data...</span>
+                  </span>
+                </li>
+                <li class="progress-step" data-step="delivery">
+                  <span class="step-dot" aria-hidden="true">03</span>
+                  <span class="step-copy">
+                    <span class="step-label" data-result-i18n="stepDelivery">Key dikirim</span>
+                    <span class="step-meta" id="deliveryStepMeta" data-result-i18n="timelineWaiting">Menunggu data...</span>
+                  </span>
+                </li>
+              </ol>
+              <span class="progress-fill" id="progressFill" aria-hidden="true"></span>
+            </div>
+
+            <div class="summary-heading">
+              <strong data-result-i18n="receiptSummary">Ringkasan</strong>
+              <span data-result-i18n="receiptPrivate">Private access</span>
+            </div>
+            <div class="summary" id="summary">
+              <div class="summary-item" id="orderText"><span class="skeleton-line long"></span><span class="skeleton-line short"></span></div>
+              <div class="summary-item" id="nameText"><span class="skeleton-line long"></span><span class="skeleton-line short"></span></div>
+              <div class="summary-item" id="gameText"><span class="skeleton-line long"></span><span class="skeleton-line short"></span></div>
+              <div class="summary-item" id="productText"><span class="skeleton-line long"></span><span class="skeleton-line short"></span></div>
+              <div class="summary-item" id="priceText"><span class="skeleton-line long"></span><span class="skeleton-line short"></span></div>
+            </div>
+          </section>
+
+          <section class="compatible-box" id="compatibleBox">
+            <div class="compatible-title"><iconify-icon icon="mdi:gamepad-variant-outline" aria-hidden="true"></iconify-icon><span data-result-i18n="compatibleTitle">Bisa dipakai di</span></div>
+            <div class="compatible-list" id="compatibleList"></div>
+            <div class="compatible-note" data-result-i18n="compatibleNote">Cek pilihan game yang didukung brand key ini.</div>
+          </section>
+
+          <section class="howto-box" id="howtoBox">
+            <div class="howto-title"><iconify-icon icon="mdi:arrow-decision-outline" aria-hidden="true"></iconify-icon><span data-result-i18n="howtoTitle">Setelah key muncul</span></div>
+            <ol class="howto-list">
+              <li data-result-i18n="howtoStep1">Copy key dari vault.</li>
+              <li data-result-i18n="howtoStep2">Buka game atau panel brand.</li>
+              <li data-result-i18n="howtoStep3">Redeem sesuai petunjuk brand.</li>
+            </ol>
+          </section>
+
+          <section class="private-group-box" id="privateGroupBox" hidden>
+            <div class="private-group-icon"><iconify-icon icon="mdi:telegram" aria-hidden="true"></iconify-icon></div>
+            <div class="private-group-copy">
+              <span class="private-group-kicker" data-result-i18n="privateGroupKicker">Buyer room</span>
+              <strong data-result-i18n="privateGroupTitle">Masuk grup buyer</strong>
+              <p data-result-i18n="privateGroupDesc">Info stok, maintenance, dan voucher kami taruh di sini.</p>
+            </div>
+            <a class="btn private-group-btn" href="https://t.me/+xzf51S3w6XJjZWQ9" target="_blank" rel="noopener noreferrer">
+              <span data-result-i18n="privateGroupBtn">Buka Telegram</span>
+              <iconify-icon icon="mdi:arrow-top-right" aria-hidden="true"></iconify-icon>
+            </a>
+          </section>
+
+          <section class="result-help" id="resultHelp" style="display:none">
+            <p data-result-i18n="needHelp">Statusnya belum beres? Kirim ID order ke admin.</p>
+            <a href="https://t.me/narlyax" target="_blank" rel="noopener noreferrer" class="btn secondary-btn">
+              <span data-result-i18n="chatAdmin">Chat admin</span>
+              <iconify-icon icon="mdi:arrow-top-right" aria-hidden="true"></iconify-icon>
+            </a>
+          </section>
+
+          <nav class="result-actions" aria-labelledby="afterOrderLinksLabel">
+            <span class="sr-only" id="afterOrderLinksLabel" data-result-i18n="afterOrderLinks">Tautan setelah order</span>
+            <a href="/account.html" class="btn secondary-btn">
+              <iconify-icon icon="mdi:account-circle-outline" aria-hidden="true"></iconify-icon>
+              <span data-result-i18n="myAccount">Akun saya</span>
+            </a>
+            <a class="btn home-btn" href="/#store-section">
+              <iconify-icon icon="mdi:storefront-outline" aria-hidden="true"></iconify-icon>
+              <span data-result-i18n="backToCatalog">Kembali ke katalog</span>
+            </a>
+          </nav>
+        </aside>
       </div>
     </main>
 
     <script>
 const resultTranslations = {
         id: {
-          pageTitle: "Hasil Pembayaran - AE Game Store",
-          brandTagline: "Premium Digital Keys",
+          pageTitle: "Status Order - AE Game Store",
+          brandTagline: "Digital delivery desk",
+          skipToResult: "Lewati ke hasil order",
+          headerStatus: "Akses order aman",
+          deliveryDesk: "AE / Pengiriman digital",
+          checkingKicker: "Mengecek order",
+          checkingTitle: "Sebentar, ya.",
+          orderLog: "Riwayat order",
+          orderDetails: "Rincian order",
+          receiptSummary: "Ringkasan",
+          receiptPrivate: "Akses privat",
+          afterOrderLinks: "Tautan setelah order",
+          themeToggle: "Mode gelap",
           title: "Status Pesanan",
           subtitle:
             "Berikut adalah detail pembayaran dan hasil pengiriman produk digital kamu.",
-          loadingStatus: "Memuat status...",
-          stepCreated: "Order",
+          loadingStatus: "Memuat status",
+          stepCreated: "Order dibuat",
           stepPayment: "Pembayaran",
-          stepDelivery: "Pengiriman",
-          keyTitle: "Game Key / Voucher",
+          stepDelivery: "Key dikirim",
+          keyTitle: "Kode produk",
+          licenseKey: "key",
+          licenseKeys: "key",
           awaitingKey: "Menunggu key...",
-          copyKey: "Copy Kode",
-          refresh: "Refresh Status",
-          myAccount: "Akun Saya",
-          backToCatalog: "Kembali ke Katalog",
+          copyKey: "Salin kode",
+          refresh: "Muat ulang status",
+          myAccount: "Akun saya",
+          backToCatalog: "Kembali ke katalog",
           loadingOrder: "Memuat data order...",
+          labelOrder: "Order ID",
           labelName: "Nama",
           labelGame: "Game",
           labelProduct: "Produk",
@@ -978,37 +1051,37 @@ const resultTranslations = {
             "Link order tidak valid. Pastikan kamu membuka halaman result dari link pembayaran yang benar.",
           incompleteKey: "Link order tidak valid.",
           deliveredMessage:
-            "Pembayaran berhasil dan produk sudah dikirim. Simpan game key ini dengan aman.",
-          deliveredToast: "Game key sudah tersedia! 🎉",
+            "Pembayaran masuk. Copy key di bawah lalu redeem di game atau panel brand.",
+          deliveredToast: "Key sudah siap",
           manualKeyFallback: "Akan dikirim manual oleh admin.",
           manualMessage:
-            "Pembayaran sudah dicek, tapi order ini perlu dikirim manual oleh admin. Hubungi admin jika belum diproses.",
+            "Pembayaran masuk. Admin akan mengirim key lewat kontak yang dipakai saat order.",
           manualCompletedKey: "Key sudah dikirim manual oleh admin.",
           manualCompletedMessage:
             "Order selesai. Admin sudah mengirim seluruh key melalui kontakmu.",
-          manualToast: "Order perlu diproses manual 🌊",
+          manualToast: "Order ditangani admin",
           processingKey: "Key sedang diproses otomatis...",
           processingMessage:
-            "Pembayaran berhasil. Key sedang diclaim otomatis dari supplier, biasanya hanya butuh beberapa detik.",
-          processingToast: "Key sedang diproses otomatis",
+            "Pembayaran masuk. Supplier sedang menyiapkan key; halaman ini akan update otomatis.",
+          processingToast: "Key sedang disiapkan",
           claimProblemKey: "Key belum berhasil dikirim.",
           claimProblemMessage:
-            "Pembayaran berhasil, tetapi pengiriman key sedang bermasalah. Admin akan bantu proses ulang. Silakan hubungi admin jika belum berubah.",
-          claimProblemToast: "Pengiriman key bermasalah",
+            "Pembayaran masuk, tetapi key belum terkirim. Admin perlu mengecek order ini.",
+          claimProblemToast: "Pengiriman key perlu dicek",
           pendingTitle: "Pembayaran belum selesai.",
           pendingSub:
-            "Jika kamu sudah membayar, tunggu beberapa saat lalu klik Refresh Status. Game key akan muncul otomatis setelah pembayaran dikonfirmasi.",
+            "Key muncul otomatis setelah pembayaran dikonfirmasi.",
           pendingMessage:
-            "Order masih menunggu pembayaran. Selesaikan pembayaran terlebih dahulu agar key bisa dikirim otomatis.",
+            "Key akan dikirim setelah pembayaran dikonfirmasi.",
           pendingToast: "Order masih menunggu pembayaran",
           inactiveKey: "Order tidak aktif.",
           inactiveMessage:
-            "Order ini sudah expired atau dibatalkan. Silakan buat order baru dari katalog.",
+            "Masa bayar habis atau order dibatalkan. Buat order baru untuk melanjutkan.",
           inactiveToast: "Order sudah tidak aktif",
           fallbackKey: "Menunggu update status order.",
           fallbackMessage:
-            "Order berhasil ditemukan. Simpan halaman ini untuk cek status order kamu kapan saja.",
-          fallbackToast: "Data order ditemukan 🌊",
+            "Order ditemukan. Halaman ini akan menampilkan update berikutnya.",
+          fallbackToast: "Order ditemukan",
           loadFailedBadge: "Gagal memuat",
           loadFailedKey: "Data order tidak bisa dimuat.",
           loadFailedFallback: "Gagal mengambil data order.",
@@ -1016,27 +1089,28 @@ const resultTranslations = {
           copySuccessText: "Game key berhasil dicopy!",
           copyFailTitle: "Oops...",
           copyFailText: "Gagal copy key.",
-          compatibleTitle: "Kompatibel Dengan",
+          compatibleTitle: "Bisa dipakai di",
           compatibleNote:
-            "Key ini dapat digunakan untuk beberapa game yang didukung brand tersebut.",
-          howtoTitle: "Cara Pakai Key",
-          howtoStep1: "Copy kode key yang sudah muncul.",
-          howtoStep2: "Buka game atau panel brand terkait.",
-          howtoStep3: "Redeem / login sesuai instruksi brand.",
-          chatAdmin: "Chat Admin",
-          needHelp: "Butuh bantuan? Hubungi admin.",
-          privateGroupKicker: "Buyer Access",
-          privateGroupTitle: "Join Private Buyer Group",
+            "Cek pilihan game yang didukung brand key ini.",
+          howtoTitle: "Setelah key muncul",
+          howtoStep1: "Copy key dari vault.",
+          howtoStep2: "Buka game atau panel brand.",
+          howtoStep3: "Redeem sesuai petunjuk brand.",
+          chatAdmin: "Chat admin",
+          needHelp: "Statusnya belum beres? Kirim ID order ke admin.",
+          privateGroupKicker: "Grup buyer",
+          privateGroupTitle: "Masuk grup buyer",
           privateGroupDesc:
-            "Dapatkan update stok, info maintenance, voucher, dan announcement khusus buyer.",
-          privateGroupBtn: "Join Group",
-          copyOrderDetail: "Copy Order Detail",
+            "Info stok, maintenance, dan voucher kami taruh di sini.",
+          privateGroupBtn: "Buka Telegram",
+          copyOrderDetail: "Salin detail order",
           continuePayment: "Lanjut Bayar",
           continuePaymentLoading: "Memuat pembayaran...",
           continuePaymentFailed: "Gagal lanjut bayar",
+          transactionIdInvalid: "Transaction ID harus 8-128 karakter tanpa spasi.",
           orderDetailCopied: "Detail order berhasil dicopy",
-          securityTitle: "Catatan Keamanan",
-          securityNote: "Jangan bagikan key sebelum redeem. AE Game Store tidak akan pernah meminta password game kamu.",
+          securityTitle: "Simpan untuk dirimu",
+          securityNote: "Jangan kirim key ke siapa pun sebelum kamu redeem. Kami tidak pernah meminta password game.",
           timelineCreated: "Order Dibuat",
           timelinePayment: "Pembayaran",
           timelineDelivery: "Pengiriman",
@@ -1044,24 +1118,73 @@ const resultTranslations = {
           timelineDone: "Selesai",
           timelineCurrent: "Sedang diproses",
           timelineFailed: "Tidak aktif",
+          timelineAttention: "Perlu dicek",
+          outcomeDeliveredKicker: "Key terkirim",
+          outcomeDeliveredTitle: "Key kamu sudah siap.",
+          outcomeManualKicker: "Pengiriman manual",
+          outcomeManualTitle: "Admin sedang menangani order.",
+          outcomeProcessingKicker: "Pembayaran diterima",
+          outcomeProcessingTitle: "Key sedang disiapkan.",
+          outcomeReviewKicker: "Bukti pembayaran masuk",
+          outcomeReviewTitle: "Menunggu verifikasi admin.",
+          outcomeProblemKicker: "Perlu dicek",
+          outcomeProblemTitle: "Pengiriman key tertahan.",
+          outcomePendingKicker: "Menunggu pembayaran",
+          outcomePendingTitle: "Selesaikan pembayaran.",
+          outcomeInactiveKicker: "Order ditutup",
+          outcomeInactiveTitle: "Order ini sudah berakhir.",
+          outcomeErrorKicker: "Gagal memuat",
+          outcomeErrorTitle: "Status belum bisa dibuka.",
+          outcomeWaitingKicker: "Order ditemukan",
+          outcomeWaitingTitle: "Menunggu kabar terbaru.",
+          reviewKey: "Bukti pembayaran sedang diverifikasi.",
+          reviewMessage: "Admin sedang mengecek Transaction ID. Key diproses setelah pembayaran disetujui.",
+          reviewToast: "Bukti pembayaran sedang dicek",
+          status_paid: "Lunas",
+          status_pending: "Menunggu bayar",
+          status_delivered: "Terkirim",
+          status_waiting_payment: "Menunggu bayar",
+          status_manual: "Ditangani admin",
+          status_processing_supplier: "Menyiapkan key",
+          status_waiting_delivery: "Menyiapkan key",
+          status_payment_review: "Sedang diverifikasi",
+          status_problem: "Perlu dicek",
+          status_expired: "Kedaluwarsa",
+          status_cancelled: "Dibatalkan",
+          status_failed: "Gagal",
+          status_refunded: "Dikembalikan",
         },
         en: {
-          pageTitle: "Order Result - AE Game Store",
-          brandTagline: "Premium Digital Keys",
+          pageTitle: "Order Status - AE Game Store",
+          brandTagline: "Digital delivery desk",
+          skipToResult: "Skip to order result",
+          headerStatus: "Secure order access",
+          deliveryDesk: "AE / Digital delivery",
+          checkingKicker: "Checking order",
+          checkingTitle: "One moment.",
+          orderLog: "Order log",
+          orderDetails: "Order details",
+          receiptSummary: "Summary",
+          receiptPrivate: "Private access",
+          afterOrderLinks: "Links after order",
+          themeToggle: "Dark mode",
           title: "Order Status",
           subtitle:
             "Here are your payment details and the delivery status of your digital product.",
-          loadingStatus: "Loading status...",
-          stepCreated: "Order",
+          loadingStatus: "Loading status",
+          stepCreated: "Order placed",
           stepPayment: "Payment",
-          stepDelivery: "Delivery",
-          keyTitle: "Game Key / Voucher",
+          stepDelivery: "Key delivered",
+          keyTitle: "Key vault",
+          licenseKey: "license key",
+          licenseKeys: "license keys",
           awaitingKey: "Waiting for key...",
-          copyKey: "Copy Code",
-          refresh: "Refresh Status",
+          copyKey: "Copy key",
+          refresh: "Refresh status",
           myAccount: "My Account",
           backToCatalog: "Back to Catalog",
           loadingOrder: "Loading order data...",
+          labelOrder: "Order ID",
           labelName: "Name",
           labelGame: "Game",
           labelProduct: "Product",
@@ -1072,37 +1195,37 @@ const resultTranslations = {
             "Invalid order link. Make sure you open this page from the correct payment link.",
           incompleteKey: "Order link is invalid.",
           deliveredMessage:
-            "Payment confirmed and product has been delivered. Save this game key safely.",
-          deliveredToast: "Game key is ready! 🎉",
+            "Payment received. Copy the key below, then redeem it in the game or brand panel.",
+          deliveredToast: "Your key is ready",
           manualKeyFallback: "Will be delivered manually by admin.",
           manualMessage:
-            "Payment was confirmed, but this order needs manual delivery by admin. Contact admin if it hasn't been processed.",
+            "Payment received. Admin will send the key through the contact used for this order.",
           manualCompletedKey: "Keys were sent manually by the admin.",
           manualCompletedMessage:
             "Order completed. The admin sent all keys through your contact.",
-          manualToast: "Order needs manual processing 🌊",
+          manualToast: "Admin is handling this order",
           processingKey: "Key is being processed automatically...",
           processingMessage:
-            "Payment confirmed. The key is being claimed from the supplier automatically, usually within a few seconds.",
-          processingToast: "Key is being processed automatically",
+            "Payment received. The supplier is preparing your key; this page updates automatically.",
+          processingToast: "Your key is being prepared",
           claimProblemKey: "Key has not been delivered yet.",
           claimProblemMessage:
-            "Payment confirmed, but key delivery has an issue. Admin will help retry the process. Please contact admin if it does not update.",
-          claimProblemToast: "Key delivery needs attention",
+            "Payment received, but the key was not delivered. Admin needs to check this order.",
+          claimProblemToast: "Key delivery needs a check",
           pendingTitle: "Payment not completed yet.",
           pendingSub:
-            "If you have already paid, wait a moment and click Refresh Status. The game key will appear automatically once payment is confirmed.",
+            "The key appears automatically after payment is confirmed.",
           pendingMessage:
-            "Order is still awaiting payment. Please complete payment so the key can be sent automatically.",
+            "Your key will be sent after payment is confirmed.",
           pendingToast: "Order is awaiting payment",
           inactiveKey: "Order is inactive.",
           inactiveMessage:
-            "This order has expired or was cancelled. Please place a new order from the catalog.",
+            "The payment window ended or the order was cancelled. Place a new order to continue.",
           inactiveToast: "Order is no longer active",
           fallbackKey: "Awaiting order status update.",
           fallbackMessage:
-            "Order found. Save this page to check your order status anytime.",
-          fallbackToast: "Order data found 🌊",
+            "Order found. This page will show the next update.",
+          fallbackToast: "Order found",
           loadFailedBadge: "Failed to load",
           loadFailedKey: "Order data could not be loaded.",
           loadFailedFallback: "Failed to fetch order data.",
@@ -1110,27 +1233,28 @@ const resultTranslations = {
           copySuccessText: "Game key copied successfully!",
           copyFailTitle: "Oops...",
           copyFailText: "Failed to copy key.",
-          compatibleTitle: "Compatible With",
+          compatibleTitle: "Works with",
           compatibleNote:
-            "This key can be used for several games supported by this brand.",
-          howtoTitle: "How to Use Key",
-          howtoStep1: "Copy the key code that appears.",
-          howtoStep2: "Open the related game or brand panel.",
-          howtoStep3: "Redeem / login according to the brand instructions.",
-          chatAdmin: "Chat Admin",
-          needHelp: "Need help? Contact admin.",
-          privateGroupKicker: "Buyer Access",
-          privateGroupTitle: "Join Private Buyer Group",
+            "Check the games supported by this key brand.",
+          howtoTitle: "Once the key appears",
+          howtoStep1: "Copy the key from the vault.",
+          howtoStep2: "Open the game or brand panel.",
+          howtoStep3: "Redeem it using the brand instructions.",
+          chatAdmin: "Chat admin",
+          needHelp: "Still not resolved? Send the order ID to admin.",
+          privateGroupKicker: "Buyer room",
+          privateGroupTitle: "Join the buyer group",
           privateGroupDesc:
-            "Get stock updates, maintenance info, vouchers, and buyer-only announcements.",
-          privateGroupBtn: "Join Group",
-          copyOrderDetail: "Copy Order Detail",
+            "Stock updates, maintenance notes, and vouchers are posted here.",
+          privateGroupBtn: "Open Telegram",
+          copyOrderDetail: "Copy order details",
           continuePayment: "Continue Payment",
           continuePaymentLoading: "Loading payment...",
           continuePaymentFailed: "Failed to continue payment",
+          transactionIdInvalid: "Transaction ID must be 8-128 characters with no spaces.",
           orderDetailCopied: "Order detail copied",
-          securityTitle: "Security Note",
-          securityNote: "Never share your key before redeeming. AE Game Store will never ask for your game password.",
+          securityTitle: "Keep it to yourself",
+          securityNote: "Do not send the key to anyone before redeeming it. We never ask for your game password.",
           timelineCreated: "Order Created",
           timelinePayment: "Payment",
           timelineDelivery: "Delivery",
@@ -1138,6 +1262,41 @@ const resultTranslations = {
           timelineDone: "Done",
           timelineCurrent: "In progress",
           timelineFailed: "Inactive",
+          timelineAttention: "Needs a check",
+          outcomeDeliveredKicker: "Key delivered",
+          outcomeDeliveredTitle: "Your key is ready.",
+          outcomeManualKicker: "Manual delivery",
+          outcomeManualTitle: "Admin is handling your order.",
+          outcomeProcessingKicker: "Payment received",
+          outcomeProcessingTitle: "Your key is being prepared.",
+          outcomeReviewKicker: "Payment proof received",
+          outcomeReviewTitle: "Waiting for admin review.",
+          outcomeProblemKicker: "Needs a check",
+          outcomeProblemTitle: "Key delivery is on hold.",
+          outcomePendingKicker: "Awaiting payment",
+          outcomePendingTitle: "Complete your payment.",
+          outcomeInactiveKicker: "Order closed",
+          outcomeInactiveTitle: "This order has ended.",
+          outcomeErrorKicker: "Unable to load",
+          outcomeErrorTitle: "The status cannot be opened yet.",
+          outcomeWaitingKicker: "Order found",
+          outcomeWaitingTitle: "Waiting for the next update.",
+          reviewKey: "Your payment proof is being reviewed.",
+          reviewMessage: "Admin is checking the Transaction ID. The key is processed after payment is approved.",
+          reviewToast: "Payment proof is being reviewed",
+          status_paid: "Paid",
+          status_pending: "Awaiting payment",
+          status_delivered: "Delivered",
+          status_waiting_payment: "Awaiting payment",
+          status_manual: "Handled by admin",
+          status_processing_supplier: "Preparing key",
+          status_waiting_delivery: "Preparing key",
+          status_payment_review: "Under review",
+          status_problem: "Needs a check",
+          status_expired: "Expired",
+          status_cancelled: "Cancelled",
+          status_failed: "Failed",
+          status_refunded: "Refunded",
         },
       };
 
@@ -1159,7 +1318,7 @@ const resultTranslations = {
 
         document.querySelectorAll("[data-result-i18n]").forEach((el) => {
           const key = el.getAttribute("data-result-i18n");
-          el.innerText = tResult(key);
+          el.textContent = tResult(key);
         });
 
         const btnId = document.getElementById("btn-id");
@@ -1170,6 +1329,9 @@ const resultTranslations = {
           btnId.setAttribute("aria-pressed", lang === "id" ? "true" : "false");
           btnEn.setAttribute("aria-pressed", lang === "en" ? "true" : "false");
         }
+        const refreshBtn = document.getElementById("refreshBtn");
+        if (refreshBtn) refreshBtn.setAttribute("aria-label", tResult("refresh"));
+        applyResultTheme();
       }
 
       function setResultLanguage(lang) {
@@ -1177,7 +1339,9 @@ const resultTranslations = {
         applyResultLanguage();
         // Re-render the order using the cached payload, if any
         if (lastOrderData) {
-          renderOrder(lastOrderData);
+          renderOrder(lastOrderData, { force: true });
+        } else {
+          loadOrder({ silent: true });
         }
       }
 
@@ -1186,20 +1350,32 @@ const resultTranslations = {
         const isDark = stored === "dark";
         document.body.classList.toggle("dark-theme", isDark);
         const btn = document.getElementById("theme-toggle");
-        if (btn) btn.innerText = isDark ? "☀️" : "🌙";
+        const icon = document.getElementById("themeIcon");
+        const label = document.getElementById("themeLabel");
+        const accessibleLabel = tResult("themeToggle");
+        if (icon) {
+          icon.setAttribute("icon", isDark ? "mdi:white-balance-sunny" : "mdi:weather-night");
+        }
+        if (label) label.textContent = accessibleLabel;
+        if (btn) {
+          btn.setAttribute("aria-label", accessibleLabel);
+          btn.setAttribute("aria-pressed", isDark ? "true" : "false");
+          btn.title = accessibleLabel;
+        }
       }
 
       function toggleResultTheme() {
         const isDark = document.body.classList.toggle("dark-theme");
         localStorage.setItem("ae_theme", isDark ? "dark" : "light");
-        const btn = document.getElementById("theme-toggle");
-        if (btn) btn.innerText = isDark ? "☀️" : "🌙";
+        applyResultTheme();
       }
 
       let latestGameKey = "";
       let lastOrderData = null;
+      let lastOrderSignature = "";
       let pendingRefreshTimer = null;
       let pendingRefreshCount = 0;
+      let isLoadingOrder = false;
       const PENDING_REFRESH_LIMIT = 10;
       const PENDING_REFRESH_INTERVAL = 12000;
 
@@ -1228,9 +1404,12 @@ const resultTranslations = {
 
       function badge(status) {
         const safeStatus = String(status || "-").toLowerCase();
-        return `<span class="badge ${escapeHtml(safeStatus)}">${escapeHtml(
-          status || tResult("dash"),
-        )}</span>`;
+        const statusClass = safeStatus.replace(/[^a-z0-9_-]/g, "");
+        const translated = tResult(`status_${safeStatus}`);
+        const label = translated === `status_${safeStatus}`
+          ? String(status || tResult("dash")).replace(/_/g, " ")
+          : translated;
+        return `<span class="badge ${escapeHtml(statusClass)}">${escapeHtml(label)}</span>`;
       }
 
       function showToast(icon, title) {
@@ -1244,8 +1423,23 @@ const resultTranslations = {
         Toast.fire({ icon, title });
       }
 
-      function refreshOrder() {
-        loadOrder({ silent: false });
+      async function refreshOrder() {
+        const btn = document.getElementById("refreshBtn");
+        if (btn?.disabled) return;
+        if (btn) {
+          btn.disabled = true;
+          btn.classList.add("is-loading");
+          btn.setAttribute("aria-busy", "true");
+        }
+        try {
+          await loadOrder({ silent: false });
+        } finally {
+          if (btn) {
+            btn.disabled = false;
+            btn.classList.remove("is-loading");
+            btn.setAttribute("aria-busy", "false");
+          }
+        }
       }
 
       function getOrderIdFromUrl() {
@@ -1283,36 +1477,71 @@ const resultTranslations = {
         });
       }
 
+      const outcomeStates = {
+        loading: ["checkingKicker", "checkingTitle", "mdi:progress-clock"],
+        delivered: ["outcomeDeliveredKicker", "outcomeDeliveredTitle", "mdi:check-decagram-outline"],
+        manual: ["outcomeManualKicker", "outcomeManualTitle", "mdi:account-clock-outline"],
+        processing: ["outcomeProcessingKicker", "outcomeProcessingTitle", "mdi:cog-sync-outline"],
+        review: ["outcomeReviewKicker", "outcomeReviewTitle", "mdi:shield-search"],
+        problem: ["outcomeProblemKicker", "outcomeProblemTitle", "mdi:alert-decagram-outline"],
+        pending: ["outcomePendingKicker", "outcomePendingTitle", "mdi:credit-card-clock-outline"],
+        inactive: ["outcomeInactiveKicker", "outcomeInactiveTitle", "mdi:archive-cancel-outline"],
+        error: ["outcomeErrorKicker", "outcomeErrorTitle", "mdi:cloud-alert-outline"],
+        waiting: ["outcomeWaitingKicker", "outcomeWaitingTitle", "mdi:radar"],
+      };
+
+      function setOutcome(state) {
+        const normalizedState = outcomeStates[state] ? state : "waiting";
+        const [kickerKey, titleKey, iconName] = outcomeStates[normalizedState];
+        const kicker = document.getElementById("outcomeKicker");
+        const title = document.getElementById("outcomeTitle");
+        const icon = document.querySelector("#outcomeIcon iconify-icon");
+        document.body.dataset.resultState = normalizedState;
+        document.getElementById("resultShell")?.setAttribute("data-result-state", normalizedState);
+        if (kicker) {
+          kicker.removeAttribute("data-result-i18n");
+          kicker.textContent = tResult(kickerKey);
+        }
+        if (title) {
+          title.removeAttribute("data-result-i18n");
+          title.textContent = tResult(titleKey);
+        }
+        if (icon) icon.setAttribute("icon", iconName);
+      }
+
+      function setOrderReference(value) {
+        const cleanId = String(value || "").trim();
+        const display = cleanId ? `ID / ${cleanId}` : "ID / -";
+        const orderRef = document.getElementById("orderRef");
+        if (orderRef) {
+          orderRef.textContent = display;
+          orderRef.title = cleanId;
+        }
+      }
+
       function renderTimeline(data, state) {
-        const box = document.getElementById("timelineMini");
-        if (!box) return;
         const createdAt = formatOrderTime(data?.created_at);
-        const paymentText = state === "delivered" || state === "manual"
+        const paymentText = state === "delivered" || state === "manual" || state === "problem"
           ? tResult("timelineDone")
           : state === "failed"
             ? tResult("timelineFailed")
             : tResult("timelineCurrent");
         const deliveryText = state === "delivered"
           ? tResult("timelineDone")
+          : state === "problem"
+            ? tResult("timelineAttention")
           : state === "manual"
             ? tResult("timelineCurrent")
             : state === "failed"
               ? tResult("timelineFailed")
               : tResult("timelineWaiting");
-        box.innerHTML = `
-          <div class="timeline-item ${state === "created" ? "is-current" : ""}">
-            <strong>${tResult("timelineCreated")}</strong>
-            <span>${escapeHtml(createdAt)}</span>
-          </div>
-          <div class="timeline-item ${state === "payment" ? "is-current" : state === "failed" ? "is-muted" : ""}">
-            <strong>${tResult("timelinePayment")}</strong>
-            <span>${escapeHtml(paymentText)}</span>
-          </div>
-          <div class="timeline-item ${state === "manual" ? "is-current" : state === "payment" ? "is-muted" : state === "failed" ? "is-muted" : ""}">
-            <strong>${tResult("timelineDelivery")}</strong>
-            <span>${escapeHtml(deliveryText)}</span>
-          </div>
-        `;
+        const createdMeta = document.getElementById("createdStepMeta");
+        const paymentMeta = document.getElementById("paymentStepMeta");
+        const deliveryMeta = document.getElementById("deliveryStepMeta");
+        if (createdMeta) createdMeta.textContent = createdAt;
+        if (paymentMeta) paymentMeta.textContent = paymentText;
+        if (deliveryMeta) deliveryMeta.textContent = deliveryText;
+
       }
 
       function copyOrderDetail() {
@@ -1348,7 +1577,7 @@ const resultTranslations = {
           preConfirm: async (reference) => {
             const clean = String(reference || "").trim();
             if (!/^[A-Za-z0-9_-]{8,128}$/.test(clean)) {
-              Swal.showValidationMessage("Transaction ID harus 8-128 karakter tanpa spasi.");
+              Swal.showValidationMessage(tResult("transactionIdInvalid"));
               return false;
             }
             const csrf = document.cookie
@@ -1450,24 +1679,29 @@ const resultTranslations = {
           setStep(0, "done");
           setStep(1, "done");
           setStep(2, "done");
-          if (fill) fill.style.width = "100%";
+          if (fill) fill.style.transform = "scaleY(1)";
         } else if (state === "manual") {
           setStep(0, "done");
           setStep(1, "done");
           setStep(2, "active");
-          if (fill) fill.style.width = "70%";
+          if (fill) fill.style.transform = "scaleY(.74)";
         } else if (state === "payment") {
           setStep(0, "done");
           setStep(1, "active");
-          if (fill) fill.style.width = "35%";
+          if (fill) fill.style.transform = "scaleY(.38)";
+        } else if (state === "problem") {
+          setStep(0, "done");
+          setStep(1, "done");
+          setStep(2, "failed");
+          if (fill) fill.style.transform = "scaleY(1)";
         } else if (state === "failed") {
           setStep(0, "done");
           setStep(1, "failed");
           setStep(2, "failed");
-          if (fill) fill.style.width = "100%";
+          if (fill) fill.style.transform = "scaleY(1)";
         } else {
           setStep(0, "active");
-          if (fill) fill.style.width = "0%";
+          if (fill) fill.style.transform = "scaleY(0)";
         }
       }
 
@@ -1524,6 +1758,13 @@ const resultTranslations = {
         clearSkeleton();
         const summaryEl = document.getElementById("summary");
         if (summaryEl) summaryEl.style.display = "";
+        setOrderReference(data.id || getOrderIdFromUrl());
+        document.getElementById("orderText").innerHTML = `
+          <span class="summary-label">${tResult("labelOrder")}</span>
+          <span class="summary-value">${escapeHtml(
+            data.id || getOrderIdFromUrl() || tResult("dash"),
+          )}</span>
+        `;
         document.getElementById("nameText").innerHTML = `
           <span class="summary-label">${tResult("labelName")}</span>
           <span class="summary-value">${escapeHtml(
@@ -1550,7 +1791,32 @@ const resultTranslations = {
         `;
       }
 
-      function renderOrder(data) {
+      function getOrderRenderSignature(data) {
+        return JSON.stringify([
+          data?.id,
+          data?.name,
+          data?.game,
+          data?.product,
+          data?.price,
+          data?.payment_status,
+          data?.delivery_status,
+          data?.manual_completed,
+          data?.created_at,
+          normalizeOrderKeys(data),
+        ]);
+      }
+
+      function renderOrder(data, options = {}) {
+        const nextSignature = getOrderRenderSignature(data);
+        if (
+          !options.force &&
+          lastOrderData &&
+          nextSignature === lastOrderSignature
+        ) {
+          lastOrderData = data;
+          return "";
+        }
+        lastOrderSignature = nextSignature;
         lastOrderData = data;
         const statusRow = document.getElementById("statusRow");
         const statusText = document.getElementById("statusText");
@@ -1565,6 +1831,8 @@ const resultTranslations = {
         if (privateGroupBox) privateGroupBox.hidden = true;
         const continuePayBtn = document.getElementById("continuePayBtn");
         if (continuePayBtn) continuePayBtn.hidden = true;
+        const copyDetailBtn = document.getElementById("copyDetailBtn");
+        if (copyDetailBtn) copyDetailBtn.disabled = false;
 
         const paymentStatus = String(data.payment_status || "").toLowerCase();
         const deliveryStatus = String(data.delivery_status || "").toLowerCase();
@@ -1581,6 +1849,7 @@ const resultTranslations = {
         keyBox.removeAttribute("data-result-i18n");
 
         if (deliveryStatus === "delivered" && data.manual_completed) {
+          setOutcome("delivered");
           latestGameKey = "";
           stopPendingAutoRefresh();
           copyBtn.style.display = "none";
@@ -1598,12 +1867,13 @@ const resultTranslations = {
         }
 
         if (deliveryStatus === "delivered" && orderKeys.length) {
+          setOutcome("delivered");
           latestGameKey = orderKeys.join("\n");
           stopPendingAutoRefresh();
           copyBtn.style.display = "flex";
           keyBox.innerHTML = `
             <div class="license-card">
-              <span class="license-kicker">${orderKeys.length} LICENSE KEY${orderKeys.length > 1 ? "S" : ""}</span>
+              <span class="license-kicker">${orderKeys.length} ${tResult(orderKeys.length > 1 ? "licenseKeys" : "licenseKey")}</span>
               <div class="license-list">
                 ${orderKeys.map((key, index) => `
                   <div class="license-item">
@@ -1629,6 +1899,7 @@ const resultTranslations = {
         }
 
         if (deliveryStatus === "manual") {
+          setOutcome("manual");
           stopPendingAutoRefresh();
           latestGameKey = "";
           copyBtn.style.display = "none";
@@ -1642,11 +1913,37 @@ const resultTranslations = {
           `;
           setProgress("manual");
           renderTimeline(data, "manual");
+          if (resultHelp) resultHelp.style.display = "";
           return "manualToast";
         }
 
+        if (paymentStatus === "pending" && deliveryStatus === "payment_review") {
+          setOutcome("review");
+          latestGameKey = "";
+          copyBtn.style.display = "none";
+          if (continuePayBtn) continuePayBtn.hidden = true;
+          if (keyWrapper) keyWrapper.className = "key-box pending";
+          keyBox.innerHTML = `
+            <div class="pending-msg">${tResult("reviewKey")}</div>
+            <div class="pending-sub">${tResult("reviewMessage")}</div>
+          `;
+          statusText.innerHTML = `
+            <div class="status-message-card warning">
+              <iconify-icon icon="mdi:shield-search" aria-hidden="true"></iconify-icon>
+              <span>${tResult("reviewMessage")}</span>
+            </div>
+          `;
+          setProgress("payment");
+          renderTimeline(data, "payment");
+          startPendingAutoRefresh();
+          return "reviewToast";
+        }
 
-        if (paymentStatus === "paid" && deliveryStatus === "processing_supplier") {
+        if (
+          paymentStatus === "paid" &&
+          (deliveryStatus === "processing_supplier" || deliveryStatus === "waiting_delivery")
+        ) {
+          setOutcome("processing");
           latestGameKey = "";
           copyBtn.style.display = "none";
           if (continuePayBtn) continuePayBtn.hidden = true;
@@ -1668,6 +1965,7 @@ const resultTranslations = {
         }
 
         if (paymentStatus === "paid" && deliveryStatus === "problem") {
+          setOutcome("problem");
           stopPendingAutoRefresh();
           latestGameKey = "";
           copyBtn.style.display = "none";
@@ -1680,8 +1978,9 @@ const resultTranslations = {
               <span>${tResult("claimProblemMessage")}</span>
             </div>
           `;
-          setProgress("manual");
-          renderTimeline(data, "manual");
+          setProgress("problem");
+          renderTimeline(data, "problem");
+          if (resultHelp) resultHelp.style.display = "";
           return "claimProblemToast";
         }
 
@@ -1689,6 +1988,7 @@ const resultTranslations = {
           paymentStatus === "pending" ||
           deliveryStatus === "waiting_payment"
         ) {
+          setOutcome("pending");
           latestGameKey = "";
           copyBtn.style.display = "none";
           if (continuePayBtn) continuePayBtn.hidden = false;
@@ -1712,8 +2012,11 @@ const resultTranslations = {
         if (
           paymentStatus === "expired" ||
           paymentStatus === "cancelled" ||
+          paymentStatus === "failed" ||
+          paymentStatus === "refunded" ||
           deliveryStatus === "cancelled"
         ) {
+          setOutcome("inactive");
           stopPendingAutoRefresh();
           latestGameKey = "";
           copyBtn.style.display = "none";
@@ -1727,12 +2030,33 @@ const resultTranslations = {
           `;
           setProgress("failed");
           renderTimeline(data, "failed");
+          if (resultHelp) resultHelp.style.display = "";
           return "inactiveToast";
         }
 
+        if (paymentStatus === "paid" && deliveryStatus === "delivered") {
+          setOutcome("problem");
+          stopPendingAutoRefresh();
+          latestGameKey = "";
+          copyBtn.style.display = "none";
+          if (keyWrapper) keyWrapper.className = "key-box problem";
+          keyBox.innerText = tResult("claimProblemKey");
+          statusText.innerHTML = `
+            <div class="status-message-card danger">
+              <iconify-icon icon="mdi:alert-circle-outline" aria-hidden="true"></iconify-icon>
+              <span>${tResult("claimProblemMessage")}</span>
+            </div>
+          `;
+          setProgress("problem");
+          renderTimeline(data, "problem");
+          if (resultHelp) resultHelp.style.display = "";
+          return "claimProblemToast";
+        }
+
+        setOutcome("waiting");
         latestGameKey = "";
         copyBtn.style.display = "none";
-        if (continuePayBtn) continuePayBtn.hidden = false;
+        if (continuePayBtn) continuePayBtn.hidden = paymentStatus === "paid";
         if (keyWrapper) keyWrapper.className = "key-box pending";
         keyBox.innerText = tResult("fallbackKey");
         statusText.innerHTML = `
@@ -1748,6 +2072,8 @@ const resultTranslations = {
       }
 
       async function loadOrder(options = {}) {
+        if (isLoadingOrder) return;
+        isLoadingOrder = true;
         const params = new URLSearchParams(window.location.search);
         const orderId = params.get("order_id");
 
@@ -1756,12 +2082,19 @@ const resultTranslations = {
         const keyBox = document.getElementById("keyBox");
         const copyBtn = document.getElementById("copyBtn");
         const keyWrapper = document.querySelector(".key-box");
+        const outcomePanel = document.getElementById("outcomePanel");
+        const copyDetailBtn = document.getElementById("copyDetailBtn");
+        if (outcomePanel) outcomePanel.setAttribute("aria-busy", "true");
+        if (!lastOrderData) setOutcome("loading");
+        setOrderReference(orderId);
 
         if (!orderId) {
           stopPendingAutoRefresh();
           lastOrderData = null;
+          setOutcome("error");
           const continuePayBtn = document.getElementById("continuePayBtn");
           if (continuePayBtn) continuePayBtn.hidden = true;
+          if (copyDetailBtn) copyDetailBtn.disabled = true;
           statusRow.innerHTML = `<span class="badge cancelled">${tResult(
             "incompleteBadge",
           )}</span>`;
@@ -1779,6 +2112,10 @@ const resultTranslations = {
           if (keyWrapper) keyWrapper.className = "key-box problem";
           setProgress("failed");
           renderTimeline({}, "failed");
+          const resultHelp = document.getElementById("resultHelp");
+          if (resultHelp) resultHelp.style.display = "";
+          if (outcomePanel) outcomePanel.setAttribute("aria-busy", "false");
+          isLoadingOrder = false;
           return;
         }
 
@@ -1799,6 +2136,7 @@ const resultTranslations = {
               inactiveToast: "error",
               processingToast: "info",
               claimProblemToast: "error",
+              reviewToast: "info",
               fallbackToast: "info",
             };
             showToast(iconMap[toastKey] || "info", tResult(toastKey));
@@ -1808,6 +2146,8 @@ const resultTranslations = {
           const continuePayBtn = document.getElementById("continuePayBtn");
           if (continuePayBtn) continuePayBtn.hidden = true;
           lastOrderData = null;
+          setOutcome("error");
+          if (copyDetailBtn) copyDetailBtn.disabled = true;
           statusRow.innerHTML = `<span class="badge cancelled">${tResult(
             "loadFailedBadge",
           )}</span>`;
@@ -1826,6 +2166,15 @@ const resultTranslations = {
           if (keyWrapper) keyWrapper.className = "key-box problem";
           setProgress("failed");
           renderTimeline({}, "failed");
+          document.getElementById("howtoBox")?.classList.remove("show");
+          document.getElementById("compatibleBox")?.classList.remove("show");
+          const privateGroupBox = document.getElementById("privateGroupBox");
+          if (privateGroupBox) privateGroupBox.hidden = true;
+          const resultHelp = document.getElementById("resultHelp");
+          if (resultHelp) resultHelp.style.display = "";
+        } finally {
+          isLoadingOrder = false;
+          if (outcomePanel) outcomePanel.setAttribute("aria-busy", "false");
         }
       }
       // Bootstrap

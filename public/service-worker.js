@@ -16,6 +16,7 @@ const STATIC_ASSETS = [
   "/account.html",
   "/reseller-login",
   "/result.html",
+  "/result-redesign.css?v=20260902-result-v1",
 ];
 
 // Paths the SW should NOT intercept at all (admin, auth, favicon, etc).
@@ -120,7 +121,12 @@ self.addEventListener("fetch", (event) => {
 
   // 3. Versioned static assets -> network first
   if (
-    ["/script.js", "/style.css", "/keysystem-ui.css"].includes(pathname) &&
+    [
+      "/script.js",
+      "/style.css",
+      "/keysystem-ui.css",
+      "/result-redesign.css",
+    ].includes(pathname) &&
     requestUrl.search
   ) {
     event.respondWith(
