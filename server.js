@@ -1478,8 +1478,15 @@ async function findSupplierProductById(productId, getCatalog, normalizeProduct =
 }
 
 async function findVipStoreProductById(productId) {
-  const rate = await getVipStoreIdrRate();
-  return findSupplierProductById(productId, getVipStoreCatalog, (item) => normalizeVipStoreCatalogProduct(item, rate));
+  const [rate, catalog] = await Promise.all([
+    getVipStoreIdrRate(),
+    getVipStoreCatalog(),
+  ]);
+  return findSupplierProductById(
+    productId,
+    () => catalog,
+    (item) => normalizeVipStoreCatalogProduct(item, rate),
+  );
 }
 
 function findCheatGameProductById(productId) {

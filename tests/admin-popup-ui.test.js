@@ -3,6 +3,7 @@ const fs = require("node:fs");
 
 const admin = fs.readFileSync("views/admin.html", "utf8");
 const server = fs.readFileSync("server.js", "utf8");
+const database = fs.readFileSync("server/database.js", "utf8");
 assert.match(admin, /fetch\(`\/products\?fresh=\$\{Date\.now\(\)\}`,[\s\S]*?cache: "no-store"/);
 const scripts = [
   ...admin.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi),
@@ -39,6 +40,9 @@ scripts.forEach(([, source]) =>
   'confirmButton: "admin-success-confirm"',
   'isEditMode ? "Produk diperbarui" : "Produk ditambahkan"',
   'isEditMode ? "Mengupdate produk..." : "Menambahkan produk..."',
+  "const saveController = new AbortController()",
+  "signal: saveController.signal",
+  'title: "Server terlalu lama merespons"',
   'isSingle ? "Sync stok produk..." : "Sync semua stok supplier..."',
   'class="product-compare-btn"',
   '#section-products th:last-child',
@@ -160,6 +164,10 @@ scripts.forEach(([, source]) =>
 ].forEach((marker) =>
   assert.ok(admin.includes(marker), `Missing admin popup marker: ${marker}`),
 );
+assert.match(server, /Promise\.all\(\[\s*getVipStoreIdrRate\(\),\s*getVipStoreCatalog\(\)/);
+assert.match(database, /lock_timeout: 10000/);
+assert.match(database, /statement_timeout: statementTimeoutMs/);
+assert.match(database, /query_timeout: statementTimeoutMs \+ 5000/);
 assert.ok(
   !admin.includes('class="user-badge-lab reseller-badge-lab" open'),
   "Reseller access tools should stay collapsed until requested",

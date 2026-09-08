@@ -15297,6 +15297,9 @@
             : "Menyimpan data produk.",
         );
 
+        const saveController = new AbortController();
+        const saveTimeout = setTimeout(() => saveController.abort(), 95000);
+
         try {
           const res = await fetch(url, {
             method,
@@ -15316,6 +15319,7 @@
               supplier_product_id,
               sync_brand_status,
             }),
+            signal: saveController.signal,
           });
 
           const data = await res.json();
@@ -15348,7 +15352,17 @@
             isEditMode ? "Update produk" : "Produk baru",
           );
         } catch (err) {
+          if (err?.name === "AbortError") {
+            Swal.fire({
+              icon: "error",
+              title: "Server terlalu lama merespons",
+              text: "Muat ulang daftar produk untuk mengecek hasil sebelum mencoba lagi.",
+            });
+            return;
+          }
           Swal.fire("Terjadi error server saat menyimpan produk");
+        } finally {
+          clearTimeout(saveTimeout);
         }
       }
 
