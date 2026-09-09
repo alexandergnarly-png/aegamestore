@@ -9,6 +9,33 @@ const fs = require("node:fs");
 
 const html = fs.readFileSync("public/index.html", "utf8");
 const script = fs.readFileSync("public/script.js", "utf8");
+// Exercise install timing without opening a native installation prompt.
+const installSource = script.slice(script.indexOf("  function setupInstallPrompt()"), script.indexOf("  function setupBottomNav()"));
+for (const scenario of ["browse", "chat", "installed", "dismissed"]) {
+  const handlers = {};
+  const nodes = Object.fromEntries(["installPromptBanner", "installPromptAction", "installPromptClose"].map((id) => [id, { hidden: true, addEventListener: (name, fn) => { handlers[`${id}:${name}`] = fn; } }]));
+  let timer;
+  let blocked = scenario === "chat";
+  let observe;
+  const win = { navigator: {}, matchMedia: () => ({ matches: scenario === "installed" }), setTimeout: (fn) => { timer = fn; return 1; }, clearTimeout: () => {}, addEventListener: (name, fn) => { handlers[name] = fn; } };
+  const doc = { hidden: false, getElementById: (id) => nodes[id], body: { matches: () => blocked, classList: { add() {}, remove() {} } }, querySelector: () => null, querySelectorAll: () => [] };
+  const storage = { getItem: () => scenario === "dismissed" ? String(Date.now()) : null, setItem() {} };
+  const Observer = class { constructor(fn) { observe = fn; } observe() {} disconnect() {} };
+  new Function("window", "document", "localStorage", "MutationObserver", "state", "STORAGE_KEYS", `${installSource}; setupInstallPrompt();`)(win, doc, storage, Observer, {}, { installDismissed: "dismissed" });
+  handlers.beforeinstallprompt({ preventDefault() {} });
+  timer?.();
+  assert.equal(nodes.installPromptBanner.hidden, scenario !== "browse", scenario);
+  if (scenario === "browse") {
+    blocked = true;
+    observe();
+    assert.equal(nodes.installPromptBanner.hidden, true, "Opening chat hides an existing banner");
+    blocked = false;
+    timer();
+    assert.equal(nodes.installPromptBanner.hidden, false, "Banner can return after the dialog closes and delay elapses");
+    handlers.appinstalled();
+    assert.equal(nodes.installPromptBanner.hidden, true);
+  }
+}
 const css = fs.readFileSync("public/style.css", "utf8");
 const keysystemCss = fs.readFileSync("public/keysystem-ui.css", "utf8");
 const serviceWorker = fs.readFileSync("public/service-worker.js", "utf8");
@@ -212,7 +239,7 @@ assert.match(css, /prefers-reduced-motion: reduce[\s\S]*?account-orbit-icon/);
     `Missing Indonesian/English translations for: ${key}`,
   );
 });
-assert.match(html, /script\.js\?v=20260910-support-v1/);
+assert.match(html, /script\.js\?v=20260910-pocket-v1/);
 assert.match(html, /style\.css\?v=20260902-key-dispatch-v5/);
 assert.match(html, /class="install-prompt-meta"/);
 assert.match(html, /AE SUPPORT DECK/);

@@ -1,0 +1,29 @@
+/* A quiet install suggestion, never a second modal. */
+#installPromptBanner {
+  display: grid !important;
+  grid-template-columns: 32px minmax(0, 1fr) 44px !important;
+  gap: 8px !important;
+  width: calc(100% - 24px) !important;
+  max-width: 380px !important;
+  padding: 12px !important;
+  bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
+  border: 1px solid #d7d7d0 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 30px rgba(0,0,0,.14) !important;
+  animation: none !important;
+  z-index: 90 !important;
+}
+#installPromptBanner[hidden] { display: none !important; }
+#installPromptBanner::before,
+#installPromptBanner .install-prompt-rail,
+#installPromptBanner .install-prompt-benefits,
+#installPromptBanner .install-prompt-meta,
+#installPromptBanner .install-prompt-icon i { display: none !important; }
+#installPromptBanner .install-prompt-icon { width: 32px !important; min-width: 32px !important; height: 32px !important; border-radius: 10px !important; box-shadow: none !important; }
+#installPromptBanner .install-prompt-icon span { font-size: 12px; }
+#installPromptBanner .install-prompt-body { grid-column: 2; padding: 0; }
+#installPromptBanner .install-prompt-body strong { font-size: 14px !important; line-height: 1.35 !important; letter-spacing: -.02em; white-space: normal; }
+#installPromptBanner .install-prompt-body > small { font-size: 11px !important; line-height: 1.5 !important; }
+#installPromptBanner #installPromptClose { position: static !important; grid-column: 3; grid-row: 1; width: 44px !important; height: 44px !important; border-radius: 10px !important; }
+#installPromptBanner #installPromptAction { grid-column: 2 / 4; width: 100% !important; min-height: 44px !important; padding: 8px 12px !important; border-radius: 10px !important; font-size: 13px !important; box-shadow: none !important; }
+#installPromptBanner :is(button, a):focus-visible { outline: 2px solid #3859d9; outline-offset: 2px; }

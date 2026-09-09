@@ -184,8 +184,8 @@ const translations = {
     pullRefreshingHint: "Memuat ulang...",
     installAppKicker: "AE POCKET MODE",
     installAppReady: "Siap dipasang",
-    installAppTitle: "Bawa AE Game Store ke layar utama",
-    installAppDesc: "Buka katalog dan checkout lebih cepat, tanpa cari tab lagi.",
+    installAppTitle: "AE di layar utama",
+    installAppDesc: "Pasang aplikasi web. Buka toko tanpa cari tab.",
     installAppBenefitFast: "Buka instan",
     installAppBenefitLight: "Hemat data",
     installAppBtn: "Pasang",
@@ -474,8 +474,8 @@ const translations = {
     pullRefreshingHint: "Refreshing...",
     installAppKicker: "AE POCKET MODE",
     installAppReady: "Ready to install",
-    installAppTitle: "Put AE Game Store on your home screen",
-    installAppDesc: "Open the catalog and checkout faster without hunting for a tab.",
+    installAppTitle: "AE on your home screen",
+    installAppDesc: "Install the web app. Open the store without hunting for a tab.",
     installAppBenefitFast: "Instant access",
     installAppBenefitLight: "Save data",
     installAppBtn: "Install",
@@ -5169,15 +5169,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const action = document.getElementById("installPromptAction");
     const closeBtn = document.getElementById("installPromptClose");
     let showTimer = null;
+    let installed = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
 
     if (!banner || !action || !closeBtn) return;
 
-    const dismissedAt = Number(
-      localStorage.getItem(STORAGE_KEYS.installDismissed) || 0,
-    );
+    let dismissedAt = 0;
+    try { dismissedAt = Number(localStorage.getItem(STORAGE_KEYS.installDismissed) || 0); } catch (_) {}
     const sevenDays = 7 * 24 * 60 * 60 * 1000;
 
-    if (dismissedAt && Date.now() - dismissedAt < sevenDays) return;
+    const coolingDown = () => dismissedAt && Date.now() - dismissedAt < sevenDays;
+    const busy = () => document.hidden || document.body.matches(".order-modal-open, .admin-chat-open") ||
+      Boolean(document.querySelector('.payment-modal.show')?.getClientRects().length);
+    // Dialog visibility is checked separately because some overlays hide their parent.
+    const dialogOpen = () => [...document.querySelectorAll('[role="dialog"][aria-modal="true"]')]
+      .some((dialog) => dialog.getClientRects().length && getComputedStyle(dialog).visibility !== "hidden" && !dialog.closest('[inert], [aria-hidden="true"]'));
 
     function showInstallBanner() {
       banner.hidden = false;
@@ -5187,9 +5192,8 @@ document.addEventListener("DOMContentLoaded", () => {
     function scheduleInstallBanner() {
       if (showTimer) window.clearTimeout(showTimer);
       showTimer = window.setTimeout(() => {
-        if (!state.deferredInstallPrompt) return;
-        if (document.body.classList.contains("order-modal-open")) return;
-        if (document.querySelector(".payment-modal.show")) return;
+        if (!state.deferredInstallPrompt || installed || coolingDown()) return;
+        if (busy() || dialogOpen()) { scheduleInstallBanner(); return; }
         showInstallBanner();
       }, 30 * 1000);
     }
@@ -5198,11 +5202,22 @@ document.addEventListener("DOMContentLoaded", () => {
       if (showTimer) window.clearTimeout(showTimer);
       banner.hidden = true;
       document.body.classList.remove("install-prompt-open");
-      localStorage.setItem(STORAGE_KEYS.installDismissed, String(Date.now()));
+      dismissedAt = Date.now();
+      try { localStorage.setItem(STORAGE_KEYS.installDismissed, String(dismissedAt)); } catch (_) {}
     }
+
+    const overlayObserver = new MutationObserver(() => {
+      if (!banner.hidden && (busy() || dialogOpen())) {
+        banner.hidden = true;
+        document.body.classList.remove("install-prompt-open");
+        scheduleInstallBanner();
+      }
+    });
+    overlayObserver.observe(document.body, { subtree: true, attributes: true, attributeFilter: ["class", "aria-hidden", "open"] });
 
     window.addEventListener("beforeinstallprompt", (event) => {
       event.preventDefault();
+      if (installed || coolingDown()) return;
       state.deferredInstallPrompt = event;
       scheduleInstallBanner();
     });
@@ -5251,6 +5266,8 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
     window.addEventListener("appinstalled", () => {
+      installed = true;
+      overlayObserver.disconnect();
       state.deferredInstallPrompt = null;
       hideInstallBanner();
     });
