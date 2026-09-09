@@ -1,4 +1,10 @@
 const assert = require("node:assert/strict");
+// All three buyer pages use the same header rules, after their legacy styles.
+for (const page of ["index.html", "user-auth.html", "account.html"]) {
+  const html = require("node:fs").readFileSync(`public/${page}`, "utf8");
+  assert.match(html, /<header class="[^"]*ae-site-header/);
+  assert.match(html, /href="\/shared-header\.css\?v=20260909-header-v1"/);
+}
 const fs = require("node:fs");
 
 const html = fs.readFileSync("public/index.html", "utf8");

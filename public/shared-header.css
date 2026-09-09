@@ -1,0 +1,121 @@
+/* Shared storefront chrome: home, buyer login, and account.
+   Scoped overrides supersede legacy page-specific responsive !important rules. */
+.ae-site-header {
+  --header-bg: #ffffff;
+  --header-ink: #111111;
+  --header-line: #d7d7d0;
+  background: var(--header-bg) !important;
+  border-bottom: 1px solid var(--header-line) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+body.dark-theme .ae-site-header {
+  --header-bg: #151515;
+  --header-ink: #f5f5f2;
+  --header-line: #383838;
+}
+.ae-site-header :is(.header-inner, .top-bar-inner) {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: 1240px !important;
+  min-height: 64px !important;
+  margin: 0 auto;
+  padding: max(10px, env(safe-area-inset-top, 0px)) 20px 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+}
+.ae-site-header :is(.header-actions, .top-actions) {
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: nowrap !important;
+  gap: 6px !important;
+  margin-left: auto !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.ae-site-header :is(.brand-logo, .brand-mark) {
+  box-sizing: border-box;
+  width: 44px !important;
+  height: 44px !important;
+  flex: 0 0 44px !important;
+  border-radius: 14px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #111111 !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+.ae-site-header :is(.brand-logo, .brand-mark) svg { width: 22px; height: 22px; }
+.ae-site-header .lang-switch {
+  box-sizing: border-box;
+  display: inline-flex;
+  flex: 0 0 auto !important;
+  gap: 0 !important;
+  padding: 0 !important;
+  height: 44px;
+  border: 1px solid var(--header-line) !important;
+  border-radius: 14px !important;
+  background: var(--header-bg) !important;
+  box-shadow: none !important;
+  overflow: hidden;
+}
+.ae-site-header .lang-switch .lang-btn {
+  box-sizing: border-box;
+  width: 44px !important;
+  min-width: 44px !important;
+  height: 42px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 12px !important;
+  background: transparent !important;
+  color: var(--header-ink) !important;
+  font: 700 12px/1 Arial, sans-serif !important;
+  letter-spacing: 0 !important;
+  box-shadow: none !important;
+}
+.ae-site-header .lang-switch .lang-btn[aria-pressed="true"] {
+  background: var(--header-ink) !important;
+  color: var(--header-bg) !important;
+}
+.ae-site-header :is(.icon-btn, .theme-toggle-btn, .nav-toggle, .header-back) {
+  box-sizing: border-box;
+  min-width: 44px !important;
+  height: 44px !important;
+  border: 1px solid var(--header-line) !important;
+  border-radius: 14px !important;
+  background: var(--header-bg) !important;
+  color: var(--header-ink) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+.ae-site-header :is(.icon-btn, .theme-toggle-btn, .nav-toggle) {
+  width: 44px !important;
+  padding: 0 !important;
+  flex: 0 0 44px !important;
+}
+.ae-site-header iconify-icon { font-size: 22px !important; }
+.ae-site-header :is(button, a):focus-visible { outline: 2px solid #3859d9; outline-offset: 2px; }
+@media (max-width: 768px) {
+  .ae-site-header :is(.header-inner, .top-bar-inner) { padding-inline: 10px !important; gap: 6px !important; }
+  .ae-site-header :is(.brand-copy, .brand-text) { display: none !important; }
+  .ae-site-header .header-back { width: 44px !important; padding: 0 !important; }
+  .ae-site-header .header-back span { display: none !important; }
+  .ae-site-header #userMenu .auth-btn {
+    box-sizing: border-box;
+    width: 44px !important;
+    min-width: 44px !important;
+    height: 44px !important;
+    padding: 0 !important;
+    border-radius: 14px !important;
+    border: 1px solid var(--header-line) !important;
+    background: var(--header-bg) !important;
+    color: var(--header-ink) !important;
+    box-shadow: none !important;
+  }
+  .ae-site-header #userMenu .auth-btn span,
+  .ae-site-header #userMenu .auth-btn::after { display: none !important; }
+}
