@@ -5104,6 +5104,8 @@ document.addEventListener("DOMContentLoaded", () => {
     document.addEventListener(
       "touchstart",
       (e) => {
+        state.pullToRefresh.active = false;
+        if (document.body.classList.contains("admin-chat-open")) return;
         if (window.scrollY > 5) return;
         const modal = document.getElementById("orderModal");
         if (modal && modal.classList.contains("show")) return;

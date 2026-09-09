@@ -23,7 +23,8 @@
 #adminChatSheet .ae-ai-summary-action { width: 32px; height: 32px; border: 0; background: transparent; color: var(--support-ink); box-shadow: none; }
 #adminChatSheet .ae-ai-summary-action iconify-icon { color: inherit; font-size: 20px; }
 #adminChatSheet .ae-ai-assistant { padding: 10px; gap: 10px; background: var(--support-paper); }
-#adminChatSheet .ae-ai-messages { padding: 4px; border: 0; background: transparent; overscroll-behavior: contain; }
+#adminChatSheet .ae-ai-messages { padding: 4px; border: 0; background: transparent; overscroll-behavior: contain; overflow-y: auto; touch-action: pan-y; scrollbar-width: thin; }
+#adminChatSheet .ae-ai-messages > .ae-ai-bubble { flex: 0 0 auto; }
 #adminChatSheet .ae-ai-bubble { padding: 12px; font-size: 14px; line-height: 1.6; border: 1px solid #d4d9e2; box-shadow: none; overflow-wrap: anywhere; }
 #adminChatSheet .ae-ai-bubble.is-user { background: #355ee8; color: #fff; border-color: #355ee8; }
 #adminChatSheet .ae-ai-bubble.is-loading { color: #536174; font-style: italic; }
@@ -38,9 +39,11 @@ body.dark-theme #adminChatSheet .ae-help-card { --support-paper: #181d26; --supp
 body.dark-theme #adminChatSheet :is(.ae-ai-bubble.is-assistant, .ae-ai-form input, .ae-ai-prompts button) { background: #252d3a; color: #f3f5fa; border-color: #465163; }
 body.dark-theme #adminChatSheet .ae-ai-disclaimer { color: #bcc7d7; }
 @media (max-width: 520px) {
-  #adminChatSheet .ae-help-card { top: 8px !important; bottom: max(8px, env(safe-area-inset-bottom)) !important; max-height: none !important; display: flex; flex-direction: column; overflow: hidden !important; }
-  #adminChatSheet .ae-ai-disclosure[open] { flex: 1 1 auto; min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr); }
-  #adminChatSheet .ae-ai-disclosure[open] .ae-ai-assistant { min-height: 0; max-height: none; overflow: hidden; grid-template-rows: minmax(0, 1fr) auto auto auto; }
-  #adminChatSheet .ae-ai-messages { min-height: 0; max-height: none; overflow-y: auto; }
+  #adminChatSheet .ae-help-card { top: 8px !important; bottom: max(8px, env(safe-area-inset-bottom)) !important; max-height: none !important; display: flex; flex-direction: column; overflow-y: auto !important; overscroll-behavior: contain; }
+  /* Native details content is not reliably a grid child across browsers.
+     Bound the actual transcript instead of relying on a fractional details row. */
+  #adminChatSheet .ae-ai-disclosure[open] { flex: 0 0 auto; min-height: 0; display: block; }
+  #adminChatSheet .ae-ai-disclosure[open] .ae-ai-assistant { min-height: 0; max-height: none; overflow: visible; display: grid; grid-template-rows: auto auto auto auto; }
+  #adminChatSheet .ae-ai-messages { min-height: 0; max-height: min(240px, 32dvh); overflow-y: auto; }
   #adminChatSheet :is(.ae-help-grid, .ae-help-note-wrap, .ae-help-hero p) { display: none; }
 }
