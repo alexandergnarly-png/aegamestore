@@ -22,8 +22,8 @@ assert.match(route, /Never use Markdown, bullets, numbered lists, headings, tabl
 assert.match(route, /Answer in one or two short sentences by default/);
 assert.match(route, /WHERE p\.active = 1/);
 assert.match(route, /price_idr/);
-assert.match(server, /function buildLocalCatalogReply\(message, catalog, history = \[\]\)/);
-assert.match(route, /buildLocalCatalogReply\(message, catalog, history\)/);
+assert.match(server, /function buildLocalCatalogReply\(message, catalog, history = \[\], language = ""\)/);
+assert.match(route, /buildLocalCatalogReply\(message, catalog, history, language\)/);
 assert.match(route, /if \(!apiKey\) return res\.json\(\{ answer: localAnswer, mode: "catalog" \}\)/);
 assert.doesNotMatch(route, /supplier_cost|api_secret|game_key|password_hash/);
 assert.doesNotMatch(route, /console\.(log|error)\([^\n]*message/);
@@ -65,3 +65,10 @@ assert.match(alternativeReply, /Nike/);
 assert.match(alternativeReply, /Alternatif lainnya/);
 
 console.log("AI assistant security contract check passed.");
+assert.match(buildLocalCatalogReply("hi", sampleCatalog, [], "en"), /Hey/);
+assert.match(buildLocalCatalogReply("sudah bayar belum masuk", sampleCatalog), /Order ID/);
+assert.match(buildLocalCatalogReply("refund", sampleCatalog, [], "en"), /can't check/);
+assert.match(buildLocalCatalogReply("admin dong", sampleCatalog), /Telegram/);
+assert.match(buildLocalCatalogReply("makasih", sampleCatalog), /Sama-sama/);
+assert.doesNotMatch(buildLocalCatalogReply("PUBG ios murah", sampleCatalog), /Aorus|Nike/);
+assert.doesNotMatch(buildLocalCatalogReply("kalau ios", sampleCatalog, [{ role: "user", content: "Delta Force Android" }]), /Aorus|Nike/);

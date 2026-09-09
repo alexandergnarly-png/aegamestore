@@ -212,7 +212,7 @@ assert.match(css, /prefers-reduced-motion: reduce[\s\S]*?account-orbit-icon/);
     `Missing Indonesian/English translations for: ${key}`,
   );
 });
-assert.match(html, /script\.js\?v=20260902-key-dispatch-v5/);
+assert.match(html, /script\.js\?v=20260910-support-v1/);
 assert.match(html, /style\.css\?v=20260902-key-dispatch-v5/);
 assert.match(html, /class="install-prompt-meta"/);
 assert.match(html, /AE SUPPORT DECK/);

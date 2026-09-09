@@ -9640,18 +9640,30 @@ app.get("/payment-config", (req, res) => {
   });
 });
 
-function buildLocalCatalogReply(message, catalog, history = []) {
+function buildLocalCatalogReply(message, catalog, history = [], language = "") {
   const text = String(message || "").toLowerCase();
-  const english = /\b(recommend|cheapest|available|which|show me|best value|hello|another|compare)\b/.test(text);
+  const english = language === "en" || (language !== "id" && /\b(recommend|cheapest|available|which|show me|best value|hello|another|compare|hi|thanks|payment|refund|help)\b/.test(text));
   const asksAlternative = /\b(yang lain|alternatif|lainnya|another|alternative)\b/.test(text);
-  const previousUser = asksAlternative
+  const followUp = asksAlternative || /^(?:kalau|kalo|yang|what about|how about|android|ios|\d+\s*(?:hari|jam|days?))/i.test(text);
+  const previousUser = followUp
     ? [...history].reverse().find((item) => item?.role === "user")?.content || ""
     : "";
   const searchText = `${previousUser} ${text}`.toLowerCase();
+  if (/\b(admin|human|manusia|cs|operator)\b/.test(text)) {
+    return english ? "Need a person to take a look? Tap Contact admin below to continue on Telegram; include your Order ID if this is about an order."
+      : "Mau dibantu admin langsung? Ketuk Hubungi admin di bawah untuk lanjut lewat Telegram; sertakan Order ID kalau terkait pesanan.";
+  }
+  if (/\b(refund|uang kembali|pengembalian|sudah bayar|udah bayar|sudah transfer|paid|belum masuk|belum sampai|not received|invalid|gagal|error)\b/.test(text)) {
+    return english ? "That needs a closer look, and I can't check your payment or key here. Open your order history or contact the admin below with your Order ID and the error message; don't send your password or full key."
+      : "Aku belum bisa cek pembayaran atau key kamu dari chat ini. Buka riwayat order atau hubungi admin di bawah dengan Order ID dan pesan errornya, tanpa mengirim password atau key lengkap ya.";
+  }
+  if (/^(makasih|terima kasih|thanks|thank you|oke|ok|sip)[!. ]*$/.test(text)) {
+    return english ? "You're welcome! Anything else you want to check before ordering?" : "Sama-sama! Ada yang mau kamu cek lagi sebelum order?";
+  }
   if (/^(halo|hai|hi|hello|pagi|siang|malam)[!. ]*$/.test(text)) {
     return english
-      ? "Hi! Tell me the game, platform, duration, or budget you have in mind."
-      : "Hai! Sebutkan game, platform, durasi, atau budget yang kamu cari ya.";
+      ? "Hey! Looking for a game key, or need help with an order?"
+      : "Hai! Lagi cari key game atau butuh bantuan soal pesanan?";
   }
   const asksOrder = /\b(order|pesanan|transaksi)\b/.test(text) && /\b(saya|my|status|cek|check)\b/.test(text);
   if (asksOrder) {
@@ -9670,6 +9682,11 @@ function buildLocalCatalogReply(message, catalog, history = []) {
   const asksStock = /stok|stock|ready|tersedia|available/.test(searchText);
   const asksCompare = /banding|compare|versus|\bvs\b/.test(searchText);
   const asksSafe = /aman|safe/.test(searchText);
+  // Explicit game/platform choices are constraints, not just ranking boosts.
+  const requestedGames = [...new Set(catalog.map((p) => String(p.game).toLowerCase()))]
+    .filter((game) => text.includes(game));
+  const contextGames = requestedGames.length ? requestedGames : [...new Set(catalog.map((p) => String(p.game).toLowerCase()))].filter((game) => searchText.includes(game));
+  const platforms = text.match(/\b(android|ios)\b/g) || searchText.match(/\b(android|ios)\b/g) || [];
   let matches = catalog
     .map((product) => {
       const searchable = `${product.game} ${product.brand} ${product.duration} ${product.platform}`.toLowerCase();
@@ -9679,7 +9696,9 @@ function buildLocalCatalogReply(message, catalog, history = []) {
       if (searchText.includes(String(product.platform).toLowerCase())) score += 3;
       return { ...product, score };
     })
-    .filter((product) => product.stock > 0 && (!budget || product.price_idr <= budget));
+    .filter((product) => product.stock > 0 && (!budget || product.price_idr <= budget)
+      && (!contextGames.length || contextGames.includes(String(product.game).toLowerCase()))
+      && (!platforms.length || platforms.includes(String(product.platform).toLowerCase())));
 
   const bestScore = Math.max(0, ...matches.map((product) => product.score));
   if (bestScore > 0) matches = matches.filter((product) => product.score > 0);
@@ -9748,8 +9767,8 @@ function buildLocalCatalogReply(message, catalog, history = []) {
   }
   if (asksSafe) {
     return english
-      ? `For a safe-to-play option, choose ${label} on ${platformName}. It is Rp${price} and ready now.`
-      : `Untuk opsi safe to play, pilih ${label} di ${platformName}. Harganya Rp${price} dan sedang ready.`;
+      ? `${label} on ${platformName} is Rp${price}. A catalog status is not a guarantee against bans or other risks.`
+      : `${label} di ${platformName} harganya Rp${price}. Status katalog bukan jaminan bebas ban atau risiko lain ya.`;
   }
   if (asksCheapest) {
     return english
@@ -9765,6 +9784,7 @@ app.post("/api/ai-assistant", aiAssistantLimiter, async (req, res) => {
   const apiKey = String(process.env.OPENAI_API_KEY || "").trim();
   const model = String(process.env.OPENAI_MODEL || "gpt-5.6-luna").trim();
   const message = String(req.body?.message || "").trim().slice(0, 500);
+  const language = req.body?.language === "en" ? "en" : "id";
   const history = Array.isArray(req.body?.messages)
     ? req.body.messages
         .slice(-6)
@@ -9816,15 +9836,20 @@ app.post("/api/ai-assistant", aiAssistantLimiter, async (req, res) => {
       play_status: product.play_status,
       stock: Number(product.available_keys || 0),
     }));
-    localAnswer = buildLocalCatalogReply(message, catalog, history);
+    localAnswer = buildLocalCatalogReply(message, catalog, history, language);
     if (!apiKey) return res.json({ answer: localAnswer, mode: "catalog" });
 
     const transcript = history
       .map((item) => `${item.role === "assistant" ? "AE AI" : "Customer"}: ${item.content}`)
       .join("\n");
     const instructions = `You are AE AI, the customer assistant for AE Game Store.
-Reply in the same language as the customer's latest message.
+Use ${language === "en" ? "English" : "Indonesian"} unless the customer explicitly requests another language.
 Sound like a friendly human store assistant: warm, direct, natural, and never corporate or robotic.
+You are an AI assistant, not a human agent. Never claim to have checked, changed, refunded, or escalated an order.
+For complaints, briefly acknowledge the specific problem, then give one practical next step. No fake apologies, forced slang, repeated greetings, or sales pitch during a support issue.
+Use earlier turns for short follow-ups, but let the customer's latest game, platform, or budget override earlier choices.
+Never guarantee safety from bans. Never ask for passwords, OTPs, or full activation keys. Refund decisions belong to the human admin; do not promise approval.
+The Contact admin link below opens Telegram. Do not claim an admin is online or promise a response time.
 Vary sentence openings and wording across turns; do not repeat the same recommendation phrasing when the context changes.
 Only answer about this store's catalog, public selling prices, stock, platform, duration, play status, basic buying guidance, vouchers, and general support.
 Use only the supplied catalog. Never invent a product, price, stock, discount, policy, or availability.

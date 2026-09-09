@@ -200,8 +200,8 @@ const translations = {
     adminChatGuideTitle: "Cara Beli",
     adminChatGuideDesc: "Panduan singkat",
     adminChatStatusTitle: "Support tersedia",
-    adminChatStatusDesc: "Biasanya membalas dalam 1–5 menit.",
-    adminChatQuestionTitle: "Tanya Admin",
+    adminChatStatusDesc: "Waktu balasan mengikuti ketersediaan admin.",
+    adminChatQuestionTitle: "Hubungi admin",
     adminChatQuestionDesc: "Chat admin via Telegram untuk bantuan cepat.",
     adminChatTermsTitle: "Terms",
     adminChatTermsDesc: "Refund & ketentuan",
@@ -209,15 +209,15 @@ const translations = {
     aiAssistantLive: "Katalog live",
     aiAssistantTitle: "Tanya AE AI",
     aiAssistantDesc: "Cari pilihan terbaik dari harga dan stok aktif.",
-    aiAssistantGreeting: "Halo! Sebutkan game, platform, durasi, atau budget kamu. Aku akan mencarikan produk yang tersedia.",
+    aiAssistantGreeting: "Hai, aku asisten AI AE. Lagi cari key game atau butuh bantuan soal pesanan?",
     aiAssistantInputLabel: "Pertanyaan untuk AE AI",
     aiAssistantPlaceholder: "Tulis pertanyaan...",
     aiAssistantSend: "Kirim",
-    aiAssistantDisclaimer: "Rekomendasi memakai harga dan stok toko saat ini. Konfirmasi sebelum checkout.",
+    aiAssistantDisclaimer: "Asisten AI · Harga akhir saat checkout. Jangan kirim password, OTP, atau key lengkap.",
     aiPromptCheap: "Yang paling hemat",
     aiPromptAndroid: "Rekomendasi Android",
     aiPromptStock: "Stok ready",
-    aiAssistantLoading: "AE AI sedang mencari...",
+    aiAssistantLoading: "Sebentar, aku cek dulu…",
     aiAssistantError: "AE AI sedang tidak tersedia. Coba lagi atau hubungi admin lewat Telegram.",
     voucherToggleTitle: "Punya voucher?",
     voucherToggleDesc: "Masukkan kode jika ada",
@@ -490,8 +490,8 @@ const translations = {
     adminChatGuideTitle: "How to Buy",
     adminChatGuideDesc: "Quick guide",
     adminChatStatusTitle: "Support available",
-    adminChatStatusDesc: "Usually replies within 1–5 minutes.",
-    adminChatQuestionTitle: "Ask a question",
+    adminChatStatusDesc: "Reply times depend on admin availability.",
+    adminChatQuestionTitle: "Contact admin",
     adminChatQuestionDesc: "Chat admin via Telegram for quick support.",
     adminChatTermsTitle: "Terms",
     adminChatTermsDesc: "Refund & policy",
@@ -499,15 +499,15 @@ const translations = {
     aiAssistantLive: "Live catalog",
     aiAssistantTitle: "Ask AE AI",
     aiAssistantDesc: "Find the best pick from current prices and live stock.",
-    aiAssistantGreeting: "Hi! Tell me your game, platform, duration, or budget and I will find available products.",
+    aiAssistantGreeting: "Hey, I'm AE's AI assistant. Looking for a game key, or need help with an order?",
     aiAssistantInputLabel: "Question for AE AI",
     aiAssistantPlaceholder: "Type your question...",
     aiAssistantSend: "Send",
-    aiAssistantDisclaimer: "Recommendations use the store's current prices and stock. Confirm before checkout.",
+    aiAssistantDisclaimer: "AI assistant · Final prices at checkout. Never share passwords, OTPs, or full keys.",
     aiPromptCheap: "Best value",
     aiPromptAndroid: "Android picks",
     aiPromptStock: "In stock",
-    aiAssistantLoading: "AE AI is searching...",
+    aiAssistantLoading: "Let me check that…",
     aiAssistantError: "AE AI is unavailable right now. Try again or contact the admin on Telegram.",
     featuredDrop: "Featured Drop",
     loadingCatalog: "Loading catalog...",
@@ -5470,13 +5470,15 @@ function setupAdminChatPopup() {
     aiBusy = true;
     aiInput.disabled = true;
     aiSend.disabled = true;
+    aiForm?.setAttribute("aria-busy", "true");
     const loadingBubble = appendAiMessage(tr("aiAssistantLoading", "AE AI sedang mencari..."), "assistant", "is-loading");
 
     try {
       const response = await fetch("/api/ai-assistant", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message, messages: context }),
+        body: JSON.stringify({ message, messages: context, language: currentLanguage }),
+        signal: AbortSignal.timeout(30_000),
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok || !data.answer) throw new Error("assistant_unavailable");
@@ -5485,12 +5487,16 @@ function setupAdminChatPopup() {
       appendAiMessage(data.answer, "assistant");
     } catch (err) {
       loadingBubble?.remove();
+      aiHistory.pop();
+      aiInput.value = message;
       appendAiMessage(tr("aiAssistantError", "AE AI sedang tidak tersedia. Coba lagi atau hubungi admin lewat Telegram."), "assistant", "is-error");
     } finally {
       aiBusy = false;
       aiInput.disabled = false;
       aiSend.disabled = false;
-      aiInput.focus();
+      aiForm?.removeAttribute("aria-busy");
+      if (aiHistory.length > 12) aiHistory.splice(0, aiHistory.length - 12);
+      if (sheet.classList.contains("show")) aiInput.focus();
     }
   }
 

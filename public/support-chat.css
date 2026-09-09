@@ -1,0 +1,46 @@
+/* AE support: quiet chat surface, persistent human-support exit. */
+#adminChatSheet .ae-help-card {
+  --support-paper: #f5f6f8;
+  --support-ink: #18212f;
+  --support-pink: #355ee8;
+  border: 1px solid #d4d9e2 !important;
+  border-radius: 22px !important;
+  background: var(--support-paper) !important;
+  box-shadow: 0 18px 70px rgba(0, 0, 0, .24) !important;
+}
+#adminChatSheet .ae-help-hero { padding: 14px; border-bottom: 1px solid #d4d9e2; background: var(--support-paper); gap: 10px; }
+#adminChatSheet .ae-help-logo { width: 38px; height: 38px; border-radius: 12px; box-shadow: none; font-size: 14px; }
+#adminChatSheet .ae-help-hero h3 { font-size: 20px; letter-spacing: -.03em; }
+#adminChatSheet .ae-help-close { width: 44px; height: 44px; min-width: 44px; border-radius: 12px; box-shadow: none; }
+#adminChatSheet .ae-help-status-card { display: none; }
+#adminChatSheet .ae-ai-disclosure { margin: 10px; border: 1px solid #d4d9e2; border-radius: 16px; box-shadow: none; }
+#adminChatSheet .ae-ai-disclosure::before { display: none; }
+#adminChatSheet .ae-ai-summary { padding: 12px; min-height: 64px; gap: 10px; background: var(--support-paper); }
+#adminChatSheet .ae-ai-mark { width: 36px; height: 36px; border-radius: 10px; box-shadow: none; background: #355ee8; color: #fff; font-size: 12px; }
+#adminChatSheet .ae-ai-summary-copy strong { font-size: 16px; }
+#adminChatSheet .ae-ai-summary-tags,
+#adminChatSheet .ae-ai-summary-kicker b { display: none; }
+#adminChatSheet .ae-ai-summary-action { width: 32px; height: 32px; border: 0; background: transparent; color: var(--support-ink); box-shadow: none; }
+#adminChatSheet .ae-ai-summary-action iconify-icon { color: inherit; font-size: 20px; }
+#adminChatSheet .ae-ai-assistant { padding: 10px; gap: 10px; background: var(--support-paper); }
+#adminChatSheet .ae-ai-messages { padding: 4px; border: 0; background: transparent; overscroll-behavior: contain; }
+#adminChatSheet .ae-ai-bubble { padding: 12px; font-size: 14px; line-height: 1.6; border: 1px solid #d4d9e2; box-shadow: none; overflow-wrap: anywhere; }
+#adminChatSheet .ae-ai-bubble.is-user { background: #355ee8; color: #fff; border-color: #355ee8; }
+#adminChatSheet .ae-ai-bubble.is-loading { color: #536174; font-style: italic; }
+#adminChatSheet .ae-ai-prompts { display: flex; overflow-x: auto; flex-wrap: nowrap; gap: 6px; }
+#adminChatSheet .ae-ai-prompts button { flex-shrink: 0; min-height: 44px; padding: 8px 12px; font-family: inherit; font-size: 12px; font-weight: 600; line-height: 1.3; border: 1px solid #d4d9e2; box-shadow: none; }
+#adminChatSheet .ae-ai-form { grid-template-columns: minmax(0, 1fr) 46px; gap: 8px; }
+#adminChatSheet .ae-ai-form input { height: 46px; min-height: 46px; font-size: 16px; border: 1px solid #d4d9e2; padding: 10px 12px; }
+#adminChatSheet .ae-ai-form button { width: 46px; height: 46px; border: 0; background: #355ee8; color: #fff; box-shadow: none; }
+#adminChatSheet .ae-ai-disclaimer { font-family: inherit; font-size: 10px; line-height: 1.5; color: #536174; }
+#adminChatSheet .ae-help-telegram-link { display: flex !important; flex-shrink: 0; min-height: 48px; margin: 0 10px 10px; border: 1px solid #d4d9e2; border-radius: 12px; box-shadow: none; }
+body.dark-theme #adminChatSheet .ae-help-card { --support-paper: #181d26; --support-ink: #f3f5fa; }
+body.dark-theme #adminChatSheet :is(.ae-ai-bubble.is-assistant, .ae-ai-form input, .ae-ai-prompts button) { background: #252d3a; color: #f3f5fa; border-color: #465163; }
+body.dark-theme #adminChatSheet .ae-ai-disclaimer { color: #bcc7d7; }
+@media (max-width: 520px) {
+  #adminChatSheet .ae-help-card { top: 8px !important; bottom: max(8px, env(safe-area-inset-bottom)) !important; max-height: none !important; display: flex; flex-direction: column; overflow: hidden !important; }
+  #adminChatSheet .ae-ai-disclosure[open] { flex: 1 1 auto; min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr); }
+  #adminChatSheet .ae-ai-disclosure[open] .ae-ai-assistant { min-height: 0; max-height: none; overflow: hidden; grid-template-rows: minmax(0, 1fr) auto auto auto; }
+  #adminChatSheet .ae-ai-messages { min-height: 0; max-height: none; overflow-y: auto; }
+  #adminChatSheet :is(.ae-help-grid, .ae-help-note-wrap, .ae-help-hero p) { display: none; }
+}
