@@ -5483,7 +5483,7 @@ function setupAdminChatPopup() {
   async function sendAiMessage(rawMessage) {
     const message = String(rawMessage || "").trim().slice(0, 500);
     if (!message || aiBusy || !aiInput || !aiSend) return;
-    const context = aiHistory.slice(-6);
+    const context = aiHistory.slice(-12);
     aiHistory.push({ role: "user", content: message });
     appendAiMessage(message, "user");
     aiBusy = true;
