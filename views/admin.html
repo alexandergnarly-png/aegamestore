@@ -8844,6 +8844,75 @@
         .reseller-detail-loader { animation: none !important; }
       }
 
+      /* Credit entry: scoped to avoid the generic admin input/card overrides. */
+      #section-wallet .wallet-grant-card {
+        border-radius: 22px;
+        border: 1px solid var(--line);
+        box-shadow: 0 8px 28px rgba(0, 0, 0, .06);
+        overflow: visible;
+      }
+      #section-wallet .wallet-grant-card .wallet-card-head {
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--line);
+        align-items: flex-start;
+      }
+      #section-wallet .wallet-grant-card .wallet-card-kicker { color: var(--accent); }
+      #section-wallet .wallet-grant-card .wallet-card-head h2 { font-size: 24px; line-height: 1.2; margin-block: 8px; }
+      #section-wallet .wallet-grant-card .wallet-card-head p { font-size: 12px; line-height: 1.6; font-weight: 500; }
+      #section-wallet .wallet-grant-card .wallet-note {
+        padding: 10px 0;
+        background: transparent;
+        border: 0;
+        border-radius: 0;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 500;
+      }
+      #section-wallet .wallet-grant-form { gap: 22px; }
+      #section-wallet .wallet-grant-form .field { min-width: 0; gap: 9px; }
+      #section-wallet .wallet-grant-form label { font-size: 11px; letter-spacing: .05em; color: var(--ink); }
+      #section-wallet .wallet-user-control input {
+        box-sizing: border-box;
+        width: 100%;
+        min-width: 0;
+        min-height: 50px;
+        padding: 12px 12px 12px 44px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 500;
+      }
+      #section-wallet .wallet-user-options { border-radius: 12px; max-height: 240px; max-height: min(240px, 40dvh); }
+      #section-wallet .wallet-recipient-proof { border-radius: 12px; padding: 12px; gap: 8px; }
+      #section-wallet .wallet-recipient-copy :is(strong, span) { white-space: normal; overflow-wrap: anywhere; }
+      #section-wallet .wallet-recipient-proof[data-state="empty"] .wallet-recipient-state { display: none; }
+      #section-wallet .wallet-amount-control {
+        grid-template-columns: 48px minmax(0, 1fr);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--surface);
+        overflow: hidden;
+      }
+      #section-wallet .wallet-amount-prefix { border: 0; border-right: 1px solid var(--line); border-radius: 0; }
+      #section-wallet .wallet-amount-control input {
+        min-width: 0;
+        width: 100%;
+        min-height: 54px;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        padding: 12px;
+        background: transparent;
+        font-size: 20px;
+      }
+      #section-wallet .wallet-amount-control:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+      #section-wallet .wallet-usd-tools { padding: 0; border: 0; background: transparent; gap: 10px; }
+      #section-wallet .wallet-usd-quick { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+      #section-wallet .wallet-usd-quick button { min-height: 46px; border-radius: 10px; font-size: 14px; }
+      #section-wallet .wallet-usd-estimate { padding: 10px; background: var(--surface-2); border-radius: 8px; font-weight: 500; font-size: 11px; }
+      #section-wallet .wallet-grant-form textarea { border-radius: 12px; min-height: 90px; padding: 12px; font-size: 14px; font-weight: 500; resize: vertical; }
+      #section-wallet .wallet-submit-btn { border-radius: 12px; min-height: 50px; font-size: 14px; }
+      #section-wallet .wallet-grant-form :is(input, textarea, button):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </head>
