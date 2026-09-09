@@ -20,3 +20,27 @@ assert.equal((source.match(/jwt\.verify\(token, jwtSecret, userJwtOptions\)/g) |
 assert.ok(source.includes('{ algorithm: "HS256", expiresIn: "7d" }'));
 
 console.log("User JWT revocation check passed.");
+
+// The admin user list must never be served from service-worker Cache Storage.
+const vm = require("node:vm");
+const handlers = {};
+vm.runInNewContext(fs.readFileSync("public/service-worker.js", "utf8"), {
+  URL,
+  self: {
+    location: { origin: "https://aegamestore.com" },
+    addEventListener: (name, handler) => { handlers[name] = handler; },
+  },
+});
+for (const [path, cache] of [
+  ["/users", "default"],
+  ["/users?refresh=1", "default"],
+  ["/users/19", "default"],
+  ["/other-data", "no-store"],
+  ["/other-data", "reload"],
+]) {
+  handlers.fetch({
+    request: { method: "GET", url: `https://aegamestore.com${path}`, cache },
+    respondWith: () => assert.fail(`${path} (${cache}) must use the network directly`),
+  });
+}
+console.log("Admin user list service-worker bypass checks passed.");

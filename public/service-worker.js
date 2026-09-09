@@ -3,7 +3,7 @@
 // always return a valid Response object so the browser doesn't fall back
 // to the offline page on transient sub-resource fails.
 
-const CACHE_VERSION = "20260829-voucher-refresh-v1";
+const CACHE_VERSION = "20260909-users-cache-v1";
 const CACHE_NAME = `ae-game-store-auto-${CACHE_VERSION}`;
 
 const STATIC_ASSETS = [
@@ -44,6 +44,7 @@ const DYNAMIC_PREFIXES = [
   "/voucher-preview",
   "/create-order",
   "/user/",
+  "/users",
   "/orders",
   "/order/",
 ];
@@ -98,6 +99,8 @@ self.addEventListener("fetch", (event) => {
 
   // Only GET requests for our origin
   if (request.method !== "GET") return;
+  // Respect explicit freshness requests before consulting Cache Storage.
+  if (request.cache === "no-store" || request.cache === "reload") return;
 
   let requestUrl;
   try {
