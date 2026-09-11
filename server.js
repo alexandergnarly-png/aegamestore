@@ -1035,6 +1035,10 @@ let vipStoreCatalogRequest = null;
 async function getVipStoreCatalog() {
   if (!vipStoreCatalogRequest) {
     vipStoreCatalogRequest = vipStoreRequest("catalog.php", { method: "GET" })
+      .then((result) => {
+        validateSupplierCatalog(result);
+        return result;
+      })
       .finally(() => {
         vipStoreCatalogRequest = null;
       });
@@ -1306,6 +1310,23 @@ function createCheatGameOrder(order) {
   });
 }
 
+function validateSupplierCatalog(result) {
+  const payload = result?.data;
+  const rejected = (value) => value === false || value === 0 || value === "false" || value === "0";
+  if (!result?.ok || rejected(payload?.success) || rejected(payload?.ok) || rejected(payload?.status)) {
+    const error = new Error(`Katalog supplier ditolak (HTTP ${Number(result?.http_code) || 0}). Periksa kredensial, izin API, dan status layanan supplier. Stok lama tidak ditimpa.`);
+    error.code = "SUPPLIER_CATALOG_REJECTED";
+    throw error;
+  }
+  const items = extractVipStoreCatalogItems(payload);
+  if (!items.length || items.some((item) => !String(getFirstDefinedValue(item, ["id", "product_id", "productId"]) || "").trim())) {
+    const error = new Error("Katalog supplier kosong atau format produk tidak valid. Sinkronisasi dihentikan; stok lama tidak ditimpa. Coba lagi setelah katalog supplier pulih.");
+    error.code = "SUPPLIER_CATALOG_INVALID";
+    throw error;
+  }
+  return items;
+}
+
 function extractVipStoreCatalogItems(payload) {
   if (Array.isArray(payload)) return payload;
   if (!payload || typeof payload !== "object") return [];
@@ -1450,7 +1471,7 @@ async function findSupplierProductById(productId, getCatalog, normalizeProduct =
   }
 
   const result = await getCatalog();
-  const items = extractVipStoreCatalogItems(result.data);
+  const items = validateSupplierCatalog(result);
   const rawProduct = items.find((item) => {
     const itemId = String(
       getFirstDefinedValue(item, ["id", "product_id", "productId"]) || "",
@@ -2162,7 +2183,7 @@ async function syncSupplierMappedProducts(deliveryType, options = {}) {
     ? normalizeCheatGameCatalogProduct
     : (item) => normalizeVipStoreCatalogProduct(item, vipStoreIdrRate);
   const catalogResult = await getCatalog();
-  const rawCatalogItems = extractVipStoreCatalogItems(catalogResult.data);
+  const rawCatalogItems = validateSupplierCatalog(catalogResult);
   const normalizedCatalog = rawCatalogItems
     .map(normalizeCatalogProduct)
     .filter((item) => item.product_id);

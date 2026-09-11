@@ -3,6 +3,23 @@ const fs = require("node:fs");
 
 const server = fs.readFileSync("server.js", "utf8");
 const migrations = fs.readFileSync("server/database-migrations.js", "utf8");
+const vm = require("node:vm");
+const catalogContext = vm.createContext({});
+vm.runInContext(server.slice(server.indexOf("function validateSupplierCatalog("), server.indexOf("function isTruthyApiValue(")), catalogContext);
+const validateCatalog = catalogContext.validateSupplierCatalog;
+for (const result of [
+  { ok: false, http_code: 401, data: { products: [{ id: 1 }] } },
+  { ok: true, http_code: 200, data: { success: false } },
+  { ok: true, http_code: 200, data: { success: "false", products: [{ id: 1 }] } },
+  { ok: true, http_code: 200, data: { products: [] } },
+  { ok: true, http_code: 200, data: { products: [{ name: "Invalid" }] } },
+  { ok: true, http_code: 200, data: "Not JSON" },
+]) assert.throws(() => validateCatalog(result), /Katalog supplier/);
+for (const data of [[{ id: 1 }], { products: [{ product_id: "20" }] }, { data: { products: [{ productId: 3 }] } }]) {
+  assert.equal(validateCatalog({ ok: true, http_code: 200, data }).length, 1);
+}
+const syncSource = server.slice(server.indexOf("async function syncSupplierMappedProducts("), server.indexOf("function syncVipStoreMappedProducts("));
+assert.ok(syncSource.indexOf("validateSupplierCatalog(catalogResult)") < syncSource.indexOf("UPDATE products"), "Reject invalid catalogs before changing stored stock");
 
 [
   "while (claimedKeys.length < quantity)",
