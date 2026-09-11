@@ -1008,6 +1008,9 @@ async function vipStoreRequest(endpoint, options = {}) {
         ok: response.ok,
         http_code: response.status,
         data,
+        diagnostic_message: endpoint === "catalog.php" && (!response.ok || data?.success === false)
+          ? sanitizeSupplierCatalogMessage(data?.message, [config.apiKey, config.apiSecret])
+          : "",
       };
     } catch (err) {
       const isTimeout = err && err.name === "AbortError";
@@ -1310,11 +1313,27 @@ function createCheatGameOrder(order) {
   });
 }
 
+function sanitizeSupplierCatalogMessage(value, secrets = []) {
+  if (typeof value !== "string") return "";
+  let message = value;
+  for (const secret of secrets) {
+    if (secret) message = message.split(secret).join("[redacted]");
+  }
+  return message
+    .replace(/<[^>]*>/g, " ")
+    .replace(/https?:\/\/\S+|[\w.+-]+@[\w.-]+\.[a-z]{2,}/gi, "[redacted]")
+    .replace(/\b(?:bearer|api[_ -]?(?:key|secret)|token|signature|password)\s*[:=]?\s*\S+/gi, "[redacted]")
+    .replace(/[A-Za-z0-9_+=\/-]{32,}/g, "[redacted]")
+    .replace(/[\x00-\x1f\x7f]/g, " ")
+    .replace(/\s+/g, " ").trim().slice(0, 240);
+}
+
 function validateSupplierCatalog(result) {
   const payload = result?.data;
   const rejected = (value) => value === false || value === 0 || value === "false" || value === "0";
   if (!result?.ok || rejected(payload?.success) || rejected(payload?.ok) || rejected(payload?.status)) {
-    const error = new Error(`Katalog supplier ditolak (HTTP ${Number(result?.http_code) || 0}). Periksa kredensial, izin API, dan status layanan supplier. Stok lama tidak ditimpa.`);
+    const detail = result?.diagnostic_message ? ` Pesan supplier: ${result.diagnostic_message}.` : " Pesan rinci tidak tersedia; periksa akses API dan status layanan supplier.";
+    const error = new Error(`Katalog supplier ditolak (HTTP ${Number(result?.http_code) || 0}).${detail} Stok lama tidak ditimpa.`);
     error.code = "SUPPLIER_CATALOG_REJECTED";
     throw error;
   }
