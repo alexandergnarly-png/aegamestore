@@ -880,6 +880,8 @@ async function migrateEncryptedGameKeys() {
   }
 }
 
+const RESELLER_SUPPLIER_SNAPSHOT_MAX_AGE_MS = 10 * 60 * 1000;
+
 function normalizeSupplierProductId(value) {
   const text = String(value || "").trim();
   if (!text) return "";
@@ -888,6 +890,22 @@ function normalizeSupplierProductId(value) {
   if (!Number.isInteger(numberValue) || numberValue <= 0) return "";
 
   return String(numberValue);
+}
+
+function canUseRecentVipStoreSnapshot(product, quantity, now = Date.now()) {
+  const syncedAt = Date.parse(product?.supplier_last_sync || "");
+  const ageMs = Number(now) - syncedAt;
+  const status = String(product?.supplier_status || "").trim().toLowerCase();
+
+  return Boolean(
+    normalizeSupplierProductId(product?.supplier_product_id) &&
+      Number.isFinite(ageMs) &&
+      ageMs >= 0 &&
+      ageMs <= RESELLER_SUPPLIER_SNAPSHOT_MAX_AGE_MS &&
+      Number(product?.supplier_maintenance || 0) !== 1 &&
+      status === "ready" &&
+      Number(product?.supplier_stock || 0) >= getOrderQuantity(quantity),
+  );
 }
 
 function getSupplierSourceFromDelivery(deliveryType) {
@@ -6668,10 +6686,27 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
         }
       } catch (error) {
         console.warn("RESELLER SUPPLIER CHECK FAILED:", error.message);
-        return res.status(503).json({
-          code: "RESELLER_SUPPLIER_CHECK_FAILED",
-          message: "Harga supplier terbaru belum bisa diverifikasi. Coba lagi sebentar.",
-        });
+        const canUseSnapshot =
+          productDeliveryType === "vipstore_api" &&
+          [
+            "SUPPLIER_CATALOG_REJECTED",
+            "SUPPLIER_CATALOG_INVALID",
+            "VIPSTORE_TIMEOUT",
+            "VIPSTORE_REQUEST_FAILED",
+          ].includes(String(error?.code || "")) &&
+          canUseRecentVipStoreSnapshot(productRow, cleanQuantity);
+
+        if (!canUseSnapshot) {
+          return res.status(503).json({
+            code: "RESELLER_SUPPLIER_CHECK_FAILED",
+            message: "Harga supplier terbaru belum bisa diverifikasi. Coba lagi sebentar.",
+          });
+        }
+
+        console.warn(
+          "RESELLER VIPSTORE CHECK USING RECENT SNAPSHOT:",
+          productRow.supplier_last_sync,
+        );
       }
     }
 
