@@ -11,6 +11,30 @@ assert.match(catalogContext.describeVipStoreInvalidResponse("", "application/jso
 assert.match(catalogContext.describeVipStoreInvalidResponse('{"products":', "application/json"), /terpotong/);
 assert.ok(!catalogContext.describeVipStoreInvalidResponse("<html>Private login details</html>", "text/html").includes("Private login details"));
 const validateCatalog = catalogContext.validateSupplierCatalog;
+for (const supplier_source of ["VIPSTORE", "CHEATGAME"]) {
+  assert.throws(() => validateCatalog({ ok: false, http_code: 402, supplier_source }), (error) => error.message.startsWith(`[${supplier_source}]`));
+}
+(async () => {
+  const source = server.slice(server.indexOf("async function syncAllMappedSupplierProducts("), server.indexOf("let vipStoreAutoSyncRunning"));
+  for (const failing of ["VIPSTORE", "CHEATGAME", "both", "none"]) {
+    const called = [];
+    const sync = (name) => async () => {
+      called.push(name);
+      if (failing === name || failing === "both") throw Object.assign(new Error("Katalog ditolak HTTP 402"), { code: "SUPPLIER_CATALOG_REJECTED" });
+      return { synced: 3, total_mapped: 3, ready: 3 };
+    };
+    const ctx = vm.createContext({ isVipStoreConfigured: () => true, isCheatGameConfigured: () => true, syncVipStoreMappedProducts: sync("VIPSTORE"), syncCheatGameMappedProducts: sync("CHEATGAME") });
+    vm.runInContext(source, ctx);
+    const result = await ctx.syncAllMappedSupplierProducts();
+    assert.deepEqual(called, ["VIPSTORE", "CHEATGAME"], "One provider failing must not skip the other");
+    assert.equal(result.synced, failing === "both" ? 0 : failing === "none" ? 6 : 3);
+    assert.equal(result.supplier_errors.length, failing === "both" ? 2 : failing === "none" ? 0 : 1);
+    if (!["both", "none"].includes(failing)) {
+      assert.equal(result.supplier_errors[0].supplier, failing);
+      assert.ok(result.message.includes(failing));
+    }
+  }
+})().catch((error) => { console.error(error); process.exitCode = 1; });
 const sanitizeMessage = catalogContext.sanitizeSupplierCatalogMessage;
 assert.equal(sanitizeMessage("Catalog temporarily unavailable"), "Catalog temporarily unavailable");
 const safeMessage = sanitizeMessage("<b>Denied</b>\nsecret-example API-Key: abc token=xyz user@example.com https://example.com/private", ["secret-example"]);

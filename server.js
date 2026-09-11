@@ -1008,6 +1008,7 @@ async function vipStoreRequest(endpoint, options = {}) {
         ok: response.ok,
         http_code: response.status,
         data,
+        supplier_source: "VIPSTORE",
         diagnostic_message: endpoint === "catalog.php" && (!response.ok || data?.success === false)
           ? sanitizeSupplierCatalogMessage(data?.message, [config.apiKey, config.apiSecret])
           : "",
@@ -1146,7 +1147,11 @@ async function cheatGameRequest(action, options = {}) {
     } catch (_) {
       data = { success: false, message: "CHEATGAME mengembalikan response non-JSON" };
     }
-    return { ok: response.ok, http_code: response.status, data };
+    return {
+      ok: response.ok, http_code: response.status, data, supplier_source: "CHEATGAME",
+      diagnostic_message: !response.ok || data?.success === false
+        ? sanitizeSupplierCatalogMessage(data?.message, [config.apiKey]) : "",
+    };
   } catch (error) {
     const wrapped = new Error(error?.name === "AbortError" ? "Request CHEATGAME timeout" : `Gagal menghubungi CHEATGAME: ${error.message}`);
     wrapped.code = error?.name === "AbortError" ? "CHEATGAME_TIMEOUT" : "CHEATGAME_REQUEST_FAILED";
@@ -1343,7 +1348,8 @@ function validateSupplierCatalog(result) {
   const rejected = (value) => value === false || value === 0 || value === "false" || value === "0";
   if (!result?.ok || rejected(payload?.success) || rejected(payload?.ok) || rejected(payload?.status)) {
     const detail = result?.diagnostic_message ? ` Detail respons: ${result.diagnostic_message}.` : " Pesan rinci tidak tersedia; periksa akses API dan status layanan supplier.";
-    const error = new Error(`Katalog supplier ditolak (HTTP ${Number(result?.http_code) || 0}).${detail} Stok lama tidak ditimpa.`);
+    const source = ["VIPSTORE", "CHEATGAME"].includes(result?.supplier_source) ? `[${result.supplier_source}] ` : "";
+    const error = new Error(`${source}Katalog supplier ditolak (HTTP ${Number(result?.http_code) || 0}).${detail} Stok lama tidak ditimpa.`);
     error.code = "SUPPLIER_CATALOG_REJECTED";
     throw error;
   }
@@ -2338,8 +2344,18 @@ async function syncAllMappedSupplierProducts(options = {}) {
     return syncSupplierMappedProducts(type, options);
   }
   const results = [];
-  if (isVipStoreConfigured()) results.push(await syncVipStoreMappedProducts(options));
-  if (isCheatGameConfigured()) results.push(await syncCheatGameMappedProducts(options));
+  const supplierErrors = [];
+  for (const [source, configured, sync] of [
+    ["VIPSTORE", isVipStoreConfigured(), syncVipStoreMappedProducts],
+    ["CHEATGAME", isCheatGameConfigured(), syncCheatGameMappedProducts],
+  ]) {
+    if (!configured) continue;
+    try {
+      results.push(await sync(options));
+    } catch (error) {
+      supplierErrors.push({ supplier: source, code: error.code || "SUPPLIER_SYNC_ERROR", message: error.message });
+    }
+  }
   const summary = results.reduce((total, item) => {
     for (const key of ["synced", "total_mapped", "ready", "out_of_stock", "maintenance", "hidden", "not_found", "failed"]) {
       total[key] += Number(item[key] || 0);
@@ -2347,6 +2363,10 @@ async function syncAllMappedSupplierProducts(options = {}) {
     return total;
   }, { synced: 0, total_mapped: 0, ready: 0, out_of_stock: 0, maintenance: 0, hidden: 0, not_found: 0, failed: 0 });
   summary.message = `Sync supplier selesai: ${summary.synced}/${summary.total_mapped} produk diproses.`;
+  summary.supplier_errors = supplierErrors;
+  if (supplierErrors.length) {
+    summary.message = `Sinkron belum lengkap. ${summary.synced} produk diproses. ` + supplierErrors.map((error) => `${error.supplier}: ${error.message}`).join(" | ");
+  }
   return summary;
 }
 
@@ -2360,6 +2380,7 @@ async function runVipStoreAutoSync(reason = "interval") {
   vipStoreAutoSyncRunning = true;
   try {
     const result = await syncAllMappedSupplierProducts();
+    if (result.supplier_errors?.length) console.error("SUPPLIER AUTO SYNC PARTIAL ERROR:", result.message);
     if (Number(result.total_mapped || 0) > 0) {
       console.log("SUPPLIER AUTO SYNC:", reason, result.message);
     }
@@ -5336,8 +5357,9 @@ app.post("/api/admin/vipstore/sync-products", requireAdminAuth, requireAdminCsrf
           }, { synced: 0, total_mapped: 0, ready: 0, out_of_stock: 0, maintenance: 0, hidden: 0, not_found: 0, failed: 0 }))
       : await syncAllMappedSupplierProducts();
 
-    return res.json({
-      ok: true,
+    const allFailed = result.supplier_errors?.length > 0 && Number(result.synced || 0) === 0;
+    return res.status(allFailed ? 502 : 200).json({
+      ok: !allFailed,
       ...result,
     });
   } catch (err) {

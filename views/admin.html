@@ -15639,6 +15639,10 @@
 
           await finishAdminLoading("Stok terbaru tersimpan");
           await loadProducts();
+          if (data.supplier_errors?.length) {
+            Swal.fire("Sinkron belum lengkap", data.message, "warning");
+            return;
+          }
           if (Number(data.failed || 0) > 0 || Number(data.not_found || 0) > 0) {
             Swal.fire("Sinkron perlu diperiksa", `${data.synced || 0}/${data.total_mapped || 0} produk diproses. ${data.not_found || 0} Product ID tidak ditemukan, ${data.failed || 0} gagal. Periksa katalog dan mapping supplier sebelum mencoba lagi.`, "warning");
             return;
