@@ -995,11 +995,11 @@ async function vipStoreRequest(endpoint, options = {}) {
       let data = null;
 
       try {
-        data = rawResponse ? JSON.parse(rawResponse) : null;
+        data = JSON.parse(rawResponse);
       } catch (parseErr) {
         data = {
           success: false,
-          message: "Supplier API mengembalikan respons non-JSON",
+          message: describeVipStoreInvalidResponse(rawResponse, response.headers.get("content-type")),
           raw_response: rawResponse,
         };
       }
@@ -1313,6 +1313,16 @@ function createCheatGameOrder(order) {
   });
 }
 
+function describeVipStoreInvalidResponse(raw, contentType) {
+  const text = String(raw || "").trim();
+  const type = String(contentType || "").split(";")[0].toLowerCase();
+  if (!text) return "Respons server kosong; bukan data katalog JSON";
+  if (type === "text/html" || /^</.test(text)) {
+    return "Respons server berupa HTML, bukan JSON API. Periksa halaman login, pembatasan akses, atau proxy pada jalur request";
+  }
+  return "Isi respons server bukan JSON valid atau terpotong. Perlu pemeriksaan respons di sisi server";
+}
+
 function sanitizeSupplierCatalogMessage(value, secrets = []) {
   if (typeof value !== "string") return "";
   let message = value;
@@ -1332,7 +1342,7 @@ function validateSupplierCatalog(result) {
   const payload = result?.data;
   const rejected = (value) => value === false || value === 0 || value === "false" || value === "0";
   if (!result?.ok || rejected(payload?.success) || rejected(payload?.ok) || rejected(payload?.status)) {
-    const detail = result?.diagnostic_message ? ` Pesan supplier: ${result.diagnostic_message}.` : " Pesan rinci tidak tersedia; periksa akses API dan status layanan supplier.";
+    const detail = result?.diagnostic_message ? ` Detail respons: ${result.diagnostic_message}.` : " Pesan rinci tidak tersedia; periksa akses API dan status layanan supplier.";
     const error = new Error(`Katalog supplier ditolak (HTTP ${Number(result?.http_code) || 0}).${detail} Stok lama tidak ditimpa.`);
     error.code = "SUPPLIER_CATALOG_REJECTED";
     throw error;
