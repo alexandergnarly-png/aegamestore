@@ -1319,7 +1319,7 @@ function validateSupplierCatalog(result) {
     throw error;
   }
   const items = extractVipStoreCatalogItems(payload);
-  if (!items.length || items.some((item) => !String(getFirstDefinedValue(item, ["id", "product_id", "productId"]) || "").trim())) {
+  if (!items.length || items.some((item) => !String(getFirstDefinedValue(item, ["id", "product_id", "productId", "variant_id"]) || "").trim())) {
     const error = new Error("Katalog supplier kosong atau format produk tidak valid. Sinkronisasi dihentikan; stok lama tidak ditimpa. Coba lagi setelah katalog supplier pulih.");
     error.code = "SUPPLIER_CATALOG_INVALID";
     throw error;
@@ -1377,7 +1377,7 @@ function parseApiNumber(value, fallback = 0) {
 
 function normalizeVipStoreCatalogProduct(item, usdToIdrRate = null) {
   const productId = String(
-    getFirstDefinedValue(item, ["id", "product_id", "productId"]) || "",
+    getFirstDefinedValue(item, ["id", "product_id", "productId", "variant_id"]) || "",
   ).trim();
 
   const name = normalizeCatalogLabel(
@@ -1404,7 +1404,9 @@ function normalizeVipStoreCatalogProduct(item, usdToIdrRate = null) {
   const isHidden = isTruthyApiValue(
     getFirstDefinedValue(item, ["is_hidden", "hidden"]),
   );
-  const isMaintenance = isTruthyApiValue(
+  const activeValue = getFirstDefinedValue(item, ["is_active"]);
+  const isInactive = activeValue !== undefined && !isTruthyApiValue(activeValue);
+  const isMaintenance = isInactive || isTruthyApiValue(
     getFirstDefinedValue(item, [
       "is_maintenance",
       "maintenance_status",
@@ -1419,7 +1421,7 @@ function normalizeVipStoreCatalogProduct(item, usdToIdrRate = null) {
 
   const maintenanceReason = String(
     getFirstDefinedValue(item, ["maintenance_reason", "maintenance_note"])
-      || "",
+      || (isInactive ? "Produk dinonaktifkan oleh supplier" : ""),
   ).trim();
 
   let status = "ready";
@@ -1474,7 +1476,7 @@ async function findSupplierProductById(productId, getCatalog, normalizeProduct =
   const items = validateSupplierCatalog(result);
   const rawProduct = items.find((item) => {
     const itemId = String(
-      getFirstDefinedValue(item, ["id", "product_id", "productId"]) || "",
+      getFirstDefinedValue(item, ["id", "product_id", "productId", "variant_id"]) || "",
     ).trim();
     return itemId === cleanSupplierProductId;
   });

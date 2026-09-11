@@ -7,6 +7,33 @@ const vm = require("node:vm");
 const catalogContext = vm.createContext({});
 vm.runInContext(server.slice(server.indexOf("function validateSupplierCatalog("), server.indexOf("function isTruthyApiValue(")), catalogContext);
 const validateCatalog = catalogContext.validateSupplierCatalog;
+catalogContext.normalizeCatalogLabel = (value) => String(value || "").trim();
+catalogContext.convertUsdToIdr = (value, rate) => value == null ? null : value * rate;
+vm.runInContext(server.slice(server.indexOf("function isTruthyApiValue("), server.indexOf("function normalizeCheatGameCatalogProduct(")), catalogContext);
+const documentedProduct = { id: 679, product_id: 679, variant_id: 679, name: "ACE DFM iOS 1 day", price: 1, reseller_price: 1, public_price_idr: 40000, public_price_usd: 3, stock: 6, is_active: true, is_hidden: 0, is_maintenance_mode: 0 };
+const normalized = catalogContext.normalizeVipStoreCatalogProduct(documentedProduct, 17000);
+assert.equal(normalized.price, 17000, "Use effective reseller price, not public price");
+assert.equal(normalized.status, "ready");
+assert.equal(normalized.product_id, "679");
+for (const is_active of [false, 0, "0", "false"]) {
+  const disabled = catalogContext.normalizeVipStoreCatalogProduct({ ...documentedProduct, is_active }, 17000);
+  assert.equal(disabled.status, "maintenance", "Inactive products must not be orderable even with stock");
+  assert.equal(disabled.is_maintenance, true);
+}
+assert.equal(catalogContext.normalizeVipStoreCatalogProduct({ variant_id: 679, stock: 6 }, 17000).product_id, "679");
+assert.equal(catalogContext.normalizeVipStoreCatalogProduct({ id: 1, stock: 6 }, 17000).status, "ready", "Missing optional active flag preserves legacy supplier behavior");
+assert.equal(validateCatalog({ ok: true, data: { success: true, products: [{ variant_id: 679 }] } }).length, 1);
+
+const crypto = require("node:crypto");
+const authContext = vm.createContext({ crypto, process: { env: { VIPSTORE_API_KEY: "test-key", VIPSTORE_API_SECRET: "test-secret" } } });
+vm.runInContext(server.slice(server.indexOf("const VIPSTORE_DEFAULT_BASE_URL"), server.indexOf("function normalizeVipStoreEndpoint(")), authContext);
+for (const rawBody of ["", '{"product_id":679,"qty":1}']) {
+  const headers = authContext.createVipStoreHeaders(rawBody);
+  const payload = `${headers["X-Timestamp"]}.${headers["X-Nonce"]}.${crypto.createHash("sha256").update(rawBody).digest("hex")}`;
+  assert.equal(headers["X-Signature"], crypto.createHmac("sha256", "test-secret").update(payload).digest("hex"));
+  assert.match(headers["X-Nonce"], /^[a-f0-9]{32}$/);
+  assert.equal(headers["X-API-Key"], "test-key");
+}
 for (const result of [
   { ok: false, http_code: 401, data: { products: [{ id: 1 }] } },
   { ok: true, http_code: 200, data: { success: false } },
