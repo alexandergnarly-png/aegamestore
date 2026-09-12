@@ -1388,6 +1388,23 @@
       .reseller-adjustment-head span { color: var(--muted); font-size: 11px; font-weight: 700; }
       .reseller-adjustment-form .field { display: grid; gap: 6px; }
       .reseller-adjustment-form button { min-height: 46px; }
+      .reseller-manual-order-form { display: grid; grid-template-columns: minmax(240px, 1.5fr) 110px minmax(240px, 1fr); gap: 12px; align-items: end; margin-bottom: 18px; padding: 16px; border: 2px solid var(--ink); border-radius: 20px; background: var(--surface); }
+      .reseller-manual-order-head { grid-column: 1 / -1; display: flex; justify-content: space-between; gap: 14px; align-items: start; }
+      .reseller-manual-order-head strong { display: block; font-size: 19px; letter-spacing: -.03em; }
+      .reseller-manual-order-head span { max-width: 520px; color: var(--muted); font-size: 11px; font-weight: 700; line-height: 1.45; text-align: right; }
+      .reseller-manual-order-form .field { display: grid; gap: 6px; }
+      .reseller-manual-order-keys { grid-column: 1 / -1; }
+      .reseller-manual-order-keys textarea { min-height: 92px; resize: vertical; }
+      .reseller-manual-order-keys small { color: var(--muted); font-size: 11px; font-weight: 700; }
+      .reseller-manual-summary { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--line); border-radius: 15px; overflow: hidden; background: var(--surface-2); }
+      .reseller-manual-summary > div { min-width: 0; padding: 11px 12px; border-right: 1px solid var(--line); }
+      .reseller-manual-summary > div:last-child { border-right: 0; }
+      .reseller-manual-summary span { display: block; color: var(--muted); font-size: 9px; font-weight: 850; letter-spacing: .05em; text-transform: uppercase; }
+      .reseller-manual-summary strong { display: block; margin-top: 4px; font-size: 16px; overflow-wrap: anywhere; }
+      .reseller-manual-summary .is-debit strong { color: var(--danger-text); }
+      .reseller-manual-order-status { grid-column: 1 / -1; min-height: 18px; color: var(--muted); font-size: 11px; font-weight: 750; }
+      .reseller-manual-order-actions { grid-column: 1 / -1; display: flex; justify-content: flex-end; }
+      .reseller-manual-order-actions button { min-height: 48px; }
       .reseller-detail-ledger-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
       .reseller-detail-block { min-width: 0; }
       .reseller-detail-block h3 { margin-bottom: 8px; font-size: 15px; }
@@ -8803,6 +8820,21 @@
         .reseller-adjustment-form input,
         .reseller-adjustment-form select { min-height: 50px; border-radius: 13px; background: var(--surface); }
         .reseller-adjustment-form button { min-height: 50px; border-radius: 13px; }
+        .reseller-manual-order-form { grid-template-columns: 1fr; gap: 11px; padding: 14px; border-radius: 19px; }
+        .reseller-manual-order-head { display: grid; gap: 5px; }
+        .reseller-manual-order-head span { text-align: left; }
+        .reseller-manual-order-form .field,
+        .reseller-manual-order-keys,
+        .reseller-manual-order-status,
+        .reseller-manual-order-actions { grid-column: 1; }
+        .reseller-manual-order-form input,
+        .reseller-manual-order-form select,
+        .reseller-manual-order-form textarea { min-height: 50px; border-radius: 13px; }
+        .reseller-manual-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .reseller-manual-summary > div { border-bottom: 1px solid var(--line); }
+        .reseller-manual-summary > div:nth-child(2) { border-right: 0; }
+        .reseller-manual-summary > div:nth-last-child(-n+2) { border-bottom: 0; }
+        .reseller-manual-order-actions button { width: 100%; min-height: 52px; border-radius: 13px; }
         .reseller-detail-ledger-grid { gap: 20px; }
         .reseller-detail-block h3 { margin: 0 0 9px 2px; font-size: 17px; }
         .reseller-detail-block .table-wrap { max-height: none; overflow: visible; }
@@ -10917,6 +10949,9 @@
       let adminResellers = [];
       let adminResellerProfits = [];
       let activeResellerId = null;
+      let activeResellerManualProducts = [];
+      let activeResellerBalance = 0;
+      let activeManualOrderRequestId = "";
       let adminWalletUsdIdrRate = 0;
       let walletGrantUsersReady = false;
       let walletGrantUsersRequest = null;
@@ -11099,6 +11134,9 @@
           if (!res.ok) throw new Error(data.message || "Gagal memuat akun reseller");
           const reseller = data.reseller || {};
           const orders = data.orders || [];
+          activeResellerBalance = Number(reseller.balance || 0);
+          activeResellerManualProducts = Array.isArray(data.manual_products) ? data.manual_products : [];
+          activeManualOrderRequestId = crypto.randomUUID();
           const revenue = orders.filter((row) => row.payment_status === "paid").reduce((sum, row) => sum + Number(row.price || 0), 0);
           const profit = orders.filter((row) => row.payment_status === "paid").reduce((sum, row) => sum + Number(row.gross_profit || 0), 0);
           title.textContent = reseller.username || "Detail reseller";
@@ -11107,13 +11145,70 @@
           const ledgerRows = (data.ledger || []).map((row) => `<tr><td data-label="Waktu">${formatTanggal(row.created_at)}</td><td data-label="Mutasi"><span class="reseller-direction ${escapeHtml(row.direction)}">${row.direction === "credit" ? "+" : "−"} ${formatRupiah(row.amount)}</span><br><small>${escapeHtml(row.description || row.entry_type)}</small></td><td data-label="Saldo">${formatRupiah(row.balance_before)} → <strong>${formatRupiah(row.balance_after)}</strong><br><small>${escapeHtml(row.admin_username || "sistem")}</small></td></tr>`).join("");
           const topupRows = (data.topups || []).map((row) => `<tr><td data-label="Waktu">${formatTanggal(row.paid_at || row.reviewed_at || row.created_at)}</td><td data-label="Nominal"><strong>${formatRupiah(row.amount)}</strong><br><small>${row.provider === "midtrans" ? "Midtrans" : "QRIS manual"}</small></td><td data-label="Status"><span class="badge ${escapeHtml(row.status)}">${escapeHtml(row.status)}</span>${row.status === "rejected" ? `<br><button class="danger-btn" data-id="${escapeHtml(row.id)}" onclick="deleteWalletTopup(this.dataset.id, true)">Hapus riwayat</button>` : ""}</td></tr>`).join("");
           const orderRows = orders.map((row) => `<tr><td data-label="Order"><strong>${escapeHtml(row.game || "-")}</strong><br><small>${escapeHtml(row.product || row.id)}</small></td><td data-label="Bayar">${formatRupiah(row.price)}<br><small>${Number(row.quantity || 1)} key</small></td><td data-label="Laba"><strong>${formatRupiah(row.gross_profit)}</strong><br><small>${escapeHtml(row.payment_status || "-")}</small></td></tr>`).join("");
+          const manualProductOptions = activeResellerManualProducts.map((product) => `<option value="${product.id}">${escapeHtml(`${product.game} · ${product.brand} - ${product.duration}`)} — ${formatRupiah(product.unit_idr)}/key</option>`).join("");
           content.innerHTML = `<div class="reseller-detail-summary"><div class="is-balance"><span>Saldo tersedia</span><strong>${formatRupiah(reseller.balance)}</strong><small>Siap dipakai untuk order</small></div><div><span>Order terbaru</span><strong>${orders.length}</strong></div><div><span>Omzet terbaru</span><strong>${formatRupiah(revenue)}</strong></div><div><span>Laba terbaru</span><strong>${formatRupiah(profit)}</strong></div></div>
+            <form class="reseller-manual-order-form" onsubmit="createManualResellerOrder(event)"><div class="reseller-manual-order-head"><div><strong>Order manual VIPStore</strong></div><span>Beli key melalui panel VIPStore, lalu tempel di sini. Harga dan potongan saldo dihitung otomatis dari modal tersimpan.</span></div><div class="field"><label for="resellerManualProduct">Produk</label><select id="resellerManualProduct" required onchange="updateManualResellerQuote()"><option value="">Pilih produk VIPStore</option>${manualProductOptions}</select></div><div class="field"><label for="resellerManualQuantity">Jumlah key</label><input id="resellerManualQuantity" type="number" inputmode="numeric" min="1" max="5" value="1" required oninput="updateManualResellerQuote()"></div><div class="field"><label for="resellerManualSupplierCost">Modal tersimpan</label><input id="resellerManualSupplierCost" type="text" value="—" readonly aria-label="Modal VIPStore tersimpan"></div><div class="field reseller-manual-order-keys"><label for="resellerManualKeys">Key yang akan dikirim</label><textarea id="resellerManualKeys" required maxlength="2500" placeholder="Satu key per baris" aria-describedby="resellerManualOrderStatus" oninput="updateManualResellerQuote()"></textarea><small>Saldo hanya dipotong jika jumlah key cocok dan order berhasil tersimpan.</small></div><div class="reseller-manual-summary" aria-live="polite"><div><span>Saldo awal</span><strong id="resellerManualBalanceBefore">${formatRupiah(activeResellerBalance)}</strong></div><div><span>Harga per key</span><strong id="resellerManualUnitPrice">—</strong></div><div class="is-debit"><span>Total dipotong</span><strong id="resellerManualTotal">—</strong></div><div><span>Saldo setelah</span><strong id="resellerManualBalanceAfter">—</strong></div></div><div id="resellerManualOrderStatus" class="reseller-manual-order-status">Pilih produk dan tempel key untuk melihat potongan.</div><div class="reseller-manual-order-actions"><button id="resellerManualOrderButton" type="submit" disabled>Potong saldo &amp; kirim key</button></div></form>
             <form class="reseller-adjustment-form" onsubmit="adjustResellerBalance(event)"><div class="reseller-adjustment-head"><strong>Penyesuaian saldo</strong><span>Setiap perubahan masuk ke mutasi akun.</span></div><div class="field"><label for="resellerAdjustmentDirection">Penyesuaian</label><select id="resellerAdjustmentDirection"><option value="credit">Tambah saldo</option><option value="debit">Kurangi saldo</option></select></div><div class="field"><label for="resellerAdjustmentAmount">Nominal</label><input id="resellerAdjustmentAmount" type="number" inputmode="numeric" min="1000" max="2000000" step="1000" required placeholder="Rp 50.000"></div><div class="field"><label for="resellerAdjustmentReason">Alasan</label><input id="resellerAdjustmentReason" type="text" minlength="4" maxlength="300" required placeholder="Contoh: koreksi deposit"></div><button type="submit">Simpan mutasi</button></form>
             <div class="reseller-detail-ledger-grid"><section class="reseller-detail-block"><h3>Mutasi saldo</h3><div class="table-wrap"><table><thead><tr><th>Waktu</th><th>Mutasi</th><th>Saldo</th></tr></thead><tbody>${ledgerRows || `<tr><td class="empty" colspan="3">Belum ada mutasi.</td></tr>`}</tbody></table></div></section><section class="reseller-detail-block"><h3>Deposit</h3><div class="table-wrap"><table><thead><tr><th>Waktu</th><th>Nominal</th><th>Status</th></tr></thead><tbody>${topupRows || `<tr><td class="empty" colspan="3">Belum ada deposit.</td></tr>`}</tbody></table></div></section><section class="reseller-detail-block"><h3>Order reseller</h3><div class="table-wrap"><table><thead><tr><th>Order</th><th>Bayar</th><th>Laba</th></tr></thead><tbody>${orderRows || `<tr><td class="empty" colspan="3">Belum ada order.</td></tr>`}</tbody></table></div></section></div>`;
         } catch (err) {
           meta.textContent = "Data tidak tersedia";
           meta.dataset.status = "error";
           content.innerHTML = `<div class="empty">${escapeHtml(err.message)}</div>`;
+        }
+      }
+
+      function updateManualResellerQuote() {
+        const productId = Number(document.getElementById("resellerManualProduct")?.value || 0);
+        const quantity = Number(document.getElementById("resellerManualQuantity")?.value || 0);
+        const keys = String(document.getElementById("resellerManualKeys")?.value || "").split(/\r?\n/).map((key) => key.trim()).filter(Boolean);
+        const product = activeResellerManualProducts.find((item) => Number(item.id) === productId);
+        const unitPrice = Number(product?.unit_idr || 0);
+        const total = unitPrice * quantity;
+        const balanceAfter = activeResellerBalance - total;
+        const setText = (id, value) => { const element = document.getElementById(id); if (element) element.textContent = value; };
+        const supplierCost = document.getElementById("resellerManualSupplierCost");
+        const button = document.getElementById("resellerManualOrderButton");
+        const status = document.getElementById("resellerManualOrderStatus");
+        setText("resellerManualUnitPrice", product ? formatRupiah(unitPrice) : "—");
+        setText("resellerManualTotal", product && quantity ? formatRupiah(total) : "—");
+        setText("resellerManualBalanceAfter", product && quantity ? formatRupiah(balanceAfter) : "—");
+        if (supplierCost) supplierCost.value = product ? formatRupiah(product.supplier_cost_idr) : "—";
+        let issue = "";
+        if (!product) issue = activeResellerManualProducts.length ? "Pilih produk VIPStore." : "Belum ada produk VIPStore aktif dengan harga modal.";
+        else if (!Number.isInteger(quantity) || quantity < 1 || quantity > 5) issue = "Jumlah harus 1 sampai 5 key.";
+        else if (keys.length !== quantity) issue = `Tempel tepat ${quantity} key, satu key per baris (sekarang ${keys.length}).`;
+        else if (balanceAfter < 0) issue = `Saldo kurang ${formatRupiah(Math.abs(balanceAfter))}.`;
+        if (status) status.textContent = issue || `Siap: potong ${formatRupiah(total)}, saldo tersisa ${formatRupiah(balanceAfter)}.`;
+        if (button) button.disabled = Boolean(issue);
+        return issue ? null : { product, quantity, keys, total, balanceAfter };
+      }
+
+      async function createManualResellerOrder(event) {
+        event.preventDefault();
+        if (!activeResellerId) return;
+        const quote = updateManualResellerQuote();
+        if (!quote) return;
+        const confirmation = await Swal.fire({
+          title: "Potong saldo & kirim key?",
+          html: `<p><strong>${escapeHtml(`${quote.product.game} · ${quote.product.brand} - ${quote.product.duration}`)}</strong></p><p>${quote.quantity} key × ${formatRupiah(quote.product.unit_idr)} = <strong>${formatRupiah(quote.total)}</strong></p><p>Saldo: ${formatRupiah(activeResellerBalance)} → <strong>${formatRupiah(quote.balanceAfter)}</strong></p>`,
+          icon: "warning", showCancelButton: true, confirmButtonText: "Ya, proses order", cancelButtonText: "Batal",
+        });
+        if (!confirmation.isConfirmed) return;
+        const button = document.getElementById("resellerManualOrderButton");
+        if (button) { button.disabled = true; button.setAttribute("aria-busy", "true"); button.textContent = "Memproses..."; }
+        try {
+          const res = await fetch(`/api/admin/resellers/${encodeURIComponent(activeResellerId)}/manual-order`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "x-csrf-token": getCsrfToken() },
+            body: JSON.stringify({ product_id: quote.product.id, qty: quote.quantity, game_key: quote.keys.join("\n"), expected_total_idr: quote.total, request_id: activeManualOrderRequestId }),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.message || "Order manual gagal diproses");
+          await Swal.fire("Order berhasil", `${data.message}. Dipotong ${formatRupiah(data.deducted_idr)}; saldo ${formatRupiah(data.balance_after)}.`, "success");
+          await Promise.all([openResellerDetail(activeResellerId), loadResellerControl()]);
+        } catch (err) {
+          Swal.fire("Gagal", err.message, "error");
+          if (button) { button.disabled = false; button.removeAttribute("aria-busy"); button.textContent = "Potong saldo & kirim key"; }
         }
       }
 

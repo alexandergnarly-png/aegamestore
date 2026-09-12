@@ -231,17 +231,49 @@ assert.ok(admin.includes("Laba Kotor"));
   'id="resellerDetailDialog"',
   "loadResellerControl",
   "openResellerDetail",
+  "createManualResellerOrder",
+  'id="resellerManualProduct"',
+  'id="resellerManualKeys"',
+  'id="resellerManualTotal"',
+  "Potong saldo &amp; kirim key",
   "adjustResellerBalance",
 ].forEach((marker) => assert.ok(admin.includes(marker), `Missing reseller admin UI marker: ${marker}`));
 [
   'app.get("/api/admin/resellers"',
   'app.get("/api/admin/resellers/:id"',
+  'app.post("/api/admin/resellers/:id/manual-order"',
   'app.post("/api/admin/resellers/:id/balance"',
+  "manual_reseller_order",
   "admin_reseller_adjustment",
   "balance_before",
   "balance_after",
   "scope = String(req.query.scope",
 ].forEach((marker) => assert.ok(server.includes(marker), `Missing reseller admin API marker: ${marker}`));
+
+const manualResellerOrderRoute = server.slice(
+  server.indexOf('app.post("/api/admin/resellers/:id/manual-order"'),
+  server.indexOf('app.post("/api/admin/resellers/:id/balance"'),
+);
+[
+  "getResellerFinancials(product, quantity, resellerRate)",
+  "expectedTotal !== total",
+  "SELECT balance FROM wallet_accounts WHERE user_id = $1 FOR UPDATE",
+  "persistOrderKeys(client, { orderId, keys: gameKeys, source: \"manual\" })",
+  "UPDATE wallet_accounts SET balance = $1",
+  "'manual_reseller_order', 'debit'",
+  "saldo tidak dipotong dua kali",
+  'await client.query("COMMIT")',
+].forEach((marker) => assert.ok(manualResellerOrderRoute.includes(marker), `Manual reseller order missing safeguard: ${marker}`));
+assert.ok(
+  manualResellerOrderRoute.indexOf("persistOrderKeys") < manualResellerOrderRoute.indexOf("UPDATE wallet_accounts SET balance"),
+  "Wallet must only be debited after the delivered keys are persisted",
+);
+assert.ok(
+  manualResellerOrderRoute.indexOf("UPDATE wallet_accounts SET balance") < manualResellerOrderRoute.indexOf('await client.query("COMMIT")'),
+  "Manual fulfillment and wallet debit must commit atomically",
+);
+assert.match(admin, /expected_total_idr\s*:\s*quote\.total/);
+assert.match(admin, /activeManualOrderRequestId/);
 [
   "section-resellers",
   "resellerControlTableBody",

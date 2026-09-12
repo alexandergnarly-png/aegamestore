@@ -7597,7 +7597,7 @@ app.get("/api/admin/resellers/:id", requireAdminAuth, async (req, res) => {
   const userId = Number(req.params.id);
   if (!Number.isInteger(userId) || userId <= 0) return res.status(400).json({ message: "ID reseller tidak valid" });
   try {
-    const [userResult, ledgerResult, topupResult, orderResult] = await Promise.all([
+    const [userResult, ledgerResult, topupResult, orderResult, productResult, resellerRate] = await Promise.all([
       query(`SELECT u.id, u.username, u.created_at, u.reseller_status, u.reseller_approved_at,
           COALESCE(w.balance, 0)::bigint AS balance
         FROM users u LEFT JOIN wallet_accounts w ON w.user_id = u.id
@@ -7614,6 +7614,16 @@ app.get("/api/admin/resellers/:id", requireAdminAuth, async (req, res) => {
           payment_status, delivery_status, created_at
         FROM orders WHERE user_id = $1 AND pricing_tier = 'reseller'
         ORDER BY created_at DESC LIMIT 12`, [userId]),
+      query(`SELECT id, game, brand, duration, price, supplier_price, platform,
+          supplier_product_id, supplier_product_name
+        FROM products
+        WHERE active = 1
+          AND COALESCE(play_status, 'safe') <> 'maintenance'
+          AND LOWER(COALESCE(delivery_type, '')) = 'vipstore_api'
+          AND COALESCE(supplier_product_id, '') <> ''
+          AND COALESCE(supplier_price, 0) > 0
+        ORDER BY LOWER(game), LOWER(brand), LOWER(duration), id`),
+      getResellerUsdIdrRate(),
     ]);
     const user = userResult.rows[0];
     if (!user) return res.status(404).json({ message: "Reseller tidak ditemukan" });
@@ -7627,10 +7637,175 @@ app.get("/api/admin/resellers/:id", requireAdminAuth, async (req, res) => {
       ledger: ledgerResult.rows.map((row) => toNumbers(row, ["amount", "balance_before", "balance_after"])),
       topups: topupResult.rows.map((row) => toNumbers(row, ["amount", "payment_amount"])),
       orders: orderResult.rows.map((row) => toNumbers(row, ["quantity", "price", "supplier_cost", "gross_profit"])),
+      usd_idr_rate: resellerRate,
+      manual_products: productResult.rows.map((product) => {
+        const pricing = getResellerPricing(product, resellerRate);
+        return {
+          id: Number(product.id),
+          game: product.game,
+          brand: product.brand,
+          duration: product.duration,
+          supplier_product_id: product.supplier_product_id,
+          supplier_product_name: product.supplier_product_name,
+          supplier_cost_idr: Number(product.supplier_price || 0),
+          unit_idr: pricing.unit_idr,
+          unit_usd: pricing.unit_usd,
+          profit_idr: pricing.profit_idr,
+        };
+      }),
     });
   } catch (err) {
     console.error("ERROR ADMIN RESELLER DETAIL:", err);
     return res.status(500).json({ message: "Gagal memuat detail reseller" });
+  }
+});
+
+app.post("/api/admin/resellers/:id/manual-order", requireAdminAuth, requireAdminCsrf, async (req, res) => {
+  const userId = Number(req.params.id);
+  const productId = Number(req.body?.product_id);
+  const quantity = parseOrderQuantity(req.body?.qty);
+  const expectedTotal = Number(req.body?.expected_total_idr);
+  const requestId = String(req.body?.request_id || "").trim().toLowerCase();
+  const rawGameKey = String(req.body?.game_key || "").trim();
+  const gameKeys = splitOrderKeys(rawGameKey);
+  const requestIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+
+  if (!Number.isInteger(userId) || userId <= 0) return res.status(400).json({ message: "ID reseller tidak valid" });
+  if (!Number.isInteger(productId) || productId <= 0) return res.status(400).json({ message: "Produk tidak valid" });
+  if (!quantity) return res.status(400).json({ message: `Jumlah harus 1 sampai ${MAX_ORDER_QUANTITY}` });
+  if (!requestIdPattern.test(requestId)) return res.status(400).json({ message: "ID permintaan tidak valid. Muat ulang detail reseller." });
+  if (rawGameKey.length > 2500) return res.status(400).json({ message: "Game key terlalu panjang" });
+  if (gameKeys.length !== quantity) return res.status(400).json({ message: `Masukkan tepat ${quantity} key, satu key per baris` });
+  if (gameKeys.some((key) => key.length > 500)) return res.status(400).json({ message: "Salah satu game key terlalu panjang" });
+
+  const resellerRate = await getResellerUsdIdrRate();
+  const adminUsername = await getAdminSessionUsername(req).catch(() => "admin");
+  const orderId = `ORDER-MANUAL-${requestId}`;
+  const client = await db.connect();
+  try {
+    await client.query("BEGIN");
+    const reseller = (await client.query(
+      `SELECT id, username, default_name, default_contact, email
+       FROM users WHERE id = $1 AND reseller_status = 'approved' FOR UPDATE`,
+      [userId],
+    )).rows[0];
+    if (!reseller) {
+      const error = new Error("Reseller aktif tidak ditemukan");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const product = (await client.query(
+      `SELECT id, game, brand, duration, price, supplier_price, platform,
+          delivery_type, supplier_source, supplier_product_id, supplier_product_name
+       FROM products
+       WHERE id = $1 AND active = 1
+         AND COALESCE(play_status, 'safe') <> 'maintenance'
+         AND LOWER(COALESCE(delivery_type, '')) = 'vipstore_api'
+         AND COALESCE(supplier_product_id, '') <> ''
+         AND COALESCE(supplier_price, 0) > 0
+       LIMIT 1`,
+      [productId],
+    )).rows[0];
+    if (!product) {
+      const error = new Error("Produk VIPStore tidak aktif atau belum memiliki harga modal");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const financials = getResellerFinancials(product, quantity, resellerRate);
+    const total = financials.unit_idr * quantity;
+    if (!Number.isSafeInteger(expectedTotal) || expectedTotal !== total) {
+      const error = new Error("Harga berubah. Periksa nominal terbaru lalu konfirmasi ulang.");
+      error.statusCode = 409;
+      error.quote = { unit_idr: financials.unit_idr, total_idr: total };
+      throw error;
+    }
+
+    await ensureWalletAccount(client, userId);
+    const wallet = (await client.query(
+      "SELECT balance FROM wallet_accounts WHERE user_id = $1 FOR UPDATE",
+      [userId],
+    )).rows[0];
+    const balanceBefore = Number(wallet?.balance || 0);
+    const balanceAfter = balanceBefore - total;
+    if (balanceAfter < 0) {
+      const error = new Error(`Saldo reseller tidak cukup. Dibutuhkan Rp${total.toLocaleString("id-ID")}.`);
+      error.statusCode = 409;
+      throw error;
+    }
+
+    const createdAt = new Date().toISOString();
+    const platform = getPlatformLabel(product.platform);
+    const productName = `${platform} • ${product.brand} - ${product.duration}`;
+    const accessToken = crypto.randomBytes(24).toString("hex");
+    const buyerName = String(reseller.default_name || reseller.username || "Reseller");
+    const buyerContact = String(reseller.email || reseller.default_contact || "");
+    await client.query(
+      `INSERT INTO orders
+       (id, product_id, user_id, access_token, name, contact, game, product, price,
+        unit_price, quantity, original_price, discount_amount, payment_fee, voucher_code,
+        payment_method, payment_status, delivery_status, gameKey, created_at, delivered_at,
+        admin_note, pricing_tier, supplier_cost, gross_profit, supplier_delivery_type,
+        supplier_source, supplier_product_id, supplier_product_name)
+       VALUES
+       ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $9, 0, 0, NULL,
+        'ae_credit', 'paid', 'delivered', $12, $13, $13, $14, 'reseller', $15, $16,
+        'vipstore_api', 'vipstore', $17, $18)`,
+      [orderId, productId, userId, accessToken, buyerName, buyerContact, product.game,
+        productName, total, financials.unit_idr, quantity, encryptGameKey(gameKeys.join("\n")),
+        createdAt, `Dipenuhi manual oleh ${adminUsername}; supplier API sedang dibatasi.`,
+        financials.supplier_cost, financials.gross_profit,
+        normalizeSupplierProductId(product.supplier_product_id), String(product.supplier_product_name || "")],
+    );
+    await persistOrderKeys(client, { orderId, keys: gameKeys, source: "manual" });
+    await client.query(
+      "UPDATE wallet_accounts SET balance = $1, updated_at = $2 WHERE user_id = $3",
+      [balanceAfter, createdAt, userId],
+    );
+    await client.query(
+      `INSERT INTO wallet_ledger
+       (user_id, entry_type, direction, amount, balance_before, balance_after, reference_type,
+        reference_id, description, admin_username, created_at)
+       VALUES ($1, 'manual_reseller_order', 'debit', $2, $3, $4, 'order', $5, $6, $7, $8)`,
+      [userId, total, balanceBefore, balanceAfter, orderId,
+        `Order manual ${productName} × ${quantity}`, adminUsername, createdAt],
+    );
+    await client.query("COMMIT");
+    return res.json({
+      message: `${quantity} key berhasil dikirim dan saldo reseller dipotong`,
+      order_id: orderId,
+      unit_price_idr: financials.unit_idr,
+      deducted_idr: total,
+      balance_before: balanceBefore,
+      balance_after: balanceAfter,
+    });
+  } catch (err) {
+    await client.query("ROLLBACK").catch(() => {});
+    if (err.code === "23505") {
+      const existing = (await client.query(
+        `SELECT o.id, o.unit_price, o.price, w.balance
+         FROM orders o LEFT JOIN wallet_accounts w ON w.user_id = o.user_id
+         WHERE o.id = $1 AND o.user_id = $2 AND o.pricing_tier = 'reseller' LIMIT 1`,
+        [orderId, userId],
+      )).rows[0];
+      if (existing) {
+        return res.json({
+          message: "Order manual sebelumnya sudah berhasil; saldo tidak dipotong dua kali",
+          order_id: existing.id,
+          unit_price_idr: Number(existing.unit_price || 0),
+          deducted_idr: Number(existing.price || 0),
+          balance_after: Number(existing.balance || 0),
+          idempotent: true,
+        });
+      }
+      return res.status(409).json({ message: "Data order manual sudah pernah digunakan" });
+    }
+    if (err.statusCode) return res.status(err.statusCode).json({ message: err.message, quote: err.quote });
+    console.error("ERROR ADMIN MANUAL RESELLER ORDER:", err);
+    return res.status(500).json({ message: "Gagal membuat order manual reseller" });
+  } finally {
+    client.release();
   }
 });
 
