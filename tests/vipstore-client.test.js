@@ -25,14 +25,10 @@ const response = (body, status = 200, contentType = "application/json") => ({
     });
   }
   let calls = 0;
-  let signatures = [];
-  const recovered = await request(config, "catalog.php", {}, async (_url, init) => {
-    signatures.push(init.headers["X-Nonce"]);
-    return ++calls === 1 ? response("<title>One moment, please...</title>", 200, "text/html") : response('{"success":true,"products":[{"id":679}]}');
-  });
-  assert.equal(recovered.ok, true);
-  assert.equal(calls, 2);
-  assert.notEqual(signatures[0], signatures[1]);
+  await assert.rejects(request(config, "catalog.php", {}, async () => {
+    calls++; return response("<title>One moment, please...</title>", 200, "text/html");
+  }), { code: "VIPSTORE_SECURITY_CHALLENGE" });
+  assert.equal(calls, 1, "The large catalog must never be retried automatically");
   calls = 0;
   await assert.rejects(request(config, "claim.php", { method: "POST", body: { product_id: 679, qty: 1 } }, async () => {
     calls++; return response("<title>One moment, please...</title>", 200, "text/html");
@@ -93,6 +89,29 @@ const response = (body, status = 200, contentType = "application/json") => ({
   await assert.rejects(request(config, "claim.php", { method: "GET" }), { code: "VIPSTORE_INVALID_REQUEST" });
   const fs = require("node:fs"), vm = require("node:vm");
   const server = fs.readFileSync("server.js", "utf8");
+  const catalogSource = server.slice(server.indexOf("let vipStoreCatalogRequest"), server.indexOf("async function getVipStoreBalance"));
+  let catalogCalls = 0;
+  const catalogContext = vm.createContext({
+    Date, process: { env: {} },
+    vipStoreRequest: async () => { catalogCalls++; return { ok: true, data: { success: true, products: [{ id: 1 }] } }; },
+    validateSupplierCatalog: () => true,
+  });
+  vm.runInContext(catalogSource, catalogContext);
+  await catalogContext.getVipStoreCatalog();
+  await catalogContext.getVipStoreCatalog();
+  assert.equal(catalogCalls, 1, "Successful catalogs are reused instead of spamming VIPStore");
+  catalogCalls = 0;
+  const blockedContext = vm.createContext({
+    Date, process: { env: {} },
+    vipStoreRequest: async () => { catalogCalls++; throw Object.assign(new Error("blocked"), { code: "VIPSTORE_SECURITY_CHALLENGE", diagnostics: { http_status: 403 } }); },
+    validateSupplierCatalog: () => true,
+  });
+  vm.runInContext(catalogSource, blockedContext);
+  await assert.rejects(blockedContext.getVipStoreCatalog());
+  await assert.rejects(blockedContext.getVipStoreCatalog());
+  assert.equal(catalogCalls, 1, "A bot-protection rejection starts a no-request cooldown");
+  assert.match(server, /VIPSTORE_SYNC_INTERVAL_MS \|\| 30 \* 60 \* 1000/);
+  assert.match(server, /15 \* 60 \* 1000,\s*\);/);
   let stored = [], issued = 0, logs = [];
   let claimResponse = { ok: true, http_code: 200, data: { success: true, product_id: 679, qty: 1, codes: ["LICENSE-ONE"] } };
   const context = vm.createContext({

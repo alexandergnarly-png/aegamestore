@@ -927,13 +927,35 @@ async function vipStoreRequest(endpoint, options = {}) {
 }
 
 let vipStoreCatalogRequest = null;
+let vipStoreCatalogCache = null;
+let vipStoreCatalogBlockedUntil = 0;
+let vipStoreCatalogBlockedError = null;
+const VIPSTORE_CATALOG_CACHE_MS = 10 * 60 * 1000;
+const VIPSTORE_CATALOG_BLOCK_COOLDOWN_MS = 15 * 60 * 1000;
 
 async function getVipStoreCatalog() {
+  const now = Date.now();
+  if (vipStoreCatalogCache && now - vipStoreCatalogCache.savedAt < VIPSTORE_CATALOG_CACHE_MS) {
+    return vipStoreCatalogCache.result;
+  }
+  if (vipStoreCatalogBlockedError && now < vipStoreCatalogBlockedUntil) {
+    throw vipStoreCatalogBlockedError;
+  }
   if (!vipStoreCatalogRequest) {
     vipStoreCatalogRequest = vipStoreRequest("catalog.php", { method: "GET" })
       .then((result) => {
         validateSupplierCatalog(result);
+        vipStoreCatalogCache = { result, savedAt: Date.now() };
+        vipStoreCatalogBlockedError = null;
+        vipStoreCatalogBlockedUntil = 0;
         return result;
+      })
+      .catch((error) => {
+        if (Number(error?.supplierHttpCode || error?.diagnostics?.http_status) === 403 || error?.code === "VIPSTORE_SECURITY_CHALLENGE") {
+          vipStoreCatalogBlockedError = error;
+          vipStoreCatalogBlockedUntil = Date.now() + VIPSTORE_CATALOG_BLOCK_COOLDOWN_MS;
+        }
+        throw error;
       })
       .finally(() => {
         vipStoreCatalogRequest = null;
@@ -1106,6 +1128,8 @@ function validateSupplierCatalog(result) {
     const source = ["VIPSTORE"].includes(result?.supplier_source) ? `[${result.supplier_source}] ` : "";
     const error = new Error(`${source}Katalog supplier ditolak (HTTP ${Number(result?.http_code) || 0}).${detail} Stok lama tidak ditimpa.`);
     error.code = "SUPPLIER_CATALOG_REJECTED";
+    error.supplierHttpCode = Number(result?.http_code) || null;
+    error.diagnostics = result?.diagnostics || {};
     throw error;
   }
   const items = extractVipStoreCatalogItems(payload);
@@ -1926,8 +1950,8 @@ function startVipStoreAutoSync() {
   }
 
   const intervalMs = Math.max(
-    Number(process.env.VIPSTORE_SYNC_INTERVAL_MS || 5 * 60 * 1000),
-    60 * 1000,
+    Number(process.env.VIPSTORE_SYNC_INTERVAL_MS || 30 * 60 * 1000),
+    15 * 60 * 1000,
   );
 
   vipStoreStartupTimer = setTimeout(

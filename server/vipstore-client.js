@@ -67,7 +67,8 @@ async function request(config, endpoint, options = {}, fetchImpl = fetch) {
     throw apiError("VIPSTORE_INVALID_BASE_URL", `Base URL VIPStore harus ${BASE_URL}`);
   }
   const rawBody = method === "GET" ? "" : JSON.stringify(options.body || {});
-  const attempts = method === "GET" ? 2 : 1;
+  // The catalog is large and protected by bot detection: never duplicate it automatically.
+  const attempts = method === "GET" && endpoint !== "catalog.php" ? 2 : 1;
   for (let attempt = 1; attempt <= attempts; attempt++) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), Number(options.timeoutMs) || 30000);
