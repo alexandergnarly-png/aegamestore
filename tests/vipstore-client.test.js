@@ -49,6 +49,14 @@ const response = (body, status = 200, contentType = "application/json") => ({
   assert.equal(denied.ok, false);
   assert.equal(calls, 1);
   assert.ok(!JSON.stringify(denied).includes("test-secret"));
+  for (const payload of [{ message: "API disabled" }, { error: "Account suspended" }, { detail: "Forbidden" }]) {
+    calls = 0;
+    const rejection = await request(config, "catalog.php", {}, async () => { calls++; return response(JSON.stringify(payload), 403); });
+    assert.equal(rejection.ok, false);
+    assert.equal(rejection.data.success, false);
+    assert.ok(rejection.diagnostic_message && rejection.diagnostic_message !== "Request ditolak VIPStore");
+    assert.equal(calls, 1, "A JSON HTTP rejection must not be retried");
+  }
   await assert.rejects(request(config, "catalog.php", {}, async () => response("", 302)), { code: "VIPSTORE_REDIRECT" });
   const product = { id: 679, name: "Test product", price: 1, stock: 6 };
   for (const success of [true, 1, "1", "true"]) {

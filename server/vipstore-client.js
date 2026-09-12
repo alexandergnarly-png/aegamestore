@@ -21,6 +21,13 @@ function apiError(code, message, diagnostics = {}) {
   return Object.assign(new Error(message), { code, diagnostics });
 }
 
+function supplierMessage(data, config) {
+  const candidates = [data?.message, data?.error, data?.detail, data?.errors?.[0]?.message];
+  let message = candidates.find((value) => typeof value === "string" && value.trim()) || "";
+  for (const secret of [config.apiKey, config.apiSecret]) message = message.split(secret).join("[redacted]");
+  return message.replace(/<[^>]*>/g, " ").replace(/[\x00-\x1f\x7f]/g, " ").replace(/\s+/g, " ").trim().slice(0, 240);
+}
+
 function normalizeCatalogResponse(data) {
   if (!data || typeof data !== "object") return data;
   const flag = (value) => {
@@ -89,16 +96,16 @@ async function request(config, endpoint, options = {}, fetchImpl = fetch) {
       diagnostics.response_shape = Array.isArray(data) ? "array" : data === null ? "null" : typeof data;
       diagnostics.success_type = typeof data?.success;
       diagnostics.products_type = Array.isArray(data?.products) ? "array" : typeof data?.products;
+      if (!response.ok && data && typeof data === "object" && !Array.isArray(data)) {
+        data = { ...data, success: false };
+      }
       if (endpoint === "catalog.php") data = normalizeCatalogResponse(data);
       if (!data || typeof data !== "object" || Array.isArray(data) || typeof data.success !== "boolean") {
         throw apiError("VIPSTORE_INVALID_RESPONSE", `Respons VIPStore belum dapat divalidasi (HTTP ${response.status}; bentuk ${diagnostics.response_shape}; success ${diagnostics.success_type}; products ${diagnostics.products_type}). Stok lama tidak ditimpa.`, diagnostics);
       }
-      // Keep only sanitized error text; never send credentials or raw HTML to logs.
-      if (typeof data.message === "string") {
-        for (const secret of [config.apiKey, config.apiSecret]) data.message = data.message.split(secret).join("[redacted]");
-        data.message = data.message.replace(/<[^>]*>/g, " ").slice(0, 240);
-      }
-      return { ok: response.ok && data.success, http_code: response.status, data, supplier_source: "VIPSTORE", diagnostics, diagnostic_message: data.success ? "" : data.message || "Request ditolak VIPStore" };
+      const diagnosticMessage = supplierMessage(data, config);
+      if (diagnosticMessage) data.message = diagnosticMessage;
+      return { ok: response.ok && data.success, http_code: response.status, data, supplier_source: "VIPSTORE", diagnostics, diagnostic_message: data.success ? "" : diagnosticMessage || "Request ditolak VIPStore" };
     } catch (error) {
       const wrapped = String(error.code || "").startsWith("VIPSTORE_") ? error : apiError(
         error.name === "AbortError" ? "VIPSTORE_TIMEOUT" : "VIPSTORE_REQUEST_FAILED",
