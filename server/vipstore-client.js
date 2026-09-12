@@ -21,6 +21,35 @@ function apiError(code, message, diagnostics = {}) {
   return Object.assign(new Error(message), { code, diagnostics });
 }
 
+function normalizeCatalogResponse(data) {
+  if (!data || typeof data !== "object") return data;
+  const flag = (value) => {
+    if ([true, 1, "1", "true"].includes(value)) return true;
+    if ([false, 0, "0", "false"].includes(value)) return false;
+    return undefined;
+  };
+  const flags = [data.success, data.ok, data.status];
+  // A denial always wins, even if a product list accompanies it.
+  if (flags.some((value) => flag(value) === false) || data.error) return { ...data, success: false };
+  if (data.success !== undefined) {
+    return { ...data, success: flag(data.success) };
+  }
+  if (flags.some((value) => value !== undefined && flag(value) === undefined)) return data;
+  const products = Array.isArray(data) ? data : data.products;
+  // Missing success is accepted ONLY for a complete, nonempty catalog shape.
+  // Never infer purchase success from a payload or from HTTP 200.
+  if (Array.isArray(products) && products.length && products.every((item) =>
+    item && typeof item === "object" && !Array.isArray(item) &&
+    Number.isSafeInteger(Number(item.id ?? item.product_id ?? item.variant_id)) &&
+    Number(item.id ?? item.product_id ?? item.variant_id) > 0 &&
+    typeof (item.name ?? item.product_name) === "string" &&
+    typeof (item.price ?? item.reseller_price) === "number" &&
+    Number.isFinite(item.price ?? item.reseller_price) && (item.price ?? item.reseller_price) >= 0 &&
+    Number.isInteger(item.stock ?? item.available_codes) && (item.stock ?? item.available_codes) >= 0
+  )) return { ...(!Array.isArray(data) ? data : {}), success: true, products };
+  return data;
+}
+
 async function request(config, endpoint, options = {}, fetchImpl = fetch) {
   endpoint = String(endpoint).replace(/^\/+/, "");
   const method = String(options.method || METHODS[endpoint] || "GET").toUpperCase();
@@ -57,8 +86,12 @@ async function request(config, endpoint, options = {}, fetchImpl = fetch) {
           challenge ? "VIPStore mengirim halaman pemeriksaan browser ke server. Admin VIPStore perlu mengecualikan endpoint API reseller dari browser challenge."
             : "VIPStore mengirim respons non-JSON. Periksa routing endpoint API di server supplier.", diagnostics);
       }
+      diagnostics.response_shape = Array.isArray(data) ? "array" : data === null ? "null" : typeof data;
+      diagnostics.success_type = typeof data?.success;
+      diagnostics.products_type = Array.isArray(data?.products) ? "array" : typeof data?.products;
+      if (endpoint === "catalog.php") data = normalizeCatalogResponse(data);
       if (!data || typeof data !== "object" || Array.isArray(data) || typeof data.success !== "boolean") {
-        throw apiError("VIPSTORE_INVALID_RESPONSE", "Struktur respons VIPStore tidak sesuai dokumentasi (success boolean wajib).", diagnostics);
+        throw apiError("VIPSTORE_INVALID_RESPONSE", `Respons VIPStore belum dapat divalidasi (HTTP ${response.status}; bentuk ${diagnostics.response_shape}; success ${diagnostics.success_type}; products ${diagnostics.products_type}). Stok lama tidak ditimpa.`, diagnostics);
       }
       // Keep only sanitized error text; never send credentials or raw HTML to logs.
       if (typeof data.message === "string") {

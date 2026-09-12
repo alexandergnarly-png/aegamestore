@@ -50,7 +50,37 @@ const response = (body, status = 200, contentType = "application/json") => ({
   assert.equal(calls, 1);
   assert.ok(!JSON.stringify(denied).includes("test-secret"));
   await assert.rejects(request(config, "catalog.php", {}, async () => response("", 302)), { code: "VIPSTORE_REDIRECT" });
-  await assert.rejects(request(config, "catalog.php", {}, async () => response('{"success":"true"}')), { code: "VIPSTORE_INVALID_RESPONSE" });
+  const product = { id: 679, name: "Test product", price: 1, stock: 6 };
+  for (const success of [true, 1, "1", "true"]) {
+    const result = await request(config, "catalog.php", {}, async () => response(JSON.stringify({ success, products: [product] })));
+    assert.equal(result.ok, true);
+    assert.equal(result.data.success, true);
+  }
+  for (const payload of [{ products: [product] }, [product], { ok: true, products: [product] }]) {
+    const result = await request(config, "catalog.php", {}, async () => response(JSON.stringify(payload)));
+    assert.equal(result.ok, true);
+    assert.deepEqual(result.data.products, [product]);
+  }
+  for (const marker of [{ success: false }, { success: "false" }, { success: 0 }, { success: "0" },
+    { success: true, ok: false }, { success: true, status: "0" }, { error: "Denied" }]) {
+    const result = await request(config, "catalog.php", {}, async () => response(JSON.stringify({ ...marker, products: [product] })));
+    assert.equal(result.ok, false, "Never override a denial with catalog data");
+  }
+  for (const payload of [null, {}, [], { products: [] }, { products: [{ id: 679 }] },
+    { success: "unknown", products: [product] }, { status: "error", products: [product] },
+    { products: [{ ...product, stock: -1 }] }]) {
+    await assert.rejects(request(config, "catalog.php", {}, async () => response(JSON.stringify(payload))),
+      (error) => error.code === "VIPSTORE_INVALID_RESPONSE" && Boolean(error.diagnostics.response_shape));
+  }
+  const httpDenied = await request(config, "catalog.php", {}, async () => response(JSON.stringify({ products: [product] }), 403));
+  assert.equal(httpDenied.ok, false, "HTTP failure must remain failure");
+  for (const endpoint of ["claim.php", "reset-key.php"]) {
+    calls = 0;
+    await assert.rejects(request(config, endpoint, {}, async () => {
+      calls++; return response(JSON.stringify({ success: "true", products: [product], codes: ["DO-NOT-ACCEPT"] }));
+    }), { code: "VIPSTORE_INVALID_RESPONSE" });
+    assert.equal(calls, 1, "Catalog compatibility must not weaken or retry POST requests");
+  }
   await assert.rejects(request({ ...config, baseUrl: "https://other.example" }, "catalog.php"), { code: "VIPSTORE_INVALID_BASE_URL" });
   await assert.rejects(request(config, "claim.php", { method: "GET" }), { code: "VIPSTORE_INVALID_REQUEST" });
   const fs = require("node:fs"), vm = require("node:vm");
