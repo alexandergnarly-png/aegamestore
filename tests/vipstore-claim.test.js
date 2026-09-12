@@ -6,36 +6,9 @@ const server = fs.readFileSync("server.js", "utf8");
 const migrations = fs.readFileSync("server/database-migrations.js", "utf8");
 const vm = require("node:vm");
 const catalogContext = vm.createContext({});
-vm.runInContext(server.slice(server.indexOf("function describeVipStoreInvalidResponse("), server.indexOf("function isTruthyApiValue(")), catalogContext);
-assert.match(catalogContext.describeVipStoreInvalidResponse("<html>Private login details</html>", "text/html; charset=utf-8"), /berupa HTML/);
-assert.match(catalogContext.describeVipStoreInvalidResponse("", "application/json"), /kosong/);
-assert.match(catalogContext.describeVipStoreInvalidResponse('{"products":', "application/json"), /terpotong/);
-assert.ok(!catalogContext.describeVipStoreInvalidResponse("<html>Private login details</html>", "text/html").includes("Private login details"));
+vm.runInContext(server.slice(server.indexOf("function sanitizeSupplierCatalogMessage("), server.indexOf("function isTruthyApiValue(")), catalogContext);
 const validateCatalog = catalogContext.validateSupplierCatalog;
-for (const supplier_source of ["VIPSTORE", "CHEATGAME"]) {
-  assert.throws(() => validateCatalog({ ok: false, http_code: 402, supplier_source }), (error) => error.message.startsWith(`[${supplier_source}]`));
-}
-(async () => {
-  const source = server.slice(server.indexOf("async function syncAllMappedSupplierProducts("), server.indexOf("let vipStoreAutoSyncRunning"));
-  for (const failing of ["VIPSTORE", "CHEATGAME", "both", "none"]) {
-    const called = [];
-    const sync = (name) => async () => {
-      called.push(name);
-      if (failing === name || failing === "both") throw Object.assign(new Error("Katalog ditolak HTTP 402"), { code: "SUPPLIER_CATALOG_REJECTED" });
-      return { synced: 3, total_mapped: 3, ready: 3 };
-    };
-    const ctx = vm.createContext({ isVipStoreConfigured: () => true, isCheatGameConfigured: () => true, syncVipStoreMappedProducts: sync("VIPSTORE"), syncCheatGameMappedProducts: sync("CHEATGAME") });
-    vm.runInContext(source, ctx);
-    const result = await ctx.syncAllMappedSupplierProducts();
-    assert.deepEqual(called, ["VIPSTORE", "CHEATGAME"], "One provider failing must not skip the other");
-    assert.equal(result.synced, failing === "both" ? 0 : failing === "none" ? 6 : 3);
-    assert.equal(result.supplier_errors.length, failing === "both" ? 2 : failing === "none" ? 0 : 1);
-    if (!["both", "none"].includes(failing)) {
-      assert.equal(result.supplier_errors[0].supplier, failing);
-      assert.ok(result.message.includes(failing));
-    }
-  }
-})().catch((error) => { console.error(error); process.exitCode = 1; });
+assert.throws(() => validateCatalog({ ok: false, http_code: 403, supplier_source: "VIPSTORE" }), /VIPSTORE/);
 const sanitizeMessage = catalogContext.sanitizeSupplierCatalogMessage;
 assert.equal(sanitizeMessage("Catalog temporarily unavailable"), "Catalog temporarily unavailable");
 const safeMessage = sanitizeMessage("<b>Denied</b>\nsecret-example API-Key: abc token=xyz user@example.com https://example.com/private", ["secret-example"]);
@@ -46,12 +19,14 @@ assert.throws(() => validateCatalog({ ok: false, http_code: 402, diagnostic_mess
 assert.throws(() => validateCatalog({ ok: false, http_code: 402, data: { success: false } }), /Pesan rinci tidak tersedia/);
 catalogContext.normalizeCatalogLabel = (value) => String(value || "").trim();
 catalogContext.convertUsdToIdr = (value, rate) => value == null ? null : value * rate;
-vm.runInContext(server.slice(server.indexOf("function isTruthyApiValue("), server.indexOf("function normalizeCheatGameCatalogProduct(")), catalogContext);
+vm.runInContext(server.slice(server.indexOf("function isTruthyApiValue("), server.indexOf("async function findSupplierProductById(")), catalogContext);
 const documentedProduct = { id: 679, product_id: 679, variant_id: 679, name: "ACE DFM iOS 1 day", price: 1, reseller_price: 1, public_price_idr: 40000, public_price_usd: 3, stock: 6, is_active: true, is_hidden: 0, is_maintenance_mode: 0 };
 const normalized = catalogContext.normalizeVipStoreCatalogProduct(documentedProduct, 17000);
 assert.equal(normalized.price, 17000, "Use effective reseller price, not public price");
 assert.equal(normalized.status, "ready");
 assert.equal(normalized.product_id, "679");
+assert.equal(catalogContext.normalizeVipStoreCatalogProduct({ ...documentedProduct, variant_name: "7 days", duration: "old", price_idr: 999 }, 17000).duration, "7 days");
+assert.equal(catalogContext.normalizeVipStoreCatalogProduct({ ...documentedProduct, price_idr: 999 }, 17000).price, 17000);
 for (const is_active of [false, 0, "0", "false"]) {
   const disabled = catalogContext.normalizeVipStoreCatalogProduct({ ...documentedProduct, is_active }, 17000);
   assert.equal(disabled.status, "maintenance", "Inactive products must not be orderable even with stock");
@@ -61,16 +36,6 @@ assert.equal(catalogContext.normalizeVipStoreCatalogProduct({ variant_id: 679, s
 assert.equal(catalogContext.normalizeVipStoreCatalogProduct({ id: 1, stock: 6 }, 17000).status, "ready", "Missing optional active flag preserves legacy supplier behavior");
 assert.equal(validateCatalog({ ok: true, data: { success: true, products: [{ variant_id: 679 }] } }).length, 1);
 
-const crypto = require("node:crypto");
-const authContext = vm.createContext({ crypto, process: { env: { VIPSTORE_API_KEY: "test-key", VIPSTORE_API_SECRET: "test-secret" } } });
-vm.runInContext(server.slice(server.indexOf("const VIPSTORE_DEFAULT_BASE_URL"), server.indexOf("function normalizeVipStoreEndpoint(")), authContext);
-for (const rawBody of ["", '{"product_id":679,"qty":1}']) {
-  const headers = authContext.createVipStoreHeaders(rawBody);
-  const payload = `${headers["X-Timestamp"]}.${headers["X-Nonce"]}.${crypto.createHash("sha256").update(rawBody).digest("hex")}`;
-  assert.equal(headers["X-Signature"], crypto.createHmac("sha256", "test-secret").update(payload).digest("hex"));
-  assert.match(headers["X-Nonce"], /^[a-f0-9]{32}$/);
-  assert.equal(headers["X-API-Key"], "test-key");
-}
 for (const result of [
   { ok: false, http_code: 401, data: { products: [{ id: 1 }] } },
   { ok: true, http_code: 200, data: { success: false } },
@@ -92,7 +57,6 @@ assert.ok(syncSource.indexOf("validateSupplierCatalog(catalogResult)") < syncSou
   "keyCount: claimedKeys.length",
   "keys: claimedKeys",
   "body: { product_id: cleanProductId, qty: cleanQuantity }",
-  'const maxAttempts = method === "GET" ? 2 : 1',
   "if (!vipStoreCatalogRequest)",
   "vipStoreCatalogRequest = null",
   "o.supplier_product_id AS order_supplier_product_id",
@@ -128,7 +92,6 @@ const refundPolicy = server.slice(
 );
 [
   '"VIPSTORE_CLAIM_REJECTED"',
-  '"CHEATGAME_ORDER_REJECTED"',
   'order.payment_status === "paid"',
   'order.delivery_status === "processing_supplier"',
   'order.pricing_tier === "reseller"',

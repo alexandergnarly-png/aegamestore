@@ -80,16 +80,23 @@ memberi notifikasi; admin tetap wajib memeriksa nominal dan Transaction ID di
 Binance lalu menekan **Konfirmasi Bayar** di halaman Order. Jangan pernah memberi
 bot izin withdrawal atau menyimpan private key/seed phrase di Render.
 
-### Supplier CHEATGAME
+### Supplier VIPStore
 
 Tambahkan ke environment lokal dan Render:
 
 ```text
-CHEATGAME_API_KEY=key_baru_yang_tidak_pernah_dikirim_ke_chat
-CHEATGAME_WEBHOOK_SECRET=secret_webhook_dari_dashboard
-CHEATGAME_CUSTOMER_EMAIL=email_fallback_jika_kontak_buyer_bukan_email
+VIPSTORE_API_BASE_URL=https://vipstore.web.id/backend/api/reseller
+VIPSTORE_API_KEY=isi_di_environment_server
+VIPSTORE_API_SECRET=isi_di_environment_server
+VIPSTORE_USD_IDR_RATE=17566
 ```
 
-Atur Webhook URL ke `https://aegamestore.com/api/webhooks/cheatgame`, aktifkan event
-`order.success`, lalu gunakan **Send Test**. API key yang pernah terkirim melalui chat
-harus di-revoke dan tidak boleh dipakai kembali.
+Kurs di atas hanya contoh, sesuaikan dengan kebijakan toko. Client VIPStore menggunakan
+HMAC-SHA256 sesuai dokumentasi. Pembelian memakai `product_id` dan `qty`;
+POST tidak diulang otomatis ketika hasilnya belum diketahui. Tidak ada webhook supplier.
+
+Jalankan `node scripts/check-vipstore.js` dari Render Shell untuk memeriksa balance dan
+catalog tanpa melakukan pembelian atau mencetak secret. Jika muncul
+`VIPSTORE_SECURITY_CHALLENGE`, kirim hasil diagnosis ke admin VIPStore agar path
+`/backend/api/reseller/*` dapat diakses server dengan autentikasi API tanpa browser challenge.
+Cache admin hanya untuk pencarian, tidak dipakai sebagai bukti sinkronisasi berhasil.

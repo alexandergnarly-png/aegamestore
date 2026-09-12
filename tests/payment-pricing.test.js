@@ -75,7 +75,7 @@ assert.doesNotMatch(script, /window\.snap\.embed\(/);
 assert.match(server, /price_usdt NUMERIC\(12,2\)/);
 assert.match(server, /price_usdt_recommended/);
 assert.match(script, /price_usdt_effective/);
-assert.match(server, /VIPSTORE RATE: endpoint rate tidak tersedia, memakai rate aman/);
+assert.match(server, /getSafeUsdtIdrRate\(configuredRate > 0 \? configuredRate : usdIdrRate\)/);
 assert.doesNotMatch(server, /VIPSTORE_EXCHANGE_RATE_UNAVAILABLE/);
 assert.match(admin, /Harga manual \$\{formatUsdt\(price_usdt\)\} tersimpan/);
 assert.match(admin, /if \(!isEditMode\) \{\s*resetProductForm\(\)/);

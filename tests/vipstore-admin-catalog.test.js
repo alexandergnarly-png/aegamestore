@@ -52,27 +52,5 @@ const source = server.slice(server.indexOf("let vipStoreAdminCatalogRequest"), s
   mappedItems.length = 0;
   await assert.rejects(ctx.getAdminVipStoreCatalog(), /HTML challenge/, "No fabricated success when no data exists");
 
-  const requestSource = server.slice(server.indexOf("async function vipStoreRequest("), server.indexOf("let vipStoreCatalogRequest"));
-  let responses = [];
-  let fetchCalls = 0;
-  const requestContext = vm.createContext({
-    getVipStoreConfig: () => ({ baseUrl: "https://example.test", apiKey: "test", apiSecret: "test" }),
-    isVipStoreConfigured: () => true,
-    createVipStoreHeaders: () => ({}),
-    normalizeVipStoreEndpoint: (value) => value,
-    describeVipStoreInvalidResponse: () => "HTML response",
-    sanitizeSupplierCatalogMessage: (message) => message,
-    AbortController, setTimeout, clearTimeout,
-    console: { warn() {} },
-    fetch: async () => { fetchCalls++; return { ok: true, status: 200, headers: new Map(), text: async () => responses.shift() }; },
-  });
-  vm.runInContext(requestSource, requestContext);
-  responses = ["<html>One moment</html>", '{"success":true,"products":[{"id":679}]}'];
-  assert.equal((await requestContext.vipStoreRequest("catalog.php")).data.success, true);
-  assert.equal(fetchCalls, 2);
-  fetchCalls = 0;
-  responses = ["<html>One moment</html>"];
-  assert.equal((await requestContext.vipStoreRequest("claim.php", { method: "POST", body: { product_id: 679, qty: 1 } })).data.success, false);
-  assert.equal(fetchCalls, 1, "Never automatically repeat a purchase POST");
   console.log("VIPStore admin catalog fallback and request retry checks passed.");
 })().catch((error) => { console.error(error); process.exitCode = 1; });

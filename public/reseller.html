@@ -3019,7 +3019,7 @@
               throw new Error(t("quoteChanged"));
             }
             if (!response.ok)
-              throw new Error(currentLang === "en" ? t("keyFailed") : (data.message || t("keyFailed")));
+              throw new Error(data.message || t("keyFailed"));
             location.assign(resultUrl(data.resultUrl));
           } catch (error) {
             message.classList.add("error");

@@ -31,8 +31,9 @@ const {
   parseMarketUsdIdrRate,
   recommendUsdtPrice,
 } = require("./server/payment-pricing");
-const { normalizeCatalogLabel, verifyCheatGameWebhook } = require("./server/cheatgame-utils");
-const { buildSupplierComparison, convertUsdToIdr, extractIdrRate } = require("./server/supplier-compare-utils");
+const vipStoreClient = require("./server/vipstore-client");
+const { normalizeCatalogLabel } = vipStoreClient;
+const { buildSupplierComparison, convertUsdToIdr } = require("./server/supplier-compare-utils");
 const { BUYER_BADGE_TIERS, getBuyerBadgeCode } = require("./server/buyer-policy");
 const { PostgresRateLimitStore } = require("./server/postgres-rate-limit-store");
 const {
@@ -647,14 +648,6 @@ function normalizeProductDeliveryType(deliveryType) {
     .toLowerCase();
 
   if (
-    value === "cheatgame_api" ||
-    value === "cheatgame" ||
-    value === "cgo_api"
-  ) {
-    return "cheatgame_api";
-  }
-
-  if (
     value === "vipstore_api" ||
     value === "vipstore" ||
     value === "supplier_api" ||
@@ -666,11 +659,11 @@ function normalizeProductDeliveryType(deliveryType) {
   if (value === "manual" || value === "manual_delivery") return "manual";
 
   // Existing AE Game Store auto/local key flow uses local keys table.
-  return "auto";
+  return value === "auto" ? "auto" : "manual";
 }
 
 function isSupplierDeliveryType(deliveryType) {
-  return ["vipstore_api", "cheatgame_api"].includes(
+return ["vipstore_api"].includes(
     normalizeProductDeliveryType(deliveryType),
   );
 }
@@ -880,8 +873,6 @@ async function migrateEncryptedGameKeys() {
   }
 }
 
-const RESELLER_SUPPLIER_SNAPSHOT_MAX_AGE_MS = 10 * 60 * 1000;
-
 function normalizeSupplierProductId(value) {
   const text = String(value || "").trim();
   if (!text) return "";
@@ -892,26 +883,9 @@ function normalizeSupplierProductId(value) {
   return String(numberValue);
 }
 
-function canUseRecentVipStoreSnapshot(product, quantity, now = Date.now()) {
-  const syncedAt = Date.parse(product?.supplier_last_sync || "");
-  const ageMs = Number(now) - syncedAt;
-  const status = String(product?.supplier_status || "").trim().toLowerCase();
-
-  return Boolean(
-    normalizeSupplierProductId(product?.supplier_product_id) &&
-      Number.isFinite(ageMs) &&
-      ageMs >= 0 &&
-      ageMs <= RESELLER_SUPPLIER_SNAPSHOT_MAX_AGE_MS &&
-      Number(product?.supplier_maintenance || 0) !== 1 &&
-      status === "ready" &&
-      Number(product?.supplier_stock || 0) >= getOrderQuantity(quantity),
-  );
-}
-
 function getSupplierSourceFromDelivery(deliveryType) {
   const type = normalizeProductDeliveryType(deliveryType);
   if (type === "vipstore_api") return "vipstore";
-  if (type === "cheatgame_api") return "cheatgame";
   return "";
 }
 
@@ -947,113 +921,9 @@ function maskSecret(value) {
   return `${text.slice(0, 4)}...${text.slice(-4)}`;
 }
 
-function createVipStoreHeaders(rawBody = "") {
-  const config = getVipStoreConfig();
-  const timestamp = Math.floor(Date.now() / 1000).toString();
-  const nonce = crypto.randomBytes(16).toString("hex");
-  const bodyHash = crypto.createHash("sha256").update(rawBody).digest("hex");
-  const payload = `${timestamp}.${nonce}.${bodyHash}`;
-  const signature = crypto
-    .createHmac("sha256", config.apiSecret)
-    .update(payload)
-    .digest("hex");
-
-  return {
-    "Content-Type": "application/json",
-    "X-API-Key": config.apiKey,
-    "X-Timestamp": timestamp,
-    "X-Nonce": nonce,
-    "X-Signature": signature,
-  };
-}
-
-function normalizeVipStoreEndpoint(endpoint) {
-  const cleanEndpoint = String(endpoint || "")
-    .trim()
-    .replace(/^\/+/, "");
-
-  if (!cleanEndpoint) {
-    throw new Error("Endpoint supplier kosong");
-  }
-
-  return cleanEndpoint;
-}
 
 async function vipStoreRequest(endpoint, options = {}) {
-  const config = getVipStoreConfig();
-
-  if (!isVipStoreConfigured()) {
-    const error = new Error(
-      "Supplier API belum dikonfigurasi. Isi kredensial supplier di environment.",
-    );
-    error.code = "VIPSTORE_NOT_CONFIGURED";
-    throw error;
-  }
-
-  const method = String(options.method || "GET").toUpperCase();
-  const body = options.body && method !== "GET" ? options.body : null;
-  const rawBody = method === "GET" ? "" : JSON.stringify(body || {});
-  const url = `${config.baseUrl}/${normalizeVipStoreEndpoint(endpoint)}`;
-  const timeoutMs = Number(options.timeoutMs || 30000);
-  const maxAttempts = method === "GET" ? 2 : 1;
-
-  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-
-    try {
-      const response = await fetch(url, {
-        method,
-        headers: createVipStoreHeaders(rawBody),
-        body: method === "GET" ? undefined : rawBody,
-        signal: controller.signal,
-      });
-
-      const rawResponse = await response.text();
-      let data = null;
-
-      try {
-        data = JSON.parse(rawResponse);
-      } catch (parseErr) {
-        if (method === "GET" && attempt < maxAttempts) {
-          console.warn(`VIPSTORE GET non-JSON, retry: ${endpoint}`);
-          continue;
-        }
-        data = {
-          success: false,
-          message: describeVipStoreInvalidResponse(rawResponse, response.headers.get("content-type")),
-          raw_response: rawResponse,
-        };
-      }
-
-      return {
-        ok: response.ok,
-        http_code: response.status,
-        data,
-        supplier_source: "VIPSTORE",
-        diagnostic_message: endpoint === "catalog.php" && (!response.ok || data?.success === false)
-          ? sanitizeSupplierCatalogMessage(data?.message, [config.apiKey, config.apiSecret])
-          : "",
-      };
-    } catch (err) {
-      const isTimeout = err && err.name === "AbortError";
-      if (isTimeout && attempt < maxAttempts) {
-        console.warn(`VIPSTORE GET timeout, retry ${attempt}/${maxAttempts - 1}: ${endpoint}`);
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        continue;
-      }
-
-      const error = new Error(
-        isTimeout
-          ? "Request supplier timeout"
-          : `Gagal menghubungi supplier: ${err.message}`,
-      );
-      error.code = isTimeout ? "VIPSTORE_TIMEOUT" : "VIPSTORE_REQUEST_FAILED";
-      throw error;
-    } finally {
-      clearTimeout(timeoutId);
-    }
-  }
+  return vipStoreClient.request(getVipStoreConfig(), endpoint, options);
 }
 
 let vipStoreCatalogRequest = null;
@@ -1116,79 +986,7 @@ async function resetVipStoreKey(productId, key) {
   });
 }
 
-const CHEATGAME_API_URL = "https://cheatgame.online/reseller_api.php";
-
-function getCheatGameConfig() {
-  return {
-    apiKey: String(process.env.CHEATGAME_API_KEY || "").trim(),
-    webhookSecret: String(process.env.CHEATGAME_WEBHOOK_SECRET || "").trim(),
-    customerEmail: String(process.env.CHEATGAME_CUSTOMER_EMAIL || "").trim(),
-  };
-}
-
-function isCheatGameConfigured() {
-  return Boolean(getCheatGameConfig().apiKey);
-}
-
-async function cheatGameRequest(action, options = {}) {
-  const config = getCheatGameConfig();
-  if (!config.apiKey) {
-    const error = new Error("CHEATGAME API belum dikonfigurasi di environment.");
-    error.code = "CHEATGAME_NOT_CONFIGURED";
-    throw error;
-  }
-
-  const method = String(options.method || "GET").toUpperCase();
-  const url = new URL(CHEATGAME_API_URL);
-  let rawBody;
-  if (method === "GET") {
-    url.searchParams.set("action", action);
-    for (const [key, value] of Object.entries(options.params || {})) {
-      if (value !== undefined && value !== null && value !== "") url.searchParams.set(key, String(value));
-    }
-  } else {
-    rawBody = JSON.stringify({ action, ...(options.body || {}) });
-  }
-
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), Number(options.timeoutMs || 30000));
-  try {
-    const response = await fetch(url, {
-      method,
-      headers: {
-        "X-API-Key": config.apiKey,
-        ...(method === "GET" ? {} : { "Content-Type": "application/json" }),
-      },
-      body: rawBody,
-      signal: controller.signal,
-    });
-    const text = await response.text();
-    let data;
-    try {
-      data = text ? JSON.parse(text) : {};
-    } catch (_) {
-      data = { success: false, message: "CHEATGAME mengembalikan response non-JSON" };
-    }
-    return {
-      ok: response.ok, http_code: response.status, data, supplier_source: "CHEATGAME",
-      diagnostic_message: !response.ok || data?.success === false
-        ? sanitizeSupplierCatalogMessage(data?.message, [config.apiKey]) : "",
-    };
-  } catch (error) {
-    const wrapped = new Error(error?.name === "AbortError" ? "Request CHEATGAME timeout" : `Gagal menghubungi CHEATGAME: ${error.message}`);
-    wrapped.code = error?.name === "AbortError" ? "CHEATGAME_TIMEOUT" : "CHEATGAME_REQUEST_FAILED";
-    throw wrapped;
-  } finally {
-    clearTimeout(timeoutId);
-  }
-}
-
-function getCheatGameCatalog() {
-  return cheatGameRequest("products");
-}
-
 const ADMIN_CATALOG_CACHE_TTL_MS = 5 * 60 * 1000;
-let cheatGameAdminCatalogRequest = null;
 let vipStoreAdminCatalogRequest = null;
 
 async function getAdminVipStoreCatalog(force = false) {
@@ -1279,103 +1077,11 @@ async function getMappedSupplierCatalog(source) {
   return [...unique.values()];
 }
 
-async function getAdminCheatGameCatalog(force = false) {
-  if (cheatGameAdminCatalogRequest) return cheatGameAdminCatalogRequest;
-  cheatGameAdminCatalogRequest = (async () => {
-    if (!force) {
-      const freshCache = await readSupplierCatalogCache("cheatgame", true);
-      if (freshCache) return { ...freshCache, cached: true, fallback: false, http_code: 200 };
-    }
-
-    try {
-      const result = await getCheatGameCatalog();
-      const products = extractVipStoreCatalogItems(result.data)
-        .map(normalizeCheatGameCatalogProduct)
-        .filter((item) => item.product_id);
-      if (!products.length) {
-        const error = new Error(result.data?.message || "Katalog CHEATGAME sedang tidak tersedia");
-        error.code = "CHEATGAME_EMPTY_CATALOG";
-        throw error;
-      }
-      const updatedAt = await saveSupplierCatalogCache("cheatgame", products);
-      return { items: products, updated_at: updatedAt, cached: false, stale: false, fallback: false, http_code: result.http_code };
-    } catch (error) {
-      const staleCache = await readSupplierCatalogCache("cheatgame", false);
-      if (staleCache) {
-        console.warn("CHEATGAME CATALOG: memakai cache terakhir.", error.message);
-        return { ...staleCache, cached: true, stale: true, fallback: true, http_code: 200 };
-      }
-      const mappedItems = await getMappedSupplierCatalog("cheatgame");
-      if (mappedItems.length) {
-        console.warn("CHEATGAME CATALOG: memakai mapping lokal.", error.message);
-        return { items: mappedItems, updated_at: null, cached: true, stale: true, fallback: true, http_code: 200 };
-      }
-      throw error;
-    }
-  })().finally(() => {
-    cheatGameAdminCatalogRequest = null;
-  });
-  return cheatGameAdminCatalogRequest;
-}
-
-function getCheatGameBalance() {
-  return cheatGameRequest("balance");
-}
-
-function getCheatGameExchangeRate() {
-  return cheatGameRequest("exchange_rate");
-}
-
 async function getVipStoreIdrRate() {
   const configuredRate = Number(process.env.VIPSTORE_USD_IDR_RATE || 0);
-  if (Number.isFinite(configuredRate) && configuredRate > 0) {
-    return getSafeUsdtIdrRate(configuredRate);
-  }
-
-  try {
-    const result = await getCheatGameExchangeRate();
-    const rate = extractIdrRate(result.data);
-    if (result.ok && rate) return getSafeUsdtIdrRate(rate, usdIdrRate);
-  } catch (error) {
-    console.warn("VIPSTORE RATE: endpoint rate tidak tersedia, memakai rate aman.", error.message);
-  }
-
-  return usdIdrRate;
+  return getSafeUsdtIdrRate(configuredRate > 0 ? configuredRate : usdIdrRate);
 }
 
-function getCheatGameOrderStatus(orderId) {
-  return cheatGameRequest("order_status", { params: { order_id: orderId } });
-}
-
-function createCheatGameOrder(order) {
-  const config = getCheatGameConfig();
-  const customerEmail = isValidEmail(order.contact) ? order.contact : config.customerEmail;
-  if (!isValidEmail(customerEmail)) {
-    const error = new Error("CHEATGAME_CUSTOMER_EMAIL wajib diisi jika kontak buyer bukan email.");
-    error.code = "CHEATGAME_CUSTOMER_EMAIL_REQUIRED";
-    throw error;
-  }
-  return cheatGameRequest("order", {
-    method: "POST",
-    body: {
-      external_ref: String(order.id),
-      product_id: Number(order.supplier_product_id),
-      quantity: getOrderQuantity(order.quantity),
-      customer_name: String(order.name || "Customer").slice(0, 60),
-      customer_email: customerEmail,
-    },
-  });
-}
-
-function describeVipStoreInvalidResponse(raw, contentType) {
-  const text = String(raw || "").trim();
-  const type = String(contentType || "").split(";")[0].toLowerCase();
-  if (!text) return "Respons server kosong; bukan data katalog JSON";
-  if (type === "text/html" || /^</.test(text)) {
-    return "Respons server berupa HTML, bukan JSON API. Periksa halaman login, pembatasan akses, atau proxy pada jalur request";
-  }
-  return "Isi respons server bukan JSON valid atau terpotong. Perlu pemeriksaan respons di sisi server";
-}
 
 function sanitizeSupplierCatalogMessage(value, secrets = []) {
   if (typeof value !== "string") return "";
@@ -1397,7 +1103,7 @@ function validateSupplierCatalog(result) {
   const rejected = (value) => value === false || value === 0 || value === "false" || value === "0";
   if (!result?.ok || rejected(payload?.success) || rejected(payload?.ok) || rejected(payload?.status)) {
     const detail = result?.diagnostic_message ? ` Detail respons: ${result.diagnostic_message}.` : " Pesan rinci tidak tersedia; periksa akses API dan status layanan supplier.";
-    const source = ["VIPSTORE", "CHEATGAME"].includes(result?.supplier_source) ? `[${result.supplier_source}] ` : "";
+    const source = ["VIPSTORE"].includes(result?.supplier_source) ? `[${result.supplier_source}] ` : "";
     const error = new Error(`${source}Katalog supplier ditolak (HTTP ${Number(result?.http_code) || 0}).${detail} Stok lama tidak ditimpa.`);
     error.code = "SUPPLIER_CATALOG_REJECTED";
     throw error;
@@ -1513,13 +1219,12 @@ function normalizeVipStoreCatalogProduct(item, usdToIdrRate = null) {
   else if (isMaintenance || rawStatus.includes("maintenance")) status = "maintenance";
   else if (stock <= 0) status = "out_of_stock";
 
-  const priceIdr = parseApiNumber(getFirstDefinedValue(item, ["price_idr", "reseller_price_idr"]), null);
-  const priceUsd = parseApiNumber(getFirstDefinedValue(item, ["price_usd", "price", "reseller_price"]), null);
+  const priceUsd = parseApiNumber(getFirstDefinedValue(item, ["price", "reseller_price"]), null);
 
   return {
     product_id: productId,
     name,
-    price: priceIdr ?? convertUsdToIdr(priceUsd, usdToIdrRate),
+    price: priceUsd === null ? null : convertUsdToIdr(priceUsd, usdToIdrRate),
     price_usd: priceUsd,
     stock,
     status,
@@ -1529,7 +1234,7 @@ function normalizeVipStoreCatalogProduct(item, usdToIdrRate = null) {
       "group", "group_name", "parent", "parent_name",
     ])),
     duration: normalizeCatalogLabel(getFirstDefinedValue(item, [
-      "duration", "variant_name", "custom_name", "variant_label", "variantLabel", "variant", "period", "validity", "plan",
+      "variant_name", "custom_name", "variant_label", "duration",
     ])),
     description: normalizeCatalogLabel(getFirstDefinedValue(item, ["description", "details", "note", "slug"])),
     is_hidden: isHidden,
@@ -1537,15 +1242,6 @@ function normalizeVipStoreCatalogProduct(item, usdToIdrRate = null) {
     maintenance_reason: maintenanceReason,
     custom_link: String(getFirstDefinedValue(item, ["custom_link", "download_link", "downloadLink"]) || "").trim(),
     youtube_link: String(getFirstDefinedValue(item, ["youtube_link", "youtubeLink", "youtube_url"]) || "").trim(),
-  };
-}
-
-function normalizeCheatGameCatalogProduct(item) {
-  const product = normalizeVipStoreCatalogProduct(item);
-  return {
-    ...product,
-    price: parseApiNumber(getFirstDefinedValue(item, ["price_idr", "reseller_price_idr"]), null),
-    price_usd: parseApiNumber(getFirstDefinedValue(item, ["price_usd", "price"]), null),
   };
 }
 
@@ -1596,10 +1292,6 @@ async function findVipStoreProductById(productId) {
   );
 }
 
-function findCheatGameProductById(productId) {
-  return findSupplierProductById(productId, getCheatGameCatalog, normalizeCheatGameCatalogProduct);
-}
-
 async function buildSupplierProductSnapshot(deliveryType, supplierProductId) {
   const cleanDeliveryType = normalizeProductDeliveryType(deliveryType);
   const cleanSupplierProductId = normalizeSupplierProductId(supplierProductId);
@@ -1621,9 +1313,7 @@ async function buildSupplierProductSnapshot(deliveryType, supplierProductId) {
   }
 
   try {
-    const lookup = cleanDeliveryType === "cheatgame_api"
-      ? await findCheatGameProductById(cleanSupplierProductId)
-      : await findVipStoreProductById(cleanSupplierProductId);
+    const lookup = await findVipStoreProductById(cleanSupplierProductId);
 
     if (!lookup.found || !lookup.product) {
       return {
@@ -1646,22 +1336,17 @@ async function buildSupplierProductSnapshot(deliveryType, supplierProductId) {
     };
   } catch (err) {
     console.error("WARN SUPPLIER PRODUCT LOOKUP:", err.message);
-    return {
-      ...baseSnapshot,
-      supplier_status: ["VIPSTORE_NOT_CONFIGURED", "CHEATGAME_NOT_CONFIGURED"].includes(err.code) ? "not_configured" : "lookup_failed",
-      supplier_maintenance_reason: err.message || "Gagal cek produk supplier",
-      supplier_last_sync: new Date().toISOString(),
-    };
+    throw err;
   }
 }
 
 function normalizeOfferSupplierSource(value) {
   const source = String(value || "").trim().toLowerCase();
-  return ["vipstore", "cheatgame"].includes(source) ? source : "";
+  return ["vipstore"].includes(source) ? source : "";
 }
 
 function offerDeliveryType(source) {
-  return source === "cheatgame" ? "cheatgame_api" : "vipstore_api";
+  return source === "vipstore" ? "vipstore_api" : "";
 }
 
 async function upsertProductSupplierOffer(productId, source, supplierProductId) {
@@ -1730,7 +1415,7 @@ async function getProductSupplierComparison(productId) {
             price_idr, stock, status, maintenance_reason, last_sync,
             (supplier_source = $2 AND supplier_product_id = $3) AS is_primary
      FROM product_supplier_offers
-     WHERE product_id = $1
+     WHERE product_id = $1 AND supplier_source = 'vipstore'
      ORDER BY supplier_source ASC`,
     [productId, String(product.supplier_source || ""), String(product.supplier_product_id || "")],
   );
@@ -1740,7 +1425,7 @@ async function getProductSupplierComparison(productId) {
 async function syncProductSupplierOffers(productId) {
   const result = await query(
     `SELECT supplier_source, supplier_product_id
-     FROM product_supplier_offers WHERE product_id = $1`,
+     FROM product_supplier_offers WHERE product_id = $1 AND supplier_source = 'vipstore'`,
     [productId],
   );
   await Promise.all(result.rows.map((offer) => (
@@ -1877,98 +1562,8 @@ function extractVipStoreBalanceValue(payload) {
 }
 
 function extractVipStoreClaimKeys(payload) {
-  const keys = [];
-  const seen = new Set();
-
-  function pushKey(value) {
-    const text = String(value || "").trim();
-    if (!text) return;
-    if (text.length < 4) return;
-
-    const blocked = [
-      "success",
-      "true",
-      "false",
-      "ready",
-      "maintenance",
-      "manual",
-      "vipstore",
-    ];
-
-    if (blocked.includes(text.toLowerCase())) return;
-    if (seen.has(text)) return;
-
-    seen.add(text);
-    keys.push(text);
-  }
-
-  function collect(value, forceString = false) {
-    if (value === undefined || value === null) return;
-
-    if (typeof value === "string" || typeof value === "number") {
-      if (forceString) pushKey(value);
-      return;
-    }
-
-    if (Array.isArray(value)) {
-      value.forEach((entry) => collect(entry, forceString));
-      return;
-    }
-
-    if (typeof value !== "object") return;
-
-    for (const [rawKey, entryValue] of Object.entries(value)) {
-      const key = String(rawKey || "").toLowerCase();
-
-      const isDirectKeyField = [
-        "key",
-        "keys",
-        "code",
-        "codes",
-        "license",
-        "licenses",
-        "license_key",
-        "licensekey",
-        "serial",
-        "pin",
-        "voucher",
-        "game_key",
-        "gamekey",
-        "activation_code",
-        "activationcode",
-        "generated_key",
-        "generatedkey",
-        "download_link",
-        "download_url",
-      ].includes(key);
-
-      const isLikelyContainer = [
-        "data",
-        "result",
-        "results",
-        "item",
-        "items",
-        "product",
-        "products",
-        "claimed",
-        "claim",
-        "generated",
-        "orders",
-      ].includes(key);
-
-      if (isDirectKeyField) {
-        collect(entryValue, true);
-      } else if (isLikelyContainer) {
-        collect(entryValue, forceString || key === "data" || key === "result");
-      } else if (entryValue && typeof entryValue === "object") {
-        collect(entryValue, forceString);
-      }
-    }
-  }
-
-  collect(payload, false);
-
-  return keys;
+  if (!Array.isArray(payload?.codes)) return [];
+  return [...new Set(payload.codes.filter((value) => typeof value === "string" && value.trim()).map((value) => value.trim()))];
 }
 
 async function claimVipStoreKeyForOrder(order, options = {}) {
@@ -2034,11 +1629,17 @@ async function claimVipStoreKeyForOrder(order, options = {}) {
         });
 
         const supplierError = new Error(message);
-        supplierError.code = "VIPSTORE_CLAIM_REJECTED";
+        supplierError.code = claimData.success === false && [400, 401, 403, 404, 405, 409, 422].includes(claimResult.http_code)
+          ? "VIPSTORE_CLAIM_REJECTED" : "VIPSTORE_CLAIM_UNCERTAIN";
         supplierError.supplierHttpCode = Number(claimResult.http_code || 0) || null;
         throw supplierError;
       }
 
+      if (claimData.success !== true || String(claimData.product_id) !== supplierProductId || claimData.qty !== 1 || !Array.isArray(claimData.codes) || claimData.codes.length !== 1 || typeof claimData.codes[0] !== "string" || !claimData.codes[0].trim()) {
+        const error = new Error("Respons claim VIPStore tidak sesuai product_id/qty/codes. Periksa riwayat supplier sebelum mencoba ulang.");
+        error.code = "VIPSTORE_CLAIM_UNCERTAIN";
+        throw error;
+      }
       const responseKeys = extractVipStoreClaimKeys(claimData).filter(
         (key) => !seenKeys.has(key),
       );
@@ -2100,7 +1701,11 @@ async function claimVipStoreKeyForOrder(order, options = {}) {
       err &&
       (err.code === "VIPSTORE_NOT_CONFIGURED" ||
         err.code === "VIPSTORE_TIMEOUT" ||
-        err.code === "VIPSTORE_REQUEST_FAILED")
+        err.code === "VIPSTORE_REQUEST_FAILED" ||
+        err.code === "VIPSTORE_INVALID_RESPONSE" ||
+        err.code === "VIPSTORE_SECURITY_CHALLENGE" ||
+        err.code === "VIPSTORE_REDIRECT" ||
+        err.code === "VIPSTORE_CLAIM_UNCERTAIN")
     ) {
       await logVipStoreClaimAttempt({
         orderId,
@@ -2117,101 +1722,11 @@ async function claimVipStoreKeyForOrder(order, options = {}) {
   }
 }
 
-function extractCheatGameOrderId(payload) {
-  const data = payload?.data && typeof payload.data === "object" ? payload.data : payload;
-  return String(
-    getFirstDefinedValue(data, ["order_id", "reseller_order_id", "id"])
-      || getFirstDefinedValue(data?.order, ["order_id", "id"])
-      || "",
-  ).trim();
-}
-
-function extractCheatGameExternalRef(payload) {
-  const data = payload?.data && typeof payload.data === "object" ? payload.data : payload;
-  return String(
-    getFirstDefinedValue(data, ["external_ref", "external_reference", "reference"])
-      || getFirstDefinedValue(data?.order, ["external_ref", "external_reference", "reference"])
-      || "",
-  ).trim();
-}
-
-async function fulfillCheatGameOrder(order, source = "auto", payload = null) {
-  const quantity = getOrderQuantity(order.quantity);
-  let supplierOrderId = String(order.supplier_order_id || "").trim();
-  if (String(order.delivery_status || "").toLowerCase() === "delivered") {
-    return { pending: false, already_delivered: true, supplier_order_id: supplierOrderId, keys: [] };
-  }
-  let result;
-
-  if (payload) {
-    result = { ok: true, http_code: 200, data: payload };
-  } else if (supplierOrderId) {
-    result = await getCheatGameOrderStatus(supplierOrderId);
-  } else {
-    result = await createCheatGameOrder(order);
-  }
-
-  if (!result.ok || result.data?.success === false) {
-    const error = new Error(result.data?.message || result.data?.error || `Order CHEATGAME gagal. HTTP ${result.http_code || "-"}`);
-    if (!supplierOrderId && result.data?.success === false) {
-      error.code = "CHEATGAME_ORDER_REJECTED";
-    }
-    throw error;
-  }
-
-  supplierOrderId = supplierOrderId || extractCheatGameOrderId(result.data);
-  if (supplierOrderId) {
-    await query("UPDATE orders SET supplier_order_id = $1 WHERE id = $2", [supplierOrderId, order.id]);
-  }
-
-  let deliveryPayload = result.data;
-  let keys = extractVipStoreClaimKeys(deliveryPayload);
-  if (keys.length < quantity && supplierOrderId && !payload) {
-    const statusResult = await getCheatGameOrderStatus(supplierOrderId);
-    if (statusResult.ok && statusResult.data?.success !== false) {
-      deliveryPayload = statusResult.data;
-      keys = extractVipStoreClaimKeys(deliveryPayload);
-    }
-  }
-
-  if (keys.length < quantity) {
-    await query(
-      "UPDATE orders SET delivery_status = 'processing_supplier', admin_note = $1 WHERE id = $2",
-      [`CHEATGAME order ${supplierOrderId || order.id} sedang diproses (${source}).`, order.id],
-    );
-    return { pending: true, supplier_order_id: supplierOrderId, keys: [] };
-  }
-
-  const deliveredKeys = keys.slice(0, quantity);
-  await persistOrderKeys(db, { orderId: order.id, keys: deliveredKeys, source: "cheatgame" });
-  const deliveredAt = new Date().toISOString();
-  await query(
-    `UPDATE orders
-     SET delivery_status = 'delivered', gameKey = $1, delivered_at = $2,
-         supplier_order_id = COALESCE(NULLIF($3, ''), supplier_order_id), admin_note = $4
-     WHERE id = $5 AND delivery_status IN ('processing_supplier', 'problem')`,
-    [
-      encryptGameKey(deliveredKeys.join("\n")),
-      deliveredAt,
-      supplierOrderId,
-      `CHEATGAME delivery success (${source}).`,
-      order.id,
-    ],
-  );
-  await query(
-    "UPDATE products SET supplier_stock = GREATEST(COALESCE(supplier_stock, 0) - $1, 0), supplier_last_sync = $2 WHERE id = $3",
-    [quantity, deliveredAt, order.product_id],
-  );
-  return { pending: false, supplier_order_id: supplierOrderId, keys: deliveredKeys };
-}
-
-
 async function syncSupplierMappedProducts(deliveryType, options = {}) {
   const cleanDeliveryType = normalizeProductDeliveryType(deliveryType);
   const supplierSource = getSupplierSourceFromDelivery(cleanDeliveryType);
-  const getCatalog = cleanDeliveryType === "cheatgame_api"
-    ? getCheatGameCatalog
-    : getVipStoreCatalog;
+  if (cleanDeliveryType !== "vipstore_api") throw new Error("Produk ini bukan produk VIPStore.");
+  const getCatalog = getVipStoreCatalog;
   const rawProductIds = Array.isArray(options.productIds)
     ? options.productIds
     : options.productId
@@ -2265,9 +1780,7 @@ async function syncSupplierMappedProducts(deliveryType, options = {}) {
   }
 
   const vipStoreIdrRate = cleanDeliveryType === "vipstore_api" ? await getVipStoreIdrRate() : null;
-  const normalizeCatalogProduct = cleanDeliveryType === "cheatgame_api"
-    ? normalizeCheatGameCatalogProduct
-    : (item) => normalizeVipStoreCatalogProduct(item, vipStoreIdrRate);
+  const normalizeCatalogProduct = (item) => normalizeVipStoreCatalogProduct(item, vipStoreIdrRate);
   const catalogResult = await getCatalog();
   const rawCatalogItems = validateSupplierCatalog(catalogResult);
   const normalizedCatalog = rawCatalogItems
@@ -2381,42 +1894,8 @@ function syncVipStoreMappedProducts(options = {}) {
   return syncSupplierMappedProducts("vipstore_api", options);
 }
 
-function syncCheatGameMappedProducts(options = {}) {
-  return syncSupplierMappedProducts("cheatgame_api", options);
-}
-
 async function syncAllMappedSupplierProducts(options = {}) {
-  const productId = Number(options.productId || 0);
-  if (productId > 0) {
-    const result = await query("SELECT delivery_type FROM products WHERE id = $1 LIMIT 1", [productId]);
-    const type = normalizeProductDeliveryType(result.rows[0]?.delivery_type);
-    return syncSupplierMappedProducts(type, options);
-  }
-  const results = [];
-  const supplierErrors = [];
-  for (const [source, configured, sync] of [
-    ["VIPSTORE", isVipStoreConfigured(), syncVipStoreMappedProducts],
-    ["CHEATGAME", isCheatGameConfigured(), syncCheatGameMappedProducts],
-  ]) {
-    if (!configured) continue;
-    try {
-      results.push(await sync(options));
-    } catch (error) {
-      supplierErrors.push({ supplier: source, code: error.code || "SUPPLIER_SYNC_ERROR", message: error.message });
-    }
-  }
-  const summary = results.reduce((total, item) => {
-    for (const key of ["synced", "total_mapped", "ready", "out_of_stock", "maintenance", "hidden", "not_found", "failed"]) {
-      total[key] += Number(item[key] || 0);
-    }
-    return total;
-  }, { synced: 0, total_mapped: 0, ready: 0, out_of_stock: 0, maintenance: 0, hidden: 0, not_found: 0, failed: 0 });
-  summary.message = `Sync supplier selesai: ${summary.synced}/${summary.total_mapped} produk diproses.`;
-  summary.supplier_errors = supplierErrors;
-  if (supplierErrors.length) {
-    summary.message = `Sinkron belum lengkap. ${summary.synced} produk diproses. ` + supplierErrors.map((error) => `${error.supplier}: ${error.message}`).join(" | ");
-  }
-  return summary;
+  return syncVipStoreMappedProducts(options);
 }
 
 let vipStoreAutoSyncRunning = false;
@@ -2424,7 +1903,7 @@ let vipStoreStartupTimer = null;
 let vipStoreIntervalTimer = null;
 
 async function runVipStoreAutoSync(reason = "interval") {
-  if ((!isVipStoreConfigured() && !isCheatGameConfigured()) || vipStoreAutoSyncRunning) return;
+  if (!isVipStoreConfigured() || vipStoreAutoSyncRunning) return;
 
   vipStoreAutoSyncRunning = true;
   try {
@@ -3189,9 +2668,6 @@ const CONFIRMED_PRE_DELIVERY_SUPPLIER_FAILURES = new Set([
   "VIPSTORE_NOT_CONFIGURED",
   "VIPSTORE_PRODUCT_NOT_MAPPED",
   "VIPSTORE_CLAIM_REJECTED",
-  "CHEATGAME_NOT_CONFIGURED",
-  "CHEATGAME_CUSTOMER_EMAIL_REQUIRED",
-  "CHEATGAME_ORDER_REJECTED",
 ]);
 
 async function refundConfirmedResellerSupplierFailure(orderId, error) {
@@ -3297,10 +2773,7 @@ async function settleWalletVipOrder(orderId) {
     );
     const order = result.rows[0];
     if (!order || order.delivery_status !== "processing_supplier") return;
-    if (String(order.supplier_source || "") === "cheatgame") {
-      await fulfillCheatGameOrder(order, "ae_credit");
-      return;
-    }
+    if (normalizeProductDeliveryType(order.delivery_type) !== "vipstore_api") throw new Error("Supplier order lama sudah dinonaktifkan; perlu penyelesaian manual.");
     const claim = await claimVipStoreKeyForOrder(order, { source: "ae_credit" });
     const deliveredAt = new Date().toISOString();
     await persistOrderKeys(db, { orderId, keys: claim.keys, source: "vipstore" });
@@ -4386,9 +3859,6 @@ app.use((req, res, next) => {
 
 app.use(express.json({
   limit: "50kb",
-  verify: (req, _res, buffer) => {
-    if (req.originalUrl === "/api/webhooks/cheatgame") req.rawBody = buffer.toString("utf8");
-  },
 }));
 app.use(cookieParser());
 
@@ -4533,73 +4003,6 @@ app.get("/health", async (req, res) => {
   }
 });
 
-app.post("/api/webhooks/cheatgame", webhookLimiter, async (req, res) => {
-  const config = getCheatGameConfig();
-  const eventType = String(req.headers["x-cgo-event"] || "").trim();
-  const eventId = String(req.headers["x-cgo-event-id"] || "").trim();
-  const timestamp = String(req.headers["x-cgo-timestamp"] || "").trim();
-  const signature = String(req.headers["x-cgo-signature"] || "").trim();
-
-  if (!config.webhookSecret) return res.status(503).json({ ok: false, message: "Webhook belum dikonfigurasi" });
-  if (!["order.success", "webhook.test"].includes(eventType) || !verifyCheatGameWebhook({
-    timestamp,
-    eventId,
-    rawBody: req.rawBody,
-    signature,
-    secret: config.webhookSecret,
-  })) {
-    return res.status(403).json({ ok: false, message: "Invalid webhook signature" });
-  }
-  if (eventType === "webhook.test") return res.json({ ok: true, test: true });
-
-  try {
-    const inserted = await query(
-      `INSERT INTO cheatgame_webhook_events (event_id, event_type, created_at)
-       VALUES ($1, $2, $3) ON CONFLICT (event_id) DO NOTHING RETURNING event_id`,
-      [eventId, eventType, new Date().toISOString()],
-    );
-    if (!inserted.rows.length) return res.json({ ok: true, duplicate: true });
-
-    const supplierOrderId = extractCheatGameOrderId(req.body);
-    const externalRef = extractCheatGameExternalRef(req.body);
-    const orderResult = await query(
-      `SELECT o.*, p.supplier_product_id, p.supplier_source, p.delivery_type
-       FROM orders o LEFT JOIN products p ON p.id = o.product_id
-       WHERE ($1 <> '' AND o.id = $1) OR ($2 <> '' AND o.supplier_order_id = $2)
-       ORDER BY CASE WHEN o.id = $1 THEN 0 ELSE 1 END LIMIT 1`,
-      [externalRef, supplierOrderId],
-    );
-    const order = orderResult.rows[0];
-    if (!order) {
-      await query(
-        "UPDATE cheatgame_webhook_events SET supplier_order_id = $1, processed_at = $2 WHERE event_id = $3",
-        [supplierOrderId || null, new Date().toISOString(), eventId],
-      );
-      return res.json({ ok: true, ignored: true });
-    }
-    if (String(order.supplier_source || "") !== "cheatgame") throw new Error("Order bukan milik supplier CHEATGAME");
-
-    order.supplier_order_id = order.supplier_order_id || supplierOrderId;
-    let delivery = await fulfillCheatGameOrder(order, "webhook", req.body);
-    if (delivery.pending && order.supplier_order_id) {
-      delivery = await fulfillCheatGameOrder(order, "webhook_status");
-    }
-    if (delivery.pending) throw new Error("Webhook success belum mengandung key atau download link");
-
-    await query(
-      `UPDATE cheatgame_webhook_events
-       SET supplier_order_id = $1, local_order_id = $2, processed_at = $3
-       WHERE event_id = $4`,
-      [delivery.supplier_order_id || supplierOrderId || null, order.id, new Date().toISOString(), eventId],
-    );
-    return res.json({ ok: true });
-  } catch (error) {
-    await query("DELETE FROM cheatgame_webhook_events WHERE event_id = $1", [eventId]).catch(() => {});
-    console.error("CHEATGAME WEBHOOK ERROR:", error.message);
-    return res.status(500).json({ ok: false, message: "Webhook processing failed" });
-  }
-});
-
 // Apply global limiter after static assets so CSS/JS/images do not consume API quota.
 app.use(globalLimiter);
 app.get("/", (req, res) => {
@@ -4691,7 +4094,7 @@ app.get("/api/reseller", async (req, res) => {
                COALESCE(p.play_status, 'safe') AS play_status,
                CASE
                  WHEN LOWER(COALESCE(p.delivery_type, 'auto')) = 'manual' THEN 1
-                 WHEN LOWER(COALESCE(p.delivery_type, 'auto')) IN ('vipstore_api', 'cheatgame_api') THEN
+                 WHEN LOWER(COALESCE(p.delivery_type, 'auto')) IN ('vipstore_api') THEN
                    CASE WHEN COALESCE(p.supplier_maintenance, 0) = 1 THEN 0
                         ELSE GREATEST(COALESCE(p.supplier_stock, 0), 0) END
                  ELSE (SELECT COUNT(*)::int FROM keys k WHERE k.product_id = p.id AND k.used = 0
@@ -4700,7 +4103,7 @@ app.get("/api/reseller", async (req, res) => {
         FROM products p
         WHERE p.active = 1
           AND COALESCE(p.play_status, 'safe') <> 'maintenance'
-          AND LOWER(COALESCE(p.delivery_type, '')) IN ('vipstore_api', 'cheatgame_api')
+          AND LOWER(COALESCE(p.delivery_type, '')) IN ('vipstore_api')
           AND COALESCE(p.supplier_product_id, '') <> ''
           AND COALESCE(p.supplier_price, 0) > 0
         ORDER BY p.game ASC, p.price ASC, p.id ASC
@@ -4771,7 +4174,7 @@ app.get("/api/reseller/preview", async (req, res) => {
        WHERE p.id = $2
          AND p.active = 1
          AND u.reseller_status = 'approved'
-         AND LOWER(COALESCE(p.delivery_type, '')) IN ('vipstore_api', 'cheatgame_api')
+         AND LOWER(COALESCE(p.delivery_type, '')) IN ('vipstore_api')
          AND COALESCE(p.supplier_product_id, '') <> ''
          AND COALESCE(p.supplier_price, 0) > 0
        LIMIT 1`,
@@ -5236,69 +4639,6 @@ app.get("/api/admin/vipstore/balance", requireAdminAuth, async (req, res) => {
   }
 });
 
-app.get("/api/admin/cheatgame/status", requireAdminAuth, async (req, res) => {
-  return res.json({
-    configured: isCheatGameConfigured(),
-    apiKey: maskSecret(getCheatGameConfig().apiKey),
-    webhookSecretConfigured: Boolean(getCheatGameConfig().webhookSecret),
-    webhookUrl: `${getAppBaseUrl(req)}/api/webhooks/cheatgame`,
-  });
-});
-
-app.get("/api/admin/cheatgame/catalog-normalized", requireAdminAuth, async (req, res) => {
-  try {
-    const limit = Math.min(Math.max(Number(req.query.limit || 500), 1), 800);
-    const result = await getAdminCheatGameCatalog(req.query.refresh === "1");
-    const products = result.items.slice(0, limit);
-    return res.json({
-      ok: true,
-      http_code: result.http_code,
-      total_detected_items: result.items.length,
-      total_returned_items: products.length,
-      items: products,
-      cached: result.cached,
-      stale: result.stale,
-      fallback: result.fallback,
-      cached_at: result.updated_at,
-    });
-  } catch (err) {
-    console.error("ERROR CHEATGAME NORMALIZED CATALOG:", err);
-    const statusCode = err.code === "CHEATGAME_NOT_CONFIGURED" ? 503 : 502;
-    return res.status(statusCode).json({ ok: false, code: err.code || "CHEATGAME_ERROR", message: err.message, items: [] });
-  }
-});
-
-app.get("/api/admin/cheatgame/product/:productId", requireAdminAuth, async (req, res) => {
-  try {
-    const lookup = await findCheatGameProductById(req.params.productId);
-    if (!lookup.found || !lookup.product) {
-      return res.status(404).json({ ok: false, found: false, message: "Produk CHEATGAME tidak ditemukan." });
-    }
-    return res.json({ ok: true, found: true, product: lookup.product });
-  } catch (err) {
-    const statusCode = err.code === "CHEATGAME_NOT_CONFIGURED" ? 503 : 502;
-    return res.status(statusCode).json({ ok: false, found: false, code: err.code || "CHEATGAME_ERROR", message: err.message });
-  }
-});
-
-app.get("/api/admin/cheatgame/balance", requireAdminAuth, async (req, res) => {
-  try {
-    const result = await getCheatGameBalance();
-    return res.status(result.ok ? 200 : 502).json({ ok: result.ok, data: result.data });
-  } catch (err) {
-    return res.status(err.code === "CHEATGAME_NOT_CONFIGURED" ? 503 : 502).json({ ok: false, message: err.message });
-  }
-});
-
-app.get("/api/admin/cheatgame/exchange-rate", requireAdminAuth, async (req, res) => {
-  try {
-    const result = await getCheatGameExchangeRate();
-    return res.status(result.ok ? 200 : 502).json({ ok: result.ok, data: result.data });
-  } catch (err) {
-    return res.status(err.code === "CHEATGAME_NOT_CONFIGURED" ? 503 : 502).json({ ok: false, message: err.message });
-  }
-});
-
 app.get("/api/admin/products/:productId/supplier-offers", requireAdminAuth, async (req, res) => {
   const productId = Number(req.params.productId);
   if (!Number.isInteger(productId) || productId <= 0) return res.status(400).json({ message: "ID produk tidak valid" });
@@ -5693,15 +5033,6 @@ app.post(
       await client.query("COMMIT");
 
       try {
-        if (deliveryType === "cheatgame_api") {
-          const delivery = await fulfillCheatGameOrder(order, "admin_retry");
-          return res.json({
-            ok: true,
-            message: delivery.pending
-              ? "Retry diterima. CHEATGAME masih memproses order."
-              : "Retry berhasil. Key CHEATGAME sudah dikirim.",
-          });
-        }
         const claim = await claimVipStoreKeyForOrder(order, {
           source: "admin_retry",
         });
@@ -6718,27 +6049,10 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
         }
       } catch (error) {
         console.warn("RESELLER SUPPLIER CHECK FAILED:", error.message);
-        const canUseSnapshot =
-          productDeliveryType === "vipstore_api" &&
-          [
-            "SUPPLIER_CATALOG_REJECTED",
-            "SUPPLIER_CATALOG_INVALID",
-            "VIPSTORE_TIMEOUT",
-            "VIPSTORE_REQUEST_FAILED",
-          ].includes(String(error?.code || "")) &&
-          canUseRecentVipStoreSnapshot(productRow, cleanQuantity);
-
-        if (!canUseSnapshot) {
-          return res.status(503).json({
-            code: "RESELLER_SUPPLIER_CHECK_FAILED",
-            message: "Harga supplier terbaru belum bisa diverifikasi. Coba lagi sebentar.",
-          });
-        }
-
-        console.warn(
-          "RESELLER VIPSTORE CHECK USING RECENT SNAPSHOT:",
-          productRow.supplier_last_sync,
-        );
+        return res.status(503).json({
+          code: "RESELLER_SUPPLIER_CHECK_FAILED",
+          message: "Harga dan stok VIPStore belum dapat diverifikasi. Saldo belum dipotong. Coba lagi setelah koneksi supplier pulih.",
+        });
       }
     }
 
@@ -7395,23 +6709,6 @@ app.post("/midtrans-notification", webhookLimiter, async (req, res) => {
 
         const orderDeliveryType = normalizeProductDeliveryType(order.delivery_type);
 
-        if (orderDeliveryType === "cheatgame_api") {
-          await client.query(
-            `UPDATE orders SET payment_status = 'paid', delivery_status = 'processing_supplier', admin_note = $1 WHERE id = $2`,
-            ["Order CHEATGAME sedang diproses otomatis", orderId],
-          );
-          await client.query("COMMIT");
-          try {
-            await fulfillCheatGameOrder(order, "midtrans_webhook");
-          } catch (error) {
-            await query(
-              "UPDATE orders SET delivery_status = 'problem', admin_note = $1 WHERE id = $2 AND delivery_status = 'processing_supplier'",
-              [`CHEATGAME order failed: ${String(error.message || "Unknown error").slice(0, 500)}`, orderId],
-            );
-          }
-          return res.status(200).send("OK");
-        }
-
         if (orderDeliveryType === "vipstore_api") {
           await client.query(
             `UPDATE orders
@@ -7828,28 +7125,6 @@ app.post(
       }
 
       const orderDeliveryType = normalizeProductDeliveryType(order.delivery_type);
-
-      if (orderDeliveryType === "cheatgame_api") {
-        await client.query(
-          `UPDATE orders SET payment_status = 'paid', delivery_status = 'processing_supplier', admin_note = $1 WHERE id = $2`,
-          ["Order CHEATGAME diproses dari konfirmasi admin", orderId],
-        );
-        await client.query("COMMIT");
-        try {
-          const delivery = await fulfillCheatGameOrder(order, "admin_confirm");
-          return res.json({
-            message: delivery.pending
-              ? "Pembayaran dikonfirmasi. CHEATGAME sedang memproses order."
-              : "Pembayaran dikonfirmasi dan key CHEATGAME berhasil dikirim.",
-          });
-        } catch (error) {
-          await query(
-            "UPDATE orders SET delivery_status = 'problem', admin_note = $1 WHERE id = $2 AND delivery_status = 'processing_supplier'",
-            [`CHEATGAME order failed: ${String(error.message || "Unknown error").slice(0, 500)}`, orderId],
-          );
-          return res.status(502).json({ message: "Pembayaran sudah dikonfirmasi, tetapi order CHEATGAME gagal." });
-        }
-      }
 
       if (orderDeliveryType === "vipstore_api") {
         await client.query(
@@ -9621,7 +8896,7 @@ app.get("/public-products", async (req, res) => {
     COALESCE(p.play_status, 'safe') AS play_status,
     CASE
       WHEN LOWER(COALESCE(p.delivery_type, 'auto')) = 'manual' THEN 9999
-      WHEN LOWER(COALESCE(p.delivery_type, 'auto')) IN ('vipstore_api', 'cheatgame_api') THEN
+      WHEN LOWER(COALESCE(p.delivery_type, 'auto')) IN ('vipstore_api') THEN
         CASE
           WHEN COALESCE(p.supplier_maintenance, 0) = 1 THEN 0
           WHEN LOWER(COALESCE(p.supplier_status, '')) IN (
@@ -9688,7 +8963,7 @@ app.get("/auto-promo", async (req, res) => {
         COALESCE(p.play_status, 'safe') AS play_status,
         CASE
           WHEN LOWER(COALESCE(p.delivery_type, 'auto')) = 'manual' THEN 9999
-          WHEN LOWER(COALESCE(p.delivery_type, 'auto')) IN ('vipstore_api', 'cheatgame_api') THEN CASE
+          WHEN LOWER(COALESCE(p.delivery_type, 'auto')) IN ('vipstore_api') THEN CASE
             WHEN COALESCE(p.supplier_maintenance, 0) = 1 THEN 0
             WHEN LOWER(COALESCE(p.supplier_status, '')) IN ('maintenance', 'hidden', 'not_found', 'lookup_failed', 'not_configured', 'mapped_pending') THEN 0
             ELSE GREATEST(COALESCE(p.supplier_stock, 0), 0)
@@ -9812,7 +9087,7 @@ app.post("/api/ai-assistant", aiAssistantLimiter, async (req, res) => {
         COALESCE(p.play_status, 'safe') AS play_status,
         CASE
           WHEN LOWER(COALESCE(p.delivery_type, 'auto')) = 'manual' THEN 1
-          WHEN LOWER(COALESCE(p.delivery_type, 'auto')) IN ('vipstore_api', 'cheatgame_api') THEN CASE
+          WHEN LOWER(COALESCE(p.delivery_type, 'auto')) IN ('vipstore_api') THEN CASE
             WHEN COALESCE(p.supplier_maintenance, 0) = 1 THEN 0
             WHEN LOWER(COALESCE(p.supplier_status, '')) IN ('maintenance', 'hidden', 'not_found', 'lookup_failed', 'not_configured', 'mapped_pending') THEN 0
             ELSE GREATEST(COALESCE(p.supplier_stock, 0), 0)

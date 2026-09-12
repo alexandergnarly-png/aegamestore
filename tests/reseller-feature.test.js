@@ -1,6 +1,5 @@
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
-const vm = require("node:vm");
 
 const server = fs.readFileSync("server.js", "utf8");
 const page = fs.readFileSync("public/reseller.html", "utf8");
@@ -44,7 +43,7 @@ const inlineScripts = (html) =>
   "getResellerFinancials(productRow, cleanQuantity, resellerRate)",
   "SET pricing_tier = $2, supplier_cost = $3, gross_profit = $4",
   "bukan produk API",
-  "LOWER(COALESCE(p.delivery_type, '')) IN ('vipstore_api', 'cheatgame_api')",
+  "LOWER(COALESCE(p.delivery_type, '')) IN ('vipstore_api')",
   "calculateResellerPrice(supplierUnitCost, exchangeRate)",
 ].forEach((marker) =>
   assert.ok(
@@ -150,32 +149,6 @@ assert.ok(
 );
 assert.match(resellerCheckoutRoute, /RESELLER_QUOTE_REQUIRED/);
 assert.match(resellerCheckoutRoute, /isResellerQuoteAccepted/);
-assert.match(resellerCheckoutRoute, /canUseRecentVipStoreSnapshot\(productRow, cleanQuantity\)/);
-
-const snapshotContext = vm.createContext({
-  Date,
-  getOrderQuantity: (value) => Number(value) || 1,
-});
-vm.runInContext(
-  server.slice(
-    server.indexOf("const RESELLER_SUPPLIER_SNAPSHOT_MAX_AGE_MS"),
-    server.indexOf("function getSupplierSourceFromDelivery"),
-  ),
-  snapshotContext,
-);
-const snapshotNow = Date.parse("2026-09-12T01:00:00.000Z");
-const freshSnapshot = {
-  supplier_product_id: "679",
-  supplier_last_sync: "2026-09-12T00:55:00.000Z",
-  supplier_status: "ready",
-  supplier_maintenance: 0,
-  supplier_stock: 2,
-};
-assert.equal(snapshotContext.canUseRecentVipStoreSnapshot(freshSnapshot, 2, snapshotNow), true);
-assert.equal(snapshotContext.canUseRecentVipStoreSnapshot({ ...freshSnapshot, supplier_last_sync: "2026-09-12T00:49:59.000Z" }, 1, snapshotNow), false);
-assert.equal(snapshotContext.canUseRecentVipStoreSnapshot({ ...freshSnapshot, supplier_stock: 1 }, 2, snapshotNow), false);
-assert.equal(snapshotContext.canUseRecentVipStoreSnapshot({ ...freshSnapshot, supplier_status: "maintenance" }, 1, snapshotNow), false);
-
 const pageIds = [...page.matchAll(/\bid=["']([^"']+)["']/g)].map(
   ([, id]) => id,
 );

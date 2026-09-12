@@ -26,14 +26,11 @@ async function ensureBulkOrderSchema(db) {
     `CREATE INDEX IF NOT EXISTS idx_orders_supplier_order_id
      ON orders(supplier_order_id)
      WHERE supplier_order_id IS NOT NULL`,
-    `CREATE TABLE IF NOT EXISTS cheatgame_webhook_events (
-      event_id TEXT PRIMARY KEY,
-      event_type TEXT NOT NULL,
-      supplier_order_id TEXT,
-      local_order_id TEXT,
-      created_at TEXT NOT NULL,
-      processed_at TEXT
-    )`,
+    // Retire old provider mappings without deleting financial/order history.
+    `ALTER TABLE products ADD COLUMN IF NOT EXISTS delivery_type TEXT DEFAULT 'auto'`,
+    `ALTER TABLE products ADD COLUMN IF NOT EXISTS supplier_status TEXT`,
+    `UPDATE products SET active = 0, delivery_type = 'manual', supplier_status = 'retired'
+     WHERE LOWER(COALESCE(delivery_type, '')) IN ('cheatgame_api', 'cheatgame', 'cgo_api')`,
     `CREATE TABLE IF NOT EXISTS product_supplier_offers (
       id SERIAL PRIMARY KEY,
       product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,

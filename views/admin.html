@@ -9311,7 +9311,6 @@
                 <option value="">Semua Sumber</option>
                 <option value="auto">Stok Lokal</option>
                 <option value="vipstore_api">VIP Store API</option>
-                <option value="cheatgame_api">CHEATGAME API</option>
                 <option value="manual">Manual</option>
               </select>
             </div>
@@ -9443,7 +9442,6 @@
               <select id="productDeliveryType" onchange="updateProductSupplierUi()">
                 <option value="auto">Stok Lokal</option>
                 <option value="vipstore_api">VIP Store API</option>
-                <option value="cheatgame_api">CHEATGAME API</option>
                 <option value="manual">Pengiriman Manual</option>
               </select>
             </div>
@@ -11721,9 +11719,6 @@
 
       function normalizeAdminDeliveryType(deliveryType) {
         const value = String(deliveryType || "auto").trim().toLowerCase();
-        if (value === "cheatgame_api" || value === "cheatgame" || value === "cgo_api") {
-          return "cheatgame_api";
-        }
         if (value === "vipstore_api" || value === "vipstore" || value === "supplier") {
           return "vipstore_api";
         }
@@ -11732,16 +11727,13 @@
       }
 
       function isAdminSupplierDelivery(deliveryType) {
-        return ["vipstore_api", "cheatgame_api"].includes(normalizeAdminDeliveryType(deliveryType));
+        return ["vipstore_api"].includes(normalizeAdminDeliveryType(deliveryType));
       }
 
       function deliverySourceBadge(deliveryType) {
         const value = normalizeAdminDeliveryType(deliveryType);
         if (value === "vipstore_api") {
           return `<span class="badge vip">VIP Store</span>`;
-        }
-        if (value === "cheatgame_api") {
-          return `<span class="badge paid">CHEATGAME</span>`;
         }
         if (value === "manual") {
           return `<span class="badge manual">Manual</span>`;
@@ -11866,7 +11858,7 @@
       }
 
       function supplierCompareSourceLabel(source) {
-        return source === "cheatgame" ? "CHEATGAME" : "VIP Store";
+        return "VIP Store";
       }
 
       function releaseAdminDialogFocus(dialog, restoreTarget = null) {
@@ -11929,7 +11921,7 @@
           ? `${eligibleCount} supplier siap dibandingkan. Supplier termurah ditandai otomatis.`
           : "Belum ada supplier yang memenuhi syarat: Ready, stok tersedia, harga IDR, dan sync maksimal 15 menit.";
 
-        grid.innerHTML = ["vipstore", "cheatgame"].map((source) => {
+        grid.innerHTML = ["vipstore"].map((source) => {
           const label = supplierCompareSourceLabel(source);
           const offer = offers.find((item) => item.supplier_source === source);
           if (!offer) {
@@ -12037,13 +12029,14 @@
         );
       }
 
+      let vipStorePickerNotice = "";
       async function loadVipStorePickerCatalog(force = false) {
         const statusEl = document.getElementById("supplierPickerStatus");
         const listEl = document.getElementById("supplierPickerList");
         const deliveryType = normalizeAdminDeliveryType(
           document.getElementById("productDeliveryType")?.value || "vipstore_api",
         );
-        const source = supplierPickerCompareSource || (deliveryType === "cheatgame_api" ? "cheatgame" : "vipstore");
+        const source = supplierPickerCompareSource || "vipstore";
 
         if (vipStorePickerItems.length && vipStorePickerSource === source && !force) {
           renderVipStoreProductPicker();
@@ -12080,6 +12073,7 @@
               : data.fallback
                 ? ` Memakai katalog tersimpan${savedAt ? ` (${savedAt})` : ""}; stok dan harga belum diperbarui. Klik Refresh untuk mencoba lagi.`
                 : data.cached && savedAt ? ` Katalog tersimpan: ${savedAt}.` : "";
+            vipStorePickerNotice = fallbackNote;
             statusEl.innerText = `${vipStorePickerItems.length} produk dimuat dari ${data.total_detected_items || vipStorePickerItems.length} katalog supplier.${fallbackNote}`;
           }
 
@@ -12190,10 +12184,7 @@
           const loadedText = vipStorePickerLoadedAt
             ? `Loaded ${vipStorePickerLoadedAt.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}`
             : "Catalog belum dimuat";
-          const missingGameNames = vipStorePickerSource === "cheatgame" && items.length && items.every((item) => !item.category);
-          statusEl.innerText = missingGameNames
-            ? `${visibleItems.length} dari ${items.length} hasil. CHEATGAME tidak mengirim nama game; cocokkan lewat Product ID. ${loadedText}.`
-            : `${visibleItems.length} hasil tampil dari ${items.length} hasil cocok. ${loadedText}.`;
+          statusEl.innerText = `${visibleItems.length} hasil tampil dari ${items.length} hasil cocok. ${loadedText}. ${vipStorePickerNotice}`;
         }
 
         if (!visibleItems.length) {
@@ -12205,7 +12196,7 @@
           .map((item) => {
             const supplierPlatform = detectSupplierPlatform(item);
             const warning = getSupplierPickerMismatchWarning(item);
-            const sourceLabel = vipStorePickerSource === "cheatgame" ? "CHEATGAME" : "VIP Store";
+            const sourceLabel = "VIP Store";
             const productTitle = [item.category, item.name].filter(Boolean).join(" — ") || "Produk tanpa nama";
             const detailText = [sourceLabel, `Product ID #${item.product_id}`, item.duration, item.description]
               .filter(Boolean)
@@ -12228,9 +12219,7 @@
                   <div class="supplier-picker-meta">
                     <span class="badge ${statusClass}">${escapeHtml(statusText)}</span>
                     <span class="badge available">${Number(item.stock || 0)} stock</span>
-                    <span class="badge entry">${vipStorePickerSource === "cheatgame"
-                      ? (item.price == null ? "Modal -" : `Modal ${formatRupiah(item.price)}`)
-                      : (item.price_usd == null ? "Modal -" : `$${Number(item.price_usd).toLocaleString("en-US", { maximumFractionDigits: 2 })} ≈ ${formatRupiah(item.price)}`)
+                    <span class="badge entry">${(item.price_usd == null ? "Modal -" : `$${Number(item.price_usd).toLocaleString("en-US", { maximumFractionDigits: 2 })} ≈ ${formatRupiah(item.price)}`)
                     }</span>
                     ${supplierPlatform ? `<span class="badge ${supplierPlatform === "ios" ? "paid" : "available"}">${getAdminPlatformLabel(supplierPlatform)}</span>` : ""}
                   </div>
@@ -12348,7 +12337,7 @@
         }
 
         try {
-          const source = deliveryType === "cheatgame_api" ? "cheatgame" : "vipstore";
+          const source = "vipstore";
           const res = await fetch(`/api/admin/${source}/product/${encodeURIComponent(supplierProductId)}`);
           const data = await res.json();
 
