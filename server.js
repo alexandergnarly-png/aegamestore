@@ -1015,6 +1015,10 @@ async function vipStoreRequest(endpoint, options = {}) {
       try {
         data = JSON.parse(rawResponse);
       } catch (parseErr) {
+        if (method === "GET" && attempt < maxAttempts) {
+          console.warn(`VIPSTORE GET non-JSON, retry: ${endpoint}`);
+          continue;
+        }
         data = {
           success: false,
           message: describeVipStoreInvalidResponse(rawResponse, response.headers.get("content-type")),
@@ -1185,6 +1189,31 @@ function getCheatGameCatalog() {
 
 const ADMIN_CATALOG_CACHE_TTL_MS = 5 * 60 * 1000;
 let cheatGameAdminCatalogRequest = null;
+let vipStoreAdminCatalogRequest = null;
+
+async function getAdminVipStoreCatalog(force = false) {
+  if (vipStoreAdminCatalogRequest) return vipStoreAdminCatalogRequest;
+  vipStoreAdminCatalogRequest = (async () => {
+    const cache = await readSupplierCatalogCache("vipstore");
+    if (!force && cache && !cache.stale) {
+      return { ...cache, cached: true, fallback: false, catalog_source: "cache" };
+    }
+    try {
+      const result = await getVipStoreCatalog();
+      const rate = await getVipStoreIdrRate();
+      const items = validateSupplierCatalog(result).map((item) => normalizeVipStoreCatalogProduct(item, rate));
+      const updatedAt = await saveSupplierCatalogCache("vipstore", items);
+      return { items, updated_at: updatedAt, cached: false, stale: false, fallback: false, catalog_source: "live" };
+    } catch (error) {
+      console.warn("VIPSTORE ADMIN CATALOG:", error.code || "CATALOG_UNAVAILABLE");
+      if (cache) return { ...cache, cached: true, stale: true, fallback: true, catalog_source: "cache" };
+      const items = await getMappedSupplierCatalog("vipstore");
+      if (items.length) return { items, updated_at: null, cached: true, stale: true, fallback: true, catalog_source: "mapping" };
+      throw error;
+    }
+  })().finally(() => { vipStoreAdminCatalogRequest = null; });
+  return vipStoreAdminCatalogRequest;
+}
 
 async function readSupplierCatalogCache(source, freshOnly = false) {
   await bulkOrderSchemaReady;
@@ -1195,8 +1224,9 @@ async function readSupplierCatalogCache(source, freshOnly = false) {
   const row = result.rows[0];
   if (!row || !Array.isArray(row.items) || !row.items.length) return null;
   const ageMs = Date.now() - new Date(row.updated_at).getTime();
-  if (freshOnly && (!Number.isFinite(ageMs) || ageMs > ADMIN_CATALOG_CACHE_TTL_MS)) return null;
-  return { items: row.items, updated_at: row.updated_at, stale: ageMs > ADMIN_CATALOG_CACHE_TTL_MS };
+  const stale = !Number.isFinite(ageMs) || ageMs < 0 || ageMs > ADMIN_CATALOG_CACHE_TTL_MS;
+  if (freshOnly && stale) return null;
+  return { items: row.items, updated_at: row.updated_at, stale };
 }
 
 async function saveSupplierCatalogCache(source, items) {
@@ -1211,18 +1241,19 @@ async function saveSupplierCatalogCache(source, items) {
   return updatedAt;
 }
 
-async function getMappedCheatGameCatalog() {
+async function getMappedSupplierCatalog(source) {
   await bulkOrderSchemaReady;
   const result = await query(
     `SELECT supplier_product_id, supplier_product_name, supplier_price AS price_idr,
             supplier_stock AS stock, supplier_status AS status,
             supplier_maintenance_reason AS maintenance_reason
        FROM products
-      WHERE supplier_source = 'cheatgame' AND COALESCE(supplier_product_id, '') <> ''
+      WHERE (supplier_source = $1 OR LOWER(delivery_type) = $1 || '_api') AND COALESCE(supplier_product_id, '') <> ''
      UNION ALL
      SELECT supplier_product_id, supplier_product_name, price_idr, stock, status, maintenance_reason
        FROM product_supplier_offers
-      WHERE supplier_source = 'cheatgame' AND COALESCE(supplier_product_id, '') <> ''`,
+      WHERE supplier_source = $1 AND COALESCE(supplier_product_id, '') <> ''`,
+    [source],
   );
   const unique = new Map();
   for (const row of result.rows) {
@@ -1230,7 +1261,7 @@ async function getMappedCheatGameCatalog() {
     if (!productId || unique.has(productId)) continue;
     unique.set(productId, {
       product_id: productId,
-      name: String(row.supplier_product_name || `CHEATGAME #${productId}`),
+      name: String(row.supplier_product_name || `${source.toUpperCase()} #${productId}`),
       price: parseApiNumber(row.price_idr, null),
       price_usd: null,
       stock: Math.max(0, Math.floor(parseApiNumber(row.stock, 0))),
@@ -1274,7 +1305,7 @@ async function getAdminCheatGameCatalog(force = false) {
         console.warn("CHEATGAME CATALOG: memakai cache terakhir.", error.message);
         return { ...staleCache, cached: true, stale: true, fallback: true, http_code: 200 };
       }
-      const mappedItems = await getMappedCheatGameCatalog();
+      const mappedItems = await getMappedSupplierCatalog("cheatgame");
       if (mappedItems.length) {
         console.warn("CHEATGAME CATALOG: memakai mapping lokal.", error.message);
         return { items: mappedItems, updated_at: null, cached: true, stale: true, fallback: true, http_code: 200 };
@@ -1498,7 +1529,7 @@ function normalizeVipStoreCatalogProduct(item, usdToIdrRate = null) {
       "group", "group_name", "parent", "parent_name",
     ])),
     duration: normalizeCatalogLabel(getFirstDefinedValue(item, [
-      "duration", "variant_label", "variantLabel", "variant", "period", "validity", "plan",
+      "duration", "variant_name", "custom_name", "variant_label", "variantLabel", "variant", "period", "validity", "plan",
     ])),
     description: normalizeCatalogLabel(getFirstDefinedValue(item, ["description", "details", "note", "slug"])),
     is_hidden: isHidden,
@@ -5130,10 +5161,8 @@ app.get("/api/admin/vipstore/catalog-normalized", requireAdminAuth, async (req, 
   try {
     const q = String(req.query.q || "").trim().toLowerCase();
     const limit = Math.min(Math.max(Number(req.query.limit || 500), 1), 800);
-    const result = await getVipStoreCatalog();
-    const items = extractVipStoreCatalogItems(result.data);
-    const exchangeRate = await getVipStoreIdrRate();
-    let products = items.map((item) => normalizeVipStoreCatalogProduct(item, exchangeRate));
+    const catalog = await getAdminVipStoreCatalog(req.query.refresh === "1");
+    let products = catalog.items;
 
     if (q) {
       const terms = q.split(/\s+/).filter(Boolean);
@@ -5164,12 +5193,15 @@ app.get("/api/admin/vipstore/catalog-normalized", requireAdminAuth, async (req, 
       })
       .slice(0, limit);
 
-    return res.status(result.ok ? 200 : 502).json({
-      ok: result.ok,
-      http_code: result.http_code,
-      total_detected_items: items.length,
+    return res.json({
+      ok: true,
+      cached: catalog.cached,
+      stale: catalog.stale,
+      fallback: catalog.fallback,
+      catalog_source: catalog.catalog_source,
+      updated_at: catalog.updated_at,
+      total_detected_items: catalog.items.length,
       total_returned_items: products.length,
-      exchange_rate: exchangeRate,
       items: products,
     });
   } catch (err) {

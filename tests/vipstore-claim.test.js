@@ -1,4 +1,5 @@
 const assert = require("node:assert/strict");
+require("./vipstore-admin-catalog.test.js");
 const fs = require("node:fs");
 
 const server = fs.readFileSync("server.js", "utf8");

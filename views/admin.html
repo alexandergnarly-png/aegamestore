@@ -12074,7 +12074,12 @@
           vipStorePickerSource = source;
 
           if (statusEl) {
-            const fallbackNote = data.fallback ? " Cache terakhir dipakai karena supplier sedang gangguan." : "";
+            const savedAt = data.updated_at ? new Date(data.updated_at).toLocaleString("id-ID") : "";
+            const fallbackNote = data.catalog_source === "mapping"
+              ? " Hanya produk yang sudah dipetakan. Katalog lengkap belum dapat diambil; stok dan harga perlu diverifikasi kembali."
+              : data.fallback
+                ? ` Memakai katalog tersimpan${savedAt ? ` (${savedAt})` : ""}; stok dan harga belum diperbarui. Klik Refresh untuk mencoba lagi.`
+                : data.cached && savedAt ? ` Katalog tersimpan: ${savedAt}.` : "";
             statusEl.innerText = `${vipStorePickerItems.length} produk dimuat dari ${data.total_detected_items || vipStorePickerItems.length} katalog supplier.${fallbackNote}`;
           }
 
