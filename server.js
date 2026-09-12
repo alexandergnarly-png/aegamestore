@@ -6025,7 +6025,7 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
       });
     }
 
-    if (resellerOrder) {
+    if (isSupplierDeliveryType(productDeliveryType)) {
       try {
         const supplierSync = await syncSupplierMappedProducts(productDeliveryType, {
           productId: cleanProductId,
@@ -6048,10 +6048,10 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
           throw new Error("Produk reseller berubah saat harga supplier diperiksa");
         }
       } catch (error) {
-        console.warn("RESELLER SUPPLIER CHECK FAILED:", error.message);
+        console.warn("SUPPLIER CHECKOUT CHECK FAILED:", error.message);
         return res.status(503).json({
-          code: "RESELLER_SUPPLIER_CHECK_FAILED",
-          message: "Harga dan stok VIPStore belum dapat diverifikasi. Saldo belum dipotong. Coba lagi setelah koneksi supplier pulih.",
+          code: "SUPPLIER_UNAVAILABLE",
+          message: "VIPStore sedang tidak dapat diakses. Pembayaran belum dibuat dan saldo tidak dipotong. Coba lagi setelah koneksi supplier pulih.",
         });
       }
     }
