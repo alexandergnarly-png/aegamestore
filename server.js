@@ -4467,6 +4467,7 @@ app.get("/api/admin/vipstore/status", requireAdminAuth, async (req, res) => {
       product_lookup: "/api/admin/vipstore/product/:productId",
       catalog_picker: "/api/admin/vipstore/catalog-normalized",
       sync_products: "/api/admin/vipstore/sync-products",
+      convert_to_local: "/api/admin/vipstore/convert-to-local",
     },
     note: "Step 3 supports supplier stock sync. Buyer checkout auto-claim is not changed yet.",
   });
@@ -4750,6 +4751,32 @@ app.delete("/api/admin/products/:productId/supplier-offers/:source", requireAdmi
   } catch (error) {
     console.error("ERROR DELETE SUPPLIER OFFER:", error.message);
     return res.status(500).json({ message: "Gagal menghapus mapping supplier" });
+  }
+});
+
+app.post("/api/admin/vipstore/convert-to-local", requireAdminAuth, requireAdminCsrf, async (req, res) => {
+  try {
+    const result = await query(
+      `UPDATE products
+       SET delivery_type = 'auto',
+           supplier_status = 'local',
+           supplier_stock = 0,
+           supplier_maintenance = 0,
+           supplier_maintenance_reason = ''
+       WHERE LOWER(COALESCE(delivery_type, 'auto')) = 'vipstore_api'
+       RETURNING id`,
+    );
+    const converted = result.rows.length;
+    return res.json({
+      ok: true,
+      converted,
+      message: converted
+        ? `${converted} produk VIPStore dialihkan ke stok lokal.`
+        : "Tidak ada produk VIPStore API yang perlu dialihkan.",
+    });
+  } catch (err) {
+    console.error("ERROR CONVERT VIPSTORE PRODUCTS TO LOCAL:", err);
+    return res.status(500).json({ ok: false, message: "Gagal mengalihkan produk ke stok lokal" });
   }
 });
 

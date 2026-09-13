@@ -9527,6 +9527,9 @@
               <button class="ghost-btn" onclick="syncVipStoreProducts()">
                 Sinkron Supplier
               </button>
+              <button id="convertVipStoreToLocalBtn" type="button" class="ghost-btn" onclick="convertVipStoreProductsToLocal()" disabled>
+                Jadikan Stok Lokal
+              </button>
             </div>
             </div>
           </details>
@@ -15129,6 +15132,15 @@
         document.getElementById("totalProductStat").innerText = products.length;
       }
 
+      function updateVipStoreLocalButton(products = allProducts) {
+        const button = document.getElementById("convertVipStoreToLocalBtn");
+        if (!button) return;
+        const count = products.filter((product) => isAdminSupplierDelivery(product.delivery_type)).length;
+        button.dataset.count = String(count);
+        button.textContent = count ? `Jadikan ${count} Produk Stok Lokal` : "Semua Sudah Stok Lokal";
+        button.disabled = count === 0;
+      }
+
       function setupProductCombobox(inputId, listId) {
         const input = document.getElementById(inputId);
         const list = document.getElementById(listId);
@@ -15413,6 +15425,7 @@
 
           if (!Array.isArray(data) || data.length === 0) {
             allProducts = [];
+            updateVipStoreLocalButton([]);
             updateProductStats([]);
             populateProductFilters([]);
             populateProductSuggestions([]);
@@ -15426,10 +15439,12 @@
           }
 
           allProducts = data;
+          updateVipStoreLocalButton(data);
           populateProductFilters(data);
           populateProductSuggestions(data);
           applyProductFilters();
         } catch (err) {
+          updateVipStoreLocalButton([]);
           statusText.innerText = "Gagal memuat daftar produk.";
           tableBody.innerHTML = `
                               <tr>
@@ -15743,6 +15758,47 @@
           );
         } catch (err) {
           Swal.fire("Sync gagal", "Terjadi error saat sync stok supplier.", "error");
+        }
+      }
+
+      async function convertVipStoreProductsToLocal() {
+        const button = document.getElementById("convertVipStoreToLocalBtn");
+        const count = Number(button?.dataset.count || 0);
+        if (!count) return;
+        const confirmation = await Swal.fire({
+          title: `Alihkan ${count} produk ke stok lokal?`,
+          html: "<p>Produk tidak lagi memanggil API VIPStore saat dibeli.</p><p><strong>Produk tanpa key lokal akan tampil habis.</strong> Mapping VIPStore tetap disimpan untuk digunakan lagi setelah whitelist selesai.</p>",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "Ya, jadikan stok lokal",
+          cancelButtonText: "Batal",
+        });
+        if (!confirmation.isConfirmed) return;
+
+        button.disabled = true;
+        button.setAttribute("aria-busy", "true");
+        showAdminLoading("Mengalihkan produk...", "Mengubah seluruh produk VIPStore menjadi stok key lokal.");
+        try {
+          const res = await fetch("/api/admin/vipstore/convert-to-local", {
+            method: "POST",
+            headers: { "x-csrf-token": getCsrfToken() },
+          });
+          const data = await res.json();
+          if (res.status === 401) {
+            Swal.close();
+            window.location.href = "/ae-auth";
+            return;
+          }
+          if (!res.ok || data.ok === false) throw new Error(data.message || "Gagal mengalihkan produk");
+          await finishAdminLoading("Produk sudah menjadi stok lokal");
+          await loadProducts();
+          loadKeyProductOptions();
+          showAdminSuccess("Stok lokal aktif", `${data.converted || 0} produk berhasil dialihkan. Tambahkan key lokal sebelum dijual.`, "Produk diperbarui");
+        } catch (err) {
+          Swal.fire("Gagal", err.message || "Gagal mengalihkan produk ke stok lokal", "error");
+        } finally {
+          button.removeAttribute("aria-busy");
+          updateVipStoreLocalButton();
         }
       }
 

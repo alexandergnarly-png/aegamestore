@@ -50,6 +50,21 @@ for (const data of [[{ id: 1 }], { products: [{ product_id: "20" }] }, { data: {
 const syncSource = server.slice(server.indexOf("async function syncSupplierMappedProducts("), server.indexOf("function syncVipStoreMappedProducts("));
 assert.ok(syncSource.indexOf("validateSupplierCatalog(catalogResult)") < syncSource.indexOf("UPDATE products"), "Reject invalid catalogs before changing stored stock");
 
+const convertToLocalRoute = server.slice(
+  server.indexOf('app.post("/api/admin/vipstore/convert-to-local"'),
+  server.indexOf('app.post("/api/admin/vipstore/sync-products"'),
+);
+[
+  "requireAdminAuth",
+  "requireAdminCsrf",
+  "SET delivery_type = 'auto'",
+  "supplier_status = 'local'",
+  "WHERE LOWER(COALESCE(delivery_type, 'auto')) = 'vipstore_api'",
+  "RETURNING id",
+].forEach((marker) => assert.ok(convertToLocalRoute.includes(marker), `Missing bulk local conversion safeguard: ${marker}`));
+assert.doesNotMatch(convertToLocalRoute, /supplier_product_id\s*=/, "Keep VIPStore mapping available for later recovery");
+assert.doesNotMatch(convertToLocalRoute, /UPDATE orders/, "Existing orders must not be silently changed");
+
 [
   "while (claimedKeys.length < quantity)",
   "claimVipStoreKey(supplierProductId, 1)",
