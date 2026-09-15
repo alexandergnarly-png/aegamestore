@@ -100,3 +100,25 @@ catalog tanpa melakukan pembelian atau mencetak secret. Jika muncul
 `VIPSTORE_SECURITY_CHALLENGE`, kirim hasil diagnosis ke admin VIPStore agar path
 `/backend/api/reseller/*` dapat diakses server dengan autentikasi API tanpa browser challenge.
 Cache admin hanya untuk pencarian, tidak dipakai sebagai bukti sinkronisasi berhasil.
+
+### Supplier CheatGame
+
+CheatGame tersedia bersama VIPStore, menggunakan integrasi `reseller_api.php`:
+
+```text
+CHEATGAME_API_KEY=isi_di_environment_server
+CHEATGAME_WEBHOOK_SECRET=secret_webhook_dari_supplier
+CHEATGAME_CUSTOMER_EMAIL=email_toko_untuk_kontak_buyer_non_email
+```
+
+Daftarkan webhook `https://aegamestore.com/api/webhooks/cheatgame` pada supplier.
+Di admin Produk, pilih **CHEATGAME API**, cari Product ID, lalu Test Supplier dan
+simpan. Produk lama yang sudah ditandai retired/manual tetap nonaktif sampai
+mapping dan status aktifnya diperiksa admin; migrasi tidak mengaktifkan stok lama.
+Harga modal CheatGame memakai `price_idr`, bukan harga publik VIPStore.
+
+Permintaan katalog bersamaan digabung; kegagalan mendapat cooldown 60 detik.
+Retry order yang sudah memiliki supplier order ID hanya mengecek status.
+Jika timeout terjadi sebelum ID diterima, pembelian ulang diblokir: tunggu webhook
+atau rekonsiliasi history supplier sebelum memenuhi order secara manual.
+Tidak ada pembelian sungguhan dalam pengujian otomatis.

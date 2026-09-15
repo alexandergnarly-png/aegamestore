@@ -32,6 +32,7 @@ const {
   recommendUsdtPrice,
 } = require("./server/payment-pricing");
 const vipStoreClient = require("./server/vipstore-client");
+const { verifyCheatGameWebhook, extractCheatGameClaimKeys } = require("./server/cheatgame-utils");
 const { normalizeCatalogLabel } = vipStoreClient;
 const { buildSupplierComparison, convertUsdToIdr } = require("./server/supplier-compare-utils");
 const { BUYER_BADGE_TIERS, getBuyerBadgeCode } = require("./server/buyer-policy");
@@ -648,6 +649,14 @@ function normalizeProductDeliveryType(deliveryType) {
     .toLowerCase();
 
   if (
+    value === "cheatgame_api" ||
+    value === "cheatgame" ||
+    value === "cgo_api"
+  ) {
+    return "cheatgame_api";
+  }
+
+  if (
     value === "vipstore_api" ||
     value === "vipstore" ||
     value === "supplier_api" ||
@@ -663,7 +672,7 @@ function normalizeProductDeliveryType(deliveryType) {
 }
 
 function isSupplierDeliveryType(deliveryType) {
-return ["vipstore_api"].includes(
+  return ["vipstore_api", "cheatgame_api"].includes(
     normalizeProductDeliveryType(deliveryType),
   );
 }
@@ -886,6 +895,7 @@ function normalizeSupplierProductId(value) {
 function getSupplierSourceFromDelivery(deliveryType) {
   const type = normalizeProductDeliveryType(deliveryType);
   if (type === "vipstore_api") return "vipstore";
+  if (type === "cheatgame_api") return "cheatgame";
   return "";
 }
 
@@ -1008,7 +1018,94 @@ async function resetVipStoreKey(productId, key) {
   });
 }
 
+const CHEATGAME_API_URL = "https://cheatgame.online/reseller_api.php";
+
+function getCheatGameConfig() {
+  return {
+    apiKey: String(process.env.CHEATGAME_API_KEY || "").trim(),
+    webhookSecret: String(process.env.CHEATGAME_WEBHOOK_SECRET || "").trim(),
+    customerEmail: String(process.env.CHEATGAME_CUSTOMER_EMAIL || "").trim(),
+  };
+}
+
+function isCheatGameConfigured() {
+  return Boolean(getCheatGameConfig().apiKey);
+}
+
+async function cheatGameRequest(action, options = {}) {
+  const config = getCheatGameConfig();
+  if (!config.apiKey) {
+    const error = new Error("CHEATGAME API belum dikonfigurasi di environment.");
+    error.code = "CHEATGAME_NOT_CONFIGURED";
+    throw error;
+  }
+
+  const method = String(options.method || "GET").toUpperCase();
+  const url = new URL(CHEATGAME_API_URL);
+  let rawBody;
+  if (method === "GET") {
+    url.searchParams.set("action", action);
+    for (const [key, value] of Object.entries(options.params || {})) {
+      if (value !== undefined && value !== null && value !== "") url.searchParams.set(key, String(value));
+    }
+  } else {
+    rawBody = JSON.stringify({ action, ...(options.body || {}) });
+  }
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), Number(options.timeoutMs || 30000));
+  try {
+    const response = await fetch(url, {
+      method,
+      headers: {
+        "X-API-Key": config.apiKey,
+        ...(method === "GET" ? {} : { "Content-Type": "application/json" }),
+      },
+      body: rawBody,
+      redirect: "error",
+      signal: controller.signal,
+    });
+    const text = await response.text();
+    let data;
+    try {
+      data = text ? JSON.parse(text) : {};
+    } catch (_) {
+      throw new Error("CHEATGAME mengembalikan respons non-JSON; periksa hasil order sebelum retry.");
+    }
+    return {
+      ok: response.ok, http_code: response.status, data, supplier_source: "CHEATGAME",
+      diagnostic_message: !response.ok || data?.success === false
+        ? sanitizeSupplierCatalogMessage(data?.message, [config.apiKey]) : "",
+    };
+  } catch (error) {
+    const wrapped = new Error(error?.name === "AbortError" ? "Request CHEATGAME timeout" : `Gagal menghubungi CHEATGAME: ${error.message}`);
+    wrapped.code = error?.name === "AbortError" ? "CHEATGAME_TIMEOUT" : "CHEATGAME_REQUEST_FAILED";
+    throw wrapped;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+let cheatGameCatalogRequest = null;
+let cheatGameCatalogFailure = null;
+let cheatGameCatalogRetryAt = 0;
+async function getCheatGameCatalog() {
+  if (Date.now() < cheatGameCatalogRetryAt) throw cheatGameCatalogFailure;
+  if (!cheatGameCatalogRequest) {
+    cheatGameCatalogRequest = cheatGameRequest("products").then((result) => {
+      validateSupplierCatalog(result);
+      return result;
+    }).catch((error) => {
+      cheatGameCatalogFailure = error;
+      cheatGameCatalogRetryAt = Date.now() + 60_000;
+      throw error;
+    }).finally(() => { cheatGameCatalogRequest = null; });
+  }
+  return cheatGameCatalogRequest;
+}
+
 const ADMIN_CATALOG_CACHE_TTL_MS = 5 * 60 * 1000;
+let cheatGameAdminCatalogRequest = null;
 let vipStoreAdminCatalogRequest = null;
 
 async function getAdminVipStoreCatalog(force = false) {
@@ -1099,6 +1196,78 @@ async function getMappedSupplierCatalog(source) {
   return [...unique.values()];
 }
 
+async function getAdminCheatGameCatalog(force = false) {
+  if (cheatGameAdminCatalogRequest) return cheatGameAdminCatalogRequest;
+  cheatGameAdminCatalogRequest = (async () => {
+    if (!force) {
+      const freshCache = await readSupplierCatalogCache("cheatgame", true);
+      if (freshCache) return { ...freshCache, cached: true, fallback: false, http_code: 200 };
+    }
+
+    try {
+      const result = await getCheatGameCatalog();
+      const products = validateSupplierCatalog(result)
+        .map(normalizeCheatGameCatalogProduct)
+        .filter((item) => item.product_id);
+      if (!products.length) {
+        const error = new Error(result.data?.message || "Katalog CHEATGAME sedang tidak tersedia");
+        error.code = "CHEATGAME_EMPTY_CATALOG";
+        throw error;
+      }
+      const updatedAt = await saveSupplierCatalogCache("cheatgame", products);
+      return { items: products, updated_at: updatedAt, cached: false, stale: false, fallback: false, http_code: result.http_code };
+    } catch (error) {
+      const staleCache = await readSupplierCatalogCache("cheatgame", false);
+      if (staleCache) {
+        console.warn("CHEATGAME CATALOG: memakai cache terakhir.", error.message);
+        return { ...staleCache, cached: true, stale: true, fallback: true, http_code: 200 };
+      }
+      const mappedItems = await getMappedSupplierCatalog("cheatgame");
+      if (mappedItems.length) {
+        console.warn("CHEATGAME CATALOG: memakai mapping lokal.", error.message);
+        return { items: mappedItems, updated_at: null, cached: true, stale: true, fallback: true, http_code: 200 };
+      }
+      throw error;
+    }
+  })().finally(() => {
+    cheatGameAdminCatalogRequest = null;
+  });
+  return cheatGameAdminCatalogRequest;
+}
+
+function getCheatGameBalance() {
+  return cheatGameRequest("balance");
+}
+
+function getCheatGameExchangeRate() {
+  return cheatGameRequest("exchange_rate");
+}
+
+function getCheatGameOrderStatus(orderId) {
+  return cheatGameRequest("order_status", { params: { order_id: orderId } });
+}
+
+function createCheatGameOrder(order) {
+  const config = getCheatGameConfig();
+  const customerEmail = isValidEmail(order.contact) ? order.contact : config.customerEmail;
+  if (!isValidEmail(customerEmail)) {
+    const error = new Error("CHEATGAME_CUSTOMER_EMAIL wajib diisi jika kontak buyer bukan email.");
+    error.code = "CHEATGAME_CUSTOMER_EMAIL_REQUIRED";
+    throw error;
+  }
+  return cheatGameRequest("order", {
+    method: "POST",
+    body: {
+      external_ref: String(order.id),
+      product_id: Number(order.supplier_product_id),
+      quantity: getOrderQuantity(order.quantity),
+      customer_name: String(order.name || "Customer").slice(0, 60),
+      customer_email: customerEmail,
+    },
+  });
+
+}
+
 async function getVipStoreIdrRate() {
   const configuredRate = Number(process.env.VIPSTORE_USD_IDR_RATE || 0);
   return getSafeUsdtIdrRate(configuredRate > 0 ? configuredRate : usdIdrRate);
@@ -1125,7 +1294,7 @@ function validateSupplierCatalog(result) {
   const rejected = (value) => value === false || value === 0 || value === "false" || value === "0";
   if (!result?.ok || rejected(payload?.success) || rejected(payload?.ok) || rejected(payload?.status)) {
     const detail = result?.diagnostic_message ? ` Detail respons: ${result.diagnostic_message}.` : " Pesan rinci tidak tersedia; periksa akses API dan status layanan supplier.";
-    const source = ["VIPSTORE"].includes(result?.supplier_source) ? `[${result.supplier_source}] ` : "";
+    const source = ["VIPSTORE", "CHEATGAME"].includes(result?.supplier_source) ? `[${result.supplier_source}] ` : "";
     const error = new Error(`${source}Katalog supplier ditolak (HTTP ${Number(result?.http_code) || 0}).${detail} Stok lama tidak ditimpa.`);
     error.code = "SUPPLIER_CATALOG_REJECTED";
     error.supplierHttpCode = Number(result?.http_code) || null;
@@ -1269,6 +1438,15 @@ function normalizeVipStoreCatalogProduct(item, usdToIdrRate = null) {
   };
 }
 
+function normalizeCheatGameCatalogProduct(item) {
+  const product = normalizeVipStoreCatalogProduct(item);
+  return {
+    ...product,
+    price: parseApiNumber(getFirstDefinedValue(item, ["price_idr", "reseller_price_idr"]), null),
+    price_usd: parseApiNumber(getFirstDefinedValue(item, ["price_usd", "price"]), null),
+  };
+}
+
 async function findSupplierProductById(productId, getCatalog, normalizeProduct = normalizeVipStoreCatalogProduct) {
   const cleanSupplierProductId = normalizeSupplierProductId(productId);
 
@@ -1316,6 +1494,10 @@ async function findVipStoreProductById(productId) {
   );
 }
 
+function findCheatGameProductById(productId) {
+  return findSupplierProductById(productId, getCheatGameCatalog, normalizeCheatGameCatalogProduct);
+}
+
 async function buildSupplierProductSnapshot(deliveryType, supplierProductId) {
   const cleanDeliveryType = normalizeProductDeliveryType(deliveryType);
   const cleanSupplierProductId = normalizeSupplierProductId(supplierProductId);
@@ -1337,7 +1519,9 @@ async function buildSupplierProductSnapshot(deliveryType, supplierProductId) {
   }
 
   try {
-    const lookup = await findVipStoreProductById(cleanSupplierProductId);
+    const lookup = cleanDeliveryType === "cheatgame_api"
+      ? await findCheatGameProductById(cleanSupplierProductId)
+      : await findVipStoreProductById(cleanSupplierProductId);
 
     if (!lookup.found || !lookup.product) {
       return {
@@ -1366,11 +1550,11 @@ async function buildSupplierProductSnapshot(deliveryType, supplierProductId) {
 
 function normalizeOfferSupplierSource(value) {
   const source = String(value || "").trim().toLowerCase();
-  return ["vipstore"].includes(source) ? source : "";
+  return ["vipstore", "cheatgame"].includes(source) ? source : "";
 }
 
 function offerDeliveryType(source) {
-  return source === "vipstore" ? "vipstore_api" : "";
+  return source === "cheatgame" ? "cheatgame_api" : source === "vipstore" ? "vipstore_api" : "";
 }
 
 async function upsertProductSupplierOffer(productId, source, supplierProductId) {
@@ -1439,7 +1623,7 @@ async function getProductSupplierComparison(productId) {
             price_idr, stock, status, maintenance_reason, last_sync,
             (supplier_source = $2 AND supplier_product_id = $3) AS is_primary
      FROM product_supplier_offers
-     WHERE product_id = $1 AND supplier_source = 'vipstore'
+     WHERE product_id = $1
      ORDER BY supplier_source ASC`,
     [productId, String(product.supplier_source || ""), String(product.supplier_product_id || "")],
   );
@@ -1449,7 +1633,7 @@ async function getProductSupplierComparison(productId) {
 async function syncProductSupplierOffers(productId) {
   const result = await query(
     `SELECT supplier_source, supplier_product_id
-     FROM product_supplier_offers WHERE product_id = $1 AND supplier_source = 'vipstore'`,
+     FROM product_supplier_offers WHERE product_id = $1`,
     [productId],
   );
   await Promise.all(result.rows.map((offer) => (
@@ -1746,11 +1930,141 @@ async function claimVipStoreKeyForOrder(order, options = {}) {
   }
 }
 
+function extractCheatGameOrderId(payload) {
+  const data = payload?.data && typeof payload.data === "object" ? payload.data : payload;
+  return String(
+    getFirstDefinedValue(data, ["order_id", "reseller_order_id", "id"])
+      || getFirstDefinedValue(data?.order, ["order_id", "id"])
+      || "",
+  ).trim();
+}
+
+function extractCheatGameExternalRef(payload) {
+  const data = payload?.data && typeof payload.data === "object" ? payload.data : payload;
+  return String(
+    getFirstDefinedValue(data, ["external_ref", "external_reference", "reference"])
+      || getFirstDefinedValue(data?.order, ["external_ref", "external_reference", "reference"])
+      || "",
+  ).trim();
+}
+
+async function fulfillCheatGameOrder(inputOrder, source = "auto", payload = null) {
+  const client = await db.connect();
+  let creating = false;
+  let order;
+  try {
+    await client.query("BEGIN");
+    order = (await client.query(
+      `SELECT o.*,
+              COALESCE(NULLIF(o.supplier_source, ''), p.supplier_source, '') AS supplier_source,
+              COALESCE(NULLIF(o.supplier_product_id, ''), p.supplier_product_id, '') AS supplier_product_id
+         FROM orders o LEFT JOIN products p ON p.id = o.product_id
+        WHERE o.id = $1 FOR UPDATE OF o`,
+      [inputOrder.id],
+    )).rows[0];
+    if (!order || order.payment_status !== "paid" || order.supplier_source !== "cheatgame") {
+      throw new Error("Order CHEATGAME harus paid dan memiliki mapping supplier yang benar.");
+    }
+    if (order.delivery_status === "delivered") {
+      await client.query("COMMIT");
+      return { pending: false, already_delivered: true, supplier_order_id: order.supplier_order_id, keys: [] };
+    }
+    if (!["processing_supplier", "problem"].includes(order.delivery_status)) throw new Error("Status order tidak dapat diproses.");
+    if (!payload && !order.supplier_order_id) {
+      if (order.cheatgame_attempted_at) {
+        throw new Error("Hasil order CHEATGAME sebelumnya belum pasti. Periksa history supplier atau tunggu webhook; pembelian ulang diblokir.");
+      }
+      if (!normalizeSupplierProductId(order.supplier_product_id)) throw new Error("Product ID CHEATGAME tidak valid.");
+      const config = getCheatGameConfig();
+      if (!config.apiKey) throw Object.assign(new Error("CHEATGAME belum dikonfigurasi."), { code: "CHEATGAME_NOT_CONFIGURED" });
+      if (!isValidEmail(order.contact) && !isValidEmail(config.customerEmail)) {
+        throw Object.assign(new Error("Isi CHEATGAME_CUSTOMER_EMAIL untuk kontak buyer non-email."), { code: "CHEATGAME_CUSTOMER_EMAIL_REQUIRED" });
+      }
+      // Persist BEFORE sending: a timeout/restart must never trigger another purchase.
+      await client.query("UPDATE orders SET cheatgame_attempted_at = $2 WHERE id = $1", [order.id, new Date().toISOString()]);
+      creating = true;
+    }
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+
+  const result = payload ? { ok: true, http_code: 200, data: payload }
+    : order.supplier_order_id ? await getCheatGameOrderStatus(order.supplier_order_id)
+      : await createCheatGameOrder(order);
+  if (!result.ok || result.data?.success === false) {
+    const error = new Error(sanitizeSupplierCatalogMessage(result.data?.message || result.data?.error, [getCheatGameConfig().apiKey]) || "Order CHEATGAME belum berhasil; periksa history supplier.");
+    // Only an explicit, non-server rejection without delivery evidence is refundable.
+    if (creating && result.http_code < 500 && result.data?.success === false
+        && !extractCheatGameOrderId(result.data) && !extractCheatGameClaimKeys(result.data).length) {
+      await query("UPDATE orders SET cheatgame_attempted_at = NULL WHERE id = $1 AND supplier_order_id IS NULL AND delivery_status = 'processing_supplier'", [order.id]);
+      error.code = "CHEATGAME_ORDER_REJECTED";
+    }
+    throw error;
+  }
+
+  const responseId = extractCheatGameOrderId(result.data);
+  const externalRef = extractCheatGameExternalRef(result.data);
+  if ((externalRef && externalRef !== String(order.id))
+      || (order.supplier_order_id && responseId && responseId !== String(order.supplier_order_id))) {
+    throw new Error("Referensi respons CHEATGAME tidak cocok dengan order.");
+  }
+  const quantity = getOrderQuantity(order.quantity);
+  const keys = extractCheatGameClaimKeys(result.data);
+  const supplierOrderId = order.supplier_order_id || responseId;
+  const deliveryClient = await db.connect();
+  try {
+    await deliveryClient.query("BEGIN");
+    const current = (await deliveryClient.query("SELECT * FROM orders WHERE id = $1 FOR UPDATE", [order.id])).rows[0];
+    if (current.payment_status !== "paid") throw new Error("Pembayaran order tidak lagi paid.");
+    if (current.delivery_status === "delivered") {
+      await deliveryClient.query("COMMIT");
+      return { pending: false, already_delivered: true, supplier_order_id: current.supplier_order_id, keys: [] };
+    }
+    if (!["processing_supplier", "problem"].includes(current.delivery_status)
+        || (current.supplier_order_id && String(current.supplier_order_id) !== String(supplierOrderId))) {
+      throw new Error("Status atau referensi order berubah; perlu pemeriksaan admin.");
+    }
+    if (keys.length !== quantity) {
+      await deliveryClient.query(
+        "UPDATE orders SET supplier_order_id = COALESCE(NULLIF($2, ''), supplier_order_id), delivery_status = 'processing_supplier', admin_note = $3 WHERE id = $1",
+        [order.id, supplierOrderId, "CHEATGAME sedang diproses. Tunggu webhook atau periksa status melalui Retry; jangan beli ulang."],
+      );
+      await deliveryClient.query("COMMIT");
+      return { pending: true, supplier_order_id: supplierOrderId, keys: [] };
+    }
+    await persistOrderKeys(deliveryClient, { orderId: order.id, keys, source: "cheatgame" });
+    const now = new Date().toISOString();
+    await deliveryClient.query(
+      `UPDATE orders SET delivery_status = 'delivered', gameKey = $2, delivered_at = $3,
+          supplier_order_id = COALESCE(NULLIF($4, ''), supplier_order_id), admin_note = $5 WHERE id = $1`,
+      [order.id, encryptGameKey(keys.join("\n")), now, supplierOrderId, `CHEATGAME delivery success (${source}).`],
+    );
+    await deliveryClient.query(
+      "UPDATE products SET supplier_stock = GREATEST(COALESCE(supplier_stock, 0) - $1, 0), supplier_last_sync = $2 WHERE id = $3 AND supplier_source = 'cheatgame' AND supplier_product_id = $4",
+      [quantity, now, order.product_id, order.supplier_product_id],
+    );
+    await deliveryClient.query("COMMIT");
+    return { pending: false, supplier_order_id: supplierOrderId, keys };
+  } catch (error) {
+    await deliveryClient.query("ROLLBACK");
+    throw error;
+  } finally {
+    deliveryClient.release();
+  }
+}
+
+
 async function syncSupplierMappedProducts(deliveryType, options = {}) {
   const cleanDeliveryType = normalizeProductDeliveryType(deliveryType);
+  if (!isSupplierDeliveryType(cleanDeliveryType)) throw new Error("Produk ini bukan produk Supplier API.");
   const supplierSource = getSupplierSourceFromDelivery(cleanDeliveryType);
-  if (cleanDeliveryType !== "vipstore_api") throw new Error("Produk ini bukan produk VIPStore.");
-  const getCatalog = getVipStoreCatalog;
+  const getCatalog = cleanDeliveryType === "cheatgame_api"
+    ? getCheatGameCatalog
+    : getVipStoreCatalog;
   const rawProductIds = Array.isArray(options.productIds)
     ? options.productIds
     : options.productId
@@ -1804,7 +2118,9 @@ async function syncSupplierMappedProducts(deliveryType, options = {}) {
   }
 
   const vipStoreIdrRate = cleanDeliveryType === "vipstore_api" ? await getVipStoreIdrRate() : null;
-  const normalizeCatalogProduct = (item) => normalizeVipStoreCatalogProduct(item, vipStoreIdrRate);
+  const normalizeCatalogProduct = cleanDeliveryType === "cheatgame_api"
+    ? normalizeCheatGameCatalogProduct
+    : (item) => normalizeVipStoreCatalogProduct(item, vipStoreIdrRate);
   const catalogResult = await getCatalog();
   const rawCatalogItems = validateSupplierCatalog(catalogResult);
   const normalizedCatalog = rawCatalogItems
@@ -1918,8 +2234,42 @@ function syncVipStoreMappedProducts(options = {}) {
   return syncSupplierMappedProducts("vipstore_api", options);
 }
 
+function syncCheatGameMappedProducts(options = {}) {
+  return syncSupplierMappedProducts("cheatgame_api", options);
+}
+
 async function syncAllMappedSupplierProducts(options = {}) {
-  return syncVipStoreMappedProducts(options);
+  const productId = Number(options.productId || 0);
+  if (productId > 0) {
+    const result = await query("SELECT delivery_type FROM products WHERE id = $1 LIMIT 1", [productId]);
+    const type = normalizeProductDeliveryType(result.rows[0]?.delivery_type);
+    return syncSupplierMappedProducts(type, options);
+  }
+  const results = [];
+  const supplierErrors = [];
+  for (const [source, configured, sync] of [
+    ["VIPSTORE", isVipStoreConfigured(), syncVipStoreMappedProducts],
+    ["CHEATGAME", isCheatGameConfigured(), syncCheatGameMappedProducts],
+  ]) {
+    if (!configured) continue;
+    try {
+      results.push(await sync(options));
+    } catch (error) {
+      supplierErrors.push({ supplier: source, code: error.code || "SUPPLIER_SYNC_ERROR", message: error.message });
+    }
+  }
+  const summary = results.reduce((total, item) => {
+    for (const key of ["synced", "total_mapped", "ready", "out_of_stock", "maintenance", "hidden", "not_found", "failed"]) {
+      total[key] += Number(item[key] || 0);
+    }
+    return total;
+  }, { synced: 0, total_mapped: 0, ready: 0, out_of_stock: 0, maintenance: 0, hidden: 0, not_found: 0, failed: 0 });
+  summary.message = `Sync supplier selesai: ${summary.synced}/${summary.total_mapped} produk diproses.`;
+  summary.supplier_errors = supplierErrors;
+  if (supplierErrors.length) {
+    summary.message = `Sinkron belum lengkap. ${summary.synced} produk diproses. ` + supplierErrors.map((error) => `${error.supplier}: ${error.message}`).join(" | ");
+  }
+  return summary;
 }
 
 let vipStoreAutoSyncRunning = false;
@@ -1927,7 +2277,7 @@ let vipStoreStartupTimer = null;
 let vipStoreIntervalTimer = null;
 
 async function runVipStoreAutoSync(reason = "interval") {
-  if (!isVipStoreConfigured() || vipStoreAutoSyncRunning) return;
+  if ((!isVipStoreConfigured() && !isCheatGameConfigured()) || vipStoreAutoSyncRunning) return;
 
   vipStoreAutoSyncRunning = true;
   try {
@@ -2692,6 +3042,9 @@ const CONFIRMED_PRE_DELIVERY_SUPPLIER_FAILURES = new Set([
   "VIPSTORE_NOT_CONFIGURED",
   "VIPSTORE_PRODUCT_NOT_MAPPED",
   "VIPSTORE_CLAIM_REJECTED",
+  "CHEATGAME_NOT_CONFIGURED",
+  "CHEATGAME_CUSTOMER_EMAIL_REQUIRED",
+  "CHEATGAME_ORDER_REJECTED",
 ]);
 
 async function refundConfirmedResellerSupplierFailure(orderId, error) {
@@ -2704,7 +3057,7 @@ async function refundConfirmedResellerSupplierFailure(orderId, error) {
     await client.query("BEGIN");
     const order = (await client.query(
       `SELECT o.id, o.user_id, o.price, o.payment_method, o.payment_status,
-              o.delivery_status, o.pricing_tier, o.supplier_order_id,
+              o.delivery_status, o.pricing_tier, o.supplier_order_id, o.cheatgame_attempted_at,
               COALESCE(o.gameKey, '') AS game_key_value,
               EXISTS (SELECT 1 FROM order_keys ok WHERE ok.order_id = o.id) AS has_keys
          FROM orders o
@@ -2721,6 +3074,7 @@ async function refundConfirmedResellerSupplierFailure(orderId, error) {
       && !order.has_keys
       && !String(order.game_key_value || "").trim()
       && !String(order.supplier_order_id || "").trim()
+      && !order.cheatgame_attempted_at
       && Number(order.price) > 0;
 
     if (!refundable) {
@@ -2797,7 +3151,11 @@ async function settleWalletVipOrder(orderId) {
     );
     const order = result.rows[0];
     if (!order || order.delivery_status !== "processing_supplier") return;
-    if (normalizeProductDeliveryType(order.delivery_type) !== "vipstore_api") throw new Error("Supplier order lama sudah dinonaktifkan; perlu penyelesaian manual.");
+    if (normalizeProductDeliveryType(order.delivery_type) === "cheatgame_api") {
+      await fulfillCheatGameOrder(order, "ae_credit");
+      return;
+    }
+    if (normalizeProductDeliveryType(order.delivery_type) !== "vipstore_api") throw new Error("Supplier order tidak dikenali; perlu penyelesaian manual.");
     const claim = await claimVipStoreKeyForOrder(order, { source: "ae_credit" });
     const deliveredAt = new Date().toISOString();
     await persistOrderKeys(db, { orderId, keys: claim.keys, source: "vipstore" });
@@ -3883,6 +4241,9 @@ app.use((req, res, next) => {
 
 app.use(express.json({
   limit: "50kb",
+  verify: (req, _res, buffer) => {
+    if (req.originalUrl === "/api/webhooks/cheatgame") req.rawBody = buffer.toString("utf8");
+  },
 }));
 app.use(cookieParser());
 
@@ -4027,6 +4388,61 @@ app.get("/health", async (req, res) => {
   }
 });
 
+app.post("/api/webhooks/cheatgame", webhookLimiter, async (req, res) => {
+  const config = getCheatGameConfig();
+  const eventType = String(req.headers["x-cgo-event"] || "").trim();
+  const eventId = String(req.headers["x-cgo-event-id"] || "").trim();
+  const timestamp = String(req.headers["x-cgo-timestamp"] || "").trim();
+  const signature = String(req.headers["x-cgo-signature"] || "").trim();
+
+  if (!config.webhookSecret) return res.status(503).json({ ok: false, message: "Webhook belum dikonfigurasi" });
+  if (!["order.success", "webhook.test"].includes(eventType) || !verifyCheatGameWebhook({
+    timestamp,
+    eventId,
+    rawBody: req.rawBody,
+    signature,
+    secret: config.webhookSecret,
+  })) {
+    return res.status(403).json({ ok: false, message: "Invalid webhook signature" });
+  }
+  if (eventType === "webhook.test") return res.json({ ok: true, test: true });
+
+  try {
+    const existing = await query("SELECT event_id FROM cheatgame_webhook_events WHERE event_id = $1 AND processed_at IS NOT NULL", [eventId]);
+    if (existing.rows.length) return res.json({ ok: true, duplicate: true });
+
+    const supplierOrderId = extractCheatGameOrderId(req.body);
+    const externalRef = extractCheatGameExternalRef(req.body);
+    const orderResult = await query(
+      `SELECT o.*,
+              COALESCE(NULLIF(o.supplier_source, ''), p.supplier_source, '') AS supplier_source
+       FROM orders o LEFT JOIN products p ON p.id = o.product_id
+       WHERE o.payment_status = 'paid'
+         AND (($1 <> '' AND o.id = $1) OR ($2 <> '' AND o.supplier_order_id = $2))
+       ORDER BY CASE WHEN o.id = $1 THEN 0 ELSE 1 END LIMIT 1`,
+      [externalRef, supplierOrderId],
+    );
+    const order = orderResult.rows[0];
+    if (!order) {
+      return res.json({ ok: true, ignored: true });
+    }
+    if (String(order.supplier_source || "") !== "cheatgame") throw new Error("Order bukan milik supplier CHEATGAME");
+
+    let delivery = await fulfillCheatGameOrder(order, "webhook", req.body);
+    if (delivery.pending) throw new Error("Webhook success belum mengandung key atau download link");
+
+    await query(
+      `INSERT INTO cheatgame_webhook_events (supplier_order_id, local_order_id, processed_at, created_at, event_id, event_type)
+       VALUES ($1, $2, $3, $3, $4, $5) ON CONFLICT (event_id) DO NOTHING`,
+      [delivery.supplier_order_id || supplierOrderId || null, order.id, new Date().toISOString(), eventId, eventType],
+    );
+    return res.json({ ok: true });
+  } catch (error) {
+    console.error("CHEATGAME WEBHOOK ERROR:", error.message);
+    return res.status(500).json({ ok: false, message: "Webhook processing failed" });
+  }
+});
+
 // Apply global limiter after static assets so CSS/JS/images do not consume API quota.
 app.use(globalLimiter);
 app.get("/", (req, res) => {
@@ -4118,7 +4534,7 @@ app.get("/api/reseller", async (req, res) => {
                COALESCE(p.play_status, 'safe') AS play_status,
                CASE
                  WHEN LOWER(COALESCE(p.delivery_type, 'auto')) = 'manual' THEN 1
-                 WHEN LOWER(COALESCE(p.delivery_type, 'auto')) IN ('vipstore_api') THEN
+                 WHEN LOWER(COALESCE(p.delivery_type, 'auto')) IN ('vipstore_api', 'cheatgame_api') THEN
                    CASE WHEN COALESCE(p.supplier_maintenance, 0) = 1 THEN 0
                         ELSE GREATEST(COALESCE(p.supplier_stock, 0), 0) END
                  ELSE (SELECT COUNT(*)::int FROM keys k WHERE k.product_id = p.id AND k.used = 0
@@ -4127,7 +4543,7 @@ app.get("/api/reseller", async (req, res) => {
         FROM products p
         WHERE p.active = 1
           AND COALESCE(p.play_status, 'safe') <> 'maintenance'
-          AND LOWER(COALESCE(p.delivery_type, '')) IN ('vipstore_api')
+          AND LOWER(COALESCE(p.delivery_type, '')) IN ('vipstore_api', 'cheatgame_api')
           AND COALESCE(p.supplier_product_id, '') <> ''
           AND COALESCE(p.supplier_price, 0) > 0
         ORDER BY p.game ASC, p.price ASC, p.id ASC
@@ -4198,7 +4614,7 @@ app.get("/api/reseller/preview", async (req, res) => {
        WHERE p.id = $2
          AND p.active = 1
          AND u.reseller_status = 'approved'
-         AND LOWER(COALESCE(p.delivery_type, '')) IN ('vipstore_api')
+         AND LOWER(COALESCE(p.delivery_type, '')) IN ('vipstore_api', 'cheatgame_api')
          AND COALESCE(p.supplier_product_id, '') <> ''
          AND COALESCE(p.supplier_price, 0) > 0
        LIMIT 1`,
@@ -4664,6 +5080,69 @@ app.get("/api/admin/vipstore/balance", requireAdminAuth, async (req, res) => {
   }
 });
 
+app.get("/api/admin/cheatgame/status", requireAdminAuth, async (req, res) => {
+  return res.json({
+    configured: isCheatGameConfigured(),
+    apiKey: maskSecret(getCheatGameConfig().apiKey),
+    webhookSecretConfigured: Boolean(getCheatGameConfig().webhookSecret),
+    webhookUrl: `${getAppBaseUrl(req)}/api/webhooks/cheatgame`,
+  });
+});
+
+app.get("/api/admin/cheatgame/catalog-normalized", requireAdminAuth, async (req, res) => {
+  try {
+    const limit = Math.min(Math.max(Number(req.query.limit || 500), 1), 800);
+    const result = await getAdminCheatGameCatalog(req.query.refresh === "1");
+    const products = result.items.slice(0, limit);
+    return res.json({
+      ok: true,
+      http_code: result.http_code,
+      total_detected_items: result.items.length,
+      total_returned_items: products.length,
+      items: products,
+      cached: result.cached,
+      stale: result.stale,
+      fallback: result.fallback,
+      cached_at: result.updated_at,
+    });
+  } catch (err) {
+    console.error("ERROR CHEATGAME NORMALIZED CATALOG:", err);
+    const statusCode = err.code === "CHEATGAME_NOT_CONFIGURED" ? 503 : 502;
+    return res.status(statusCode).json({ ok: false, code: err.code || "CHEATGAME_ERROR", message: err.message, items: [] });
+  }
+});
+
+app.get("/api/admin/cheatgame/product/:productId", requireAdminAuth, async (req, res) => {
+  try {
+    const lookup = await findCheatGameProductById(req.params.productId);
+    if (!lookup.found || !lookup.product) {
+      return res.status(404).json({ ok: false, found: false, message: "Produk CHEATGAME tidak ditemukan." });
+    }
+    return res.json({ ok: true, found: true, product: lookup.product });
+  } catch (err) {
+    const statusCode = err.code === "CHEATGAME_NOT_CONFIGURED" ? 503 : 502;
+    return res.status(statusCode).json({ ok: false, found: false, code: err.code || "CHEATGAME_ERROR", message: err.message });
+  }
+});
+
+app.get("/api/admin/cheatgame/balance", requireAdminAuth, async (req, res) => {
+  try {
+    const result = await getCheatGameBalance();
+    return res.status(result.ok ? 200 : 502).json({ ok: result.ok, data: result.data });
+  } catch (err) {
+    return res.status(err.code === "CHEATGAME_NOT_CONFIGURED" ? 503 : 502).json({ ok: false, message: err.message });
+  }
+});
+
+app.get("/api/admin/cheatgame/exchange-rate", requireAdminAuth, async (req, res) => {
+  try {
+    const result = await getCheatGameExchangeRate();
+    return res.status(result.ok ? 200 : 502).json({ ok: result.ok, data: result.data });
+  } catch (err) {
+    return res.status(err.code === "CHEATGAME_NOT_CONFIGURED" ? 503 : 502).json({ ok: false, message: err.message });
+  }
+});
+
 app.get("/api/admin/products/:productId/supplier-offers", requireAdminAuth, async (req, res) => {
   const productId = Number(req.params.productId);
   if (!Number.isInteger(productId) || productId <= 0) return res.status(400).json({ message: "ID produk tidak valid" });
@@ -5061,7 +5540,7 @@ app.post(
         });
       }
 
-      if (deliveryStatus === "processing_supplier") {
+      if (deliveryStatus === "processing_supplier" && deliveryType !== "cheatgame_api") {
         await client.query("ROLLBACK");
         return res.status(409).json({
           ok: false,
@@ -5084,6 +5563,15 @@ app.post(
       await client.query("COMMIT");
 
       try {
+        if (deliveryType === "cheatgame_api") {
+          const delivery = await fulfillCheatGameOrder(order, "admin_retry");
+          return res.json({
+            ok: true,
+            message: delivery.pending
+              ? "Retry diterima. CHEATGAME masih memproses order."
+              : "Retry berhasil. Key CHEATGAME sudah dikirim.",
+          });
+        }
         const claim = await claimVipStoreKeyForOrder(order, {
           source: "admin_retry",
         });
@@ -6102,7 +6590,7 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
         console.warn("SUPPLIER CHECKOUT CHECK FAILED:", error.message);
         return res.status(503).json({
           code: "SUPPLIER_UNAVAILABLE",
-          message: "VIPStore sedang tidak dapat diakses. Pembayaran belum dibuat dan saldo tidak dipotong. Coba lagi setelah koneksi supplier pulih.",
+          message: "Supplier sedang tidak dapat diakses. Pembayaran belum dibuat dan saldo tidak dipotong. Coba lagi setelah koneksi supplier pulih.",
         });
       }
     }
@@ -6760,6 +7248,23 @@ app.post("/midtrans-notification", webhookLimiter, async (req, res) => {
 
         const orderDeliveryType = normalizeProductDeliveryType(order.delivery_type);
 
+        if (orderDeliveryType === "cheatgame_api") {
+          await client.query(
+            `UPDATE orders SET payment_status = 'paid', delivery_status = 'processing_supplier', admin_note = $1 WHERE id = $2`,
+            ["Order CHEATGAME sedang diproses otomatis", orderId],
+          );
+          await client.query("COMMIT");
+          try {
+            await fulfillCheatGameOrder(order, "midtrans_webhook");
+          } catch (error) {
+            await query(
+              "UPDATE orders SET delivery_status = 'problem', admin_note = $1 WHERE id = $2 AND delivery_status = 'processing_supplier'",
+              [`CHEATGAME order failed: ${String(error.message || "Unknown error").slice(0, 500)}`, orderId],
+            );
+          }
+          return res.status(200).send("OK");
+        }
+
         if (orderDeliveryType === "vipstore_api") {
           await client.query(
             `UPDATE orders
@@ -7176,6 +7681,28 @@ app.post(
       }
 
       const orderDeliveryType = normalizeProductDeliveryType(order.delivery_type);
+
+      if (orderDeliveryType === "cheatgame_api") {
+        await client.query(
+          `UPDATE orders SET payment_status = 'paid', delivery_status = 'processing_supplier', admin_note = $1 WHERE id = $2`,
+          ["Order CHEATGAME diproses dari konfirmasi admin", orderId],
+        );
+        await client.query("COMMIT");
+        try {
+          const delivery = await fulfillCheatGameOrder(order, "admin_confirm");
+          return res.json({
+            message: delivery.pending
+              ? "Pembayaran dikonfirmasi. CHEATGAME sedang memproses order."
+              : "Pembayaran dikonfirmasi dan key CHEATGAME berhasil dikirim.",
+          });
+        } catch (error) {
+          await query(
+            "UPDATE orders SET delivery_status = 'problem', admin_note = $1 WHERE id = $2 AND delivery_status = 'processing_supplier'",
+            [`CHEATGAME order failed: ${String(error.message || "Unknown error").slice(0, 500)}`, orderId],
+          );
+          return res.status(502).json({ message: "Pembayaran sudah dikonfirmasi, tetapi order CHEATGAME gagal." });
+        }
+      }
 
       if (orderDeliveryType === "vipstore_api") {
         await client.query(
@@ -9122,7 +9649,7 @@ app.get("/public-products", async (req, res) => {
     COALESCE(p.play_status, 'safe') AS play_status,
     CASE
       WHEN LOWER(COALESCE(p.delivery_type, 'auto')) = 'manual' THEN 9999
-      WHEN LOWER(COALESCE(p.delivery_type, 'auto')) IN ('vipstore_api') THEN
+      WHEN LOWER(COALESCE(p.delivery_type, 'auto')) IN ('vipstore_api', 'cheatgame_api') THEN
         CASE
           WHEN COALESCE(p.supplier_maintenance, 0) = 1 THEN 0
           WHEN LOWER(COALESCE(p.supplier_status, '')) IN (
@@ -9189,7 +9716,7 @@ app.get("/auto-promo", async (req, res) => {
         COALESCE(p.play_status, 'safe') AS play_status,
         CASE
           WHEN LOWER(COALESCE(p.delivery_type, 'auto')) = 'manual' THEN 9999
-          WHEN LOWER(COALESCE(p.delivery_type, 'auto')) IN ('vipstore_api') THEN CASE
+          WHEN LOWER(COALESCE(p.delivery_type, 'auto')) IN ('vipstore_api', 'cheatgame_api') THEN CASE
             WHEN COALESCE(p.supplier_maintenance, 0) = 1 THEN 0
             WHEN LOWER(COALESCE(p.supplier_status, '')) IN ('maintenance', 'hidden', 'not_found', 'lookup_failed', 'not_configured', 'mapped_pending') THEN 0
             ELSE GREATEST(COALESCE(p.supplier_stock, 0), 0)
@@ -9313,7 +9840,7 @@ app.post("/api/ai-assistant", aiAssistantLimiter, async (req, res) => {
         COALESCE(p.play_status, 'safe') AS play_status,
         CASE
           WHEN LOWER(COALESCE(p.delivery_type, 'auto')) = 'manual' THEN 1
-          WHEN LOWER(COALESCE(p.delivery_type, 'auto')) IN ('vipstore_api') THEN CASE
+          WHEN LOWER(COALESCE(p.delivery_type, 'auto')) IN ('vipstore_api', 'cheatgame_api') THEN CASE
             WHEN COALESCE(p.supplier_maintenance, 0) = 1 THEN 0
             WHEN LOWER(COALESCE(p.supplier_status, '')) IN ('maintenance', 'hidden', 'not_found', 'lookup_failed', 'not_configured', 'mapped_pending') THEN 0
             ELSE GREATEST(COALESCE(p.supplier_stock, 0), 0)
