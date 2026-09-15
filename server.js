@@ -932,8 +932,9 @@ function maskSecret(value) {
 }
 
 
+const guardedVipStoreRequest = vipStoreClient.createGuardedRequest();
 async function vipStoreRequest(endpoint, options = {}) {
-  return vipStoreClient.request(getVipStoreConfig(), endpoint, options);
+  return guardedVipStoreRequest(getVipStoreConfig(), endpoint, options);
 }
 
 let vipStoreCatalogRequest = null;
@@ -2236,6 +2237,26 @@ function syncVipStoreMappedProducts(options = {}) {
 
 function syncCheatGameMappedProducts(options = {}) {
   return syncSupplierMappedProducts("cheatgame_api", options);
+}
+
+function supplierCheckoutFailure(error, deliveryType) {
+  const supplier = deliveryType === "cheatgame_api" ? "CheatGame" : "VIPStore";
+  const status = Number(error?.supplierHttpCode || error?.diagnostics?.http_status || 0);
+  const prefix = `${supplier} ${status ? `HTTP ${status}` : "API"}: `;
+  const reason = status === 401
+    ? "autentikasi ditolak. Periksa API key, secret, dan waktu server di Environment Render."
+    : status === 403
+      ? "akses server ditolak. Periksa whitelist IP Render atau izin API supplier."
+      : status === 429
+        ? "terlalu banyak request. Tunggu batas permintaan supplier pulih."
+        : error?.code === "VIPSTORE_SECURITY_CHALLENGE"
+          ? "request terkena browser challenge. Minta supplier mengecualikan endpoint API."
+          : "katalog belum dapat diverifikasi. Cek Render Logs untuk penyebab lengkap.";
+  return {
+    code: status === 401 ? "SUPPLIER_AUTH_REJECTED" : "SUPPLIER_UNAVAILABLE",
+    supplier_http_code: status || null,
+    message: prefix + reason + " Pembayaran belum dibuat dan saldo tidak dipotong.",
+  };
 }
 
 async function syncAllMappedSupplierProducts(options = {}) {
@@ -6569,8 +6590,13 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
         const supplierSync = await syncSupplierMappedProducts(productDeliveryType, {
           productId: cleanProductId,
         });
+        if (Number(supplierSync.total_mapped || 0) !== 1) {
+          return res.status(409).json({
+            code: "SUPPLIER_NOT_MAPPED",
+            message: "Produk belum dipetakan ke supplier. Pembayaran belum dibuat dan saldo tidak dipotong.",
+          });
+        }
         if (
-          Number(supplierSync.total_mapped || 0) !== 1 ||
           Number(supplierSync.synced || 0) !== 1 ||
           Number(supplierSync.failed || 0) > 0
         ) {
@@ -6588,10 +6614,7 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
         }
       } catch (error) {
         console.warn("SUPPLIER CHECKOUT CHECK FAILED:", error.message);
-        return res.status(503).json({
-          code: "SUPPLIER_UNAVAILABLE",
-          message: "Supplier sedang tidak dapat diakses. Pembayaran belum dibuat dan saldo tidak dipotong. Coba lagi setelah koneksi supplier pulih.",
-        });
+        return res.status(503).json(supplierCheckoutFailure(error, productDeliveryType));
       }
     }
 

@@ -152,7 +152,8 @@ assert.match(
   /if \(isSupplierDeliveryType\(productDeliveryType\)\) \{\s*try \{\s*const supplierSync = await syncSupplierMappedProducts/,
   "Every supplier checkout must verify live access before accepting buyer payment",
 );
-assert.match(resellerCheckoutRoute, /code: "SUPPLIER_UNAVAILABLE"/);
+assert.match(resellerCheckoutRoute, /supplierCheckoutFailure\(error, productDeliveryType\)/);
+assert.match(resellerCheckoutRoute, /code: "SUPPLIER_NOT_MAPPED"/);
 assert.match(resellerCheckoutRoute, /RESELLER_QUOTE_REQUIRED/);
 assert.match(resellerCheckoutRoute, /isResellerQuoteAccepted/);
 const pageIds = [...page.matchAll(/\bid=["']([^"']+)["']/g)].map(

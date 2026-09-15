@@ -67,8 +67,8 @@ async function request(config, endpoint, options = {}, fetchImpl = fetch) {
     throw apiError("VIPSTORE_INVALID_BASE_URL", `Base URL VIPStore harus ${BASE_URL}`);
   }
   const rawBody = method === "GET" ? "" : JSON.stringify(options.body || {});
-  // The catalog is large and protected by bot detection: never duplicate it automatically.
-  const attempts = method === "GET" && endpoint !== "catalog.php" ? 2 : 1;
+  // Never amplify a failed request, including a browser challenge or timeout.
+  const attempts = 1;
   for (let attempt = 1; attempt <= attempts; attempt++) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), Number(options.timeoutMs) || 30000);
@@ -84,11 +84,12 @@ async function request(config, endpoint, options = {}, fetchImpl = fetch) {
         server: response.headers.get("server") || "",
         request_id: response.headers.get("cf-ray") || "",
         bytes: Buffer.byteLength(raw),
+        retry_after: response.headers.get("retry-after") || "",
       };
       if (response.status >= 300 && response.status < 400) throw apiError("VIPSTORE_REDIRECT", "VIPStore mengalihkan endpoint API. Periksa konfigurasi routing API supplier.", diagnostics);
       let data;
       try { data = JSON.parse(raw); } catch {
-        const challenge = /one moment|just a moment|checking your browser|challenge-platform|captcha|bot verification/i.test(raw);
+        const challenge = /one moment|just a moment|checking your browser|challenge-platform|captcha|bot verification|imunify360|bot-protection/i.test(raw);
         diagnostics.challenge = challenge;
         throw apiError(challenge ? "VIPSTORE_SECURITY_CHALLENGE" : "VIPSTORE_INVALID_RESPONSE",
           challenge ? "VIPStore mengirim halaman pemeriksaan browser ke server. Admin VIPStore perlu mengecualikan endpoint API reseller dari browser challenge."
@@ -111,10 +112,61 @@ async function request(config, endpoint, options = {}, fetchImpl = fetch) {
       const wrapped = String(error.code || "").startsWith("VIPSTORE_") ? error : apiError(
         error.name === "AbortError" ? "VIPSTORE_TIMEOUT" : "VIPSTORE_REQUEST_FAILED",
         error.name === "AbortError" ? "Request VIPStore timeout." : "Koneksi server ke VIPStore gagal.", { endpoint });
-      if (attempt < attempts && ["VIPSTORE_TIMEOUT", "VIPSTORE_REQUEST_FAILED", "VIPSTORE_INVALID_RESPONSE", "VIPSTORE_SECURITY_CHALLENGE"].includes(wrapped.code)) continue;
       throw wrapped;
     } finally { clearTimeout(timer); }
   }
+}
+
+// ponytail: per-process protection; use shared storage before running multiple instances.
+function createGuardedRequest(send = request, now = Date.now) {
+  let blockedUntil = 0;
+  let blockedStatus = 403;
+  const cache = new Map();
+  const pending = new Map();
+  function observe(value) {
+    const status = Number(value?.http_code || value?.diagnostics?.http_status);
+    const challenge = value?.code === "VIPSTORE_SECURITY_CHALLENGE";
+    if (status !== 403 && status !== 429 && !challenge) return;
+    const retryAfter = value?.diagnostics?.retry_after;
+    const retryMs = /^\d+$/.test(retryAfter || "")
+      ? Number(retryAfter) * 1000 : Date.parse(retryAfter) - now();
+    const delay = status === 429 ? 15 * 60 * 1000 : 24 * 60 * 60 * 1000;
+    blockedUntil = Math.max(blockedUntil, now() + Math.max(delay, Number.isFinite(retryMs) ? retryMs : 0));
+    blockedStatus = status === 429 ? 429 : 403;
+    cache.clear();
+  }
+  return async function guardedRequest(config, endpoint, options = {}) {
+    if (now() < blockedUntil) {
+      throw Object.assign(apiError("VIPSTORE_REQUEST_PAUSED",
+        `Request VIPStore dijeda sampai ${new Date(blockedUntil).toISOString()} setelah penolakan supplier. Tidak ada request baru yang dikirim.`,
+        { endpoint, http_status: blockedStatus, retry_at: blockedUntil }),
+      { supplierHttpCode: blockedStatus });
+    }
+    const read = METHODS[endpoint] === "GET";
+    // Hash credentials so a key rotation cannot reuse the previous account's balance.
+    const key = crypto.createHash("sha256").update(JSON.stringify([config, endpoint])).digest("hex");
+    if (read && cache.get(key)?.expires > now()) return cache.get(key).result;
+    if (read && pending.has(key)) return pending.get(key);
+    const task = (async () => {
+      try {
+        const result = await Promise.resolve().then(() => send(config, endpoint, options));
+        observe(result);
+        if (read && result.ok && now() >= blockedUntil) {
+          cache.set(key, { result, expires: now() + 60 * 1000 });
+        }
+        // A purchase or reset can change balance and stock. Never cache or retry POST.
+        if (!read) cache.clear();
+        return result;
+      } catch (error) {
+        observe(error);
+        throw error;
+      } finally {
+        if (read) pending.delete(key);
+      }
+    })();
+    if (read) pending.set(key, task);
+    return task;
+  };
 }
 
 function normalizeCatalogLabel(value) {
@@ -123,4 +175,4 @@ function normalizeCatalogLabel(value) {
   return String(value ?? "").trim();
 }
 
-module.exports = { BASE_URL, METHODS, headersFor, request, normalizeCatalogLabel };
+module.exports = { BASE_URL, METHODS, headersFor, request, createGuardedRequest, normalizeCatalogLabel };

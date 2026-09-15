@@ -1,12 +1,60 @@
 const assert = require("node:assert/strict");
 const crypto = require("node:crypto");
-const { request, headersFor, BASE_URL, METHODS } = require("../server/vipstore-client");
+const { request, createGuardedRequest, headersFor, BASE_URL, METHODS } = require("../server/vipstore-client");
 const config = { baseUrl: BASE_URL, apiKey: "test-key", apiSecret: "test-secret" };
 const response = (body, status = 200, contentType = "application/json") => ({
   ok: status >= 200 && status < 300, status,
   headers: new Map([["content-type", contentType]]), text: async () => body,
 });
 (async () => {
+  let clock = 1000000;
+  let guardedCalls = 0;
+  let nextResult = { ok: true, http_code: 200, data: { success: true, balance: 10 } };
+  const guarded = createGuardedRequest(async () => {
+    guardedCalls++;
+    await Promise.resolve();
+    if (nextResult instanceof Error) throw nextResult;
+    return nextResult;
+  }, () => clock);
+  await Promise.all(Array.from({ length: 20 }, () => guarded(config, "balance.php")));
+  assert.equal(guardedCalls, 1, "Concurrent balance checks share one request");
+  await guarded(config, "balance.php");
+  assert.equal(guardedCalls, 1, "Repeated balance checks use cache");
+  clock += 60001;
+  await guarded(config, "balance.php");
+  assert.equal(guardedCalls, 2, "Balance cache expires");
+  await guarded(config, "claim.php", { method: "POST" });
+  await guarded(config, "claim.php", { method: "POST" });
+  assert.equal(guardedCalls, 4, "Purchases are never deduplicated or cached");
+  await guarded(config, "balance.php");
+  assert.equal(guardedCalls, 5, "Purchase invalidates cached balance");
+  nextResult = { ok: false, http_code: 403 };
+  await guarded(config, "catalog.php");
+  for (const endpoint of Object.keys(METHODS)) {
+    await assert.rejects(guarded(config, endpoint), { code: "VIPSTORE_REQUEST_PAUSED", supplierHttpCode: 403 });
+  }
+  assert.equal(guardedCalls, 6, "403 pauses every endpoint, including cached reads and purchases");
+  clock += 24 * 60 * 60 * 1000;
+  nextResult = Object.assign(new Error("challenge"), { code: "VIPSTORE_SECURITY_CHALLENGE", diagnostics: { http_status: 200 } });
+  await assert.rejects(guarded(config, "balance.php"), { code: "VIPSTORE_SECURITY_CHALLENGE" });
+  await assert.rejects(guarded(config, "claim.php"), { code: "VIPSTORE_REQUEST_PAUSED" });
+  assert.equal(guardedCalls, 7, "HTTP 200 browser challenge also pauses all requests");
+  clock += 24 * 60 * 60 * 1000;
+  nextResult = { ok: false, http_code: 429, diagnostics: { retry_after: "3600" } };
+  await guarded(config, "balance.php");
+  clock += 20 * 60 * 1000;
+  await assert.rejects(guarded(config, "catalog.php"), { supplierHttpCode: 429 });
+  assert.equal(guardedCalls, 8, "Retry-After longer than default is respected");
+  clock += 40 * 60 * 1000;
+  nextResult = { ok: true, http_code: 200, data: { success: true } };
+  await guarded(config, "balance.php");
+  assert.equal(guardedCalls, 9, "Requests resume after cooldown");
+  let challengeCalls = 0;
+  await assert.rejects(request(config, "balance.php", {}, async () => {
+    challengeCalls++;
+    return response("Imunify360 bot-protection", 403, "text/html");
+  }), { code: "VIPSTORE_SECURITY_CHALLENGE" });
+  assert.equal(challengeCalls, 1, "Balance browser challenges are never retried");
   for (const raw of ["", '{"product_id":679,"qty":1}', '{"product_id":"AORUS","key":"a/b"}']) {
     const headers = headersFor(config, raw, 1234, "nonce");
     const hash = crypto.createHash("sha256").update(raw).digest("hex");
@@ -39,7 +87,7 @@ const response = (body, status = 200, contentType = "application/json") => ({
     calls++;
     return new Promise((_, reject) => init.signal.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")), { once: true }));
   }), { code: "VIPSTORE_TIMEOUT" });
-  assert.equal(calls, 2, "AbortError numeric code must be handled and retried only for GET");
+  assert.equal(calls, 1, "Timeouts must not trigger automatic retries");
   calls = 0;
   const denied = await request(config, "catalog.php", {}, async () => { calls++; return response('{"success":false,"message":"test-secret denied"}', 403); });
   assert.equal(denied.ok, false);
