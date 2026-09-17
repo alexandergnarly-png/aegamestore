@@ -3373,6 +3373,37 @@
         font-size: 11px;
       }
 
+      /* Manual order: compact transaction receipt, including 319px screens. */
+      .manual-order-confirm {
+        width: min(420px, calc(100vw - 24px)); max-height: calc(100dvh - 24px);
+        box-sizing: border-box; margin: auto; padding: 20px; overflow-y: auto;
+        border: 1px solid var(--line); border-radius: 22px;
+        background: var(--surface); color: var(--ink); box-shadow: var(--shadow);
+        font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+      }
+      .manual-order-confirm::backdrop { background: rgb(15 18 25 / 55%); }
+      .manual-order-confirm h2 { margin: 6px 0 8px; font-size: 22px; line-height: 1.25; letter-spacing: -.04em; }
+      .manual-order-confirm .receipt-label { color: var(--muted); font: 11px "JetBrains Mono", monospace; text-transform: uppercase; letter-spacing: .08em; }
+      .manual-order-confirm .receipt-product { margin: 0 0 16px; font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
+      .manual-order-confirm .receipt-total { padding: 16px; border-radius: 14px; background: var(--ink); color: var(--surface); }
+      .manual-order-confirm .receipt-total span { display: block; font-size: 12px; }
+      .manual-order-confirm .receipt-total strong { display: block; margin-top: 6px; font-size: 28px; line-height: 1.25; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+      .manual-order-confirm dl { margin: 14px 0; }
+      .manual-order-confirm dl div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 12px; }
+      .manual-order-confirm dt { color: var(--muted); }
+      .manual-order-confirm dd { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; }
+      .manual-order-confirm .receipt-note { color: var(--muted); font-size: 11px; line-height: 1.6; }
+      .manual-order-confirm .receipt-actions { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 16px; }
+      .manual-order-confirm button { width: 100%; min-height: 44px; padding: 10px 12px; border-radius: 12px; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+      .manual-order-confirm .receipt-cancel { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
+      .manual-order-confirm button:focus-visible,
+      .reseller-manual-order-form input:focus-visible,
+      .reseller-manual-order-form select:focus-visible { outline: 3px solid #355cff; outline-offset: 3px; }
+      .reseller-manual-order-form .field { min-width: 0; }
+      .reseller-manual-order-form select { width: 100%; min-width: 0; min-height: 48px; font-size: 14px; text-overflow: ellipsis; }
+      .reseller-product-search { width: 100%; min-height: 44px; font-size: 16px; }
+      .reseller-product-count { color: var(--muted); font-size: 11px; line-height: 1.5; }
+
       .swal2-popup {
         border: 1px solid var(--line) !important;
         border-radius: 28px !important;
@@ -11155,11 +11186,69 @@
             <form class="reseller-manual-order-form" onsubmit="createManualResellerOrder(event)"><div class="reseller-manual-order-head"><div><strong>Order manual VIPStore</strong></div><span>Beli key melalui panel VIPStore, lalu tempel di sini. Harga dan potongan saldo dihitung otomatis dari modal tersimpan.</span></div><div class="field"><label for="resellerManualProduct">Produk</label><select id="resellerManualProduct" required onchange="updateManualResellerQuote()"><option value="">Pilih produk VIPStore</option>${manualProductOptions}</select></div><div class="field"><label for="resellerManualQuantity">Jumlah key</label><input id="resellerManualQuantity" type="number" inputmode="numeric" min="1" max="5" value="1" required oninput="updateManualResellerQuote()"></div><div class="field"><label for="resellerManualSupplierCost">Modal tersimpan</label><input id="resellerManualSupplierCost" type="text" value="—" readonly aria-label="Modal VIPStore tersimpan"></div><div class="field reseller-manual-order-keys"><label for="resellerManualKeys">Key yang akan dikirim</label><textarea id="resellerManualKeys" required maxlength="2500" placeholder="Satu key per baris" aria-describedby="resellerManualOrderStatus" oninput="updateManualResellerQuote()"></textarea><small>Saldo hanya dipotong jika jumlah key cocok dan order berhasil tersimpan.</small></div><div class="reseller-manual-summary" aria-live="polite"><div><span>Saldo awal</span><strong id="resellerManualBalanceBefore">${formatRupiah(activeResellerBalance)}</strong></div><div><span>Harga per key</span><strong id="resellerManualUnitPrice">—</strong></div><div class="is-debit"><span>Total dipotong</span><strong id="resellerManualTotal">—</strong></div><div><span>Saldo setelah</span><strong id="resellerManualBalanceAfter">—</strong></div></div><div id="resellerManualOrderStatus" class="reseller-manual-order-status">Pilih produk dan tempel key untuk melihat potongan.</div><div class="reseller-manual-order-actions"><button id="resellerManualOrderButton" type="submit" disabled>Potong saldo &amp; kirim key</button></div></form>
             <form class="reseller-adjustment-form" onsubmit="adjustResellerBalance(event)"><div class="reseller-adjustment-head"><strong>Penyesuaian saldo</strong><span>Setiap perubahan masuk ke mutasi akun.</span></div><div class="field"><label for="resellerAdjustmentDirection">Penyesuaian</label><select id="resellerAdjustmentDirection"><option value="credit">Tambah saldo</option><option value="debit">Kurangi saldo</option></select></div><div class="field"><label for="resellerAdjustmentAmount">Nominal</label><input id="resellerAdjustmentAmount" type="number" inputmode="numeric" min="1000" max="2000000" step="1000" required placeholder="Rp 50.000"></div><div class="field"><label for="resellerAdjustmentReason">Alasan</label><input id="resellerAdjustmentReason" type="text" minlength="4" maxlength="300" required placeholder="Contoh: koreksi deposit"></div><button type="submit">Simpan mutasi</button></form>
             <div class="reseller-detail-ledger-grid"><section class="reseller-detail-block"><h3>Mutasi saldo</h3><div class="table-wrap"><table><thead><tr><th>Waktu</th><th>Mutasi</th><th>Saldo</th></tr></thead><tbody>${ledgerRows || `<tr><td class="empty" colspan="3">Belum ada mutasi.</td></tr>`}</tbody></table></div></section><section class="reseller-detail-block"><h3>Deposit</h3><div class="table-wrap"><table><thead><tr><th>Waktu</th><th>Nominal</th><th>Status</th></tr></thead><tbody>${topupRows || `<tr><td class="empty" colspan="3">Belum ada deposit.</td></tr>`}</tbody></table></div></section><section class="reseller-detail-block"><h3>Order reseller</h3><div class="table-wrap"><table><thead><tr><th>Order</th><th>Bayar</th><th>Laba</th></tr></thead><tbody>${orderRows || `<tr><td class="empty" colspan="3">Belum ada order.</td></tr>`}</tbody></table></div></section></div>`;
+          setupManualProductSearch();
         } catch (err) {
           meta.textContent = "Data tidak tersedia";
           meta.dataset.status = "error";
           content.innerHTML = `<div class="empty">${escapeHtml(err.message)}</div>`;
         }
+      }
+
+      function setupManualProductSearch() {
+        const select = document.getElementById("resellerManualProduct");
+        if (!select || document.getElementById("resellerProductSearch")) return;
+        const input = document.createElement("input");
+        input.id = "resellerProductSearch";
+        input.type = "search";
+        input.className = "reseller-product-search";
+        input.placeholder = "Cari game, brand, atau durasi";
+        input.setAttribute("aria-label", "Cari produk order manual");
+        const count = document.createElement("small");
+        count.className = "reseller-product-count";
+        count.setAttribute("role", "status");
+        const options = [...select.options].map((option) => option.cloneNode(true));
+        const filter = () => {
+          const value = select.value;
+          const query = input.value.trim().toLocaleLowerCase();
+          const matches = options.filter((option) => option.value && option.textContent.toLocaleLowerCase().includes(query));
+          const visible = options.filter((option) => !option.value || option.value === value || matches.includes(option));
+          select.replaceChildren(...visible.map((option) => option.cloneNode(true)));
+          select.value = value;
+          count.textContent = `${matches.length} produk cocok${value ? " · pilihan saat ini tetap disimpan" : ""}`;
+        };
+        select.before(input);
+        select.after(count);
+        input.addEventListener("input", filter);
+        filter();
+      }
+
+      function showResellerDialog(title, content, confirmText = "Mengerti", cancelText = "") {
+        const previousFocus = document.activeElement;
+        const dialog = document.createElement("dialog");
+        dialog.className = "manual-order-confirm";
+        dialog.setAttribute("aria-labelledby", "manualOrderConfirmTitle");
+        dialog.innerHTML = `<span class="receipt-label">Transaksi reseller</span>
+          <h2 id="manualOrderConfirmTitle">${escapeHtml(title)}</h2>${content}
+          <form method="dialog" class="receipt-actions"><button value="confirm" ${cancelText ? "" : "autofocus"}>${escapeHtml(confirmText)}</button>${cancelText ? `<button value="cancel" class="receipt-cancel" autofocus>${escapeHtml(cancelText)}</button>` : ""}</form>`;
+        document.body.append(dialog);
+        return new Promise((resolve) => {
+          dialog.addEventListener("close", () => {
+            const isConfirmed = dialog.returnValue === "confirm";
+            dialog.remove();
+            if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
+            resolve({ isConfirmed });
+          }, { once: true });
+          dialog.showModal();
+        });
+      }
+
+      function confirmManualResellerOrder(quote) {
+        return showResellerDialog("Periksa potongan saldo", `
+          <p class="receipt-product">${escapeHtml(`${quote.product.game} · ${quote.product.brand} — ${quote.product.duration}`)}</p>
+          <div class="receipt-total"><span>Total dipotong · ${quote.quantity} key</span><strong>${formatRupiah(quote.total)}</strong></div>
+          <dl><div><dt>Harga per key</dt><dd>${formatRupiah(quote.product.unit_idr)}</dd></div><div><dt>Saldo awal</dt><dd>${formatRupiah(activeResellerBalance)}</dd></div><div><dt>Saldo setelah order</dt><dd>${formatRupiah(quote.balanceAfter)}</dd></div></dl>
+          <p class="receipt-note">Pastikan produk dan key sudah benar. Saldo dipotong saat order berhasil disimpan.</p>`,
+          "Potong saldo & kirim key", "Kembali periksa");
       }
 
       function updateManualResellerQuote() {
@@ -11193,11 +11282,7 @@
         if (!activeResellerId) return;
         const quote = updateManualResellerQuote();
         if (!quote) return;
-        const confirmation = await Swal.fire({
-          title: "Potong saldo & kirim key?",
-          html: `<p><strong>${escapeHtml(`${quote.product.game} · ${quote.product.brand} - ${quote.product.duration}`)}</strong></p><p>${quote.quantity} key × ${formatRupiah(quote.product.unit_idr)} = <strong>${formatRupiah(quote.total)}</strong></p><p>Saldo: ${formatRupiah(activeResellerBalance)} → <strong>${formatRupiah(quote.balanceAfter)}</strong></p>`,
-          icon: "warning", showCancelButton: true, confirmButtonText: "Ya, proses order", cancelButtonText: "Batal",
-        });
+        const confirmation = await confirmManualResellerOrder(quote);
         if (!confirmation.isConfirmed) return;
         const button = document.getElementById("resellerManualOrderButton");
         if (button) { button.disabled = true; button.setAttribute("aria-busy", "true"); button.textContent = "Memproses..."; }
@@ -11209,10 +11294,10 @@
           });
           const data = await res.json();
           if (!res.ok) throw new Error(data.message || "Order manual gagal diproses");
-          await Swal.fire("Order berhasil", `${data.message}. Dipotong ${formatRupiah(data.deducted_idr)}; saldo ${formatRupiah(data.balance_after)}.`, "success");
+          await showResellerDialog("Order berhasil", `<p class="receipt-product">${escapeHtml(data.message || "Order tersimpan")}. Dipotong ${formatRupiah(data.deducted_idr)}; saldo ${formatRupiah(data.balance_after)}.</p>`);
           await Promise.all([openResellerDetail(activeResellerId), loadResellerControl()]);
         } catch (err) {
-          Swal.fire("Gagal", err.message, "error");
+          await showResellerDialog("Order belum berhasil", `<p class="receipt-product">${escapeHtml(err.message)}</p>`);
           if (button) { button.disabled = false; button.removeAttribute("aria-busy"); button.textContent = "Potong saldo & kirim key"; }
         }
       }
@@ -11223,15 +11308,15 @@
         const direction = document.getElementById("resellerAdjustmentDirection")?.value;
         const amount = Number(document.getElementById("resellerAdjustmentAmount")?.value || 0);
         const reason = document.getElementById("resellerAdjustmentReason")?.value.trim();
-        const confirmation = await Swal.fire({ title: direction === "credit" ? "Tambah saldo reseller?" : "Kurangi saldo reseller?", html: `<p><strong>${formatRupiah(amount)}</strong></p><p>${escapeHtml(reason || "")}</p>`, icon: "warning", showCancelButton: true, confirmButtonText: "Simpan mutasi", cancelButtonText: "Batal" });
+        const confirmation = await showResellerDialog(direction === "credit" ? "Tambah saldo reseller?" : "Kurangi saldo reseller?", `<p class="receipt-product"><strong>${formatRupiah(amount)}</strong></p><p class="receipt-product">${escapeHtml(reason || "")}</p>`, "Simpan mutasi", "Batal");
         if (!confirmation.isConfirmed) return;
         try {
           const res = await fetch(`/api/admin/resellers/${encodeURIComponent(activeResellerId)}/balance`, { method: "POST", headers: { "Content-Type": "application/json", "x-csrf-token": getCsrfToken() }, body: JSON.stringify({ direction, amount, reason }) });
           const data = await res.json();
           if (!res.ok) throw new Error(data.message || "Mutasi gagal disimpan");
-          await Swal.fire("Tersimpan", `${data.message}. Saldo ${formatRupiah(data.balance)}.`, "success");
+          await showResellerDialog("Tersimpan", `<p class="receipt-product">${escapeHtml(data.message || "Mutasi tersimpan")}. Saldo ${formatRupiah(data.balance)}.</p>`);
           await Promise.all([openResellerDetail(activeResellerId), loadResellerControl()]);
-        } catch (err) { Swal.fire("Gagal", err.message, "error"); }
+        } catch (err) { await showResellerDialog("Mutasi belum berhasil", `<p class="receipt-product">${escapeHtml(err.message)}</p>`); }
       }
 
       async function loadWalletTopups() {

@@ -13,6 +13,54 @@ scripts.forEach(([, source]) =>
   assert.doesNotThrow(() => new Function(source)),
 );
 
+// Manual order confirmation uses the native top layer, not aria-hidden on its trigger.
+const manualConfirm = admin.slice(admin.indexOf("function showResellerDialog("), admin.indexOf("function updateManualResellerQuote()"));
+assert.match(manualConfirm, /document\.createElement\("dialog"\)/);
+assert.match(manualConfirm, /dialog\.showModal\(\)/);
+assert.match(manualConfirm, /previousFocus\.focus\(\{ preventScroll: true \}\)/);
+assert.match(manualConfirm, /value="cancel"[^>]*autofocus/);
+assert.match(manualConfirm, /escapeHtml\(`/);
+assert.doesNotMatch(manualConfirm, /Swal|setAttribute\("aria-hidden"/);
+assert.match(admin, /await confirmManualResellerOrder\(quote\)/);
+const resellerMoneyFlow = admin.slice(admin.indexOf("async function createManualResellerOrder(event)"), admin.indexOf("async function loadWalletTopups()"));
+assert.doesNotMatch(resellerMoneyFlow, /Swal\.fire/, "All confirmations and results inside the reseller dialog must use the top layer");
+assert.match(resellerMoneyFlow, /await showResellerDialog\("Order berhasil"/);
+assert.match(resellerMoneyFlow, /await showResellerDialog\("Order belum berhasil"/);
+assert.match(admin, /setupManualProductSearch\(\);/);
+assert.match(admin, /option\.value === value \|\| matches\.includes\(option\)/);
+
+// Exercise confirm/cancel and focus restoration without network or a real order.
+const vm = require("node:vm");
+let confirmationDialog;
+let restoredFocus = 0;
+const confirmationContext = {
+  document: {
+    activeElement: { isConnected: true, focus() { restoredFocus++; } },
+    body: { append() {} },
+    createElement() {
+      confirmationDialog = { setAttribute() {}, addEventListener(_name, callback) { this.onClose = callback; }, showModal() { this.open = true; }, remove() { this.open = false; } };
+      return confirmationDialog;
+    },
+  },
+  activeResellerBalance: 100000,
+  escapeHtml: (value) => String(value).replaceAll("<", "&lt;"),
+  formatRupiah: (value) => `Rp ${value}`,
+};
+vm.createContext(confirmationContext);
+vm.runInContext(manualConfirm, confirmationContext);
+(async () => {
+  for (const value of ["confirm", "cancel", ""]) {
+    const result = confirmationContext.confirmManualResellerOrder({ product: { game: "<test>", brand: "Brand", duration: "1 hari", unit_idr: 1000 }, quantity: 1, total: 1000, balanceAfter: 99000 });
+    assert.equal(confirmationDialog.open, true);
+    assert.ok(confirmationDialog.innerHTML.includes("&lt;test>"));
+    confirmationDialog.returnValue = value;
+    confirmationDialog.onClose();
+    assert.equal((await result).isConfirmed, value === "confirm");
+    assert.equal(confirmationDialog.open, false);
+  }
+  assert.equal(restoredFocus, 3);
+})().catch((error) => { console.error(error); process.exitCode = 1; });
+
 [
   'customClass: { popup: "admin-key-popup" }',
   'class="admin-key-state" role="alert"',
