@@ -11121,6 +11121,10 @@ app.delete("/api/admin/wallet/topups/:id", requireAdminAuth, requireAdminCsrf, a
 });
 
 app.post("/api/admin/wallet/grant", requireAdminAuth, requireAdminCsrf, async (req, res) => {
+  const direction = req.body?.direction ?? "credit";
+  const requestId = String(req.body?.request_id || "");
+  if (!["credit", "debit"].includes(direction)) return res.status(400).json({ message: "Jenis penyesuaian tidak valid" });
+  if (direction === "debit" && !/^[0-9a-f-]{36}$/i.test(requestId)) return res.status(400).json({ message: "ID penyesuaian wajib valid" });
   const userId = Number(req.body?.user_id);
   const amount = Number(req.body?.amount);
   const reason = String(req.body?.reason || "").trim().slice(0, 300);
@@ -11132,27 +11136,38 @@ app.post("/api/admin/wallet/grant", requireAdminAuth, requireAdminCsrf, async (r
   const client = await db.connect();
   try {
     await client.query("BEGIN");
+    if (direction === "debit") await client.query("SELECT pg_advisory_xact_lock(hashtext($1))", [requestId]);
     const userResult = await client.query(`SELECT id, username FROM users WHERE id = $1 FOR UPDATE`, [userId]);
     const targetUser = userResult.rows[0];
     if (!targetUser) { await client.query("ROLLBACK"); return res.status(404).json({ message: "Buyer tidak ditemukan" }); }
     await ensureWalletAccount(client, targetUser.id);
     const wallet = (await client.query(`SELECT balance FROM wallet_accounts WHERE user_id = $1 FOR UPDATE`, [targetUser.id])).rows[0];
     const before = Number(wallet?.balance || 0);
-    const after = before + amount;
+    if (direction === "debit") {
+      const previous = await client.query(`SELECT user_id, amount, description, balance_after FROM wallet_ledger WHERE reference_type = 'admin_debit' AND reference_id = $1`, [requestId]);
+      if (previous.rows.length) {
+        const entry = previous.rows[0];
+        await client.query("ROLLBACK");
+        if (Number(entry.user_id) !== userId || Number(entry.amount) !== amount || entry.description !== reason) return res.status(409).json({ message: "ID penyesuaian sudah digunakan" });
+        return res.json({ message: "Potongan ini sudah tercatat; tidak dipotong ulang", balance: before });
+      }
+    }
+    const after = direction === "debit" ? before - amount : before + amount;
+    if (after < 0) { await client.query("ROLLBACK"); return res.status(409).json({ message: "Saldo buyer tidak cukup untuk potongan ini" }); }
     if (after > WALLET_MAX_BALANCE) { await client.query("ROLLBACK"); return res.status(400).json({ message: "Saldo buyer melewati batas maksimum" }); }
     const now = new Date().toISOString();
     const grantId = `GRANT-${crypto.randomUUID()}`;
     await client.query(`UPDATE wallet_accounts SET balance = $1, updated_at = $2 WHERE user_id = $3`, [after, now, targetUser.id]);
     await client.query(`INSERT INTO wallet_ledger
       (user_id, entry_type, direction, amount, balance_before, balance_after, reference_type, reference_id, description, admin_username, created_at)
-      VALUES ($1, 'admin_adjustment', 'credit', $2, $3, $4, 'admin_grant', $5, $6, $7, $8)`,
-      [targetUser.id, amount, before, after, grantId, reason, adminUsername, now]);
+      VALUES ($1, 'admin_adjustment', $9, $2, $3, $4, $10, $5, $6, $7, $8)`,
+      [targetUser.id, amount, before, after, direction === "debit" ? requestId : grantId, reason, adminUsername, now, direction, direction === "debit" ? "admin_debit" : "admin_grant"]);
     await client.query("COMMIT");
-    return res.json({ message: `Saldo ${targetUser.username} bertambah ${formatWalletAmountForMessage(amount)}`, username: targetUser.username, balance: after });
+    return res.json({ message: `Saldo ${targetUser.username} ${direction === "debit" ? "berkurang" : "bertambah"} ${formatWalletAmountForMessage(amount)}`, username: targetUser.username, balance: after });
   } catch (err) {
     await client.query("ROLLBACK").catch(() => {});
     console.error("ERROR ADMIN WALLET GRANT:", err);
-    return res.status(500).json({ message: "Gagal menambahkan saldo" });
+    return res.status(500).json({ message: "Gagal menyesuaikan saldo" });
   } finally { client.release(); }
 });
 // ----------------------------------------------

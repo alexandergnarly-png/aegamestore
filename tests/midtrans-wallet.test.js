@@ -100,7 +100,7 @@ const admin = fs.readFileSync("views/admin.html", "utf8");
   'class="card wallet-history-card',
   "loadWalletGrantUsers",
   "syncWalletGrantUserSelection",
-  "JSON.stringify({ user_id: userId, amount, reason })",
+  "JSON.stringify({ user_id: userId, amount, reason, direction, request_id: isDebit ? walletDebitRequest.id : undefined })",
   "setWalletGrantUsd(10)",
   "updateWalletGrantUsdEstimate",
   'id="vipResetProductSelect"',
@@ -150,3 +150,49 @@ const walletGrantRoute = server.slice(
 assert.doesNotMatch(walletGrantRoute, /LOWER\(username\)/, "Wallet grant must target the selected buyer ID, not an ambiguous username");
 
 console.log("Midtrans wallet security check passed.");
+
+// Execute the actual route with a transactional DB stub: no real wallet is touched.
+(async () => {
+  const vm = require("node:vm");
+  let handler;
+  let balance = 5000;
+  let entry;
+  let writes = 0;
+  const client = {
+    async query(sql, values = []) {
+      if (sql.includes("SELECT id, username")) return { rows: [{ id: 1, username: "buyer" }] };
+      if (sql.includes("SELECT balance FROM wallet_accounts")) return { rows: [{ balance }] };
+      if (sql.includes("SELECT user_id, amount")) return { rows: entry ? [entry] : [] };
+      if (sql.includes("UPDATE wallet_accounts")) { balance = values[0]; writes++; }
+      if (sql.includes("INSERT INTO wallet_ledger")) {
+        assert.equal(values[8], "debit");
+        assert.equal(values[9], "admin_debit");
+        entry = { user_id: values[0], amount: values[1], description: values[5], balance_after: values[3] };
+      }
+      return { rows: [] };
+    }, release() {},
+  };
+  vm.runInNewContext(walletGrantRoute, {
+    app: { post(_path, ...args) { handler = args.at(-1); } },
+    requireAdminAuth() {}, requireAdminCsrf() {}, WALLET_MAX_TOPUP: 2000000,
+    WALLET_MAX_BALANCE: 10000000, getAdminSessionUsername: async () => "admin",
+    db: { connect: async () => client }, ensureWalletAccount: async () => {},
+    crypto: { randomUUID: () => "test" }, formatWalletAmountForMessage: String, console,
+  });
+  async function call(body) {
+    const result = { statusCode: 200, status(value) { this.statusCode = value; return this; }, json(value) { this.body = value; return this; } };
+    await handler({ body }, result);
+    return result;
+  }
+  const body = { user_id: 1, amount: 2000, reason: "Koreksi", direction: "debit", request_id: "12345678-1234-1234-1234-123456789012" };
+  assert.equal((await call({ ...body, amount: 6000 })).statusCode, 409);
+  assert.equal(writes, 0, "Insufficient balance cannot change wallet");
+  assert.equal((await call({ ...body, reason: "" })).statusCode, 400);
+  assert.equal((await call({ ...body, direction: "invalid" })).statusCode, 400);
+  assert.equal((await call(body)).statusCode, 200);
+  assert.equal(balance, 3000);
+  assert.equal((await call(body)).statusCode, 200);
+  assert.equal(writes, 1, "Replay must not deduct twice");
+  assert.equal((await call({ ...body, amount: 1000 })).statusCode, 409);
+  console.log("Manual buyer debit validation, ledger and replay checks passed.");
+})().catch((error) => { console.error(error); process.exitCode = 1; });

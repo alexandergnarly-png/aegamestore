@@ -10730,15 +10730,16 @@
       <div class="wallet-hero delay-1">
         <div class="wallet-hero-copy">
           <div class="wallet-hero-icon" aria-hidden="true"><svg class="ui-icon"><use href="#icon-wallet"></use></svg></div>
-          <div><span class="wallet-kicker">OWNER CREDIT DESK</span><h1>AE Credit</h1><p>Tambah saldo buyer dan cek pembayaran deposit dari satu halaman.</p></div>
+          <div><span class="wallet-kicker">OWNER CREDIT DESK</span><h1>AE Credit</h1><p>Kelola saldo buyer dan cek pembayaran deposit dari satu halaman.</p></div>
         </div>
         <div class="wallet-rate-card"><span>Kurs grant</span><strong id="walletHeroRate">Memuat...</strong><small>USD / IDR reseller</small></div>
       </div>
       <div class="wallet-grid">
         <article class="card wallet-grant-card delay-1">
-          <div class="wallet-card-head"><div><span class="wallet-card-kicker">CREDIT ENTRY</span><h2>Tambah saldo</h2><p>Pilih buyer, tentukan nominal, lalu catat alasannya.</p></div><div class="section-badge">Owner only</div></div>
-          <div class="wallet-note"><svg class="ui-icon" aria-hidden="true"><use href="#icon-check"></use></svg><span>Setiap grant masuk ke mutasi akun beserta nama admin.</span></div>
+          <div class="wallet-card-head"><div><span class="wallet-card-kicker">CREDIT ENTRY</span><h2>Penyesuaian saldo</h2><p>Pilih buyer, tambah atau kurangi saldo, lalu catat alasannya.</p></div><div class="section-badge">Owner only</div></div>
+          <div class="wallet-note"><svg class="ui-icon" aria-hidden="true"><use href="#icon-check"></use></svg><span>Setiap penyesuaian masuk ke mutasi akun beserta nama admin.</span></div>
           <form class="wallet-grant-form" onsubmit="grantWalletCredit(event)">
+            <div class="field"><label for="walletGrantDirection">Jenis penyesuaian</label><select id="walletGrantDirection" onchange="document.querySelector('#walletGrantSubmit span').textContent = this.value === 'debit' ? 'Kurangi AE Credit' : 'Tambah AE Credit'"><option value="credit">Tambah saldo</option><option value="debit">Kurangi saldo</option></select><small>Potongan tidak membuat order atau mengirim key. Semua perubahan dicatat di mutasi.</small></div>
             <input id="walletGrantUserId" type="hidden" />
             <div class="field">
               <label for="walletGrantUsername">Akun penerima</label>
@@ -10751,7 +10752,7 @@
               </div>
             </div>
             <div class="field">
-              <label for="walletGrantAmount">Nominal credit</label>
+              <label for="walletGrantAmount">Nominal penyesuaian</label>
               <div class="wallet-amount-control"><span class="wallet-amount-prefix">Rp</span><input id="walletGrantAmount" type="number" min="1000" max="2000000" step="1" inputmode="numeric" placeholder="50000" oninput="updateWalletGrantUsdEstimate()" required /></div>
               <div class="wallet-usd-tools"><div class="wallet-usd-quick" aria-label="Pilih nominal USD"><button type="button" data-wallet-usd="10" onclick="setWalletGrantUsd(10)">$10</button><button type="button" data-wallet-usd="25" onclick="setWalletGrantUsd(25)">$25</button><button type="button" data-wallet-usd="50" onclick="setWalletGrantUsd(50)">$50</button><button type="button" data-wallet-usd="100" onclick="setWalletGrantUsd(100)">$100</button></div><p class="wallet-usd-estimate" id="walletGrantUsdEstimate" aria-live="polite">Memuat kurs USD...</p></div>
             </div>
@@ -10994,6 +10995,7 @@
       let walletGrantUserMatches = [];
       let walletGrantUserActiveIndex = -1;
       let walletGrantInFlight = false;
+      let walletDebitRequest = null;
 
       function toggleSidebar() {
         const isCollapsed = document.body.classList.toggle("sidebar-collapsed");
@@ -11629,6 +11631,8 @@
         const userId = Number(document.getElementById("walletGrantUserId")?.value || 0);
         const selectedUser = ADMIN_USERS_CACHE.find((item) => Number(item.id) === userId);
         const amount = Number(document.getElementById("walletGrantAmount")?.value || 0);
+        const direction = document.getElementById("walletGrantDirection")?.value || "credit";
+        const isDebit = direction === "debit";
         const reason = document.getElementById("walletGrantReason")?.value.trim();
         const submit = document.getElementById("walletGrantSubmit");
         if (!selectedUser) return Swal.fire("Pilih akun buyer", "Ketik nama lalu pilih username dari daftar yang muncul.", "warning");
@@ -11639,12 +11643,15 @@
           submit.setAttribute("aria-busy", "true");
         }
         try {
-          const confirm = await Swal.fire({ title: "Tambah saldo buyer?", html: `<p><strong>${escapeHtml(selectedUser.username)}</strong> · Buyer #${escapeHtml(selectedUser.id)}</p><p>Nominal: <strong>${formatRupiah(amount)}</strong></p><p>Catatan: ${escapeHtml(reason)}</p>`, icon: "warning", showCancelButton: true, confirmButtonText: "Tambah saldo", cancelButtonText: "Batal" });
+          const confirm = await Swal.fire({ title: isDebit ? "Kurangi saldo buyer?" : "Tambah saldo buyer?", html: `<p><strong>${escapeHtml(selectedUser.username)}</strong> · Buyer #${escapeHtml(selectedUser.id)}</p><p>${isDebit ? "Potongan" : "Tambahan"}: <strong>${formatRupiah(amount)}</strong></p><p>Catatan: ${escapeHtml(reason)}</p>`, icon: "warning", showCancelButton: true, focusCancel: isDebit, confirmButtonText: isDebit ? "Ya, kurangi saldo" : "Tambah saldo", cancelButtonText: "Batal" });
           if (!confirm.isConfirmed) return;
-          const res = await fetch("/api/admin/wallet/grant", { method: "POST", headers: { "Content-Type": "application/json", "x-csrf-token": getCsrfToken() }, body: JSON.stringify({ user_id: userId, amount, reason }) });
+          const signature = JSON.stringify([userId, amount, reason]);
+          if (isDebit && walletDebitRequest?.signature !== signature) walletDebitRequest = { signature, id: crypto.randomUUID() };
+          const res = await fetch("/api/admin/wallet/grant", { method: "POST", headers: { "Content-Type": "application/json", "x-csrf-token": getCsrfToken() }, body: JSON.stringify({ user_id: userId, amount, reason, direction, request_id: isDebit ? walletDebitRequest.id : undefined }) });
           const data = await res.json();
           if (!res.ok) throw new Error(data.message || "Grant gagal");
-          await Swal.fire("Saldo ditambahkan", `${data.message}. Saldo sekarang ${formatRupiah(data.balance)}.`, "success");
+          walletDebitRequest = null;
+          await Swal.fire(isDebit ? "Saldo dikurangi" : "Saldo ditambahkan", `${data.message}. Saldo sekarang ${formatRupiah(data.balance)}.`, "success");
           document.getElementById("walletGrantUsername").value = "";
           document.getElementById("walletGrantUserId").value = "";
           document.getElementById("walletGrantAmount").value = "";
