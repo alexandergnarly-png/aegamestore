@@ -2240,22 +2240,11 @@ function syncCheatGameMappedProducts(options = {}) {
 }
 
 function supplierCheckoutFailure(error, deliveryType) {
-  const supplier = deliveryType === "cheatgame_api" ? "CheatGame" : "VIPStore";
   const status = Number(error?.supplierHttpCode || error?.diagnostics?.http_status || 0);
-  const prefix = `${supplier} ${status ? `HTTP ${status}` : "API"}: `;
-  const reason = status === 401
-    ? "autentikasi ditolak. Periksa API key, secret, dan waktu server di Environment Render."
-    : status === 403
-      ? "akses server ditolak. Periksa whitelist IP Render atau izin API supplier."
-      : status === 429
-        ? "terlalu banyak request. Tunggu batas permintaan supplier pulih."
-        : error?.code === "VIPSTORE_SECURITY_CHALLENGE"
-          ? "request terkena browser challenge. Minta supplier mengecualikan endpoint API."
-          : "katalog belum dapat diverifikasi. Cek Render Logs untuk penyebab lengkap.";
   return {
     code: status === 401 ? "SUPPLIER_AUTH_REJECTED" : "SUPPLIER_UNAVAILABLE",
     supplier_http_code: status || null,
-    message: prefix + reason + " Pembayaran belum dibuat dan saldo tidak dipotong.",
+    message: "Terjadi kesalahan. Silakan coba lagi nanti.",
   };
 }
 
@@ -6613,7 +6602,13 @@ app.post("/create-order", orderLimiter, requireUserCsrf, async (req, res) => {
           throw new Error("Produk reseller berubah saat harga supplier diperiksa");
         }
       } catch (error) {
-        console.warn("SUPPLIER CHECKOUT CHECK FAILED:", error.message);
+        console.warn("SUPPLIER CHECKOUT CHECK FAILED:", {
+          supplier: productDeliveryType, code: error.code || "SUPPLIER_CHECK_FAILED",
+          http_status: error.supplierHttpCode || error.diagnostics?.http_status || null,
+          endpoint: error.diagnostics?.endpoint || "catalog.php",
+          elapsed_ms: error.diagnostics?.elapsed_ms || null,
+          message: error.message,
+        });
         return res.status(503).json(supplierCheckoutFailure(error, productDeliveryType));
       }
     }

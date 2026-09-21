@@ -2528,6 +2528,13 @@ async function buy() {
       return;
     }
 
+    // Never treat a failed checkout as a successful payment/legacy redirect.
+    if (!res.ok && (res.status >= 500 || String(data.code || "").startsWith("SUPPLIER_"))) {
+      setLoading(false);
+      await Swal.fire({ icon: "error", title: "Error", text: "Terjadi kesalahan. Silakan coba lagi nanti.", confirmButtonColor: "#0a0a0a" });
+      return;
+    }
+
     if (data.binanceManual) {
       closeOrderModal(false);
       setLoading(false);

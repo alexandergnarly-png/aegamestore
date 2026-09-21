@@ -8,6 +8,17 @@ const response = (body, status = 200, contentType = "application/json") => ({
 });
 (async () => {
   let clock = 1000000;
+  let timeoutCalls = 0;
+  const timeoutGuard = createGuardedRequest(async () => {
+    timeoutCalls++;
+    throw Object.assign(new Error("timeout"), { code: "VIPSTORE_TIMEOUT" });
+  }, () => clock);
+  await assert.rejects(timeoutGuard(config, "catalog.php"), { code: "VIPSTORE_TIMEOUT" });
+  await assert.rejects(timeoutGuard(config, "balance.php"), { code: "VIPSTORE_REQUEST_PAUSED", supplierHttpCode: 503 });
+  assert.equal(timeoutCalls, 1);
+  clock += 60000;
+  await assert.rejects(timeoutGuard(config, "catalog.php"), { code: "VIPSTORE_TIMEOUT" });
+  assert.equal(timeoutCalls, 2, "Timeout cooldown expires without automatic retry");
   let guardedCalls = 0;
   let nextResult = { ok: true, http_code: 200, data: { success: true, balance: 10 } };
   const guarded = createGuardedRequest(async () => {

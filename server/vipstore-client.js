@@ -69,6 +69,7 @@ async function request(config, endpoint, options = {}, fetchImpl = fetch) {
   const rawBody = method === "GET" ? "" : JSON.stringify(options.body || {});
   // Never amplify a failed request, including a browser challenge or timeout.
   const attempts = 1;
+  const startedAt = Date.now();
   for (let attempt = 1; attempt <= attempts; attempt++) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), Number(options.timeoutMs) || 30000);
@@ -111,7 +112,7 @@ async function request(config, endpoint, options = {}, fetchImpl = fetch) {
     } catch (error) {
       const wrapped = String(error.code || "").startsWith("VIPSTORE_") ? error : apiError(
         error.name === "AbortError" ? "VIPSTORE_TIMEOUT" : "VIPSTORE_REQUEST_FAILED",
-        error.name === "AbortError" ? "Request VIPStore timeout." : "Koneksi server ke VIPStore gagal.", { endpoint });
+        error.name === "AbortError" ? "Request VIPStore timeout." : "Koneksi server ke VIPStore gagal.", { endpoint, elapsed_ms: Date.now() - startedAt });
       throw wrapped;
     } finally { clearTimeout(timer); }
   }
@@ -126,13 +127,14 @@ function createGuardedRequest(send = request, now = Date.now) {
   function observe(value) {
     const status = Number(value?.http_code || value?.diagnostics?.http_status);
     const challenge = value?.code === "VIPSTORE_SECURITY_CHALLENGE";
-    if (status !== 403 && status !== 429 && !challenge) return;
+    const unavailable = ["VIPSTORE_TIMEOUT", "VIPSTORE_REQUEST_FAILED"].includes(value?.code) || status >= 500;
+    if (status !== 403 && status !== 429 && !challenge && !unavailable) return;
     const retryAfter = value?.diagnostics?.retry_after;
     const retryMs = /^\d+$/.test(retryAfter || "")
       ? Number(retryAfter) * 1000 : Date.parse(retryAfter) - now();
-    const delay = status === 429 ? 15 * 60 * 1000 : 24 * 60 * 60 * 1000;
+    const delay = unavailable ? 60 * 1000 : status === 429 ? 15 * 60 * 1000 : 24 * 60 * 60 * 1000;
     blockedUntil = Math.max(blockedUntil, now() + Math.max(delay, Number.isFinite(retryMs) ? retryMs : 0));
-    blockedStatus = status === 429 ? 429 : 403;
+    blockedStatus = unavailable ? 503 : status === 429 ? 429 : 403;
     cache.clear();
   }
   return async function guardedRequest(config, endpoint, options = {}) {

@@ -10,10 +10,14 @@ vm.runInContext(server.slice(server.indexOf("function supplierCheckoutFailure(")
 const authFailure = checkoutFailureContext.supplierCheckoutFailure({ supplierHttpCode: 401, diagnostic_message: "secret-example" }, "vipstore_api");
 assert.equal(authFailure.code, "SUPPLIER_AUTH_REJECTED");
 assert.equal(authFailure.supplier_http_code, 401);
-assert.match(authFailure.message, /Environment Render/);
+assert.equal(authFailure.message, "Terjadi kesalahan. Silakan coba lagi nanti.");
 assert.ok(!authFailure.message.includes("secret-example"));
-assert.match(checkoutFailureContext.supplierCheckoutFailure({ diagnostics: { http_status: 403 } }, "vipstore_api").message, /whitelist IP Render/);
-assert.match(checkoutFailureContext.supplierCheckoutFailure({ supplierHttpCode: 429 }, "cheatgame_api").message, /terlalu banyak request/);
+for (const status of [403, 429, 503]) {
+  assert.equal(checkoutFailureContext.supplierCheckoutFailure({ supplierHttpCode: status }, "vipstore_api").message, authFailure.message);
+}
+const buyerScript = fs.readFileSync("public/script.js", "utf8");
+assert.ok(buyerScript.indexOf('if (!res.ok &&') < buyerScript.indexOf('if (data.binanceManual)'));
+assert.match(buyerScript, /if \(!res\.ok &&[^\n]+\{\s+setLoading\(false\);/);
 const catalogContext = vm.createContext({});
 vm.runInContext(server.slice(server.indexOf("function sanitizeSupplierCatalogMessage("), server.indexOf("function isTruthyApiValue(")), catalogContext);
 const validateCatalog = catalogContext.validateSupplierCatalog;
