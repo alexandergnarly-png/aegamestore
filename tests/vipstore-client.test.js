@@ -7,6 +7,22 @@ const response = (body, status = 200, contentType = "application/json") => ({
   headers: new Map([["content-type", contentType]]), text: async () => body,
 });
 (async () => {
+  // Capture scheduled deadlines without waiting or contacting the supplier.
+  const originalSetTimeout = global.setTimeout;
+  const deadlines = [];
+  try {
+    global.setTimeout = (callback, delay) => {
+      deadlines.push(delay);
+      return originalSetTimeout(callback, delay);
+    };
+    for (const endpoint of ["catalog.php", "balance.php", "claim.php"]) {
+      await request(config, endpoint, {}, async () => response('{"success":true}'));
+    }
+    await request(config, "catalog.php", { timeoutMs: 1234 }, async () => response('{"success":true}'));
+  } finally {
+    global.setTimeout = originalSetTimeout;
+  }
+  assert.deepEqual(deadlines, [60000, 30000, 30000, 1234], "Only the catalog gets a 60-second default; explicit timeouts remain supported");
   let clock = 1000000;
   let timeoutCalls = 0;
   const timeoutGuard = createGuardedRequest(async () => {

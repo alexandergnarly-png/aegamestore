@@ -72,7 +72,8 @@ async function request(config, endpoint, options = {}, fetchImpl = fetch) {
   const startedAt = Date.now();
   for (let attempt = 1; attempt <= attempts; attempt++) {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), Number(options.timeoutMs) || 30000);
+    // Supplier recommends allowing the full catalog up to 60s; claims stay at 30s.
+    const timer = setTimeout(() => controller.abort(), Number(options.timeoutMs) || (endpoint === "catalog.php" ? 60000 : 30000));
     try {
       const response = await fetchImpl(`${BASE_URL}/${endpoint}`, {
         method, headers: headersFor(config, rawBody), redirect: "manual",

@@ -10,7 +10,7 @@ const config = {
   for (const endpoint of ["balance.php", "catalog.php"]) {
     const started = Date.now();
     try {
-      const result = await client.request(config, endpoint, { timeoutMs: 20000 });
+      const result = await client.request(config, endpoint);
       console.log(JSON.stringify({ endpoint, ok: result.ok, ...result.diagnostics,
         products: Array.isArray(result.data.products) ? result.data.products.length : undefined,
         elapsed_ms: Date.now() - started }));
