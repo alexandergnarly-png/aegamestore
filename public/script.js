@@ -2531,7 +2531,15 @@ async function buy() {
     // Never treat a failed checkout as a successful payment/legacy redirect.
     if (!res.ok && (res.status >= 500 || String(data.code || "").startsWith("SUPPLIER_"))) {
       setLoading(false);
-      await Swal.fire({ icon: "error", title: "Error", text: "Terjadi kesalahan. Silakan coba lagi nanti.", confirmButtonColor: "#0a0a0a" });
+      await Swal.fire({
+        icon: "error",
+        iconHtml: '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M12 7v6"/><circle cx="12" cy="17" r="1" fill="currentColor" stroke="none"/></svg>',
+        title: "Error",
+        text: "Terjadi kesalahan. Silakan coba lagi nanti.",
+        customClass: { popup: "ae-checkout-error" },
+        confirmButtonText: currentLanguage === "en" ? "Close" : "Tutup",
+        confirmButtonColor: "#0a0a0a",
+      });
       return;
     }
 

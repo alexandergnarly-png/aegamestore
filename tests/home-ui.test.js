@@ -239,8 +239,11 @@ assert.match(css, /prefers-reduced-motion: reduce[\s\S]*?account-orbit-icon/);
     `Missing Indonesian/English translations for: ${key}`,
   );
 });
-assert.match(html, /script\.js\?v=20260921-checkout-errors-v1/);
-assert.match(html, /style\.css\?v=20260902-key-dispatch-v5/);
+assert.match(html, /script\.js\?v=20260921-error-badge-v1/);
+assert.match(html, /style\.css\?v=20260921-error-badge-v1/);
+const errorScript = fs.readFileSync("public/script.js", "utf8");
+assert.match(errorScript, /popup: "ae-checkout-error"/);
+assert.match(errorScript, /iconHtml: '<svg[^\n]+aria-hidden="true"/);
 assert.match(html, /class="install-prompt-meta"/);
 assert.match(html, /AE SUPPORT DECK/);
 assert.match(html, /aria-labelledby="installPromptTitle"/);

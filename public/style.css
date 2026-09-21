@@ -1107,6 +1107,46 @@ body.dark-theme .swal2-html-container {
   font-size: 14px !important;
 }
 
+/* Quiet checkout failure: compact status badge instead of the oversized red X. */
+.swal2-container .ae-checkout-error.swal2-popup {
+  width: min(360px, calc(100vw - 32px)) !important;
+  padding: 24px !important;
+  border-radius: 22px !important;
+}
+.ae-checkout-error .swal2-icon.swal2-error {
+  width: 44px !important;
+  height: 44px !important;
+  margin: 0 0 16px !important;
+  border: 1px solid #efd8d1 !important;
+  border-radius: 14px !important;
+  background: #fff3ef;
+  color: #a4402b !important;
+  animation: none !important;
+}
+.ae-checkout-error .swal2-icon-content { font-size: 0 !important; }
+.ae-checkout-error .swal2-title {
+  padding: 0 !important;
+  font-size: 24px !important;
+  text-align: left;
+}
+.ae-checkout-error .swal2-html-container {
+  margin: 10px 0 0 !important;
+  color: #585852 !important;
+  text-align: left;
+}
+.ae-checkout-error .swal2-actions { margin: 22px 0 0 !important; width: 100%; }
+.ae-checkout-error .swal2-confirm {
+  width: 100% !important;
+  min-height: 46px !important;
+  margin: 0 !important;
+  border-radius: 12px !important;
+  font-size: 14px !important;
+  cursor: pointer;
+}
+.ae-checkout-error .swal2-confirm:focus-visible { outline: 3px solid #355cff; outline-offset: 3px; }
+body.dark-theme .ae-checkout-error .swal2-icon.swal2-error { background: #35231f; border-color: #634037 !important; color: #f3b5a3 !important; }
+body.dark-theme .ae-checkout-error .swal2-html-container { color: #c5c5be !important; }
+
 .swal2-close {
   top: 12px !important;
   right: 12px !important;
