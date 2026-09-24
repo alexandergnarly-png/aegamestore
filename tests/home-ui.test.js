@@ -1,4 +1,5 @@
 const assert = require("node:assert/strict");
+require("./payment-page.test");
 // All three buyer pages use the same header rules, after their legacy styles.
 for (const page of ["index.html", "user-auth.html", "account.html"]) {
   const html = require("node:fs").readFileSync(`public/${page}`, "utf8");
@@ -239,7 +240,7 @@ assert.match(css, /prefers-reduced-motion: reduce[\s\S]*?account-orbit-icon/);
     `Missing Indonesian/English translations for: ${key}`,
   );
 });
-assert.match(html, /script\.js\?v=20260921-error-badge-v1/);
+assert.match(html, /script\.js\?v=20260925-payment-page-v1/);
 assert.match(html, /style\.css\?v=20260921-error-badge-v1/);
 const errorScript = fs.readFileSync("public/script.js", "utf8");
 assert.match(errorScript, /popup: "ae-checkout-error"/);

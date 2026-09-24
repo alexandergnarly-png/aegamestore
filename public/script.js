@@ -6211,6 +6211,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function open(opts) {
+    if (opts?.orderId) {
+      window.location.assign("/payment.html?order_id=" + encodeURIComponent(opts.orderId));
+      return;
+    }
     if (state.isOpen) return;
     if (!opts || !opts.snapToken || !opts.clientKey) {
       throw new Error("Missing snap token / client key");
