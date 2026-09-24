@@ -125,9 +125,15 @@ function createGuardedRequest(send = request, now = Date.now) {
   let blockedStatus = 403;
   const cache = new Map();
   const pending = new Map();
-  function observe(value) {
+  function observe(value, endpoint) {
     const status = Number(value?.http_code || value?.diagnostics?.http_status);
     const challenge = value?.code === "VIPSTORE_SECURITY_CHALLENGE";
+    // claim.php documents insufficient funds as 403, not an IP/bot ban.
+    // Keep the failed claim intact; only exempt this explicit business rejection.
+    const insufficientFunds = endpoint === "claim.php" && status === 403 &&
+      !challenge && value?.data?.success === false &&
+      /^insufficient balance[.!]?$/i.test(String(value.data.message || "").trim());
+    if (insufficientFunds) return;
     const unavailable = ["VIPSTORE_TIMEOUT", "VIPSTORE_REQUEST_FAILED"].includes(value?.code) || status >= 500;
     if (status !== 403 && status !== 429 && !challenge && !unavailable) return;
     const retryAfter = value?.diagnostics?.retry_after;
@@ -153,7 +159,7 @@ function createGuardedRequest(send = request, now = Date.now) {
     const task = (async () => {
       try {
         const result = await Promise.resolve().then(() => send(config, endpoint, options));
-        observe(result);
+        observe(result, endpoint);
         if (read && result.ok && now() >= blockedUntil) {
           cache.set(key, { result, expires: now() + 60 * 1000 });
         }
@@ -161,7 +167,7 @@ function createGuardedRequest(send = request, now = Date.now) {
         if (!read) cache.clear();
         return result;
       } catch (error) {
-        observe(error);
+        observe(error, endpoint);
         throw error;
       } finally {
         if (read) pending.delete(key);

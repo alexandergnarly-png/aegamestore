@@ -24,6 +24,26 @@ const response = (body, status = 200, contentType = "application/json") => ({
   }
   assert.deepEqual(deadlines, [60000, 30000, 30000, 1234], "Only the catalog gets a 60-second default; explicit timeouts remain supported");
   let clock = 1000000;
+  let balanceDenialCalls = 0;
+  const balanceDenialGuard = createGuardedRequest((cfg, endpoint, options) =>
+    request(cfg, endpoint, options, async () => {
+      balanceDenialCalls++;
+      return endpoint === "claim.php"
+        ? response('{"success":false,"message":"Insufficient balance"}', 403)
+        : response('{"success":true,"products":[],"balance":0}');
+    }), () => clock);
+  const insufficient = await balanceDenialGuard(config, "claim.php", { body: { product_id: 679, qty: 1 } });
+  assert.equal(insufficient.ok, false, "Insufficient balance must never become a successful purchase");
+  assert.equal(insufficient.http_code, 403);
+  assert.equal(balanceDenialCalls, 1, "Failed claim is not retried");
+  assert.equal((await balanceDenialGuard(config, "catalog.php")).ok, true);
+  assert.equal((await balanceDenialGuard(config, "balance.php")).ok, true);
+  assert.equal(balanceDenialCalls, 3, "Insufficient funds must not pause catalog or balance checks");
+  const accessDeniedGuard = createGuardedRequest(async () => ({
+    ok: false, http_code: 403, data: { success: false, message: "Access denied by Imunify360 bot-protection" },
+  }), () => clock);
+  await accessDeniedGuard(config, "claim.php");
+  await assert.rejects(accessDeniedGuard(config, "catalog.php"), { code: "VIPSTORE_REQUEST_PAUSED" });
   let timeoutCalls = 0;
   const timeoutGuard = createGuardedRequest(async () => {
     timeoutCalls++;
