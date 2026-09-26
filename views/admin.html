@@ -9294,6 +9294,20 @@
       </section>
 
       <section id="section-products" class="admin-section">
+        <div class="card" style="padding:20px;margin-bottom:20px">
+          <h3>Channel Telegram per brand</h3>
+          <p>Link muncul setelah buyer membayar dan menerima key. Berlaku untuk semua produk dengan nama brand yang sama.</p>
+          <button type="button" onclick="loadBrandChannels()">Muat daftar brand</button>
+          <form onsubmit="saveBrandChannel(event)" style="display:grid;gap:12px;margin-top:16px">
+            <label for="channelBrand">Brand</label>
+            <select id="channelBrand" required onchange="selectBrandChannel()"><option value="">Muat daftar brand terlebih dahulu</option></select>
+            <label for="channelUrl">Link undangan Telegram</label>
+            <input id="channelUrl" type="url" maxlength="300" placeholder="https://t.me/+..." aria-describedby="channelHelp">
+            <small id="channelHelp">Kosongkan lalu simpan untuk menghapus link. Link yang sudah dibagikan tetap perlu dicabut melalui Telegram.</small>
+            <button type="submit" id="saveChannel">Simpan channel brand</button>
+            <p id="channelStatus" role="status" aria-live="polite"></p>
+          </form>
+        </div>
         <div class="card delay-1">
           <div class="card-header">
             <div class="card-title-wrap">
@@ -12638,6 +12652,48 @@
       function getCsrfToken() {
         const match = document.cookie.match(/(?:^|; )admin_csrf=([^;]+)/);
         return match ? decodeURIComponent(match[1]) : "";
+      }
+
+      let brandChannelSettings = [];
+      async function loadBrandChannels() {
+        const status = document.getElementById("channelStatus");
+        status.textContent = "Memuat brand…";
+        try {
+          const response = await fetch("/api/admin/brand-channels", { cache: "no-store" });
+          if (!response.ok) throw new Error("Gagal memuat brand. Cek sesi admin.");
+          brandChannelSettings = await response.json();
+          const select = document.getElementById("channelBrand");
+          select.replaceChildren(new Option("Pilih brand", ""));
+          brandChannelSettings.forEach(row => select.add(new Option(row.brand, row.brand)));
+          document.getElementById("channelUrl").value = "";
+          status.textContent = "Pilih brand untuk menambah atau mengedit link.";
+        } catch (error) { status.textContent = error.message; }
+      }
+      function selectBrandChannel() {
+        const brand = document.getElementById("channelBrand").value;
+        document.getElementById("channelUrl").value = brandChannelSettings.find(row => row.brand === brand)?.channel_url || "";
+      }
+      async function saveBrandChannel(event) {
+        event.preventDefault();
+        const button = document.getElementById("saveChannel");
+        if (button.disabled) return;
+        button.disabled = true;
+        const brand = document.getElementById("channelBrand").value;
+        const channel_url = document.getElementById("channelUrl").value.trim();
+        const status = document.getElementById("channelStatus");
+        status.textContent = "Menyimpan…";
+        try {
+          const response = await fetch("/api/admin/brand-channels", {
+            method: "POST", headers: { "Content-Type": "application/json", "x-csrf-token": getCsrfToken() },
+            body: JSON.stringify({ brand, channel_url }),
+          });
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.message || "Gagal menyimpan");
+          const row = brandChannelSettings.find(item => item.brand === brand);
+          if (row) row.channel_url = channel_url;
+          status.textContent = data.message;
+        } catch (error) { status.textContent = error.message; }
+        finally { button.disabled = false; }
       }
 
       function maskSecretKey(value) {

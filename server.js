@@ -1,6 +1,7 @@
 const db = require("./server/database");
 const express = require("express");
 const midtransClient = require("midtrans-client");
+const { normalizeBrand, validateChannelUrl, channelForOrder } = require("./server/brand-channels");
 const fs = require("fs");
 const path = require("path");
 const cookieParser = require("cookie-parser");
@@ -250,6 +251,10 @@ const productsTableReady = db.query(
       IN ('8ballpool', 'pubgm', 'pubgmobile')
   `);
   console.log("Table products ready");
+  await db.query(`CREATE TABLE IF NOT EXISTS brand_channels (
+    brand TEXT PRIMARY KEY,
+    channel_url TEXT NOT NULL
+  )`);
 });
 
 const autoPromoPeriodsReady = db.query(`
@@ -7482,6 +7487,7 @@ app.get("/order/:id", orderCheckLimiter, async (req, res) => {
       gameKey: gameKeys.join("\n"),
       gameKeys,
       manual_completed: manualCompleted,
+      brand_channel_url: await channelForOrder(query, order, gameKeys),
       created_at: order.created_at,
     });
   } catch (err) {
@@ -9216,6 +9222,39 @@ app.post("/keys/bulk", requireAdminAuth, requireAdminCsrf, async (req, res) => {
       message: "Gagal menambahkan bulk key: " + err.message,
     });
   }
+});
+
+app.get("/api/admin/brand-channels", requireAdminAuth, async (req, res) => {
+  try {
+    await productsTableReady;
+    const result = await query(`SELECT DISTINCT LOWER(TRIM(p.brand)) AS brand,
+      COALESCE(c.channel_url, '') AS channel_url FROM products p
+      LEFT JOIN brand_channels c ON c.brand = LOWER(TRIM(p.brand))
+      WHERE TRIM(p.brand) <> '' ORDER BY brand`);
+    res.setHeader("Cache-Control", "no-store");
+    return res.json(result.rows);
+  } catch (_) { return res.status(500).json({ message: "Gagal memuat channel brand" }); }
+});
+
+app.post("/api/admin/brand-channels", requireAdminAuth, requireAdminCsrf, async (req, res) => {
+  const brand = normalizeBrand(req.body.brand);
+  let channelUrl;
+  try {
+    if (!brand || brand.length > 200) throw new Error("Brand tidak valid");
+    channelUrl = validateChannelUrl(req.body.channel_url);
+  } catch (_) { return res.status(400).json({ message: "Pilih brand dan gunakan link https://t.me/... yang valid" }); }
+  try {
+    await productsTableReady;
+    const product = await query("SELECT 1 FROM products WHERE LOWER(TRIM(brand)) = $1 LIMIT 1", [brand]);
+    if (!product.rows.length) return res.status(404).json({ message: "Brand tidak ditemukan" });
+    if (channelUrl) {
+      await query(`INSERT INTO brand_channels (brand, channel_url) VALUES ($1, $2)
+        ON CONFLICT (brand) DO UPDATE SET channel_url = EXCLUDED.channel_url`, [brand, channelUrl]);
+    } else {
+      await query("DELETE FROM brand_channels WHERE brand = $1", [brand]);
+    }
+    return res.json({ message: channelUrl ? "Link channel brand disimpan" : "Link channel brand dihapus" });
+  } catch (_) { return res.status(500).json({ message: "Gagal menyimpan channel brand" }); }
 });
 
 app.get("/products", requireAdminAuth, async (req, res) => {

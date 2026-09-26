@@ -1,4 +1,5 @@
 const assert = require("node:assert");
+require("./brand-channels.test");
 const fs = require("node:fs");
 const path = require("node:path");
 

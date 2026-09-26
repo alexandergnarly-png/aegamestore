@@ -513,6 +513,7 @@
         align-items: start;
       }
       .private-group-box[hidden] { display: none !important; }
+      #brandChannelLink[hidden] { display: none !important; }
       .private-group-icon {
         width: 48px;
         height: 48px;
@@ -972,6 +973,7 @@
           </section>
 
           <section class="private-group-box" id="privateGroupBox" hidden>
+            <a id="brandChannelLink" class="btn private-group-btn" target="_blank" rel="noopener noreferrer" hidden>Channel Telegram brand</a>
             <div class="private-group-icon"><iconify-icon icon="mdi:telegram" aria-hidden="true"></iconify-icon></div>
             <div class="private-group-copy">
               <span class="private-group-kicker" data-result-i18n="privateGroupKicker">Buyer room</span>
@@ -1829,6 +1831,9 @@ const resultTranslations = {
         if (resultHelp) resultHelp.style.display = "none";
         const privateGroupBox = document.getElementById("privateGroupBox");
         if (privateGroupBox) privateGroupBox.hidden = true;
+        const brandChannelLink = document.getElementById("brandChannelLink");
+        brandChannelLink.hidden = true;
+        brandChannelLink.removeAttribute("href");
         const continuePayBtn = document.getElementById("continuePayBtn");
         if (continuePayBtn) continuePayBtn.hidden = true;
         const copyDetailBtn = document.getElementById("copyDetailBtn");
@@ -1895,6 +1900,16 @@ const resultTranslations = {
           setProgress("delivered");
           renderTimeline(data, "delivered");
           if (privateGroupBox) privateGroupBox.hidden = false;
+          if (paymentStatus === "paid" && data.brand_channel_url) {
+            try {
+              const channel = new URL(data.brand_channel_url);
+              if (channel.protocol === "https:" && channel.hostname === "t.me") {
+                brandChannelLink.href = channel.href;
+                brandChannelLink.textContent = getResultLanguage() === "en" ? "Join brand Telegram channel" : "Gabung channel Telegram brand";
+                brandChannelLink.hidden = false;
+              }
+            } catch (_) { /* Invalid links stay hidden. */ }
+          }
           return "deliveredToast";
         }
 
